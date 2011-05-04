@@ -1,0 +1,47 @@
+***************
+*** 16,29 ****
+          <summary>Organization, editing and display of user uploaded photos.</summary>
+          <release-date>2006-02-18</release-date>
+          <vendor url="http://openacs.org">OpenACS</vendor>
+-         <description format="text/html">A photo album application that provides photo display and grouping
+- functionality using the ACS Content Repository.
+- &lt;p&gt;
+- Allows users to upload photos, store and edit attributes, and group
+- photos into albums and folders.  Supports permissioning, exif data, and user clipboards.
+- &lt;p&gt;
+- Requires installation of ImageMagick and jhead on host machine.  See design doc
+- for details.
+  </description>
+          <maturity>1</maturity>
+  
+--- 16,29 ----
+          <summary>Organization, editing and display of user uploaded photos.</summary>
+          <release-date>2006-02-18</release-date>
+          <vendor url="http://openacs.org">OpenACS</vendor>
++         <description format="text/html">A photo album application that provides photo display and grouping
++ functionality using the ACS Content Repository.
++ &lt;p&gt;
++ Allows users to upload photos, store and edit attributes, and group
++ photos into albums and folders.  Supports permissioning, exif data, and user clipboards.
++ &lt;p&gt;
++ Requires installation of ImageMagick and jhead on host machine.  See design doc
++ for details.
+  </description>
+          <maturity>1</maturity>
+  
+***************
+*** 50,55 ****
+              <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="ThumbnailSize"  default="150x150" description="Max Dimension for thumbnail image"/>
+              <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="ThumbnailsPerPage"  default="12" description="Number of thumbnail images to be displayed per album page"/>
+              <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="ViewerSize"  default="700x500" description="Max Dimension for viewer image"/>
+          </parameters>
+  
+      </version>
+--- 50,56 ----
+              <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="ThumbnailSize"  default="150x150" description="Max Dimension for thumbnail image"/>
+              <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="ThumbnailsPerPage"  default="12" description="Number of thumbnail images to be displayed per album page"/>
+              <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="ViewerSize"  default="700x500" description="Max Dimension for viewer image"/>
++             <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="UseAjaxPa"  default="0" description="Set to 1 if you want to use ajax-photoalbum-ui with this instance of photo-album."/>
+          </parameters>
+  
+      </version>

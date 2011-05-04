@@ -1,0 +1,95 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/openacs/!svn/ver/1558/trunk/packages/chat/java
+END
+adUserInfo.java
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adUserInfo.java
+END
+adChatDatasource.java
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatDatasource.java
+END
+adChatClientInfo.java
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatClientInfo.java
+END
+adChatFormatMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatFormatMessage.java
+END
+adChatServer.java
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatServer.java
+END
+adChatLoginMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatLoginMessage.java
+END
+adChatClient.java
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatClient.java
+END
+adClientSession.java
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/1558/trunk/packages/chat/java/adClientSession.java
+END
+adChatMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatMessage.java
+END
+adChatClientListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatClientListener.java
+END
+adPrivateChatFrame.java
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adPrivateChatFrame.java
+END
+adChatApplet.java
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatApplet.java
+END
+adChatterList.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatterList.java
+END
+adChatSimpleXMLParser.java
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatSimpleXMLParser.java
+END
+adChatSystemMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/chat/java/adChatSystemMessage.java
+END

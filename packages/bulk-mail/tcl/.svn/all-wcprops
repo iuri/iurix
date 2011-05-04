@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/openacs/!svn/ver/769/trunk/packages/bulk-mail/tcl
+END
+bulk-mail-init.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/769/trunk/packages/bulk-mail/tcl/bulk-mail-init.tcl
+END
+bulk-mail-procs.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/769/trunk/packages/bulk-mail/tcl/bulk-mail-procs.tcl
+END
+bulk-mail-procs.xql
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/12/trunk/packages/bulk-mail/tcl/bulk-mail-procs.xql
+END
+bulk-mail-procs-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/12/trunk/packages/bulk-mail/tcl/bulk-mail-procs-postgresql.xql
+END
+bulk-mail-procs-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/12/trunk/packages/bulk-mail/tcl/bulk-mail-procs-oracle.xql
+END

@@ -1,0 +1,31 @@
+***************
+*** 2,7 ****
+  <property name="title">@folder_name;noquote@</property>
+  <property name="context">@context;noquote@</property>
+  
+  <if @folder_description@ not nil>
+  <p>@folder_description;noquote@</p>
+  </if>
+--- 2,12 ----
+  <property name="title">@folder_name;noquote@</property>
+  <property name="context">@context;noquote@</property>
+  
++ <if @use_ajaxpa_p@ eq 1>
++ <include src="/packages/ajax-photoalbum-ui/lib/ajaxpa-include" package_id="@package_id@" layoutdiv="pacontainer">
++ </if>
++ 
++ <div id="pacontainer">
+  <if @folder_description@ not nil>
+  <p>@folder_description;noquote@</p>
+  </if>
+***************
+*** 63,66 ****
+        <a href="http://shutterfly.com">#photo-album.shutterflycom#</a> #photo-album.lt_for______printing_fro# <a href="clipboards">#photo-album.clipboard#</a> #photo-album.screen#
+      </p>
+  </if>
+- 
+--- 68,71 ----
+        <a href="http://shutterfly.com">#photo-album.shutterflycom#</a> #photo-album.lt_for______printing_fro# <a href="clipboards">#photo-album.clipboard#</a> #photo-album.screen#
+      </p>
+  </if>
++ </div>

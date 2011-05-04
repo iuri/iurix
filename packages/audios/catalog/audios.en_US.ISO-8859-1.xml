@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="audios" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="Accept_Term">Accept Term of Responsability</msg>
+  <msg key="Add_video">Add Audio</msg>
+  <msg key="Admin">Admin</msg>
+  <msg key="Ads">Ads</msg>
+  <msg key="Advertising">Advertising</msg>
+  <msg key="Audio">Audio</msg>
+  <msg key="Audios">Audios</msg>
+  <msg key="Audio_del">Delete Audio</msg>
+  <msg key="Audio_dont_removed">Audio don't removed</msg>
+  <msg key="Audio_Edit">Audio Edit</msg>
+  <msg key="Audios_removed">Audios removed</msg>
+  <msg key="author">author</msg>
+  <msg key="Author">Author</msg>
+  <msg key="By">By</msg>
+  <msg key="CC">CC</msg>
+  <msg key="Class">Class</msg>
+  <msg key="Comments">Comments</msg>
+  <msg key="Community">Community</msg>
+  <msg key="community">community</msg>
+  <msg key="Click_here">Click Here</msg>
+  <msg key="CoAuthor">CoAuthor</msg>
+  <msg key="Confirme_remove_Audios">Do you really want to remove this audio?</msg>
+  <msg key="Creator">Creator</msg>
+  <msg key="creator">creator</msg>
+  <msg key="Debate">Debate</msg>
+  <msg key="Description">Description</msg>
+  <msg key="description">description</msg>
+  <msg key="DGPL">DGPL</msg>
+  <msg key="Documentary">Documentary</msg>
+  <msg key="Download_Audio">Download Audio</msg>
+  <msg key="file">file</msg>
+  <msg key="File">File</msg>
+  <msg key="GPL">GPL</msg> 
+  <msg key="Go_Back">Go Back</msg> 
+  <msg key="Group">Group</msg>
+  <msg key="in">in</msg>
+  <msg key="Interview">Interview</msg>
+  <msg key="Institutional">Institutional</msg>
+  <msg key="License">License</msg>
+  <msg key="More">More</msg>
+  <msg key="More_Audios">More Audios</msg>
+  <msg key="Most_Popular">Most Popular</msg>
+  <msg key="Name">Name</msg>
+  <msg key="name">name</msg>
+  <msg key="New">New</msg>
+  <msg key="No">No</msg>
+  <msg key="No_records">No Records</msg>
+  <msg key="publish_date_select">Public Date Select</msg>
+  <msg key="Posted_by">Posted by</msg>
+  <msg key="Recent_Audios">Recent Audios</msg>
+  <msg key="Relationship_Audios">Relationship Audios</msg>
+  <msg key="Related_Audios">Related Audios</msg>
+  <msg key="Search">Search</msg>
+  <msg key="See_others">See Others</msg>
+  <msg key="Share_this_audio">Share this Audio</msg>
+  <msg key="Source">Source</msg>
+  <msg key="source">source</msg>
+  <msg key="Speech">Speech</msg>
+  <msg key="Tags">Tags</msg>
+  <msg key="Term">Term</msg>
+  <msg key="This_file_isnt_audio_file">This file isn't a audio file</msg>
+  <msg key="Thumbnail">Thumbnail</msg>
+  <msg key="Type">Type</msg>
+  <msg key="Use_spaces">Use spaces to diferentiate tags</msg>
+  <msg key="Yes">Yes</msg>
+  <msg key="y-m-d">Format YYYY-MM-DD</msg>
+</message_catalog>
+
+
+<message_catalog package_key="categories" locale="en_US" charset="ISO-8859-1">
+  <msg key="Type">Type<msg>
+  <msg key="Description">Description<msg>
+  <msg key="Interview">Interview<msg>
+  <msg key="Institutional">Institutional<msg>
+  <msg key="Ads">Ads<msg>
+  <msg key="Class">Class<msg>
+  <msg key="Documentary">Documentary<msg>
+  <msg key="Speech">Speech<msg>
+  <msg key="Debate">Debate<msg>
+  <msg key="License">License<msg>
+  <msg key="CC">CC<msg>
+  <msg key="DGPL">DGPL<msg>
+  <msg key="GPL">GPL<msg>
+</message_catalog>
+

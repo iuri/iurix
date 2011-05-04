@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/oracle
+END
+survey-notifications-init.sql
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/oracle/survey-notifications-init.sql
+END
+survey-package-create.sql
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/oracle/survey-package-create.sql
+END
+survey-package-drop.sql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/oracle/survey-package-drop.sql
+END
+survey-create.sql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/oracle/survey-create.sql
+END
+survey-drop.sql
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/oracle/survey-drop.sql
+END

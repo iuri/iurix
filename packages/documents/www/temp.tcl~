@@ -1,0 +1,9 @@
+ad_page_contract {
+
+    @date 2010
+} {
+}
+
+array set node [site_node::get -node_id $node_id]
+
+ns_log Notice "[parray $node]"

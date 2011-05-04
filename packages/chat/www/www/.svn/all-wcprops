@@ -1,0 +1,611 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www
+END
+transcript-edit.adp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-edit.adp
+END
+room.adp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room.adp
+END
+fish2.gif
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/fish2.gif
+END
+room-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-delete.adp
+END
+user-ban-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-ban-oracle.xql
+END
+ajax-chat-script.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/ajax-chat-script.tcl
+END
+room-exit.adp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-exit.adp
+END
+index.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/index.tcl
+END
+noactive.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/noactive.tcl
+END
+chat-transcripts.adp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-transcripts.adp
+END
+message-new.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/message-new.tcl
+END
+user-unban-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-unban-2.tcl
+END
+user-unban.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-unban.tcl
+END
+transcript-new.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-new.tcl
+END
+imessages.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/imessages.tcl
+END
+java-chat.adp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/java-chat.adp
+END
+html-chat.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/html-chat.tcl
+END
+unauthorized.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/unauthorized.tcl
+END
+message-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/message-delete.tcl
+END
+room-bulk-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-bulk-delete.adp
+END
+chat-master.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-master.adp
+END
+invite-user.xql
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/invite-user.xql
+END
+invite-user.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/invite-user.adp
+END
+room-edit.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-edit.tcl
+END
+user-ban-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-ban-postgresql.xql
+END
+chat-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-oracle.xql
+END
+search-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/search-2.tcl
+END
+search-3.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/search-3.tcl
+END
+imessages-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/imessages-oracle.xql
+END
+transcript-new-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-new-oracle.xql
+END
+search.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/search.tcl
+END
+file-add.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/file-add.tcl
+END
+moderator-revoke.adp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-revoke.adp
+END
+chat.jar
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat.jar
+END
+user-ban-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-ban-2.tcl
+END
+transcript-edit.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-edit.tcl
+END
+room.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room.tcl
+END
+room-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-delete.tcl
+END
+chat-popup.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-popup.tcl
+END
+transcript-view.adp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-view.adp
+END
+room-exit.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-exit.tcl
+END
+room-enter.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-enter.tcl
+END
+chat-transcript.adp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-transcript.adp
+END
+chat-transcripts.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-transcripts.tcl
+END
+moderator-grant-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-grant-oracle.xql
+END
+index-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/index-oracle.xql
+END
+grant-entry.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/grant-entry.adp
+END
+room-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-oracle.xql
+END
+chat-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-postgresql.xql
+END
+unauthorized-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/unauthorized-delete.adp
+END
+transcript-new-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-new-postgresql.xql
+END
+imessages-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/imessages-postgresql.xql
+END
+user-unban-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-unban-oracle.xql
+END
+moderator-grant-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-grant-2.tcl
+END
+moderator-grant.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-grant.tcl
+END
+change-status.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/change-status.tcl
+END
+room-bulk-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-bulk-delete.tcl
+END
+chat-master.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-master.tcl
+END
+invite-user.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/invite-user.tcl
+END
+moderator-revoke-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-revoke-oracle.xql
+END
+transcript-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-delete.adp
+END
+transcript-new-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-new-2.tcl
+END
+message-delete-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/message-delete-2.tcl
+END
+moderator-revoke-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-revoke-2.tcl
+END
+ajax-chat-script.adp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/ajax-chat-script.adp
+END
+moderator-revoke.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-revoke.tcl
+END
+moderator-grant-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-grant-postgresql.xql
+END
+index.adp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/index.adp
+END
+noactive.adp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/noactive.adp
+END
+index-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/index-postgresql.xql
+END
+close-window.adp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/close-window.adp
+END
+message-new.xql
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/message-new.xql
+END
+message-new.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/message-new.adp
+END
+room-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-postgresql.xql
+END
+transcript-view.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-view.tcl
+END
+user-unban.adp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-unban.adp
+END
+chat-room-grant.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-room-grant.tcl
+END
+imessages.adp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/imessages.adp
+END
+user-unban-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-unban-postgresql.xql
+END
+chat-popup-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-popup-postgresql.xql
+END
+html-chat.adp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/html-chat.adp
+END
+unauthorized.adp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/unauthorized.adp
+END
+message-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/message-delete.adp
+END
+chat-transcript.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat-transcript.tcl
+END
+moderator-revoke-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/moderator-revoke-postgresql.xql
+END
+transcript-entry.adp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-entry.adp
+END
+room-delete-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-delete-2.tcl
+END
+transcript-edit-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-edit-2.tcl
+END
+user-ban.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/user-ban.tcl
+END
+chat.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/chat.tcl
+END
+room-edit.adp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-edit.adp
+END
+unauthorized-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/unauthorized-delete.tcl
+END
+room-exit-popup.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-exit-popup.tcl
+END
+search-2.adp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/search-2.adp
+END
+file-add.adp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/file-add.adp
+END
+search.adp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/search.adp
+END
+search.xql
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/search.xql
+END
+room-enter-popup.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/room-enter-popup.tcl
+END
+transcript-delete-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-delete-2.tcl
+END
+person.gif
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/person.gif
+END
+transcript-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/1580/trunk/packages/chat/www/www/transcript-delete.tcl
+END

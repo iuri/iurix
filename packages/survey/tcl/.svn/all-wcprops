@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/openacs/!svn/ver/1137/trunk/packages/survey/tcl
+END
+survey-procs.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1137/trunk/packages/survey/tcl/survey-procs.tcl
+END
+survey-procs.xql
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/12/trunk/packages/survey/tcl/survey-procs.xql
+END
+survey-procs-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/openacs/!svn/ver/12/trunk/packages/survey/tcl/survey-procs-postgresql.xql
+END
+survey-notification-procs.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/12/trunk/packages/survey/tcl/survey-notification-procs.tcl
+END
+survey-procs-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/tcl/survey-procs-oracle.xql
+END
+survey-notification-procs.xql
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/12/trunk/packages/survey/tcl/survey-notification-procs.xql
+END

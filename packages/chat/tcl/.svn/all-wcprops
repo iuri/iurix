@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/openacs/!svn/ver/1578/trunk/packages/chat/tcl
+END
+chat-init.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1563/trunk/packages/chat/tcl/chat-init.tcl
+END
+chat-procs.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1578/trunk/packages/chat/tcl/chat-procs.tcl
+END
+chat-ajax-procs.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1561/trunk/packages/chat/tcl/chat-ajax-procs.tcl
+END
+chat-procs.xql
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/openacs/!svn/ver/12/trunk/packages/chat/tcl/chat-procs.xql
+END
+chat-procs-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/chat/tcl/chat-procs-postgresql.xql
+END
+chat-procs-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/chat/tcl/chat-procs-oracle.xql
+END

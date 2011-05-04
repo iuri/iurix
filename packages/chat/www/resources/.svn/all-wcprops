@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/openacs/!svn/ver/12/trunk/packages/chat/www/resources
+END
+inactive.png
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/12/trunk/packages/chat/www/resources/inactive.png
+END
+admin.gif
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/12/trunk/packages/chat/www/resources/admin.gif
+END
+active.png
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/12/trunk/packages/chat/www/resources/active.png
+END

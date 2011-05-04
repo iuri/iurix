@@ -1,0 +1,115 @@
+# /packages/news/www/index.tcl
+
+ad_page_contract {
+
+    Displays a hyperlinked list of published news titles either 'live' or 'archived'
+    
+    @author Stefan Deusch (stefan@arsdigita.com)
+    @creation-date 2000-12-20
+    @cvs-id $Id: index.tcl,v 1.16 2008/11/09 23:29:28 donb Exp $
+
+} {
+
+   {view:trim "live"}
+   page:optional
+
+} -properties {
+
+   
+    title:onevalue
+    context:onevalue
+    news_admin_p:onevalue
+    news_create_p:onevalue 
+    news_items:multirow
+}
+
+
+set package_id [ad_conn package_id]
+ad_require_permission $package_id news_read
+
+
+set context {} 
+
+set actions_list [list]
+
+# view switch in live | archived news
+if { [string equal "live" $view] } {
+
+    set title [apm_instance_name_from_id $package_id]
+    set view_clause [db_map view_clause_live]
+
+    if { [db_string archived_p {}]} {
+        lappend actions_list [_ news.Show_archived_news] \
+            [export_vars -base [ad_conn url] {{view archive}}] \
+            [_ news.Show_archived_news]
+    }
+    
+} else {
+    
+    set title [apm_instance_name_from_id $package_id]
+    set view_clause [db_map view_clause_archived]
+
+    if { [db_string live_p {}] } {
+        lappend actions_list [_ news.Show_live_news] \
+            [export_vars -base [ad_conn url] {{view live}}] \
+            [_ news.Show_live_news]
+    }
+}
+
+# switches for privilege-enabled links: admin for news_admin, submit for registered users
+set news_admin_p [ad_permission_p $package_id news_admin]
+set news_create_p [ad_permission_p $package_id news_create]
+
+if { $news_admin_p } {
+    lappend actions_list [_ news.Create_a_news_item] \
+        "item-create" \
+        [_ news.Create_a_news_item]
+    lappend actions_list [_ news.Administer] \
+        "admin/" \
+        [_ news.Administer]
+} else {
+    if { $news_create_p } {
+        lappend actions_list [_ news.Submit_a_news_item] \
+            "item-create" \
+            [_ news.Submit_a_news_item]
+    }
+}
+
+
+# build the multirow for the list
+
+db_multirow -extend { publish_date news_item_url } news_items item_list {} {
+    set publish_date [lc_time_fmt $publish_date_ansi "%q"]
+    set news_item_url [export_vars -base "item" {item_id}]
+}
+
+# TODO: pagination
+set max_dspl [ad_parameter DisplayMax "news" 10]
+template::list::create -name news -multirow news_items -actions $actions_list -no_data [_ news.lt_There_are_no_news_ite] -elements {
+    publish_date {
+        label "[_ news.Release_Date]"
+    }
+    publish_title {
+        label "[_ news.Title]"
+        display_col publish_title
+        link_url_col news_item_url
+        link_html {title "#news.show_content_news_items_publish_title#"}
+    }
+    publish_lead {
+        label "[_ news.Lead]"
+    }
+}
+
+# Footer links
+set rss_exists [rss_support::subscription_exists \
+                    -summary_context_id $package_id \
+                    -impl_name news]
+set rss_url "[news_util_get_url $package_id]rss/rss.xml"
+
+set notification_chunk [notification::display::request_widget \
+                        -type one_news_item_notif \
+                        -object_id $package_id \
+                        -pretty_name "News" \
+                        -url [ad_return_url] \
+                        ]
+ad_return_template

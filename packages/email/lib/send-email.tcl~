@@ -1,0 +1,15 @@
+# /packages/email/www/send-email.tcl
+ad_page_contract {
+    @author Iuri Sampaio (iuri.sampaio@gmail.com)
+    @creation-date 2011-04-28
+}
+
+ad_form -name "send-email" form {
+    {subject:text(text)
+	{label "Subject"}
+    }
+    {body:text(textarea)
+	{label "Body"}
+    }
+}	    
+    

@@ -1,0 +1,34 @@
+9
+
+dir
+1584
+http://svn.softwarepublico.gov.br/svn/openacs/trunk/packages/documents/sql
+http://svn.softwarepublico.gov.br/svn/openacs
+
+
+
+2010-12-21T13:02:50.623383Z
+1549
+iuri.sampaio@gmail.com
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+65270c51-0825-0410-a41e-fc8022ce9244
+
+postgresql
+dir
+
+oracle
+dir
+

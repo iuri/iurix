@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<queryset>
+  <fullquery name="documents::new.new_document">
+    <querytext>
+	SELECT document_item__new (
+	:document_id, 
+	:name, 
+	:description, 
+	:group_id, 
+	:author, 
+	:coauthor, 
+	:language, 
+	:source,
+	:publish_date,
+	:creation_user,
+	:creation_ip,
+	:context_id)
+    </querytext>
+  </fullquery>
+
+  <fullquery name="documents::edit.update_info">
+    <querytext>
+      UPDATE document_items SET 
+	name = :name, 
+	description = :description, 
+	group_id = :group_id, 
+	author = :author, 
+	coauthor = :coauthor, 
+	language = :language, 
+	source = :source,
+        publish_date = :publish_date,
+	user_id = :creation_user
+      WHERE document_id = :document_id
+    </querytext>
+  </fullquery>
+  
+  <fullquery name="documents::delete.delete_document">
+    <querytext> 
+      SELECT document_item__delete(:document_id)
+    </querytext>
+  </fullquery>
+</queryset>

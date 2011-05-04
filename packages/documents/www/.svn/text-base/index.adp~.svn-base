@@ -1,0 +1,60 @@
+<master>
+
+  <table width="100%">
+    <tr>
+      <td valign="top" align="left"><h1>#documents.Documents#</h1></td>
+     </tr>
+    <if @admin_p@>
+    <tr>
+      <td valign="top" align="left">
+        #documents.Admin#: <a href="document-ae">#documents.New#</a><br><br>
+      </td>
+    </tr> 
+    </if>
+    <tr>
+      <td valign="top" align="center">
+      	  <formtemplate id="search" style="inline"></formtemplate>
+      </td>
+    </tr>
+
+<if @folder_p@>
+    <tr>
+      <td valign="top" align="center">
+      	  <br><br>Folder:
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" align="center">
+        <table width="100%">
+	  <tr>
+      	    <multiple name="folder_content">
+ 	      <td valign="top" align="center">
+	       
+	      </td>		
+  	    </multiple>
+	  </tr>
+	</table>
+      </td>
+    </tr>
+</if>
+<else>
+    <tr>
+      <td valign="top" align="center">
+      	  <br><br> #documents.Types#
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" align="center">
+        <table width="100%">
+	  <tr>
+      	    <multiple name="document_types">
+ 	      <td valign="top" align="center">
+	        <a href="@document_types.type_url@">@document_types.title;noquote@</a>
+	      </td>		
+  	    </multiple>
+	  </tr>
+	</table>
+      </td>
+    </tr>
+</else>
+  </table>

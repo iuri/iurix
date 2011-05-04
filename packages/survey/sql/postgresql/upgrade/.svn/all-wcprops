@@ -1,0 +1,11 @@
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/921/trunk/packages/survey/sql/postgresql/upgrade
+END
+upgrade-5.0.1-5.0.2.sql
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/openacs/!svn/ver/921/trunk/packages/survey/sql/postgresql/upgrade/upgrade-5.0.1-5.0.2.sql
+END

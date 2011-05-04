@@ -1,0 +1,77 @@
+9
+
+dir
+1582
+http://svn.softwarepublico.gov.br/svn/openacs/trunk/packages/survey
+http://svn.softwarepublico.gov.br/svn/openacs
+
+
+
+2010-06-06T12:27:56.457342Z
+1373
+eduardo.edusantos@gmail.com
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+65270c51-0825-0410-a41e-fc8022ce9244
+
+sql
+dir
+
+tcl
+dir
+
+www
+dir
+
+lib
+dir
+
+survey.info
+file
+
+
+
+
+2011-03-14T18:45:54.000000Z
+fa86578cc5063239ef9c063776e824c9
+2009-01-12T12:59:37.917499Z
+921
+eduardo.edusantos@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1402
+
+catalog
+dir
+

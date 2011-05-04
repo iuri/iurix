@@ -1,0 +1,174 @@
+***************
+*** 347,352 ****
+  }
+  
+  ad_proc -public pa_make_new_image {
+      base_image
+      new_image
+      geometry
+--- 347,353 ----
+  }
+  
+  ad_proc -public pa_make_new_image {
++     {-package_id {}}
+      base_image
+      new_image
+      geometry
+***************
+*** 370,377 ****
+      if {[regexp {^[0-9]+$} $geometry]} { 
+          set geometry ${geometry}x${geometry}
+      }
+      ns_log debug "pa_make_new_image: Start convert, making $new_image geometry $geometry"
+-     exec [ad_parameter ImageMagickPath]/convert -geometry $geometry -interlace None -sharpen 1x2 $base_image $new_image
+      if {[catch {exec jhead -dt $new_image} errmsg]} { 
+          ns_log Warning "pa_make_new_image: jhead failed with error - $errmsg"
+      }
+--- 371,379 ----
+      if {[regexp {^[0-9]+$} $geometry]} { 
+          set geometry ${geometry}x${geometry}
+      }
++     if { ![exists_and_not_null package_id] } { set package_id [ad_conn package_id] }
+      ns_log debug "pa_make_new_image: Start convert, making $new_image geometry $geometry"
++     exec [parameter::get -parameter ImageMagickPath -package_id $package_id]/convert -geometry $geometry -interlace None -sharpen 1x2 $base_image $new_image
+      if {[catch {exec jhead -dt $new_image} errmsg]} { 
+          ns_log Warning "pa_make_new_image: jhead failed with error - $errmsg"
+      }
+***************
+*** 705,719 ****
+  }      
+  
+  ad_proc -public  pa_file_info {
+      file 
+  } {
+      return the image information from a given file
+  } { 
+      set info [list]
+      if { [catch {set size [file size $file]} errMsg] } { 
+          return -code error $errMsg
+      } 
+-     if { [ catch {set out [exec [ad_parameter ImageMagickPath]/identify -format "%w %h %m %k %q %#" $file]} errMsg]} { 
+          return -code error $errMsg
+      }            
+      
+--- 707,723 ----
+  }      
+  
+  ad_proc -public  pa_file_info {
++     {-package_id {}}
+      file 
+  } {
+      return the image information from a given file
+  } { 
+      set info [list]
++     if { ![exists_and_not_null package_id] } { set package_id [ad_conn package_id] }
+      if { [catch {set size [file size $file]} errMsg] } { 
+          return -code error $errMsg
+      } 
++     if { [ catch {set out [exec [parameter::get -parameter ImageMagickPath -package_id $package_id]/identify -format "%w %h %m %k %q %#" $file]} errMsg]} { 
+          return -code error $errMsg
+      }            
+      
+***************
+*** 826,832 ****
+              set client_filename $upload_name
+          }
+  
+-         if {[catch {set base_info [pa_file_info $image_file]} errMsg]} {
+              ns_log Warning "pa_load_images: error parsing file data $image_file Error: $errMsg"
+              error "pa_load_images: error parsing file data $image_file Error: $errMsg"
+              continue
+--- 830,836 ----
+              set client_filename $upload_name
+          }
+  
++         if {[catch {set base_info [pa_file_info -package_id $package_id $image_file]} errMsg]} {
+              ns_log Warning "pa_load_images: error parsing file data $image_file Error: $errMsg"
+              error "pa_load_images: error parsing file data $image_file Error: $errMsg"
+              continue
+***************
+*** 840,846 ****
+              set new_image [file join $tmp_path "tmp-[file rootname [file tail $image_file]]"]
+              if {![empty_string_p $base_colors] && $base_colors < 257} { 
+                  # convert it to a png
+-                 if {[catch {exec [ad_parameter ImageMagickPath]/convert $image_file PNG:$new_image.png} errMsg]} { 
+                      ns_log Warning "pa_load_images: Failed convert to PNG for $image_file (magicktype $base_type)" 
+                  }
+                  if { $remove } { 
+--- 844,850 ----
+              set new_image [file join $tmp_path "tmp-[file rootname [file tail $image_file]]"]
+              if {![empty_string_p $base_colors] && $base_colors < 257} { 
+                  # convert it to a png
++                 if {[catch {exec [parameter::get -parameter ImageMagickPath -package_id $package_id]/convert $image_file PNG:$new_image.png} errMsg]} { 
+                      ns_log Warning "pa_load_images: Failed convert to PNG for $image_file (magicktype $base_type)" 
+                  }
+                  if { $remove } { 
+***************
+*** 850,856 ****
+                  set remove 1
+              } elseif {![empty_string_p $base_colors] && $base_colors > 256} { 
+                  # convert it to a jpg
+-                 if {[catch {exec [ad_parameter ImageMagickPath]/convert $image_file JPG:$new_image.jpg} errMsg]} { 
+                      ns_log Warning "pa_load_images: failed convert to JPG for $image_file (magicktype $base_type)" 
+                  }
+                  if { $remove } { 
+--- 854,860 ----
+                  set remove 1
+              } elseif {![empty_string_p $base_colors] && $base_colors > 256} { 
+                  # convert it to a jpg
++                 if {[catch {exec [parameter::get -parameter ImageMagickPath -package_id $package_id]/convert $image_file JPG:$new_image.jpg} errMsg]} { 
+                      ns_log Warning "pa_load_images: failed convert to JPG for $image_file (magicktype $base_type)" 
+                  }
+                  if { $remove } { 
+***************
+*** 863,869 ****
+              }
+  
+              # get info again
+-             foreach {base_bytes base_width base_height base_type base_mime base_colors base_quantum base_sha256} [pa_file_info $image_file] { break }
+          }
+          
+          if {[string equal $base_mime image/jpeg]} { 
+--- 867,873 ----
+              }
+  
+              # get info again
++             foreach {base_bytes base_width base_height base_type base_mime base_colors base_quantum base_sha256} [pa_file_info -package_id $package_id $image_file] { break }
+          }
+          
+          if {[string equal $base_mime image/jpeg]} { 
+***************
+*** 898,913 ****
+          set viewer_size [parameter::get -parameter ViewerSize -package_id $package_id]
+          set viewer_filename [pa_make_file_name -ext $BaseExt $viewer_rev_id]
+          set full_viewer_filename [file join ${tmp_path} ${viewer_filename}]
+-         pa_make_new_image $image_file ${full_viewer_filename} $viewer_size
+-         foreach {viewer_bytes viewer_width viewer_height viewer_type viewer_mime viewer_colors viewer_quantum viewer_sha256} [pa_file_info $full_viewer_filename] {}
+  
+          # Handle thumb file 
+          #
+          set thumb_size [parameter::get -parameter ThumbnailSize -package_id $package_id]
+          set thumb_filename [pa_make_file_name -ext $BaseExt $thumb_rev_id]
+          set full_thumb_filename [file join $tmp_path $thumb_filename]
+-         pa_make_new_image ${full_viewer_filename} ${full_thumb_filename} $thumb_size
+-         foreach {thumb_bytes thumb_width thumb_height thumb_type thumb_mime thumb_colors thumb_quantum thumb_sha256} [pa_file_info $full_thumb_filename] {}
+  
+          # copy the tmp file to the cr's file-system
+          set thumb_filename_relative [cr_create_content_file -move $thumb_item_id $thumb_rev_id ${full_thumb_filename}]
+--- 902,917 ----
+          set viewer_size [parameter::get -parameter ViewerSize -package_id $package_id]
+          set viewer_filename [pa_make_file_name -ext $BaseExt $viewer_rev_id]
+          set full_viewer_filename [file join ${tmp_path} ${viewer_filename}]
++         pa_make_new_image -package_id $package_id $image_file ${full_viewer_filename} $viewer_size
++         foreach {viewer_bytes viewer_width viewer_height viewer_type viewer_mime viewer_colors viewer_quantum viewer_sha256} [pa_file_info -package_id $package_id $full_viewer_filename] {}
+  
+          # Handle thumb file 
+          #
+          set thumb_size [parameter::get -parameter ThumbnailSize -package_id $package_id]
+          set thumb_filename [pa_make_file_name -ext $BaseExt $thumb_rev_id]
+          set full_thumb_filename [file join $tmp_path $thumb_filename]
++         pa_make_new_image -package_id $package_id ${full_viewer_filename} ${full_thumb_filename} $thumb_size
++         foreach {thumb_bytes thumb_width thumb_height thumb_type thumb_mime thumb_colors thumb_quantum thumb_sha256} [pa_file_info -package_id $package_id $full_thumb_filename] {}
+  
+          # copy the tmp file to the cr's file-system
+          set thumb_filename_relative [cr_create_content_file -move $thumb_item_id $thumb_rev_id ${full_thumb_filename}]

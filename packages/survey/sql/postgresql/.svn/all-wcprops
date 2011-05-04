@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/openacs/!svn/ver/921/trunk/packages/survey/sql/postgresql
+END
+survey-notifications-init.sql
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/postgresql/survey-notifications-init.sql
+END
+survey-create.sql
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/postgresql/survey-create.sql
+END
+survey-drop.sql
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/sql/postgresql/survey-drop.sql
+END

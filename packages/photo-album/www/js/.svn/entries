@@ -1,0 +1,47 @@
+9
+
+dir
+1422
+http://svn.softwarepublico.gov.br/svn/openacs/branches/spb-3.0/packages/photo-album/www/Slideflow-1.1/js
+http://svn.softwarepublico.gov.br/svn/openacs
+
+
+
+2010-07-18T23:00:40.159326Z
+1422
+andreluiz99@gmail.com
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+0
+
+scriptaculous
+dir
+
+slideflow
+dir
+
+ie6fix
+dir
+
+xmlparser
+dir
+

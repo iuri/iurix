@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/1283/branches/spb-3.0/packages/photo-album/sql/oracle/upgrade
+END
+upgrade-5.2.0d1-5.2.0d2.sql
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/openacs/!svn/ver/1283/branches/spb-3.0/packages/photo-album/sql/oracle/upgrade/upgrade-5.2.0d1-5.2.0d2.sql
+END
+upgrade-4.0.1-4.5.sql
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/openacs/!svn/ver/1283/branches/spb-3.0/packages/photo-album/sql/oracle/upgrade/upgrade-4.0.1-4.5.sql
+END
+upgrade-4.6.0-5.0d1.sql
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/openacs/!svn/ver/1283/branches/spb-3.0/packages/photo-album/sql/oracle/upgrade/upgrade-4.6.0-5.0d1.sql
+END

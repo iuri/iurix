@@ -1,0 +1,173 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www
+END
+document-ae.tcl~
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/document-ae.tcl~
+END
+documents.tcl~
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/documents.tcl~
+END
+document-ae.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/document-ae.tcl
+END
+documents.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/documents.tcl
+END
+delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/delete.tcl
+END
+temp.tcl~
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1519/trunk/packages/documents/www/temp.tcl~
+END
+folder-chunk.xql
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/folder-chunk.xql
+END
+folder-chunk.adp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/folder-chunk.adp
+END
+folder-chunk-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/folder-chunk-postgresql.xql
+END
+temp.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1519/trunk/packages/documents/www/temp.tcl
+END
+index.tcl~
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/index.tcl~
+END
+index.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/index.tcl
+END
+list.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/list.tcl
+END
+folder-chunk.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/folder-chunk.tcl
+END
+documents.adp~
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/documents.adp~
+END
+documents.xql
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1519/trunk/packages/documents/www/documents.xql
+END
+documents.adp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/documents.adp
+END
+document-ae.adp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/document-ae.adp
+END
+delete.xql
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/delete.xql
+END
+delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/delete.adp
+END
+delete-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/delete-postgresql.xql
+END
+delete-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/delete-oracle.xql
+END
+index.adp~
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/index.adp~
+END
+index.xql~
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/index.xql~
+END
+index.adp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/index.adp
+END
+index.xql
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1582/trunk/packages/documents/www/index.xql
+END
+file-upload-confirm.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/file-upload-confirm.tcl
+END
+list.adp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1490/trunk/packages/documents/www/list.adp
+END

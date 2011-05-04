@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/openacs/!svn/ver/1101/trunk/packages/survey/lib
+END
+one_list.adp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1075/trunk/packages/survey/lib/one_list.adp
+END
+respond-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/1075/trunk/packages/survey/lib/respond-oracle.xql
+END
+portlet.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1077/trunk/packages/survey/lib/portlet.tcl
+END
+respond.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1101/trunk/packages/survey/lib/respond.tcl
+END
+portlet.adp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1081/trunk/packages/survey/lib/portlet.adp
+END
+portlet.xql
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/openacs/!svn/ver/12/trunk/packages/survey/lib/portlet.xql
+END
+respond.adp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1081/trunk/packages/survey/lib/respond.adp
+END
+respond.xql
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/1075/trunk/packages/survey/lib/respond.xql
+END
+respond-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/1075/trunk/packages/survey/lib/respond-postgresql.xql
+END

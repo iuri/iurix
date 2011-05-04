@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<queryset>
+    <rdbms><type>postgresql</type><version>8.2</version></rdbms>
+
+    <fullquery name="select_folders">
+      <querytext>
+
+    SELECT  ci.item_id as folder_id, o.title  
+    FROM cr_items ci, acs_objects o
+    WHERE ci.content_type = 'content_folder' 
+    AND ci.parent_id = :root_folder_id
+    AND o.object_id = ci.item_id
+
+      </querytext>
+   </fullquery>
+</queryset>
+

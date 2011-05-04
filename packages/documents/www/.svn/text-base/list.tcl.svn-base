@@ -1,0 +1,12 @@
+ad_page_contract {
+    @author iuri sampaio (iuri.sampaio@gmail.com)
+    @date 2010-09-30
+}
+
+ns_log Notice "PAGE documents/index"
+set return_url [ad_return_url]
+
+set folder_id [db_list select_folder_id "select object_id from acs_objects where object_type = 'content_folder' and title = 'Documents'"]
+
+set n_past_days 99999
+set category_id ""

@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/openacs/!svn/ver/1578/trunk/packages/chat/catalog
+END
+chat.de_DE.ISO-8859-1.xml
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/1373/trunk/packages/chat/catalog/chat.de_DE.ISO-8859-1.xml
+END
+chat.pt_BR.ISO-8859-1.xml
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/1578/trunk/packages/chat/catalog/chat.pt_BR.ISO-8859-1.xml
+END
+chat.en_US.ISO-8859-1.xml
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/1578/trunk/packages/chat/catalog/chat.en_US.ISO-8859-1.xml
+END
+chat.ca_ES.ISO-8859-1.xml
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/1558/trunk/packages/chat/catalog/chat.ca_ES.ISO-8859-1.xml
+END
+chat.es_ES.ISO-8859-1.xml
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/1578/trunk/packages/chat/catalog/chat.es_ES.ISO-8859-1.xml
+END

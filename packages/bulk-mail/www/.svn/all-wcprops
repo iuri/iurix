@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/openacs/!svn/ver/1397/trunk/packages/bulk-mail/www
+END
+one.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/openacs/!svn/ver/12/trunk/packages/bulk-mail/www/one.tcl
+END
+one.adp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/openacs/!svn/ver/769/trunk/packages/bulk-mail/www/one.adp
+END
+one.xql
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/openacs/!svn/ver/12/trunk/packages/bulk-mail/www/one.xql
+END
+cancel.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/12/trunk/packages/bulk-mail/www/cancel.tcl
+END
+cancel.xql
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/12/trunk/packages/bulk-mail/www/cancel.xql
+END
+index.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1397/trunk/packages/bulk-mail/www/index.tcl
+END
+index.adp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/openacs/!svn/ver/1397/trunk/packages/bulk-mail/www/index.adp
+END

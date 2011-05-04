@@ -1,0 +1,22 @@
+# packages/videos/tcl/videos-callback-procs.tcl
+
+ad_library {
+    
+    callback implementations for videos
+    
+    @author iuri sampaio (iuri.sampaio@gmail.com)
+    @creation-date 2010-06-09
+}
+
+ad_proc -public -callback videos::add_categories {
+    {-array:required}
+    {-package_id ""}
+} {
+    a callback that adds standard tree, categories ans sub-categories related to video 
+} {
+
+    #create category tree
+    category_tree::add -name videos
+    
+    
+}

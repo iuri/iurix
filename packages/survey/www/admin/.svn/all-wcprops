@@ -1,0 +1,827 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/openacs/!svn/ver/929/trunk/packages/survey/www/admin
+END
+view-text-responses-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/view-text-responses-postgresql.xql
+END
+response-drill-boolean.xql
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/response-drill-boolean.xql
+END
+responses.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/responses.adp
+END
+survey-copy.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-copy.tcl
+END
+description-edit.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/description-edit.tcl
+END
+question-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-delete.tcl
+END
+survey-toggle.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-toggle.tcl
+END
+survey-category-add.xql
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-category-add.xql
+END
+survey-create-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-create-postgresql.xql
+END
+response-delete-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-delete-postgresql.xql
+END
+user-responses-delete-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/user-responses-delete-oracle.xql
+END
+survey-category-add-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-category-add-oracle.xql
+END
+response-editable-toggle.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-editable-toggle.tcl
+END
+name-edit.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/name-edit.adp
+END
+one-respondent-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one-respondent-oracle.xql
+END
+respondents.xql
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/respondents.xql
+END
+survey-copy-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-copy-postgresql.xql
+END
+user-responses-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/user-responses-delete.tcl
+END
+respond-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/respond-postgresql.xql
+END
+send-mail-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/send-mail-oracle.xql
+END
+question-modify-text.adp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-modify-text.adp
+END
+one.adp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one.adp
+END
+question-required-toggle.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-required-toggle.tcl
+END
+response-editable-toggle-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-editable-toggle-oracle.xql
+END
+respond.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/respond.tcl
+END
+question-add-2.xql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-add-2.xql
+END
+response-limit-toggle-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-limit-toggle-oracle.xql
+END
+response-drill-boolean.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/response-drill-boolean.tcl
+END
+survey-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-delete.adp
+END
+user-responses-delete-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/user-responses-delete-postgresql.xql
+END
+survey-display-type-edit.xql
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-display-type-edit.xql
+END
+responses-export-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/responses-export-oracle.xql
+END
+survey-create-choice.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-create-choice.tcl
+END
+response-drill-down.adp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/response-drill-down.adp
+END
+question-required-toggle-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-required-toggle-oracle.xql
+END
+send-mail-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/send-mail-postgresql.xql
+END
+process-response.xql
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/process-response.xql
+END
+survey-preview.adp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-preview.adp
+END
+survey-category-add.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-category-add.tcl
+END
+respondents.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/respondents.tcl
+END
+site-wide-survey.adp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/site-wide-survey.adp
+END
+one_table.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one_table.adp
+END
+survey-create-confirm.adp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-create-confirm.adp
+END
+response-limit-toggle-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-limit-toggle-postgresql.xql
+END
+master.adp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/master.adp
+END
+question-modify.xql
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/633/trunk/packages/survey/www/admin/question-modify.xql
+END
+one-respondent.xql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one-respondent.xql
+END
+question-active-toggle-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-active-toggle-oracle.xql
+END
+survey-copy.adp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-copy.adp
+END
+description-edit.adp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/description-edit.adp
+END
+index.xql
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/index.xql
+END
+question-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-delete.adp
+END
+question-add-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/633/trunk/packages/survey/www/admin/question-add-2.tcl
+END
+process-response-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/process-response-postgresql.xql
+END
+question-add.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-add.tcl
+END
+survey-display-type-edit.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-display-type-edit.tcl
+END
+process-response.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/process-response.tcl
+END
+user-responses-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/user-responses-delete.adp
+END
+survey-create.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-create.xql
+END
+responses-export.xql
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/responses-export.xql
+END
+question-active-toggle-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-active-toggle-postgresql.xql
+END
+survey-create-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-create-oracle.xql
+END
+response-delete-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-delete-oracle.xql
+END
+modify-responses.xql
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/modify-responses.xql
+END
+send-mail.xql
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/send-mail.xql
+END
+question-modify.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/929/trunk/packages/survey/www/admin/question-modify.tcl
+END
+respond.adp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/respond.adp
+END
+view-text-responses.xql
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/view-text-responses.xql
+END
+respond-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/respond-oracle.xql
+END
+one-respondent.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one-respondent.tcl
+END
+question-copy.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-copy.xql
+END
+response-drill-boolean.adp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/response-drill-boolean.adp
+END
+responses.xql
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/responses.xql
+END
+index.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/index.tcl
+END
+name-edit.xql
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/name-edit.xql
+END
+respondents.adp
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/respondents.adp
+END
+one_paragraph.adp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one_paragraph.adp
+END
+one_list.adp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one_list.adp
+END
+response-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/921/trunk/packages/survey/www/admin/response-delete.tcl
+END
+survey-create.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-create.tcl
+END
+question-active-toggle.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-active-toggle.tcl
+END
+question-modify-text.xql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-modify-text.xql
+END
+responses-export.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/responses-export.tcl
+END
+question-swap.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-swap.xql
+END
+question-swap-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-swap-postgresql.xql
+END
+one.xql
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one.xql
+END
+modify-responses.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/modify-responses.tcl
+END
+send-mail.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/633/trunk/packages/survey/www/admin/send-mail.tcl
+END
+view-text-responses.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/view-text-responses.tcl
+END
+no-responses.adp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/no-responses.adp
+END
+question-add-2.adp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-add-2.adp
+END
+question-copy.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-copy.tcl
+END
+question-add.adp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-add.adp
+END
+question-add-3.xql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-add-3.xql
+END
+responses.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/responses.tcl
+END
+survey-category-add-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-category-add-postgresql.xql
+END
+one-respondent-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one-respondent-postgresql.xql
+END
+modify-responses-2.xql
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/modify-responses-2.xql
+END
+response-drill-down.xql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/response-drill-down.xql
+END
+response-limit-toggle.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-limit-toggle.tcl
+END
+question-delete-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-delete-oracle.xql
+END
+process-response.adp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/process-response.adp
+END
+survey-preview.xql
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-preview.xql
+END
+process-response-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/process-response-oracle.xql
+END
+name-edit.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/name-edit.tcl
+END
+response-editable-toggle-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-editable-toggle-postgresql.xql
+END
+question-modify.adp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-modify.adp
+END
+question-modify-text.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-modify-text.tcl
+END
+question-swap.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-swap.tcl
+END
+one.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/one.tcl
+END
+question-add-3-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-add-3-oracle.xql
+END
+one-respondent.adp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/921/trunk/packages/survey/www/admin/one-respondent.adp
+END
+survey-delete-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-delete-oracle.xql
+END
+responses-export-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/responses-export-postgresql.xql
+END
+question-required-toggle-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-required-toggle-postgresql.xql
+END
+survey-copy.xql
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-copy.xql
+END
+description-edit.xql
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/description-edit.xql
+END
+question-delete.xql
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-delete.xql
+END
+index.adp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/index.adp
+END
+question-delete-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-delete-postgresql.xql
+END
+question-add-3.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/question-add-3.tcl
+END
+survey-delete.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-delete.tcl
+END
+survey-toggle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-toggle.xql
+END
+view-text-responses-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/view-text-responses-oracle.xql
+END
+modify-responses-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/modify-responses-2.tcl
+END
+response-drill-down.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/openacs/!svn/ver/634/trunk/packages/survey/www/admin/response-drill-down.tcl
+END
+site-wide-survey-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/site-wide-survey-oracle.xql
+END
+survey-preview.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-preview.tcl
+END
+survey-delete-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-delete-postgresql.xql
+END
+survey-create.adp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-create.adp
+END
+response-delete.adp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/response-delete.adp
+END
+question-add-3-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/question-add-3-postgresql.xql
+END
+site-wide-survey.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/site-wide-survey.tcl
+END
+survey-create-confirm.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/survey-create-confirm.tcl
+END
+send-mail.adp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/send-mail.adp
+END
+respond.xql
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/respond.xql
+END
+view-text-responses.adp
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/openacs/!svn/ver/12/trunk/packages/survey/www/admin/view-text-responses.adp
+END

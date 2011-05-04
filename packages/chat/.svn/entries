@@ -1,0 +1,83 @@
+9
+
+dir
+1584
+http://svn.softwarepublico.gov.br/svn/openacs/trunk/packages/chat
+http://svn.softwarepublico.gov.br/svn/openacs
+
+
+
+2011-03-02T19:44:22.552651Z
+1580
+iuri.sampaio@gmail.com
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+65270c51-0825-0410-a41e-fc8022ce9244
+
+sql
+dir
+
+java
+dir
+
+tcl
+dir
+
+www
+dir
+
+conf
+dir
+
+lib
+dir
+
+chat.info
+file
+
+
+
+
+2011-03-29T13:06:45.000000Z
+8388a41436fab1c462de5d18366f1b60
+2011-03-02T19:27:34.794659Z
+1578
+iuri.sampaio@gmail.com
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2239
+
+catalog
+dir
+

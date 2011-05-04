@@ -1,0 +1,34 @@
+9
+
+dir
+1413
+http://svn.softwarepublico.gov.br/svn/openacs/branches/spb-3.0/packages/photo-album/sql
+http://svn.softwarepublico.gov.br/svn/openacs
+
+
+
+2008-04-07T17:07:32.945567Z
+428
+eduardo
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+65270c51-0825-0410-a41e-fc8022ce9244
+
+postgresql
+dir
+
+oracle
+dir
+

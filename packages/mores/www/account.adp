@@ -17,40 +17,40 @@
 			<div class="ctn1top wl"></div>
 			<div class="ctnLcontent wlctn">
 				<h1>@account_name@ </h1>
-				<h2> #mores.resumo_atualizado_em# (@updated_at@)</h2>
-				<div class="cae mdflt">#mores.selecione_os_filtros_que_desejar#</div>
+				<h2> #mores.brief_updated_by# (@updated_at@)</h2>
+				<div class="cae mdflt">#mores.select_filters#</div>
 				<div class="form lista_bloco">
 					<form action="account">
-						 #mores.Por_termo#: <select id="query_id_p" name="query_id_p" <if @query_id_p@> style="color:red;font-weight:bold;" </if>>
+						 #mores.by_term#: <select id="query_id_p" name="query_id_p" <if @query_id_p@> style="color:red;font-weight:bold;" </if>>
 									<option value="">TODAS</option>
 									<multiple name=querys>
 										<option value="@querys.query_id@" <if @querys.query_id@ eq @query_id_p@> selected="selected" </if> >@querys.query_text@ (@querys.qtd@)</option>
 									</multiple>
 							</select>
 				
-							#mores.por_rede#: <select id="source_p" name="source_p" <if @source_p@> style="color:red;font-weight:bold;" </if>>
+							#mores.by_network#: <select id="source_p" name="source_p" <if @source_p@> style="color:red;font-weight:bold;" </if>>
 									<option value="">TODAS</option>
 									<multiple name=redes>
 										<option value="@redes.source@" <if @redes.source@ eq @source_p@> selected="selected" </if> >@redes.source@ (@redes.qtd@)</option>
 									</multiple>
 							</select> 
 							
-						 #mores.por_lingua#: <select id="lang_p" name="lang_p" <if @lang_p@> style="color:red;font-weight:bold;" </if>>
+						 #mores.by_idiom#: <select id="lang_p" name="lang_p" <if @lang_p@> style="color:red;font-weight:bold;" </if>>
 								<option value="todas">TODAS</option>
 								<multiple name=langs>
 									<option value="@langs.lang@" <if @langs.lang@ eq @lang_p@> selected="selected" </if> >@langs.lang@ (@langs.qtd@)</option>
 								</multiple>
 						</select> 
 						<input type="hidden" id="account_id" name="account_id" value ="@account_id@"  >
-						<input type="submit" value ="#mores.filtrar#"  >
+						<input type="submit" value ="#mores.filter#"  >
 					</form>
 				</div>	
-				<div class="cae mdflt">#mores.entre# <b>@min_date@</b> #mores.e# <b>@max_date@</b>,  <b>@qtd_total@ #mores.mencoes_unicas# </b>#mores.nas_redes_sociais_relacionados_aos_termos#.</div>	
+				<div class="cae mdflt">#mores.sign_in# <b>@min_date@</b> #mores.and# <b>@max_date@</b>,  <b>@qtd_total@ #mores.unique_mentions# </b>#mores.on_the social_networks_related_to_terms#.</div>	
 			</div>	
 			<div class="ctnbotton"></div>
 		</div>
 		<div class="bloco  ctn2">
-			<div class="ctn2top wl">#mores.Buscas# (#mores.clique_para_abrir_o_planeta#) <if @admin_p@ eq 1> <a href="query?account_id=@account_id@"> #mores.Administrar_termos# </a> </if> </div>
+			<div class="ctn2top wl">#mores.Searches# (#mores.click_here_to_open#) <if @admin_p@ eq 1> <a href="query?account_id=@account_id@"> #mores.Administrate_terms# </a> </if> </div>
 			<div class="ctnLcontent wlctn">
 				<ul class="tags">
 					<multiple name=querys>
@@ -59,15 +59,15 @@
 				</ul>
 				<if @admin_geral@ eq 1> 
 					<div class="cae mdflt">
-						<a  href="query-ae?account_id=@account_id@" class="newtag link">#mores.cadastrar_nova_hashtag#</a>
+						<a  href="query-ae?account_id=@account_id@" class="newtag link">#mores.insert_new_hashtag#</a>
 					</div>
 				</if> 
 				<div class="form cae mdflt">
 					<form action="monitor">
-							#mores.ou_veja_rapidamente_um_termo#: <input type="text" id="query_text" name="query_text" value ="">
+							#mores.or_quickly_see_a_term#: <input type="text" id="query_text" name="query_text" value ="">
 						<input type="hidden" id="query_id" name="query_id" value =" "  >
 						<input type="hidden" id="account_id" name="account_id" value ="@account_id@"  >
-						<input type="submit" value ="#mores.monitorar_online#"  >
+						<input type="submit" value ="#mores.online_monitoring#"  >
 					</form>
 				</div>		
 			</div>	
@@ -75,15 +75,15 @@
 		</div>	
 
 		<div class="bloco ctn2">
-			<div class="ctn2top wl">#mores.Grafico_das_mencoes# </div>
+			<div class="ctn2top wl">#mores.Graphic_of_mentions# </div>
 			<div id="chartarea" class="ctnLcontent wlctn">
 			
 				<ul class="button_list" >
-					<li style="display:inline;"><input class="selecionado button" type=button id="link_hoje" value="#mores.por_hora_hoje#" /> </li>
+					<li style="display:inline;"><input class="selecionado button" type=button id="link_hoje" value="#mores.by_hour_today#" /> </li>
 					<li style="display:inline;">  -  </li>
-					<li style="display:inline;"><input class="button" type=button  id="link_hora" value="#mores.por_hora_historico#"/> </li>
+					<li style="display:inline;"><input class="button" type=button  id="link_hora" value="#mores.by_hour_history#"/> </li>
 					<li style="display:inline;">  -  </li>
-					<li style="display:inline;"><input class="button" type=button  id="link_dia" value="#mores.por_dia#"/> </li>
+					<li style="display:inline;"><input class="button" type=button  id="link_dia" value="#mores.by_day#"/> </li>
 				</ul>
 				<div id="chart_dia" style="display:none;">
 					<div id="mychart" class="chart" style="width: 700px; height: 500px;">
@@ -153,7 +153,7 @@
 				<!-- so.addVariable("chart_data", @xml;noquote@); -->
 				<form id="relatorio" action="abrir-relatorio"> 	
 					<input type="hidden" value="@account_id@" id="account_id" name="account_id" >
-					<input type="submit" value="#mores.abrir_gerador_de_relatorios#">
+					<input type="submit" value="#mores.open_report_generator#">
 				</form>	
 			</div> <!-- end chart area -->
 			<div class="ctnbotton"></div>
@@ -164,7 +164,7 @@
 	<div id="right" class="right ctnR">
 
 		<div class="bloco ctnR1 first">
-			<div class="ctnR1top wr">#mores.Analise_de_sentimento#</div>
+			<div class="ctnR1top wr">#mores.feeling_analyzer#</div>
 			<div class="ctnRcontent wrctn lista_bloco">
 			<if @total_sent@ gt 0> 
 					<!-- ampie script-->
@@ -193,13 +193,13 @@
 					<!-- end of ampie script -->
 			</if>
 			<else>
-					<p> #mores.sem_analise_sobre_o_sentimento# </p>
+					<p> #mores.without_analysis_of_feeling# </p>
 					<if @admin_p@ eq 1> 
-					#mores.para_analisar_clique_abaixo#.
+					#mores.click_here_to_analyze#.
 						</if>
 			</else>
 			<if @admin_p@ eq 1> 
-					<a href="sentimento-manual?@export_vars;noquote@"> #mores.analisar_manualmente#</a>
+					<a href="sentimento-manual?@export_vars;noquote@"> #mores.mannually_analyze#</a>
 			</if>
 			@total_sent@ / @qtd_total@
 			</div>
@@ -214,12 +214,12 @@
 			<div class="ctnRbotton wr"></div>
 		</div>
 		<div class="bloco ctnR1">
-			<div class="ctnR1top wr">#mores.usuarios_ativos#:</div>
+			<div class="ctnR1top wr">#mores.Active_Users#:</div>
 			<div style="background:#fff;padding:10px; max-height: 264px;overflow-y: scroll;width: 244px;">
 					<table clear="all"  border="0" class="lista_bloco" cellpadding=0 cellspacing=0>	
 						<multiple name=users>
 							<tr><td><a target="_blank" href="http://twitter.com/@users.user_name@" ><b>@@users.user_name@ </b> </a></td>
-							 <td> <a target="_blank"  href="sentimento-manual?@export_vars;noquote@&user=@users.user_name@">@users.qtd@ #mores.mencoes# </a></td> </tr>
+							 <td> <a target="_blank"  href="sentimento-manual?@export_vars;noquote@&user=@users.user_name@">@users.qtd@ #mores.mentions# </a></td> </tr>
 						</multiple>
 					</table>
 				</div>
@@ -227,12 +227,12 @@
 			</div>
 		
 		<div class="bloco ctnR1">
-			<div class="ctnR1top wr">#mores.resultado_por_rede#:</div>
+			<div class="ctnR1top wr">#mores.Results_by_network#:</div>
 			 <div style="background:#fff;padding:10px; max-height: 264px;overflow-y: scroll;width: 244px; ">
 				<table clear="all" border="0" class="lista_bloco" cellpadding=0 cellspacing=0>	
 					<multiple name=redes>
 						<tr><td><b>@redes.source@ </b></td> 
-						<td> <a target="_blank" href="sentimento-manual?@export_vars;noquote@&source_p=@redes.source@">@redes.qtd@ #mores.mencoes# </a></td> </tr>
+						<td> <a target="_blank" href="sentimento-manual?@export_vars;noquote@&source_p=@redes.source@">@redes.qtd@ #mores.mentions# </a></td> </tr>
 					</multiple>
 				</table>
 			</div>

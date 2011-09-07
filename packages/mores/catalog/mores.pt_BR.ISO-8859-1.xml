@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="mores" locale="pt_BR" charset="ISO-8859-1">
+
+
+  <msg key="Active_Users">Usuarios Ativos</msg>
+  <msg key="brief_updated_by">resumo atualizado em</msg>
+  <msg key="select_filters">selecione os filtros que desejar</msg>
+  <msg key="by_term">Por termo</msg>
+  <msg key="by_network">Por rede</msg>
+  <msg key="by_idiom">Por idioma</msg>
+  <msg key="filter">filtrar</msg>
+  <msg key="sign_in">entre</msg>
+  <msg key="and">e</msg>
+  <msg key="unique_mentions">mencoes unicas</msg>
+  <msg key="on_the social_networks_related_to_terms">nas redes sociais relacionadas aos termos</msg>
+  <msg key="Searches">Buscas</msg>
+  <msg key="click_here_to_open">clique para abrir o planeta</msg>
+  <msg key="click_here_to_analyze">Clique aqui para analizar o sentimento</msg>
+  <msg key="Administrate_terms">Administrar termos</msg>
+  <msg key="insert_new_hashtag">cadastrar nova hashtag</msg>
+  <msg key="or_quickly_see_a_term">ou veja rapidamente um termo</msg>
+  <msg key="online_monitoring">monitorar online</msg>
+  <msg key="Graphic_of_mentions">Grafico das mencoes</msg>
+  <msg key="by_hour_today">por hora hoje</msg>
+  <msg key="by_hour_history">por hora historico</msg>
+  <msg key="by_day">por dia</msg>
+  <msg key="open_report_generator">abrir gerador de relatorios</msg>
+  <msg key="feeling_analyzer">Analise de sentimento</msg>
+  <msg key="without_analysis_of_feeling">Nenhuma analise realizada</msg>
+  <msg key="click_bellow_to_analyze">para analisar clique abaixo</msg>
+  <msg key="mannually_analyze">analisar manualmente</msg>
+  <msg key="mentions">mencoes</msg>
+  <msg key="Results_by_network">Resultados por rede</msg>
+
+</message_catalog>

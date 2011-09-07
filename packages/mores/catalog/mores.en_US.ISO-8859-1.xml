@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="mores" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="Active_Users">Active Users</msg>
+  <msg key="brief_updated_by">brief updated by</msg>
+  <msg key="select_filters">select filters</msg>
+  <msg key="by_term">by term</msg>
+  <msg key="by_network">by network</msg>
+  <msg key="by_idiom">by idiom</msg>
+  <msg key="filter">filter</msg>
+  <msg key="sign_in">sign in</msg>
+  <msg key="and">and</msg>
+  <msg key="unique_mentions">unique mentions</msg>
+  <msg key="on_the social_networks_related_to_terms">on the social networks related to terms</msg>
+  <msg key="Searches">Searches</msg>
+  <msg key="Click_here_to_open">Click here to open</msg>
+  <msg key="Click_here_to_analyze">Click here to analyze the feeling</msg>
+  <msg key="Administrate_terms">Administrate_terms</msg>
+  <msg key="insert_new_hashtag">insert new hashtag</msg>
+  <msg key="or_quickly_see_a_term">or quickly see a term</msg>
+  <msg key="online_monitoring">online monitoring</msg>
+  <msg key="Graphic_of_mentions">Graphic of mentions</msg>
+  <msg key="by_hour_today">by hour today</msg>
+  <msg key="by_hour_history">by hour history</msg>
+  <msg key="by_day">by day</msg>
+  <msg key="open_report_generator">open report generator</msg>
+  <msg key="feeling_analyzer">Feeling Analyzer</msg>
+  <msg key="without_analysis_of_feeling">without analysis of feeling</msg>
+  <msg key="click_bellow_to_analyze">click bellow to analyze</msg>
+  <msg key="mannually_analyze">mannually_analyze</msg>
+  <msg key="mentions">mentions</msg>
+  <msg key="Results_by_network">Results by network</msg>
+</message_catalog>

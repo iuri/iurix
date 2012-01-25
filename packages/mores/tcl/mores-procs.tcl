@@ -83,20 +83,20 @@ ad_proc -public mores::query_new {
 
 	
 	set query_id [db_string create_query {
-		select mores_query__new (
-			null,				-- account_id
-			:account_id, 		-- account_id
-			:query_text, 		-- query_text
-			:isactive, 			-- isactive
-			null , 			-- last_request
-    		:package_id,		-- package_id
-		    now(), 				-- creation_date
-			:creation_user, 	-- creation_user
-		    :creation_ip, 		-- creation_ip
-		   	:package_id			-- context_id
+	    select mores_query__new (
+				     null,			-- account_id
+				     :account_id, 		-- account_id
+				     :query_text, 		-- query_text
+				     :isactive, 		-- isactive
+				     null , 			-- last_request
+				     :package_id,		-- package_id
+				     now(), 			-- creation_date
+				     :creation_user, 	        -- creation_user
+				     :creation_ip, 		-- creation_ip
+				     :package_id		-- context_id
 		)
 	}]	
-
+    
 	return $query_id
 }
 
@@ -104,10 +104,17 @@ ad_proc -public mores::query_new {
 
 ad_proc -public mores::query_del {
     {-query_id:required}
+    {-account_id:required}
 } {
      delete query
 } {
-    set retorno [db_string delete_query { select mores_query__del(:query_id)}]
+
+    #set retorno [db_string delete_query { select mores_query__del(:query_id)}]
+    set retorno [db_dml delete_query { 
+	UPDATE mores_acc_query SET isactive = 'f', deleted_p = 't' 
+	WHERE account_id = :account_id AND query_id = :query_id
+    }]
+
     mores::util::restart_twitter
     return $retorno
 }

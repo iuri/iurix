@@ -22,13 +22,6 @@ auth::require_login
 set package_id [ad_conn package_id]
 set user_id [ad_conn user_id]
 
-set admin_p [permission::permission_p -object_id $package_id -party_id $user_id -privilege "admin"]
-
-set username [db_string select_user {
-    SELECT u.first_names || u.last_name FROM cc_users u WHERE user_id = :user_id
-} -default ""]
-
-
 if {![info exists item_type_id]} {
     set item_type_id ""
 }
@@ -73,9 +66,13 @@ ad_form -name cal_item  -export { return_url } -form {
         {label "[_ calendar.Date_1]"}
         {format "YYYY MM DD"}
         {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" onclick ="return showCalendarWithDateWidget('date', 'y-m-d');" > \[<b>[_ calendar.y-m-d]</b>\]} } }
-    {time_p:text(hidden)
-	{value 0}
+    {time_p:text(radio)     
+        {label "&nbsp;"}
+        {html {onClick "javascript:TimePChanged(this);"}} 
+        {options {{"[_ calendar.All_Day_Event]" 0}
+                  {"[_ calendar.Use_Hours_Below]" 1} }}
     }
+
     {start_time:date,optional
         {label "[_ calendar.Start_Time]"}
         {format {[lc_get formbuilder_time_format]}}
@@ -85,19 +82,23 @@ ad_form -name cal_item  -export { return_url } -form {
         {label "[_ calendar.End_Time]"}
         {format {[lc_get formbuilder_time_format]}}
     }
+
     {description:text(textarea),optional
         {label "[_ calendar.Description]"}
         {html {cols 45 rows 10}}
     }
-    {calendar_id:integer(hidden)
-	{value 1774}
+    {calendar_id:integer(radio)
+        {label "[_ calendar.Sharing]"}
+        {options $calendar_options}
     }
 }
 
 if { [ad_form_new_p -key cal_item_id] } {
     ad_form -extend -name cal_item -form {
-        {repeat_p:text(hidden)
-	    {value 0}
+        {repeat_p:text(radio)     
+            {label "[_ calendar.Repeat_1]"}
+            {options {{"[_ calendar.Yes]" 1}
+                {"[_ calendar.No]" 0} }}
         }
     }
 } else {

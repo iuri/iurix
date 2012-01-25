@@ -1,0 +1,137 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts
+END
+add-applications.adp
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/add-applications.adp
+END
+manage-includelets.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/manage-includelets.tcl
+END
+add-elements.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/add-elements.tcl
+END
+configure.adp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/configure.adp
+END
+pageset-show.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/pageset-show.tcl
+END
+copy-elements.xql
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/copy-elements.xql
+END
+index.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/index.tcl
+END
+user-pagesets.xql
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/user-pagesets.xql
+END
+user-pagesets.adp
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/user-pagesets.adp
+END
+add-applications-2.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/add-applications-2.tcl
+END
+add-applications.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/add-applications.tcl
+END
+delete-elements.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/delete-elements.tcl
+END
+configure.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/configure.tcl
+END
+manage-includelets.adp
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/manage-includelets.adp
+END
+copy-elements.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/copy-elements.tcl
+END
+manage-includelets-postgresql.xql
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/manage-includelets-postgresql.xql
+END
+manage-includelets-oracle.xql
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/manage-includelets-oracle.xql
+END
+user-pagesets.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/user-pagesets.tcl
+END
+pageset-show.adp
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/pageset-show.adp
+END
+index.adp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/index.adp
+END
+pageset-admin-master.adp
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/pageset-admin-master.adp
+END
+add-applications-2.xql
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/admin/layouts/add-applications-2.xql
+END

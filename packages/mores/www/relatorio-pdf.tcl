@@ -330,83 +330,78 @@ append dados_hora_grafico $tabela2
 
 
 
-#FEELING
+#SENTIMENTO
 set sent(1) 0
 set sent(2) 0
 set sent(3) 0
 set sent(4) 0
 
-db_foreach feeling "
-  SELECT feeling, count(*) as qtd
+db_foreach sentimento "SELECT sentimento, count(*) as qtd
   FROM mores_items3 mi, mores_acc_query maq 
-  WHERE maq.account_id = :account_id and  maq.query_id = mi.query_id and feeling <> 0 $sql_query_id2  and created_at > '2010-11-20' $sql_source
-  GROUP BY feeling;
-" {
-    set sent($feeling) [expr $qtd *1.0]
+  where maq.account_id = :account_id and  maq.query_id = mi.query_id and sentimento <> 0 $sql_query_id2  and created_at > '2010-11-20' $sql_source
+  group by sentimento;" {
+  	set sent($sentimento) [expr $qtd *1.0]
 }
 append value_query "\['Positivo', $sent(1)\], \['Negativo', $sent(3)\], \['Neutro', $sent(2)\], \['Divulgação', $sent(4)\]"
 
 
 set cont_query_sent 0
 set current_query ""
-
-db_foreach feeling "
-  SELECT query_text, base.feeling, COALESCE (qtd,0) as qtd FROM 
-	(SELECT distinct maq.query_id,query_text,  feeling
-		FROM mores_ feeling mi, mores_acc_query maq 
-		WHERE maq.account_id = :account_id $sql_query_id2
-		ORDER BY query_text, feeling 
-	) AS base
+db_foreach sentimento "select  query_text, base.sentimento, COALESCE (qtd,0) as qtd from 
+	(SELECT distinct maq.query_id,query_text, sentimento
+		FROM mores_sentimento mi, mores_acc_query maq 
+		where maq.account_id = :account_id $sql_query_id2
+		order by query_text, sentimento 
+	) as base
 	
-	left join (SELECT query_id, feeling, count(*) as qtd
+	left join (SELECT query_id, sentimento, count(*) as qtd
 	  FROM mores_items3 mi
-	  WHERE feeling <> 0 $sql_datai2 $sql_dataf2  $sql_query_id $sql_source
-	  group by query_id, feeling
+	  where   sentimento <> 0 $sql_datai2 $sql_dataf2  $sql_query_id $sql_source
+	  group by query_id, sentimento 
 	) sent on base.query_id = sent.query_id 
-		and base.feeling = sent.feeling
-  ORDER BY base.query_id, feeling;
-" {
-    if {$query_text != $current_query} {
-	if {$cont_query_sent >= 1 } {
-	    set total [expr $qtd_sent(1)+ $qtd_sent(2)+ $qtd_sent(3)+ $qtd_sent(4)]
-	    if {$total > 0} {
-		set perc_positivo [expr ($qtd_sent(1)*1.0 / $total) *100 ]
-		set perc_neutro [expr (($qtd_sent(2)*1.0 + $qtd_sent(4)) / $total) * 100]
-		set aceitacao [expr round($perc_positivo+ ( $perc_neutro / 2))]
-	    } else {
-		set aceitacao 50
-	      }
-	    append dados_aceitacao "data.setValue([expr $cont_query_sent -1], 0, '$current_query');
+		and base.sentimento = sent.sentimento
+  order by base.query_id, sentimento;
+  " {
+  	if {$query_text != $current_query} {
+  		if {$cont_query_sent >= 1 } {
+  			set total [expr $qtd_sent(1)+ $qtd_sent(2)+ $qtd_sent(3)+ $qtd_sent(4)]
+  			if {$total > 0} {
+  				set perc_positivo [expr ($qtd_sent(1)*1.0 / $total) *100 ]
+				set perc_neutro [expr (($qtd_sent(2)*1.0 + $qtd_sent(4)) / $total) * 100]
+				set aceitacao [expr round($perc_positivo+ ( $perc_neutro / 2))]
+ 			} else {
+				set aceitacao 50
+ 			}
+ 			append dados_aceitacao "data.setValue([expr $cont_query_sent -1], 0, '$current_query');
 									data.setValue([expr $cont_query_sent -1], 1, $aceitacao); "
-	}
-	incr cont_query_sent
-	set current_query $query_text
-	set qtd_sent(1) 0
-	set qtd_sent(2) 0
-	set qtd_sent(3) 0
-	set qtd_sent(4) 0
-    }
-    
-    set qtd_sent($feeling) $qtd
+  		}
+  		 incr cont_query_sent
+  		set current_query $query_text
+  		set qtd_sent(1) 0
+  		set qtd_sent(2) 0
+  		set qtd_sent(3) 0
+  		set qtd_sent(4) 0
+  	}
+  
+  	set qtd_sent($sentimento) $qtd
 }
-
 set total [expr $qtd_sent(1)+ $qtd_sent(2)+ $qtd_sent(3)+ $qtd_sent(4)]
 if {$total > 0} {
-    set perc_positivo [expr ($qtd_sent(1)*1.0 / $total) *100 ]
-    set perc_neutro [expr (($qtd_sent(2)*1.0 + $qtd_sent(4)) / $total) * 100]
-    set aceitacao [expr round($perc_positivo+ ( $perc_neutro / 2))]
+	set perc_positivo [expr ($qtd_sent(1)*1.0 / $total) *100 ]
+	set perc_neutro [expr (($qtd_sent(2)*1.0 + $qtd_sent(4)) / $total) * 100]
+	set aceitacao [expr round($perc_positivo+ ( $perc_neutro / 2))]
 } else {
-    set aceitacao 50
+	set aceitacao 50
 }
 append dados_aceitacao "data.setValue([expr $cont_query_sent -1], 0, '$current_query');
 						data.setValue([expr $cont_query_sent -1], 1, $aceitacao); "
-
+			
 
 set base "http://pwti.com.br"
 set html "<html lang=\"pt\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\">
 	<head>
-		<title>Planeta MPI</title>
-		<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">
+		<title>Relatório de Monitoramento do Planeta</title>
+		<meta http-equiv=\"content-type\" content=\"text/html; charset=iso8859-1\">
 		<link rel=\"stylesheet\" type=\"text/css\" href=\"$base/resources/mores/mores.css\" /> 
 		<link rel=\"stylesheet\" type=\"text/css\" href=\"$base/resources/mores/styles.css\" />
 		<link href=\"css/cssrelatorio.css\" rel=\"stylesheet\" type=\"text/css\" />
@@ -732,11 +727,13 @@ puts $fd $html
 
 close $fd
 
+
+
 ns_log notice "close fd" 
 ns_log notice "passou iconv |  exec /usr/bin/pisa/wkhtmltopdf $filename_base $filename_pdf" 
 # if [catch {exec htmldoc --firstpage toc --size 210x297mm --left 1cm --right 1.5cm --webpage --quiet -f $filename_pdf $filename_base2 -} errmsg]
 
-if {[catch {exec /usr/bin/pisa/wkhtmltopdf-i386 $filename_base $filename_pdf  } errmsg]} {
+if {[catch {exec /usr/bin/pisa/wkhtmltopdf-i386  --encoding iso8859-1 $filename_base $filename_pdf  } errmsg]} {
 	ns_log notice "ERRO: $errmsg"   	    
     if { $errmsg eq "child process exited abnormally" || 1} {
      	ns_set update [ns_conn outputheaders] Content-Disposition "attachment; filename=\"relatorio-planeta-$account_name-[ad_generate_random_string 5].pdf\""

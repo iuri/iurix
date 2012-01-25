@@ -205,22 +205,20 @@ db_foreach select_grafico2 " select hora as hour, COALESCE(msg3.qtd,0) as qtd
 
 
 
-#FEELING
+#SENTIMENTO
 set sent(1) 0
 set sent(2) 0
 set sent(3) 0
 set sent(4) 0
 
-db_foreach feeling "
-  SELECT feeling, count(*) as qtd
+db_foreach sentimento "SELECT sentimento, count(*) as qtd
   FROM mores_items3 mi, mores_acc_query maq 
-  where maq.account_id = :account_id and  maq.query_id = mi.query_id and feeling <> 0 $sql_query_id2  and created_at > '2010-11-20' $sql_source
-  group by feeling;
-" {
-    set sent($feeling) [expr $qtd *1.0]
+  where maq.account_id = :account_id and  maq.query_id = mi.query_id and sentimento <> 0 $sql_query_id2  and created_at > '2010-11-20' $sql_source
+  group by sentimento;" {
+  	set sent($sentimento) [expr $qtd *1.0]
 }
 
-append value_query "\['Positivo', $sent(1)\], \['Negativo', $sent(3)\], \['Neutro', $sent(2)\], \['Divulgação', $sent(4)\]"
+	append value_query "\['Positivo', $sent(1)\], \['Negativo', $sent(3)\], \['Neutro', $sent(2)\], \['Divulgação', $sent(4)\]"
 
 
 

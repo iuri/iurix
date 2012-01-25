@@ -1,0 +1,31 @@
+9
+
+dir
+1476
+http://svn.softwarepublico.gov.br/svn/openacs/trunk/packages/layout-managed-subsite/sql
+http://svn.softwarepublico.gov.br/svn/openacs
+
+
+
+2010-09-03T20:28:33.887800Z
+1473
+iuri.sampaio@gmail.com
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+65270c51-0825-0410-a41e-fc8022ce9244
+
+postgresql
+dir
+

@@ -127,17 +127,21 @@ set cont_date2 0
 set current_query 0
 set cont_query 0
 
-db_foreach select_grafico2 " select base.query_id, query_text, hora as hour, COALESCE(msg3.qtd,0) as qtd 
-					  from (select hora,query_id, query_text from    (SELECT distinct data as hora FROM mores_stat_graph msg
-						WHERE msg.tipo = 'hora')as tabela1, 
-						mores_acc_query maq
-						WHERE maq.account_id = :account_id $sql_query_id2
-					   ) as base
-					left join (select query_id, sum(qtd) as qtd, data 
-						from mores_stat_graph  where account_id = :account_id $sql_query_id $sql_source $sql_lang and tipo = 'hora'
-						group by query_id, data) msg3 on msg3.query_id = base.query_id AND msg3.data = base.hora
-						order by query_id, query_text, hora
-	" {
+db_foreach select_grafico2 "
+ select base.query_id, query_text, hora as hour, COALESCE(msg3.qtd,0) as qtd
+                                          from (select hora,query_id, query_text from    (SELECT data as hora FROM mores_stat_graph msg
+                                                WHERE msg.tipo = 'hora' GROUP BY data)as tabela1,
+                                                mores_acc_query maq
+                                                WHERE maq.account_id = :account_id $sql_query_id2
+                                           ) as base
+                                        left join (select query_id, sum(qtd) as qtd, data
+                                                from mores_stat_graph  where account_id = :account_id $sql_query_id $sql_source $sql_lang and tipo = 'hora'
+                                                group by query_id, data) msg3 on msg3.query_id = base.query_id AND msg3.data = base.hora
+                                                order by query_id, query_text, hora
+
+
+
+" {
   		if {$current_query != $query_id} {
   			if {$cont_query > 0} {
   				  append xml_dados2 "</graph>"  			
@@ -164,34 +168,36 @@ set cont_date3 0
 set current_query 0
 set cont_query 0
 
-db_foreach select_grafico3 "select base.query_id, query_text, hora  as hour, COALESCE(msg3.qtd,0) as qtd 
-					  from (select hora,query_id, query_text from    (SELECT distinct data as hora FROM mores_stat_graph msg
-						WHERE msg.tipo = 'hora')as tabela1, 
-						mores_acc_query maq
-						WHERE maq.account_id = :account_id $sql_query_id2
-					   ) as base
-					left join (select query_id, sum(qtd) as qtd, data 
-						from mores_stat_graph  where account_id = :account_id $sql_query_id $sql_source $sql_lang
-								and tipo = 'hora' and date = now()
-						group by query_id, data) msg3 on msg3.query_id = base.query_id AND msg3.data = base.hora
-						order by query_id, query_text, hora
-	" {
-  		if {$current_query != $query_id} {
-  			if {$cont_query > 0} {
-  				  append xml_dados3 "</graph>"  			
-  			}
-  			regsub -all {\'} $query_text {} query_text	 
-  			append xml_dados3 "<graph gid='$cont_query' title='$query_text'>"
-  			set current_query $query_id
-			incr cont_query
-  		}
-  		if {$cont_query == 1} {
-		  	set idx_date3($hour) $cont_date3
-		  	append xml_date3 "<value xid='$cont_date3'>$hour</value>"
-		  	incr cont_date3
-	  	}
-  		append xml_dados3 "<value xid='$idx_date3($hour)'>$qtd</value>"
-  }
+db_foreach select_grafico3 "
+    SELECT base.query_id, query_text, hora AS hour, COALESCE(msg3.qtd,0) AS qtd
+    FROM (SELECT hora,query_id, query_text 
+	  FROM (SELECT data AS hora FROM mores_stat_graph msg
+		WHERE msg.tipo = 'hora' GROUP BY data) AS tabela1,
+	  mores_acc_query maq
+	  WHERE maq.account_id = :account_id $sql_query_id2
+	  ) AS base
+    LEFT JOIN (SELECT query_id, sum(qtd) AS qtd, data
+	       FROM mores_stat_graph WHERE account_id = :account_id $sql_query_id $sql_source $sql_lang
+	       AND tipo = 'hora' AND date= now()
+	       GROUP BY query_id, data) msg3 ON msg3.query_id = base.query_id AND msg3.data = base.hora
+    ORDER BY query_id, query_text, hora
+" {
+    if {$current_query != $query_id} {
+	if {$cont_query > 0} {
+	    append xml_dados3 "</graph>"  			
+		}
+	regsub -all {\'} $query_text {} query_text	 
+	append xml_dados3 "<graph gid='$cont_query' title='$query_text'>"
+	set current_query $query_id
+	incr cont_query
+    }
+    if {$cont_query == 1} {
+	set idx_date3($hour) $cont_date3
+	append xml_date3 "<value xid='$cont_date3'>$hour</value>"
+	incr cont_date3
+    }
+    append xml_dados3 "<value xid='$idx_date3($hour)'>$qtd</value>"
+}
 
 set xml3 	"<chart><series>$xml_date3</series><graphs>$xml_dados3</graph></graphs></chart>"
 
@@ -202,11 +208,13 @@ db_multirow  -extend {clear_query} querys   select_account "
 	  	from mores_stat_source_query mssq
 	  	where 1 = 1 $sql_query_id $sql_source $sql_lang
 	  	group by query_id) as dt on ( dt.query_id = maq.query_id)
-	WHERE  maq.account_id =:account_id   $sql_query_id2
+	WHERE  maq.account_id =:account_id
+        AND maq.deleted_p = 'f' 
+        $sql_query_id2
 	--group by maq.query_id, maq.query_text
 	order by 3 desc 
 	" {
-		regsub -all {\#} $query_text {} clear_query
+	    regsub -all {\#} $query_text {} clear_query
 	}
 
 
@@ -217,7 +225,7 @@ db_multirow users select_users "SELECT user_id as user_name, sum(qtd) as qtd
   group by user_id
   order by 2 desc
   limit 300;" {
-}
+  }
 
 set total_sent 0
 set sent(1) 0
@@ -225,14 +233,12 @@ set sent(2) 0
 set sent(3) 0
 set sent(4) 0
 
-db_foreach feeling "
-  SELECT feeling, count(*) as qtd
-  FROM mores_feeling mi, mores_acc_query maq 
-  WHERE maq.account_id = :account_id and  maq.query_id = mi.query_id and feeling <> 0 $sql_query_id2 $sql_source $sql_lang
-  GROUP BY feeling;
-" {
-    set total_sent [expr $total_sent + $qtd]
-    set sent($feeling) [expr $qtd *1.0]
+db_foreach sentimento "SELECT sentimento, count(*) as qtd
+  FROM mores_sentimento mi, mores_acc_query maq 
+  where maq.account_id = :account_id and  maq.query_id = mi.query_id and sentimento <> 0 $sql_query_id2 $sql_source $sql_lang
+  group by sentimento;" {
+  	set total_sent [expr $total_sent + $qtd]
+  	set sent($sentimento) [expr $qtd *1.0]
 }
 
 

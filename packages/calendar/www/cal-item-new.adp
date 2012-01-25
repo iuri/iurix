@@ -38,14 +38,10 @@
 
   <div id="viewadp-mini-calendar">
     <include src="mini-calendar" base_url="view" view="@view@" date="@ansi_date@">
-
-    <if @admin_p@>
     <include src="cal-options">	
-    </if>
   </div>
         
   <div id="viewadp-cal-table">   
-   <h1>Hello @username;noquote@, <br> </h1>
     <formtemplate id="cal_item"></formtemplate>
   </div>
 

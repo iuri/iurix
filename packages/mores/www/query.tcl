@@ -47,10 +47,11 @@ template::list::create -name query_list -multirow query_list -key query_id -acti
 }
 
 db_multirow  query_list  select_query {
-	  SELECT query_id, query_text, isactive
-  FROM mores_acc_query
-  where account_id = :account_id;
-	} {
+    SELECT query_id, query_text, isactive
+    FROM mores_acc_query
+    WHERE account_id = :account_id
+    AND deleted_p = 'f';
+} {
 		set admin_p $admin_p	
 		if {$isactive == "t"} {
 			set isactive "Ativada"

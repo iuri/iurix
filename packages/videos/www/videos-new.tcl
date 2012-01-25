@@ -9,6 +9,7 @@ ad_page_contract {
 } {
     {video_id:optional}
     {video:trim,optional}
+    {mode "file"}
 }
 
 
@@ -19,16 +20,32 @@ set progress_bar_p 0
 #get community and subsite options 
 set community_options [videos::get_community_options]
 
-ad_form -html { enctype multipart/form-data } -name video -has_submit 1 -form {
+ad_form -name video -has_submit 1 -form {
     {video_id:key}
     {name:text {label "[_ videos.Name]"}}
     {description:text(textarea),optional 
 	{label "[_ videos.Description]"}
     }
-    {video:file {label "[_ videos.File]"}}
+    {mode:text(radio)
+	{label "[_ videos.Mode]"}
+	{options {{File file} {Link link}}}
+	{html {onChange "document.video.__refreshing_p.value='1';document.video.submit()"}}
+    }
+
 }
 
-
+switch $mode { 
+    file {
+	ad_form -extend -html { enctype multipart/form-data } -name video -form {
+	    {video:file {label "[_ videos.File]"}}
+	}
+    }
+    link {
+	ad_form -extend -name video -form {
+	    {link:text {label "[_ videos.Embed]"}}
+	}
+    }
+}
 
 
 set category_ids [list]
@@ -45,13 +62,7 @@ foreach {category_id category_name} [videos::get_categories -package_id $package
 
 
 ad_form -extend -name video -form {
-    {autor:text(text) {label "#videos.Author#"}}
-    {coautor:text(text),optional {label "#videos.CoAuthor#"}}
-    {source:text(text),optional {label "#videos.Source#"}}
-    {community_id:text(select),optional
-	{label {[_ videos.Community]}}
-	{options {$community_options}}
-    }
+    {author:text(text) {label "#videos.Author#"}}
     {publish_date_select:date(date)
 	{label "[_ videos.publish_date_select]"}
 	{html {id sel1} }
@@ -68,27 +79,11 @@ ad_form -extend -name video -form {
 
 
 
-if {![exists_and_not_null video_id]} {
-    ad_form -extend -name video -form {
-	{terms:text(inform)
-	    {label "[_ videos.Term]"} 
-	    {value " O Portal do Software Público não assume nenhuma responsabilidade pelo conteúdo dos artefatos publicados dos usuários. A responsabilidade do conteúdo das mensagens recai sobre a pessoa ou pessoas que enviaram a mensagem. A Portal do Software Público não restringe o conteúdo de mensagens a não ser que violem os termos de uso ou sejam consideradas de natureza abusiva. Reservamo-nos o direito de monitorar o conteúdo de todas as mensagens com o propósito de restringir os abusos desse serviço sem aviso prévio ou consentimento do remetente ou destinatário. Qualquer usuário que violar os termos e condições aqui listados podem ser permanentemente banidos do serviço de mensagens."}
-	}
-	{read_term:text(checkbox)
-	    {label ""}
-	    {options {{"[_ videos.Accept_Term]" "checked"}}}
-	}
-    }
-    if {[exists_and_not_null video]} {
-	ad_form -extend -name video  -validate {
-	#    {video 
-	#	{[string equal [lindex [split [template::util::file::get_property mime_type $video] "/"] 0] "video"]}
-	#	"#videos.This_file_isnt_video_file#"
-	#    }
-	    {read_term
-		{[string equal $read_term "checked"]} 
-		"#videos.You_must_check_read_term_box#"
-	    }
+if {[exists_and_not_null video]} {
+    ad_form -extend -name video  -validate {
+	{video 
+	    {[string equal [lindex [split [template::util::file::get_property mime_type $video] "/"] 0] "video"]}
+	    "#videos.This_file_isnt_video_file#"
 	}
     }
 }
@@ -110,16 +105,11 @@ ad_form -extend -name video -form {
 	select video_name as name, 
 	video_description as description, 
 	video_date as publish_date_select, 
-	autor,
-	coautor,
-	community_id,
-	video_source as source
+	author,
 	from videos 
 	where video_id = :video_id
     }
 
-    set community_id $community_id
-    
     set publish_date_select [videos::from_sql_datetime -sql_date $publish_date_select  -format "YYYY-MM-DD"]
     foreach {category_id category_name} [videos::get_categories -package_id $package_id] {
 	
@@ -143,10 +133,7 @@ ad_form -extend -name video -form {
 	-name $name \
 	-description $description \
 	-video_date $publish_date_select \
-	-autor $autor \
-	-coautor $coautor \
-	-video_source $source \
-	-community_id $community_id 
+	-author $author 
     
     
     if {![empty_string_p $video]} {
@@ -158,10 +145,7 @@ ad_form -extend -name video -form {
 	    -item_id $video_id \
 	    -description $description \
 	    -name $name \
-	    -autor $autor \
-	    -coautor $coautor \
-	    -video_source $source \
-	    -community_id $community_id \
+	    -author $author \
 	    -tags $tags \
 	    -package_id $package_id \
 	    -user_id $user_id \
@@ -186,44 +170,52 @@ ad_form -extend -name video -form {
 
 } -new_data {
     
+    set publish_date_select "[lindex $publish_date_select 0]-[lindex $publish_date_select 1]-[lindex $publish_date_select 2]"
+    
+    switch $mode {
+	file {
+	    set tmp_filename [template::util::file::get_property tmp_filename $video] 
+	    set filename [template::util::file::get_property filename $video] 
 
-    db_transaction {
-	set tmp_filename [template::util::file::get_property tmp_filename $video] 
-	set filename [template::util::file::get_property filename $video] 
-	
-	set publish_date_select "[lindex $publish_date_select 0]-[lindex $publish_date_select 1]-[lindex $publish_date_select 2]"
-	
-	ns_log Notice "NEW: $tmp_filename | $filename"
-	
-	set video_id [videos::new -filename $filename \
+	    set video_id [videos::new -filename $filename \
 			  -tmp_filename $tmp_filename \
 			  -name $name \
 			  -description $description \
 			  -video_date $publish_date_select \
-			  -autor $autor \
-			  -coautor $coautor \
-			  -video_source $source \
-			  -community_id $community_id \
+			  -author $author \
 			  -tags $tags \
 			  -user_id $user_id \
 			  -package_id $package_id \
 			  -creation_ip $creation_ip]
-	
-	
-	foreach {category_id category_name} [videos::get_categories -package_id $package_id] {
-	    
-	    set child_id  [set cat_${category_id}]
-	    category::map_object -remove_old -object_id $video_id $child_id
-	    #	    ns_log Notice " TTT [set cat_${category_id}]"
-	    
 	}
-	foreach {category_id category_name} [videos::get_categories -package_id $package_id] {
-	    #    ns_log Notice " TTT [set cat_${category_id}]"
-	    set child_id  [set cat_${category_id}]
-	    category::map_object -object_id $video_id $child_id
-	    
+	link {
+	 set video_id [videos::new -filename $link \
+			  -tmp_filename $tmp_filename \
+			  -name $name \
+			  -description $description \
+			  -video_date $publish_date_select \
+			  -author $author \
+			  -tags $tags \
+			  -user_id $user_id \
+			  -package_id $package_id \
+			  -creation_ip $creation_ip]
 	}
     }
+    
+    foreach {category_id category_name} [videos::get_categories -package_id $package_id] {
+	
+	set child_id  [set cat_${category_id}]
+	category::map_object -remove_old -object_id $video_id $child_id
+	#	    ns_log Notice " TTT [set cat_${category_id}]"
+	
+    }
+    foreach {category_id category_name} [videos::get_categories -package_id $package_id] {
+	#    ns_log Notice " TTT [set cat_${category_id}]"
+	set child_id  [set cat_${category_id}]
+	category::map_object -object_id $video_id $child_id
+	
+    }
+
 } -after_submit {
     ad_returnredirect "."
     ad_script_abort

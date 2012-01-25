@@ -13,12 +13,12 @@
 </style>	
 <div  class="socialmention-buzz-widget clearfix" id="socialmention_buzz_1942">
 	<ul class="compact">
-        <li><a class="button" title="Voltar para a Conta" href="account?account_id=@account_id@"><#Voltar_para_a_Conta Voltar para a Conta#></a></li>
+        <li><a class="button" title="Voltar para a Conta" href="account?account_id=@account_id@">Voltar para a Conta</a></li>
     </ul>
-	<h2><#lt_Relatrio_do_Monitoram Relatório do Monitoramento da conta:#> <b> @account_name@ </b></h2>
+	<h2>Relatório do Monitoramento da conta: <b> @account_name@ </b></h2>
 	<form action="relatorio-pdf">
 		<div style="margin-left:100px;width:39%;float:left;">                 
-	<#Por_Termo Por Termo:#><br> <input type="checkbox" value="0" name="query_p" id="q_all" onclick="javascript:preenche_tudo(this, 'query_id_p');" checked="checked"> <label for="q_all"><#TODAS TODAS#></label><br>
+	Por Termo:<br> <input type="checkbox" value="0" name="query_p" id="q_all" onclick="javascript:preenche_tudo(this, 'query_id_p');" checked="checked"> <label for="q_all">TODAS</label><br>
 			<multiple name=querys>
 				<input type="checkbox" value="@querys.query_id@" name="query_id_p" id="q@querys.query_id@" checked="checked"><label for="q@querys.query_id@">@querys.query_text@ (@querys.qtd@)</label> <br />
 			</multiple>
@@ -27,31 +27,31 @@
 		 
 		 </div>
 		 <div>
-			<#Redes Redes:#><select name="sources" id="sources">
-				<option value=""><#Todas Todas#></option>
+			Redes:<select name="sources" id="sources">
+				<option value="">Todas</option>
 			<multiple name="redes">
-				<option value="@redes.source@"><#lt_redessource_-_redesqt @redes.source@ - @redes.qtd@ menções#></option>
+				<option value="@redes.source@">@redes.source@ - @redes.qtd@ menções</option>
 			</multiple>
 			</select>
 			<br />
 			<br />
 	 <!--
 		Usuários:<select name="users" id="users">
-				<option value=""><#Tods Tod@s#></option>
+				<option value="">Tod@s</option>
 			<multiple name="users">
-				<option value="@users.user_name@"><#lt_usersuser_name_-_rede @users.user_name@ - @redes.qtd@ menções#></option>
+				<option value="@users.user_name@">@users.user_name@ - @redes.qtd@ menções</option>
 			</multiple>
 			</select>
 			<br/> -->
 
 			<br/>
 
-			<#Data_inicial Data inicial:#><input type="text" value="@min_date@" readonly name="datai" id="datai">
+			Data inicial:<input type="text" value="@min_date@" readonly name="datai" id="datai">
 			<input type="button" value="escolha" onclick="displayCalendar(document.forms[0].datai,'yyyy-mm-dd',this)">
 			<br/>
 			<br/>
 			<br/>
-			<#Data_final Data final:#> <input type="text" id="dataf" name="dataf" value="">
+			Data final: <input type="text" id="dataf" name="dataf" value="">
 			<input type="button" value="escolha " onclick="displayCalendar(document.forms[0].dataf,'yyyy-mm-dd',this)">
 			<br/>
 
@@ -66,4 +66,3 @@
 
 	</form>
 </div>
-

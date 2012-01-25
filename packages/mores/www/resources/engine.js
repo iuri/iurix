@@ -324,7 +324,7 @@ var googleblog2 = function(query) {
 		query = escape(query);
 
 
-		this.api_uri = "http://173.230.132.158/search/search-engine.php?url=http%3a%2f%2fapi2.socialmention.com%2fsearch%3fq%3d"+query+"%26btnG%3dSearch%26lang%3dpt%26f%3djson%26src%5b%5d%3dbing%26src%5b%5d%3ddelicious%26src%5b%5d%3ddigg%26src%5b%5d%3dfacebook%26src%5b%5d%3dflickr%26src%5b%5d%3dfriendfeed%26src%5b%5d%3dgoogle_blog%26src%5b%5d%3dgoogle_buzz%26src%5b%5d%3dgoogle_news%26src%5b%5d%3dgoogle_video%26src%5b%5d%3didentica%26src%5b%5d%3dlinkedin%26src%5b%5d%3dmsn_social%26src%5b%5d%3dmsn_video%26src%5b%5d%3dmybloglog%26src%5b%5d%3dmyspace%26src%5b%5d%3dmyspace_photo%26src%5b%5d%3dmyspace_video%26src%5b%5d%3dning%26src%5b%5d%3dpanoramio%26src%5b%5d%3dpicasaweb%26src%5b%5d%3dreddit%26src%5b%5d%3dstumbleupon%26src%5b%5d%3dwordpress%26src%5b%5d%3dyahoo%26src%5b%5d%3dyahoo_news%26src%5b%5d%3dyouare%26src%5b%5d%3dyoutube";
+		this.api_uri = "http://173.230.132.158/search/search-engine.php?url=http%3a%2f%2fapi2.socialmention.com%2fsearch%3fq%3d"+query+"%26btnG%3DSearch%26lang%3Dpt%26f%3Djson%26src%5B%5D%3Dbing%26src%5B%5D%3Ddelicious%26src%5B%5D%3Ddigg%26src%5B%5D%3Dfacebook%26src%5B%5D%3Dflickr%26src%5B%5D%3Dfriendfeed%26src%5B%5D%3Dgoogle_blog%26src%5B%5D%3Dgoogle_buzz%26src%5B%5D%3Dgoogle_news%26src%5B%5D%3Dgoogle_video%26src%5B%5D%3Didentica%26src%5B%5D%3Dlinkedin%26src%5B%5D%3Dmsn_social%26src%5B%5D%3Dmsn_video%26src%5B%5D%3Dmybloglog%26src%5B%5D%3Dning%26src%5B%5D%3Dpanoramio%26src%5B%5D%3Dpicasaweb%26src%5B%5D%3Dreddit%26src%5B%5D%3Dstumbleupon%26src%5B%5D%3Dwordpress%26src%5B%5D%3Dyahoo%26src%5B%5D%3Dyahoo_news%26src%5B%5D%3Dyouare%26src%5B%5D%3Dyoutube";
 	} else {
 
 

@@ -5,7 +5,7 @@ ad_page_contract {
     @author Ben Adida (ben@openforce.net)
     
     @creation-date Mar 16, 2002
-    @cvs-id $Id: calendar-item-types.tcl,v 1.4.4.1 2009/07/21 10:50:58 emmar Exp $
+    @cvs-id $Id: calendar-item-types.tcl,v 1.5 2009/10/10 22:38:09 donb Exp $
 } {
     calendar_id:notnull
 }

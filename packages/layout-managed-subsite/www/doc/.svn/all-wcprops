@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc
+END
+pageset-configuration.adp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/pageset-configuration.adp
+END
+create-subsite.adp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/create-subsite.adp
+END
+wizard.adp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/wizard.adp
+END
+applications.adp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/applications.adp
+END
+install.adp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/install.adp
+END
+index.adp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/index.adp
+END
+includelets.adp
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/includelets.adp
+END
+master.adp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/master.adp
+END
+pagesets.adp
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/openacs/!svn/ver/1473/trunk/packages/layout-managed-subsite/www/doc/pagesets.adp
+END

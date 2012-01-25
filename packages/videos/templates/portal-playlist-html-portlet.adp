@@ -18,15 +18,15 @@
 		
 		<p class="main_video_title"><strong>@videos.video_name@</strong></p>
 
-		<div id='mediaspace'>This text will be replaced</div>
+		<div id='mediaspace'><#lt_This_text_will_be_rep This text will be replaced#></div>
  
 		<script type='text/javascript'>
-		  var so = new SWFObject('/resources/videos/player.swf','mpl','@width@','@height@','9');
+		  <#lt_var_so__new_SWFObject var so = new SWFObject('/resources/videos/player.swf','mpl','@width@','@height@','9');
 		  so.addParam('allowfullscreen','true');
 		  so.addParam('allowscriptaccess','always');
 	          so.addParam('wmode','opaque');
 		  so.addParam('flashvars','file=@videos.url@/@videos.video_id@.flv&image=@videos.url@@videos.video_id@.jpg');
-		  so.write('mediaspace');
+		  so.write('mediaspace');#>
 		</script>
 
 	</else>
@@ -35,4 +35,5 @@
 <p><a href="@url@videos-new">#videos.New#</a></p>
 </if>
  
+
 

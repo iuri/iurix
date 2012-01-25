@@ -178,21 +178,34 @@ ad_proc -public mores::util::sync_twitter {
 			set stop 1	
 			return 0	
 		} else {
-	#	ns_log notice "twitter buscando $page"
+	ns_log notice "twitter buscando $page"
+
+
 		}
+
+	set json [encoding convertfrom utf-8 $json]
+	regsub -all {\-} $json {$$*} json
+	set json_list [util::json::parse $json]
+	set json2 [util::json::object::get_value -object $json_list -attribute "results"]
+
+	set items [lindex $json2 1]
+	
+
+	regsub -all {\$\$\*} $items {-} items
+
 			
-		set json [encoding convertfrom utf-8 $json]
-	 	regsub -all {&nbsp;} $json {} json
-		regsub -all {&nbsp;} $json {} json
-		regsub -all {\-} $json {$$*} json
-
-		set json_list [util::json::parse $json]
-
-		set results [lindex $json_list 1]
-		set results_list [lindex $results 1]
-		set items [lindex $results_list 1]
-
-		regsub -all {\$\$\*} $items {-} items
+#		set json [encoding convertfrom utf-8 $json]
+#	 	regsub -all {&nbsp;} $json {} json
+#		regsub -all {&nbsp;} $json {} json
+#		regsub -all {\-} $json {$$*} json
+#
+#		set json_list [util::json::parse $json]
+#
+#		set results [lindex $json_list 1]
+#		set results_list [lindex $results 1]
+#		set items [lindex $results_list 1]
+#
+#		regsub -all {\$\$\*} $items {-} items
 
 		foreach one_item $items {
 			set from_user_id ""
@@ -489,8 +502,9 @@ ad_proc -public mores::util::sync_twitter_posts  {
 		   text, lang, post_url, type, followers, following, favorites, statuses, verified
 	  FROM mores_items_tmp;
 	} {
+		regsub -all {\\} $text {} text
 		db_foreach select_query { SELECT query_id, account_id, query_text
-		  FROM mores_acc_query where lower(:text) like '%'||lower(trim(both '"' from query_text))||'%'
+		  FROM mores_acc_query where lower(:text) like '%'||lower(trim(both '\"' from query_text))||'%'
 		} {
 			incr cont
 			set query_id $query_id 
@@ -570,43 +584,49 @@ ad_proc -public mores::util::items_new {
 } { 
 	Add item
 } {
-	
-	
 
-		if {[catch {db_dml insert_item {
-				INSERT INTO mores_items3(
-				    query_id, user_id, user_nick, user_name, profile_img, post_id, 
-				    created_at, updated_at, title, "text", lang, source, favicon, 
-				    "domain", post_url, post_img, to_user, "type")
+    set queries [db_list select_query_id {                                                                                                                
+        SELECT query_id FROM mores_items3 WHERE query_id = query_id
+    } ]
+
+
+    if {![exists_and_not_null queries]} {
+    
+	if {[catch {db_dml insert_item {
+	    INSERT INTO mores_items3(
+				     query_id, user_id, user_nick, user_name, profile_img, post_id, 
+				     created_at, updated_at, title, "text", lang, source, favicon, 
+				     "domain", post_url, post_img, to_user, "type")
 			VALUES (:query_id, 		-- query_id
-					:user_id, 		-- user_id
-					:user_nick, 	-- user_nick
-					:user_name , 	-- user_name   
-					:profile_img, 	--	profile_img	
-					:post_id, 		--	post_id     
-					:created_at, 	--	created_at 	
-					:updated_at , 	--	updated_at  
-					:title, 		--	title       
-					:text ,			-- text        
-					:lang,			--  lang       
-					:source ,		--  source      
-					:favicon,		--  favicon    
-					:domain ,		-- 	domain      		
-					:post_url  ,	--  post_url    
-					:post_img,  	--	post_img    
-					:to_user, 		--	to_user     
-					:type			--	type 
+				:user_id, 		-- user_id
+				:user_nick, 	-- user_nick
+				:user_name , 	-- user_name   
+				:profile_img, 	--	profile_img	
+				:post_id, 		--	post_id     
+				:created_at, 	--	created_at 	
+				:updated_at , 	--	updated_at  
+				:title, 		--	title       
+				:text ,			-- text        
+				:lang,			--  lang       
+				:source ,		--  source      
+				:favicon,		--  favicon    
+				:domain ,		-- 	domain      		
+				:post_url  ,	--  post_url    
+				:post_img,  	--	post_img    
+				:to_user, 		--	to_user     
+				:type			--	type 
 				)
-		} }	result]} {
-				#ERROR
-			   return 1
-		
+	} }	result]} {
+	    #ERROR
+	    return 1
+	    
 	}
+    }
 	return 1
-
+	
 }
-
-
+    
+    
 ad_proc -public mores::util::items_new_with_user {
     {-query_id}
 	{-user_id}
@@ -636,42 +656,50 @@ ad_proc -public mores::util::items_new_with_user {
 } {
 	
 	
+    set queries [db_list select_query_id {                                                                                                                
+        SELECT query_id FROM mores_items3 WHERE query_id = query_id
+    } ]
 
-		if {[catch {db_dml insert_item {
-				INSERT INTO mores_items3(
-				    query_id, user_id, user_nick, user_name, profile_img, post_id, 
-				    created_at, updated_at, title, "text", lang, source, favicon, 
-				    "domain", post_url, post_img, to_user, "type",followers,following,favorites,statuses,verified)
-			VALUES (:query_id, 		-- query_id
-					:user_id, 		-- user_id
-					:user_nick, 	-- user_nick
-					:user_name , 	-- user_name   
-					:profile_img, 	--	profile_img	
-					:post_id, 		--	post_id     
-					:created_at, 	--	created_at 	
-					:updated_at , 	--	updated_at  
-					:title, 		--	title       
-					:text ,			-- text        
-					:lang,			--  lang       
-					:source ,		--  source      
-					:favicon,		--  favicon    
-					:domain ,		-- 	domain      		
-					:post_url  ,	--  post_url    
-					:post_img,  	--	post_img    
-					:to_user, 		--	to_user     
-					:type,			--	type 
-					:followers,
-					:following,
-					:favorites,
-					:statuses,
-					:verified
-				)
-		} }	result]} {
-				#ERROR
-			   return 1
-		
+
+    if {![exists_and_not_null queries]} {
+	
+	if {[catch {db_dml insert_item {
+	    INSERT INTO mores_items3(
+				     query_id, user_id, user_nick, user_name, profile_img, post_id, 
+				     created_at, updated_at, title, "text", lang, source, favicon, 
+				     "domain", post_url, post_img, to_user, "type",followers,following,favorites,statuses,verified)
+	    VALUES (:query_id, 		-- query_id
+		    :user_id, 		-- user_id
+		    :user_nick, 	-- user_nick
+		    :user_name , 	-- user_name   
+		    :profile_img, 	--	profile_img	
+		    :post_id, 		--	post_id     
+		    :created_at, 	--	created_at 	
+		    :updated_at , 	--	updated_at  
+		    :title, 		--	title       
+		    :text ,			-- text        
+		    :lang,			--  lang       
+		    :source ,		--  source      
+		    :favicon,		--  favicon    
+		    :domain ,		-- 	domain      		
+		    :post_url  ,	--  post_url    
+		    :post_img,  	--	post_img    
+		    :to_user, 		--	to_user     
+		    :type,			--	type 
+		    :followers,
+		    :following,
+		    :favorites,
+		    :statuses,
+		    :verified
+		    )
+	} }	result]} {
+	    #ERROR
+	    return 1
+	    
 	}
-	return 1
+    }
+    
+    return 1
 
 }
 
@@ -731,6 +759,7 @@ ad_proc -public mores::util::sync_all {
 	db_dml delete_item { delete from mores_stat_source_query_tmp;}
 	db_dml delete_item { delete from mores_stat_source_tmp;}
 	db_dml delete_item { delete from mores_stat_twt_usr_tmp;}
+#	db_dml delete_item { delete from mores_stat_twt_tmp;}
 	
 	
 		
@@ -813,6 +842,17 @@ ad_proc -public mores::util::sync_all {
 	ns_log notice "atualizou users"
 
 
+
+
+# db_dml insert_item {
+#		INSERT INTO mores_stat_twt_tmp (
+#			account_id, query_id, lang, user_nick, user_name, user_img, following, 
+#			followers, favorites, statuses, verified)
+#		SELECT  distinct on (query_id, lang,user_name) 1 as acc, query_id, lang,user_nick
+#			, user_name, profile_img, following,followers, favorites, statuses, verified
+#			FROM mores_items3 where followers is not null;
+#	
+#	}
 
 
 #			select account_id, query_id, source, to_char(hour,'HH24') as hour,
@@ -909,14 +949,16 @@ ad_proc -public mores::util::sync_all {
 	}
 	ns_log notice "atualizou users"
 
-	db_dml insert_item {
-		INSERT INTO mores_stat_twt(
-			account_id, query_id, lang, user_nick, user_name, user_img, following, 
-			followers, favorites, statuses, verified)
-		SELECT  distinct 1 as acc, query_id, lang,user_nick, user_name, profile_img, following,
-			followers, favorites, statuses, verified
-			FROM mores_items3 where followers is not null;
-	}
+
+####
+#	db_dml insert_item {
+#		INSERT INTO mores_stat_twt(
+#			account_id, query_id, lang, user_nick, user_name, user_img, following, 
+#			followers, favorites, statuses, verified)
+#		SELECT  distinct on (query_id, lang,user_name) 1 as acc, query_id, lang,user_nick, user_name, profile_img, following,
+#			followers, favorites, statuses, verified
+#			FROM mores_items3 where followers is not null;
+#	}
 	ns_log notice "atualizou users stats"
 
 	db_dml delete_item { delete from mores_stat_graph_tmp;}

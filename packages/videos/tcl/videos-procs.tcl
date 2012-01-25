@@ -12,18 +12,18 @@ ad_library {
 
 namespace eval videos {}
 
+ad_proc -public videos::new {
+    
 
+}
 ad_proc -public videos::new {
     {-item_id ""}
-    {-filename:required}
-    {-tmp_filename:required}
+    {-filename ""}
+    {-tmp_filename ""}
     {-name:required}
     {-description ""}
     {-video_date "now"}
-    {-autor ""}
-    {-coautor ""}
-    {-video_source ""}
-    {-community_id}
+    {-author ""}
     {-tags ""}
     {-user_id:required}
     {-package_id:required}
@@ -39,10 +39,7 @@ ad_proc -public videos::new {
     set new_video 0
     set suggest_name [lang::util::suggest_key $name]
     set guessed_file_type [ns_guesstype $filename]
-    set n_bytes [file size $tmp_filename]
 
-    ns_log Notice "FILE: $guessed_file_type | $filename | $tmp_filename"
-    
     if {![exists_and_not_null item_id]} {
 	set new_video 1
 	set item_id [db_nextval "acs_object_id_seq"]
@@ -57,107 +54,112 @@ ad_proc -public videos::new {
     }
     
 
-    ## remove video from videos_queue if exists
     ###
     ## add video to cr_revisions
     ###
-    set revision_id [cr_import_content \
-			 -item_id $item_id \
-			 -storage_type file \
-			 -creation_user $user_id \
-			 -creation_ip $creation_ip \
-			 -description $description \
-			 -package_id $package_id \
-			 $package_id \
-			 $tmp_filename \
-			 $n_bytes \
-			 $guessed_file_type \
-			 video-$package_id-$user_id-$suggest_name-$n_bytes]
-    
-    item::publish -item_id $item_id -revision_id $revision_id
-    
-    
-    ###
-    ## get a video image if video file is FLV
-    ###
-    switch $guessed_file_type {
-	{video/x-flv} - {video/mp4} - {video/x-msvideo} - {video/quicktime} - {text/plain} {
-	    set image_tmp_filename "/tmp/image-videos-[ns_rand 1000000].jpeg"
-	    set image_tmp "/tmp/image-videos-2[ns_rand 1000000].jpeg"
-	    
-	    set image_size [parameter::get -package_id $package_id -parameter ImageSize]
-	    set film_image_to_composite [parameter::get -package_id $package_id -parameter ImageToComposite]
-	    ns_log Notice "IMAGE: $film_image_to_composite | "
-	    
-	    if {![catch {[exec ffmpeg -an -y -i $tmp_filename -f mjpeg -s $image_size -ss 10 -vframes 1 $image_tmp_filename]} errorMsg]} {
-		ns_log Notice "Erro na conversao da imagem" 
-		# do nothing
-	    } else {
-		set image_tmp $image_tmp_filename
-		if {$film_image_to_composite != ""} {
-		    ns_log Notice "ROOT DIR: [acs_root_dir]"
-		    ns_log Notice "$image_tmp_filename - $film_image_to_composite - $image_tmp"
-		    catch {exec convert -composite $tmp_filename "[acs_root_dir]$film_image_to_composite" $image_tmp} aux
+    if {[exists_and_not_null tmp_filenname]} {
+	
+	set n_bytes [file size $tmp_filename]
+	
+	set revision_id [cr_import_content \
+			     -item_id $item_id \
+			     -storage_type file \
+			     -creation_user $user_id \
+			     -creation_ip $creation_ip \
+			     -description $description \
+			     -package_id $package_id \
+			     $package_id \
+			     $tmp_filename \
+			     $n_bytes \
+			     $guessed_file_type \
+			     video-$package_id-$user_id-$suggest_name-$n_bytes]
+	
+	item::publish -item_id $item_id -revision_id $revision_id
+	
+	###
+	## get a video image if video file is FLV
+	###
+	switch $guessed_file_type {
+	    {video/x-flv} - {video/mp4} - {video/x-msvideo} - {video/quicktime} - {text/plain} {
+		set image_tmp_filename "/tmp/image-videos-[ns_rand 1000000].jpeg"
+		set image_tmp "/tmp/image-videos-2[ns_rand 1000000].jpeg"
+		
+		set image_size [parameter::get -package_id $package_id -parameter ImageSize]
+		set film_image_to_composite [parameter::get -package_id $package_id -parameter ImageToComposite]
+		ns_log Notice "IMAGE: $film_image_to_composite | "
+		
+		if {![catch {[exec ffmpeg -an -y -i $tmp_filename -f mjpeg -s $image_size -ss 10 -vframes 1 $image_tmp_filename]} errorMsg]} {
+		    ns_log Notice "Erro na conversao da imagem" 
+		    # do nothing
+		} else {
+		    set image_tmp $image_tmp_filename
+		    if {$film_image_to_composite != ""} {
+			ns_log Notice "ROOT DIR: [acs_root_dir]"
+			ns_log Notice "$image_tmp_filename - $film_image_to_composite - $image_tmp"
+			catch {exec convert -composite $tmp_filename "[acs_root_dir]$film_image_to_composite" $image_tmp} aux
+		    }
+		    ns_log Notice "IMAGE1: $image_tmp - $image_tmp_filename"
+		    
 		}
-		ns_log Notice "IMAGE1: $image_tmp - $image_tmp_filename"
-
 	    }
 	}
-    }
-
-    ###
-    ##add image 
-    ###
-    
-    if {[exists_and_not_null image_tmp]} {
-	ns_log Notice "FLAG 1"
-	set image_guessed_file_type [ns_guesstype $image_tmp] 
 	
-	ns_log Notice "FLAG 2: $image_guessed_file_type"
-	set image_item_id [videos::get_image_id \
-			       -item_id $item_id \
-			       -package_id $package_id \
-			       -creation_user $user_id \
-			       -creation_ip $creation_ip]
-	ns_log Notice "FLAG 3: $image_item_id"
-
-	set image_tmp_size [file size $image_tmp]
-	ns_log Notice "FLAG 4: $image_tmp_size"
-
-	set image_revision_id [cr_import_content \
-				   -item_id $image_item_id \
-				   -image_only \
-				   -storage_type file \
-				   -creation_user $user_id \
-				   -creation_ip $creation_ip \
-				   -description $description \
+	###
+	##add image 
+	###
+    
+	if {[exists_and_not_null image_tmp]} {
+	    ns_log Notice "FLAG 1"
+	    set image_guessed_file_type [ns_guesstype $image_tmp] 
+	    
+	    ns_log Notice "FLAG 2: $image_guessed_file_type"
+	    set image_item_id [videos::get_image_id \
+				   -item_id $item_id \
 				   -package_id $package_id \
-				   $package_id \
-				   $image_tmp \
-				   $image_tmp_size \
-				   $image_guessed_file_type \
-				   video-image-$item_id-$revision_id]
-	
-	ns_log Notice "FLAG 5: $image_revision_id"
-
-	item::publish -item_id $image_item_id -revision_id $image_revision_id
-	ns_log Notice "FLAG 6: "
-
-	set video_image_rel_id [relation::get_id -object_id_one $item_id \
-				    -object_id_two $image_item_id \
-				    -rel_type "videos_image_thumbnail_rel"]
-	
-	if {[empty_string_p $video_image_rel_id]} {
-	    db_exec_plsql create_rel_image {}
+				   -creation_user $user_id \
+				   -creation_ip $creation_ip]
+	    ns_log Notice "FLAG 3: $image_item_id"
+	    
+	    set image_tmp_size [file size $image_tmp]
+	    ns_log Notice "FLAG 4: $image_tmp_size"
+	    
+	    set image_revision_id [cr_import_content \
+				       -item_id $image_item_id \
+				       -image_only \
+				       -storage_type file \
+				       -creation_user $user_id \
+				       -creation_ip $creation_ip \
+				       -description $description \
+				       -package_id $package_id \
+				       $package_id \
+				       $image_tmp \
+				       $image_tmp_size \
+				       $image_guessed_file_type \
+				       video-image-$item_id-$revision_id]
+	    
+	    ns_log Notice "FLAG 5: $image_revision_id"
+	    
+	    item::publish -item_id $image_item_id -revision_id $image_revision_id
+	    ns_log Notice "FLAG 6: "
+	    
+	    set video_image_rel_id [relation::get_id -object_id_one $item_id \
+					-object_id_two $image_item_id \
+					-rel_type "videos_image_thumbnail_rel"]
+	    
+	    if {[empty_string_p $video_image_rel_id]} {
+		db_exec_plsql create_rel_image {}
+	    }
+	    
+	    file delete $image_tmp
+	    file delete $tmp_filename
+	    file delete $filename
 	}
-	
-	file delete $image_tmp
-	file delete $tmp_filename
-	file delete $filename
+    } else {
+	#if the video is a link
     }
-    
-
-
+	
+	
+	
 
     ## insert if it's a new video
     if {$new_video} {

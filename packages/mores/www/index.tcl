@@ -4,15 +4,19 @@ ad_page_contract {
     
     @author Breno Assunção (assuncao.b@gmail.com)
     @creation-date 2010-08-23
-} {
+} 
 
-}
+
+set user_id [auth::require_login]
+
+
+
+
 
 
 	#template::head::add_css -href "/resources/mores/layouts/sebrae/css/css2.css"
 	set css ""
 set package_id [ad_conn package_id]
-set user_id [ad_conn user_id]
 
 permission::require_permission -party_id [ad_conn user_id] -object_id [ad_conn package_id] -privilege read
 set admin_p [permission::permission_p -party_id [ad_conn user_id] -object_id [ad_conn package_id] -privilege admin]

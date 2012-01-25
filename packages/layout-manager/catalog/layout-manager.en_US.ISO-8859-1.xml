@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="layout-manager" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="add_hidden">Add hidden portlet</msg>
+  <msg key="add_page">Add a new page</msg>
+  <msg key="Add_Page">Add Page</msg>
+  <msg key="Add_this_page_to_menu">Add this page to menu</msg>
+  <msg key="Add_new_page">Add New Page</msg>
+  <msg key="Admin_Menu">Admin Menu</msg>
+  <msg key="Change_Theme">Change Theme</msg>
+  <msg key="Configure">Configure</msg>
+  <msg key="Customize_layout_turn_On">Turn On</msg>
+  <msg key="Customize_layout_turn_Off">Turn Off</msg>
+  <msg key="Edit_Layout">Edit Layout</msg>
+  <msg key="Edit_Menu">Edit Menu</msg>
+  <msg key="Edit_Page">Edit Page</msg>
+  <msg key="Edit_Theme">Edit Theme</msg>
+  <msg key="left_and_right_sidebar_layout_description">Left and right sidebars</msg>
+  <msg key="left_sidebar_layout_description">Left sidebar</msg>
+  <msg key="Name">Name</msg>
+  <msg key="New_Page">New Page</msg>
+  <msg key="no_elements">No elements on this page</msg>
+  <msg key="Package">Package</msg>
+  <msg key="Page">Page</msg>
+  <msg key="pageset_theme">Page Set theme</msg>
+  <msg key="Rename">Rename</msg>
+  <msg key="Revert">Revert</msg>
+  <msg key="revert_layout">Revert to the default layout</msg>
+  <msg key="right_sidebar_layout_description">Right sidebar</msg>
+  <msg key="simple_1column_layout_description">One column</msg>
+  <msg key="simple_2column_layout_description">Two columns</msg>
+  <msg key="simple_3column_layout_description">Three columns</msg>
+  <msg key="Template">Template</msg>
+  <msg key="Theme">Theme</msg>
+  <msg key="Turn_Off_Menu">Turn off menu</msg>
+  <msg key="Turn_On_Menu">Turn on menu</msg>
+  <msg key="uninitialized">The page set package hasn't been configured yet.</msg>
+  <msg key="Update">Update</msg>
+  <msg key="Url_Name">Url Name</msg>
+
+</message_catalog>

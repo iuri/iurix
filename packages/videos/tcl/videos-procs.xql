@@ -44,13 +44,13 @@
 	</fullquery>
 	<fullquery name="videos::new.video_insert">
       	  <querytext>
-	    select videos__new (:item_id, :name, :description, :package_id, :video_date, :user_id, :autor, :coautor, :video_source, :community_id)
+	    select videos__new (:item_id, :name, :description, :package_id, :video_date, :user_id, :author)
 	  </querytext>
 	</fullquery>
 	
 	<fullquery name="videos::new_flv.video_insert">
       	  <querytext>
-	    select videos__new (:item_id, :name, :description, :package_id, :video_date, :user_id, :autor, :coautor, :video_source, :community_id)
+	    select videos__new (:item_id, :name, :description, :package_id, :video_date, :user_id, :author)
 	  </querytext>
 	</fullquery>
 	

@@ -4,8 +4,8 @@
 					
 				   					<div id="panel">
 							
-						<h3><a href="http://paramoreredd.com/work/case-study/gary-player-group/" title="Gary Player Group">Gary Player Group</a></h3>
-						<p>The world&#8217;s most-traveled athlete says, &#8220;Everything in life is negotiable, except quality.&#8220; That&#8217;s why they chose Paramore|Redd for GPG&#8217;s extensive worldwide enterprises. The main site is some of our favorite work.</p>
+						<h3><a href="http://paramoreredd.com/work/case-study/gary-player-group/" title="Gary Player Group"><#Gary_Player_Group Gary Player Group#></a></h3>
+						<p><#lt_The_world8217s_most-t The world&#8217;s most-traveled athlete says, &#8220;Everything in life is negotiable, except quality.&#8220; That&#8217;s why they chose Paramore|Redd for GPG&#8217;s extensive worldwide enterprises. The main site is some of our favorite work.#></p>
 
 					</div><!-- /#panel -->
 				  <multiple name="videos">
@@ -16,8 +16,8 @@
 
 	
 				</div><!-- /#featured -->
-				<a id="next" href="#" title="next" onclick="return false">next</a>
-				<a id="back" href="#" title="back" onclick="return false">back</a>
+				<a id="next" href="#" title="next" onclick="return false"><#next next#></a>
+				<a id="back" href="#" title="back" onclick="return false"><#back back#></a>
 
 				<div id="project-slider-wrap">
 					<ul id="project-slider" class="float-clear">
@@ -46,3 +46,4 @@
 				</div><!-- /#project-slider-wrap -->
 	</div>
 </div>
+

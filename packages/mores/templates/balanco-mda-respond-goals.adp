@@ -20,7 +20,7 @@ textarea  {border:1px solid #CCCCCC;color:#787878;font:13px Arial,Helvetica,sans
 </style>
 <p>
 			<span style="color: rgb(153, 153, 153); font-size: 2.45em; font-weight: bold; letter-spacing: -0.9px; margin-right: 3px;">
-				<#lt_Clique_nos_botes_abai Clique nos botões abaixo para informar os dados qualitativos e quantitativos da ação @current_action@.#>
+				Clique nos botões abaixo para informar os dados qualitativos e quantitativos da ação @current_action@.
 			</span> 
 	</p>
 	<ul  class="nav-list">
@@ -54,15 +54,15 @@ textarea  {border:1px solid #CCCCCC;color:#787878;font:13px Arial,Helvetica,sans
 		<input type="hidden" name="step_name"  id="step_name"  value="Financeiro" />
 
 		<div class="desativado box" id="questionarioAcaofinanceiro">
-			<div class="titulo"><br/><#Financeiro Financeiro#></div> <br />
-			<div class="sub-texto"><#lt_Para_inserir_os_dados Para inserir os dados basta seguir os passos abaixo:#></div> <br />
+			<div class="titulo"><br/>Financeiro</div> <br />
+			<div class="sub-texto">Para inserir os dados basta seguir os passos abaixo:</div> <br />
 			<div class="texto">
-				<#lt_1_-_Obtenha_o_arquivo 1 - Obtenha o arquivo modelo#> <a class="bt_execucao"  href="file-goals?territory_action_id_p=@territory_action_id@&territory_step_id_p=0"><#clicando_aqui clicando aqui#></a> <#lt_e_salve_o_arquivo_no_ e salve o arquivo no seu computador.#><br/>
-				<#lt_2_-_Preencha_a_planil 2 - Preencha a planilha com os dados requeridos. (quando não houver o dado, digite o número 0 na célula correspondente)#><br/>
-				<#lt_3_-_Selecione_os_dado 3 - Selecione os dados da planilha (todas as colunas e todas as linhas, exceto a primeira linha - cabeçalho)#><br/>
-				<#lt_4_-_Copie_e_cole_no_c 4 - Copie e cole no campo abaixo os dados#><br/>
-				<#lt_5_-_Pressione_o_boto_ 5 - Pressione o botão "Preencher campos"#><br />
-				<#lt_6_-_Confira_os_dados_ 6 - Confira os dados e em seguida clique em salvar.#>
+				1 - Obtenha o arquivo modelo <a class="bt_execucao"  href="file-goals?territory_action_id_p=@territory_action_id@&territory_step_id_p=0">clicando aqui</a> e salve o arquivo no seu computador.<br/>
+				2 - Preencha a planilha com os dados requeridos. (quando não houver o dado, digite o número 0 na célula correspondente)<br/>
+				3 - Selecione os dados da planilha (todas as colunas e todas as linhas, exceto a primeira linha - cabeçalho)<br/>
+				4 - Copie e cole no campo abaixo os dados<br/>
+				5 - Pressione o botão "Preencher campos"<br />
+				6 - Confira os dados e em seguida clique em salvar.
 			</div>		
 					<br/>
 					<br/>
@@ -73,7 +73,7 @@ textarea  {border:1px solid #CCCCCC;color:#787878;font:13px Arial,Helvetica,sans
 			  <div id="dados">
 				<table width="760" border="0" align="center" cellpadding="2" cellspacing="2">
 					<tr> 
-						<td align="center" bgcolor="#4c4c4c" class="title"><#Ano Ano#></td>
+						<td align="center" bgcolor="#4c4c4c" class="title">Ano</td>
 						<multiple name=lista_matrix>
 							<td align="center" bgcolor="#4c4c4c" class="title">@lista_matrix.matrix_name@</td>
 						</multiple>
@@ -109,14 +109,14 @@ textarea  {border:1px solid #CCCCCC;color:#787878;font:13px Arial,Helvetica,sans
 				<input type="hidden" name="step_name"  id="step_name"  value="@lista_dados.step_name@" />
 				<div class="desativado box" id="questionarioAcao@lista_dados.step_name@">
 				<div class="titulo"><br/>@lista_dados.step_name@</div> <br />
-					<div class="sub-texto"><#lt_Para_inserir_os_dados Para inserir os dados basta seguir os passos abaixo:#></div> <br />
+					<div class="sub-texto">Para inserir os dados basta seguir os passos abaixo:</div> <br />
 					<div class="texto">
-					<#lt_1_-_Obtenha_o_arquivo 1 - Obtenha o arquivo modelo#> <a class="bt_execucao"  href="file-goals?territory_action_id_p=@territory_action_id@&territory_step_id_p=0"><#clicando_aqui clicando aqui#></a> <#lt_e_salve_o_arquivo_no_ e salve o arquivo no seu computador.#><br/>
-					<#lt_2_-_Preencha_a_planil 2 - Preencha a planilha com os dados requeridos. (quando não houver o dado, digite o número 0 na célula correspondente)#><br/>
-					<#lt_3_-_Selecione_os_dado 3 - Selecione os dados da planilha (todas as colunas e todas as linhas, exceto a primeira linha - cabeçalho)#><br/>
-					<#lt_4_-_Copie_e_cole_no_c 4 - Copie e cole no campo abaixo os dados#><br/>
-					<#lt_5_-_Pressione_o_boto_ 5 - Pressione o botão "Preencher campos"#><br />
-					<#lt_6_-_Confira_os_dados_ 6 - Confira os dados e em seguida clique em salvar.#>
+					1 - Obtenha o arquivo modelo <a class="bt_execucao"  href="file-goals?territory_action_id_p=@territory_action_id@&territory_step_id_p=0">clicando aqui</a> e salve o arquivo no seu computador.<br/>
+					2 - Preencha a planilha com os dados requeridos. (quando não houver o dado, digite o número 0 na célula correspondente)<br/>
+					3 - Selecione os dados da planilha (todas as colunas e todas as linhas, exceto a primeira linha - cabeçalho)<br/>
+					4 - Copie e cole no campo abaixo os dados<br/>
+					5 - Pressione o botão "Preencher campos"<br />
+					6 - Confira os dados e em seguida clique em salvar.
 				</div>		
 					<br/>
 					<br/>
@@ -127,7 +127,7 @@ textarea  {border:1px solid #CCCCCC;color:#787878;font:13px Arial,Helvetica,sans
 					  <div id="dados">
 						<table width="760" border="0" align="center" cellpadding="2" cellspacing="2">
 						<tr> 
-							<td align="center" bgcolor="#4c4c4c" class="title"><#Ano Ano#></td>
+							<td align="center" bgcolor="#4c4c4c" class="title">Ano</td>
 							<multiple name=lista_matrix>
 								<td align="center" bgcolor="#4c4c4c" class="title">@lista_matrix.matrix_name@</td>
 							</multiple>
@@ -154,6 +154,5 @@ textarea  {border:1px solid #CCCCCC;color:#787878;font:13px Arial,Helvetica,sans
 		</div>
 	</multiple>
 	<!-- end of form -->
-
 
 

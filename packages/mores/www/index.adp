@@ -9,6 +9,11 @@
 <style type="text/css">
 	@extra_css;noquote@
 </style>
+
+<if @admin_p@> <a href="admin" class="button">Admin</a></if>
+
+
+
 	<multiple name=accounts>
 	    <h2>@accounts.instance@</h2>
 	    <div class="list-button-bar-top">

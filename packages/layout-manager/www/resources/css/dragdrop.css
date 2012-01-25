@@ -1,0 +1,4 @@
+div.getDrag {min-height: 50px;}
+div.itemDrag {margin: 7px; border: 1px solid #ccc; padding: 7px; }
+div.itemDrag h2 { cursor: move; background-color: #ff3300; color: #fff; padding: 3px;}
+.dragAjuda { border: 3px dashed #0066cc; width: auto !important;}

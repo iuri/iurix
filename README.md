@@ -18,7 +18,7 @@ Assuring scallability, vertically and horizontally.
 
 The design bellow, shows a vertical architecture of the message system. It describe how a client request is processed and stored and responded. 
 
-< add image1 >
+![alt Vertical Architecture](https://www.iurix.com/resources/images/vert-arch.png)
 Figure 1. One possible vertical architecture for a data system that combines several components.
 
 
@@ -27,10 +27,11 @@ The content-item module guaratees that content (i.e. messages) are reliable, sca
 
 The image bellow describes a horizontal archciteture of the system.
 
-<add image2>
-
-
 For example, it's possible to scale the message system installed in a clustered environment where the servers can supply the absence of one of the nodes. A proxy balances the traffic to the apllication. NGINX covers this task beautifully.   
+
+
+![alt Horizontal Architecture](https://www.iurix.com/resources/images/horz-arch.png)
+
 
 
 

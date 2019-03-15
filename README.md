@@ -5,7 +5,9 @@ Designing a data system or service is a lot of tricky and questions arise during
 
 How do you ensure that the data remains correct and complete, even when things go wrong internally? 
 There's not unique solution. A few subjects must be covered to supports reliability, scalability and maintenability. 
-The content item system is compliant with all the requirements.
+The content item system must be compliant with all these requirements. It must follow the design, architecture 
+
+
 
 
 

@@ -95,6 +95,7 @@ https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageBus.html
 https://www.makeareadme.com/#what-is-it
 http://www.project-open.com/en/install-debian
 https://github.com/gustafn/install-ns
+https://stackoverflow.com/questions/14494747/add-images-to-readme-md-on-github
 
 
 

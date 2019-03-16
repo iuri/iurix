@@ -33,9 +33,9 @@ For example, it's possible to scale the message system installed in a clustered 
 The images bellow describe a horizontal archciteture of the system.
 
 Applications Overview
-![alt Horizontal Architectire 1] https://drive.google.com/file/d/1nY_clTzs_15D0NRTncnVlgaAOJYInmi8/view?usp=sharing
+![alt Horizontal Architectire ] (https://drive.google.com/file/d/1nY_clTzs_15D0NRTncnVlgaAOJYInmi8/view?usp=sharing
 
-![alt Horizontal Architecture 2](https://www.iurix.com/resources/images/vert-arch-2.png)
+![alt Horizontal Architecture](https://www.iurix.com/resources/images/vert-arch-2.png)
 
 
 Objects Overview

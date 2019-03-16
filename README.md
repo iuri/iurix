@@ -1,5 +1,5 @@
 # iurix
-iurix is a message system to facilitate people's understanding in the field of software engineering, designing, architecture and development.
+iurix is a message system to facilitate team's communication, software engineering, designing, architecture and development.
 
 
 ## Description

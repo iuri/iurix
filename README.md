@@ -35,6 +35,8 @@ The images bellow describe a horizontal archciteture of the system.
 Applications Overview
 ![alt Horizontal Architectire 1] https://drive.google.com/file/d/1nY_clTzs_15D0NRTncnVlgaAOJYInmi8/view?usp=sharing
 
+![alt Horizontal Architecture 2](https://www.iurix.com/resources/images/horz-arch-2.png)
+
 
 Objects Overview
 ![alt Horizontal Architecture 2](https://www.iurix.com/resources/images/horz-arch.png)

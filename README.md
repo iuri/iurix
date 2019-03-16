@@ -30,9 +30,14 @@ The content-item module guaratees that content (i.e. messages) are reliable, sca
 
 For example, it's possible to scale the message system installed in a clustered environment where the servers can supply the absence of one of the nodes. A proxy balances the traffic to the apllication. NGINX covers this task beautifully.   
 
-The image bellow describes a horizontal archciteture of the system.
+The images bellow describe a horizontal archciteture of the system.
 
-![alt Horizontal Architecture](https://www.iurix.com/resources/images/horz-arch.png)
+Applications Overview
+![alt Horizontal Architectire 1] https://drive.google.com/file/d/1nY_clTzs_15D0NRTncnVlgaAOJYInmi8/view?usp=sharing
+
+
+Objects Overview
+![alt Horizontal Architecture 2](https://www.iurix.com/resources/images/horz-arch.png)
 
 
 

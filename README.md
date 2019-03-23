@@ -1,5 +1,7 @@
 # iurix
-iurix is a message system to facilitate team's communication, software engineering, designing, architecture and development.
+iurix is community based system, with multiple applications and tools for CMS, messaging, management, projects, ecommerce, blog and etc
+
+The goal is to build software to facilitate poeples communication, team's engagement and involvement in the field of software development, engineering, architecture designing and whatever else is possible in the real world using software and hardware technologies and the human brain, its rationals and senses.
 
 
 ## Description

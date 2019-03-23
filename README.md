@@ -60,12 +60,14 @@ https://iurix.com/api-doc/
 
 
 
-### Applying cache on application and proxy levels
+### Applying cache in the application and proxy levels
 Applying cache in the proxy level is a matter of setting up NGINX 
 
 By default, NGINX respects the Cache-Control headers from origin servers. It does not cache responses with Cache-Control set to Private , No-Cache , or No-Store or with Set-Cookie in the response header. NGINX only caches GET and HEAD client requests. ... NGINX does not cache responses if proxy_buffering is set to off .
 
 To enable cache no NGINX only two directives are needed to enable basic caching: proxy_cache_path and proxy_cache. The proxy_cache_path directive sets the path and configuration of the cache, and the proxy_cache directive activates it. See the example bellow. 
+
+More information to set up parameters can be found at official  NGINX documentation https://www.nginx.com/blog/nginx-caching-guide/
 
 ```
 
@@ -79,10 +81,54 @@ server {
         proxy_pass http://my_upstream;
     }
 }
-Give an example
+
+
 ```
 
-More information to set up parameters can be found at official  NGINX documentation https://www.nginx.com/blog/nginx-caching-guide/
+Futrthermore, in the application level utilising cache can be implemented by writing a pair of function tas follows. The example shows 2 functions, one public and other private 
+
+```
+ad_proc -public acs_user::get_by_username {
+    {-authority_id ""}
+    {-username:required}
+} {
+    Returns user_id from authority and username. Returns the empty string if no user found.
+
+    @param authority_id The authority. Defaults to local authority.
+
+    @param username The username of the user you're trying to find.
+
+    @return user_id of the user, or the empty string if no user found.
+}  {
+    # Default to local authority                                                                                                                                                                            
+    if { $authority_id eq "" } {
+        set authority_id [auth::authority::local]
+    }
+
+    set user_id [util_memoize [list acs_user::get_by_username_not_cached -authority_id $authority_id -username $username]]
+    if {$user_id eq ""} {
+        util_memoize_flush [list acs_user::get_by_username_not_cached -authority_id $authority_id -username $username]
+    }
+    return $user_id
+}
+
+ad_proc -private acs_user::get_by_username_not_cached {
+    {-authority_id:required}
+    {-username:required}
+} {
+    Returns user_id from authority and username. Returns the empty string if no user found.
+
+    @param authority_id The authority. Defaults to local authority.
+
+    @param username The username of the user you're trying to find.
+
+    @return user_id of the user, or the empty string if no user found.
+}  {
+    return [db_string user_id_from_username {} -default {}]
+}
+
+    
+```
 
 
 

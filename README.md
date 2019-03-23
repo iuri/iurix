@@ -85,24 +85,9 @@ server {
 
 ```
 
-Futrthermore, in the application level, utilizing cache can be implemented by writing a set of functions capable of persist data as described in the example. 
+Furthermore, in the application level, utilizing cache can be implemented by writing a set of functions capable of persist data as described in the example. 
 
 It shows 2 functions: one public and other private, acs_user::get_by_username and acs_user::get_by_username_not_cached respectively. They return user_id from authority and username. Returns the empty string if no user found. 
-
-In the private function, there's another function called  util_memoize_flush. Basically util_memoize_flush script is the main part for caching. If the script is executed before, returns the value, which it returned last time, unless it was more than max_age seconds ago.
-
-Otherwise, evaluate script and cache and return the result.
-
-
-```
-  if {$max_age ne ""} {
-            set max_age "-expires $max_age"
-        }
-        ns_cache_eval {*}$max_age  -- util_memoize $script {*}$script
-
-```
-
-
 
 ```
 ad_proc -public acs_user::get_by_username {
@@ -148,6 +133,48 @@ ad_proc -private acs_user::get_by_username_not_cached {
 ```
 
 
+
+In the private function, there's another function called  util_memoize_flush. Basically util_memoize_flush script is the main part for caching. If the script is executed before, returns the value, which it returned last time, unless it was more than max_age seconds ago.
+
+Otherwise, evaluate script and cache and return the result.
+
+
+```
+  if {$max_age ne ""} {
+            set max_age "-expires $max_age"
+        }
+        ns_cache_eval {*}$max_age  -- util_memoize $script {*}$script
+
+```
+
+
+The function ns_cache_eval is implemeted within util_memoize_flush. It is the point of connection between the webserver and application levels, as following in the example. In this case, a time 5 seconds into the future is constructed once and passed to both cache calls. The second call will use the remainder of the time once the first completes.
+
+ 
+ 
+```
+
+set timeout [ns_time incr [ns_time get] 5]
+if {[catch {
+    set user [ns_cache_eval -timeout $timeout -- users $userid {
+        db_query {
+            select name, email
+            from users
+            where userid = :userid
+        }
+    }]
+    set ad [ns_cache_eval -timeout $timeout -expires 120 -- ads $userid {
+        db_query {
+            select advert from
+            personalized_adverts
+            where userid = :userid
+        }
+    }]
+} errmsg]} {
+    ns_returnunavailable "Sorry, our web server is too busy."
+}
+ns_return 200 text/html [example_personalized_page $user $ad]
+```
 
 ## Built With
 

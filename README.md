@@ -60,7 +60,7 @@ https://iurix.com/api-doc/
 
 
 
-### Applying cache in the application and proxy levels
+### Applying cache in the application, webserver and proxy levels
 Applying cache in the proxy level is a matter of setting up NGINX 
 
 By default, NGINX respects the Cache-Control headers from origin servers. It does not cache responses with Cache-Control set to Private , No-Cache , or No-Store or with Set-Cookie in the response header. NGINX only caches GET and HEAD client requests. ... NGINX does not cache responses if proxy_buffering is set to off .
@@ -85,7 +85,24 @@ server {
 
 ```
 
-Futrthermore, in the application level utilising cache can be implemented by writing a pair of function tas follows. The example shows 2 functions, one public and other private 
+Futrthermore, in the application level, utilizing cache can be implemented by writing a set of functions capable of persist data as described in the example. 
+
+It shows 2 functions: one public and other private, acs_user::get_by_username and acs_user::get_by_username_not_cached respectively. They return user_id from authority and username. Returns the empty string if no user found. 
+
+In the private function, there's another function called  util_memoize_flush. Basically util_memoize_flush script is the main part for caching. If the script is executed before, returns the value, which it returned last time, unless it was more than max_age seconds ago.
+
+Otherwise, evaluate script and cache and return the result.
+
+
+```
+  if {$max_age ne ""} {
+            set max_age "-expires $max_age"
+        }
+        ns_cache_eval {*}$max_age  -- util_memoize $script {*}$script
+
+```
+
+
 
 ```
 ad_proc -public acs_user::get_by_username {

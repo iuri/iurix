@@ -29,7 +29,6 @@ The content-item module guaratees that content (i.e. messages) are reliable, sca
 
 
 #### Horizontal Architecture
-
 For example, it's possible to scale the message system installed in a clustered environment where the servers can supply the absence of one of the nodes. A proxy balances the traffic to the apllication. NGINX covers this task beautifully.   
 
 The images bellow describe a horizontal archciteture of the system.
@@ -57,6 +56,34 @@ Vertically and horizontally. As per description above
 
 Read api-doc of content-item and acs-message
 https://iurix.com/api-doc/
+
+
+
+
+### Applying cache on application and proxy levels
+Applying cache in the proxy level is a matter of setting up NGINX 
+
+By default, NGINX respects the Cache-Control headers from origin servers. It does not cache responses with Cache-Control set to Private , No-Cache , or No-Store or with Set-Cookie in the response header. NGINX only caches GET and HEAD client requests. ... NGINX does not cache responses if proxy_buffering is set to off .
+
+To enable cache no NGINX only two directives are needed to enable basic caching: proxy_cache_path and proxy_cache. The proxy_cache_path directive sets the path and configuration of the cache, and the proxy_cache directive activates it. See the example bellow. 
+
+```
+
+proxy_cache_path /path/to/cache levels=1:2 keys_zone=my_cache:10m max_size=10g 
+                 inactive=60m use_temp_path=off;
+
+server {
+    # ...
+    location / {
+        proxy_cache my_cache;
+        proxy_pass http://my_upstream;
+    }
+}
+Give an example
+```
+
+More information to set up parameters can be found at official  NGINX documentation https://www.nginx.com/blog/nginx-caching-guide/
+
 
 
 ## Built With

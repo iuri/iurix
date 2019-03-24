@@ -1,7 +1,7 @@
 # iurix
 iurix is community based system, with multiple applications and tools for CMS, messaging, management, projects, ecommerce, blog and etc
 
-The goal is to build software to facilitate poeples communication, team's engagement and involvement in the field of software development, engineering, architecture designing and whatever else is possible in the real world using software and hardware technologies and the human brain, its rationals and senses.
+The goal is to build software to facilitate communication, team's engagement and involvement in the field of software development, engineering, architecture designing and, whatever else will have been possible in this world, using software and hardware technologies, the human brain its rationals and senses.
 
 
 ## Description

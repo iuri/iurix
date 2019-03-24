@@ -22,7 +22,7 @@ Assuring scallability, vertically and horizontally.
 The design bellow, shows a vertical architecture of the message system. It describe how a client request is processed and stored and responded. 
 
 ![alt Vertical Architecture](https://www.iurix.com/resources/images/vert-arch.png)
-Figure 1. One possible vertical architecture for a data system that combines several components.
+Figure 1. One possible vertical architecture for a data system that combines several components. [Kleppmann, M. 2010]
 
 
 The content-item module guaratees that content (i.e. messages) are reliable, scalable and maintenable.

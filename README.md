@@ -40,7 +40,7 @@ Applications Overview
 
 
 Objects Overview
-![alt Horizontal Architecture 2](https://www.iurix.com/resources/images/horz-arch.png)
+![alt Horizontal Architecture 2](https://www.iurix.com/resources/images/horz-arch.png) [donnemartin, Github Repository, 2019]
 
 
 

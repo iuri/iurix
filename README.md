@@ -22,7 +22,7 @@ Assuring scallability, vertically and horizontally.
 The design bellow, shows a vertical architecture of the message system. It describe how a client request is processed and stored and responded. 
 
 ![alt Vertical Architecture](https://www.iurix.com/resources/images/vert-arch.png)
-Figure 1. One possible vertical architecture for a data system that combines several components. [Kleppmann, M. 2010]
+Figure 1. One possible vertical architecture for a data messaging system. I shows a few aspects and components of the organism. [Kleppmann, M. 2010]
 
 
 The content-item module guaratees that content (i.e. messages) are reliable, scalable and maintenable.
@@ -37,9 +37,10 @@ Applications Overview
 ![alt Horizontal Architecture ] (https://drive.google.com/file/d/1nY_clTzs_15D0NRTncnVlgaAOJYInmi8/view?usp=sharing
 
 ![alt Horizontal Architecture 1](https://www.iurix.com/resources/images/horz-arch-2.png)
+Figure 2. Network and Application's Overview Diagram.
+ 
 
-
-Objects Overview
+Business Objects Overview
 ![alt Horizontal Architecture 2](https://www.iurix.com/resources/images/horz-arch.png) [donnemartin, Github Repository, 2019]
 
 

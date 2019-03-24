@@ -37,10 +37,14 @@ Applications Overview
 ![alt Horizontal Architecture ] (https://drive.google.com/file/d/1nY_clTzs_15D0NRTncnVlgaAOJYInmi8/view?usp=sharing
 
 ![alt Horizontal Architecture 1](https://www.iurix.com/resources/images/horz-arch-2.png)
+
 Figure 2. Network and Application's Overview Diagram.
  
 
-Business Objects Overview
+#### Business Objects Overview
+Another aspect can be described by looking at the organism, identifying and decribing its part as business objects. The following image is well desingned, by Donnemartin. 
+  
+
 ![alt Horizontal Architecture 2](https://www.iurix.com/resources/images/horz-arch.png) [donnemartin, Github Repository, 2019]
 
 

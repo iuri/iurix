@@ -20,19 +20,19 @@ i.e. /acs-admin/apm, and start the updgrading wizzard, in the administration sec
 ![alt Start Wizzard ] (https://iurix.com/resources/resources/images/start-wizzard.png)
 
 ### 5. Select the link to upgrade
-![alt Select the link to upgrade] (https://iurix.com/resources/resources/images/select-upgrade.png)
+![alt Select the link to upgrade](https://iurix.com/resources/resources/images/select-upgrade.png)
 
 ### 6. Select the package, which one needs to be upgraded
-![alt Select the package] (https://iurix.com/resources/resources/images/select-package.png)
+![alt Select the package](https://iurix.com/resources/resources/images/select-package.png)
 
 ### 7. Mark the checkbox to run SQL scripts 
-![alt ] (https://iurix.com/resources/resources/images/select-SQL-script.png)
+![alt ](https://iurix.com/resources/resources/images/select-SQL-script.png)
 
 ### 8. Click on "restart the system"
-![alt Mark the checkbox] (https://iurix.com/resources/resources/images/restarting-system.png )
+![alt Mark the checkbox](https://iurix.com/resources/resources/images/restarting-system.png )
 
 ### 9. Click on "return to admin"
-![alt return to admin] (https://iurix.com/resources/resources/images/return-admin.png )
+![alt return to admin](https://iurix.com/resources/resources/images/return-admin.png )
 
 
 ## References

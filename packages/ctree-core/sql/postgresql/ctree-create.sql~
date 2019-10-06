@@ -1,0 +1,17 @@
+-- /packages/ctree-core/sql/postgresql/ctree-create.sql
+
+
+
+select content_type__create_type (
+       'file_storage_object',    -- content_type
+       'content_revision',       -- supertype. We search revision content 
+                                 -- first, before item metadata
+       'File Storage Object',    -- pretty_name
+       'File Storage Objects',   -- pretty_plural
+       NULL,        -- table_name
+       -- DAVEB: acs_object_types supports a null table name so we do that
+       -- instead of passing a false value so we can actually use the
+       -- content repository instead of duplicating all the code in file-storage
+       NULL,	         -- id_column
+       'file_storage__get_title' -- name_method
+);

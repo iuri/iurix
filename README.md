@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # iurix
 iurix is community based system, with multiple applications and tools for CMS, messaging, management, projects, ecommerce, blog and etc
 
@@ -232,3 +233,6 @@ https://naviserver.sourceforge.io
 
 
 
+=======
+# nevessouza
+>>>>>>> Initial commit

@@ -5,11 +5,11 @@ ad_page_contract {
     Page to view one item (live or archived) in its active revision
     @author stefan@arsdigita.com
     @creation-date 2000-12-20
-    @cvs-id $Id: item.tcl,v 1.18 2009/12/30 23:13:36 donb Exp $
+    @cvs-id $Id: item.tcl,v 1.21.2.1 2015/09/12 11:06:42 gustafn Exp $
     
 } {
 
-    item_id:integer,notnull
+    item_id:naturalnum,notnull
 
 } -properties {
     title:onevalue
@@ -41,8 +41,8 @@ if { $item_exist_p } {
     # Footer actions
     set footer_links [list]
 
-    if { [ad_parameter SolicitCommentsP "news" 0] &&
-         [ad_permission_p $item_id general_comments_create] } {
+    if { [parameter::get -parameter SolicitCommentsP -default 0] &&
+         [permission::permission_p -object_id $item_id -privilege general_comments_create] } {
 
         lappend footer_links [general_comments_create_link \
                                   -link_attributes { class="button" } \
@@ -72,3 +72,9 @@ if { $item_exist_p } {
     set contect [list $title]
     ad_return_complaint 1 [_ news.lt_Could_not_find_the_re]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

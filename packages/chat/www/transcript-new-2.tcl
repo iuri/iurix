@@ -2,7 +2,7 @@
 ad_page_contract {
     Save transcript.
 } {
-    room_id:integer,notnull
+    room_id:naturalnum,notnull
     transcript_name:trim,notnull
     {description:trim ""}
     {delete_messages:optional "off"}

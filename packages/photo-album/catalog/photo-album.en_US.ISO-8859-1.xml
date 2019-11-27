@@ -74,7 +74,6 @@
   <msg key="Album_Name">Album Name</msg>
   <msg key="Caption">Caption</msg>
   <msg key="Caption_1">Caption:</msg>
-  <msg key="Clean_this_album">Clean this album</msg>
   <msg key="Clipboard">Clipboard:</msg>
   <msg key="clipboard">clipboard</msg>
   <msg key="Clipboard_addedit">&quot;Clipboard add/edit&quot;</msg>
@@ -106,7 +105,6 @@
   <msg key="lt_Are_you_sure_you_want">Are you sure you want to delete the album &quot;%title%&quot;?  This action cannot be reversed.</msg>
   <msg key="lt_Are_you_sure_you_want_1">Are you sure you want to delete the folder &quot;%title%&quot;?  This action cannot be reversed.</msg>
   <msg key="lt_Are_you_sure_you_want_2">Are you sure you want to delete the photo &quot;%title%&quot;?  This action cannot be undone.</msg>
-  <msg key="lt_Are_you_sure_you_want_album">Are you sure you want to delete all these pictures? This can't be undone.</msg>
   <msg key="lt_Click_on_the_small_ph">Click on the small photos to see a bigger
 version, the numbers to see different pages, or the Next or Previous
 page links to move back and forth.  You can also pick photos for
@@ -165,7 +163,6 @@ currently being processed...</msg>
   <msg key="Photo_clipboard">Photo clipboard</msg>
   <msg key="Photographer">Photographer</msg>
   <msg key="Photographer_">Photographer </msg>
-  <msg key="Photos">Photos</msg>
   <msg key="photos">photos</msg>
   <msg key="Prev">Prev</msg>
   <msg key="register">register</msg>
@@ -184,8 +181,6 @@ currently being processed...</msg>
   <msg key="Title_1">Title:</msg>
   <msg key="Upload_a_Photo">Upload a Photo</msg>
   <msg key="Upload_photos">Upload photos from the server directory</msg>
-  <msg key="Unsorted_Photos">Unsorted Photos</msg>
-  <msg key="Navigate_throughout_albums">Navigate Throughout Albums</msg>
   <msg key="You_will_have_to">You will have to</msg>
   <msg key="Your_clipboards">Your clipboards</msg>
 </message_catalog>

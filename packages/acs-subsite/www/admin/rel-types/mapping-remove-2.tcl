@@ -7,12 +7,12 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Dec 12 10:45:07 2000
-    @cvs-id $Id: mapping-remove-2.tcl,v 1.4 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: mapping-remove-2.tcl,v 1.5.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    { group_rel_id:integer "" }
-    { group_type_rel_id "" }
-    { return_url "" }
+    { group_rel_id:naturalnum "" }
+    { group_type_rel_id:naturalnum "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
 }
@@ -34,3 +34,9 @@ if { $group_rel_id ne "" } {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

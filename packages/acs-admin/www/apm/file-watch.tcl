@@ -5,11 +5,11 @@ ad_page_contract {
 
     @author Peter Marklund
     @creation-date 17 April 2000
-    @cvs-id $Id: file-watch.tcl,v 1.11 2003/04/04 09:19:59 peterm Exp $
+    @cvs-id $Id: file-watch.tcl,v 1.12.2.3 2016/05/20 19:52:59 gustafn Exp $
 } {
-    version_id:integer
+    version_id:naturalnum,notnull
     paths:multiple
-    {return_url ""}
+    {return_url:localurl ""}
 } 
 
 set package_key [apm_package_key_from_version_id $version_id]
@@ -19,3 +19,9 @@ foreach path $paths {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

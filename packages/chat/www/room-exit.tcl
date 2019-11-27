@@ -4,23 +4,27 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 25, 2000
-    @cvs-id $Id: room-exit.tcl,v 1.5 2007/11/19 01:14:16 donb Exp $
+    @cvs-id $Id: room-exit.tcl,v 1.5.6.2 2016/10/28 18:57:36 antoniop Exp $
 } {
-    room_id:integer,notnull
+    room_id:naturalnum,notnull
 }
 
 set user_id [ad_conn user_id]
-set read_p [permission::permission_p -object_id $room_id -privilege "chat_room_view"]
-set write_p [permission::permission_p -object_id $room_id -privilege "chat_room_edit"]
+set read_p [permission::permission_p -object_id $room_id -privilege "chat_read"]
+set write_p [permission::permission_p -object_id $room_id -privilege "chat_write"]
 set ban_p [permission::permission_p -object_id $room_id -privilege "chat_ban"]
 
-if { ($read_p == "0" && $write_p == "0") || ($ban_p == "1") } {
+if { ($read_p == 0 && $write_p == 0) || ($ban_p == 1) } {
     #Display unauthorize privilege page.
     ad_returnredirect unauthorized
     ad_script_abort
 }
 
-chat_message_post $room_id $user_id "[_ chat.has_left_the_room]." "1"
+# apisano: I don't think this code should be here anymore, as
+# message about user leaving the room is already issued by
+# the parent chat class in xotcl-core when we issue the logout
+# method	
+# chat_message_post $room_id $user_id "[_ chat.has_left_the_room]." "1"
 
 # send to AJAX
 set session_id [ad_conn session_id]

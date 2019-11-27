@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: content-drop.sql,v 1.4 2001/09/27 22:48:16 danw Exp $
+-- $Id: content-drop.sql,v 1.6 2011/07/07 10:46:02 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -13,30 +13,37 @@
 -- set serveroutput on
 
 -- unregistering types, deleting the default folders
-create function inline_0 () returns integer as '
-declare
+
+
+--
+-- procedure inline_0/0
+--
+CREATE OR REPLACE FUNCTION inline_0(
+
+) RETURNS integer AS $$
+DECLARE
   v_id integer;
-begin
+BEGIN
 
   -- root folder for templates
   v_id := content_template__get_root_folder();
 
   PERFORM content_folder__unregister_content_type(
     v_id,
-    ''content_template'',
-    ''t''
+    'content_template',
+    't'
     );
 
   PERFORM content_folder__unregister_content_type(
     v_id,
-    ''content_symlink'',
-    ''t''
+    'content_symlink',
+    't'
   );
 
   PERFORM content_folder__unregister_content_type(
     v_id,
-    ''content_folder'',
-    ''t''
+    'content_folder',
+    't'
   );
 
   PERFORM content_folder__delete(v_id);
@@ -47,27 +54,28 @@ begin
 
   PERFORM content_folder__unregister_content_type(
     v_id,
-    ''content_symlink'',
-    ''t''
+    'content_symlink',
+    't'
   );
 
   PERFORM content_folder__unregister_content_type(
     v_id,
-    ''content_folder'',
-    ''t''
+    'content_folder',
+    't'
   );
 
   PERFORM content_folder__unregister_content_type (
     v_id,
-    ''content_revision'',
-    ''t''
+    'content_revision',
+    't'
   );	 
 
   PERFORM content_folder__delete (v_id);
 
   return null;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0 ();
 
@@ -206,19 +214,5 @@ drop table cr_locales ;
 -- mime types
 drop table cr_content_mime_type_map ;
 drop table cr_mime_types ;
-
-
--- dropping ats datatypes for cms
-begin;
-
-  delete from acs_datatypes where datatype in ('text');
-
-  delete from acs_datatypes where datatype in ('keyword');
-
-  delete from acs_datatypes where datatype in ('integer');
-
-commit;
-
-
 
 

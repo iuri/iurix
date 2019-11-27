@@ -4,10 +4,10 @@ ad_page_contract {
     
     @author stefan@arsdigita.com
     @creation-date 2000-12-18
-    @cvs-id $Id: preview.tcl,v 1.27 2009/12/30 23:24:44 donb Exp $
+    @cvs-id $Id: preview.tcl,v 1.31.2.3 2016/08/11 12:52:38 gustafn Exp $
     
 } {
-    {item_id:integer ""}
+    {item_id:naturalnum ""}
     action:notnull,trim
     publish_title:notnull,trim
     {publish_lead {}}
@@ -30,7 +30,7 @@ ad_page_contract {
 } -validate {
 
     check_revision_log -requires {action revision_log} {
-	if { ![string match $action "News Item"] && [empty_string_p $revision_log]} {
+	if { $action eq "News Item" && $revision_log eq ""} {
 	    ad_complain "[_ news.lt_You_must_supply_a_rev]"
 	    return
 	}
@@ -58,14 +58,14 @@ set user_id [auth::require_login]
 set package_id [ad_conn package_id]
 
 # only people with at least write-permission beyond this point
-ad_require_permission $package_id news_create
+permission::require_permission -object_id $package_id -privilege news_create
 
-set news_admin_p [ad_permission_p $package_id news_admin]
+set news_admin_p [permission::permission_p -object_id $package_id -privilege news_admin]
 
 # Template parser treats publish_body.format as an array reference
 set publish_format ${publish_body.format}
 
-if { [string match $action "News Item"] } {
+if { $action eq "News Item" } {
     set title "[_ news.Preview_news_item]"
 } else {
     set title "[_ news.Preview] $action"
@@ -86,7 +86,7 @@ if {[info exists publish_date_ansi] && [info exists archive_date_ansi]} {
 # deal with Dates, granularity is 'day'
 
 # with news_admin privilege fill in publish and archive dates
-if { $news_admin_p == 1 || [string equal [parameter::get -parameter ApprovalPolicy] "open"] } {
+if { $news_admin_p == 1 || [parameter::get -parameter ApprovalPolicy] eq "open" } {
 
     if { [info exists publish_date(year)] && [info exists publish_date(month)] && [info exists publish_date(day)] } { 
 	set publish_date_ansi "$publish_date(year)-$publish_date(month)-$publish_date(day)"
@@ -126,44 +126,51 @@ if { ${publish_body.format} eq "text/html" || ${publish_body.format} eq "text/en
     # the check will need to be added as a validator for each ad_form call.
 
     set errors [ad_html_security_check $publish_body]
-    if { ![empty_string_p $errors] } {
+    if { $errors ne "" } {
         ad_return_complaint 1 $errors
         ad_script_abort
     }
 }
 
-if { [string match $action "News Item"] } {
+if { $action eq "News Item" } {
 
     # form variables for confirmation step
 
-    set hidden_vars [export_form_vars publish_title publish_lead publish_body publish_body.format \
-                         publish_date_ansi archive_date_ansi html_p permanent_p imgfile]
-    set image_vars [export_form_vars publish_title publish_lead publish_body publish_body.format \
+    set hidden_vars [export_vars -form {publish_title publish_lead publish_body publish_body.format \
+                         publish_date_ansi archive_date_ansi html_p permanent_p imgfile}]
+    set image_vars [export_vars -form {publish_title publish_lead publish_body publish_body.format \
                         publish_date_ansi archive_date_ansi html_p \
-                        permanent_p action]
-    set form_action "<form method=post action=item-create-3 enctype=multipart/form-data class=\"inline-form\">"
-    set edit_action "<form method=post action=item-create class=\"inline-form\">"
+                        permanent_p action}]
+    set form_action "<form method='post' action='item-create-3' enctype='multipart/form-data' class='inline-form'>"
+    set edit_action "<form method='post' action='item-create' class='inline-form'>"
 
 } else {
 
     # Form vars to carry through Confirmation Page
-    set hidden_vars [export_form_vars item_id revision_log publish_title publish_lead \
+    set hidden_vars [export_vars -form {item_id revision_log publish_title publish_lead \
                          publish_body publish_body.format publish_date_ansi archive_date_ansi \
-                         permanent_p html_p imgfile]
-    set image_vars [export_form_vars publish_title publish_lead publish_body publish_body.format \
+                         permanent_p html_p imgfile}]
+    set image_vars [export_vars -form {publish_title publish_lead publish_body publish_body.format \
                         publish_date_ansi archive_date_ansi html_p \
-                        permanent_p action item_id revision_log]
-    set form_action "<form method=post action=admin/revision-add-3 class=\"inline-form\">"
-    set edit_action "<form method=post action=admin/revision-add class=\"inline-form\">"
+                        permanent_p action item_id revision_log}]
+    set form_action "<form method='post' action='admin/revision-add-3' class='inline-form'>"
+    set edit_action "<form method='post' action='admin/revision-add' class='inline-form'>"
 }
 
 # creator link 
-set creator_name [db_string creator "
-select first_names || ' ' || last_name 
-from   cc_users 
-where  user_id = :user_id"]
-set creator_link "<a href=\"/shared/community-member?user_id=$user_id\">$creator_name</a>"
+set creator_name [db_string creator {
+    select first_names || ' ' || last_name 
+    from   cc_users 
+    where  user_id = :user_id
+}]
+set creator_link "<a href='/shared/community-member?user_id=$user_id'>[ns_quotehtml $creator_name]</a>"
 
 template::head::add_style -style ".news-item-preview { color: inherit; background-color: #eeeeee; margin: 1em 4em 1em 4em; padding: 1em; }" -media screen
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

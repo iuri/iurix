@@ -2,7 +2,7 @@ ad_library {
 
     notifications init - sets up scheduled procs
 
-    @cvs-id $Id: sweep-init.tcl,v 1.5 2003/01/16 13:53:10 jeffd Exp $
+    @cvs-id $Id: sweep-init.tcl,v 1.5.24.1 2015/09/12 11:06:47 gustafn Exp $
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-27
 
@@ -34,3 +34,9 @@ foreach interval [notification::get_all_intervals] {
         ad_schedule_proc -thread t 60 notification::sweep::sweep_notifications -interval_id [lindex $interval 1] -batched_p $batched_p
     }        
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

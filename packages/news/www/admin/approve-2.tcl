@@ -8,10 +8,10 @@ ad_page_contract {
   
     @author stefan@arsdigita.com
     @creation-date 2000-12-20
-    @cvs-id $Id: approve-2.tcl,v 1.4 2005/02/24 13:33:23 jeffd Exp $
+    @cvs-id $Id: approve-2.tcl,v 1.6.2.2 2016/01/02 20:34:50 gustafn Exp $
 
 } { 
-    revision_id:notnull
+    revision_id:naturalnum,notnull
     {return_url: ""}
     {permanent_p: "f"}
     {publish_date:array,date ""}
@@ -23,7 +23,7 @@ ad_page_contract {
 
 set publish_date_ansi $publish_date(date)
 
-if {[string equal $permanent_p "t"]} {
+if {$permanent_p == "t"} {
 
     set archive_date_ansi [db_null]
 
@@ -47,20 +47,7 @@ set live_revision_p "t"
 
 foreach id $revision_id {
     
-    db_exec_plsql news_item_approve_publish {
-	begin
-        news.set_approve(
-	    approve_p       => 't',
-	    revision_id     => :id,
-	    publish_date    => :publish_date_ansi,
-            archive_date    => :archive_date_ansi,
-            approval_user   => :approval_user,
-            approval_date   => :approval_date,
-            approval_ip     => :approval_ip,
-            live_revision_p => :live_revision_p
-         );
-    end;
-    }       
+    db_exec_plsql news_item_approve_publish {}       
 
 }
 set package_id [ad_conn package_id]
@@ -77,3 +64,9 @@ ad_returnredirect "$return_url"
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

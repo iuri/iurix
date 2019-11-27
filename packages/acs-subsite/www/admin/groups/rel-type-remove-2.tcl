@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Jan  2 12:28:33 2001
-    @cvs-id $Id: rel-type-remove-2.tcl,v 1.2 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: rel-type-remove-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     group_rel_id:naturalnum,notnull
-    { return_url "" }
+    { return_url:localurl "" }
     { operation:trim "No, I want to cancel my request" }
 }
 
@@ -65,7 +65,13 @@ if {$operation eq "Yes, I really want to delete this relationship type"} {
 
 
 if { $return_url eq "" } {
-    set return_url one?[ad_export_vars {group_id}]
+    set return_url [export_vars -base one {group_id}]
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

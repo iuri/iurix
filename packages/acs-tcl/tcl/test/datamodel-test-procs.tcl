@@ -3,7 +3,7 @@ ad_library {
 
     @author Jeff Davis
     @creation-date 2005-02-28
-    @cvs-id $Id: datamodel-test-procs.tcl,v 1.11 2007/09/16 18:42:57 gustafn Exp $
+    @cvs-id $Id: datamodel-test-procs.tcl,v 1.13.6.1 2015/09/10 08:22:03 gustafn Exp $
 }
 
 
@@ -53,6 +53,7 @@ aa_register_case -cats {db smoke production_safe} datamodel__named_constraints {
 
 	    regsub {_[[:alpha:]]+$} $constraint_name "" name_without_type
 	    set standard_name "${name_without_type}_${constraint_type}"
+            set standard_name_alt "${name_without_type}_[ad_decode $constraint_type pk pkey fk fkey un key ck ck missing]"
 
 	    if { $db_is_pg_p } {
 		set columns_list [split [string range $conkey 1 end-1] ","]
@@ -83,7 +84,8 @@ aa_register_case -cats {db smoke production_safe} datamodel__named_constraints {
 		set hint "hint: $standard_name"
 	    }
 
-	    if { $standard_name ne $constraint_name } {
+	    if { $standard_name ne $constraint_name 
+                 && $standard_name_alt ne $constraint_name } {
 		aa_log_result fail "Table $table_name constraint $constraint_name ($constraint_type) violates naming standard ($hint)"
 	    }
 	}
@@ -189,6 +191,7 @@ aa_register_case -cats {db smoke production_safe} datamodel__acs_attribute_check
                 if {[string is space $column_name]} {
                     set column_name $attribute_name
                 }
+                set column_name [string tolower $column_name]
 
                 if {[lsearch $columns($obj_type_table) $column_name] < 0} {
                     aa_log_result fail "Type $object_type attribute column $column_name not found in $obj_type_table"
@@ -216,3 +219,9 @@ aa_register_case -cats {db smoke production_safe} datamodel__acs_attribute_check
         }
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

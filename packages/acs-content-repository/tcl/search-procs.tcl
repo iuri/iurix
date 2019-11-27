@@ -20,11 +20,6 @@ ad_proc content_search__datasource {
         and i.item_id = r.item_id
     " -column_array datasource
 
-    if { $datasource(storage_type) ne "lob" } {
-        set datasource(storage_type) "text"
-        set datasource(content) [cr_write_content -string -revision_id $object_id ]
-    }
-
     return [array get datasource]
 }
 
@@ -150,7 +145,13 @@ ad_proc content_search__search_ids {
 
     set package_id [apm_package_id_from_key search]
     set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
-    array set result [acs_sc_call FtsEngineDriver search [list $q $offset $limit] $driver]
+    array set result [acs_sc::invoke -contract FtsEngineDriver -operation search -call_args [list $q $offset $limit] -impl $driver]
 
     return $result(ids)
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

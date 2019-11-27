@@ -1,4 +1,4 @@
--- $Id: acs-sc-packages-create.sql,v 1.15 2004/03/12 18:48:53 jeffd Exp $
+-- $Id: acs-sc-packages-create.sql,v 1.15.20.1 2017/04/21 16:21:48 gustafn Exp $
 
 create or replace package acs_sc_contract
 as
@@ -77,7 +77,7 @@ as
        impl_name		acs_sc_impls.impl_name%TYPE
    );
 
-   /* Next 2 functions are deprecated but left here for backwards compatability */
+   /* Next 2 functions are deprecated but left here for backwards compatibility */
 
    function new_alias (
        impl_contract_name	acs_sc_contracts.contract_name%TYPE,

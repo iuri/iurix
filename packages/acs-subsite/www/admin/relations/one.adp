@@ -1,6 +1,6 @@
 <master>
-<property name="context">@context;noquote@</property>
-<property name="title">One relation</property>
+<property name="context">@context;literal@</property>
+<property name="doc(title)">One relation</property>
 				   
 <h3>Attributes</h3>
 
@@ -16,7 +16,7 @@
    </if><else>
       @attributes.value@
    </else>
-   <if @write_p@ eq 1>
+   <if @write_p;literal@ true>
      (<a href="../attributes/edit-one?@attributes.export_vars@">edit</a>) 
    </if>
    </li>
@@ -40,12 +40,13 @@
       <a href="../parties/one?party_id=@rel.object_id_two@">@rel.object_id_two_name@</a> </li>
 </ul>
 
-<if @admin_p@ eq "1" or @delete_p@ eq "1">
+<if @admin_p@ true or @delete_p@ true>
 <p><h3>Administration</h3>
  <ul>
-  <if @admin_p@ eq "1" and @member_state@ ne "">
+  <if @admin_p@ true and @member_state@ ne "">
+        <li> Member State:
       <form method="post" action="change-member-state">
-      <li> Member State:
+    	<div>
       <input type="hidden" name="return_url" value="@QQreturn_url@">
       <input type="hidden" name="rel_id" value="@rel_id@">
       <select name="member_state">
@@ -59,14 +60,15 @@
       </list>
       </select>
       <input type="submit" value="Change Status">
-      </li>
+      </div>
       </form>
+      </li>
   </if>
-  <li> <a href=remove?rel_id=@rel_id@>Remove this relation</a> </li>
+  <li> <a href="remove?rel_id=@rel_id@">Remove this relation</a> </li>
  </ul>
 </if>
 
-<if @object_two_read_p@ eq "1">
+<if @object_two_read_p;literal@ true>
     <h3>About @rel.object_id_two_name@</h3>
     
     <ul>
@@ -81,7 +83,7 @@
        </if><else>
           @object_two_attributes.value@
        </else>
-       <if @object_two_write_p@ eq 1>
+       <if @object_two_write_p;literal@ true>
          (<a href="../attributes/edit-one?@object_two_attributes.export_vars@">edit</a>) 
        </if>
        </li>

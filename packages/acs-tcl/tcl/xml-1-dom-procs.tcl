@@ -19,7 +19,7 @@ ad_library {
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying this software.
 #
-    @cvs-id $Id: xml-1-dom-procs.tcl,v 1.3 2007/01/10 21:22:12 gustafn Exp $
+    @cvs-id $Id: xml-1-dom-procs.tcl,v 1.4.2.1 2015/09/10 08:22:02 gustafn Exp $
 }
 
 package provide dom 1.6
@@ -394,7 +394,7 @@ proc dom::document {method token args} {
 	configure {
 	    if {[llength $args] == 1} {
 		return [document cget $token [lindex $args 0]]
-	    } elseif {[expr {[llength $args] % 2}]} {
+	    } elseif {[llength $args] % 2} {
 		return -code error "no value specified for option \"[lindex $args end]\""
 	    } else {
 		foreach {option value} $args {
@@ -485,7 +485,7 @@ proc dom::document {method token args} {
 		return -code error "wrong number of arguments"
 	    }
 
-	    foreach {name extid dtd entities notations} $args break
+	    lassign $args name extid dtd entities notations
 	    set result [CreateDocType $token $name $extid $dtd $entities $notations]
 	}
 
@@ -562,8 +562,9 @@ proc dom::CreateElement {token name aList args} {
 
 	if {$parent(node:nodeType) eq "documentFragment" } {
 	    if {$parent(id) == $parent(documentFragment:masterDoc)} {
-		if {[info exists parent(document:documentElement)] && \
-		    [string length $parent(document:documentElement)]} {
+		if {[info exists parent(document:documentElement)] 
+		    && [string length $parent(document:documentElement)]
+		} {
 		    unset docArray($id)
 		    return -code error "document element already exists"
 		} else {
@@ -866,7 +867,7 @@ proc dom::node {method token args} {
 
 	    if {[llength $args] == 1} {
 		return [document cget $token [lindex $args 0]]
-	    } elseif {[expr {[llength $args] % 2}]} {
+	    } elseif {[llength $args] % 2} {
 		return -code error "no value specified for option \"[lindex $args end]\""
 	    } else {
 		foreach {option value} $args {
@@ -1204,7 +1205,7 @@ proc dom::element {method token args} {
 	configure {
 	    if {[llength $args] == 1} {
 		return [document cget $token [lindex $args 0]]
-	    } elseif {[expr {[llength $args] % 2}]} {
+	    } elseif {[llength $args] % 2} {
 		return -code error "no value specified for option \"[lindex $args end]\""
 	    } else {
 		foreach {option value} $args {
@@ -1308,8 +1309,9 @@ proc dom::Element:GetByTagName {token name} {
 	foreach child [set $node(node:childNodes)] {
 	    catch {unset childNode}
 	    array set childNode [set $child]
-	    if {$childNode(node:nodeType) eq "element" && \
-		[GetField childNode(node:nodeName)] eq $name } {
+	    if {$childNode(node:nodeType) eq "element" 
+		&& [GetField childNode(node:nodeName)] eq $name 
+	    } {
 		lappend result $child
 	    }
 	}
@@ -1438,7 +1440,7 @@ proc dom::processinginstruction {method token args} {
 	configure {
 	    if {[llength $args] == 1} {
 		return [document cget $token [lindex $args 0]]
-	    } elseif {[expr {[llength $args] % 2}]} {
+	    } elseif {[llength $args] % 2} {
 		return -code error "no value specified for option \"[lindex $args end]\""
 	    } else {
 		foreach {option value} $args {
@@ -1519,7 +1521,7 @@ proc dom::Serialize:document {token args} {
 
     if {![info exists node(document:documentElement)]} {
 	return -code error "document has no document element"
-    } elseif {![string length $node(document:doctype)]} {
+    } elseif {$node(document:doctype) eq ""} {
 	return -code error "no document type declaration given"
     } else {
 
@@ -1743,9 +1745,9 @@ proc dom::Serialize:attributeList {l} {
 	# Handle special characters
 	regsub -all < $value {\&lt;} value
 
-	if {![string match *\"* $value]} {
+	if {![string match "*\"*" $value]} {
 	    append result \"$value\"
-	} elseif {![string match *'* $value]} {
+	} elseif {![string match "*'*" $value]} {
 	    append result '$value'
 	} else {
 	    regsub -all \" $value {\&quot;} value
@@ -1926,7 +1928,7 @@ proc dom::Trim nodeid {
     switch $node(node:nodeType) {
 
 	textNode {
-	    if {![string length [string trim $node(node:nodeValue)]]} {
+	    if {[string trim $node(node:nodeValue)] eq ""} {
 		node removeChild $node(node:parentNode) $nodeid
 	    }
 	}
@@ -2009,3 +2011,9 @@ proc dom::Boolean b {
     return $b
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

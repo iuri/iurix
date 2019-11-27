@@ -3,7 +3,7 @@ ad_library {
 
     @author Joel Aufrecht
     @creation-date 2 Nov 2003
-    @cvs-id $Id: acs-api-browser-procs.tcl,v 1.2 2004/02/15 10:46:22 tilmanns Exp $
+    @cvs-id $Id: acs-api-browser-procs.tcl,v 1.2.22.1 2015/09/10 08:21:11 gustafn Exp $
 }
 
 aa_register_case \
@@ -20,3 +20,8 @@ aa_register_case \
                 [ string match "*packages/acs-api-browser/tcl/acs-api-documentation-procs.tcl*" $result]
         }
 }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

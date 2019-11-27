@@ -5,12 +5,12 @@ ad_page_contract {
     @author Timo Hentschel (timo@timohentschel.de)
     @cvs-id $Id:
 } {
-    link_category_id:integer,multiple
-    category_id:integer,notnull
-    tree_id:integer,notnull
+    link_category_id:naturalnum,multiple
+    category_id:naturalnum,notnull
+    tree_id:naturalnum,notnull
     {locale ""}
-    object_id:integer,optional
-    ctx_id:integer,optional
+    object_id:naturalnum,optional
+    ctx_id:naturalnum,optional
 }
 
 set user_id [auth::require_login]
@@ -26,3 +26,9 @@ db_transaction {
 }
 
 ad_returnredirect [export_vars -no_empty -base category-links-view {category_id tree_id locale object_id ctx_id}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

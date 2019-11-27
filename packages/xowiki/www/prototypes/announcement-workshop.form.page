@@ -1,5 +1,5 @@
 # -*- tcl-*-
-# $Id: announcement-workshop.form.page,v 1.1 2010/12/31 13:42:42 gustafn Exp $
+# $Id: announcement-workshop.form.page,v 1.3 2012/09/13 16:05:36 victorg Exp $
 ::xowiki::Form new \
     -set name en:announcement-workshop.form \
     -title "Workshop Announcement" \

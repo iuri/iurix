@@ -6,11 +6,10 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 1/8/2000
-    @cvs-id $Id: album-delete.tcl,v 1.5 2003/11/18 22:59:03 rocaelh Exp $
+    @cvs-id $Id: album-delete.tcl,v 1.9 2015/06/26 20:59:39 gustafn Exp $
 } {
-    album_id:integer,notnull
-    {confirmed_p "f"}
-    return_url:optional
+    album_id:naturalnum,notnull
+    {confirmed_p:boolean "f"}
 } -validate {
     valid_album -requires {album_id:integer} {
 	if [string equal [pa_is_album_p $album_id] "f"] {
@@ -32,10 +31,10 @@ ad_page_contract {
 # to delete a album must have delete permission on the album
 # and write on parent folder
 set parent_folder_id [db_string get_parent "select parent_id from cr_items where item_id = :album_id"]
-ad_require_permission $album_id delete
-ad_require_permission $parent_folder_id write
+permission::require_permission -object_id $album_id -privilege delete
+permission::require_permission -object_id $parent_folder_id -privilege write
 
-if { [string equal $confirmed_p "t"]  } {
+if {$confirmed_p == "t"} {
     # they have confirmed that they want to delete the album
 
     db_exec_plsql album_delete "
@@ -45,13 +44,7 @@ if { [string equal $confirmed_p "t"]  } {
 
     pa_flush_photo_in_album_cache $album_id
 
-    # HAM : added return_url
-    if { ![exists_and_not_null return_url] } {
-        #redirect back to index page with parent_id
-        ad_returnredirect "?folder_id=$parent_folder_id"
-    } else {
-        ad_returnredirect $return_url
-    }
+    ad_returnredirect "?folder_id=$parent_folder_id"
     ad_script_abort
 
 } else {

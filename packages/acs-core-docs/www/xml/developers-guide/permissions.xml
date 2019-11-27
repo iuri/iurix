@@ -272,7 +272,7 @@ explained by example: consider some hypothetical rows in the
 <para>
 The first row represents an entry in User 123's personal address book,
 the second row represents an entry in User Group 456's shared address
-book, and the third row represents an entry in the site's public
+book, and the third row represents an entry in the site&#39;s public
 address book. In this way, the scoping columns identify the security context in
 which a given object belongs, where each context is <emphasis>either</emphasis> a
 person <emphasis>or</emphasis> a group of people <emphasis>or</emphasis> the general public
@@ -310,7 +310,7 @@ and point the <computeroutput>context_id</computeroutput> field of a new message
 forum. Then, suppose we grant every user in the system read-access to
 this forum. By default, they will automatically have read-access to
 the new message we just inserted, since the system automatically
-checks permissions on the message's context. To allow the creator of
+checks permissions on the message&#39;s context. To allow the creator of
 the message to change the message after it has been posted we grant
 the user write-access on the message, and we are done.
 </para>
@@ -323,7 +323,7 @@ hierarchy for a hypothetical site:
 </para>
 
 <blockquote>
-<graphic fileref="../images/context-hierarchy.gif" format="GIF"></graphic>
+<graphic fileref="images/context-hierarchy.gif" format="GIF"></graphic>
 </blockquote>
 
 <para>
@@ -367,7 +367,7 @@ permissions in a hierarchical fashion.
 then used to check permissions in application pages.
 </para>
 
-<para><phrase role="cvstag">($Id: permissions.xml,v 1.16 2006/08/05 05:18:21 torbenb Exp $)</phrase></para>
+<para><phrase role="cvstag">($Id: permissions.xml,v 1.17.6.1 2016/06/23 08:32:46 gustafn Exp $)</phrase></para>
 
 </sect2>
 

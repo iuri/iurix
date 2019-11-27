@@ -6,10 +6,10 @@ ad_page_contract {
     @param context_p Set to 0 if you don't want the diffs to be listed with context.
     @author Jon Salz [jsalz@arsdigita.com]
     @creation-date 9 May 2000
-    @cvs-id $Id: version-generate-diffs.tcl,v 1.3 2005/02/26 17:52:20 jeffd Exp $
+    @cvs-id $Id: version-generate-diffs.tcl,v 1.4.2.3 2017/06/20 19:34:23 antoniop Exp $
 } {
     {version_id:integer}
-    {context_p 1}
+    {context_p:boolean 1}
 }
 
 db_1row apm_package_by_version_id {}
@@ -29,8 +29,6 @@ doc_body_flush
 
 set no_changes [list]
 
-global errorCode
-
 foreach file [apm_get_package_files -package_key $package_key] {
     if { ![file isfile "[acs_root_dir]/$file"] } {
 	doc_body_append "<h3>$file</h3>\n<blockquote>This file has been locally added.</blockquote>\n"
@@ -41,7 +39,10 @@ foreach file [apm_get_package_files -package_key $package_key] {
 	continue
     }
 
-    set cmd [list exec /usr/bin/diff]
+    if {[set diff [util::which diff]] eq ""} {
+        error "'diff' command not found on the system"
+    }
+    set cmd [list exec $diff]
     if { $context_p } {
 	lappend cmd "-c"
     }
@@ -50,7 +51,7 @@ foreach file [apm_get_package_files -package_key $package_key] {
     if { $errno == 0 } {
 	lappend no_changes $file
     } else {
-	set status [lindex $errorCode 2]
+	set status [lindex $::errorCode 2]
 	if { $status == 1 } {
 	    regsub {child process exited abnormally$} $diffs "" diffs
 	    doc_body_append "<h3>$file</h3>\n<blockquote><pre>[ns_quotehtml $diffs]</pre></blockquote>\n"
@@ -67,3 +68,9 @@ if { [llength $no_changes] > 0 } {
 
 doc_body_append [ad_footer]
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

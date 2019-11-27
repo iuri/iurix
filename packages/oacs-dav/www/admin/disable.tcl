@@ -6,9 +6,9 @@ ad_page_contract {
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-02-15
-    @cvs-id $Id: disable.tcl,v 1.1.1.1 2004/02/16 16:49:28 daveb Exp $
+    @cvs-id $Id: disable.tcl,v 1.2.2.1 2015/09/12 19:00:43 gustafn Exp $
 } {
-    folder_id:integer,multiple
+    folder_id:naturalnum,multiple
 } -properties {
 } -validate {
 } -errors {
@@ -26,3 +26,8 @@ foreach id $folder_id {
 }
 util_user_message -message [_ oacs-dav.Folders_Disabled]
 ad_returnredirect "."
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

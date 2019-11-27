@@ -1,10 +1,10 @@
 <master>
-<property name="title">@page_title@</property>
-<property name="context">@context;noquote@</property>
+<property name="doc(title)">@page_title;literal@</property>
+<property name="context">@context;literal@</property>
 
 <div class="lars_blogger_body">
 
-  <if @display_bloggers_p@ eq 1>
+  <if @display_bloggers_p;literal@ true>
     <if @bloggers:rowcount@ gt 0>
       <ul>
         <multiple name="bloggers">
@@ -15,8 +15,8 @@
     <else>
       <i>#lars-blogger.No_bloggers_here#</i>
     </else>
-    <if @create_p@ true>
-      <if @user_has_blog_p@ true>
+    <if @create_p;literal@ true>
+      <if @user_has_blog_p;literal@ true>
         <p>
           <b>&raquo;</b> <a href="@package_url@entry-edit" title="Add an entry to your weblog">#lars-blogger.Add_entry#</a><br>
         </p>
@@ -27,7 +27,7 @@
         </p>
       </else>
     </if>
-    <if @admin_p@ true>
+    <if @admin_p;literal@ true>
       <p>
         <b>&raquo;</b> <a href="@package_url@admin/" title="Visit administration pages">#lars-blogger.Administer#<a/>
       </p>
@@ -35,18 +35,18 @@
   </if>
   <else>
 
-    <div id="lars_blogger_left">
-      <div class="lars_blogger_content_table">
-        <include src="blog" type="@type@" archive_interval="@interval@" archive_date="@archive_date@" screen_name="@screen_name@" category_id="@category_id@" sw_category_id="@sw_category_id@" max_content_length="" unpublish_p="@unpublish_p@" manageown_p="@manageown_p@">
+    <div id="lars_blogger_left" style="width:90%;">
+      <div class="lars_blogger_content_table" style="width:90%;">
+        <include src="blog" type="@type;literal@" archive_interval="@interval;literal@" archive_date="@archive_date;literal@" screen_name="@screen_name;literal@" category_id="@category_id;literal@" sw_category_id="@sw_category_id;literal@" max_content_length="" unpublish_p="@unpublish_p;literal@" manageown_p="@manageown_p;literal@">
       </div>
     </div>
 
-    <if @show_archive_p@ true>
+    <if @show_archive_p;literal@ true>
       <div id="lars_blogger_right">
       <div class="lars_blogger_portlet">
         <h2>#lars-blogger.Archive#</h2>
-        <include src="calendar" date="@date@" screen_name="@screen_name@">
-        <include-optional src="blog-months" screen_name="@screen_name@">
+        <include src="calendar" date="@date;literal@" screen_name="@screen_name;literal@">
+        <include-optional src="blog-months" screen_name="@screen_name;literal@">
           <include-output>
         </include-optional>
       </div>
@@ -70,14 +70,14 @@
         </div>
       </if>
       </if>
-      <if @create_p@ true>
+      <if @create_p;literal@ true>
         <div class="lars_blogger_portlet">
           <h2>#lars-blogger.Actions#</h2>
 	  <div class="action-links">
 	  <ul>
             <li><a href="@package_url@entry-edit" title="Add an entry to this blog">#lars-blogger.Add_entry#</a></li>
-                <if @unpublish_p@ true><li><a href="@package_url@drafts" title="View draft entries">#lars-blogger.Draft_entries#</a></li></if>
-            <if @admin_p@ true>
+                <if @unpublish_p;literal@ true><li><a href="@package_url@drafts" title="View draft entries">#lars-blogger.Draft_entries#</a></li></if>
+            <if @admin_p;literal@ true>
               <li><a href="@package_url@admin/" title="Visit administration pages">#lars-blogger.Administer#</a></li>
             </if>
 	  </ul>

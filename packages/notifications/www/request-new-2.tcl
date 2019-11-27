@@ -5,11 +5,11 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-24
-    @cvs-id $Id: request-new-2.tcl,v 1.3 2003/01/16 13:53:40 jeffd Exp $
+    @cvs-id $Id: request-new-2.tcl,v 1.4.2.2 2016/05/21 10:18:18 gustafn Exp $
 } {
-    type_id:integer,notnull
-    object_id:integer,notnull
-    return_url
+    type_id:naturalnum,notnull
+    object_id:naturalnum,notnull
+    return_url:localurl
 }
 
 set user_id [ad_conn user_id]
@@ -28,3 +28,9 @@ notification::request::new \
 ad_returnredirect $return_url
 
         
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

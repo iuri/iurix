@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Dec 14 18:06:02 2000
-    @cvs-id $Id: one.tcl,v 1.3 2003/10/10 12:25:51 lars Exp $
+    @cvs-id $Id: one.tcl,v 1.4.2.2 2015/10/28 09:38:36 gustafn Exp $
 
 } {
     constraint_id:naturalnum,notnull
@@ -18,9 +18,9 @@ ad_page_contract {
     req_rel:onerow
 }
 
-ad_require_permission $constraint_id read
+permission::require_permission -object_id $constraint_id -privilege read
 
-set admin_p [ad_permission_p $constraint_id admin]
+set admin_p [permission::permission_p -object_id $constraint_id -privilege admin]
 
 set package_id [ad_conn package_id]
 
@@ -54,34 +54,10 @@ set context [list [list "../" "Relational segments"] [list "../one?segment_id=$p
 # because they would be too hard to read in one query.
 
 set rel_type $props(rel_type)
-db_1row select_rel_type_info {
-    select role1.role as role_one, 
-           nvl(role1.pretty_name,'Object on side one') as role_one_pretty_name,
-           nvl(role1.pretty_plural,'Objects on side one') as role_one_pretty_plural,
-           role2.role as role_two, 
-           nvl(role2.pretty_name,'Object on side two') as role_two_pretty_name,
-           nvl(role2.pretty_plural,'Objects on side two') as role_two_pretty_plural,
-           acs_object_type.pretty_name(rel.rel_type) as rel_type_pretty_name
-      from acs_rel_types rel, acs_rel_roles role1, acs_rel_roles role2
-     where rel.rel_type = :rel_type
-       and rel.role_one = role1.role(+)
-       and rel.role_two = role2.role(+)
-} -column_array rel
+db_1row select_rel_type_info {} -column_array rel
 
 set rel_type $props(req_rel_type)
-db_1row select_rel_type_info {
-    select role1.role as role_one, 
-           nvl(role1.pretty_name,'Object on side one') as role_one_pretty_name,
-           nvl(role1.pretty_plural,'Objects on side one') as role_one_pretty_plural,
-           role2.role as role_two, 
-           nvl(role2.pretty_name,'Object on side two') as role_two_pretty_name,
-           nvl(role2.pretty_plural,'Objects on side two') as role_two_pretty_plural,
-           acs_object_type.pretty_name(rel.rel_type) as rel_type_pretty_name
-      from acs_rel_types rel, acs_rel_roles role1, acs_rel_roles role2
-     where rel.rel_type = :rel_type
-       and rel.role_one = role1.role(+)
-       and rel.role_two = role2.role(+)
-} -column_array req_rel
+db_1row select_rel_type_info {} -column_array req_rel
 
 
 # Choose the appropriate role based on the side of the relation used
@@ -115,3 +91,9 @@ set req_rel(role_pretty_plural) [lang::util::localize $req_rel(role_${rel_side}_
 #  }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

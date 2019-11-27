@@ -4,7 +4,7 @@ ad_page_contract {
     @author Peter Marklund (peter@collaboraid.biz)
     @author Jade Rubick (jader@bread.com) project-manager integration
     @creation-date 2003-04-16
-    @cvs-id $Id: log.tcl,v 1.43 2007/02/06 11:45:54 maltes Exp $
+    @cvs-id $Id: log.tcl,v 1.45 2018/05/09 15:33:31 hectorr Exp $
 } {
     entry_id:integer,optional
     project_id:integer,optional

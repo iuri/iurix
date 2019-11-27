@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author jader@bread.com
     @creation-date 2003-09-25
-    @cvs-id $Id: process-task-assign-add-edit.tcl,v 1.4 2005/05/26 09:34:29 maltes Exp $
+    @cvs-id $Id: process-task-assign-add-edit.tcl,v 1.5 2018/03/27 17:08:50 hectorr Exp $
 
     @return context_bar Context bar.
     @return title Page title.
@@ -14,7 +14,7 @@ ad_page_contract {
 
     @param process_id The process that we're adding or editing items for.
     @param process_task_id The tasks we're creating and adding assignments for
-    @param use_dependency A list of tasks that will need dependencies. Needs to be passed to the depedency page.
+    @param use_dependency A list of tasks that will need dependencies. Needs to be passed to the dependency page.
 } {
 
     my_key:integer,optional

@@ -3,25 +3,33 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 10 Nov 2000
-    @cvs-id $Id: simple-delete.tcl,v 1.8 2009/02/13 22:13:06 jeffd Exp $
+    @cvs-id $Id: simple-delete.tcl,v 1.9.2.2 2017/04/11 05:20:12 antoniop Exp $
 } {
-    object_id:integer,notnull
-    folder_id:notnull
+    object_id:naturalnum,notnull
+    folder_id:naturalnum,notnull
 }
 
 # check for delete permission on the file
-ad_require_permission $object_id delete
+permission::require_permission -object_id $object_id -privilege delete
 
 # Delete
 
 db_transaction {
 
     fs::do_notifications -folder_id $folder_id -filename [content::extlink::name -item_id $object_id] -item_id $object_id -action "delete_url"
-
-    content::extlink::delete -extlink_id $object_id
+    
+    fs::delete_file \
+        -item_id $object_id \
+        -parent_id $folder_id
 
 }
 
 
 ad_returnredirect "./?folder_id=$folder_id"
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

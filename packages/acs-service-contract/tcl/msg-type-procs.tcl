@@ -3,7 +3,7 @@ ad_library {
     
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-01-14
-    @cvs-id $Id: msg-type-procs.tcl,v 1.3 2003/09/02 10:06:25 lars Exp $
+    @cvs-id $Id: msg-type-procs.tcl,v 1.4.2.2 2015/12/09 21:21:43 gustafn Exp $
 }
 
 namespace eval acs_sc::msg_type {}
@@ -20,15 +20,15 @@ ad_proc -public acs_sc::msg_type::new {
 }
 
 ad_proc -public acs_sc::msg_type::delete {
-    {-msg_type_id}
-    {-name}
+    {-msg_type_id ""}
+    {-name ""}
 } {
     Delete a message type. Supply either ID or name.
 
     @param msg_type_id The ID of the msg_type to delete.
     @param name Name of the service contract to delete
 } {
-    if { ![exists_and_not_null msg_type_id] && ![exists_and_not_null name] } {
+    if { $msg_type_id eq "" && $name eq "" } {
         error "You must supply either name or msg_type_id"
     }
 
@@ -36,9 +36,13 @@ ad_proc -public acs_sc::msg_type::delete {
     # It seems like delete by ID doesn't work, because our PG bind thing turns all integers into strings
     # by wrapping them in single quotes, causing PG to invoke the function for deleting by name
 
-    if { ![exists_and_not_null name] } {
+    if { $name eq "" } {
         # get msg_type name
-        db_1row select_name {}
+        db_1row select_name {        
+	    select msg_type_name as name
+	    from   acs_sc_msg_types 
+	    where  msg_type_id = :msg_type_id
+	}
     }
 
     db_exec_plsql delete_by_name {}
@@ -118,3 +122,9 @@ ad_proc -public acs_sc::msg_type::element::new {
     db_exec_plsql insert_msg_type_element {}
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

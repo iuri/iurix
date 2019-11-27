@@ -3,7 +3,7 @@
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Aug 11, 2006
-  @cvs-id $Id: export.tcl,v 1.17 2010/06/28 11:49:11 gustafn Exp $
+  @cvs-id $Id: export.tcl,v 1.22.2.1 2015/09/10 08:10:41 gustafn Exp $
 
   @param object_type 
 } -parameter {
@@ -18,7 +18,7 @@ set folder_id [::$package_id folder_id]
 #
 if {$objects eq ""} {
   set sql [$object_type instance_select_query -folder_id $folder_id -with_subtypes true]
-  db_foreach instance_select $sql { set items($item_id) 1 }
+  xo::dc foreach instance_select $sql { set items($item_id) 1 }
 } else {
   foreach o $objects {
     $package_id get_lang_and_name -default_lang [::xo::cc lang] -path $o lang stripped_name
@@ -36,5 +36,11 @@ if {$objects eq ""} {
 # The exporter exports the specified objects together with implicitely
 # needed objects.
 #
-::xowiki::::exporter export [array names items]
+::xowiki::exporter export [array names items]
+ns_conn close
 
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

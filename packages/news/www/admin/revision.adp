@@ -1,6 +1,6 @@
 <master>
-<property name="context">@context;noquote@</property>
-<property name="title">@title;noquote@</property>
+<property name="context">@context;literal@</property>
+<property name="doc(title)">@title;literal@</property>
 
 
 
@@ -13,10 +13,10 @@
   #news.Archive_Date#: @archive_date_pretty@
 </p>
 <hr>
-<include src="../news"
+<include src="/packages/news/lib/news"
     publish_title="@publish_title;noquote@ (#news.rev# @revision_no;noquote@)"
-    publish_lead="@publish_lead@"
-    publish_body="@publish_body;noquote@"
-    publish_format="@publish_format;noquote@"
-    creator_link="@creator_link;noquote@"
+    publish_lead="@publish_lead;literal@"
+    publish_body="@publish_body;literal@"
+    publish_format="@publish_format;literal@"
+    creator_link="@creator_link;literal@"
 >

@@ -1,7 +1,7 @@
 ad_page_contract {
     Adding a user by an administrator
 
-    @cvs-id $Id: user-add.tcl,v 1.6 2007/09/17 13:26:58 maltes Exp $
+    @cvs-id $Id: user-add.tcl,v 1.6.12.1 2015/09/10 08:21:10 gustafn Exp $
 } -query {
     {referer "/acs-admin/users"}
 } -properties {
@@ -20,3 +20,9 @@ set user_new_template [parameter::get -parameter "UserNewTemplate" -package_id $
 if {$user_new_template eq ""} {
     set user_new_template "/packages/acs-subsite/lib/user-new"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

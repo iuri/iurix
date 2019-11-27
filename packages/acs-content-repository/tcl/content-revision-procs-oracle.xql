@@ -5,7 +5,7 @@
 <!-- @author Dave Bauer (dave@thedesignexperience.org) -->
 <!-- @creation-date 2005-02-09 -->
 <!-- @arch-tag: 7db5e029-8e8c-46a5-b178-e405a6875116 -->
-<!-- @cvs-id $Id: content-revision-procs-oracle.xql,v 1.7 2009/07/23 12:30:27 miguelc Exp $ -->
+<!-- @cvs-id $Id: content-revision-procs-oracle.xql,v 1.7.8.1 2016/01/02 14:31:29 gustafn Exp $ -->
 
 <queryset>
   
@@ -19,15 +19,6 @@
         set    content = empty_blob()
         where  revision_id = :revision_id
         returning content into :1
-    </querytext>
-  </fullquery>
-
-  <fullquery name="content::revision::new.update_lob_attribute">
-    <querytext>
-		update $lob_table
-		set $lob_attribute = empty_clob()
-		where $lob_id_column = :revision_id
-		returning $lob_attribute into :1
     </querytext>
   </fullquery>
 

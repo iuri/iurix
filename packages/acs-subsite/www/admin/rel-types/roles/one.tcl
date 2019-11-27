@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Mon Dec 11 11:08:34 2000
-    @cvs-id $Id: one.tcl,v 1.4 2002/12/05 13:11:11 peterm Exp $
+    @cvs-id $Id: one.tcl,v 1.4.24.1 2015/09/10 08:21:46 gustafn Exp $
 
 } {
     role:notnull
@@ -46,3 +46,9 @@ db_multirow rels select_rel_types_one {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

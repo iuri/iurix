@@ -5,7 +5,7 @@ ad_library {
 
     @author Vinod Kurup [vinod@kurup.com]
     @creation-date Sun Oct  5 19:52:39 2003
-    @cvs-id $Id: metaweblog-api-procs.tcl,v 1.5 2004/07/12 11:33:19 jeffd Exp $
+    @cvs-id $Id: metaweblog-api-procs.tcl,v 1.8 2018/05/09 15:33:31 hectorr Exp $
 }
 
 ad_proc -public metaWeblog.newPost {
@@ -63,11 +63,11 @@ ad_proc -public metaWeblog.newPost {
 
     set entry_id [db_nextval t_acs_object_id_seq]
 
-    if { ![exists_and_not_null content(title)] } {
+    if { ![info exists content(title)] || $content(title) eq "" } {
         set content(title) " "
     }
     
-    if { ![exists_and_not_null content(description)] } {
+    if { ![info exists content(description)] || $content(description) eq "" } {
         set content(description) " "
     }
     
@@ -79,7 +79,7 @@ ad_proc -public metaWeblog.newPost {
         set pubDate [clock format [clock seconds] -format $fmt]
     }
     
-    if { [exists_and_not_null content(categories)] } {
+    if { [info exists content(categories)] && $content(categories) ne "" } {
 	# Only looking at the first category
 	set category_id [lars_blogger::category::get_id_by_name \
 			     -package_id $package_id \
@@ -131,11 +131,11 @@ ad_proc -public metaWeblog.editPost {
         -object_id $entry_id \
         -privilege write
 
-    if { ![exists_and_not_null content(title)] } {
+    if { ![info exists content(title)] || $content(title) eq "" } {
         set content(title) " "
     }
     
-    if { ![exists_and_not_null content(description)] } {
+    if { ![info exists content(description)] || $content(description) eq "" } {
         set content(description) " "
     }
     
@@ -147,7 +147,7 @@ ad_proc -public metaWeblog.editPost {
         set pubDate [clock format [clock seconds] -format $fmt]
     }
     
-    if { [exists_and_not_null content(categories)] } {
+    if { [info exists content(categories)] && $content(categories) ne "" } {
 	# Only looking at the first category
 	set category_id [lars_blogger::category::get_id_by_name \
 			     -package_id $package_id \

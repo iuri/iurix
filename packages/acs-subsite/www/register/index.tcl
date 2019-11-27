@@ -1,11 +1,18 @@
 ad_page_contract {
     Prompt the user for email and password.
-    @cvs-id $Id: index.tcl,v 1.13 2007/11/30 18:16:43 daveb Exp $
+    @cvs-id $Id: index.tcl,v 1.14.2.6 2017/05/31 11:48:36 gustafn Exp $
 } {
-    {authority_id ""}
+    {authority_id:naturalnum ""}
     {username ""}
     {email ""}
-    {return_url ""}
+    {return_url:localurl ""}
+    {host_node_id:naturalnum ""}
+} -validate {
+    valid_email -requires email {
+        if {![regexp {^[\w.@+/=$%!*~-]+$} $email]} {
+            ad_complain "invalid email address"
+        }
+    }
 }
 
 set subsite_id [ad_conn subsite_id]
@@ -15,3 +22,10 @@ if {$login_template eq ""} {
     set login_template "/packages/acs-subsite/lib/login"
 }
 
+ns_log notice "register/index.tcl: login_template <$login_template> host_node_id <$host_node_id>"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

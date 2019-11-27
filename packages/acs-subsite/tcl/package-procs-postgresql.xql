@@ -3,20 +3,6 @@
 <queryset>
    <rdbms><type>postgresql</type><version>7.1</version></rdbms>
 
-<fullquery name="package_type_dynamic_p.object_type_dynamic_p">      
-      <querytext>
-      
-	select case when exists (select 1 
-                                   from acs_object_types t
-                                  where t.dynamic_p = 't'
-                                    and t.object_type = :object_type)
-	            then 1 else 0 end
-	  
-    
-      </querytext>
-</fullquery>
-
- 
 <fullquery name="package_create_attribute_list.select_all_attributes">      
       <querytext>
 
@@ -52,13 +38,13 @@
 <fullquery name="package_create.package_valid_p">      
       <querytext>
       
-	    select case when exists (select 1 
-                                       from user_objects 
-                                      where status = 'INVALID'
-                                        and object_name = upper(:package_name)
-                                        and object_type = upper(:type))
-                        then 0 else 1 end
-	      
+--	    select case when exists (select 1 
+--                                       from user_objects 
+--                                      where status = 'INVALID'
+--                                        and object_name = upper(:package_name)
+--                                        and object_type = upper(:type))
+--                        then 0 else 1 end
+            select 1 from dual;     
 	
       </querytext>
 </fullquery>
@@ -99,17 +85,6 @@
 </fullquery>
 
  
-<fullquery name="package_insert_default_comment.select_comments">      
-      <querytext>
-      
-	    select acs_object__name(:user_id) as author,
-	           current_timestamp as creation_date
-	      
-	
-      </querytext>
-</fullquery>
-
- 
 <fullquery name="package_object_attribute_list.attributes_select">      
       <querytext>
 
@@ -129,7 +104,7 @@
 		  and t2.object_type = :start_with) t
          where a.object_type = :object_type
            and t.object_type = a.ancestor_type $storage_clause
-         order by type_level, attribute_id
+         order by type_level, sort_order, attribute_id
       </querytext>
 </fullquery>
 
@@ -167,15 +142,6 @@
       </querytext>
 </fullquery>
  
-<fullquery name="package_create.package_valid_p">      
-      <querytext>
-
-select 1
-    
-      </querytext>
-</fullquery>
-
- 
 <fullquery name="package_instantiate_object.create_object">      
       <querytext>
 
@@ -190,12 +156,10 @@ select 1
  
 <fullquery name="package_generate_body.select_supertype_function_params">      
       <querytext>
-      
-	select args.arg_name
-	  from acs_function_args args
-         where args.function =upper(:supertype_package_name) || '__NEW'
-    
-      </querytext>
+        select args.arg_name
+          from acs_function_args args
+        where args.function = upper(:supertype_package_name) || '__NEW'
+       </querytext>
 </fullquery>
 
  
@@ -208,12 +172,12 @@ perform drop_package('${package_name}');
 
 perform define_function_args('${package_name}__new','[plpgsql_utility::define_function_args $attribute_list]');
 
-create function ${package_name}__new([plpgsql_utility::generate_function_signature $attribute_list])
-returns [plpgsql_utility::table_column_type ${table_name} ${id_column}] as '
-declare
+CREATE FUNCTION ${package_name}__new([plpgsql_utility::generate_function_signature $attribute_list])
+RETURNS [plpgsql_utility::table_column_type ${table_name} ${id_column}] AS $$
+DECLARE
     [plpgsql_utility::generate_attribute_parameters $attribute_list];
     v_$id_column ${table_name}.${id_column}%TYPE;
-begin
+BEGIN
 
     v_$id_column := ${supertype_package_name}__new (
                      [plpgsql_utility::generate_attribute_parameter_call_from_attributes \
@@ -229,18 +193,20 @@ begin
 
     return v_$id_column;
 
-end;' language 'plpgsql';
+END; 
+$$ LANGUAGE plpgsql;
 
-create function ${package_name}__delete ([plpgsql_utility::table_column_type ${table_name} ${id_column}])
-returns integer as '
-declare
-    p_${id_column}      alias for [plpgsql_utility::dollar]1;
-begin
+CREATE FUNCTION ${package_name}__delete (
+    p_${id_column} [plpgsql_utility::table_column_type ${table_name} ${id_column}]
+) RETURNS integer AS $$
+DECLARE
+BEGIN
 
     perform ${supertype_package_name}__delete( p_${id_column} );
     return 1;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 return null;
 end;

@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 14 Nov 2000
-    @cvs-id $Id: search.tcl,v 1.4 2005/05/26 08:28:46 maltes Exp $
+    @cvs-id $Id: search.tcl,v 1.4.10.2 2016/01/02 20:13:30 gustafn Exp $
 } {
     query:trim,notnull
 } -properties {
@@ -26,16 +26,16 @@ regsub -all {\*} $query {%} query
 set query "%${query}%"
 regsub -all {%+} $query {%} query
 
-db_multirow results results {
-    select item_id as file_id,
-           content_item.get_title(item_id) as title
-    from   cr_items
-    where  lower(content_item.get_title(item_id)) like :query
-    and    acs_permission.permission_p(item_id,:user_id,'read') = 't'
-}
+db_multirow results results {}
 
 # get the (lowercased) original back to feed to the template
 
 set query $orig_query
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -13,8 +13,8 @@
 <fullquery name="update_photo_attributes">      
       <querytext>
 	    select content_revision__new (
-	      :new_caption, -- caption
-	      :new_desc, -- description 
+	      :new_title, -- title => 
+  	      :new_desc, -- description 
       	      current_timestamp, -- publish_date
       	      null, -- mime_type
       	      null, -- nls_language
@@ -23,7 +23,7 @@
 	      :revision_id, -- revision_id 
 	      current_timestamp, -- creation_date 
 	      :user_id, -- creation_user
-	      :peeraddr -- creation_ip
+	      :peeraddr -- creation_ip 
 	    )
 	      </querytext>
 </fullquery>
@@ -42,12 +42,11 @@
                 exposure_time  = prev.exposure_time,
                 focus_distance = prev.focus_distance,
                 sha256         = prev.sha256,
-	        community_id  = prev.community_id,
-	        photographer  = prev.photographer
+                photographer   = prev.photographer
            FROM (
              SELECT user_filename,camera_model,date_taken,flash, 
                     aperture,metering,focal_length,exposure_time,
-                    focus_distance,sha256,community_id,photographer
+                    focus_distance,sha256,photographer
                FROM pa_photos prev
               WHERE prev.pa_photo_id = :previous_revision
               ) prev

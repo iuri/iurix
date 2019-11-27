@@ -6,7 +6,7 @@ ad_library {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Nov  7 22:52:39 2000
-    @cvs-id $Id: group-type-procs.tcl,v 1.5 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: group-type-procs.tcl,v 1.6.2.3 2016/11/27 12:19:35 gustafn Exp $
 
 }
 
@@ -31,14 +31,7 @@ namespace eval group_type {
 	    } 
 	    set user_id [ad_conn user_id]	
 	}
-	return [db_string group_exists_p {
-	    select case when exists (select 1 
-                                       from acs_objects o
-                                      where acs_permission.permission_p(o.object_id, :user_id, 'delete') = 'f'
-                                        and o.object_type = :group_type)
-                        then 0 else 1 end
-              from dual
-	}]
+	return [db_string group_exists_p {}]
     }
 
     
@@ -136,16 +129,16 @@ namespace eval group_type {
         lappend plsql_drop [list remove_rel_types "delete from group_type_rels where group_type = :group_type"]
         lappend plsql [list copy_rel_types [db_map copy_rel_types]]
 
-        if { $execute_p eq "f" } {
+        if { $execute_p == "f" } {
 	    set text "-- Create script"
 	    foreach pair $plsql {
 		append text "[plsql_utility::parse_sql [lindex $pair 1]]\n\n"
 	    }
 	    # Now add the drop script
 	    append text "-- Drop script\n";
-	    for { set i [expr {[llength $plsql_drop] - 1}] } { $i >= 0 } { set i [expr {$i - 1}] } {
+	    for { set i [expr {[llength $plsql_drop] - 1}] } { $i >= 0 } { incr i -1 } {
 		# Don't need the sql keys when we display debugging information
-		append text "-- [lindex [lindex $plsql_drop $i] 1]\n\n"
+		append text "-- [lindex $plsql_drop $i 1]\n\n"
 	    }
 	    return $text
 	}
@@ -186,3 +179,9 @@ create table $table_name (
     }
 	
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

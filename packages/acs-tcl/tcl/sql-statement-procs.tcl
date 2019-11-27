@@ -2,7 +2,7 @@ ad_library {
     Procs for manipulating SQL statements
 
     @author lars@pinds.com, May 2000
-    @cvs-id $Id: sql-statement-procs.tcl,v 1.3 2007/01/10 21:22:12 gustafn Exp $
+    @cvs-id $Id: sql-statement-procs.tcl,v 1.4.2.1 2015/09/10 08:21:59 gustafn Exp $
 
     How to use this:
 
@@ -23,8 +23,6 @@ ad_library {
 }
 
 ad_proc -public ad_sql_get { 
-    { 
-    }
     sqlarrayname
 } {
     @param sqlarrayname array reference
@@ -60,13 +58,11 @@ ad_proc -public ad_sql_get {
 }
 
 ad_proc -public ad_sql_append { 
-    {
-	-select {}
-	-from {}
-	-where {}
-	-groupby {}
-	-orderby {}
-    } 
+    {-select {}}
+    {-from {}}
+    {-where {}}
+    {-groupby {}}
+    {-orderby {}}
     sqlarrayname
 } { 
     Adds to the SQL statement.
@@ -89,3 +85,9 @@ ad_proc -public ad_sql_append {
     }
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

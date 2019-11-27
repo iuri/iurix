@@ -2,7 +2,7 @@ ad_library {
 
     Sweep for expired user approvals.
 
-    @cvs-id $Id: approval-expiration-init.tcl,v 1.3 2003/09/19 16:13:25 lars Exp $
+    @cvs-id $Id: approval-expiration-init.tcl,v 1.3.24.1 2015/09/10 08:21:35 gustafn Exp $
     @author Lars Pind  (lars@collaboraid.biz)
     @creation-date 2003-05-28
 
@@ -15,3 +15,9 @@ if { $ApprovalExpirationDays > 0 } {
     # Schedule proc to run once nightly
     ad_schedule_proc -thread t -schedule_proc ns_schedule_daily [list 0 0] subsite::sweep_expired_approvals -days $ApprovalExpirationDays
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

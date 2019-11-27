@@ -1,5 +1,5 @@
 <master>
-<property name="context">@context;noquote@</property>
+<property name="context">@context;literal@</property>
 <property name="&doc">doc</property>
 
 <h1>@doc.title@</h1>
@@ -22,9 +22,9 @@
 
 <form method=post action="chat#xj220">
 #chat.message#: <input tabindex='1' type='text' size='80' name='message' id='chatMsg'>
-<input type=hidden name="room_id" value="@room_id@">
-<input type=hidden name="client" value="html">
-<input type=submit value="#chat.Send_Refresh#">
-<input type=submit value="#chat.Refresh#">
+<input type="hidden" name="room_id" value="@room_id@">
+<input type="hidden" name="client" value="html">
+<input type="submit" value="#chat.Send_Refresh#">
+<input type="submit" value="#chat.Refresh#">
 </form>
 

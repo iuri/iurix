@@ -10,7 +10,7 @@ ad_page_contract {
     @cvs-id survey-category-add.tcl,v 1.4.2.4 2000/07/21 04:04:22 ron Exp
 } {
 
-    section_id:integer,notnull
+    section_id:naturalnum,notnull
     category:notnull
 
 }
@@ -40,5 +40,5 @@ db_transaction {
 
 get_survey_info -section_id $section_id
 set survey_id $survey_info(survey_id)
-ad_returnredirect "one?[export_url_vars survey_id]"
+ad_returnredirect [export_vars -base one {survey_id}]
 

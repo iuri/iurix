@@ -5,9 +5,7 @@
      @creation-date November 13, 2000
      @cvs-id $Id: index.adp,v 1.10 2008/11/09 23:29:23 donb Exp $
 -->
-<master src="chat-master">
-<property name="title">Chat rooms</property>
-<property name="context">{Chat rooms}</property>
+<master>
 <property name="&doc">doc</property>
 
 <if @warning@ not nil>

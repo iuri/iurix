@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2005-01-22
     @arch-tag: 601774f4-7b83-4eee-9b36-97c278ba1bd4
-    @cvs-id $Id: rss-support-procs.tcl,v 1.2 2005/02/24 13:33:25 jeffd Exp $
+    @cvs-id $Id: rss-support-procs.tcl,v 1.3.2.2 2017/03/27 10:41:51 gustafn Exp $
 }
 
 namespace eval ::rss_support:: {}
@@ -61,10 +61,10 @@ ad_proc -public ::rss_support::add_subscription {
                       [list p_creation_ip $creation_ip] \
                       [list p_context_id $context_id]
                   ]
-    if {[exists_and_not_null creation_date]} {
+    if {([info exists creation_date] && $creation_date ne "")} {
         lappend var_list [list creation_date $creation_date]
     }
-    if {[exists_and_not_null lastbuild]} {
+    if {([info exists lastbuild] && $lastbuild ne "")} {
         lappend var_list [list p_lastbuild $lastbuild]
     }    
     
@@ -99,7 +99,7 @@ ad_proc -public rss_support::del_subscription {
 		       -owner $owner]   
     set report_dir [rss_gen_report_dir -subscr_id $subscr_id]
     # remove generated RSS reports for this subscription
-    file delete -force $report_dir
+    file delete -force -- $report_dir
     package_exec_plsql \
         -var_list [list [list subscr_id $subscr_id]] \
         rss_gen_subscr del
@@ -147,3 +147,9 @@ ad_proc -public rss_support::get_subscr_id {
     set impl_id [db_string get_impl_id ""]
     return [db_string get_subscr_id ""]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

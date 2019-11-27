@@ -6,7 +6,7 @@ ad_library {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Dec 12 15:40:39 2000
-    @cvs-id $Id: rel-types-procs.tcl,v 1.9 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: rel-types-procs.tcl,v 1.11.2.5 2016/08/31 18:57:41 gustafn Exp $
 }
 
 ad_page_contract_filter rel_type_dynamic_p {name value} {
@@ -17,12 +17,13 @@ ad_page_contract_filter rel_type_dynamic_p {name value} {
     @creation-date 12/30/2000
 } {
     if {[db_string rel_type_dynamic_p {
-	select case when exists (select 1
-				 from acs_object_types t
-				 where t.dynamic_p = 't'
-				 and t.object_type = :value)
-	then 1 else 0 end
-	from dual}]} {
+        	select case when exists (select 1 
+                                   from acs_object_types t
+                                  where t.dynamic_p = 't'
+                                    and t.object_type = :value)
+	            then 1 else 0 end
+	  from dual
+    }]} {
 	return 1
     }
     ad_complain "Specific rel type either does not exist or is not dynamic and thus cannot be modified"
@@ -61,16 +62,7 @@ namespace eval rel_types {
 	@author Michael Bryzek (mbryzek@arsdigita.com)
 	@creation-date 12/30/2000
     } {
-	return [db_string "group_rel_type_exists" "
-	     select case when exists (select 1
-                                        from acs_object_types t
-                                        where t.object_type not in (select g.rel_type
-                                                                      from group_rels g
-                                                                     where g.group_id = :group_id)
-                                      connect by prior t.object_type = t.supertype
-                                        start with t.object_type in ('membership_rel','composition_rel'))
-                    then 1 else 0 end
-               from dual"]
+	return [db_string group_rel_type_exists {}]
     }
 
     ad_proc -private additional_rel_types_group_type_p {
@@ -82,16 +74,7 @@ namespace eval rel_types {
 	@author Michael Bryzek (mbryzek@arsdigita.com)
 	@creation-date 12/30/2000
     } {
-	return [db_string "group_rel_type_exists" "
-	     select case when exists (select 1
-                                        from acs_object_types t
-                                        where t.object_type not in (select g.rel_type
-                                                                      from group_type_rels g
-                                                                     where g.group_type = :group_type)
-                                      connect by prior t.object_type = t.supertype
-                                        start with t.object_type in ('membership_rel','composition_rel'))
-                    then 1 else 0 end
-               from dual"]
+	return [db_string group_rel_type_exists {}]
     }
 
     ad_proc -public new {
@@ -109,6 +92,7 @@ namespace eval rel_types {
 	object_type_two
 	min_n_rels_two
 	max_n_rels_two
+        {composable_p "t"}
     } {
 	Creates a new relationship type named rel_type
 
@@ -151,12 +135,12 @@ namespace eval rel_types {
 
 	# Create the actual acs object type
 
-	lappend plsql_drop [list db_exec_plsql drop_type {FOO}]
-	lappend plsql [list db_exec_plsql create_type {FOO}]
+	lappend plsql_drop [list db_exec_plsql drop_type {}]
+	lappend plsql [list db_exec_plsql create_type {}]
 
 	# Mark the type as dynamic
 
-	lappend plsql [list db_dml update_type {FOO}]
+	lappend plsql [list db_dml update_type FOO]
 	
 	# Force internationalisation of Roles
 	
@@ -176,14 +160,14 @@ namespace eval rel_types {
 	set pretty_name "#acs-translations.${message_key}#"
 	set pretty_plural "#acs-translations.${message_key}_plural#"
 
-	foreach pair $plsql {
-	    eval [lindex $pair 0] [lindex $pair 1] [lindex $pair 2]
+	foreach cmd $plsql {
+	    {*}$cmd
 	}
 
 	# The following create table statement commits the transaction. If it
 	# fails, we roll back what we've done
 
-	if {$create_table_p eq "t"} {
+	if {$create_table_p == "t"} {
 	    if {[catch {db_exec_plsql create_table "
 		create table $table_name (
         	   rel_id constraint $fk_constraint_name
@@ -194,8 +178,8 @@ namespace eval rel_types {
 		# Roll back our work so for
 
 		for {set i [expr {[llength $plsql_drop] - 1}]} {$i >= 0} {incr i -1} {
-		    set drop_pair [lindex $plsql_drop $i]
-		    if {[catch {eval [lindex $drop_pair 0] [lindex $drop_pair 1] [lindex $drop_pair 2]} err_msg_2]} {
+		    set drop_cmd [lindex $plsql_drop $i]
+		    if {[catch $dropcmd err_msg_2]} {
 			append errmsg "\nAdditional error while trying to roll back: $err_msg_2"
 			return -code error $errmsg
 		    }
@@ -218,6 +202,7 @@ namespace eval rel_types {
 	Add a permissible relationship for a given group type
     } {
 	if {[catch {
+	    set group_rel_type_id [db_nextval acs_object_id_seq]
 	    db_dml insert_rel_type {}
 	} errmsg]} {
 	}
@@ -254,7 +239,7 @@ namespace eval rel_types {
 
 	@return 1 if successful
     } {
-	if {![exists_and_not_null role]} {
+	if {![info exists role] || $role eq ""} {
 	    set role [util_text_to_url \
 			  -text $pretty_name \
 			  -replacement "_" \
@@ -321,3 +306,9 @@ namespace eval rel_types {
 	return $return_code
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

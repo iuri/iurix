@@ -1,6 +1,6 @@
 <master>
-<property name="context">@context_bar;noquote@</property>
-<property name="title">@room_name;noquote@</property>
+<property name="context">@context_bar;literal@</property>
+<property name="doc(title)">@room_name;literal@</property>
 
 <center>
    <applet code=adChatApplet.class archive=chat.jar width=@width@ height=@height@>
@@ -9,7 +9,7 @@
    <param name="room_id" value="@room_id@">
    <param name="host" value="@host@">
    <param name="port" value="@port@">
-   <if @moderator_p@ eq "1">
+   <if @moderator_p;literal@ true>
    <param name="moderator" value="true">
    </if>
    </applet>

@@ -10,7 +10,7 @@ ad_library {
     @creation-date 30 September 2000
     @author Jeff Davis (davis@xarg.net) 
     @author Ashok Argent-Katwala (akatwala@arsdigita.com)
-    @cvs-id $Id: localization-procs.tcl,v 1.23 2008/04/18 06:48:42 victorg Exp $
+    @cvs-id $Id: localization-procs.tcl,v 1.24.2.7 2017/04/22 18:21:46 gustafn Exp $
 }
 
 
@@ -21,7 +21,7 @@ ad_proc -public lc_parse_number {
 } {
     Converts a number to its canonical 
     representation by stripping everything but the 
-    decimal seperator and triming left 0's so it 
+    decimal separator and triming left 0's so it 
     won't be octal. It can process the following types of numbers:
     <ul>
     <li>Just digits (allows leading zeros).
@@ -43,10 +43,24 @@ ad_proc -public lc_parse_number {
 	return ""
     }
 
-    set dec [lc_get -locale $locale "decimal_point"]
+    set dec  [lc_get -locale $locale "decimal_point"]
     set thou [lc_get -locale $locale "mon_thousands_sep"][lc_get -locale $locale "thousands_sep"]
-    set neg [lc_get -locale $locale "negative_sign"]
-    set pos [lc_get -locale $locale "positive_sign"]
+    set neg  [lc_get -locale $locale "negative_sign"]
+    set pos  [lc_get -locale $locale "positive_sign"]
+
+    #
+    # Sanity check: decimal point must be different from the thousands
+    # separators. This test should be really either in regression
+    # testing or be forumulated as constraint after changing the
+    # message keys.  However, since a violation can lead to incorrect
+    # results, the safety check is here as well.
+    #
+    if {[string first $dec $thou] > -1} {
+	error "error in locale $locale: decimal point '$decimal_point' must be different\
+		from thousands separator\
+		(mon_thousands_sep '[lc_get -locale $locale mon_thousands_sep]'\
+		and thousands_sep '[lc_get -locale $locale thousands_sep]')"
+    }
 
     lang::util::escape_vars_if_not_null {dec thou neg pos}
 
@@ -69,18 +83,15 @@ ad_proc -public lc_parse_number {
 	error "Not a number $num"
     } else {
 
-	regsub -all "$thou" $number "" number
+	regsub -all $thou $number "" number
 
 	if {!$integer_only_p} {
-	    regsub -all "$dec" $number "." number
+	    regsub -all $dec $number "." number
 	}
 
-
-	# Strip leading zeros
-	regexp -- "0*(\[0-9\.\]+)" $number match number
+        set number [util::trim_leading_zeros $number]
 	
-	# if number is real and mod(number)<1, then we have pulled off the leading zero; i.e. 0.231 -> .231 -- this is still fine for tcl though...
-	# Last pathological case
+        # Last pathological case
 	if {"." eq $number } {
 	    set number 0
 	}
@@ -103,7 +114,7 @@ ad_proc -private lc_sepfmt {
     Called by lc_numeric and lc_monetary.
     <p>
     Takes a grouping specifier and 
-    inserts the given seperator into the string. 
+    inserts the given separator into the string. 
     Given a separator of : 
     and a number of 123456789 it returns:
     <pre>
@@ -121,10 +132,9 @@ ad_proc -private lc_sepfmt {
     @param num_re     Regular expression for valid numbers
     @return           Number formatted with thousand separator
 } {
-    # with empty seperator or grouping string we behave 
+    # with empty separator or grouping string we behave 
     # posixly
-    if {$grouping eq "" 
-        || $sep eq "" } { 
+    if {$grouping eq "" || $sep eq "" } { 
         return $num
     }
     
@@ -134,7 +144,7 @@ ad_proc -private lc_sepfmt {
     set match "^(-?$num_re+)("
     set group [lindex $grouping 0]
     
-    while { 1 && $group > 0} { 
+    while { $group > 0} { 
         set re "$match[string repeat $num_re $group])"
         if { ![regsub -- $re $num "\\1$sep\\2" num] } { 
             break 
@@ -159,7 +169,7 @@ ad_proc -public lc_numeric {
     for that locale.
 
     @param num      Number in canonical form
-    @param fmt      Format string used by the tcl format 
+    @param fmt      Format string used by the Tcl format 
                     command (should be restricted to the form "%.Nf" if present).
     @param locale   Locale
     @return         Localized form of the number
@@ -185,131 +195,8 @@ ad_proc -public lc_numeric {
     }
     
     regsub {\.} $out $dec out
-
     return [lc_sepfmt $out $grouping $sep]
 }
-
-ad_proc -public lc_monetary_currency {
-    { -label_p 0 }
-    { -style local }
-    num currency locale
-} {
-    Formats a monetary amount, based on information held on given currency (ISO code), e.g. GBP, USD.
-
-    @param label_p     Set switch to a true value if you want to specify the label used for the currency.
-    @param style       Set to int to display the ISO code as the currency label. Otherwise displays
-                       an HTML entity for the currency. The label parameter must be true for this
-                       flag to take effect.
-    @param num         Number to format as a monetary amount.
-    @param currency    ISO currency code.
-    @param locale      Locale used for formatting the number.
-    @return            Formatted monetary amount
-} {
-
-    set row_returned [db_0or1row lc_currency_select {}]
-
-    if { !$row_returned } {
-	ns_log Warning "lc_monetary_currency: Unsupported monetary currency, defaulting digits to 2"
-	set fractional_digits 2
-	set html_entity ""
-    }
-    
-    if { $label_p } {
-	if {$style eq "int" } {
-	    set use_as_label $currency
-	} else {
-	    set use_as_label $html_entity
-	}
-    } else {
-	set use_as_label ""
-    }
-    
-    return [lc_monetary -- $num $locale $fractional_digits $use_as_label]
-}
-
-
-ad_proc -private lc_monetary {
-    { -label_p 0 }
-    { -style local }
-    num 
-    locale 
-    {forced_frac_digits ""} 
-    {forced_currency_symbol ""}
-} { 
-    Formats a monetary amount.
-
-    @param label       Specify this switch if you want to specify the label used for the currency.
-    @param style       Set to int to display the ISO code as the currency label. Otherwise displays
-                       an HTML entity for the currency. The label parameter must be specified for this
-                       flag to take effect.
-    @param num         Number to format as a monetary amount. If this number could be negative
-                       you should put &quot;--&quot; in your call before it.
-    @param currency    ISO currency code.
-    @param locale      Locale used for formatting the number.
-    @return            Formatted monetary amount
-} { 
-
-    if {$forced_frac_digits ne "" && [string is integer $forced_frac_digits]} {
-	set dig $forced_frac_digits
-    } else {
-	# look up the digits
-	if {$style eq "int" } { 
-	    set dig [lc_get -locale $locale "int_frac_digits"]
-	} else { 
-	    set dig [lc_get -locale $locale "frac_digits"]
-	}
-    }
-
-    # figure out if negative 
-    if {$num < 0} { 
-        set num [expr {abs($num)}]
-        set neg 1
-    } else { 
-        set neg 0
-    }
-    
-    # generate formatted number
-    set out [format "%.${dig}f" $num]
-
-    # look up the label if needed 
-    if {$forced_currency_symbol eq ""} {
-	if {$label_p} {
-	    if {$style eq "int" } { 
-		set sym [lc_get -locale $locale "int_curr_symbol"]
-	    } else { 
-		set sym [lc_get -locale $locale "currency_symbol"]
-	    }
-	} else { 
-	    set sym {}
-	}
-    } else {
-	set sym $forced_currency_symbol
-    }
-
-    # signorama
-    if {$neg} { 
-        set cs_precedes [lc_get -locale $locale "n_cs_precedes"]
-        set sep_by_space [lc_get -locale $locale "n_sep_by_space"]
-        set sign_pos [lc_get -locale $locale "n_sign_posn"]
-        set sign [lc_get -locale $locale "negative_sign"]
-    } else {
-        set cs_precedes [lc_get -locale $locale "p_cs_precedes"]
-        set sep_by_space [lc_get -locale $locale "p_sep_by_space"]
-        set sign_pos [lc_get -locale $locale "p_sign_posn"]
-        set sign [lc_get -locale $locale "positive_sign"]
-    } 
-    
-    # decimal seperator
-    set dec [lc_get -locale $locale "mon_decimal_point"]
-    regsub {\.} $out $dec out
-
-    # commify
-    set sep [lc_get -locale $locale "mon_thousands_sep"]
-    set grouping [lc_get -locale $locale "mon_grouping"]
-    set num [lc_sepfmt $out $grouping $sep]
-    
-    return [subst [nsv_get locale "money:$cs_precedes$sign_pos$sep_by_space"]]
-}    
 
 ad_proc -public clock_to_ansi {
     seconds
@@ -404,7 +291,7 @@ ad_proc -public lc_time_fmt {
     </pre>
     See also <pre>man strftime</pre> on a UNIX shell prompt for more of these abbreviations.
     @param locale          Locale identifier must be in the locale database
-    @error                 Fails if given a non-existant locale or a malformed datetime
+    @error                 Fails if given a non-existent locale or a malformed datetime
                            Doesn't check for impossible dates. Ask it for 29 Feb 1999 and it will tell you it was a Monday
                            (1st March was a Monday, it wasn't a leap year). Also it only works with the Gregorian calendar -
                            but that's reasonable, but could be a problem if you are running a seriously historical site 
@@ -415,7 +302,7 @@ ad_proc -public lc_time_fmt {
         return ""
     }
 
-    if { ![exists_and_not_null locale] } {
+    if { $locale eq "" } {
         set locale [ad_conn locale]
     }
     
@@ -436,15 +323,16 @@ ad_proc -public lc_time_fmt {
 	    error "Invalid date: $datetime"
 	}
     }
-
-    set a [expr (14 - $lc_time_month) / 12]
+    set lc_time_year [util::trim_leading_zeros $lc_time_year]
+    
+    set a [expr {(14 - $lc_time_month) / 12}]
     set y [expr {$lc_time_year - $a}]
     set m [expr {$lc_time_month + 12*$a - 2}]
     
     # day_no becomes 0 for Sunday, through to 6 for Saturday. Perfect for addressing zero-based lists pulled from locale info.
-    set lc_time_day_no [expr (($lc_time_days + $y + ($y/4) - ($y / 100) + ($y / 400)) + ((31*$m) / 12)) % 7]
+    set lc_time_day_no [expr {(($lc_time_days + $y + $y/4 - $y/100 + $y/400) + (31 * $m / 12)) % 7}]
     
-    return [subst [util_memoize "lc_time_fmt_compile {$fmt} $locale"]]
+    return [subst [util_memoize [list lc_time_fmt_compile $fmt $locale]]]
 }
 
 ad_proc -public lc_time_fmt_compile {
@@ -644,9 +532,9 @@ ad_proc -public lc_list_all_timezones { } {
 ad_proc -private lc_time_drop_meridian { hours } {
     Converts HH24 to HH12.
 } {
-    if {$hours>12} {
+    if {$hours > 12} {
 	incr hours -12
-    } elseif {$hours==0} {
+    } elseif {$hours == 0} {
 	set hours 12
     }
     return $hours
@@ -692,3 +580,9 @@ ad_proc -private lc_leading_zeros {
 } {
     return [format "%0${n_desired_digits}d" $the_integer]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

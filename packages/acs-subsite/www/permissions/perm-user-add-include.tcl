@@ -1,13 +1,13 @@
 ad_page_contract {
 } {
-    object_id:integer,notnull
-    return_url
-    page:integer,optional
+    object_id:naturalnum,notnull
+    return_url:localurl
+    page:naturalnum,optional
 }
 
 # check they have read permission on this file
 
-ad_require_permission $object_id admin
+permission::require_permission -object_id $object_id -privilege admin
 
 # TODO:
 # parties, select privilges, css, clean up
@@ -16,7 +16,7 @@ ad_require_permission $object_id admin
 
 set user_id [ad_conn user_id]
 
-set perm_url "[site_node_closest_ancestor_package_url]permissions/"
+set perm_url "[lindex [site_node::get_url_from_object_id -object_id [site_node::closest_ancestor_package -include_self -package_key [subsite::package_keys]]] 0]permissions/"
 
 list::create \
     -name users \
@@ -48,8 +48,6 @@ list::create \
 	return_url {}
     }
 
-set page_where_clause [list::page_where_clause -name users -and]
-
 db_multirow -extend { add_url } users users_who_dont_have_any_permissions {} {
     set add_url [export_vars -base "${perm_url}perm-user-add-2" { return_url object_id user_id }]
 }
@@ -57,3 +55,9 @@ db_multirow -extend { add_url } users users_who_dont_have_any_permissions {} {
 set img_path "[ad_conn package_url]images"
 
 set form_export_vars [export_vars -form {object_id return_url }]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -6,21 +6,17 @@ ad_page_contract {
 
     @author stefan@arsdigita.com
     @creation-date 2000-12-20
-    @cvs-id $Id: revision-set-active.tcl,v 1.3 2002/11/30 17:39:28 jeffd Exp $
+    @cvs-id $Id: revision-set-active.tcl,v 1.4.2.2 2016/01/02 20:34:50 gustafn Exp $
     
 } {
 
-    item_id:integer,notnull
-    new_rev_id:integer,notnull
+    item_id:naturalnum,notnull
+    new_rev_id:naturalnum,notnull
     
 }
 
 
-db_exec_plsql update_forum {
-    begin
-       news.revision_set_active (:new_rev_id);
-    end;
-}
+db_exec_plsql update_forum {}
     
 ad_returnredirect "item?item_id=$item_id"
 
@@ -29,3 +25,9 @@ ad_returnredirect "item?item_id=$item_id"
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

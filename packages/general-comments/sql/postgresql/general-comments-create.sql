@@ -5,7 +5,7 @@
 -- @author Pascal Scheffers (pascal@scheffers.net)
 -- @creation-date 2000-10-12
 --
--- @cvs-id $Id: general-comments-create.sql,v 1.5 2005/03/21 12:01:21 rob Exp $
+-- @cvs-id $Id: general-comments-create.sql,v 1.6 2013/03/30 22:50:45 gustafn Exp $
 --
 -- General comments: Commenting facility for any object in ACS 4.0
 -- 
@@ -34,18 +34,18 @@ comment on column general_comments.category is '
 -- create an index on foreign key constraint
 create index general_comments_object_id_idx on general_comments (object_id);
 
-create function inline_0 ()
-returns integer as '
+CREATE OR REPLACE FUNCTION inline_0 () RETURNS integer AS $$
 -- define and grant privileges
-begin
+BEGIN
 
     -- create privileges
-    PERFORM acs_privilege__create_privilege(''general_comments_create'', null, null);
+    PERFORM acs_privilege__create_privilege('general_comments_create', null, null);
 
-    PERFORM acs_privilege__add_child(''annotate'', ''general_comments_create'');
+    PERFORM acs_privilege__add_child('annotate', 'general_comments_create');
 
     return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0 ();
 
@@ -55,27 +55,27 @@ drop function inline_0 ();
 
 -- NOTE: this is only temporary until we figure out how
 --       packages will register child types to an acs-message
-create function inline_1 ()
-returns integer as '
-begin
+CREATE OR REPLACE FUNCTION inline_1 () RETURNS integer AS $$
+BEGIN
 
     PERFORM content_type__register_child_type (
-        /* parent_type => */ ''acs_message_revision'',
-        /* child_type  => */ ''content_revision'',
-	''generic'', 0, null
+        /* parent_type => */ 'acs_message_revision',
+        /* child_type  => */ 'content_revision',
+	'generic', 0, null
     );
     PERFORM content_type__register_child_type (
-        /* parent_type => */ ''acs_message_revision'',
-        /* child_type  => */ ''image'',
-	''generic'', 0, null
+        /* parent_type => */ 'acs_message_revision',
+        /* child_type  => */ 'image',
+	'generic', 0, null
     );
     PERFORM content_type__register_child_type (
-        /* parent_type => */ ''acs_message_revision'',
-        /* child_type  => */ ''content_extlink'',
-	''generic'', 0, null
+        /* parent_type => */ 'acs_message_revision',
+        /* child_type  => */ 'content_extlink',
+	'generic', 0, null
     );
     return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_1 ();
 

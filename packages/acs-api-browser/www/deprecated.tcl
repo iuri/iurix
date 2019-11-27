@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author Todd Nightingale
     @creation-date 2000-7-14
-    @cvs-id $Id: deprecated.tcl,v 1.3 2002/09/10 22:22:04 jeffd Exp $
+    @cvs-id $Id: deprecated.tcl,v 1.4.2.1 2015/09/10 08:21:11 gustafn Exp $
 
 } {
 } -properties {
@@ -20,7 +20,7 @@ set context [list "Deprecated Procedures"]
 
 multirow create deprecated proc args
 
-foreach proc [nsv_array names api_proc_doc] { 
+foreach proc [lsort [nsv_array names api_proc_doc]] { 
     array set doc_elements [nsv_get api_proc_doc $proc]
  
     if {$doc_elements(deprecated_p) == 1} {
@@ -28,3 +28,9 @@ foreach proc [nsv_array names api_proc_doc] {
     } 
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

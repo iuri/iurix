@@ -3,7 +3,7 @@ ad_page_contract {
 
   @author Lee Denison (lee@xarg.co.uk)
 
-  $Id: default-master.tcl,v 1.1 2007/09/08 14:21:22 hamiltonc Exp $
+  $Id: default-master.tcl,v 1.2 2014/10/27 16:40:53 victorg Exp $
 }
 
 #
@@ -11,13 +11,13 @@ ad_page_contract {
 #
 set system_name [ad_system_name]
 
-if { [string equal [ad_conn url] "/"] } {
+if {[ad_conn url] eq "/"} {
     set system_url ""
 } else {
     set system_url [ad_url]
 }
 
-if {[template::util::is_nil title]} {
+if {![info exists title]} {
     # TODO: decide how best to set the lang attribute for the title
     set title [ad_conn instance_name]
 }
@@ -114,7 +114,7 @@ util_get_user_messages -multirow user_messages
 set acs_lang_url [apm_package_url_from_key "acs-lang"]
 set num_of_locales [llength [lang::system::get_locales]]
 
-if {[empty_string_p $acs_lang_url]} {
+if {$acs_lang_url eq ""} {
     set lang_admin_p 0
 } else {
     set lang_admin_p [permission::permission_p \

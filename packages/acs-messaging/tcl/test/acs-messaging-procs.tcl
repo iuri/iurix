@@ -3,7 +3,7 @@ ad_library {
 
     @author Joel Aufrecht
     @creation-date 2 Nov 2003
-    @cvs-id $Id: acs-messaging-procs.tcl,v 1.4 2003/11/17 06:37:36 simonc Exp $
+    @cvs-id $Id: acs-messaging-procs.tcl,v 1.4.22.1 2015/09/10 08:21:32 gustafn Exp $
 }
 
 aa_register_case acs_messaging_format_as_html {
@@ -34,3 +34,9 @@ aa_register_case acs_messaging_message_p {
 
         }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

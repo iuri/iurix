@@ -2,10 +2,10 @@ ad_page_contract {
     Adds a dependency to a version of a package. 
     @author Bryan Quinn
     @creation-date 17 April 2000
-    @cvs-id $Id: version-dependency-add-2.tcl,v 1.11 2010/04/01 23:21:01 donb Exp $
+    @cvs-id $Id: version-dependency-add-2.tcl,v 1.14.2.2 2015/09/18 07:39:04 gustafn Exp $
 } {
     {dependency_id:naturalnum}
-    {version_id:integer}
+    {version_id:naturalnum,notnull}
     dependency_type
     service:notnull
     our_package_key:notnull
@@ -46,8 +46,14 @@ db_transaction {
 	where dependency_id = :dependency_id
     } -default 0] } {
 	ad_return_complaint 1 "The database returned the following error:
-	<blockquote><pre>[ad_quotehtml $errmsg]</pre></blockquote>"
+	<blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote>"
     }
 }
 
-ad_returnredirect "version-dependencies?[export_url_vars version_id]"
+ad_returnredirect [export_vars -base version-dependencies {version_id}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

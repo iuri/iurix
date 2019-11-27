@@ -2,7 +2,7 @@ ad_page_contract {
     Edit a package version
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date 17 April 2000
-    @cvs-id $Id: version-edit-2.tcl,v 1.11 2007/01/10 21:21:59 gustafn Exp $
+    @cvs-id $Id: version-edit-2.tcl,v 1.13.2.1 2015/09/10 08:21:04 gustafn Exp $
 
 } {
     version_id:naturalnum,notnull
@@ -17,7 +17,7 @@ ad_page_contract {
     vendor_uri
     {auto_mount ""}
     {release_date ""}
-    { upgrade_p 0 }
+    { upgrade_p:boolean 0 }
 }
 
 # Validate dynamic package version attributes
@@ -29,7 +29,7 @@ foreach attribute_name [array names all_attributes] {
     set attribute_value [ns_set iget [rp_getform] $attribute_name]
 
     if { [info exists attribute(validation_proc)] } {
-        set attribute_error [eval $attribute(validation_proc) $attribute_value]
+        set attribute_error [$attribute(validation_proc) $attribute_value]
 
         if { $attribute_error ne "" } {
             ad_return_complaint 1 $attribute_error
@@ -92,3 +92,9 @@ I was unable to update your version for the following reason:
 }
 
 ad_returnredirect "version-generate-info?version_id=$version_id&write_p=1"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

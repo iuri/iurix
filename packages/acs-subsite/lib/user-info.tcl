@@ -1,6 +1,6 @@
 #
 # Expects: 
-#  user_id:optional
+#  user_id:naturalnum,optional
 #  return_url:optional
 #  edit_p:optional
 #  message:optional
@@ -8,17 +8,17 @@
 
 auth::require_login -account_status closed
 
-if { ![exists_and_not_null user_id] } {
+if { (![info exists user_id] || $user_id eq "") } {
     set user_id [ad_conn untrusted_user_id]
 } elseif { $user_id != [auth::get_user_id -account_status closed] } {
     permission::require_permission -object_id $user_id -privilege admin
 }
 
-if { ![exists_and_not_null return_url] } {
+if { (![info exists return_url] || $return_url eq "") } {
     set return_url [ad_conn url]
 }
 
-if { ![exists_and_not_null show_groups_p] } {
+if { (![info exists show_groups_p] || $show_groups_p eq "") } {
     set show_groups_p 0
 }
 
@@ -41,10 +41,10 @@ foreach elm $read_only_elements {
     set elm_mode($elm) {display}
 }
 
-set edit_mode_p [expr ![empty_string_p [form::get_action user_info]]]
+set edit_mode_p [expr {[form::get_action user_info] ne ""}]
 
 set form_mode display
-if { [exists_and_equal edit_p 1] } {
+if { [info exists edit_p] && $edit_p eq "1" } {
     set form_mode edit
 }
 
@@ -68,8 +68,10 @@ if { [llength [auth::authority::get_authority_options]] > 1 } {
     lappend read_only_elements authority_id
 }
 
-if { $user(authority_id) != [auth::authority::local] || ![auth::UseEmailForLoginP] || \
-         ([acs_user::site_wide_admin_p] && [llength [auth::authority::get_authority_options]] > 1) } {
+if { $user(authority_id) != [auth::authority::local]
+     || ![auth::UseEmailForLoginP]
+     || ([acs_user::site_wide_admin_p] && [llength [auth::authority::get_authority_options]] > 1)
+ } {
     lappend elms_list {
         username:text(text)
         {label "[_ acs-subsite.Username]"}
@@ -216,12 +218,23 @@ ad_form -extend -name user_info -form $elms_list -on_request {
 
 # LARS HACK: Make the URL and email elements real links
 if { ![form is_valid user_info] } {
-    element set_properties user_info email -display_value "<a href=\"mailto:[element get_value user_info email]\">[element get_value user_info email]</a>"
-    if {![string match -nocase "http://*" [element get_value user_info url]]} {
-	element set_properties user_info url -display_value \
-		"<a href=\"http://[element get_value user_info url]\">[element get_value user_info url]</a>"
+    element set_properties user_info email \
+        -display_value "<a href=\"mailto:[element get_value user_info email]\">[element get_value user_info email]</a>"
+    
+    set url [element get_value user_info url]
+    if {   ![string match -nocase "http://*" $url]
+        && ![string match -nocase "https://*" $url]
+    } {
+        element set_properties user_info url \
+            -display_value "<a href=\"http://$url\">$url</a>"
     } else {
 	element set_properties user_info url -display_value \
-		"<a href=\"[element get_value user_info url]\">[element get_value user_info url]</a>"
+		"<a href=\"$url\">$url</a>"
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

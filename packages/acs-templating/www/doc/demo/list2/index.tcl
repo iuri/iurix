@@ -4,7 +4,7 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-10-23
-  @cvs-id $Id: index.tcl,v 1.2 2006/02/06 13:06:29 jiml Exp $
+  @cvs-id $Id: index.tcl,v 1.2.14.1 2015/09/10 08:22:13 gustafn Exp $
 } -properties {
   notes:multirow
 }
@@ -39,3 +39,9 @@ template::list::create -name notes \
     }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

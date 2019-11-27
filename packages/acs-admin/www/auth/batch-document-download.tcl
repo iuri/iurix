@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Peter Marklund
 } {
-    job_id:integer
+    job_id:naturalnum,notnull
 }
 
 set document [db_string select_document {
@@ -13,3 +13,9 @@ set document [db_string select_document {
 }]
 
 ns_return 200 text/plain $document
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

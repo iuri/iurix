@@ -2,7 +2,7 @@ ad_library {
     Procedures in the folder namespace related to content folders.
 
     @author Peter Marklund
-    @cvs-id $Id: folder-procs.tcl,v 1.2 2004/12/01 05:11:01 alfredw Exp $
+    @cvs-id $Id: folder-procs.tcl,v 1.2.18.1 2015/09/10 08:21:18 gustafn Exp $
 }
 
 namespace eval folder {}
@@ -20,3 +20,9 @@ ad_proc -public -deprecated folder::delete {
 } {
     db_exec_plsql delete_folder {}
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

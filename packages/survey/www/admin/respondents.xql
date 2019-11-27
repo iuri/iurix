@@ -19,7 +19,7 @@
                      parties.email,
                      persons.first_names,
                      persons.last_name
-    [ad_order_by_from_sort_spec $orderby $table_def]
+            [template::list::orderby_clause -orderby -name respondents]
 
         </querytext>
     </fullquery>

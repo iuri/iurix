@@ -26,23 +26,19 @@ where choice_id = :choice_id
       
 select
   first_names || ' ' || last_name as responder_name,
-  p.email,
   person_id as user_id,
-  to_char(creation_date,'YYYY-MM-DD HH24:MI:SS') as creation_date
+  creation_date
 from
   acs_objects,
   survey_responses sr,
   persons u,
-  parties p,
-  survey_ques_responses_latest qr
+  survey_question_responses qr
 where
   qr.response_id = sr.response_id
   and qr.response_id = object_id
   and creation_user = person_id
-  and person_id = p.party_id
   and qr.question_id = :question_id
   and qr.choice_id = :choice_id
-order by responder_name
       </querytext>
 </fullquery>
 

@@ -4,7 +4,7 @@ ad_page_contract {
     @param version_id The package to be processed.
     @author ron@arsdigita.com
     @creation-date 9 May 2000
-    @cvs-id $Id: version-tag.tcl,v 1.6 2008/10/04 20:12:51 emmar Exp $
+    @cvs-id $Id: version-tag.tcl,v 1.6.10.1 2015/09/10 08:21:06 gustafn Exp $
 } {
     {version_id:integer}
 }
@@ -127,3 +127,9 @@ doc_body_append "
 [ad_footer]
 "
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

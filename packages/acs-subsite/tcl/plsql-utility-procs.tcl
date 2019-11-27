@@ -6,7 +6,7 @@ ad_library {
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Dec  7 10:31:56 2000
-    @cvs-id $Id: plsql-utility-procs.tcl,v 1.2 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: plsql-utility-procs.tcl,v 1.3.2.3 2016/01/02 20:57:57 gustafn Exp $
     
 }
 
@@ -30,7 +30,7 @@ namespace eval plsql_utility {
 	@creation-date 11/2000
 
     } {
-	set max_length_without_stem [expr $max_length - [expr {[string length $stem] + 1}]]
+	set max_length_without_stem [expr {$max_length - [expr {[string length $stem] + 1}]}]
 
 	set text "${table}_$column"
 	if { [string length $text] > $max_length_without_stem } {
@@ -41,7 +41,7 @@ namespace eval plsql_utility {
 	    }
 	    append text "_$column"
 	}
-	return [string toupper "[string range $text 0 [expr {$max_length_without_stem - 1}]]_$stem"]
+	return [string toupper "[string range $text 0 $max_length_without_stem-1]_$stem"]
     }
 
     ad_proc -public object_type_exists_p { object_type } {
@@ -55,8 +55,8 @@ namespace eval plsql_utility {
                         then 1
                         else 0
                    end
-              from dual
-	}]
+              from dual            
+        }]
     }
 
 
@@ -111,8 +111,7 @@ object_type    => group,
 	set text ""
 	set col_width [expr {$max_length + $num_spaces}]
 	foreach pair $pieces {
-	    set left [lindex $pair 0]
-	    set right [lindex $pair 1]
+	    lassign $pair left right
 	    while { [string length $left] < $col_width } {
 		append left " "
 	    }
@@ -147,7 +146,7 @@ object_type    => group,
 
     } {
 	
-	if { $include_object_id eq "t" } {
+	if { $include_object_id == "t" } {
 	    set id [db_nextval "acs_object_id_seq"]
 	    set suffix "_$id"
 	} else {
@@ -163,7 +162,7 @@ object_type    => group,
 	#Trim to fit in $max_length character limit
 	set max_length_without_suffix [expr {$max_length - [string length $suffix]}]
 	if { [string length $stem] >= $max_length_without_suffix } {
-	    set stem [string range $stem 0 [expr {$max_length_without_suffix - 1}]]
+	    set stem [string range $stem 0 $max_length_without_suffix-1]
 	}
 	if { $stem eq "" } {
 	    error "generate_oracle_name failed to generate a safe oracle name from the stem \"$stem\"\n"
@@ -182,13 +181,13 @@ object_type    => group,
 
 	<p>Example:
 <pre>
-set group_id -2
-set sql "select acs_group.name(:group_id) from dual"
-ns_write [plsql_utility::parse_sql $sql]
+   set group_id -2
+   set sql {select acs_group.name(:group_id) from dual}
+   ns_write [plsql_utility::parse_sql $sql]
 </pre>
 would write the following to the browser:
 <pre>
-select acs_group.name('-2') from dual
+   select acs_group.name('-2') from dual
 </pre>
 
 	@author Michael Bryzek (mbryzek@arsdigita.com)
@@ -224,12 +223,12 @@ select acs_group.name('-2') from dual
 	foreach triple $attr_list {
 	    set table [string toupper [string trim [lindex $triple 0]]]
 	    set attr [string toupper [string trim [lindex $triple 1]]]
-	    if { [empty_string_p [lindex $triple 2]] } {
+	    if { [lindex $triple 2] eq "" } {
 		set default_string ""
 	    } else {
 		set default_string " DEFAULT [lindex $triple 2]"
 	    }
-	    lappend pieces [list "$attr" "IN ${table}.${attr}%TYPE${default_string}"]
+	    lappend pieces [list $attr "IN ${table}.${attr}%TYPE${default_string}"]
 	}
 	return [format_pieces -indent $indent $pieces]
 
@@ -298,7 +297,7 @@ select acs_group.name('-2') from dual
 	foreach triple $attr_list {
 	    set table [string toupper [string trim [lindex $triple 0]]]
 	    set column [string toupper [string trim [lindex $triple 1]]]
-	    if { [lsearch -exact $ignore [string toupper $column]] != -1 } {
+	    if {[string toupper $column] in $ignore} {
 		# Ignore this column
 		continue
 	    }
@@ -311,7 +310,7 @@ select acs_group.name('-2') from dual
 	    return ""
 	}
 	set return_value [join $this_columns ", "]
-	if { $start_with_comma eq "t" } {
+	if { $start_with_comma == "t" } {
 	    return ", $return_value"
 	}
 	return $return_value
@@ -320,3 +319,9 @@ select acs_group.name('-2') from dual
 
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

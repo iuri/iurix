@@ -12,7 +12,7 @@ ad_library {
  
     @author Peter Harper (peter.harper@open-msg.com)
     @creation-date 24 July 2001
-    @cvs-id $Id: example-procs.tcl,v 1.3 2004/01/26 15:39:42 jeffd Exp $
+    @cvs-id $Id: example-procs.tcl,v 1.3.24.1 2015/09/10 08:21:13 gustafn Exp $
 }
  
 ad_proc -public aa_example_write_audit_entry {
@@ -42,3 +42,9 @@ ad_proc -public aa_example_write_audit_entries {
   }
   return 1;
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

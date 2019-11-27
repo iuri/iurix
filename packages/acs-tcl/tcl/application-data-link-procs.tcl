@@ -34,7 +34,7 @@ ad_proc -public application_data_link::new {
         -relation_tag $relation_tag
 	
     }]}  {
-	# check if error occured because of existing link
+	# check if error occurred because of existing link
     if { [application_data_link::exist_link -object_id $this_object_id -target_object_id $target_object_id -relation_tag $relation_tag] eq "1" } {
 	    ns_log Debug "application_data_link::new: link already exists" 
 	} else {  
@@ -103,7 +103,7 @@ ad_proc -public application_data_link::exist_link {
     @param relation_tag Relationship identifier
 } {
     set linked_objects [ application_data_link::get -object_id $object_id -relation_tag $relation_tag]
-    if { [lsearch -exact $linked_objects "$target_object_id"] != -1 } {
+    if {$target_object_id in $linked_objects} {
       # found link
       return 1
     } else {
@@ -246,12 +246,38 @@ ad_proc -public application_data_link::get_links_from {
 
     if {[info exists to_type] && $to_type ne ""} {
 	set to_type_clause [db_map to_type_where_clause]
-        if {[content::type::is_content_type -content_type $to_type]} {
+        if {[content::type::is_content_type -object_type $to_type]} {
 	    set to_type_clause [db_map content_type_where_clause]
 	    set content_type_from_clause [db_map content_type_from_clause]
 	}
     }
     return [db_list links_from {}]
+}
+
+ad_proc -public application_data_link::get_links_to {
+    -object_id:required
+    {-from_type}
+    {-relation_tag ""}
+} {
+    Get a list of objects that are linked to an object,
+    possible using the relation_tag.
+    If from_type is a subtype of content_revision, we lookup 
+    content_items that have that content_type
+
+    @param object_id object_id two, get objects linked to this object
+    @param from_type object_type of the objects to get links from
+} {
+    set from_type_where_clause ""
+    set content_type_from_clause ""
+
+    if {[info exists from_type] && $from_type ne ""} {
+	set from_type_clause [db_map from_type_where_clause]
+        if {[content::type::is_content_type -content_type $from_type]} {
+	    set from_type_clause [db_map content_type_where_clause]
+	    set content_type_from_clause [db_map content_type_from_clause]
+	}
+    }
+    return [db_list links_to {}]
 }
 
 ad_proc -public application_data_link::scan_for_links {
@@ -293,7 +319,7 @@ ad_proc -public application_data_link::update_links_from {
 
     @param object_id Object_id to update
     @param text Text to scan for references
-    @param linked_object_ids List of object ids to update the links to. Links not in this list will be deleted, and any in this list that are not in teh database will be added.
+    @param linked_object_ids List of object ids to update the links to. Links not in this list will be deleted, and any in this list that are not in the database will be added.
     @param relation_tag Relationship identifier
 
     @return List of updated linked object_ids
@@ -301,23 +327,34 @@ ad_proc -public application_data_link::update_links_from {
     @author Dave Bauer (dave@solutiongrove.com)
     @creation-date 2006-08-31
 } {
-    set old_links [application_data_link::get_links_from -object_id $object_id -relation_tag $relation_tag]
+    set old_links [application_data_link::get_links_from \
+		       -object_id $object_id \
+		       -relation_tag $relation_tag]
+
     if {![llength $link_object_ids]} {
 	set link_object_ids [application_data_link::scan_for_links -text $text]
     }
     set delete_ids [list]
     foreach old_link $old_links {
-	if {[lsearch $link_object_ids $old_link] < 0} {
+	if {$old_link ni $link_object_ids} {
 	    lappend delete_ids $old_link
 	}
     }
-    application_data_link::delete_from_list -object_id $object_id -link_object_id_list $delete_ids -relation_tag $relation_tag
+    application_data_link::delete_from_list \
+	-object_id $object_id \
+	-link_object_id_list $delete_ids \
+	-relation_tag $relation_tag
+
     foreach new_link $link_object_ids {
 	if {![application_data_link::link_exists \
 		  -from_object_id $object_id \
 		  -to_object_id $new_link \
-          -relation_tag $relation_tag]} {
-        application_data_link::new_from -object_id $object_id -to_object_id $new_link -relation_tag $relation_tag
+		  -relation_tag $relation_tag]
+	} {
+	    application_data_link::new_from \
+		-object_id $object_id \
+		-to_object_id $new_link \
+		-relation_tag $relation_tag
 	}
     }
 }
@@ -356,3 +393,9 @@ ad_proc -public application_data_link::relation_tag_where_clause {
         return [db_map where_clause]
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

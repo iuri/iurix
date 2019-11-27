@@ -2,9 +2,9 @@ ad_page_contract {
     View and edit blogger categories.
 
     @author Steffen Christensen (steffen@refresh.dk)
-    @cvs-id $Id: category-edit.tcl,v 1.8 2006/10/16 15:21:54 maltes Exp $
+    @cvs-id $Id: category-edit.tcl,v 1.10 2014/08/06 16:39:15 gustafn Exp $
 } {
-    category_id:integer,optional
+    category_id:naturalnum,optional
     {return_url ""}
     {name:allhtml ""}
     {short_name:allhtml ""}
@@ -26,7 +26,7 @@ if { [lars_blog_categories_p -package_id $package_id] != 1} {
     ad_script_abort
 }
 
-if { [empty_string_p $return_url] } {
+if { $return_url eq "" } {
     set return_url [ad_conn url]
 }
 
@@ -56,7 +56,7 @@ ad_form -name category -cancel_url $return_url -form {
 
 } -on_submit {
     
-    if { ![empty_string_p $short_name] } {
+    if { $short_name ne "" } {
 	db_1row short_name_exists { *SQL* }
 	if { $short_name_exists > 0 } {
 	    form set_error category short_name "[_ lars-blogger.lt_This_short_name_is_al]"

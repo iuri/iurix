@@ -5,10 +5,10 @@ ad_page_contract {
   @author Lee Denison (lee@xarg.co.uk)
   @creation-date: 2007-02-18
 
-  $Id: blank-compat.tcl,v 1.4 2007/12/03 20:29:30 daveb Exp $
+  $Id: blank-compat.tcl,v 1.5 2014/10/27 16:42:09 victorg Exp $
 }
 
-if { [template::util::is_nil title] } {
+if { ![info exists title] } {
     set title [ad_conn instance_name]
 }
 
@@ -69,7 +69,7 @@ multirow append link stylesheet text/css /resources/acs-templating/lists.css "" 
 multirow append link stylesheet text/css /resources/acs-templating/forms.css "" [ad_conn language] all
 
 if {![template::multirow exists script]} {
-    template::multirow create script type src charset defer content
+    template::multirow create script type src charset defer async content
 }
 
 # 

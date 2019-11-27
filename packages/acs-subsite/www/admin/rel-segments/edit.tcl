@@ -4,10 +4,10 @@ ad_page_contract {
 
     @author lars@collaboraid.biz
     @creation-date 2003-06-11
-    @cvs-id $Id: edit.tcl,v 1.5 2004/03/12 18:48:55 jeffd Exp $
+    @cvs-id $Id: edit.tcl,v 1.6.2.1 2015/09/10 08:21:44 gustafn Exp $
 
 } {
-    segment_id:integer,notnull
+    segment_id:naturalnum,notnull
 } -validate {
     segment_exists_p -requires {segment_id:notnull} {
 	if { ![rel_segments_permission_p $segment_id] } {
@@ -51,3 +51,9 @@ ad_form -name segment -cancel_url $view_url -form {
     ad_returnredirect $view_url
     ad_script_abort
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

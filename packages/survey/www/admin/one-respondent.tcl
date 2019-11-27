@@ -7,15 +7,15 @@ ad_page_contract {
     @author jsc@arsdigita.com
     @author nstrug@arsdigita.com
     @date   February 11, 2000
-    @cvs-id $Id: one-respondent.tcl,v 1.4 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id $Id: one-respondent.tcl,v 1.7 2014/10/27 16:41:56 victorg Exp $
 } {
 
-    user_id:integer
-    survey_id:integer
+    user_id:naturalnum,notnull
+    survey_id:naturalnum,notnull
 
 } 
 
-ad_require_permission $survey_id survey_admin_survey
+permission::require_permission -object_id $survey_id -privilege survey_admin_survey
 
 get_survey_info -survey_id $survey_id
 set survey_name $survey_info(name)
@@ -38,10 +38,11 @@ if { !$user_exists_p } {
 }
 
 set context [_ survey.One_Respondent]
- 
 
-db_multirow -extend {response_display} responses get_responses {} {
-set response_display [survey_answer_summary_display $response_id 1 ]
+
+db_multirow -extend {response_display respond_url} responses get_responses {} {
+    set response_display [survey_answer_summary_display $response_id 1 ]
+    set respond_url [export_vars -base respond {response_id survey_id user_id}]
 }
 
 ad_return_template

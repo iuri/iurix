@@ -27,7 +27,7 @@
  
 <fullquery name="get_choice_id">      
       <querytext>
-      select survey_choice_id_sequence.nextval as choice_id 
+      select nextval as choice_id from survey_choice_id_sequence 
       </querytext>
 </fullquery>
 

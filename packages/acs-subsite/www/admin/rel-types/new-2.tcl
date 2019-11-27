@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Nov 12 18:27:08 2000
-    @cvs-id $Id: new-2.tcl,v 1.6 2005/07/22 04:49:38 skaufman Exp $
+    @cvs-id $Id: new-2.tcl,v 1.8.2.4 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     supertype:trim,notnull
@@ -21,7 +21,7 @@ ad_page_contract {
     role_two:optional
     min_n_rels_two:optional
     max_n_rels_two:optional
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     supertype_pretty_name:onevalue
@@ -74,24 +74,12 @@ db_1row select_object_types {
        and r.rel_type = t.object_type
 }
 
-set object_types_one_list [db_list_of_lists select_object_types_one {
-    select replace(lpad(' ', (level - 1) * 4), ' ', '&nbsp;') || t.pretty_name, 
-           t.object_type as rel_type
-      from acs_object_types t
-   connect by prior t.object_type = t.supertype
-     start with t.object_type=:max_object_type_one
-}]
+set object_types_one_list [db_list_of_lists select_object_types_one {}]
 foreach obj $object_types_one_list {
     lappend object_types_one_list_i18n [lang::util::localize $obj]
 }
 
-set object_types_two_list [db_list_of_lists select_object_types_two {
-    select replace(lpad(' ', (level - 1) * 4), ' ', '&nbsp;') || t.pretty_name, 
-           t.object_type as rel_type
-      from acs_object_types t
-   connect by prior t.object_type = t.supertype
-     start with t.object_type=:max_object_type_two
-}]
+set object_types_two_list [db_list_of_lists select_object_types_two {}]
 foreach obj $object_types_two_list {
     lappend object_types_two_list_i18n [lang::util::localize $obj]
 }
@@ -116,7 +104,7 @@ template::element create rel_type object_type_one \
 set role_return_url_enc [ad_urlencode "[ad_conn url]?[ad_conn query]"]
 
 template::element create rel_type role_one \
-	-label "Role one<br><font size=-1>(<a href=roles/new?return_url=$role_return_url_enc>create new role</a>)</font>" \
+	-label "Role one<br><small>(<a href=\"roles/new?return_url=$role_return_url_enc\">create new role</a>)</small>" \
 	-datatype text \
 	-widget select \
 	-options $roles_list_i18n
@@ -141,7 +129,7 @@ template::element create rel_type object_type_two \
 
 
 template::element create rel_type role_two \
-	-label "Role two<br><font size=-1>(<a href=roles/new?return_url=$role_return_url_enc>create new role</a>)</font>" \
+	-label "Role two<br><small>(<a href=\"roles/new?return_url=$role_return_url_enc\">create new role</a>)</small>" \
 	-datatype text \
 	-widget select \
 	-options $roles_list_i18n
@@ -175,20 +163,12 @@ if { [template::form is_valid rel_type] } {
 Please back up and choose another.</li>"
     } else {
 	# let's make sure the names are unique
-	if { [db_string pretty_name_unique {
-	    select case when exists (select 1 from acs_object_types t where t.pretty_name = :pretty_name)
-                    then 1 else 0 end
-	      from dual
-	}] } {
+	if { [db_string pretty_name_unique {}] } {
 	    incr exception_count
 	    append exception_text "<li> The specified pretty name, $pretty_name, already exists. Please enter another </li>"
 	}
 
-	if { [db_string pretty_plural_unique {
-	    select case when exists (select 1 from acs_object_types t where t.pretty_plural = :pretty_plural)
-                    then 1 else 0 end
-	      from dual
-	}] } {
+	if { [db_string pretty_plural_unique {}] } {
 	    incr exception_count
 	    append exception_text "<li> The specified pretty plural, $pretty_plural, already exists. Please enter another </li>"
 	}
@@ -218,3 +198,9 @@ Please back up and choose another.</li>"
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -1,6 +1,6 @@
 <master>
-  <property name="title">@page_title@</property>
-  <property name="context">@context;noquote@</property>
+  <property name="doc(title)">@page_title;literal@</property>
+  <property name="context">@context;literal@</property>
 
 <p>
   Here's what the configuration looks like at this point:
@@ -12,7 +12,7 @@
       Current time, according to the database:
     </td>
     <td>
-      <b>@sysdate@</b>
+      <strong>@sysdate@</strong>
     </td>
   </tr>
 
@@ -21,7 +21,7 @@
       OpenACS Timezone setting:
     </td>
     <td>
-      <b>@system_timezone@</b>
+      <strong>@system_timezone@</strong>
     </td>
   </tr>
 
@@ -30,47 +30,57 @@
       Difference between database time and UTC according to OpenACS timezone setting above:
     </td>
     <td>
-      <b>@system_utc_offset@ hours</b>
+      <strong>@system_utc_offset@ hours</strong>
     </td>
   </tr>
 
-  <tr bgcolor="yellow">
+  <tr style="background: yellow">
+    <td>
+      UTC time returned from time server  <a
+        href="http://www.timeanddate.com/worldclock/">timeanddate.com</a>:
+    </td>
+    <td>
+      <strong>@utc_from_page@</strong>
+    </td>
+  </tr>
+
+  <tr style="background: yellow">
     <td>
       UTC time according to database and the OpenACS timezone setting above:
     </td>
     <td>
-      <b>@sysdate_utc@</b>
+      <strong>@sysdate_utc@</strong>
     </td>
   </tr>
 
   <if @utc_ansi@ not nil>
-    <tr bgcolor="yellow">
+    <tr style="background: yellow">
       <td>
         Actual UTC time according to <a
         href="http://www.timeanddate.com/worldclock/">timeanddate.com</a>:
       </td>
       <td>
-        <b>@utc_ansi@</b>
+        <strong>@utc_ansi@</strong>
       </td>
     </tr>
   </if>
 
   <if @correct_p@ not nil>
-    <tr bgcolor=<if @correct_p@ true>"#00bb00"</if><else>"red"</else>>
+    <tr style=<if @correct_p;literal@ true>"background: #00bb00"</if><else>"background: red"</else>>
       <td>
-        <font color="white">
+        <span style="color: white">
           Does it look like the OpenACS timezone setting above is correct:
-        </font>
+        </span>
       </td>
       <td>
-        <font color="white">
-          <if @correct_p@ true>
-            <b>YES!</b> (Congratulations)
+        <span style="color: white">
+          <if @correct_p;literal@ true>
+            <strong>YES!</strong> (Congratulations)
           </if>
           <else>
-            <b>NO</b>. Set below.
+            <strong>NO</strong>. Set below.
           </else>
-        </font>
+        </span>
       </td>
     </tr>
   </if>
@@ -96,7 +106,7 @@
 <form action="set-system-timezone" method="post">
   <if @suggested_timezones:rowcount@ not nil and @suggested_timezones:rowcount@ gt 0>
     <p>
-     <b>Your server appears to be @recommended_offset_pretty@ which includes the following timezones:</b>
+     <strong>Your server appears to be @recommended_offset_pretty@ which includes the following timezones:</strong>
     </p>
     <p>
       <select name="timezone_recommended">
@@ -107,12 +117,12 @@
       </select>
     </p>
     <p>
-      <b>Or select from all zones:</b>
+      <strong>Or select from all zones:</strong>
     </p>
   </if>
   <else>
       <p>
-        <b>Set Timezone:</b>
+        <strong>Set Timezone:</strong>
       </p>
   </else>
   <p>

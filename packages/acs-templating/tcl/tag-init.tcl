@@ -5,7 +5,7 @@
 #          Stanislav Freidin 	  (sfreidin@arsdigita.com)
 #          Christian Brechbuehler (chrisitan@arsdigita.com)
 
-# $Id: tag-init.tcl,v 1.33 2008/12/21 17:28:52 gustafn Exp $
+# $Id: tag-init.tcl,v 1.39.2.13 2017/04/22 18:15:50 gustafn Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
@@ -20,7 +20,7 @@
 template_tag tcl { chunk params } {
 
   # if the chunk begins with = then add our own append
-  if { [string index $chunk 0] == "=" } {
+  if { [string index $chunk 0] eq "=" } {
     template::adp_append_code "append __adp_output [string range $chunk 1 end]"
   } else {
     template::adp_append_code $chunk
@@ -33,12 +33,20 @@ template_tag tcl { chunk params } {
 
 template_tag property { chunk params } {
 
-  set name [ns_set iget $params name]
+    set name [ns_set iget $params name]
+    set adp  [ns_set iget $params adp]
+    if {$adp eq ""} {set adp 0}
 
-  # quote dollar signs, square bracket and quotes
-  regsub -all {[\]\[""\\$]} $chunk {\\&} quoted_chunk
+    # quote dollar signs, square bracket and quotes
+    regsub -all {[\]\[\"\\$]} $chunk {\\&} quoted_chunk
+    if {$adp} {
+        regsub -all {<tcl>} $quoted_chunk {<%} quoted_chunk
+        regsub -all {</tcl>} $quoted_chunk {%>} quoted_chunk
 
-  template::adp_append_code "set __adp_properties($name) \"$quoted_chunk\""
+        template::adp_append_code "set __adp_properties($name) \[ns_adp_parse -string \"$quoted_chunk\"\]"
+    } else {
+        template::adp_append_code "set __adp_properties($name) \"$quoted_chunk\""
+    }
 }
 
 # Set the master template.
@@ -51,7 +59,7 @@ template_tag master { params } {
   if {[template::util::is_true $slave_properties_p]} {
     template::adp_append_code "
       foreach {__key __value} \$__args {
-        if {!\[string equal \$__key __adp_slave\]} {
+        if {\$__key ne \"__adp_slave\"} {
           set __adp_properties(\$__key) \"\$__value\"
         }
       }
@@ -65,7 +73,7 @@ template_tag master { params } {
   }
   
   template::adp_append_code "
-    set __adp_master \[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
+    set __adp_master \[template::util::master_to_file \"$src\" \"\$__adp_stub\"\]"
 }
 
 # Insert the slave template
@@ -73,7 +81,7 @@ template_tag master { params } {
 template_tag slave { params } {
 
   #Start developer support frame around subordinate template.
-  if { [llength [info procs ::ds_enabled_p]] && [llength [info procs ::ds_adp_start_box]] } {
+  if { [info commands ::ds_enabled_p] ne "" && [info commands ::ds_adp_start_box] ne "" } {
       ::ds_adp_start_box
   }
 
@@ -84,75 +92,100 @@ template_tag slave { params } {
   "
 
   #End developer support frame around subordinate template.
-  if { [llength [info procs ::ds_enabled_p]] && [llength [info procs ::ds_adp_end_box]] } {
+  if { [info commands ::ds_enabled_p] ne "" && [info commands ::ds_adp_end_box] ne "" } {
       ::ds_adp_end_box
   }
 
 }
 
+#
 # Include another template in the current template
+#
+ad_proc -private template:template_tag_helper {params} {
+    set src [ns_set iget $params src]
+    set ds [ns_set iget $params ds]
+    if {$ds eq ""} {set ds 1}
+    
+    #Start developer support frame around subordinate template.
+    if { $ds && [info commands ::ds_enabled_p] ne "" && [info commands ::ds_adp_start_box] ne "" } {
+	::ds_adp_start_box -stub "\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
+    }
+
+    # pass additional arguments as key-value pairs
+
+    set command "template::adp_parse"
+    append command " \[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
+    append command " \[list"
+
+    for { set i 0 } { $i < [ns_set size $params] } { incr i } {
+
+	set key [ns_set key $params $i]
+	if {$key in {src ds}} { continue }
+	
+	set value [ns_set value $params $i]
+	append command " $key \"$value\"";	# is $value quoted sufficiently?
+    }
+    append command "\]"
+
+    # We explicitly test for ad_script_abort, so we don't dump that as an error, and don't catch it, either
+    # (We do catch it, but then we re-throw it)
+    template::adp_append_code "if { \[catch { append __adp_output \[$command\] } errmsg\] } {"
+    template::adp_append_code "    if { \[lindex \$::errorCode 0\] eq \"AD\" && \[lindex \$::errorCode 1\] eq \"EXCEPTION\" && \[lindex \$::errorCode 2\] eq \"ad_script_abort\" } {"
+    template::adp_append_code "        ad_script_abort"
+    template::adp_append_code "    } else {"
+    template::adp_append_code "        append __adp_output \"Error in include template \\\"\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]\\\": \[ns_quotehtml \$errmsg\]\""
+    # JCD: If we have the ds_page_bits cache maybe save the error for later
+    if { [info commands ::ds_enabled_p] ne "" && [info commands ::ds_page_fragment_cache_enabled_p] ne "" } {
+	template::adp_append_code "        if {\[info exists ::ds_enabled_p\]"
+	template::adp_append_code "            && \[info exists ::ds_collection_enabled_p\] } {"
+	template::adp_append_code "            set __include_errors {}"
+	template::adp_append_code "            ns_cache get ds_page_bits \[ad_conn request\]:error __include_errors"
+	template::adp_append_code "            ns_cache set ds_page_bits \[ad_conn request\]:error \[lappend __include_errors \[list \"$src\" \$::errorInfo\]\]"
+	template::adp_append_code "        }"
+    }
+    template::adp_append_code "        ad_log Error \"Error in include template \\\"\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]\\\": \$errmsg\""
+    template::adp_append_code "    }"
+    template::adp_append_code "}"
+
+    #End developer support frame around subordinate template.
+    if { $ds && [info commands ::ds_enabled_p] ne "" && [info commands ::ds_adp_end_box] ne "" } {
+	::ds_adp_end_box -stub "\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
+    }
+}
 
 template_tag include { params } {
-
-  set src [ns_set iget $params src]
-
-  #Start developer support frame around subordinate template.
-  if { [llength [info procs ::ds_enabled_p]] && [llength [info procs ::ds_adp_start_box]] } {
-      ::ds_adp_start_box -stub "\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
-  }
-
-  # pass additional arguments as key-value pairs
-
-  set command "template::adp_parse"
-  append command " \[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
-  append command " \[list"
-
-  for { set i 0 } { $i < [ns_set size $params] } { incr i } {
-
-    set key [ns_set key $params $i]
-    if {$key eq "src"} { continue }
-    
-    set value [ns_set value $params $i]
-
-    append command " $key \"$value\"";	# is $value quoted sufficiently?
-  }
-  append command "\]"
-
-  # We explicitly test for ad_script_abort, so we don't dump that as an error, and don't catch it, either
-  # (We do catch it, but then we re-throw it)
-  template::adp_append_code "if { \[catch { append __adp_output \[$command\] } errmsg\] } {"
-  template::adp_append_code "    global errorInfo errorCode"
-  template::adp_append_code "    if { \[string equal \[lindex \$errorCode 0\] \"AD\"\] && \[string equal \[lindex \$errorCode 1\] \"EXCEPTION\"\] && \[string equal \[lindex \$errorCode 2\] \"ad_script_abort\"\] } {"
-  template::adp_append_code "        ad_script_abort"
-  template::adp_append_code "    } else {"
-  template::adp_append_code "        append __adp_output \"Error in include template \\\"\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]\\\": \$errmsg\""
-  # JCD: If we have the ds_page_bits cache maybe save the error for later
-  if { [llength [info procs ::ds_enabled_p]] && [llength [info procs ::ds_page_fragment_cache_enabled_p]] } {
-      template::adp_append_code "        if {\[::ds_enabled_p\]"
-      template::adp_append_code "            && \[::ds_collection_enabled_p\] } {"
-      template::adp_append_code "            set __include_errors {}"
-      template::adp_append_code "            ns_cache get ds_page_bits \[ad_conn request\]:error __include_errors"
-      template::adp_append_code "            ns_cache set ds_page_bits \[ad_conn request\]:error \[lappend __include_errors \[list \"$src\" \$errorInfo\]\]"
-      template::adp_append_code "        }"
-  }
-  template::adp_append_code "        ns_log Error \"Error in include template \\\"\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]\\\": \$errmsg\n\$errorInfo\""
-  template::adp_append_code "    }"
-  template::adp_append_code "}"
-
-  #End developer support frame around subordinate template.
-  if { [llength [info procs ::ds_enabled_p]] && [llength [info procs ::ds_adp_end_box]] } {
-      ::ds_adp_end_box -stub "\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
-  }
-
+    #
+    # Check, if the src can be resolved against resources/templates in
+    # the theme package
+    #
+    ns_set update $params src [template::themed_template [ns_set iget $params src]]
+    template:template_tag_helper $params
 }
+
+#
+# <widget> is very similar to <include>, but uses widget specific name
+# resolution based on themes.  If the theme package contains
+# resources/widgets/$specifiedName it is used from there. Otherwise it
+# behaves exactly like <include> (without the resources/templates/
+# theming)
+#
+template_tag widget { params } {
+    set src [ns_set iget $params src]
+    set adp_stub [template::resource_path -type widgets -style $src -relative]
+    if {[file exists $::acs::rootdir/$adp_stub.adp]} {
+	ns_set update $params src $adp_stub
+    }
+    template:template_tag_helper $params 
+}
+
 
 # Repeat a template chunk for each row of a multirow data source
 
 template_tag multiple { chunk params } {
 
-  set name     [template::get_attribute multiple $params name       ]
-  set startrow [template::get_attribute multiple $params startrow  0]
-  set maxrows  [template::get_attribute multiple $params maxrows  -1]; #unlimit
+  set name      [template::get_attribute multiple $params name       ]
+  set startrow  [template::get_attribute multiple $params startrow  0]
+  set maxrows   [template::get_attribute multiple $params maxrows  -1]; #unlimit
   set delimiter [template::get_attribute multiple $params delimiter ""]
 
   set tag_id [template::current_tag]
@@ -168,7 +201,7 @@ template_tag multiple { chunk params } {
   for { set $i [expr {1 + $startrow}] } { \$$i <= \${$name:rowcount}"
 
   if {$maxrows >= 0} {
-    template::adp_append_code " && \$$i <= [expr {$maxrows + $startrow}]" \
+    template::adp_append_code " && \$$i <= $maxrows + $startrow" \
 	-nobreak
   }
   
@@ -181,7 +214,7 @@ template_tag multiple { chunk params } {
       template::adp_append_code " if { \$$i < \${$name:rowcount}"
 
       if {$maxrows >= 0} {
-	  template::adp_append_code " && \$$i < [expr {$maxrows + $startrow}]" \
+	  template::adp_append_code " && \$$i < $maxrows + $startrow" \
 	      -nobreak
       }
 
@@ -202,7 +235,7 @@ template_tag multiple { chunk params } {
 template_tag list { chunk params } {
 
   # the list tag accepts a value so that it may be used without a data
-  # source in the tcl script
+  # source in the Tcl script
 
   set value [ns_set iget $params value]
 
@@ -215,12 +248,12 @@ template_tag list { chunk params } {
       set name "__ats_list_value"
     }
 
-    template::adp_append_code "\nset $name \[eval list $value\]\n"
-    template::adp_append_code "\nset $name:rowcount \[llength \$$name\]\n"
+    template::adp_append_code [list set $name $value]
+    template::adp_append_code "set $name:rowcount \[llength \$$name\]\n"
 
   } else {
 
-    # Expect a data source from the tcl script
+    # Expect a data source from the Tcl script
     set name [template::get_attribute list $params name]
     template::adp_append_code "\nset {$name:rowcount} \[llength \${$name}\]\n"
   }
@@ -229,7 +262,7 @@ template_tag list { chunk params } {
 
   for { set __ats_${name}_i 0 } { \$__ats_${name}_i < \${$name:rowcount} } { incr __ats_${name}_i } {
     set $name:item \[lindex \${$name} \$__ats_${name}_i\]
-    set $name:rownum \[expr \$__ats_${name}_i + 1\]
+    set $name:rownum \[expr {\$__ats_${name}_i + 1}\]
   "
   template::adp_compile_chunk $chunk
 
@@ -284,8 +317,8 @@ template_tag group { chunk params } {
       if { \$$i >= \${$name:rowcount} } {
         set ${name}(groupnum_last_p) 1
       } else {
-        upvar 0 ${name}:\[expr \$$i + 1\] $name:next 
-        set ${name}(groupnum_last_p) \[expr !\[string equal \[set \"${name}:next(${column})\"\] \$${name}($column)\]\]
+        upvar 0 ${name}:\[expr {\$$i + 1}\] $name:next 
+        set ${name}(groupnum_last_p) \[expr {\${${name}:next(${column})} ne \$${name}($column)}\]
       }
   "
 
@@ -297,8 +330,8 @@ template_tag group { chunk params } {
       if { \$$i >= \${$name:rowcount} } {
         break
       }
-      upvar 0 ${name}:\[expr \$$i + 1\] $name:next 
-      if { !\[string equal \[set \"${name}:next(${column})\"\] \$${name}(${column})\] } { 
+      upvar 0 ${name}:\[expr {\$$i + 1}\] $name:next 
+      if { \${${name}:next($column)} ne \$${name}(${column}) } { 
         break
       }
   "
@@ -408,7 +441,7 @@ template_tag formwidget { params } {
   set tag_attributes [template::util::set_to_list $params id]
 
   template::adp_append_string \
-    "\[template::element render \${form:id} $id { $tag_attributes } \]"
+      "\[template::element render \${form:id} [list $id] { $tag_attributes } \]"
 }
 
 # Display the help information for an element
@@ -421,7 +454,7 @@ template_tag formhelp { params } {
   set tag_attributes [template::util::set_to_list $params id]
 
   template::adp_append_string \
-    "\[template::element render_help \${form:id} $id { $tag_attributes } \]"
+      "\[template::element render_help \${form:id} [list $id] { $tag_attributes } \]"
 }
 
 # Report a form error if one is specified.
@@ -466,7 +499,7 @@ template_tag formgroup { chunk params } {
   # generate a list of options and option labels as a data source
 
   template::adp_append_code \
-    "template::element options \${form:id} $id { $tag_attributes }"
+      "template::element options \${form:id} [list $id] { $tag_attributes }"
 
   # make sure name is a parameter to pass to the rendering tag handler
   ns_set update $params name formgroup
@@ -492,13 +525,12 @@ template_tag formgroup-widget { chunk params } {
 
     # generate a list of options and option labels as a data source
 
-
     template::adp_append_code \
-        "template::element options \${form:id} $id { $tag_attributes }"
+        "template::element options \${form:id} [list $id] { $tag_attributes }"
     
-  # make sure name is a parameter to pass to the rendering tag handler
-  ns_set update $params name formgroup
-  ns_set update $params id formgroup
+    # make sure name is a parameter to pass to the rendering tag handler
+    ns_set update $params name formgroup
+    ns_set update $params id formgroup
     template::adp_append_code "append __adp_output \"\$\{formgroup:${row}(widget)\} \$\{formgroup:${row}(label)\}\""
 
 }
@@ -510,24 +542,21 @@ template_tag formgroup-widget { chunk params } {
 template_tag formtemplate { chunk params } {
 
   set level [template::adp_level]
-
   set id [template::get_attribute formtemplate $params id]
 
   upvar #$level $id:properties form_properties
 
-  template::adp_append_code "set form:id \"$id\""
+  template::adp_append_code [list set form:id $id]
 
   # Set optional attributes for the grid template
-  template::adp_append_code "
-    upvar 0 \"$id:properties\" form_properties"
+  template::adp_append_code \
+      [list upvar 0 $id:properties form_properties]
 
   foreach varname {headers title cols} {
 
     set form_properties($varname) [ns_set iget $params $varname]
-
-    template::adp_append_code "
-      set form_properties($varname) \"$form_properties($varname)\"
-    "
+    template::adp_append_code \
+	[list set form_properties($varname) $form_properties($varname)]
   }
 
   # get any additional HTML attributes specified by the designer
@@ -550,7 +579,7 @@ template_tag formtemplate { chunk params } {
    
     # Render any hidden variables that have not been rendered yet
     template::adp_append_string \
-    "\[template::form check_elements $id\]"
+	"\[template::form check_elements $id\]"
   }
 
   if { [info exists form_properties(fieldset)] } {
@@ -634,10 +663,16 @@ template_tag content { params } {
 
 template_tag include-optional { chunk params } {
 
-  set src [ns_set iget $params src]
+  #
+  # Check, if the src can be resolved against resources/templates in
+  # the theme package
+  #
+  set src [template::themed_template [ns_set iget $params src]]
+  set ds [ns_set iget $params ds]
+  if {$ds eq ""} {set ds 1}
 
   #Start developer support frame around subordinate template.
-  if { [llength [info procs ::ds_enabled_p]] && [llength [info procs ::ds_adp_start_box]] } {
+  if { $ds && [info commands ::ds_enabled_p] ne "" && [info commands ::ds_adp_start_box] ne ""} {
       ::ds_adp_start_box -stub "\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
   }
 
@@ -664,11 +699,10 @@ template_tag include-optional { chunk params } {
   # Finally, we pop the output off of the __adp_include_optional_output stack.
 
   template::adp_append_code "if { \[catch { ad_try { lappend __adp_include_optional_output \[$command\] } ad_script_abort val { } } errmsg\] } {"
-  template::adp_append_code "    global errorInfo"
-  template::adp_append_code "    append __adp_output \"Error in include template \\\"\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]\\\": \$errmsg\""
-  template::adp_append_code "    ns_log Error \"Error in include template \\\"\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]\\\": \$errmsg\n\$errorInfo\""
+  template::adp_append_code "    append __adp_output \"Error in include template \\\"\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]\\\": \[ns_quotehtml \$errmsg\]\""
+  template::adp_append_code "    ad_log Error \"Error in include template \\\"\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]\\\": \$errmsg\""
   template::adp_append_code "} else {"
-  template::adp_append_code "if { !\[string equal \[string trim \[lindex \$__adp_include_optional_output end\]\] \"\"] } {"
+  template::adp_append_code "if { \[string trim \[lindex \$__adp_include_optional_output end\]\] ne {} } {"
 
   template::adp_compile_chunk $chunk
 
@@ -679,7 +713,7 @@ template_tag include-optional { chunk params } {
   "
 
   #End developer support frame around subordinate template.
-  if { [llength [info procs ::ds_enabled_p]] && [llength [info procs ::ds_adp_end_box]] } {
+  if { $ds && [info commands ::ds_enabled_p] ne "" && [info commands ::ds_adp_end_box] ne "" } {
       ::ds_adp_end_box -stub "\[template::util::url_to_file \"$src\" \"\$__adp_stub\"\]"
   }
 
@@ -745,7 +779,7 @@ template_tag trn { chunk params } {
 }
 
 
-# DanW: implements a switch statement just like in tcl
+# DanW: implements a switch statement just like in Tcl
 # use as follows:
 #
 # <switch flag=regexp @some_var@>
@@ -919,3 +953,9 @@ template_tag box { chunk params } {
     template::adp_compile_chunk $chunk
     template::adp_append_code "append __adp_output {</div></div>}"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

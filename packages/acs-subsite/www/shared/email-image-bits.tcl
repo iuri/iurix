@@ -3,8 +3,14 @@ ad_page_contract {
 
     @author Miguel Marin (miguelmarin@viaro.net) Viaro Networks (www.viaro.net)
 } {
-    revision_id:integer
+    revision_id:naturalnum,notnull
 }
 
 cr_write_content -revision_id $revision_id
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

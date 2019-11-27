@@ -2,7 +2,7 @@
 -- a mechanism for associating location (url) with a certain chunk of data.
 --
 -- @author Ben Adida (ben@openforce)
--- @version $Id: site-node-object-map-create.sql,v 1.5 2008/06/07 20:28:52 donb Exp $
+-- @version $Id: site-node-object-map-create.sql,v 1.7 2015/04/27 15:28:17 victorg Exp $
 --
 
 create table site_node_object_mappings (
@@ -21,15 +21,20 @@ create table site_node_object_mappings (
                                     constraint snom_node_id_nn
                                     not null
 );
+create index site_node_object_mappings_node_id_idx on site_node_object_mappings(node_id);
+
 
 select define_function_args('site_node_object_map__new', 'object_id,node_id');
 
-create function site_node_object_map__new (integer,integer)
-returns integer as '
-declare
-    p_object_id                     alias for $1;
-    p_node_id                       alias for $2;
-begin
+--
+-- procedure site_node_object_map__new/2
+--
+CREATE OR REPLACE FUNCTION site_node_object_map__new(
+   p_object_id integer,
+   p_node_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
     perform site_node_object_map__del(p_object_id);
 
     insert
@@ -39,20 +44,27 @@ begin
     (p_object_id, p_node_id);
 
     return 0;
-end;
-' language 'plpgsql';
+END;
+
+$$ LANGUAGE plpgsql;
 
 select define_function_args('site_node_object_map__del', 'object_id');
 
-create function site_node_object_map__del (integer)
-returns integer as '
-declare
-    p_object_id                     alias for $1;
-begin
+
+
+--
+-- procedure site_node_object_map__del/1
+--
+CREATE OR REPLACE FUNCTION site_node_object_map__del(
+   p_object_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
     delete
     from site_node_object_mappings
     where object_id = p_object_id;
 
     return 0;
-end;
-' language 'plpgsql';
+END;
+
+$$ LANGUAGE plpgsql;

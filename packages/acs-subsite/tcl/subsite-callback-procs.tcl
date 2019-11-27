@@ -8,7 +8,7 @@ ad_library {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Feb 21 17:10:24 2001
-    @cvs-id $Id: subsite-callback-procs.tcl,v 1.6 2010/04/03 23:13:47 donb Exp $
+    @cvs-id $Id: subsite-callback-procs.tcl,v 1.7.2.3 2017/04/22 18:28:25 gustafn Exp $
 
 }
 
@@ -48,26 +48,17 @@ ad_proc -public subsite_callback {
     # handle. Note that we need the distinct in case two callbacks are
     # registered for an object and it's parent object type.
 
-    set callback_list [db_list_of_lists select_callbacks {
-	select distinct callback, callback_type
-	  from subsite_callbacks
-	 where object_type in (select t.object_type
-	                        from acs_object_types t
-	                     connect by prior t.supertype = t.object_type
-	                       start with t.object_type = :object_type)
-	   and event_type = :event_type
-    }]
+    set callback_list [db_list_of_lists select_callbacks {}]
 
     set node_id [ad_conn node_id]
     set package_id [ad_conn package_id]
 
     foreach row $callback_list {
-	set callback [lindex $row 0]
-	set type [lindex $row 1]
+	lassign $row callback type
 
 	switch -- $type {
 	    tcl { 
-		# Execute the tcl procedure
+		# Execute the Tcl procedure
 		$callback -object_id $object_id -node_id $node_id -package_id $package_id
 	    }
 	    default { error "Callbacks of type $type not supported" }
@@ -113,3 +104,9 @@ ad_proc -public -callback subsite::url {
 
     The type let's you define what kind of URL you are looking for (e.g. admin/edit/display)
 } -
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

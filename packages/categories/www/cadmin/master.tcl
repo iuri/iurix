@@ -6,7 +6,7 @@ if { ![info exists change_locale] } {
     set change_locale t
 }
 
-if {![exists_and_not_null locale]} {
+if {(![info exists locale] || $locale eq "")} {
     #set locale [parameter::get -parameter DefaultLocale -default en_US]
     set locale [ad_conn locale]
 }
@@ -31,3 +31,9 @@ ad_form -name locale_form -action [ad_conn url] \
     -form {
       {locale:text(select),optional {label "Language"} {value $locale} {options $languages}}
     }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

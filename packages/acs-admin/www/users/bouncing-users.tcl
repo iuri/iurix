@@ -4,12 +4,12 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-24
-    @cvs-id $Id: bouncing-users.tcl,v 1.1 2007/04/09 07:10:57 maltes Exp $
+    @cvs-id $Id: bouncing-users.tcl,v 1.3.2.1 2015/09/10 08:21:08 gustafn Exp $
 
 } {
     {page ""}
     {page_size 25}
-    {orderby "username,asc"}
+    {orderby:token "username,asc"}
 }
 
 
@@ -47,7 +47,13 @@ template::list::create \
 
 db_multirow -extend {unbounce_link} bouncing_users select_bouncing_users {} {
     set return_url [ad_return_url]
-    set unbounce_link [export_vars -base "/register/restore-bounce" -url {user_id return_url}]
+    set unbounce_link [export_vars -base /register/restore-bounce {user_id return_url}]
 }
 
-set context [list [list "." "Users"] "[_ acs_mail_lite.Bouncing_users]"]
+set context [list [list "." "Users"] "[_ acs-mail-lite.Bouncing_users]"]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

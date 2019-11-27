@@ -4,12 +4,12 @@ ad_page_contract {
 
     @author Arjun Sanyal (arjun@openforce.net)
     @author Ben Adida (ben@openforce.net)
-    @cvs-id $Id: attach-2.tcl,v 1.4 2003/12/11 21:39:57 jeffd Exp $
+    @cvs-id $Id: attach-2.tcl,v 1.4.18.2 2017/02/01 16:04:17 gustafn Exp $
 
 } -query {
-    {object_id:notnull}
-    {item_id:notnull}
-    {return_url:notnull}
+    {object_id:naturalnum,notnull,notnull}
+    {item_id:naturalnum,notnull,notnull}
+    {return_url:localurl,notnull}
 }
 
 # Perms
@@ -24,3 +24,9 @@ if {[catch {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

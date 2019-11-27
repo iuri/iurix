@@ -6,25 +6,25 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Nov 12 18:27:08 2000
-    @cvs-id $Id: new.tcl,v 1.3 2002/09/06 21:50:03 jeffd Exp $
+    @cvs-id $Id: new.tcl,v 1.5.2.4 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
 }
 
 
-db_multirow supertypes select_supertypes {
-    select replace(lpad(' ', (level - 1) * 4), ' ', '&nbsp;') || t.pretty_name as name,
-           t.object_type
-      from acs_object_types t
-   connect by prior t.object_type = t.supertype
-     start with t.object_type in ('membership_rel','composition_rel')
-}
+db_multirow supertypes select_supertypes {}
 
-set context [list [list "[ad_conn package_url]admin/rel-types/" "Relationship types"] "Add relationship type"]
+set context [list [list "[ad_conn package_url]admin/rel-types/" [_ acs-subsite.Relationship_Types]] [_ acs-subsite.Create_relation_type]]
 
-set export_vars [ad_export_vars -form {return_url}]
+set export_vars [export_vars -form {return_url}]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

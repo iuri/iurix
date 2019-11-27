@@ -4,9 +4,9 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-10-23
-  @cvs-id $Id: index.tcl,v 1.1 2006/02/06 13:08:30 jiml Exp $
+  @cvs-id $Id: index.tcl,v 1.2.2.2 2016/06/04 12:00:52 gustafn Exp $
 } -query {
-  orderby:optional
+  orderby:optional,token,notnull
 } -properties {
   notes:multirow
   context:onevalue
@@ -17,7 +17,7 @@ set package_id [ad_conn package_id]
 set user_id [ad_conn user_id]
 
 set context [list]
-set create_p [ad_permission_p $package_id create]
+set create_p [permission::permission_p -object_id $package_id -privilege create]
 
 template::list::create -name notes \
     -multirow template_demo_notes \
@@ -58,3 +58,9 @@ template::list::create -name notes \
 db_multirow template_demo_notes template_demo_notes {}
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -2,7 +2,7 @@ ad_page_contract {
     Scans the packages directory for new or modified packages.
     @author Jon Salz [jsalz@arsdigita.com]
     @creation-date 17 April 2000
-    @cvs-id $Id: package-scan.tcl,v 1.3 2002/09/10 22:21:59 jeffd Exp $
+    @cvs-id $Id: package-scan.tcl,v 1.3.28.1 2015/09/10 08:21:02 gustafn Exp $
 } {
 }
 
@@ -26,3 +26,8 @@ Done.
 
 [ad_footer]
 "
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

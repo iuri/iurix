@@ -1,5 +1,5 @@
 <master>
-<property name="title">XML-RPC Administration</property>
+<property name="doc(title)">XML-RPC Administration</property>
 
 <table>
 <tr>
@@ -10,7 +10,7 @@
 <tr>
   <th>Status: </th> 
   <td>
-    <a href="toggle"><if @server_enabled_p@>Enabled</if><else>Disabled</else></a>
+    <a href="toggle"><if @server_enabled_p;literal@ true>Enabled</if><else>Disabled</else></a>
   </td>
 </tr>
 

@@ -4,7 +4,7 @@ ad_library {
 
     @author yon (yon@openforce.net)
     @creation-date 2002-05-07
-    @version $Id: bulk-mail-procs.tcl,v 1.11 2008/01/16 10:00:08 emmar Exp $
+    @cvs-id $Id: bulk-mail-procs.tcl,v 1.12.2.4 2017/06/30 17:41:28 gustafn Exp $
 
 }
 
@@ -21,7 +21,7 @@ namespace eval bulk_mail {
     } {
         return the pretty name of this instance
     } {
-        if {[empty_string_p $package_id]} {
+        if {$package_id eq ""} {
             set package_id [ad_conn package_id]
         }
 
@@ -36,7 +36,7 @@ namespace eval bulk_mail {
     } {
         returns the bulk_mail parameter value for the given parameter
     } {
-        if {[empty_string_p $package_id]} {
+        if {$package_id eq ""} {
             set package_id [package_id]
         }
 
@@ -135,17 +135,17 @@ namespace eval bulk_mail {
         }
 
         # default the package_id to the appropriate value
-        if {[empty_string_p $package_id]} {
+        if {$package_id eq ""} {
             set package_id [ad_conn package_id]
         }
 
         # set a reasonable default for send_date
-        if {[empty_string_p $send_date]} {
+        if {$send_date eq ""} {
             set send_date [db_string select_current_date {}]
         }
 
         # set a reasonable default for the reply_to header
-        if {[empty_string_p $reply_to]} {
+        if {$reply_to eq ""} {
             set reply_to $from_addr
         }
 
@@ -200,21 +200,21 @@ namespace eval bulk_mail {
                 }
 
                 # it's possible that someone may want to override the from
-                # address on a per recepient basis
+                # address on a per recipient basis
                 set from_addr [ns_set get $bulk_mail from_addr]
                 if {[ns_set find $recipient from_addr] > -1} {
                     set from_addr [ns_set get $recipient from_addr]
                 }
 
                 # it's possible that someone may want to override the
-                # reply_to address on a per recepient basis
+                # reply_to address on a per recipient basis
                 set reply_to [ns_set get $bulk_mail reply_to]
                 if {[ns_set find $recipient reply_to] > -1} {
                     set reply_to [ns_set get $recipient reply_to]
                 }
 
                 # it's possible that someone may want to override the
-                # subject on a per recepient basis
+                # subject on a per recipient basis
                 # create the new bulk_mail message
                 set subject [ns_set get $bulk_mail subject]
                 if {[ns_set find $recipient subject] > -1} {
@@ -226,7 +226,7 @@ namespace eval bulk_mail {
                 set subject [interpolate -values $pairs -text $subject]
 
                 # it's possible that someone may want to override the
-                # message on a per recepient basis
+                # message on a per recipient basis
                 set message [ns_set get $bulk_mail message]
                 if {[ns_set find $recipient message] > -1} {
                     set message [ns_set get $recipient message]
@@ -235,7 +235,7 @@ namespace eval bulk_mail {
                 # mohan's hack to fix the passing of message type for the
                 # mail.
                 # Comment: I have to ask Caroline or Andrew if itis ok to 
-                # change bulk-mail datamodel to accomodate message_type.
+                # change bulk-mail datamodel to accommodate message_type.
 
                 set extra_headers [util_list_to_ns_set [ns_set get $bulk_mail extra_headers]]
                 set message_type  [ns_set get $extra_headers bulk-mail-type]
@@ -247,9 +247,9 @@ namespace eval bulk_mail {
                 # into the message body
                 set message [interpolate -values $pairs -text $message]
 
-                if {$message_type == "html"} {
+                if {$message_type eq "html"} {
                     set mime_type "text/html"
-                    if {[string compare $message_old $message] != 0} {
+                    if {$message_old ne $message } {
                         # If this message is different then the last loop 
                         # we set up the html and text messages. Note that 
                         # ad_html_text_convert can get quite expensive, 
@@ -276,7 +276,9 @@ namespace eval bulk_mail {
                     -mime_type $mime_type \
                     -reply_to $reply_to \
                     -extraheaders $extra_headers \
-                    -use_sender
+                    -use_sender \
+                    -package_id [ns_set get $bulk_mail package_id] \
+                    -object_id [ns_set get $bulk_mail bulk_mail_id]
             }
 
             # mark the bulk_mail as sent so that we don't process it again
@@ -307,3 +309,9 @@ namespace eval bulk_mail {
     }
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

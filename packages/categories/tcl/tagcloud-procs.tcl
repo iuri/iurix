@@ -20,7 +20,7 @@ ad_proc -private category::tagcloud::get_minmax_tagweights {
     @author Matthew Burke (matt-oacs@bluedino.net)
 } {
     set max_weight 0
-    set min_weight [lindex [lindex $tag_list 0] 1]
+    set min_weight [lindex $tag_list 0 1]
     foreach tag $tag_list {
         set tag_weight [lindex $tag 1]
         if {$tag_weight < $min_weight} {
@@ -45,7 +45,7 @@ ad_proc -private category::tagcloud::scale_weight {
 } {
     set denominator [expr {[lindex $extremes 1] - [lindex $extremes 0]}]
     if {$denominator != 0} {
-        set multiplier [expr ($weight * 1.0)/$denominator]
+        set multiplier [expr {($weight * 1.0)/$denominator}]
     } else {
         set multiplier 0
     }
@@ -104,17 +104,7 @@ ad_proc -private category::tagcloud::get_tags_no_mem {
     # so we should check for the reader's locale and use that
     # or the default_locale, but ...
 
-    set tag_list [db_list_of_lists tagcloud_get_keys {
-        select category_id, count(com.object_id), min(trans.name)
-        from categories natural left join category_object_map com natural join category_trees
-        natural join category_translations trans
-        where tree_id = :tree_id and trans.locale = :default_locale
-	and exists (select 1 from acs_object_party_privilege_map ppm
-                    where ppm.object_id = com.object_id
-                    and ppm.privilege = 'read'
-                    and ppm.party_id = :user_id)
-        group by category_id
-    }]
+    set tag_list [db_list_of_lists tagcloud_get_keys {}]
 }
 
 
@@ -137,3 +127,9 @@ ad_proc -public category::tagcloud::get_tags {
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

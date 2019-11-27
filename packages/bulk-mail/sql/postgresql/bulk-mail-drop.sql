@@ -2,24 +2,25 @@
 -- bulk_mail model drop
 --
 -- @author <a href="mailto:yon@openforce.net">yon@openforce.net</a>
--- @version $Id: bulk-mail-drop.sql,v 1.2 2002/06/12 13:53:13 yon Exp $
+-- @version $Id: bulk-mail-drop.sql,v 1.3 2014/10/27 16:41:06 victorg Exp $
 --
 
-create function inline_0 ()
-returns integer as'
-declare
+CREATE FUNCTION inline_0 ()
+RETURNS integer AS $$
+DECLARE
     row RECORD;
-begin
+BEGIN
 
     for row in select bulk_mail_id from bulk_mail_messages loop
         perform bulk_mail__delete(row.bulk_mail_id);
     end loop;
 
-    perform acs_object_type__drop_type(''bulk_mail_message'', ''f'');
+    perform acs_object_type__drop_type('bulk_mail_message', 'f');
 
     return null;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0();
 

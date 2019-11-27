@@ -6,12 +6,12 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Fri Dec  8 14:41:36 2000
-    @cvs-id $Id: delete-2.tcl,v 1.2 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: delete-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    group_id:integer,notnull
+    group_id:naturalnum,notnull
     { operation "" }
-    { return_url "" }
+    { return_url:localurl "" }
 } -validate {
     groups_exists_p -requires {group_id:notnull} {
 	if { ![group::permission_p $group_id] } {
@@ -25,13 +25,19 @@ if {$operation eq "Yes, I really want to delete this group"} {
 	set group_type [group::delete $group_id]
     }
     if { $return_url eq "" && $group_type ne "" } {
-	set return_url "../group-types/one?[ad_export_vars group_type]"
+	set return_url [export_vars -base ../group-types/one group_type]
     }
 } else {
     if { $return_url eq "" } {
-	set return_url "one?[ad_export_vars group_id]"
+	set return_url [export_vars -base one group_id]
     }
 }
 
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

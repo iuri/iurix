@@ -1,8 +1,8 @@
 ad_page_contract {
     The page restores a user from the deleted state.
-    @cvs-id $Id: restore-user.tcl,v 1.5 2003/09/24 15:19:24 lars Exp $
+    @cvs-id $Id: restore-user.tcl,v 1.5.24.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    {return_url {[ad_pvt_home]}}
+    {return_url:localurl {[ad_pvt_home]}}
 }
 
 set page_title [_ acs-subsite.Account_reopened_title]
@@ -34,3 +34,9 @@ auth::verify_account_status
 
 # Used in a message key
 set system_name [ad_system_name]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

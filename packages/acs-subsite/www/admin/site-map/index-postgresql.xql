@@ -18,7 +18,8 @@
         </querytext>
     </fullquery>
 
-    <fullquery name="nodes_select">
+    <fullquery name="dbqd.acs-subsite.www.admin.site-map.index.nodes_select">
+        <rdbms><type>postgresql</type><version>8.4</version></rdbms>
         <querytext>
             select package_id,
                    package_key,
@@ -41,11 +42,7 @@
                          n.parent_id
                   from site_nodes n, site_nodes n2
                   where (n.object_id is null
-                         or exists (
-                            select 1 from acs_object_party_privilege_map ppm 
-                             where ppm.object_id = n.object_id 
-                               and ppm.party_id = :user_id 
-                               and ppm.privilege = 'read'))
+                         or acs_permission__permission_p(n.object_id, :user_id, 'read'))
                   and n2.node_id = (select coalesce(:root_id, site_node__node_id('/', null)))
                   and n.tree_sortkey between n2.tree_sortkey and tree_right(n2.tree_sortkey)
                   and (n.parent_id is null or n.parent_id in ([join $expand ", "]))) site_map
@@ -56,19 +53,21 @@
     </fullquery>
 
     <fullquery name="services_select">
+        <rdbms><type>postgresql</type><version>8.4</version></rdbms>
         <querytext>
+        With apm_services AS (
             select package_id,
-                   ap.package_key,
-                   ap.instance_name,
-                   apm_package_type__num_parameters(ap.package_key) as parameter_count
+            ap.package_key,
+            ap.instance_name,
+            apm_package_type__num_parameters(ap.package_key) as parameter_count
             from apm_packages ap,
-                 apm_package_types
+            apm_package_types
             where ap.package_key = apm_package_types.package_key
             and package_type = 'apm_service'
             and not exists (select 1 from site_nodes sn where sn.object_id = package_id)
-            and exists (select 1 from acs_object_party_privilege_map ppm 
-                        where ppm.object_id = package_id and ppm.party_id = :user_id and ppm.privilege = 'admin')
             order by instance_name
+        ) select * from apm_services where
+            acs_permission__permission_p(package_id, :user_id, 'admin')
         </querytext>
     </fullquery>
 

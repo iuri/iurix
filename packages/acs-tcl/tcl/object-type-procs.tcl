@@ -4,7 +4,7 @@ ad_library {
 
     @author Yonatan Feldman (yon@arsdigita.com)
     @creation-date August 13, 2000
-    @cvs-id $Id: object-type-procs.tcl,v 1.8 2005/07/22 05:07:13 skaufman Exp $
+    @cvs-id $Id: object-type-procs.tcl,v 1.11.2.1 2015/09/10 08:21:58 gustafn Exp $
 
 }
 
@@ -34,7 +34,7 @@ ad_proc -public acs_object_type_hierarchy {
 
     set result ""
 
-    if { [exists_and_not_null object_type] } {
+    if { [info exists object_type] && $object_type ne "" } {
         set sql [db_map object_type_not_null]
 	set join_string "&nbsp;&gt;&nbsp;"
     } else {
@@ -48,9 +48,9 @@ ad_proc -public acs_object_type_hierarchy {
 	    append result $join_string
 	}
 	incr i
-	append result "\n    $indent<a href=./one?[export_url_vars object_type]>[lang::util::localize $pretty_name]</a>"
+	set href [export_vars -base ./one {object_type}]
+	append result [subst {\n    $indent<a href="[ns_quotehtml $href]">[lang::util::localize $pretty_name]</a>}]
 	append result $additional_html
-
     }
 
     return $result
@@ -160,3 +160,9 @@ ad_proc -private acs_object_type::get_table_name_not_cached {
 } {
     return [db_string get_table_name ""]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

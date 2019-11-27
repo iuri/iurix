@@ -2,11 +2,11 @@ ad_page_contract {
     This is the view-edit page for notes.
 
     @author Your Name (you@example.com)
-    @cvs-id $Id: note-edit.tcl,v 1.2 2004/02/04 16:47:34 joela Exp $
+    @cvs-id $Id: note-edit.tcl,v 1.3.2.1 2015/09/10 08:21:20 gustafn Exp $
  
     @param item_id If present, assume we are editing that note.  Otherwise, we are creating a new note.
 } {
-    item_id:integer,optional
+    item_id:naturalnum,optional
 }
 
 ad_form -name note -form {
@@ -39,3 +39,8 @@ ad_form -name note -form {
     ad_returnredirect "."
     ad_script_abort
 }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -3,13 +3,13 @@ ad_page_contract {
 
     @author Ben Adida
     @creation-date 01 April 2002
-    @cvs-id $Id: simple-edit.tcl,v 1.10 2009/02/13 22:13:06 jeffd Exp $
+    @cvs-id $Id: simple-edit.tcl,v 1.12.2.1 2015/09/12 11:06:20 gustafn Exp $
 } {
-    object_id:notnull
+    object_id:naturalnum,notnull
 }
 
 # check for write permission on the item
-ad_require_permission $object_id write
+permission::require_permission -object_id $object_id -privilege write
 
 # Message lookup uses variable pretty_name
 
@@ -38,7 +38,7 @@ ad_form -extend -edit_request {
 								       -container_object_id $package_id \
 								       -element_name category_id]
     }
-    ad_returnredirect "?[export_vars folder_id]"
+    ad_returnredirect [export_vars -base . folder_id]
 }
 
 set pretty_name "$name"
@@ -46,3 +46,9 @@ set context [fs_context_bar_list -final "[_ file-storage.Edit_URL]" $folder_id]
 set page_title [_ file-storage.file_edit_page_title_1]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

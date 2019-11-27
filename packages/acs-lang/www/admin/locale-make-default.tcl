@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author Bruno Mattarollo <bruno.mattarollo@ams.greenpeace.org>
     @creation-date 19 march 2002
-    @cvs-id $Id: locale-make-default.tcl,v 1.6 2005/02/26 16:00:10 jeffd Exp $
+    @cvs-id $Id: locale-make-default.tcl,v 1.6.18.1 2015/09/10 08:21:28 gustafn Exp $
 } {
     locale
 } -properties {
@@ -29,3 +29,9 @@ db_transaction {
 util_memoize_flush_regexp {^lang::util::default_locale_from_lang_not_cached}
 
 template::forward "index?tab=locales"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

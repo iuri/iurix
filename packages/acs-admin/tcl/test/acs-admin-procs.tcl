@@ -3,19 +3,7 @@ ad_library {
 
     @author Joel Aufrecht
     @creation-date 2 Nov 2003
-    @cvs-id $Id: acs-admin-procs.tcl,v 1.3 2004/02/15 10:43:01 tilmanns Exp $
-}
-
-aa_register_case -cats smoke acs_admin_trivial_smoke_test {
-    Minimal smoke test for acs-admin package.
-} {    
-
-    aa_run_with_teardown \
-        -rollback \
-        -test_code {
-            set header_result [apm_header]
-            aa_true "apm_header returns a non-null string?" [exists_and_not_null header_result]
-        }
+    @cvs-id $Id: acs-admin-procs.tcl,v 1.4.2.1 2015/09/10 08:21:01 gustafn Exp $
 }
 
 aa_register_case -cats {api smoke} apm_higher_version_installed_p {
@@ -34,3 +22,9 @@ aa_register_case -cats {api smoke} apm_higher_version_installed_p {
 
         }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

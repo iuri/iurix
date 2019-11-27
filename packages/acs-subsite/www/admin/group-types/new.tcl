@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author rhs@mit.edu
     @creation-date 2000-12-04
-    @cvs-id $Id: new.tcl,v 1.4 2005/07/22 19:38:06 skaufman Exp $
+    @cvs-id $Id: new.tcl,v 1.5.6.3 2016/01/02 12:42:04 gustafn Exp $
 } {
     { object_type:trim "" }
     { pretty_name:trim "" }
@@ -16,39 +16,36 @@ ad_page_contract {
     context:onevalue
 }
 
-set context [list [list "[ad_conn package_url]admin/group-types/" "Group types"] "Add type"]
+set doc(title) [_ acs-subsite.Add_group_type]
+set context [list [list "[ad_conn package_url]admin/group-types/" [_ acs-subsite.Group_Types]] [_ acs-subsite.Add_type]]
 
 template::form create group_type
 
 template::element create group_type object_type \
-	-datatype "text" \
-	-label "Group type" \
-	-html { size 30 maxlength 30 }
+    -datatype "text" \
+    -label [_ acs-subsite.Group_type] \
+    -html { size 30 maxlength 30 }
 
-set supertype_options [db_list_of_lists "select_group_supertypes" {
-	select replace(lpad(' ', (level - 1) * 4), ' ', '&nbsp;') || t.pretty_name, t.object_type
-          from acs_object_types t
-       connect by prior t.object_type = t.supertype
-         start with t.object_type = 'group'}]
+set supertype_options [db_list_of_lists select_group_supertypes {}]
 foreach opt $supertype_options {
     lappend supertype_options_i18n [lang::util::localize $opt]
 }
 
 template::element create group_type supertype \
-	-datatype "text" \
-	-widget select \
-	-options $supertype_options_i18n \
-	-label "Supertype"
+    -datatype "text" \
+    -widget select \
+    -options $supertype_options_i18n \
+    -label [_ acs-subsite.Supertype]
 
 template::element create group_type pretty_name \
-	-datatype "text" \
-	-label "Pretty name" \
-	-html { size 50 maxlength 100 }
+    -datatype "text" \
+    -label [_ acs-subsite.Pretty_name] \
+    -html { size 50 maxlength 100 }
 
 template::element create group_type pretty_plural \
-	-datatype "text" \
-	-label "Pretty plural" \
-	-html { size 50 maxlength 100 }
+    -datatype "text" \
+    -label [_ acs-subsite.Pretty_plural] \
+    -html { size 50 maxlength 100 }
 
 set approval_policy_options {
     { {Open: Users can create groups of this type} open }
@@ -64,41 +61,43 @@ if { [template::form is_valid group_type] } {
     
     set safe_object_type [plsql_utility::generate_oracle_name -max_length 29 $object_type]
     if { [plsql_utility::object_type_exists_p $safe_object_type] } {
-	incr exception_count
-	append exception_text "<li> The specified object type, $object_type, already exists. 
-[ad_decode $safe_object_type $object_type "" "Note that we converted the object type to \"$safe_object_type\" to ensure that the name would be safe for the database."]
-Please back up and choose another.</li>"
+        incr exception_count
+        append exception_text \
+            "<li>The specified object type, $object_type, already exists. " \
+            [ad_decode $safe_object_type $object_type "" \
+                 "Note that we converted the object type to \"$safe_object_type\" to ensure that the name would be safe for the database."] \
+            "Please back up and choose another.</li>"
     } else {
-	# let's make sure the names are unique
-	if { [db_string pretty_name_unique {
-	    select case when exists (select 1 from acs_object_types t where t.pretty_name = :pretty_name)
-                    then 1 else 0 end
-	  from dual
-	}] } {
-	    incr exception_count
-	    append exception_text "<li> The specified pretty name, $pretty_name, already exists. Please enter another </li>"
-	}
+        # let's make sure the names are unique
+        if { [db_string pretty_name_unique {}] } {
+            incr exception_count
+            append exception_text \
+                "<li>The specified pretty name, $pretty_name, already exists. Please enter another </li>"
+        }
 
-	if { [db_string pretty_name_unique {
-	    select case when exists (select 1 from acs_object_types t where t.pretty_plural = :pretty_plural)
-                    then 1 else 0 end
-	  from dual
-	}] } {
-	    incr exception_count
-	    append exception_text "<li> The specified pretty plural, $pretty_plural, already exists. Please enter another </li>"
-	}
+        if { [db_string pretty_name_unique {}] } {
+            incr exception_count
+            append exception_text \
+                "<li>The specified pretty plural, $pretty_plural, already exists. Please enter another </li>"
+        }
     }
 
     if { $exception_count > 0 } {
-	ad_return_complaint $exception_count $exception_text
-	ad_script_abort
+        ad_return_complaint $exception_count $exception_text
+        ad_script_abort
     }
 
-    db_transaction {	
-	group_type::new -group_type $object_type -supertype $supertype $pretty_name $pretty_plural
+    db_transaction {
+        group_type::new -group_type $object_type -supertype $supertype $pretty_name $pretty_plural
     }
     ad_returnredirect ""
     return 
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

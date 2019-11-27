@@ -35,13 +35,13 @@ namespace eval calendar::outlook {
         return $timestamp
     }
 
-    ad_proc cal_outlook_gmt_sql {{hours 0} {dash ""}} {formats the hours to substract or add to make the date_time be in gmt} {
+    ad_proc cal_outlook_gmt_sql {{hours 0} {dash ""}} {formats the hours to subtract or add to make the date_time be in gmt} {
         # east of gmt is notated as "-",
         # in order to get gmt (to store the date_time for outlook)
         # we need to have the hour equal gmt at the same time as the client
         # i.e. if its noon gmt, then its 4am in pst
         # 
-        if ![empty_string_p $dash] {
+        if {$dash ne ""} {
             set date_time_math "- $hours/24"
         } else {
             set date_time_math "+ $hours/24"
@@ -52,11 +52,11 @@ namespace eval calendar::outlook {
 
     ad_proc -public format_item {
         {-cal_item_id:required}
-        {-all_occurences_p 0}
+        {-all_occurrences_p 0}
         {-client_timezone 0}
     } {
         the cal_item_id is obvious.
-        If we want all occurrences, we set all_occurences_p to true.
+        If we want all occurrences, we set all_occurrences_p to true.
         
         The client timezone helps to make things right. 
         It is the number offset from GMT.
@@ -76,7 +76,7 @@ namespace eval calendar::outlook {
         set ics_event "BEGIN:VCALENDAR\r\nPRODID:-//OpenACS//OpenACS 5.0 MIMEDIR//EN\r\nVERSION:2.0\r\nMETHOD:PUBLISH\r\nBEGIN:VEVENT\r\nDTSTART:$DTSTART\r\nDTEND:$DTEND\r\n"
 
         # Recurrence stuff
-        if {![empty_string_p $cal_item(recurrence_id)] && $all_occurences_p} {
+        if {$cal_item(recurrence_id) ne "" && $all_occurrences_p} {
 
             set recur_rule "RRULE:FREQ="
 
@@ -91,7 +91,7 @@ namespace eval calendar::outlook {
                 year { append recur_rule "YEARLY"}
             }
 
-            if { $recurrence(interval_name) == "week" && ![empty_string_p $recurrence(days_of_week)] } {
+            if { $recurrence(interval_name) eq "week" && $recurrence(days_of_week) ne "" } {
                 
                 #DRB: Standard indicates ordinal week days are OK, but Outlook
                 #only takes two-letter abbreviation form.
@@ -106,11 +106,11 @@ namespace eval calendar::outlook {
                 }
             }
 
-            if { ![empty_string_p $recurrence(every_nth_interval)] } {
+            if { $recurrence(every_nth_interval) ne "" } {
                 append recur_rule ";INTERVAL=$recurrence(every_nth_interval)"
             }
 
-            if { ![empty_string_p $recurrence(recur_until)] } {
+            if { $recurrence(recur_until) ne "" } {
                 #DRB: this should work with a DATE: type but doesn't with Outlook at least.
                 append recur_rule ";UNTIL=$recurrence(recur_until)"
                 append recur_rule "T000000Z"
@@ -133,3 +133,9 @@ namespace eval calendar::outlook {
     }
         
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

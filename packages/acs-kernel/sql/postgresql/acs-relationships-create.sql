@@ -7,7 +7,7 @@
 --
 -- @author rhs@mit.edu
 --
--- @cvs-id $Id: acs-relationships-create.sql,v 1.31 2010/03/10 00:44:03 donb Exp $
+-- @cvs-id $Id: acs-relationships-create.sql,v 1.32.4.3 2016/08/31 18:57:41 gustafn Exp $
 --
 
 ----------------------------------------------------------------
@@ -22,11 +22,11 @@ create table acs_rel_roles (
 );
 
 create table acs_rel_types (
-	rel_type	varchar(100) not null
+	rel_type	varchar(1000) not null
 			constraint acs_rel_types_rel_type_pk primary key
 			constraint acs_rel_types_rel_type_fk
 			references acs_object_types(object_type),
-	object_type_one	varchar(100) not null
+	object_type_one	varchar(1000) not null
 			constraint acs_rel_types_obj_type_1_fk
 			references acs_object_types (object_type),
 	role_one	varchar(100) constraint acs_rel_types_role_one_fk
@@ -37,7 +37,7 @@ create table acs_rel_types (
 	max_n_rels_one	integer
 			constraint acs_rel_types_max_n_1_ck
 			check (max_n_rels_one >= 0),
-	object_type_two	varchar(100) not null
+	object_type_two	varchar(1000) not null
 			constraint acs_rel_types_obj_type_2_fk
 			references acs_object_types (object_type),
 	role_two	varchar(100) constraint acs_rel_types_role_two_fk
@@ -48,6 +48,8 @@ create table acs_rel_types (
 	max_n_rels_two	integer
 			constraint acs_rel_types_max_n_2_ck
 			check (max_n_rels_two >= 0),
+        composable_p    boolean
+	                default 't' not null,
 	constraint acs_rel_types_n_rels_one_ck
 	check (min_n_rels_one <= max_n_rels_one),
 	constraint acs_rel_types_n_rels_two_ck
@@ -59,7 +61,7 @@ create index acs_rel_types_role_one_idx on acs_rel_types (role_one);
 create index acs_rel_types_objtypetwo_idx on acs_rel_types (object_type_two);
 create index acs_rel_types_role_two_idx on acs_rel_types (role_two);
 
-comment on table acs_rel_types is '
+comment on table acs_rel_types is $$
  Each row in <code>acs_rel_types</code> represents a type of
  relationship between objects. For example, the following DML
  statement:
@@ -69,9 +71,9 @@ comment on table acs_rel_types is '
    object_type_one, role_one, min_n_rels_one, max_n_rels_one,
    object_type_two, role_two, min_n_rels_two, max_n_rels_two)
  values
-  (''employment'',
-   ''person'', ''employee'', 0, null,
-   ''company'', ''employer'', 0, null)
+  ('employment',
+   'person', 'employee', 0, null,
+   'company', 'employer', 0, null)
  </pre></blockquote>
  defines an "employment" relationship type that can be expressed in
  in natural language as:
@@ -79,102 +81,183 @@ comment on table acs_rel_types is '
  A person may be the employee of zero or more companies, and a company
  may be the employer of zero or more people.
  </blockquote>
-';
+$$;
 
-create function acs_rel_type__create_role (varchar,varchar,varchar)
-returns integer as '
-declare
-  create_role__role                   alias for $1;  
-  create_role__pretty_name            alias for $2;  -- default null  
-  create_role__pretty_plural          alias for $3;  -- default null
-begin
+
+
+-- added
+select define_function_args('acs_rel_type__create_role','role,pretty_name;null,pretty_plural;null');
+
+--
+-- procedure acs_rel_type__create_role/3
+--
+CREATE OR REPLACE FUNCTION acs_rel_type__create_role(
+   create_role__role varchar,
+   create_role__pretty_name varchar,  -- default null
+   create_role__pretty_plural varchar -- default null
+
+) RETURNS integer AS $$
+DECLARE
+BEGIN
     insert into acs_rel_roles
      (role, pretty_name, pretty_plural)
     values
      (create_role__role, coalesce(create_role__pretty_name,create_role__role), coalesce(create_role__pretty_plural,create_role__role));
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create function acs_rel_type__create_role (varchar)
-returns integer as '
-declare
-  create_role__role                   alias for $1;  
-begin
+
+
+--
+-- procedure acs_rel_type__create_role/1
+--
+CREATE OR REPLACE FUNCTION acs_rel_type__create_role(
+   create_role__role varchar
+) RETURNS integer AS $$
+DECLARE
+BEGIN
     perform acs_rel_type__create_role(create_role__role, NULL, NULL);
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- procedure drop_role
-create function acs_rel_type__drop_role (varchar)
-returns integer as '
-declare
-  drop_role__role                   alias for $1;  
-begin
+
+
+-- added
+select define_function_args('acs_rel_type__drop_role','role');
+
+--
+-- procedure acs_rel_type__drop_role/1
+--
+CREATE OR REPLACE FUNCTION acs_rel_type__drop_role(
+   drop_role__role varchar
+) RETURNS integer AS $$
+DECLARE
+BEGIN
     delete from acs_rel_roles
     where role = drop_role__role;
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- function role_pretty_name
-create or replace function acs_rel_type__role_pretty_name (varchar)
-returns varchar as '
-declare
-  role_pretty_name__role        alias for $1;  
+
+
+-- added
+select define_function_args('acs_rel_type__role_pretty_name','role');
+
+--
+-- procedure acs_rel_type__role_pretty_name/1
+--
+CREATE OR REPLACE FUNCTION acs_rel_type__role_pretty_name(
+   role_pretty_name__role varchar
+) RETURNS varchar AS $$
+DECLARE
   v_pretty_name                 acs_rel_roles.pretty_name%TYPE;
-begin
+BEGIN
     select r.pretty_name into v_pretty_name
       from acs_rel_roles r
      where r.role = role_pretty_name__role;
 
     return v_pretty_name;
    
-end;' language 'plpgsql' stable strict;
+END;
+$$ LANGUAGE plpgsql stable strict;
 
 
 -- function role_pretty_plural
-create function acs_rel_type__role_pretty_plural (varchar)
-returns varchar as '
-declare
-  role_pretty_plural__role      alias for $1;  
+
+
+-- added
+select define_function_args('acs_rel_type__role_pretty_plural','role');
+
+--
+-- procedure acs_rel_type__role_pretty_plural/1
+--
+CREATE OR REPLACE FUNCTION acs_rel_type__role_pretty_plural(
+   role_pretty_plural__role varchar
+) RETURNS varchar AS $$
+DECLARE
   v_pretty_plural               acs_rel_roles.pretty_plural%TYPE;
-begin
+BEGIN
     select r.pretty_plural into v_pretty_plural
       from acs_rel_roles r
      where r.role = role_pretty_plural__role;
 
     return v_pretty_plural;
    
-end;' language 'plpgsql' stable strict;
+END;
+$$ LANGUAGE plpgsql stable strict;
 
 
 -- procedure create_type
-create function acs_rel_type__create_type (varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,integer,integer,varchar,varchar,integer,integer)
-returns integer as '
-declare
-  create_type__rel_type               alias for $1;  
-  create_type__pretty_name            alias for $2;  
-  create_type__pretty_plural          alias for $3;  
-  create_type__supertype              alias for $4;  -- default ''relationship''
-  create_type__table_name             alias for $5;  
-  create_type__id_column              alias for $6;  
-  create_type__package_name           alias for $7;  
-  create_type__object_type_one        alias for $8; 
-  create_type__role_one               alias for $9;  -- default null 
-  create_type__min_n_rels_one         alias for $10; 
-  create_type__max_n_rels_one         alias for $11; 
-  create_type__object_type_two        alias for $12; 
-  create_type__role_two               alias for $13; -- default null
-  create_type__min_n_rels_two         alias for $14; 
-  create_type__max_n_rels_two         alias for $15; 
+
+
+-- procedure create_type
+
+--  acs_rel_type__create_type /15 vs. /16 has
+--  /15 has no "roles" (one and two), but "type_extension_table"
+
+-- /16
+--   pos 1-7: same as /15
+--   pos 08: object_type_one (varchar) 
+--   pos 09: role_one (varchar) 
+--   pos 10: min_n_rels_one (integer)
+--   pos 11: max_n_rels (integer)
+--   pos 12: object_type_one (varchar) 
+--   pos 13: role_two (varchar) 
+--   pos 14: min_n_rels_two (integer)
+--   pos 15: max_n_rels_two (integer) 
+--   pos 16: composable_p (boolean)
+
+-- /15 
+--   pos 1-7: same as /15
+--   pos 08: type_extension_table (varchar)
+--   pos 09: object_type_one (varchar) 
+--   pos 10: min_n_rels_one (integer)
+--   pos 11: max_n_rels (integer)
+--   pos 12: object_type_two (varchar) 
+--   pos 13: min_n_rels_two (integer)
+--   pos 14: max_n_rels_two (integer) 
+--   pos 15: composable_p (boolean)
+
+
+select define_function_args('acs_rel_type__create_type','rel_type,pretty_name,pretty_plural,supertype;relationship,table_name,id_column,package_name,object_type_one,role_one;null,min_n_rels_one,max_n_rels_one,object_type_two,role_two;null,min_n_rels_two,max_n_rels_two,composable_p;t');
+
+--
+-- procedure acs_rel_type__create_type/16
+--
+CREATE OR REPLACE FUNCTION acs_rel_type__create_type(
+   create_type__rel_type varchar,
+   create_type__pretty_name varchar,
+   create_type__pretty_plural varchar,
+   create_type__supertype varchar, -- default 'relationship'
+   create_type__table_name varchar,
+   create_type__id_column varchar,
+   create_type__package_name varchar,
+   create_type__object_type_one varchar,
+   create_type__role_one varchar,  -- default null
+   create_type__min_n_rels_one integer,
+   create_type__max_n_rels_one integer,
+   create_type__object_type_two varchar,
+   create_type__role_two varchar,  -- default null
+   create_type__min_n_rels_two integer,
+   create_type__max_n_rels_two integer,
+   create_type__composable_p boolean default true
+
+) RETURNS integer AS $$
+DECLARE
 
   type_extension_table acs_object_types.type_extension_table%TYPE default null;
-  abstract_p   acs_object_types.abstract_p%TYPE      default ''f'';
+  abstract_p   acs_object_types.abstract_p%TYPE      default 'f';
   name_method  acs_object_types.name_method%TYPE     default null;     
-begin
+BEGIN
     PERFORM acs_object_type__create_type(
       create_type__rel_type,
       create_type__pretty_name,
@@ -193,43 +276,52 @@ begin
       object_type_one, role_one,
       min_n_rels_one, max_n_rels_one,
       object_type_two, role_two,
-      min_n_rels_two, max_n_rels_two)
+      min_n_rels_two, max_n_rels_two,
+      composable_p)
     values
      (create_type__rel_type,
       create_type__object_type_one, create_type__role_one,
       create_type__min_n_rels_one, create_type__max_n_rels_one,
       create_type__object_type_two, create_type__role_two,
-      create_type__min_n_rels_two, create_type__max_n_rels_two);
+      create_type__min_n_rels_two, create_type__max_n_rels_two,
+      create_type__composable_p);
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 
--- procedure create_type
-create function acs_rel_type__create_type (varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,integer,integer,varchar,integer,integer)
-returns integer as '
-declare
-  create_type__rel_type               alias for $1;  
-  create_type__pretty_name            alias for $2;  
-  create_type__pretty_plural          alias for $3;  
-  create_type__supertype              alias for $4;  -- default ''relationship''  
-  create_type__table_name             alias for $5;  
-  create_type__id_column              alias for $6;  
-  create_type__package_name           alias for $7;  
-  create_type__type_extension_table   alias for $8;  -- default null
-  create_type__object_type_one        alias for $9; 
-  create_type__min_n_rels_one         alias for $10; 
-  create_type__max_n_rels_one         alias for $11; 
-  create_type__object_type_two        alias for $12; 
-  create_type__min_n_rels_two         alias for $13; 
-  create_type__max_n_rels_two         alias for $14; 
 
-  abstract_p   acs_object_types.abstract_p%TYPE      default ''f'';
+
+--
+-- procedure acs_rel_type__create_type/15
+--
+CREATE OR REPLACE FUNCTION acs_rel_type__create_type(
+   create_type__rel_type varchar,
+   create_type__pretty_name varchar,
+   create_type__pretty_plural varchar,
+   create_type__supertype varchar,            -- default 'relationship'
+   create_type__table_name varchar,
+   create_type__id_column varchar,
+   create_type__package_name varchar,
+   create_type__type_extension_table varchar, -- default null
+   create_type__object_type_one varchar,
+   create_type__min_n_rels_one integer,
+   create_type__max_n_rels_one integer,
+   create_type__object_type_two varchar,
+   create_type__min_n_rels_two integer,
+   create_type__max_n_rels_two integer,
+   create_type__composable_p boolean default true
+
+) RETURNS integer AS $$
+DECLARE
+
+  abstract_p   acs_object_types.abstract_p%TYPE      default 'f';
   name_method  acs_object_types.name_method%TYPE     default null;     
   create_type__role_one  acs_rel_types.role_one%TYPE default null;           
   create_type__role_two  acs_rel_types.role_two%TYPE default null;
-begin
+BEGIN
 
     PERFORM acs_object_type__create_type(
       create_type__rel_type,
@@ -249,31 +341,43 @@ begin
       object_type_one, role_one,
       min_n_rels_one, max_n_rels_one,
       object_type_two, role_two,
-      min_n_rels_two, max_n_rels_two)
+      min_n_rels_two, max_n_rels_two,
+      composable_p)
     values
      (create_type__rel_type,
       create_type__object_type_one, create_type__role_one,
       create_type__min_n_rels_one, create_type__max_n_rels_one,
       create_type__object_type_two, create_type__role_two,
-      create_type__min_n_rels_two, create_type__max_n_rels_two);
+      create_type__min_n_rels_two, create_type__max_n_rels_two,
+      create_type__composable_p);
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- procedure drop_type
-create or replace function acs_rel_type__drop_type (varchar,boolean)
-returns integer as '
-declare
-  drop_type__rel_type               alias for $1;  
-  drop_type__cascade_p              alias for $2;  -- default ''f''  
+
+
+-- added
+select define_function_args('acs_rel_type__drop_type','rel_type,cascade_p;f');
+
+--
+-- procedure acs_rel_type__drop_type/2
+--
+CREATE OR REPLACE FUNCTION acs_rel_type__drop_type(
+   drop_type__rel_type varchar,
+   drop_type__cascade_p boolean -- default 'f'
+
+) RETURNS integer AS $$
+DECLARE
   v_cascade_p                       boolean;
-begin
+BEGIN
     -- XXX do cascade_p.
     -- JCD: cascade_p seems to be ignored in acs_o_type__drop_type anyway...
 
     if drop_type__cascade_p is null then 
-	v_cascade_p := ''f'';
+	v_cascade_p := 'f';
     else 
 	v_cascade_p := drop_type__cascade_p;
     end if;
@@ -285,7 +389,8 @@ begin
                                        v_cascade_p);
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 
@@ -394,16 +499,23 @@ create index acs_data_links_rel_tag_idx on acs_data_links (relation_tag);
 
 -- added by oumi@arsdigita.com - Jan 11, 2001
 
-create function acs_rels_in_tr () returns trigger as '
-declare
+
+
+--
+-- procedure acs_rels_in_tr/0
+--
+CREATE OR REPLACE FUNCTION acs_rels_in_tr(
+
+) RETURNS trigger AS $$
+DECLARE
   dummy integer;
   target_object_type_one acs_object_types.object_type%TYPE;
   target_object_type_two acs_object_types.object_type%TYPE;
   actual_object_type_one acs_object_types.object_type%TYPE;
   actual_object_type_two acs_object_types.object_type%TYPE;
-begin
+BEGIN
 
-    -- DRB: The obvious rewrite to use Dan''s port of this to use tree_ancestor_keys kills
+    -- DRB: The obvious rewrite to use Dan's port of this to use tree_ancestor_keys kills
     -- Postgres!!!  Argh!!!  This is fast, to, so there ...
 
     -- Get all the object type info from the relationship.
@@ -430,7 +542,7 @@ begin
                    where root1.tree_sortkey = parents1.tree_sortkey
                      and root2.tree_sortkey = parents2.tree_sortkey) then
 
-      raise EXCEPTION ''-20001: %  violation: Invalid object types. Object % (%) must be of type % Object % (%) must be of type %'', new.rel_type, 
+      raise EXCEPTION '-20001: %  violation: Invalid object types. Object % (%) must be of type % Object % (%) must be of type %', new.rel_type, 
                                          new.object_id_one,
                                          actual_object_type_one,
                                          target_object_type_one,
@@ -442,10 +554,12 @@ begin
 
     return new;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create trigger acs_rels_in_tr before insert or update on acs_rels
-for each row execute procedure acs_rels_in_tr ();
+
+ create trigger acs_rels_in_tr before insert or update on acs_rels
+ for each row execute procedure acs_rels_in_tr ();
 
 -- show errors
 
@@ -474,19 +588,25 @@ for each row execute procedure acs_rels_in_tr ();
 -- create or replace package body acs_rel
 -- function new
 
-select define_function_args('acs_rel__new','rel_id,rel_type,object_id_one,object_id_two,context_id,creation_user,creation_ip');
-create or replace function acs_rel__new (integer,varchar,integer,integer,integer,integer,varchar)
-returns integer as '
-declare
-  new__rel_id            alias for $1;  -- default null  
-  new__rel_type          alias for $2;  -- default ''relationship''
-  new__object_id_one     alias for $3;  
-  new__object_id_two     alias for $4;  
-  context_id             alias for $5;  -- default null
-  creation_user          alias for $6;  -- default null
-  creation_ip            alias for $7;  -- default null
+
+select define_function_args('acs_rel__new','rel_id;null,rel_type;relationship,object_id_one,object_id_two,context_id;null,creation_user;null,creation_ip;null');
+
+--
+-- procedure acs_rel__new/7
+--
+CREATE OR REPLACE FUNCTION acs_rel__new(
+   new__rel_id integer,   -- default null
+   new__rel_type varchar, -- default 'relationship'
+   new__object_id_one integer,
+   new__object_id_two integer,
+   context_id integer,    -- default null
+   creation_user integer, -- default null
+   creation_ip varchar    -- default null
+
+) RETURNS integer AS $$
+DECLARE
   v_rel_id               acs_rels.rel_id%TYPE;
-begin
+BEGIN
     v_rel_id := acs_object__new (
       new__rel_id,
       new__rel_type,
@@ -494,8 +614,8 @@ begin
       creation_user,
       creation_ip,
       context_id,
-      ''t'',
-      new__rel_type || '': '' || new__object_id_one || '' - '' || new__object_id_two,
+      't',
+      new__rel_type || ': ' || new__object_id_one || ' - ' || new__object_id_two,
       null
     );
 
@@ -506,20 +626,27 @@ begin
 
     return v_rel_id;
    
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- procedure delete
 select define_function_args('acs_rel__delete','rel_id');
-create function acs_rel__delete (integer)
-returns integer as '
-declare
-  rel_id                 alias for $1;  
-begin
+
+
+--
+-- procedure acs_rel__delete/1
+--
+CREATE OR REPLACE FUNCTION acs_rel__delete(
+   rel_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
     PERFORM acs_object__delete(rel_id);
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 -----------
 -- VIEWS --

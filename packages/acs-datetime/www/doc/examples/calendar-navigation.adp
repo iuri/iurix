@@ -1,18 +1,19 @@
-<!-- $Id: calendar-navigation.adp,v 1.3 2003/09/22 19:44:28 lars Exp $ -->
+<!-- $Id: calendar-navigation.adp,v 1.5.2.2 2016/10/25 07:08:52 gustafn Exp $ -->
 
-<master src="master">
+<master>
 
-<property name="title">@title;noquote@</property>
+<property name="doc(title)">@title;literal@</property>
+<property name="context">@context;literal@</property>
 
-<pre>dt_widget_calendar_navigation <i>base_url</i> <i>view</i> <i>date</i> <i>pass_in_vars</i> </pre>
+<pre>dt_widget_calendar_navigation <em>base_url</em> <em>view</em> <em>date</em> <em>pass_in_vars</em> </pre>
 
 <p>
 <dl>
-<p><dt><b>Parameters:</b></dt><dd>
-<b>base_url</b> (optional)<br>
-<b>view</b> (defaults to <code>week</code>)<br>
-<b>date</b> (optional)<br>
-<b>pass_in_vars</b> (optional)<br>
+<dt><strong>Parameters:</strong></dt><dd>
+<strong>base_url</strong> (optional)<br>
+<strong>view</strong> (defaults to <code>week</code>)<br>
+<strong>date</strong> (optional)<br>
+<strong>pass_in_vars</strong> (optional)<br>
 </dd>
 </dl>
 
@@ -32,13 +33,9 @@ in that url's environment: <code>view</code> and <code>date</code>.
 simply reads <code>view</code> and <code>date</code> as URL variables
 and uses them to initialize the display.
 
-<center>
-<form>
 
-@calendar_widget@
+@calendar_widget;noquote@
 
-</form>
-</center>
 
 <p>Click on any view, date, or other navigational element to change
 the display of this page.</p>

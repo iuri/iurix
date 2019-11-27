@@ -3,7 +3,7 @@
 ad_page_contract {
     Searches for procedures with containing query_string
     if lucky redirects to best match
-    Weight the different hits with the propper weights
+    Weight the different hits with the proper weights
 
     Shows a list of returned procs with links to proc-view
 
@@ -11,16 +11,16 @@ ad_page_contract {
 
     @author Todd Nightingale (tnight@arsdigita.com)
     @creation-date Jul 14, 2000
-    @cvs-id $Id: proc-search.tcl,v 1.12 2007/01/10 21:22:01 gustafn Exp $
+    @cvs-id $Id: proc-search.tcl,v 1.15.2.10 2017/04/21 15:35:24 gustafn Exp $
 } {
-    {name_weight:optional 0}
-    {doc_weight:optional 0}
-    {param_weight:optional 0}
-    {source_weight:optional 0}
+    {name_weight:notnull 0}
+    {doc_weight:integer,notnull 0}
+    {param_weight:integer,notnull 0}
+    {source_weight:integer,notnull 0}
     {search_type:optional 0}
-    {show_deprecated_p 0}
-    {show_private_p 0}
-    query_string
+    {show_deprecated_p:boolean,notnull 0}
+    {show_private_p:boolean,notnull 0}
+    {query_string:token,notnull}
 } -properties {
     title:onevalue
     context:onevalue
@@ -30,6 +30,8 @@ ad_page_contract {
     source_weight:onevalue
     query_string:onevalue
     results:multirow
+} -validate {
+    csrf { csrf::validate }
 }
 
 ##########################################################
@@ -46,7 +48,7 @@ if {$quick_view && [nsv_exists api_proc_doc $query_string]} {
 
 ###########################
 # No weighting use default:
-if { ($name_weight == 0) && ($doc_weight == 0) && ($param_weight == 0) && ($source_weight ==0) } {
+if { ($name_weight == 0) && ($doc_weight == 0) && ($param_weight == 0) && ($source_weight == 0) } {
     set name_weight 1
 }
 
@@ -72,17 +74,17 @@ foreach proc [nsv_array names api_proc_doc] {
     ###############
     ## Name Search:
     ###############
-    if {$name_weight} {
+    if {$name_weight != 0 && [string is integer -strict $name_weight]} {
         # JCD: this was a little perverse since exact matches were
         # actually worth less than matches in the name (if there were
         # 2 or more, which happens with namespaces) so I doubled the
         # value of an exact match.
 
         ##Exact match:
-        if {[string tolower $query_string] == [string tolower $proc]} {
+        if {[string tolower $query_string] eq [string tolower $proc]} {
             incr score [expr {$name_weight * 2}]
         } elseif { ! $exact_match_p } {
-            incr score [expr {$name_weight * [ad_keywords_score $query_string $proc]}] 
+            incr score [expr {$name_weight * [::apidoc::ad_keywords_score $query_string $proc]}] 
         }
     }
    
@@ -90,16 +92,16 @@ foreach proc [nsv_array names api_proc_doc] {
     ## Param Search:
     ################
     if {$param_weight} {
-        incr score [expr {$param_weight * [ad_keywords_score $query_string "$doc_elements(positionals) $doc_elements(switches)"]}]
+        incr score [expr {$param_weight * [::apidoc::ad_keywords_score $query_string "$doc_elements(positionals) $doc_elements(switches)"]}]
     }
     
 
     ##############
     ## Doc Search:
     ##############
-    if {$doc_weight} {
+    if {$doc_weight > 0} {
         
-        set doc_string "[lindex $doc_elements(main) 0]"
+        set doc_string [lindex $doc_elements(main) 0]
         if {[info exists doc_elements(param)]} {
             foreach parameter $doc_elements(param) {
                 append doc_string " $parameter"
@@ -108,16 +110,16 @@ foreach proc [nsv_array names api_proc_doc] {
         if {[info exists doc_elements(return)]} {
             append doc_string " $doc_elements(return)"
         }
-        incr score [expr {$doc_weight * [ad_keywords_score $query_string $doc_string]}]
+        incr score [expr {$doc_weight * [::apidoc::ad_keywords_score $query_string $doc_string]}]
         
     }
     
     #################
     ## Source Search:
     #################
-    if {$source_weight} {
+    if {$source_weight != 0} {
         if {![catch {set source [info body $proc]}]} {
-            incr score [expr {$source_weight * [ad_keywords_score $query_string $source]}] 
+            incr score [expr {$source_weight * [::apidoc::ad_keywords_score $query_string $source]}] 
         }    
     }
 
@@ -132,7 +134,7 @@ foreach proc [nsv_array names api_proc_doc] {
         if { $doc_elements(deprecated_p) } {
             lappend deprecated_matches [list $proc $score $args]
         } else {
-            if { $doc_elements(public_p) } { 
+            if { $doc_elements(protection) eq "public" } { 
                 lappend matches [list $proc $score $args]
             } else {
                 lappend private_matches [list $proc $score $args]
@@ -141,10 +143,10 @@ foreach proc [nsv_array names api_proc_doc] {
     }
 }
 
-set matches [lsort -command ad_sort_by_score_proc $matches]
+set matches [lsort -command ::apidoc::ad_sort_by_score_proc $matches]
 
 if {$quick_view && $matches ne "" || [llength $matches] == 1 } {
-    ad_returnredirect [api_proc_url [lindex [lindex $matches 0] 0]]
+    ad_returnredirect [api_proc_url [lindex $matches 0 0]]
     ad_script_abort
 }
 
@@ -155,10 +157,8 @@ multirow create results score proc args url
 
 foreach output $matches {
     incr counter
-    set proc  [lindex $output 0]    
-    set score [lindex $output 1]
-    set args  [lindex $output 2]
-    set url   [api_proc_url $proc]
+    lassign $output proc score args
+    set url [api_proc_url $proc]
     multirow append results $score $proc $args $url
 }
 
@@ -166,29 +166,39 @@ multirow create deprecated_results score proc args url
 
 foreach output $deprecated_matches {
     incr counter
-    set proc  [lindex $output 0]    
-    set score [lindex $output 1]
-    set args  [lindex $output 2]
-    set url   [api_proc_url $proc]
+    lassign $output proc score args
+    set url [api_proc_url $proc]
     multirow append deprecated_results $score $proc $args $url
 }
+global __csrf_token
 
-set show_deprecated_url [export_vars -base [ad_conn url] -override { { show_deprecated_p 1 } } { name_weight doc_weight param_weight source_weight search_type query_string show_private_p }]
+set show_deprecated_url [export_vars -base [ad_conn url] -override {{ show_deprecated_p 1 }} {
+    name_weight doc_weight param_weight source_weight search_type query_string show_private_p __csrf_token
+}]
 
-set hide_deprecated_url [export_vars -base [ad_conn url] -override { { show_deprecated_p 0 } } { name_weight doc_weight param_weight source_weight search_type query_string show_private_p }]
+set hide_deprecated_url [export_vars -base [ad_conn url] -override { { show_deprecated_p 0 } } {
+    name_weight doc_weight param_weight source_weight search_type query_string show_private_p __csrf_token
+}]
 
 
 multirow create private_results score proc args url
 
 foreach output $private_matches {
     incr counter
-    set proc  [lindex $output 0]    
-    set score [lindex $output 1]
-    set args  [lindex $output 2]
-    set url   [api_proc_url $proc]
+    lassign $output proc score args
+    set url [api_proc_url $proc]
     multirow append private_results $score $proc $args $url
 }
 
-set show_private_url [export_vars -base [ad_conn url] -override { { show_private_p 1 } } { name_weight doc_weight param_weight source_weight search_type query_string show_deprecated_p }]
+set show_private_url [export_vars -base [ad_conn url] -override { { show_private_p 1 } } {
+    name_weight doc_weight param_weight source_weight search_type query_string show_deprecated_p __csrf_token
+}]
+set hide_private_url [export_vars -base [ad_conn url] -override { { show_private_p 0 } } {
+    name_weight doc_weight param_weight source_weight search_type query_string show_deprecated_p __csrf_token
+}]
 
-set hide_private_url [export_vars -base [ad_conn url] -override { { show_private_p 0 } } { name_weight doc_weight param_weight source_weight search_type query_string show_deprecated_p }]
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

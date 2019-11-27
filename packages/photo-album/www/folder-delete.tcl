@@ -7,11 +7,10 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 1/8/2000
-    @cvs-id $Id: folder-delete.tcl,v 1.5 2003/11/18 22:59:03 rocaelh Exp $
+    @cvs-id $Id: folder-delete.tcl,v 1.9 2015/06/26 20:59:39 gustafn Exp $
 } {
-    folder_id:integer,notnull
-    {confirmed_p "f"}
-    return_url:optional
+    folder_id:naturalnum,notnull
+    {confirmed_p:boolean "f"}
 } -validate {
     valid_folder -requires {folder_id:integer} {
 	if [string equal [pa_is_folder_p $folder_id] "f"] {
@@ -40,10 +39,10 @@ ad_page_contract {
 # to delete a folder must have delete permission on the folder
 # and write on parent folder
 set parent_folder_id [db_string get_parent "select parent_id from cr_items where item_id = :folder_id"]
-ad_require_permission $folder_id delete
-ad_require_permission $parent_folder_id write
+permission::require_permission -object_id $folder_id -privilege delete
+permission::require_permission -object_id $parent_folder_id -privilege write
 
-if { [string equal $confirmed_p "t"]  } {
+if {$confirmed_p == "t"} {
     # they have confirmed that they want to delete the folder
 
     db_exec_plsql folder_delete "
@@ -51,14 +50,7 @@ if { [string equal $confirmed_p "t"]  } {
         content_folder.del(:folder_id);
     end;"
 
-    # HAM : added return_url
-    if { ![exists_and_not_null return_url] } {
-        #redirect back to index page with parent_id
-        ad_returnredirect "?folder_id=$parent_folder_id"
-    } else {
-        ad_returnredirect $return_url
-    }
-
+    ad_returnredirect "?folder_id=$parent_folder_id"
     ad_script_abort
 } else {
     # they still need to confirm

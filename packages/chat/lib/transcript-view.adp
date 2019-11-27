@@ -1,4 +1,4 @@
-<if @edit_p@ eq 1>
+<if @edit_p;literal@ true>
 <p><a class="button" href="@edit_url@">#chat.Edit#</a></p>
 </if>
 

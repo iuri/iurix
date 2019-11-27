@@ -43,7 +43,7 @@ things you can do:</para>
 psgml rpm</ulink> from <ulink url="http://sources.redhat.com/docbook-tools/">RedHat&#39;s
 docbook-tools</ulink> and install it as usual.</para></listitem>
 
-<listitem><para>On other systems: Get the tarball from the <ulink url="http://www.lysator.liu.se/~lenst/about_psgml/">PSGML Website.</ulink>
+<listitem><para>On other systems: Get the tarball from the <ulink url="https://www.emacswiki.org/emacs/PsgmlMode">PSGML Website.</ulink>
 Unpack it and follow the install instructions.</para></listitem>
 </orderedlist>
 
@@ -223,7 +223,7 @@ what its contents can be and lists its attributes.</entry>
 
 <para>Start with the <xref linkend="docbook-primer"/></para>
 
-<para><phrase role="cvstag">($Id: psgml-mode.xml,v 1.8 2006/07/17 05:38:37 torbenb Exp $)</phrase></para>
+<para><phrase role="cvstag">($Id: psgml-mode.xml,v 1.8.14.1 2017/06/15 13:56:42 gustafn Exp $)</phrase></para>
 
 </sect2>
 

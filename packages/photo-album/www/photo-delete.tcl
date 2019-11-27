@@ -9,11 +9,10 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 12/21/2000
-    @cvs-id $Id: photo-delete.tcl,v 1.5 2003/11/18 22:59:03 rocaelh Exp $
+    @cvs-id $Id: photo-delete.tcl,v 1.9 2015/06/26 20:59:39 gustafn Exp $
 } {
-    photo_id:integer,notnull
-    {confirmed_p "f"}
-    return_url:optional
+    photo_id:naturalnum,notnull
+    {confirmed_p:boolean "f"}
 } -validate {
     valid_photo -requires {photo_id:integer} {
 	if [string equal [pa_is_photo_p $photo_id] "f"] {
@@ -28,23 +27,14 @@ ad_page_contract {
     width:onevalue
 }
 
-
 # to delete a photo need delete on photo and write on parent album 
 set album_id [db_string get_parent_album "select parent_id from cr_items where item_id = :photo_id"]
-ad_require_permission $photo_id delete
-ad_require_permission $album_id write
+permission::require_permission -object_id $photo_id -privilege delete
+permission::require_permission -object_id $album_id -privilege write
 
-if { [string equal $confirmed_p "t"]  } {
+if {$confirmed_p == "t"} {
     # they have confirmed that they want to delete the photo
     # delete pa_photo object which drops all associate images and schedules binaries to be deleted
-
-    if {[apm_package_installed_p tags]} {
-	#Remove tags first!!
-	db_dml clear_tags {
-	    delete from tags_tags
-	    where item_id = :photo_id
-	}
-    }
 
     db_exec_plsql drop_image {
 	begin
@@ -54,12 +44,7 @@ if { [string equal $confirmed_p "t"]  } {
 
     pa_flush_photo_in_album_cache $album_id
     
-    # HAM : added return_url
-    if { ![exists_and_not_null return_url] } {
-        ad_returnredirect "album?album_id=$album_id"
-    } else {
-        ad_returnredirect $return_url
-    }
+    ad_returnredirect "album?album_id=$album_id"
     ad_script_abort
 
 } else {

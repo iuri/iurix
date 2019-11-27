@@ -6,10 +6,10 @@ ad_page_contract {
     @author Oumi Mehrotra (oumi@arsdigita.com)
 
     @creation-date 2001-02-23
-    @cvs-id $Id: change-join-policy.tcl,v 1.3 2002/09/06 21:49:59 jeffd Exp $
+    @cvs-id $Id: change-join-policy.tcl,v 1.4.2.4 2016/05/20 20:02:44 gustafn Exp $
 } {
-    group_id:integer,notnull
-    {return_url ""}
+    group_id:naturalnum,notnull
+    {return_url:localurl ""}
 } -properties {
     context:onevalue
     group_id:onevalue
@@ -44,5 +44,10 @@ db_1row group_info {
 }
 
 set possible_join_policies [list open "needs approval" closed]
-set QQreturn_url [ad_quotehtml $return_url]
+set QQreturn_url [ns_quotehtml $return_url]
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

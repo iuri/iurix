@@ -3,7 +3,7 @@ ad_library {
     
     @creation-date 2003-09-05
     @author Lars Pind (lars@collaboraid.biz)
-    @cvs-id $Id: sync-procs.tcl,v 1.34 2009/07/12 01:08:23 donb Exp $
+    @cvs-id $Id: sync-procs.tcl,v 1.35.2.3 2015/10/20 08:19:13 gustafn Exp $
 }
 
 namespace eval auth {}
@@ -194,8 +194,7 @@ Job message       : $job(message)
 To view the complete log, please visit\n$job(log_url)"
         } {
             # We don't fail hard here, just log an error
-            global errorInfo
-            ns_log Error "Error sending registration confirmation to [ad_system_owner].\n$errorInfo"
+            ns_log Error "Error sending registration confirmation to [ad_system_owner].\n$::errorInfo"
         }
     }
     
@@ -455,10 +454,9 @@ ad_proc -public auth::sync::job::action {
                 }
             } {
                 # Get errorInfo and log it
-                global errorInfo
-                ns_log Error "Error during batch syncrhonization job:\n$errorInfo"
+                ns_log Error "Error during batch syncrhonization job:\n$::errorInfo"
                 set success_p 0
-                set result(message) $errorInfo
+                set result(message) $::errorInfo
             }
         }
 
@@ -511,14 +509,16 @@ ad_proc -public auth::sync::purge_jobs {
 } {
     Purge jobs that are older than KeepBatchLogDays days.
 } {
-    if { ![exists_and_not_null num_days] } {
+    if { $num_days eq "" } {
         set num_days [parameter::get_from_package_key \
                           -parameter KeepBatchLogDays \
                           -package_key "acs-authentication" \
                           -default 0]
     }
     
-    validate_integer num_days $num_days
+    if {![string is integer -strict $num_days]} {
+	error "num_days ($num_days) has to be an integer"
+    }
 
     if { $num_days > 0 } { 
         db_dml purge_jobs {}
@@ -721,9 +721,9 @@ ad_proc -private auth::sync::get_doc::http::GetDocument {
     
     array set param $parameters
     
-    if { ($param(SnapshotURL) ne "" && [string equal [clock format [clock seconds] -format "%d"] "01"]) || \
-             $param(IncrementalURL) eq "" } {
-
+    if { ($param(SnapshotURL) ne "" && [clock format [clock seconds] -format "%d"] eq "01")
+         || $param(IncrementalURL) eq ""
+     } {
         # On the first day of the month, we get a snapshot
         set url $param(SnapshotURL)
         set result(snapshot_p) "t"
@@ -736,7 +736,8 @@ ad_proc -private auth::sync::get_doc::http::GetDocument {
         error "You must specify at least one URL to get."
     }
 
-    set result(document) [util_httpget $url]
+    set dict [util::http::get -url $url]
+    set result(document) [dict get $dict page]
 
     set result(doc_status) "ok"
 
@@ -798,9 +799,9 @@ ad_proc -private auth::sync::get_doc::file::GetDocument {
     
     array set param $parameters
     
-    if { ($param(SnapshotPath) ne "" && [string equal [clock format [clock seconds] -format "%d"] "01"]) || \
-             $param(IncrementalPath) eq "" } {
-
+    if { ($param(SnapshotPath) ne "" && [clock format [clock seconds] -format "%d"] eq "01")
+         || $param(IncrementalPath) eq ""
+     } {
         # On the first day of the month, we get a snapshot
         set path $param(SnapshotPath)
         set result(snapshot_p) "t"
@@ -985,3 +986,9 @@ ad_proc -public auth::sync::process_doc::ims::GetAcknowledgementDocument {
     
     return $doc
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -4,7 +4,7 @@ ad_page_contract {
     with a known secret as well as one with an unknown secret.
 
     @author Richard Li (richardl@arsdigita.com)
-    @cvs-id $Id: signed-cookies-test.tcl,v 1.2 2002/09/18 14:54:46 jeffd Exp $
+    @cvs-id $Id: signed-cookies-test.tcl,v 1.2.28.1 2015/09/10 08:21:08 gustafn Exp $
     @creation-date 19 October 2000
 
 } 
@@ -21,3 +21,8 @@ ns_return 200 text/html "
 cookies set. <a href=\"signed-cookies-test-2\">test it out</a>.
 
 [ad_footer]"
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

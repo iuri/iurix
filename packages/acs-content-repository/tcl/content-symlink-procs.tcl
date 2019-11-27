@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
     @arch-tag: 31c66882-e912-4db4-84fe-8a2b0890ffb0
-    @cvs-id $Id: content-symlink-procs.tcl,v 1.5 2006/06/04 00:45:23 donb Exp $
+    @cvs-id $Id: content-symlink-procs.tcl,v 1.6.2.1 2015/09/10 08:21:17 gustafn Exp $
 }
 
 namespace eval ::content::symlink {}
@@ -87,7 +87,7 @@ ad_proc -public content::symlink::new {
         [list creation_user $creation_user ] \
         [list creation_ip $creation_ip ] \
     ]
-    if {[exists_and_not_null creation_date]} {
+    if {[info exists creation_date] && $creation_date ne ""} {
         lappend var_list [list creation_date $creation_date ]
     }
     return [package_exec_plsql -var_list $var_list content_symlink new]
@@ -119,3 +119,9 @@ ad_proc -public content::symlink::resolve_content_type {
         [list item_id $item_id ] \
     ] content_symlink resolve_content_type]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

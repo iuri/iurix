@@ -4,11 +4,11 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-09-12
-  @cvs-id $Id: mount.tcl,v 1.3 2003/05/17 10:01:14 jeffd Exp $
+  @cvs-id $Id: mount.tcl,v 1.5.2.1 2015/09/10 08:21:47 gustafn Exp $
 } {
-  node_id:integer,notnull
+  node_id:naturalnum,notnull
   {expand:integer,multiple {}}
-  root_id:integer,optional
+  root_id:naturalnum,optional
 }
 
 set user_id [ad_conn user_id]
@@ -20,15 +20,21 @@ set context [list [list . "Site Map"] $page_title]
 set site_node_url [site_node::get_url -node_id $node_id]
 
 db_multirow -extend { url } unmounted packages_unmounted_select {} {
-    set url "mount-2?[export_vars { expand:multiple root_id node_id package_id }]"
+    set url [export_vars -base mount-2 { expand:multiple root_id node_id package_id }]
 }
 
 db_multirow -extend { url } mounted packages_mounted_select {} {
-    set url "mount-2?[export_vars { expand:multiple root_id node_id package_id}]"
+    set url [export_vars -base mount-2 { expand:multiple root_id node_id package_id}]
 }
 
 db_multirow -extend { url } singleton packages_singleton_select {} {
-    set url "mount-2?[export_vars { expand:multiple root_id node_id package_id}]"
+    set url [export_vars -base mount-2 { expand:multiple root_id node_id package_id}]
 }
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

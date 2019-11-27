@@ -3,7 +3,7 @@ ad_library {
 
     @author Jon Griffin <jon@jongriffin.com>
     @creation-date 2001-08-28
-    @cvs-id $Id: acs-reference-procs.tcl,v 1.1 2001/08/29 04:37:15 jong Exp $
+    @cvs-id $Id: acs-reference-procs.tcl,v 1.1.30.1 2015/09/10 08:21:32 gustafn Exp $
 }
 
 ad_proc -private acs_reference_get_db_structure {
@@ -13,3 +13,9 @@ ad_proc -private acs_reference_get_db_structure {
 } {
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

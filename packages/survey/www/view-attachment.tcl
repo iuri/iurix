@@ -10,17 +10,17 @@ ad_page_contract {
   @author jbank@arsdigita.com
   @author nstrug@arsdigita.com
   @date   28th September 2000
-  @cvs-id $Id: view-attachment.tcl,v 1.2 2003/03/12 01:05:39 daveb Exp $
+  @cvs-id $Id: view-attachment.tcl,v 1.4 2014/10/27 16:41:56 victorg Exp $
 } {
 
-  response_id:integer,notnull
-  question_id:integer,notnull
+  response_id:naturalnum,notnull
+  question_id:naturalnum,notnull
 
 } -validate {
     attachment_exists -requires {response_id question_id} {
 	db_1row get_file_info {}
 
-	if { [empty_string_p $file_type] } {
+	if { $file_type eq "" } {
 	    ad_complain "[_ survey.lt_Couldnt_find_attachment]"
 	}
     }

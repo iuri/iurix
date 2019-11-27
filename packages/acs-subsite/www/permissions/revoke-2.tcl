@@ -4,9 +4,9 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-08-20
-  @cvs-id $Id: revoke-2.tcl,v 1.5 2007/01/10 21:22:09 gustafn Exp $
+  @cvs-id $Id: revoke-2.tcl,v 1.7.2.1 2015/09/10 08:21:50 gustafn Exp $
 } {
-  object_id:integer,notnull
+  object_id:naturalnum,notnull
   revoke_list:multiple
   { operation "" }
   {application_url ""}
@@ -24,4 +24,10 @@ if {$operation eq "Yes"} {
     }
 }
 
-ad_returnredirect "one?[export_vars {object_id application_url}]"
+ad_returnredirect [export_vars -base one {object_id application_url}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -6,14 +6,13 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Dec  7 18:09:49 2000
-    @cvs-id $Id: index.tcl,v 1.3 2003/05/17 10:00:06 jeffd Exp $
+    @cvs-id $Id: index.tcl,v 1.4.6.2 2016/06/06 18:28:20 gustafn Exp $
 
 } {
     {view_by "group_type"}
 } -validate {
     view_by_valid_p {
-	set valid_view_by_list [list group_type rel_type]
-	if { [lsearch $valid_view_by_list $view_by] == -1} { 
+	if { $view_by ni {group_type rel_type}} { 
 	    ad_complain "view_by is invalid."
 	}
     }
@@ -24,7 +23,8 @@ ad_page_contract {
     view_by:onevalue
 }
 
-set context [list "Groups"]
+set context [list [_ acs-subsite.Groups]]
+set doc(title) [_ acs-subsite.Group_administration]
 
 set this_url [ad_conn url]
 
@@ -37,5 +37,12 @@ db_1row subsite_info {
       and ag.package_id = :package_id
 }
 
+set intro_text [lang::util::localize [_ acs-subsite.Currently_the_instance_name_has_the_following_groups]]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

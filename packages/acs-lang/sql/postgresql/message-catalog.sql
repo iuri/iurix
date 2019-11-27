@@ -5,7 +5,7 @@
 -- @author Jeff Davis (davis@xarg.net)
 -- @author Christian Hvid
 -- @creation-date 2000-09-10
--- @cvs-id $Id: message-catalog.sql,v 1.17 2006/09/25 20:41:12 byronl Exp $
+-- @cvs-id $Id: message-catalog.sql,v 1.17.14.1 2017/04/21 16:06:05 gustafn Exp $
 --
 
 begin;
@@ -114,7 +114,7 @@ create table lang_translate_columns (
         column_id               integer 
                                 constraint ltc_column_id_pk 
                 		primary key,
-        -- cant do references on user_tables cause oracle sucks
+        -- can't do references on user_tables cause oracle sucks
         on_which_table          varchar(50),
         on_what_column          varchar(50),
         --

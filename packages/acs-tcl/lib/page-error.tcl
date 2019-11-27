@@ -5,7 +5,7 @@ ad_page_contract {
     @author Victor Guerra (guerra@galileo.edu)
     @creation-date 2005-02-03
     @arch-tag: 983f3d87-40c8-4327-8873-c6a01ba7d875
-    @cvs-id $Id: page-error.tcl,v 1.7 2009/07/12 01:08:30 donb Exp $
+    @cvs-id $Id: page-error.tcl,v 1.10.2.3 2016/01/02 00:46:27 gustafn Exp $
 } {
     {bug_number ""}
 }
@@ -15,15 +15,13 @@ set user_agent_p 1
 set error_info $stacktrace
 set comment_action 0
 
-
-
 set return_url $prev_url
 
 if {$user_id eq 0} {
-    set user_name "[_ acs-tcl.Public_User]"
+    set user_name [_ acs-tcl.Public_User]
     set public_userm_email [parameter::get -package_id [ad_acs_kernel_id] -parameter HostAdministrator -default ""]
 } else {
-    db_1row get_user_info { *SQL* }
+    db_1row get_user_info {}
     set public_userm_email $user_email
 }
 
@@ -37,18 +35,18 @@ set error_desc_email "
  --------------------------------------------------------<br>
                    [_ acs-tcl.Error_Report]<br>
  --------------------------------------------------------<br>
-<strong>[_ acs-tcl.Previus]</strong> $return_url<br>
-<strong>[_ acs-tcl.Page]</strong> $error_url<br>
-<strong>[_ acs-tcl.File]</strong> $error_file<br>
-<strong>[_ acs-tcl.User_Name]</strong> $user_name<br>
-<strong>[_ acs-tcl.lt_User_Id_of_the_user_t]</strong> $user_id<br>
-<strong>IP:</strong> [ns_conn peeraddr]<br>
-<strong>[_ acs-tcl.Browser_of_the_user]</strong> [ad_quotehtml [ns_set get [ns_conn headers] User-Agent]]<br>
+<strong>[_ acs-tcl.Previus]</strong> [ns_quotehtml $return_url]<br>
+<strong>[_ acs-tcl.Page]</strong> [ns_quotehtml $error_url]<br>
+<strong>[_ acs-tcl.File]</strong> [ns_quotehtml $error_file]<br>
+<strong>[_ acs-tcl.User_Name]</strong> [ns_quotehtml $user_name]<br>
+<strong>[_ acs-tcl.lt_User_Id_of_the_user_t]</strong> [ns_quotehtml $user_id]<br>
+<strong>IP:</strong> [ns_quotehtml [ns_conn peeraddr]]<br>
+<strong>[_ acs-tcl.Browser_of_the_user]</strong> [ns_quotehtml [ns_set get [ns_conn headers] User-Agent]]<br>
 <br>
 -----------------------------<br>
 [_ acs-tcl.Error_details]<br>
 -----------------------------<br>
-<pre>[ad_quotehtml $error_info]</pre>
+<pre>[ns_quotehtml $error_info]</pre>
 <br>
 ------------------------------<br>
 <br>
@@ -56,7 +54,10 @@ set error_desc_email "
 [_ acs-tcl.lt_NB_This_error_was_sub]"
 
 if { $bug_number eq "" && $send_email_p} {
-    acs_mail_lite::send -send_immediately -to_addr $send_to -from_addr $public_userm_email -subject $subject -body $error_desc_email
+    acs_mail_lite::send -send_immediately \
+	-to_addr $send_to -from_addr $public_userm_email \
+	-subject $subject \
+	-body $error_desc_email
 }
 set bt_instance [parameter::get -package_id [ad_acs_kernel_id] \
 		     -parameter BugTrackerInstance -default ""]
@@ -102,7 +103,7 @@ if {$auto_submit_p && $user_id > 0} {
 	    -user_id $user_id
 	
 	bug_tracker::bugs_exist_p_set_true -package_id $bt_package_id
-        db_dml insert_auto_bug { *SQL* }
+        db_dml insert_auto_bug {}
     } else {
 	
 	#Comment on the Existing Bug even if the user dont want to add
@@ -112,7 +113,7 @@ if {$auto_submit_p && $user_id > 0} {
 	set bug_id $exist_bug
 	
 	if {$bug_number eq ""} {
-	    db_dml increase_reported_times { *SQL* }
+	    db_dml increase_reported_times {}
 	}
 	
 	# Get the bug data
@@ -256,29 +257,20 @@ if {$auto_submit_p && $user_id > 0} {
 
 	array set row [list]
 	
-#	if { $enabled_action_id ne "" } {
-#	    foreach field [workflow::action::get_element -action_id $action_id -element edit_fields] {
-#		set row($field) [element get_value bug_edit $field]
-#	    }
-#	    foreach {category_id category_name} [bug_tracker::category_types] {
-#		set row($category_id) [element get_value bug_edit $category_id]
-#	    }
-#	}
-	
 	set description [element get_value bug_edit description]
 	set error_desc_html "
  -------------------------------------------------------- <br>
                    [_ acs-tcl.Error_Report] <br>
  -------------------------------------------------------- <br>
-<br><strong>[_ acs-tcl.Previus]</strong> $prev_url
-<br><strong>[_ acs-tcl.Page]</strong> $error_url
-<br><strong>[_ acs-tcl.File]</strong> $error_file
-<br><strong>[_ acs-tcl.User_Name]</strong> $user_name
-<br><strong>[_ acs-tcl.lt_User_Id_of_the_user_t]</strong> $user_id
-<br>[_ acs-tcl.Browser_of_the_user]</strong> [ad_quotehtml [ns_set get [ns_conn headers] User-Agent]]
+<br><strong>[_ acs-tcl.Previus]</strong> [ns_quotehtml $prev_url]
+<br><strong>[_ acs-tcl.Page]</strong> [ns_quotehtml $error_url]
+<br><strong>[_ acs-tcl.File]</strong> [ns_quotehtml $error_file]
+<br><strong>[_ acs-tcl.User_Name]</strong> [ns_quotehtml $user_name]
+<br><strong>[_ acs-tcl.lt_User_Id_of_the_user_t]</strong> [ns_quotehtml $user_id]
+<br>[_ acs-tcl.Browser_of_the_user]</strong> [ns_quotehtml [ns_set get [ns_conn headers] User-Agent]]
 <br><br><strong>[_ acs-tcl.User_comments]</strong>  
 <br>
-[template::util::richtext::get_property contents $description] <br>
+[ns_quotehtml [template::util::richtext::get_property contents $description]]<br>
 <br>"
  
   foreach available_enabled_action_id [workflow::case::get_available_enabled_action_ids -case_id $case_id] {
@@ -327,7 +319,11 @@ if { ![form is_valid bug_edit] } {
         }
     }
     # Display value for patches
-    set bug(patches_display) "[bug_tracker::get_patch_links -bug_id $bug(bug_id) -show_patch_status $show_patch_status] &nbsp; \[ <a href=\"patch-add?[export_vars { { bug_number $bug(bug_number) } { component_id $bug(component_id) } }]\">[_ bug-tracker.Upload_Patch]</a> \]"
+    set href [export_vars -base patch-add { { bug_number $bug(bug_number) } { component_id $bug(component_id) } }]
+    set bug(patches_display) [subst {
+	[bug_tracker::get_patch_links -bug_id $bug(bug_id) -show_patch_status $show_patch_status]
+	&nbsp; \[ <a href="[ns_quotehtml $href]">[_ bug-tracker.Upload_Patch]</a> \]
+    }]
     
     # Hide elements that should be hidden depending on the bug status
     foreach element $bug(hide_fields) {
@@ -373,7 +369,7 @@ if { ![form is_valid bug_edit] } {
     }
     # Add empty option to resolution code
     if { $enabled_action_id ne "" } {
-        if { [lsearch [workflow::action::get_element -action_id $action_id -element edit_fields] "resolution"] == -1 } {
+        if {"resolution" ni [workflow::action::get_element -action_id $action_id -element edit_fields]} {
             element set_properties bug_edit resolution -options [concat {{{} {}}} [element get_property bug_edit resolution options]]
         }
     } else {
@@ -409,3 +405,9 @@ if { ![form is_valid bug_edit] } {
 }    
     
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

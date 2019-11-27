@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Nov  8 18:29:11 2000
-    @cvs-id $Id: delete-2.tcl,v 1.5 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: delete-2.tcl,v 1.7.2.5 2016/07/03 11:38:02 gustafn Exp $
 
 } {
     group_type
-    { return_url "" }
+    { return_url:localurl "" }
     { operation "" }
 } -properties {
     context:onevalue
@@ -24,7 +24,7 @@ ad_page_contract {
 
 if { $operation ne "Yes, I really want to delete this group type" } {
     if { $return_url eq "" } {
-	ad_returnredirect "one?[ad_export_vars {group_type}]"
+	ad_returnredirect [export_vars -base one {group_type}]
     } else {
 	ad_returnredirect $return_url
     }
@@ -42,14 +42,7 @@ if { ![db_0or1row select_type_info {
     set package_name $group_type
 }
     
-if { [db_string package_exists {
-    select case when exists (select 1 
-                               from user_objects o
-                              where o.object_type='PACKAGE' 
-                                and o.object_name = upper(:package_name))
-           then 1 else 0 end
-      from dual
-}] } {
+if { [db_string package_exists {}] } {
     lappend plsql [list "package_drop" [db_map package_drop]]
 } else {
     set package_name ""
@@ -61,13 +54,7 @@ lappend plsql [list "delete_rel_types" [db_map delete_rel_types]]
 # Remove the group_type
 lappend plsql [list "delete_group_type" [db_map delete_group_type]]
 
-if { [db_string type_exists {
-    select case when exists (select 1 from acs_object_types t where t.object_type = :group_type)
-                then 1
-                else 0
-           end
-      from dual
-}] } {
+if { [db_string type_exists {}] } {
     lappend plsql [list "drop_type" [db_map drop_type]]
 }
 
@@ -91,14 +78,7 @@ db_transaction {
     # First delete the groups
     if { $package_name ne "" } {
 
-	foreach group_id [db_list select_group_ids {
-	    select o.object_id
-	    from acs_objects o, acs_object_party_privilege_map perm
-	    where perm.object_id = o.object_id
-              and perm.party_id = :user_id
-              and perm.privilege = 'delete'
-	      and o.object_type = :group_type
-	}] {
+	foreach group_id [db_list select_group_ids {}] {
 	    group::delete $group_id
 	}
     }
@@ -115,3 +95,9 @@ db_transaction {
 package_object_view_reset $group_type
 
 ad_returnredirect $return_url 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

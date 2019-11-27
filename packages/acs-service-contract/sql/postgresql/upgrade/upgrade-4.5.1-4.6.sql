@@ -3,20 +3,32 @@
 -- @author Vinod Kurup (vinod@kurup.com)
 -- @creation_date 2002-08-14
 --
--- $Id: upgrade-4.5.1-4.6.sql,v 1.2 2002/11/30 17:21:34 jeffd Exp $
+-- $Id: upgrade-4.5.1-4.6.sql,v 1.3 2013/03/30 17:40:53 gustafn Exp $
 
 -- UPGRADE ISSUE #1
 -- add more verbose error message
 
-create or replace function acs_sc_binding__new(integer,integer)
-returns integer as '
-declare
-    p_contract_id		alias for $1;
-    p_impl_id			alias for $2;
+
+
+-- added
+
+-- old define_function_args('acs_sc_binding__new','contract_id,impl_id')
+-- new
+select define_function_args('acs_sc_binding__new','contract_id,impl_id');
+
+
+--
+-- procedure acs_sc_binding__new/2
+--
+CREATE OR REPLACE FUNCTION acs_sc_binding__new(
+   p_contract_id integer,
+   p_impl_id integer
+) RETURNS integer AS $$
+DECLARE
     v_contract_name		varchar;
     v_impl_name			varchar;
     v_count			integer;
-begin
+BEGIN
 
     v_contract_name := acs_sc_contract__get_name(p_contract_id);
     v_impl_name := acs_sc_impl__get_name(p_impl_id);
@@ -30,7 +42,7 @@ begin
 			       and impl_id = p_impl_id);
 
     if v_count > 0 then
-        raise exception ''Binding of % to % failed since certain operations are not implemented.'', v_contract_name, v_impl_name;
+        raise exception 'Binding of % to % failed since certain operations are not implemented.', v_contract_name, v_impl_name;
     end if;
 
     insert into acs_sc_bindings (
@@ -43,5 +55,6 @@ begin
 
     return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 

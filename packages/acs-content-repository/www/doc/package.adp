@@ -35,11 +35,11 @@ See also: @info.see@
 
 <a name="api"><h3>API</h3></a>
 <multiple name=methods>
-  <include src=method package=@package_name;noquote@ method=@methods.name;noquote@>
+  <include src=method package="@package_name;literal@" method="@methods.name;literal@">
   <p>&nbsp;</p>
 </multiple>
 
-Last Modified: $Id: package.adp,v 1.2 2003/05/22 14:02:53 jeffd Exp $
+Last Modified: $Id: package.adp,v 1.3 2015/07/14 22:26:55 gustafn Exp $
 
 </body>
 </html>

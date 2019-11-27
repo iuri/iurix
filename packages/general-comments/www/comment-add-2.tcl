@@ -6,16 +6,16 @@ ad_page_contract {
     @author Phong Nguyen <phong@arsdigita.com>
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-add-2.tcl,v 1.6 2002/11/07 08:32:49 peterm Exp $
+    @cvs-id $Id: comment-add-2.tcl,v 1.7.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    object_id:integer,notnull
+    object_id:naturalnum,notnull
     { object_name "[acs_object_name $object_id]" }
     title:notnull
     content:html,notnull
     comment_mime_type:notnull
-    { context_id "$object_id" }
+    { context_id:naturalnum "$object_id" }
     { category {} }
-    { return_url {} }
+    { return_url:localurl {} }
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -30,12 +30,12 @@ ad_page_contract {
 }
 
 # check to see if the user can create comments on this object
-ad_require_permission $object_id general_comments_create
+permission::require_permission -object_id $object_id -privilege general_comments_create
 
 # ad_page_contract does not set object_name to
 # [acs_object_name $object_id] if object_name is passed
 # in as an empty string.
-if { [empty_string_p $object_name] } {
+if { $object_name eq "" } {
     set object_name [acs_object_name $object_id]
 }
 
@@ -46,3 +46,9 @@ set target "comment-add-3"
 set html_content [ad_html_text_convert -from $comment_mime_type -- $content]
 
 ad_return_template "comment-ae-2"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -99,7 +99,7 @@ Responses:</msg>
   <msg key="lt_Cancel_and_return_to__1">Cancel and return to survey administration</msg>
   <msg key="lt_Completely_delete">Completely delete %user_name_var%'s response from %response_date_var%? (Note: This can not be undone.)</msg>
   <msg key="lt_Confirm_Survey_Detail">Confirm Survey Details</msg>
-  <msg key="lt_Copying_a_survey_will">Copying a survey will create a new survey with copies of all the questions.&lt;br /&gt; None of the response data will be duplicated.</msg>
+  <msg key="lt_Copying_a_survey_will">Copying a survey will create a new survey with copies of all the questions.&lt;br&gt; None of the response data will be duplicated.</msg>
   <msg key="lt_Could_not_find_a_surv">Could not find a survey question</msg>
   <msg key="lt_Could_not_find_the_re">Could not find the response</msg>
   <msg key="lt_Couldnt_find_attachment">Couldn't find attachment. Couldn't find an attachment matching the response_id %response_id%, question_id %question_id% given.</msg>
@@ -113,7 +113,7 @@ Responses:</msg>
   <msg key="lt_Everyone_eligible_to_">Everyone eligible to take this survey</msg>
   <msg key="lt_Everyone_who_has_alre">Everyone who has already taken this survey</msg>
   <msg key="lt_Everyone_who_has_not_">Everyone who has not yet taken this survey</msg>
-  <msg key="lt_For_Multiple_Choicebr">For Multiple Choice&lt;br /&gt;Enter a List of Valid Responses&lt;br /&gt; (enter one choice per line)</msg>
+  <msg key="lt_For_Multiple_Choicebr">For Multiple Choice&lt;br&gt;Enter a List of Valid Responses&lt;br&gt; (enter one choice per line)</msg>
   <msg key="lt_had_to_say_in_respons">had to say in response to %survey_name%:</msg>
   <msg key="lt_Here_is_how_your_surv">Here is how your survey description will appear:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Administer Surveys&quot;&gt;</msg>

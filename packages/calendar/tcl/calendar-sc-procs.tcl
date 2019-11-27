@@ -3,7 +3,7 @@ ad_library {
 
     @creation-date 2004-04-01
     @author Jeff Davis davis@xarg.net
-    @cvs-id $Id: calendar-sc-procs.tcl,v 1.2 2006/08/16 17:52:14 daveb Exp $
+    @cvs-id $Id: calendar-sc-procs.tcl,v 1.3.2.1 2015/09/10 08:30:14 gustafn Exp $
 }
 
 namespace eval calendar::fts {}
@@ -15,16 +15,16 @@ ad_proc -private calendar::fts::datasource { cal_item_id } {
     @param cal_item_id
 
     @author davis@xarg.net
-    @creation_date 2004-04-01
+    @creation-date 2004-04-01
 } {
     calendar::item::get -cal_item_id $cal_item_id -array row
 
     # build a text content 
     foreach key {description pretty_day_of_week start_time end_time full_start_date start_date_ansi} {
-        if {[string eq $key start_time]} { 
+        if {$key eq "start_time"} { 
             append content "from "
         }
-        if {[string eq $key end_time]} { 
+        if {$key eq "end_time"} { 
             append content "to "
         }
         append content "$row($key) "
@@ -43,7 +43,7 @@ ad_proc -private calendar::fts::url { cal_item_id } {
     returns a url for an event to the search package
 
     @author davis@xarg.net
-    @creation_date 2004-04-01
+    @creation-date 2004-04-01
 } {
     calendar::item::get -cal_item_id $cal_item_id -array row
     return "[ad_url][apm_package_url_from_id $row(calendar_package_id)]cal-item-view?cal_item_id=$cal_item_id"
@@ -94,3 +94,9 @@ ad_proc -private calendar::sc::register_acs_event_fts_impl {} {
 
    acs_sc::impl::new_from_spec -spec $spec
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -4,7 +4,7 @@ ad_page_contract {
     Based on the presentation type selected in previous form,
     gives the user various options on how to lay out the question.
 
-    @param section_id          integer determining survey we're dealing with
+    @param section_id         integer determining survey we're dealing with
     @param after              optional integer determining placement of question
     @param question_text      text comprising this question
     @param presentation_type  string denoting widget used to provide answer
@@ -15,21 +15,22 @@ ad_page_contract {
     @author Jin Choi (jsc@arsdigita.com)
     @author nstrug@arsdigita.com
     @date   February 9, 2000
-    @cvs-id $Id: question-add-2.tcl,v 1.4 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id $Id: question-add-2.tcl,v 1.8 2015/06/27 20:46:15 gustafn Exp $
 } {
 
-    section_id:integer
+    section_id:naturalnum,notnull
     question_text:html,notnull
     presentation_type
     {after:integer ""}
-    {required_p t}
-    {active_p t}
+    {required_p:boolean t}
+    {active_p:boolean t}
     {n_responses ""}
+
 }
 
 set package_id [ad_conn package_id]
-set user_id [ad_get_user_id]
-ad_require_permission $package_id survey_create_question
+set user_id [ad_conn user_id]
+permission::require_permission -object_id $package_id -privilege survey_create_question
 
 set question_id [db_nextval acs_object_id_seq]
 get_survey_info -section_id $section_id
@@ -62,12 +63,12 @@ ad_form -name create-question-2 -action question-add-3 -form {
 # set exception_count 0
 # set exception_text ""
 
-# if { $type != "general" && $type != "scored" } {
+# if { $type ne "general" && $type ne "scored" } {
 #     incr exception_count
 #     append exception_text "<li>Surveys of type $type are not currently available\n"
 # }
 
-# if { $presentation_type == "upload_file" } {
+# if { $presentation_type eq "upload_file" } {
 # #    incr exception_count
 # #    append exception_text "<li>The presentation type: upload file is not supported at this time."
     
@@ -80,7 +81,7 @@ ad_form -name create-question-2 -action question-add-3 -form {
 
 # Survey-type specific question settings
 
-if { $type == "scored" } {
+if { $type eq "scored" } {
 
     db_1row count_variable_names ""
 
@@ -107,9 +108,9 @@ if { $type == "scored" } {
     append response_fields "</table>\n"
     set response_type_html "<input type=hidden name=abstract_data_type value=\"choice\">"
     set presentation_options_html ""
-    set form_var_list [export_form_vars section_id question_id question_text presentation_type after required_p active_p type n_variables variable_id_list]
+    set form_var_list [export_vars -form {section_id question_id question_text presentation_type after required_p active_p type n_variables variable_id_list}]
 
-} elseif { $type == "general" } {
+} elseif { $type eq "general" } {
 
 # Display presentation options for sizing text input fields and textareas.
 
@@ -155,9 +156,7 @@ if { $type == "scored" } {
 	    ad_form -extend -name create-question-2 -form {
 		{valid_responses:text(textarea) {label "[_ survey.lt_Valid_Resposnes_enter]"} {html {rows 10 cols 50}}}
 		{abstract_data_type:text(hidden) {value "choice"}}
-		{response_type:text(select) {label "[_ survey.Response_type]"} {help_text "[_ survey.Response_type_help]"} {options {{{[_ survey.Line_answer]} {standard}} {{[_ survey.Personal]} {personal}}}} }
-	    {n_v_responses:integer(text),optional {label "[_ survey.N_Respostas]"} {help_text "[_ survey.N_Respostas_Help]"}}
-	   }
+	    }
 	}
 
 
@@ -179,6 +178,6 @@ if { $type == "scored" } {
 ad_form -extend -name create-question-2 -form {
     {presentation_alignment:text(radio) {options {{"[_ survey.Beside_the_question]" beside} {"[_ survey.Below_the_question]" below}}} {value below} {label "[_ survey.lt_Presentation_Alignmen]"}}
 }
-set context [list [list "one?[export_url_vars survey_id]" $survey_info(name)] "[_ survey.Add_A_Question]"]
+set context [list [list [export_vars -base one {survey_id}] $survey_info(name)] "[_ survey.Add_A_Question]"]
 
 ad_return_template

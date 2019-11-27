@@ -15,9 +15,15 @@
 ad_page_contract {
 
     @author Arjun Sanyal (arjun@openforce.net)
-    @cvs-id $Id: redirect.tcl,v 1.3 2002/09/10 22:22:22 jeffd Exp $
+    @cvs-id $Id: redirect.tcl,v 1.3.24.1 2015/09/10 08:30:13 gustafn Exp $
 
 } -query {
     {referer:notnull}
 }
 ad_returnredirect $referer
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

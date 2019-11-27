@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Peter Marklund
 
-    @cvs-id $Id: whos-online.tcl,v 1.11 2009/09/13 23:54:41 donb Exp $
+    @cvs-id $Id: whos-online.tcl,v 1.11.8.1 2015/09/10 08:21:53 gustafn Exp $
 } -properties {
     title:onevalue
     context:onevalue
@@ -53,3 +53,9 @@ foreach elm $users {
         [lindex $elm 1] \
         [lindex $elm 2]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

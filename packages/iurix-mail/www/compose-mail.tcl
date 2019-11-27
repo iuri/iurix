@@ -45,5 +45,5 @@ ad_form -name send-email -form {
 
     set msg "Your message has been sent! <br> $to_address <br><br><br> $subject"
     ad_returnredirect [export_vars -base . {msg}]
-    ad_script_abort
+  //  ad_script_abort
 }

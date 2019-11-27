@@ -5,9 +5,9 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 22, 2000
-    @cvs-id $Id: chat.tcl,v 1.13 2008/11/09 23:29:23 donb Exp $
+    @cvs-id $Id: chat.tcl,v 1.13.4.2 2016/11/22 18:34:35 antoniop Exp $
 } {
-    room_id
+    room_id:naturalnum,notnull
     {client "ajax"}
     {message:html ""}
 } -properties {
@@ -25,10 +25,9 @@ ad_page_contract {
     msgs:multirow
 }
 
-ns_log Notice "CHAT"
-
 if { [catch {set room_name [chat_room_name $room_id]} errmsg] } {
     ad_return_complaint 1 "[_ chat.Room_not_found]"
+    ad_script_abort
 }
 
 set doc(title) $room_name
@@ -38,13 +37,10 @@ set context [list $doc(title)]
 
 auth::require_login
 set user_id [ad_conn user_id]
-set read_p [permission::permission_p -object_id $room_id -privilege "chat_room_view"]
-set write_p [permission::permission_p -object_id $room_id -privilege "chat_room_edit"]
-set ban_p [permission::permission_p -object_id $room_id -privilege "chat_ban"]
+set read_p  [permission::permission_p -object_id $room_id -privilege "chat_read"]
+set write_p [permission::permission_p -object_id $room_id -privilege "chat_write"]
+set ban_p   [permission::permission_p -object_id $room_id -privilege "chat_ban"]
 set moderate_room_p [chat_room_moderate_p $room_id]
-
-ns_log Notice "CHAT"
-ns_log Notice "$user_id | $read_p | $write_p"
 
 if { $moderate_room_p == "t" } {
     set moderator_p [permission::permission_p -object_id $room_id -privilege "chat_moderator"]
@@ -53,7 +49,7 @@ if { $moderate_room_p == "t" } {
     set moderator_p "1"
 }
 
-if { ($read_p == "0" && $write_p == "0") || ($ban_p == "1") } {
+if { ($read_p == 0 && $write_p == 0) || ($ban_p == 1) } {
     #Display unauthorize privilege page.
     ad_returnredirect unauthorized
     ad_script_abort
@@ -62,17 +58,12 @@ if { ($read_p == "0" && $write_p == "0") || ($ban_p == "1") } {
 # Get chat screen name.
 set user_name [chat_user_name $user_id]
 
-# send message to the database 
-if { ![empty_string_p $message] } {
-    chat_message_post $room_id $user_id $message $moderator_p
-}
-
 # Determine which template to use for html or ajax client
 switch $client {
     "html" {
         set template_use "html-chat"
         # forward to ajax if necessary
-        if { ![empty_string_p $message] } {
+        if { $message ne "" } {
             set session_id [ad_conn session_id]
             ::chat::Chat c1 -volatile -chat_id $room_id -session_id $session_id
             c1 add_msg $message
@@ -80,16 +71,6 @@ switch $client {
     }
     "ajax" {
         set template_use "ajax-chat-script"
-    }
-    "java" {
-	set template_use "java-chat"
-	
-	# Get config paramater for applet.
-	set width [ad_parameter AppletWidth "" 500]
-	set height [ad_parameter AppletHeight "" 400]   
-	
-	set host [ad_parameter ServerHost "" [ns_config "ns/server/[ns_info server]/module/nssock" Hostname]]
-	set port [ad_parameter ServerPort "" 8200]
     }
 }
 

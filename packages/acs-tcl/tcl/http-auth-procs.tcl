@@ -1,6 +1,6 @@
 # packages/acs-tcl/tcl/http-auth-procs.tcl
 ad_library {
-   Use openacs user logins for HTTP authentication
+   Use OpenACS user logins for HTTP authentication
 }
 
 namespace eval http_auth {}
@@ -18,10 +18,8 @@ ad_proc http_auth::set_user_id {} {
         # get the second bit, the base64 encoded bit
         set up [lindex [split $a " "] 1]
         # after decoding, it should be user:password; get the username
-        set user [lindex [split [ns_uudecode $up] ":"] 0]
-        set password [lindex [split [ns_uudecode $up] ":"] 1]
+	lassign [split [ns_uudecode $up] ":"] user password
         ns_log debug "\nACS VERSION [ad_acs_version]"
-        
         ns_log debug "\nHTTP authentication"
 	# check all authorities 
 	foreach authority [auth::authority::get_authority_options] {
@@ -48,7 +46,7 @@ ad_proc http_auth::set_user_id {} {
 	    ns_returnunauthorized
 	    return 0
 	}
-        ns_log debug "\nTDAV: auth_check openacs 5.0 user_id= $auth(user_id)"
+        ns_log debug "\nTDAV: auth_check OpenACS 5.0 user_id= $auth(user_id)"
         ad_conn -set user_id $auth(user_id)
 
     } else {
@@ -66,7 +64,7 @@ ad_proc http_auth::register_filter {
 
     @param url_pattern Follows ns_register_filter rules for defining the
     pattern to match.
-    @param proc Name of tcl procedure to call to check permissions. Use this to figure out what object the URL pattern matches to. This proc should accept two named parameters user_id and url. Should return a valid Tcl true or false value. If empty the site_node matching the URL will be checked.
+    @param proc Name of Tcl procedure to call to check permissions. Use this to figure out what object the URL pattern matches to. This proc should accept two named parameters user_id and url. Should return a valid Tcl true or false value. If empty the site_node matching the URL will be checked.
     
     @return Tcl true or false 
 
@@ -86,7 +84,7 @@ ad_proc http_auth::authorize {
     args
     why
 } {
-    Check HTTP authentication for an openacs user account and
+    Check HTTP authentication for an OpenACS user account and
     call the registered procedure to handle the URL to check
     permissions
 } {
@@ -95,7 +93,7 @@ ad_proc http_auth::authorize {
     if {$proc eq {}} {
 	set proc http_auth::site_node_authorize
     }
-    return [eval [list $proc -user_id $user_id -url [ns_conn url]]]
+    return [$proc -user_id $user_id -url [ns_conn url]]
 }
 
 ad_proc http_auth::site_node_authorize {
@@ -116,3 +114,9 @@ ad_proc http_auth::site_node_authorize {
     return filter_return
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

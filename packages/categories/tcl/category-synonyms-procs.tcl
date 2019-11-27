@@ -5,7 +5,7 @@ ad_library {
     @author Timo Hentschel (timo@timohentschel.de)
 
     @creation-date 8 January 2004
-    @cvs-id $Id: category-synonyms-procs.tcl,v 1.3 2008/11/08 17:05:38 gustafn Exp $
+    @cvs-id $Id: category-synonyms-procs.tcl,v 1.3.6.1 2015/09/10 08:30:18 gustafn Exp $
 }
 
 
@@ -101,3 +101,9 @@ ad_proc -private category_synonym::search_sweeper {
 } {
     db_dml delete_old_searches ""
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

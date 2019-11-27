@@ -4,11 +4,11 @@ ad_page_contract {
     @author Lars Pind (lars@pinds.com)
     @author Jeff Davis <davis@xarg.net>
     @creation-date 2003-10-28
-    @cvs-id $Id: set.tcl,v 1.2 2010/01/09 01:56:09 donb Exp $
+    @cvs-id $Id: set.tcl,v 1.3.2.4 2016/05/20 19:55:32 gustafn Exp $
 } {
     field 
-    enabled_p
-    {return_url "."}
+    enabled_p:boolean
+    {return_url:localurl "."}
 }
 
 ds_require_permission [ad_conn package_id] "admin"
@@ -28,6 +28,7 @@ switch -- $field {
     }
     ds {
         nsv_set ds_properties enabled_p $enabled_p
+        set ::ds_enabled_p $enabled_p
     }
     frag {
         nsv_set ds_properties page_fragment_cache_p $enabled_p
@@ -40,3 +41,9 @@ switch -- $field {
     }
 }
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -5,7 +5,7 @@ ad_page_contract {
     @author jader@bread.com
     @author ncarroll@ee.usyd.edu.au (on first version that used CR)
     @creation-date 2003-05-15
-    @cvs-id $Id: projects.tcl,v 1.1 2007/02/19 15:54:15 maltes Exp $
+    @cvs-id $Id: projects.tcl,v 1.3 2018/05/09 15:33:33 hectorr Exp $
 
     @return title Page title.
     @return context Context bar.

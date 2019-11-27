@@ -3,7 +3,7 @@ ad_library {
     Manage external links in the content repository
 
     @author Don Baccus (dhogaza@pacifier.com)
-    @cvs-d $Id: extlink-procs.tcl,v 1.10 2009/02/13 22:13:06 jeffd Exp $
+    @cvs-id $Id: extlink-procs.tcl,v 1.11.2.1 2015/09/10 08:21:17 gustafn Exp $
 
 }
 
@@ -23,13 +23,13 @@ ad_proc -deprecated content_extlink::new {
 
     @see content::extlink::new
 
-    @extlink_id Optional pre-assigned object_id for the link
-    @url The URL of the external resource
-    @parent_id The folder that will contain this extlink
-    @name Name to assign the object (defaults to "link extlink_id")
-    @label Label for the extlink (defaults to the URL)
-    @description An extended description of the link (defaults to NULL)
-    @package_id Package Id of the package that created the link
+    @param extlink_id Optional pre-assigned object_id for the link
+    @param url The URL of the external resource
+    @param parent_id The folder that will contain this extlink
+    @param name Name to assign the object (defaults to "link extlink_id")
+    @param label Label for the extlink (defaults to the URL)
+    @param description An extended description of the link (defaults to NULL)
+    @param package_id Package Id of the package that created the link
 
 } {
 
@@ -55,10 +55,10 @@ ad_proc -deprecated content_extlink::edit {
     is assumed that the caller will be pulling the existing values out of
     the database before editing them.
 
-    @extlink_id Optional pre-assigned object_id for the link
-    @url The URL of the external resource
-    @label Label for the extlink (defaults to the URL)
-    @description An extended description of the link (defaults to NULL)
+    @param extlink_id Optional pre-assigned object_id for the link
+    @param url The URL of the external resource
+    @param label Label for the extlink (defaults to the URL)
+    @param description An extended description of the link (defaults to NULL)
 
     @see content::extlink::edit
 } {
@@ -79,7 +79,7 @@ ad_proc -deprecated content_extlink::delete {
     Delete an external link.
     @see content::extlink::delete
 
-    @extlink_id  The object id of the link to delete
+    @param extlink_id  The object id of the link to delete
 
 } {
     db_exec_plsql extlink_delete {}
@@ -92,7 +92,7 @@ ad_proc -deprecated content_extlink::extlink_p {
     Returns true if the given item is an external link.
 
     @see content::extlink::is_extlink
-    @extlink_id  The object id of the item to check.
+    @param extlink_id  The object id of the item to check.
 
 } {
     return [db_string extlink_check {}]
@@ -104,9 +104,15 @@ ad_proc -deprecated content_extlink::extlink_name {
 
     Returns the name of an extlink
 
-    @item_id  The object id of the item to check.
+    @param item_id  The object id of the item to check.
 
     @see content::extlink::name
 } {
     return [db_string extlink_name {}]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

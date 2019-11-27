@@ -10,7 +10,7 @@ ad_library {
 
     @creation-date 2002-05-24
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: delivery-method-procs.tcl,v 1.12 2007/06/27 18:54:48 matthewg Exp $
+    @cvs-id $Id: delivery-method-procs.tcl,v 1.13.2.1 2015/09/12 11:06:45 gustafn Exp $
 
 }
 
@@ -53,7 +53,7 @@ ad_proc -public notification::delivery::send {
     set args [list $from_user_id $to_user_id $reply_object_id $notification_type_id $subject $content_text $content_html $file_ids]
 
     # Make the generic call
-    return [acs_sc_call NotificationDeliveryMethod Send $args $impl_key]
+    return [acs_sc::invoke -contract NotificationDeliveryMethod -operation Send -call_args $args -impl $impl_key]
 }
 
 ad_proc -public notification::delivery::scan_replies {
@@ -74,7 +74,7 @@ ad_proc -public notification::delivery::scan_replies {
     # ns_log Notice "NOTIF-DELIV-METHOD: about to call acs_sc on $impl_key"
 
     # Make the generic call
-    return [acs_sc_call NotificationDeliveryMethod ScanReplies $args $impl_key]
+    return [acs_sc::invoke -contract NotificationDeliveryMethod -operation ScanReplies -call_args $args -impl $impl_key]
 }
 
 ad_proc -public notification::delivery::new {
@@ -121,3 +121,9 @@ ad_proc -public notification::delivery::get_id {
     return [db_string select_delivery_method_id {}]
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

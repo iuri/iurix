@@ -3,31 +3,6 @@
 <queryset>
    <rdbms><type>oracle</type><version>8.1.6</version></rdbms>
 
-<fullquery name="ad_user_new.user_insert">      
-      <querytext>
-      
-	begin
-	    :1 := acs.add_user(
-                user_id => :user_id,
-		email => :email,
-		url => :url,
-                authority_id => :authority_id,
-		username => :username,
-		first_names => :first_names,
-		last_name => :last_name,
-		screen_name => :screen_name,
-		password => :hashed_password,
-	        salt => :salt,
-                creation_user => :creation_user,
-	        creation_ip => :peeraddr,
-	        email_verified_p => :email_verified_p,
-	        member_state => :member_state
-            );
-	end;
-	
-      </querytext>
-</fullquery>
-
 <fullquery name="acs_user::delete.permanent_delete">
       <querytext>
           begin
@@ -48,18 +23,6 @@
       </querytext>
 </fullquery>
 
-<fullquery name="user_search">
-  <querytext>
-      select distinct u.first_names || ' ' || u.last_name || ' (' || u.email || ')' as name, u.user_id
-      from   cc_users u
-      where  lower(nvl(u.first_names || ' ', '')  ||
-             nvl(u.last_name || ' ', '') ||
-             u.email || ' ' ||
-             nvl(u.screen_name, '')) like lower('%'||:value||'%')
-      order  by name
-  </querytext>
-</fullquery>
- 
 <fullquery name="acs_user::get_from_user_id_not_cached.select_user_info">      
       <querytext>
 

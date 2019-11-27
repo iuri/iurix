@@ -3,7 +3,7 @@ ad_page_contract {
     
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-06-02
-    @cvs-id $Id: member-invite.tcl,v 1.9 2007/01/10 21:22:09 gustafn Exp $
+    @cvs-id $Id: member-invite.tcl,v 1.10.6.2 2015/09/10 08:21:48 gustafn Exp $
 }
 
 subsite::assert_user_may_add_member
@@ -17,6 +17,10 @@ set context [list [list "." "Members"] "Invite"]
 group::get \
     -group_id $group_id \
     -array group_info
+
+# if we are at main site, only show the form for creating a new user
+
+set subsite_p [expr { [subsite::main_site_id] ne [ad_conn package_id] }]
 
 ad_form -name user_search -cancel_url . -form {
     {user_id:search
@@ -58,8 +62,7 @@ ad_form -extend -name user_search -on_submit {
                 -rel_type $rel_type
         } {
             form set_error user_search user_id "Error adding user to community: $errmsg"
-            global errorInfo
-            ns_log Error "Error adding user $user_id to community group $group_id: $errmsg\n$errorInfo"
+            ns_log Error "Error adding user $user_id to community group $group_id: $errmsg\n$::errorInfo"
             break
         }
     }
@@ -76,3 +79,9 @@ ad_form -action user-new -name user_create -cancel_url . -form {
         {html {size 50}}
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

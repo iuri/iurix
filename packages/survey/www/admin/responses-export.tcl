@@ -5,25 +5,25 @@ ad_page_contract {
 
   @author  sebastian@arsdigita.com
   @date    July 2000
-  @cvs-id  $Id: responses-export.tcl,v 1.9 2005/01/21 17:24:28 jeffd Exp $
+  @cvs-id  $Id: responses-export.tcl,v 1.13 2015/06/27 20:46:16 gustafn Exp $
 
 } {
 
-  survey_id:integer,notnull
-  {unique_users_p f}
-  on_what_id:optional,integer
+  survey_id:naturalnum,notnull
+  {unique_users_p:boolean f}
+  on_what_id:naturalnum,optional
   {start:naturalnum 1}
   {end:naturalnum 10000}
 }
 set csv_export ""
 set package_id [ad_conn package_id]
-ad_require_permission $package_id survey_admin_survey
+permission::require_permission -object_id $package_id -privilege survey_admin_survey
 
 set n_responses [db_string get_n_responses {}]
 ns_log notice "DAVEB: n_responses=$n_responses"
 if {$n_responses==0} {
     get_survey_info -survey_id $survey_id
-    set context [list [list "one?[export_url_vars survey_id]" $survey_info(name)] "[_ survey.CSV_Export]"]
+    set context [list [list [export_vars -base one {survey_id}] $survey_info(name)] "[_ survey.CSV_Export]"]
     ad_return_template "no-responses"
     return
 }
@@ -83,11 +83,11 @@ ns_write "$headline \r\n"
 db_foreach get_all_survey_question_responses "" {
 
     if { $response_id != $current_response_id } {
-	if { ![empty_string_p $current_question_id] } {
+	if { $current_question_id ne "" } {
 	    append current_response ",\"[join $current_question_list ","]\""
 	}
 
-	if { ![empty_string_p $current_response_id] } {
+	if { $current_response_id ne "" } {
 	    append csv_export "$current_response \r\n"
 	}
 	set current_response_id $response_id
@@ -110,7 +110,7 @@ db_foreach get_all_survey_question_responses "" {
       regsub -all {[\r\n]} $response_value {} response_value
 
       if { $question_id != $current_question_id } {
-  	if { ![empty_string_p $current_question_id] } {
+  	if { $current_question_id ne "" } {
   	    append current_response ",\"[join $current_question_list ","]\""
   	}
   	set current_question_id $question_id
@@ -134,13 +134,13 @@ db_foreach get_all_survey_question_responses "" {
 
     }
 
-  if { ![empty_string_p $current_question_id] } {
+  if { $current_question_id ne "" } {
       append current_response ",\"[join $current_question_list ","]\""
   }
-  if { ![empty_string_p $current_response_id] } {
+  if { $current_response_id ne "" } {
      append csv_export "$current_response\r\n"
  }
-    if {[empty_string_p $csv_export]} {
+    if {$csv_export eq ""} {
 	set csv_export "\r\n"
     }
     ns_write $csv_export

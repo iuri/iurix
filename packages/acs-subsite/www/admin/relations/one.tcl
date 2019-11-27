@@ -6,10 +6,10 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Dec 13 20:11:27 2000
-    @cvs-id $Id: one.tcl,v 1.3 2003/10/10 15:03:38 lars Exp $
+    @cvs-id $Id: one.tcl,v 1.4.2.3 2015/10/28 09:38:38 gustafn Exp $
 
 } {
-    rel_id:integer,notnull
+    rel_id:naturalnum,notnull
 } -properties {
     context:onevalue
     rel_id:onevalue
@@ -37,26 +37,15 @@ ad_page_contract {
     }
 }
 
-set admin_p [ad_permission_p $rel_id "admin"]
-set delete_p [ad_permission_p $rel_id "delete"]
-set write_p [ad_permission_p $rel_id "write"]
+set admin_p [permission::permission_p -object_id $rel_id -privilege "admin"]
+set delete_p [permission::permission_p -object_id $rel_id -privilege "delete"]
+set write_p [permission::permission_p -object_id $rel_id -privilege "write"]
 
 set context [list "One relation"]
 
 set subsite_group_id [application_group::group_id_from_package_id]
 
-if { ![db_0or1row select_rel_info {
-    select r.rel_type, acs_object_type.pretty_name(t.rel_type) as rel_type_pretty_name,
-           acs_rel_type.role_pretty_name(t.role_one) as role_one_pretty_name,
-           acs_rel_type.role_pretty_name(t.role_two) as role_two_pretty_name,
-           t.object_type_two as object_type_two,
-           acs_object.name(r.object_id_one) as object_id_one_name,
-           r.object_id_one,
-           acs_object.name(r.object_id_two) as object_id_two_name,
-           r.object_id_two
-      from acs_rels r, acs_rel_types t
-     where r.rel_id = :rel_id
-       and r.rel_type = t.rel_type} -column_array rel] 
+if { ![db_0or1row select_rel_info {} -column_array rel] 
 } {
     ad_return_error "Error" "Relation #rel_id does not exist"
     ad_script_abort
@@ -88,12 +77,12 @@ db_0or1row select_member_state {
 
 # Data used to build the "toggle member state" widget.
 set return_url [ad_conn url]?[ad_conn query]
-set QQreturn_url [ad_quotehtml $return_url]
+set QQreturn_url [ns_quotehtml $return_url]
 set possible_member_states [group::possible_member_states]
 
-set object_two_read_p  [ad_permission_p $rel(object_id_two) "read"]
+set object_two_read_p  [permission::permission_p -object_id $rel(object_id_two) -privilege "read"]
 if {$object_two_read_p} {
-    set object_two_write_p [ad_permission_p $rel(object_id_two) "write"]
+    set object_two_write_p [permission::permission_p -object_id $rel(object_id_two) -privilege "write"]
 
     attribute::multirow \
 	    -start_with party \
@@ -103,3 +92,9 @@ if {$object_two_read_p} {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

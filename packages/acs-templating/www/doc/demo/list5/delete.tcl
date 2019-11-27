@@ -4,9 +4,9 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-10-23
-  @cvs-id $Id: delete.tcl,v 1.1 2006/02/09 06:39:55 jiml Exp $
+  @cvs-id $Id: delete.tcl,v 1.2.2.2 2017/04/21 16:50:30 gustafn Exp $
 } {
-  template_demo_note_id:integer,notnull,multiple
+  template_demo_note_id:naturalnum,notnull,multiple
 }
 
 # Here, we delete all the notes being fed to us, which is all 
@@ -15,11 +15,11 @@ ad_page_contract {
 # is there are a bunch of template_demo_note_id values coming in 
 # through the url. So, this list is sorta becoming a form too :)
 #
-# so this loop runs thru all passed-in values of template_demo_note_id
+# so this loop runs through all passed-in values of template_demo_note_id
 # and for each, deletes that note.
 
 foreach template_demo_note_id $template_demo_note_id {
-    ad_require_permission $template_demo_note_id delete
+    permission::require_permission -object_id $template_demo_note_id -privilege delete
 
     package_exec_plsql \
         -var_list \
@@ -34,3 +34,9 @@ foreach template_demo_note_id $template_demo_note_id {
 }
 
 ad_returnredirect "./"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

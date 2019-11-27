@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="ms_MY" charset="utf-8">
+<message_catalog package_key="survey" locale="ms_MY" charset="utf-8">
 
   <msg key="-__Created_by">- Dicipta oleh</msg>
   <msg key="_on_creation_date">, pada %creation_date% </msg>
@@ -94,7 +94,7 @@
   <msg key="lt_Everyone_eligible_to_">Semua orang layak untuk mengambil survei ini</msg>
   <msg key="lt_Everyone_who_has_alre">Semua orang sudah pun mengambil survei ini</msg>
   <msg key="lt_Everyone_who_has_not_">Semua orang yang belum lagi mengambil survei ini</msg>
-  <msg key="lt_For_Multiple_Choicebr">Untuk Pilihan Berbilang &lt;br /&gt;Masukkan Senarai Maklumbalas Sah &lt;br /&gt; (masukkan satu pilihan setiap baris)</msg>
+  <msg key="lt_For_Multiple_Choicebr">Untuk Pilihan Berbilang &lt;br&gt;Masukkan Senarai Maklumbalas Sah &lt;br&gt; (masukkan satu pilihan setiap baris)</msg>
   <msg key="lt_had_to_say_in_respons">terpaksa dikatakan bagi maklum balas untuk %survey_name%:</msg>
   <msg key="lt_Here_is_how_your_surv">Beginilah bagaimana perihal survei anda akan kelihatan:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Tadbir Survei-survei&quot;&gt;</msg>

@@ -1,13 +1,17 @@
-# Filter procedures for the ArsDigita Templating System
+ad_library {
+    Filter procedures for the ArsDigita Templating System
+
+    @author Karl Goldstein    (karlg@arsdigita.com)
+    
+    @cvs-id $Id: filter-procs.tcl,v 1.16.2.5 2016/10/03 18:52:07 antoniop Exp $
+}
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
-# Authors: Karl Goldstein    (karlg@arsdigita.com)
-
-# $Id: filter-procs.tcl,v 1.15 2007/01/10 21:22:12 gustafn Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
 # http://www.fsf.org/copyleft/gpl.html
+
 
 namespace eval template {}
 
@@ -27,7 +31,7 @@ ad_proc -public template::forward { url args } {
 
     set cache_p [lindex $args 0]
 
-    if {$cache_p eq "t"} {
+    if {$cache_p == "t"} {
         set persistent_p [lindex $args 1]
 	set excluded_vars [lindex $args 2]
 
@@ -76,8 +80,7 @@ ad_proc -public cmp_page_filter { why } {
         set url [ns_conn url]
         regsub {.cmp} $url {} url_stub
         regexp {^/([^/]*)(.*)} $url_stub all package_key rest
-        set file_stub "[acs_root_dir]/packages/$package_key/www$rest"
-
+        set file_stub "$::acs::rootdir/packages/$package_key/www$rest"
         set beginTime [clock clicks -milliseconds]
 
         set output "<pre>[ns_quotehtml [template::adp_compile -file $file_stub.adp]]</pre>"
@@ -86,8 +89,7 @@ ad_proc -public cmp_page_filter { why } {
         ns_log debug "cmp_page_filter: Time elapsed: $timeElapsed"
 
     } errMsg] } {
-        global errorInfo
-        set output <html><body><pre>[ad_quotehtml $errorInfo]</pre></body></html>
+        set output <html><body><pre>[ns_quotehtml $::errorInfo]</pre></body></html>
     }
 
     ns_return 200 text/html $output
@@ -102,11 +104,10 @@ ad_proc -public dat_page_filter { why } {
         set url [ns_conn url]
         regsub {.dat} $url {} url_stub
         regexp {^/([^/]*)(.*)} $url_stub all package_key rest
-        set code_stub "[acs_root_dir]/packages/$package_key/www$rest"
-
+        set code_stub "$::acs::rootdir/packages/$package_key/www$rest"
         set beginTime [clock clicks -milliseconds]
 
-        set file_stub [template::get_resource_path]/messages/datasources
+	set file_stub [template::resource_path -type messages -style $datasources]
 
         set output [template::adp_parse $file_stub [list code_stub $code_stub]]
 
@@ -114,8 +115,7 @@ ad_proc -public dat_page_filter { why } {
         ns_log debug " dat_page_filter: Time elapsed: $timeElapsed"
 
     } errMsg] } {
-        global errorInfo
-        set output <html><body><pre>$errorInfo</pre></body></html>
+        set output <html><body><pre>$::errorInfo</pre></body></html>
     }
 
     ns_return 200 text/html $output
@@ -136,11 +136,10 @@ namespace eval template {
         set url [ns_conn url]
         regsub {.frm} $url {} url_stub
         regexp {^/([^/]*)(.*)} $url_stub all package_key rest
-        set __adp_stub "[acs_root_dir]/packages/$package_key/www$rest"
+        set __adp_stub "$::acs::rootdir/packages/$package_key/www$rest"
 
         # Set the parse level
-        variable parse_level
-        lappend parse_level [info level]
+        lappend ::templating::parse_level [info level]
 
         # execute the code to prepare the form(s) for a template
         adp_prepare
@@ -154,7 +153,6 @@ ad_proc -private frm_page_filter { why } {
     Return the form data for a request for .frm
 } {
     if { [catch {
-
         set beginTime [clock clicks -milliseconds]
 
         set output [template::frm_page_handler]
@@ -163,11 +161,16 @@ ad_proc -private frm_page_filter { why } {
         ns_log debug "frm_page_filter: Time elapsed: $timeElapsed"
 
     } errMsg] } {
-        global errorInfo
-        set output $errorInfo
+        set output $::errorInfo
     }
 
     ns_return 200 text/html "<html><body><pre>[ns_quotehtml $output]</pre></body></html>"
 
     return filter_return
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

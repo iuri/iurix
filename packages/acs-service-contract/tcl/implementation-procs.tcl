@@ -3,7 +3,7 @@ ad_library {
     
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-01-14
-    @cvs-id $Id: implementation-procs.tcl,v 1.13 2007/01/10 21:22:05 gustafn Exp $
+    @cvs-id $Id: implementation-procs.tcl,v 1.14.2.2 2017/06/30 17:27:41 gustafn Exp $
 }
 
 namespace eval acs_sc::impl {}
@@ -45,7 +45,7 @@ ad_proc -public acs_sc::impl::delete {
     Delete a service contract implementation 
 } {
 
-    if { ![exists_and_not_null contract_name] || ![exists_and_not_null impl_name] } {
+    if { $contract_name eq "" || $impl_name eq "" } {
         error "You must supply contract_name and impl_name"
     }
 
@@ -88,7 +88,7 @@ ad_proc -public acs_sc::impl::new_from_spec {
       <li>owner: Owner of the implementation, use the package-key.
       <li>name: Name of your implementation.
       <li>name: Pretty name of your implementation. You'd typically use this when displaying the service contract implementation through a UI.
-      <li>aliases: Specification of the tcl procedures for each of the service contract's operations.
+      <li>aliases: Specification of the Tcl procedures for each of the service contract's operations.
     </ul>
 
     The aliases section is itself an array-list. The keys are the operation names 
@@ -102,7 +102,7 @@ ad_proc -public acs_sc::impl::new_from_spec {
     # Spec contains: contract_name, name, pretty_name, owner, aliases
     array set impl $spec
     
-    if { ![exists_and_not_null impl(pretty_name)] } {
+    if { ![info exists impl(pretty_name)] } {
         set impl(pretty_name) ""
     }
 
@@ -147,7 +147,7 @@ ad_proc -public acs_sc::impl::get_id {
     a service contract,
     if the contract is not specified.
 } {
-    if {[exists_and_not_null contract]} {
+    if {([info exists contract] && $contract ne "")} {
         return [db_string select_impl_id_with_contract {}]
     } else {
         return [db_string select_impl_id {}]
@@ -204,7 +204,7 @@ ad_proc -public acs_sc::impl::get_options {
         # There are exclude names
         foreach element $full_list {
             set impl_name [lindex $element 0]
-            if { [lsearch -exact $exclude_names $impl_name] == -1 } {
+            if {$impl_name ni $exclude_names} {
                 # Name is not in exclude list so add option
                 lappend impl_list $element
             }
@@ -355,3 +355,9 @@ ad_proc -private acs_sc::impl::binding::init_procs {
 }
 
     
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

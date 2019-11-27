@@ -6,9 +6,9 @@ ad_page_contract {
     @author Jeff Davis (davis@xarg.net)
 
     @creation-date 12/10/2000
-    @cvs-id $Id: album.tcl,v 1.4 2003/11/18 22:59:03 rocaelh Exp $
+    @cvs-id $Id: album.tcl,v 1.11 2018/05/09 15:33:33 hectorr Exp $
 } {
-    album_id:integer,notnull
+    album_id:naturalnum,notnull
     {page:integer,notnull "1"}
     {msg:integer,notnull "0"}
 } -validate {
@@ -24,6 +24,7 @@ ad_page_contract {
     description:onevalue
     story:onevalue
     context:onevalue
+    child_photo:multirow
     page_nav:onevalue
     admin_p:onevalue
     photo_p:onevalue
@@ -31,17 +32,12 @@ ad_page_contract {
     move_p:onevalue
     delete_p:onevalue
     collections:onevalue
-    child_photo:multirow
-    child:multirow
 }
 
-set logged_p [auth::get_user_id]
-
 set user_id [ad_conn user_id]
-set this_url [export_vars -base [ad_conn url] {album_id}]
 
 # check for read permission on album
-ad_require_permission $album_id read
+permission::require_permission -object_id $album_id -privilege read
 
 # These lines are to uncache the image in Netscape, Mozilla. 
 # IE6 & Safari (mac) have a bug with the images cache
@@ -56,14 +52,14 @@ set context [pa_context_bar_list $album_id]
 db_1row get_album_info {} 
 
 # to move an album need write on album and write on parent folder
-set move_p [expr $write_p && $folder_write_p]
+set move_p [expr {$write_p && $folder_write_p}]
 
 # to delete an album, album must be empty, need delete on album, and write on parent folder
-set has_children_p [expr [pa_count_photos_in_album $album_id] > 0]
-set delete_p [expr !($has_children_p) && $album_delete_p && $folder_write_p]
+set has_children_p [expr {[pa_count_photos_in_album $album_id] > 0}]
+set delete_p [expr {!($has_children_p) && $album_delete_p && $folder_write_p}]
 
 # Did we get a msg id, if so display it at the top of the page
-# TODO: JCD: We should remove it from vars so it does not propigate
+# TODO: JCD: We should remove it from vars so it does not propagate
 array set msgtext { 
     1 {<strong>Your text changes have been saved and any image changes such as rotations 
         are being carried out in the background</strong>}
@@ -102,7 +98,6 @@ if {$has_children_p && [llength $photos_on_page] > 0} {
 	set child($photo_id) [array get val]
     }
     
-
     # if the structure of the multirow datasource ever changes, this needs to be rewritten    
     set counter 0
     foreach id $photos_on_page {
@@ -121,7 +116,7 @@ if {$has_children_p && [llength $photos_on_page] > 0} {
     for {set i 1} {$i <= $total_pages} {incr i} {
         lappend pages $i
     }
-    set page_nav [pa_pagination_bar $page $pages "album?[export_vars -url {album_id}]&amp;page=" page]
+    set page_nav [pa_pagination_bar $page $pages "[export_vars -base album {album_id}]&page="]
 
 } else {
     # don't bother querying for children if we know they don't exist

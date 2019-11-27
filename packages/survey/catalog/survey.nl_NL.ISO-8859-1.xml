@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="nl_NL" charset="ISO-8859-1">
+<message_catalog package_key="survey" locale="nl_NL" charset="ISO-8859-1">
 
   <msg key="-__Created_by">- Gemaakt door</msg>
   <msg key="_on_creation_date">, op %creation_date% </msg>
@@ -107,7 +107,7 @@ Antwoorden: </msg>
   <msg key="lt_Everyone_eligible_to_">Iedereen die deze vragenlijst mag af nemen</msg>
   <msg key="lt_Everyone_who_has_alre">Iedereen die deze vragenlijst al gedaan heeft</msg>
   <msg key="lt_Everyone_who_has_not_">Iedereen die deze vragenlijst nog niet gedaan heeft</msg>
-  <msg key="lt_For_Multiple_Choicebr">Voor meerkeuze-vraag&lt;br /&gt;Vul een lijst van geldige antwoorden in&lt;br /&gt;(geef één keuze per regel)</msg>
+  <msg key="lt_For_Multiple_Choicebr">Voor meerkeuze-vraag&lt;br&gt;Vul een lijst van geldige antwoorden in&lt;br&gt;(geef één keuze per regel)</msg>
   <msg key="lt_had_to_say_in_respons">zei in antwoord op %survey_name%</msg>
   <msg key="lt_Here_is_how_your_surv">De vragenlijst zal er zo uit zien:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src='graphics/admin.gif' border=0 alt='Vragenlijsten beheren'&gt;</msg>

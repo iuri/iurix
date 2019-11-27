@@ -1,9 +1,12 @@
-# Documentation procedures for the ArsDigita Templating System
+ad_library {
+    Documentation procedures for the ArsDigita Templating System
+
+    @author Karl Goldstein    (karlg@arsdigita.com)
+
+    @cvs-id $Id: doc-procs.tcl,v 1.7.2.2 2016/10/03 18:52:07 antoniop Exp $
+}
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
-# Authors: Karl Goldstein    (karlg@arsdigita.com)
-
-# $Id: doc-procs.tcl,v 1.6 2007/01/10 21:22:12 gustafn Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
@@ -13,11 +16,8 @@
 
 # @datasource foo multirow
 # Output info about a foo.
-# @column name The name of the foo.
-# @column id   The ID of the foo.
-
-# @param id 
-# The ID of the foo passed with the request.
+# @param column name The name of the foo.
+# @param id The ID of the foo passed with the request.
 
 namespace eval template {}
 
@@ -169,3 +169,9 @@ ad_proc -public template::verify_datasources {} {
   return 1
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

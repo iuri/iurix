@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Dec 13 10:20:29 2000
-    @cvs-id $Id: edit.tcl,v 1.4 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: edit.tcl,v 1.6.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     role:notnull
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     
@@ -22,7 +22,7 @@ db_1row select_role_props {
      where r.role = :role
 }
 
-set context [list [list "../" "Relationship types"] [list "one?[ad_export_vars role]" "One role"] "Edit"]
+set context [list [list "../" "Relationship types"] [list [export_vars -base one role] "One role"] "Edit"]
 
 template::form create role_form
 
@@ -57,8 +57,14 @@ if { [template::form is_valid role_form] } {
 	 where r.role = :role
     } -bind [ns_getform]
     if { $return_url eq "" } {
-	set return_url "one?[ad_export_vars role]"
+	set return_url [export_vars -base one role]
     }
     ad_returnredirect $return_url
     ad_script_abort
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

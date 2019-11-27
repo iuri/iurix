@@ -4,7 +4,7 @@ ad_library {
 
     @creation-date 18 Nov 1998
     @author Allen Pulsifer (pulsifer@mediaone.net)
-    @cvs-id $Id: admin-init.tcl,v 1.8 2004/06/29 10:17:44 jeffd Exp $
+    @cvs-id $Id: admin-init.tcl,v 1.8.18.1 2015/09/10 08:21:55 gustafn Exp $
 
 }
 
@@ -35,3 +35,9 @@ if { [parameter::get -package_id [ad_acs_kernel_id] -parameter RegisterRestrictE
     ad_register_filter preauth HEAD "${url}*" ad_restrict_entire_server_to_registered_users
   }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

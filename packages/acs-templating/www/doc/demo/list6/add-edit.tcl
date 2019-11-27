@@ -3,13 +3,13 @@ ad_page_contract {
 
   @author Don Baccus (dhogaza@pacifier.com)
   @creation-date 2000-10-23
-  @cvs-id $Id: add-edit.tcl,v 1.3 2007/09/25 15:22:39 donb Exp $
+  @cvs-id $Id: add-edit.tcl,v 1.4.2.3 2017/04/22 18:15:50 gustafn Exp $
 
   Example script that allows for the creation or editing of a simple note
   object type, using ad_form and package Tcl API tools.
 
 } -query {
-    template_demo_note_id:integer,notnull,optional
+    template_demo_note_id:naturalnum,notnull,optional
 } -properties {
     context:onevalue
     page_title:onevalue
@@ -129,3 +129,9 @@ set context [list $page_title]
 # processing an "edit" request or a submitted form that contains errors.
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

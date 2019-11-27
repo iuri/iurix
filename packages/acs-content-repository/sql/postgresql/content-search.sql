@@ -1,4 +1,4 @@
--- @cvs-id $Id: content-search.sql,v 1.8 2006/09/06 14:46:03 daveb Exp $ 
+-- @cvs-id $Id: content-search.sql,v 1.10.2.2 2016/02/11 08:07:03 gustafn Exp $ 
 ------------------------------------------------------------
 -- declare CR as a content provider for search/indexing interface
 ------------------------------------------------------------
@@ -81,29 +81,29 @@ select acs_sc_binding__new('FtsContentProvider','content_template');
 
 -- DaveB: We only want to index live_revisions 2002-09-26
 
+--
+-- procedure content_search__itrg/0
+--
 
-
-create function content_search__itrg ()
-returns opaque as '
-begin
+CREATE OR REPLACE FUNCTION content_search__itrg () RETURNS trigger AS $$
+BEGIN
 if (select live_revision from cr_items where item_id=new.item_id) = new.revision_id and new.publish_date >= current_timestamp then
-        perform search_observer__enqueue(new.revision_id,''INSERT'');
+        perform search_observer__enqueue(new.revision_id,'INSERT');
     end if;
     return new;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create function content_search__dtrg ()
-returns opaque as '
-begin
-    perform search_observer__enqueue(old.revision_id,''DELETE'');
-    return old;
-end;' language 'plpgsql';
 
-create or replace function content_search__utrg ()
-returns opaque as '
-declare
+--
+-- procedure content_search__utrg/0
+--
+CREATE OR REPLACE FUNCTION content_search__utrg(
+
+) RETURNS trigger AS $$
+DECLARE
     v_live_revision integer;
-begin
+BEGIN
     select into v_live_revision live_revision from
         cr_items where item_id=old.item_id;
     if old.revision_id=v_live_revision
@@ -113,37 +113,37 @@ begin
             event
         ) values (
 old.revision_id,
-            ''UPDATE''
+            'UPDATE'
         );
     end if;
     return new;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 -- we need new triggers on cr_items to index when a live revision
 -- changes -DaveB 2002-09-26
 
-create function content_item_search__utrg ()
-returns opaque as '
-begin
-    if new.live_revision is not null and coalesce(old.live_revision,0) <> new.live_revision and (select publish_date from cr_revisions where revision_id=new.live_revision) <= current_timestamp then
-        perform search_observer__enqueue(new.live_revision,''INSERT'');        
+CREATE OR REPLACE FUNCTION content_item_search__utrg () RETURNS trigger AS $$
+BEGIN
+    if new.live_revision is not null and coalesce(old.live_revision,0) <> new.live_revision
+    and (select publish_date from cr_revisions where revision_id=new.live_revision) <= current_timestamp then
+        perform search_observer__enqueue(new.live_revision,'INSERT');        
     end if;
 
-    if old.live_revision is not null and old.live_revision <> coalesce(new.live_revision,0) then
-        perform search_observer__enqueue(old.live_revision,''DELETE'');
+    if old.live_revision is not null and old.live_revision <> coalesce(new.live_revision,0)
+    and (select publish_date from cr_revisions where revision_id=old.live_revision) <= current_timestamp then
+        perform search_observer__enqueue(old.live_revision,'DELETE');
     end if;
-    if new.publish_status = ''expired'' then
-        perform search_observer__enqueue(old.live_revision,''DELETE'');
+    if old.live_revision is not null and new.publish_status = 'expired' then
+        perform search_observer__enqueue(old.live_revision,'DELETE');
     end if;
 
     return new;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 create trigger content_search__itrg after insert on cr_revisions
 for each row execute procedure content_search__itrg (); 
-
-create trigger content_search__dtrg after delete on cr_revisions
-for each row execute procedure content_search__dtrg (); 
 
 create trigger content_search__utrg after update on cr_revisions
 for each row execute procedure content_search__utrg (); 

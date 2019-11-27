@@ -12,7 +12,7 @@ ad_library {
     @author Pascal Scheffers <pascal@scheffers.net>
 
     @creation-date 2000-10-12
-    @cvs-id $Id: general-comments-procs.tcl,v 1.20 2007/05/05 15:54:47 maltes Exp $
+    @cvs-id $Id: general-comments-procs.tcl,v 1.22.2.3 2017/02/13 10:58:46 gustafn Exp $
 }
 
 
@@ -34,43 +34,45 @@ ad_proc general_comment_new {
     
     @error 
 } {
+
+    # Generate a unique id for the message
+    # result from proc comes enveloped in <>
+    set rfc822_id [string range [acs_mail_lite::generate_message_id] 1 end-1]
     
     db_transaction {
-	db_exec_plsql insert_comment { }
+        
+        db_exec_plsql insert_comment {}
+        db_dml add_entry {}
+        db_1row get_revision {}  
+        db_dml set_content {} -blobs [list $content]
 
-	db_dml add_entry { }
+        # Grant the user sufficient permissions to 
+        # created comment. This is done here to ensure that
+        # a fail on permissions granting will not leave
+        # the comment with incorrect permissions. 
+        if {$user_id ne ""} {
+            permission::grant -object_id $comment_id \
+                -party_id $user_id \
+                -privilege "read"
 
-	db_1row get_revision {}  
+            permission::grant -object_id $comment_id \
+                -party_id $user_id \
+                -privilege "write"
 
-	db_dml set_content {} -blobs [list $content]
-
-	# Grant the user sufficient permissions to 
-	# created comment. This is done here to ensure that
-	# a fail on permissions granting will not leave
-	# the comment with incorrect permissions. 
-	if {![empty_string_p $user_id]} {
-	    permission::grant -object_id $comment_id \
-		              -party_id $user_id \
-		              -privilege "read"
-
-	    permission::grant -object_id $comment_id \
-		              -party_id $user_id \
-		              -privilege "write"
-
-	}
+        }
     }
     # Convert the comment to HTML
     
     if {$comment_mime_type ne "text/html"} {
-	set content [ad_convert_to_html $content]
+        set content [ad_convert_to_html $content]
     } 
 
     # Start notifications
     callback general_comments::notify_objects \
-	-object_id $object_id \
-	-comment $content \
-	-title $title \
-	-object_type [acs_object_type $object_id]
+        -object_id $object_id \
+        -comment $content \
+        -title $title \
+        -object_type [acs_object_type $object_id]
 
     return $revision_id
 }
@@ -88,7 +90,7 @@ ad_proc -public general_comments_get_comments {
 
     @param print_content_p Pass in 1 to print out content of comments.
     @param print_attachments_p Pass in 1 to print out attachments of comments, 
-                               only works if print_content_p is 1. 
+    only works if print_content_p is 1. 
     @param context_id Show only comments with given context_id
     @param object_id The object_id to retrieve the comments for.
     @param return_url A url for the user to return to after viewing a comment.
@@ -96,7 +98,7 @@ ad_proc -public general_comments_get_comments {
 
     # get the package url
     set package_url [general_comments_package_url]
-    if { [empty_string_p $package_url] } {
+    if { $package_url eq "" } {
         return ""
     }
 
@@ -124,7 +126,7 @@ ad_proc -public general_comments_get_comments {
 
     if {[string is true $my_comments_only_p] 
         && [string is true $allow_my_comments_only_p]} {
-	set user_id [ad_conn user_id]
+        set user_id [ad_conn user_id]
         set my_comments_clause "and o.creation_user = :user_id "
     } else {
         set my_comments_clause ""
@@ -138,7 +140,7 @@ ad_proc -public general_comments_get_comments {
         set content_select [db_map content_select] ;# ", r.content"
     }
 
-    if { ![empty_string_p $context_id] } {
+    if { $context_id ne "" } {
         set context_clause "and o.context_id = :context_id"
     } else {
         set context_clause ""
@@ -150,8 +152,8 @@ ad_proc -public general_comments_get_comments {
         set pretty_date2 [lc_time_fmt $creation_date "%q %X"]
         # call on helper proc to print out comment
         append html [general_comments_print_comment $comment_id $title $mime_type \
-                $creation_user $author $pretty_date $pretty_date2 $content \
-                $print_content_p $print_attachments_p $package_url $return_url $print_user_info_p]
+                         $creation_user $author $pretty_date $pretty_date2 $content \
+                         $print_content_p $print_attachments_p $package_url $return_url $print_user_info_p]
     }
     return $html
 }
@@ -203,37 +205,46 @@ ad_proc -private general_comments_print_comment {
         if { $print_attachments_p == 1 } {
             set attachments_html ""
             db_foreach get_attachments "
-	                    select r.title, r.mime_type,  i.name, i.item_id
-	                      from cr_items i, cr_revisions r
-	                     where i.parent_id = :comment_id 
+                        select r.title, r.mime_type,  i.name, i.item_id
+                          from cr_items i, cr_revisions r
+                         where i.parent_id = :comment_id 
                                and r.revision_id = i.live_revision" {
 
-                append attachments_html "<li>$title "
-                if { $mime_type == "image_gif" || $mime_type == "image/jpeg" } {
-                    append attachments_html "(<a href=\"[ad_quotehtml ${package_url}view-image?image_id=$item_id&return_url=$return_url]\">$name</a>)\n"
-                } else {
-                    append attachments_html "(<a href=\"[ad_quotehtml ${package_url}file-download?item_id=$item_id]\">$name</a>)\n"
-                }
-            }
+                                   append attachments_html "<li>$title "
+                                   if { $mime_type eq "image_gif" || $mime_type eq "image/jpeg" } {
+                                       append attachments_html "(<a href=\"[ns_quotehtml ${package_url}view-image?image_id=$item_id&return_url=$return_url]\">$name</a>)\n"
+                                   } else {
+                                       append attachments_html "(<a href=\"[ns_quotehtml ${package_url}file-download?item_id=$item_id]\">$name</a>)\n"
+                                   }
+                               }
 
             db_foreach get_links "
-	              select i.item_id, e.label, e.url
-	                from cr_items i, cr_extlinks e
-	               where i.parent_id = :comment_id and e.extlink_id = i.item_id" {
-                append attachments_html "<li><a href=\"[ad_quotehtml $url]\">$label</a>\n"
-            }
-            if { ![empty_string_p $attachments_html] } {
+                  select i.item_id, e.label, e.url
+                    from cr_items i, cr_extlinks e
+                   where i.parent_id = :comment_id and e.extlink_id = i.item_id" {
+                       append attachments_html "<li><a href=\"[ns_quotehtml $url]\">$label</a>\n"
+                   }
+            if { $attachments_html ne "" } {
                 append html "<h5>[_ general-comments.Attachments]</h5>\n<ul>\n$attachments_html</ul>\n"
             }
         }
-        append html "<p>-- <a href=\"[ad_quotehtml /shared/community-member?user_id=$creation_user]\">$author</a> [_ general-comments.on] $pretty_date2 (<a href=\"[ad_quotehtml ${package_url}view-comment?[export_url_vars comment_id return_url]]\">[_ general-comments.view_details]</a>)</p>\n"
+        append html [subst {<p>--
+            <a href="[ns_quotehtml [export_vars -base /shared/community-member {{user_id $creation_user}}]]">$author</a>
+            [_ general-comments.on] $pretty_date2
+            (<a href="[ns_quotehtml [export_vars -base ${package_url}view-comment {comment_id return_url}]]">[_ general-comments.view_details]</a>)</p>
+        }]
     } else {
-        append html "<li><a href=\"[ad_quotehtml ${package_url}view-comment?[export_url_vars comment_id return_url]]\">$title</a>"
-	if {$print_user_info_p} {
-	    append html " [_ general-comments.by] <a href=\"[ad_quotehtml /shared/community-member?user_id=$creation_user]\">$author</a> [_ general-comments.on] $pretty_date<br>\n"
-	} else {
-	    append html "<br>\n"
-	}
+        append html [subst {
+            <li><a href="[ns_quotehtml [export_vars -base ${package_url}view-comment {comment_id return_url}]]">$title</a>
+        }]
+        if {$print_user_info_p} {
+            append html [subst {
+                [_ general-comments.by] <a href="[ns_quotehtml [export_vars -base /shared/community-member {{user_id $creation_user}}]]">$author</a>
+                [_ general-comments.on] $pretty_date<br>
+            }]
+        } else {
+            append html "<br>\n"
+        }
     }
 
     return $html
@@ -258,12 +269,12 @@ ad_proc -public general_comments_create_link {
     @param context_id  The context_id for the comment.
     @param category    A category to associate comment to.
     @param link_attributes  Some additional parameters for the link. Could be used
-			to set the link title and other things like that. Ex. -link_attributes
-			<i>{ title="My link title" }</i>
+    to set the link title and other things like that. Ex. -link_attributes
+    <i>{ title="My link title" }</i>
 } {
     # get the package url
     set package_url [general_comments_package_url]
-    if { [empty_string_p $package_url] } {
+    if { $package_url eq "" } {
         return ""
     }
 
@@ -271,7 +282,8 @@ ad_proc -public general_comments_create_link {
     if { ![info exists object_name] } { set object_name [acs_object_name $object_id] }
     if { ![info exists context_id] } { set context_id $object_id }
 
-    set html "<a href=\"[ad_quotehtml ${package_url}comment-add?[export_url_vars object_id object_name return_url context_id category]]\" $link_attributes>$link_text</a>"
+    set html [subst {<a href="[ns_quotehtml [export_vars -base ${package_url}comment-add {object_id 
+         object_name return_url context_id category}]]" $link_attributes>$link_text</a>}]
 
     return $html
 }
@@ -286,20 +298,20 @@ ad_proc -public general_comments_package_url {} {
 # these are being replaced with the above procs
 namespace eval general_comments {
 
-ad_proc -deprecated get_comments {object_id return_url} {
-    Generates a line item list of comments for the object_id.
+    ad_proc -deprecated get_comments {object_id return_url} {
+        Generates a line item list of comments for the object_id.
 
-    @param object_id The object_id to retrieve the comments for.
-    @param return_url A url for the user to return to after viewing a comment.
-    
-    @see general_comments_get_comments
-} {
+        @param object_id The object_id to retrieve the comments for.
+        @param return_url A url for the user to return to after viewing a comment.
+        
+        @see general_comments_get_comments
+    } {
 
-    # get the package url
-    set package_url [general_comments_package_url]
+        # get the package url
+        set package_url [general_comments_package_url]
 
-    set html ""
-    db_foreach get_comments_deprecated "
+        set html ""
+        db_foreach get_comments_deprecated "
              select g.comment_id,
                     r.title,
                     r.content,
@@ -318,26 +330,38 @@ ad_proc -deprecated get_comments {object_id return_url} {
                     o.object_id = g.comment_id and
                     p.person_id = o.creation_user
               order by creation_date" {
-        append html "<li><a href=\"[ad_quotehtml ${package_url}view-comment?[export_url_vars comment_id return_url]]\">$title</a> by $author, $creation_date<br>\n"
+                  append html [subst {
+                      <li><a href="[ns_quotehtml [export_vars -base ${package_url}view-comment {comment_id return_url}]]">$title</a>
+                      by $author, $creation_date<br>
+                  }]
+              }
+        return "$html"
     }
-    return "$html"
+
+    ad_proc -deprecated create_link {object_id object_name return_url link_text {context_id ""} {category ""}} {
+        Generates an html link to add a comment to an object.
+        @param object_id   The object to comment on.
+        @param object_name The name of the object.
+        @param return_url  A url for the user to return to after viewing a comment.
+        @param link_text   The text to display for the link.
+        @param category    A category to associate comment to.
+
+        @see general_comments_create_link
+    } {
+        # get the package url
+        set package_url [general_comments_package_url]
+
+        set html [subst {<a href="[ns_quotehtml [export_vars -base ${package_url}comment-add {object_id 
+             object_name return_url context_id category}]]">$link_text</a>
+        }]
+        return $html
+    }
+
 }
 
-ad_proc -deprecated create_link {object_id object_name return_url link_text {context_id ""} {category ""}} {
-    Generates an html link to add a comment to an object.
-    @param object_id   The object to comment on.
-    @param object_name The name of the object.
-    @param return_url  A url for the user to return to after viewing a comment.
-    @param link_text   The text to display for the link.
-    @param category    A category to associate comment to.
-
-    @see general_comments_create_link
-} {
-    # get the package url
-    set package_url [general_comments_package_url]
-
-    set html "<a href=\"[ad_quotehtml ${package_url}comment-add?[export_url_vars object_id object_name return_url context_id category]]\">$link_text</a>"
-    return $html
-}
-
-}
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

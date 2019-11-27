@@ -1,17 +1,17 @@
 <master>
-<property name="title">@page_title;noquote@</property>
-<property name="context">@context;noquote@</property>
+<property name="doc(title)">@page_title;literal@</property>
+<property name="context">@context;literal@</property>
 
 
 <p>
-<table border=1 cellspacing=0 cellpadding=5>
+<table border="1" cellspacing="0" cellpadding="5">
 <tr>
-  <td colspan=2 align=center>#general-comments.lt_Current_values_for_Ge#</td></tr>
+  <td colspan="2" align="center">#general-comments.lt_Current_values_for_Ge#</td></tr>
 <tr>
   <td>package_id</td>
   <td>
     <if @package_id@ eq "">
-      <i>#general-comments.lt_no_gc_package_instanc#</i>
+      <em>#general-comments.lt_no_gc_package_instanc#</em>
     </if>
     <else>
       @package_id@
@@ -20,7 +20,7 @@
   <td>package_url</td>
   <td>
     <if @package_url@ eq "">
-      <i>#general-comments.gc_is_not_mounted#</i>
+      <em>#general-comments.gc_is_not_mounted#</em>
     </if>
     <else>
       <a href="@package_url@">@package_url@</a>
@@ -29,40 +29,40 @@
   <td>AutoApproveCommentsP</td>
   <td>
     <if @auto_approve_comments_p@ eq "">
-      <i>#general-comments.not_set#</i>
+      <em>#general-comments.not_set#</em>
     </if>
     <else>
-      <a href="/admin/site-map/parameter-set?package_id=@package_id@">
+      <a href="@params_url@">
       @auto_approve_comments_p@</a>
     </else></td></tr>
 <tr>
   <td>AllowFileAttachmentsP</td>
   <td>
     <if @allow_file_attachments_p@ eq "">
-      <i>#general-comments.not_set#</i>
+      <em>#general-comments.not_set#</em>
     </if>
     <else>
-      <a href="/admin/site-map/parameter-set?package_id=@package_id@">
+      <a href="@params_url@">
       @allow_file_attachments_p@</a>
     </else></td></tr>
 <tr>
   <td>AllowLinkAttachmentsP</td>
   <td>
     <if @allow_link_attachments_p@ eq "">
-      <i>#general-comments.not_set#</i>
+      <em>#general-comments.not_set#</em>
     </if>
     <else>
-      <a href="/admin/site-map/parameter-set?package_id=@package_id@">
+      <a href="@params_url@">
       @allow_link_attachments_p@</a>
     </else></td></tr>
 <tr>
   <td>MaxFileSize</td>
   <td>
     <if @max_file_size@ eq "">
-      <i>#general-comments.not_set#</i>
+      <em>#general-comments.not_set#</em>
     </if>
     <else>
-      <a href="/admin/site-map/parameter-set?package_id=@package_id@">
+      <a href="@params_url@">
       @max_file_size@</a>
     </else></td></tr>
 </table>

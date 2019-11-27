@@ -14,17 +14,17 @@
       </multiple>
       <p>
         <multiple name=responses>
-          <table width=100% cellpadding=2 cellspacing=2 border=0>
-            <tr class="table-header" bgcolor="#e6e6e6">
+          <table width="100%" cellpadding="2" cellspacing="2" border="0">
+            <tr class="table-header" style="background-color:#e6e6e6;">
               <td><a name="@responses.response_id@">#survey.lt_Your_response________#</a>
-		<if @editable_p@ eq "t">[<a
-            href="respond?survey_id=@survey_id@&response_id=@responses.response_id@">#survey.edit_this_response#</a>]</if>
+                <if @editable_p;literal@ true>
+                  [<a href="@responses.respond_url@">#survey.edit_this_response#</a>]
+                </if>
 	      </td>
             </tr>
-            <tr class="odd" bgcolor="#f4f4f4">
+            <tr class="odd" style="background-color:#f4f4f4;">
               <td>@responses.answer_summary;noquote@</td>
             </tr>
           </table>
         </multiple>
-  </html>
 

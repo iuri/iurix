@@ -1,8 +1,8 @@
 /all-party-projects.adp/1.1/Fri Nov 11 20:20:24 2005//
-/all-party-projects.tcl/1.1/Fri Nov 11 20:20:24 2005//
+/all-party-projects.tcl/1.3/Wed May  9 15:33:33 2018//
 /all-party-projects.xql/1.1/Fri Nov 11 20:20:24 2005//
 /all-party-tasks.adp/1.1/Thu Nov 10 22:55:46 2005//
-/all-party-tasks.tcl/1.1/Thu Nov 10 22:55:46 2005//
+/all-party-tasks.tcl/1.2/Thu Mar 29 15:03:01 2018//
 /all-party-tasks.xql/1.1/Thu Nov 10 22:55:46 2005//
 /assignee-portlet.adp/1.9/Wed Oct 19 12:03:58 2005//
 /assignee-portlet.tcl/1.13/Tue Nov  8 15:31:41 2005//
@@ -12,7 +12,7 @@
 /comments-portlet.adp/1.4/Fri Aug 26 20:59:12 2005//
 /comments-portlet.tcl/1.5/Wed Dec 14 17:51:19 2005//
 /customer-group-list.adp/1.1/Wed Oct  5 18:24:24 2005//
-/customer-group-list.tcl/1.2/Thu Aug  2 11:35:19 2007//
+/customer-group-list.tcl/1.4/Thu Apr  5 14:44:09 2018//
 /customer-group-list.xql/1.2/Sun Oct 30 14:35:35 2005//
 /customizations-portlet-oracle.xql/1.1/Thu May 26 09:34:27 2005//
 /customizations-portlet-postgresql.xql/1.1/Thu May 26 09:34:27 2005//
@@ -85,7 +85,7 @@
 /tasks-portlet.tcl/1.12/Wed Nov 29 12:02:17 2006//
 /tasks-postgresql.xql/1.30/Thu Feb 15 13:22:41 2007//
 /tasks.adp/1.5/Wed Nov 29 12:02:17 2006//
-/tasks.tcl/1.65/Mon Jun 25 07:25:06 2007//
+/tasks.tcl/1.67/Wed May  9 15:33:33 2018//
 /view-week-display-oracle.xql/1.1/Sat Jul 30 00:26:33 2005//
 /view-week-display-postgresql.xql/1.1/Sat Jul 30 00:26:33 2005//
 /view-week-display.adp/1.2/Sat Sep 17 13:03:45 2005//

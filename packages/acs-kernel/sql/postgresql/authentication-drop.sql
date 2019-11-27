@@ -7,23 +7,30 @@
 --
 -- @creation-date 20003-08-21
 --
--- @cvs-id $Id: authentication-drop.sql,v 1.1 2003/08/22 11:38:08 peterm Exp $
+-- @cvs-id $Id: authentication-drop.sql,v 1.2 2011/07/07 10:46:02 gustafn Exp $
 --
 
-create function inline_0 ()
-returns integer as '
-declare
+
+
+--
+-- procedure inline_0/0
+--
+CREATE OR REPLACE FUNCTION inline_0(
+
+) RETURNS integer AS $$
+DECLARE
         row     record;
-begin
+BEGIN
         for row in select authority_id from auth_authorities
         loop
                 perform authority__del(row.authority_id);
         end loop;
 
-        perform acs_object_type__drop_type(''authority'', ''t'');
+        perform acs_object_type__drop_type('authority', 't');
 
         return 1;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 select inline_0 ();
 drop function inline_0();
 

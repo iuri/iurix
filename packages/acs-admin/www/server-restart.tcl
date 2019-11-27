@@ -4,14 +4,33 @@ ad_page_contract {
 
     @author Peter Marklund (peter@collaboraid.biz)
     @creation-date 27:th of March 2003
-    @cvs-id $Id: server-restart.tcl,v 1.4 2003/10/28 08:54:44 lars Exp $
+    @cvs-id $Id: server-restart.tcl,v 1.4.24.3 2017/07/25 09:49:58 gustafn Exp $
 }
 
 set page_title "Restarting Server"
-
 set context [list $page_title]
 
+#
+# When using NaviServer, and when the kernel parameter
+# "NsShutdownWithNonZeroExitCode" is set to be true, the "-restart"
+# option will be used.
+#
+if {[ns_info name] eq "NaviServer" &&
+    [parameter::get -parameter NsShutdownWithNonZeroExitCode -package_id [ad_acs_kernel_id] -default 0]
+} {
+    set cmd {ns_shutdown -restart}
+} else {
+    set cmd ns_shutdown
+}
 
-# We do this as a schedule proc, so the server will have time to serve the page
+#
+# We perform the shutdown as a scheduled proc, so the server will have
+# time to serve the page.
+#
+ad_schedule_proc -thread t -once t 2 {*}$cmd
 
-ad_schedule_proc -thread t -once t 2 ns_shutdown
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

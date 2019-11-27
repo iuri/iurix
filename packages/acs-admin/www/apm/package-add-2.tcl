@@ -3,16 +3,16 @@ ad_page_contract {
     
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date 17 April 2000
-    @cvs-id $Id: package-add-2.tcl,v 1.9.4.1 2010/04/10 16:53:53 donb Exp $
+    @cvs-id $Id: package-add-2.tcl,v 1.12.2.1 2015/09/10 08:21:01 gustafn Exp $
 } {
     package_key
     pretty_name
     pretty_plural
     { package_type "apm_application"}
-    { initial_install_p "f" }
-    { singleton_p "f" }
-    { implements_subsite_p f }
-    { inherit_templates_p t }
+    { initial_install_p:boolean "f" }
+    { singleton_p:boolean "f" }
+    { implements_subsite_p:boolean f }
+    { inherit_templates_p:boolean t }
     { auto_mount "" }
     package_uri
     version_name
@@ -26,9 +26,9 @@ ad_page_contract {
     { owner_uri:multiple}
     { vendor [db_null] } 
     { vendor_uri [db_null] }
-    { install_p 0 }
-    {implements_subsite_p "f"}
-    {inherit_templates_p "f"}
+    { install_p:boolean 0 }
+    {implements_subsite_p:boolean "f"}
+    {inherit_templates_p:boolean "f"}
 } -validate {
     package_key_format -requires {package_key} {
 	if { [regexp {[^a-z0-9-]} $package_key] } {
@@ -145,5 +145,10 @@ db_transaction {
     ad_script_abort
 }
 
-db_release_unused_handles
 ad_returnredirect "version-view?version_id=$version_id"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

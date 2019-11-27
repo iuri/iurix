@@ -1,7 +1,7 @@
 ad_library {
     A library which dispatches tcl callback events.
 
-    Events are assigned heirarchical symbolic names, eg:
+    Events are assigned hierarchical symbolic names, eg:
 
         major-type
         major-type.minor-type
@@ -33,7 +33,7 @@ ad_library {
 
     @author Lee Denison (lee@xarg.net)
     @creation-date 2004/11/11
-    @cvs-id $Id: event-procs.tcl,v 1.5 2005/09/04 12:13:28 maltes Exp $
+    @cvs-id $Id: event-procs.tcl,v 1.8 2018/05/09 15:33:31 hectorr Exp $
 } 
 
 namespace eval util {}

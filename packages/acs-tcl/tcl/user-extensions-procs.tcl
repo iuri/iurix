@@ -7,7 +7,7 @@ ad_library {
 
     @author ben@openforce.net
     @creation-date 2002-01-22
-    @cvs-id $Id: user-extensions-procs.tcl,v 1.5 2007/01/10 21:22:12 gustafn Exp $
+    @cvs-id $Id: user-extensions-procs.tcl,v 1.6.2.1 2015/09/10 08:22:01 gustafn Exp $
 
 }
 
@@ -32,7 +32,7 @@ namespace eval acs_user_extension {
 
         # Loop through the extensions
         foreach extension $extensions {
-            acs_sc_call UserData $op $list_of_args $extension
+            set r [acs_sc::invoke -contract UserData -operation $op -call_args $list_of_args -impl $extension]
         }
     }
 
@@ -94,3 +94,9 @@ namespace eval acs_user_extension {
 
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

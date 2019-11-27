@@ -1,7 +1,7 @@
 # Expects:
 # blog:onerow
 # show_comments_p:boolean
-# retrun_url:onevalue,optional
+# return_url:onevalue,optional
 # package_id:optional
 # screen_name:onevalue,optional
 # perma_p: 1/0 (defaults to 0 -- set to 1 if this is the permalink page)
@@ -17,10 +17,10 @@ set mrname $blog(sw_category_multirow)
 # the template we are included from.
 template::multirow -local -ulevel 1 upvar $mrname sw_category_multirow
 
-if { ![exists_and_not_null perma_p] } {
+if { ![info exists perma_p] || $perma_p eq "" } {
     set perma_p 0
 }
-if { ![exists_and_not_null show_comments_p] } {
+if { ![info exists show_comments_p] || $show_comments_p eq "" } {
     set show_comments_p $perma_p
 }
 
@@ -30,14 +30,14 @@ if { ![info exists package_id] } {
     set package_id [ad_conn package_id]
 }
 
-if { ![exists_and_not_null return_url] } {
+if { ![info exists return_url] || $return_url eq "" } {
     set return_url [ad_return_url]
 }
-if { ![exists_and_not_null screen_name] } {
+if { ![info exists screen_name] } {
     set screen_name ""
 }
 
-if { ![exists_and_not_null max_content_length] } {
+if { ![info exists max_content_length] || $max_content_length eq "" } {
     set max_content_length 0
 }        
 
@@ -47,14 +47,14 @@ set user_id [ad_conn user_id]
 
 set general_comments_package_url [general_comments_package_url]
 
-set show_poster_p [ad_parameter "ShowPosterP" "" "1"]
+set show_poster_p [parameter::get -parameter "ShowPosterP" -default "1"]
 
 set entry_id $blog(entry_id)
 
-if { [empty_string_p $screen_name] } {
-    set blog(permalink_url) "${package_url}one-entry?[export_vars { entry_id }]"
+if { $screen_name eq "" } {
+    set blog(permalink_url) [export_vars -base ${package_url}one-entry { entry_id }]
 } else {
-    set blog(permalink_url) "${package_url}user/$screen_name/one-entry?[export_vars { entry_id }]"
+    set blog(permalink_url) [export_vars -base ${package_url}user/$screen_name/one-entry { entry_id }]
 }
 
 lars_blogger::entry::htmlify \
@@ -79,7 +79,11 @@ set display_categories [lars_blog_categories_p \
 
 if { [template::util::is_true $show_comments_p] } {
     lars_blogger::entry::get_comments -entry_id $entry_id
-    set blog(comment_add_url) [export_vars -base "${general_comments_package_url}comment-add" { { object_id $entry_id } { object_name $blog(title) } { return_url "${package_url}flush-cache?[export_vars { return_url }]"} }]
+    set blog(comment_add_url) [export_vars -base "${general_comments_package_url}comment-add" {
+	{ object_id $entry_id }
+	{ object_name $blog(title) }
+	{ return_url "[export_vars -base ${package_url}flush-cache { return_url }]"}
+    }]
 }
 
 set blog(posted_time_pretty) [util::age_pretty \

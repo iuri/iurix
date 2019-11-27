@@ -1,4 +1,4 @@
-# $Id: acs-developer-support-init.tcl,v 1.8 2010/01/09 01:56:09 donb Exp $
+# $Id: acs-developer-support-init.tcl,v 1.9.2.3 2017/06/30 17:26:20 gustafn Exp $
 # File:        developer-support-init.tcl
 # Author:      Jon Salz <jsalz@mit.edu>
 # Date:        22 Apr 2000
@@ -12,14 +12,14 @@ if { ![nsv_exists ds_properties enabled_p] } {
 
     nsv_set ds_properties enabled_p [parameter::get -package_id [ds_instance_id] -parameter EnabledOnStartupP -default 0]
 
-    # Take the IP list (space or comma seperated) and turn it into a tcl list.
+    # Take the IP list (space or comma separated) and turn it into a Tcl list.
     set IPs [list]
     foreach ip [lsort -unique [split [parameter::get -package_id [ds_instance_id] -parameter EnabledIPs -default *] { ,}]] { 
-        if {[string equal $ip "*"]} {
+        if {$ip eq "*"} {
             # a star means anything will match so just use the * instead
             set IPs "*"
             break
-        } elseif {![empty_string_p $ip]} {
+        } elseif {$ip ne ""} {
             lappend IPs $ip
         }
     }
@@ -40,3 +40,9 @@ if { ![nsv_exists ds_properties enabled_p] } {
 }
 
 ds_watch_packages
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

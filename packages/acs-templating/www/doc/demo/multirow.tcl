@@ -1,5 +1,5 @@
 ad_page_contract {
-  @cvs-id $Id: multirow.tcl,v 1.2 2002/09/10 22:22:16 jeffd Exp $
+  @cvs-id $Id: multirow.tcl,v 1.2.28.1 2015/09/10 08:22:11 gustafn Exp $
   @datasource body multirow
   The sun and planets of our solar system
   @column name "Sun" or name of the planet.
@@ -17,3 +17,9 @@ template::multirow append body "Mercury"    4866 3.30e23    57950000
 template::multirow append body "Venus"     12106 4.869e24  108110000
 template::multirow append body "Earth"     12742 5.9736e24 149570000
 template::multirow append body "Mars"       6760 6.4219e23 227840000
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -37,11 +37,11 @@
                   <td bgcolor="#ddddff">
                 </else>
               </noparse>
-                <b>
+                <strong>
                   <font face="tahoma,verdana,arial,helvetica,sans-serif">
                     @elements.label;noquote@
                   </font>
-                </b>
+                </strong>
                 &nbsp;&nbsp;
               </td>
             </if>
@@ -65,7 +65,7 @@
                   <table cellpadding="4" cellspacing="0" border="0">
                     <formgroup id="@elements.id@">
                       <tr>
-                        <td>\@formgroup.widget@</td>
+                        <td>\@formgroup.widget;noquote@</td>
                         <td>
                           <font face="tahoma,verdana,arial,helvetica,sans-serif">
                             <label for="@elements.form_id@:elements:@elements.id@:\@formgroup.option@">
@@ -91,7 +91,7 @@
                 <formerror id="@elements.id@">
                   <br>
                   <font face="tahoma,verdana,arial,helvetica,sans-serif" color="red">
-                    <b>\@formerror.@elements.id@;noquote\@<b>
+                    <strong>\@formerror.@elements.id@;noquote\@<strong>
                   </font>
                 </formerror>
               </noparse>
@@ -100,7 +100,7 @@
                 <p style="margin-top: 4px; margin-bottom: 2px;">
                   <font face="tahoma,verdana,arial,helvetica,sans-serif">
                     <noparse>
-                      <i><formhelp id="@elements.id@"></i>
+                      <em><formhelp id="@elements.id@"></em>
                     </noparse>
                   </font>
                 </p>

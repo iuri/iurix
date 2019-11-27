@@ -8,12 +8,18 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: file-download.tcl,v 1.3 2001/10/31 20:42:07 donb Exp $
+    @cvs-id $Id: file-download.tcl,v 1.4.2.1 2015/09/12 11:06:35 gustafn Exp $
 } {
-    item_id:notnull
+    item_id:naturalnum,notnull
 }
 
 # check for permissions
-ad_require_permission $item_id read
+permission::require_permission -object_id $item_id -privilege read
 
 cr_write_content -item_id $item_id
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

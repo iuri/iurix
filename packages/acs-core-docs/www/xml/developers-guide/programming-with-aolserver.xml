@@ -9,7 +9,7 @@
 
 
 <authorblurb>
-<para>By Michael Yoon, Jon Salz and <ulink url="http://www.pinds.com/lars">Lars Pind</ulink>.</para>
+<para>By Michael Yoon, Jon Salz and Lars Pind.</para>
 </authorblurb>
 
 <sect2 id="programming-aolserver-global">
@@ -112,7 +112,7 @@ called from two levels deep.
 <title>Returning More Than One Value From a Function</title>
 
 <para>
-Many functions have a single return value. For instance, <ulink url="/api-doc/proc-view?proc=empty%5fstring%5fp"><computeroutput>empty_string_p</computeroutput></ulink>
+Many functions have a single return value. For instance, <ulink url="/api-doc/proc-view?proc=util_email_valid_p"><computeroutput>util_email_valid_p</computeroutput></ulink>
 returns a number: 1 or 0. Other functions need to return a composite value.
 For instance, consider a function that looks up a user&#39;s name and email
 address, given an ID. One way to implement this is to return a three-element
@@ -324,7 +324,7 @@ hash table, so <computeroutput>ns_set</computeroutput>s are slower than arrays w
 entries is large. 
 </para>
 
-<para><phrase role="cvstag">($Id: programming-with-aolserver.xml,v 1.6 2006/07/17 05:38:37 torbenb Exp $)</phrase></para>
+<para><phrase role="cvstag">($Id: programming-with-aolserver.xml,v 1.7.2.1 2017/06/17 10:28:29 gustafn Exp $)</phrase></para>
 
 </sect2>
 

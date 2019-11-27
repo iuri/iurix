@@ -1,6 +1,6 @@
 <master>
-<property name="context">@context;noquote@</property>
-<property name="title">@party_name;noquote@</property>
+<property name="context">@context;literal@</property>
+<property name="doc(title)">@party_name;literal@</property>
 
 <h3>Attributes</h3>
 
@@ -16,7 +16,7 @@
    </if><else>
       @attributes.value@
    </else>
-   <if @write_p@ eq 1>
+   <if @write_p;literal@ true>
      (<a href="../attributes/edit-one?@attributes.export_vars@">edit</a>) 
    </if>
    </li>
@@ -25,9 +25,9 @@
 </ul>
 
 
-<if @admin_p@ eq 1>
+<if @admin_p;literal@ true>
   <h3>Extreme Actions</h3>
   <ul>
-    <li> <a href=delete?party_id=@party_id@>Nuke this party</a>
+    <li> <a href="delete?party_id=@party_id@">Nuke this party</a>
   </ul>
 </if>

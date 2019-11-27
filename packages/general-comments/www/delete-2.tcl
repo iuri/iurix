@@ -8,10 +8,10 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: delete-2.tcl,v 1.2 2007/05/05 15:54:47 maltes Exp $
+    @cvs-id $Id: delete-2.tcl,v 1.4.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    comment_id:integer,notnull
-    { return_url {} }
+    comment_id:naturalnum,notnull
+    { return_url:localurl {} }
 }
 
 # There is a bug in content_item.delete that results in
@@ -28,9 +28,13 @@ db_dml delete_image_attachments {
 # Only need to call on acs_message.delete since
 # deletion of row from general_comments table
 # relies on "on delete cascade"
-db_exec_plsql delete_comment {
-    select acs_message__delete(:comment_id) from dual
-}
+db_exec_plsql delete_comment {}
 
 ad_returnredirect $return_url
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
     @arch-tag: f8f62c6c-bf3b-46d9-8e1e-fa5e60ba1c05
-    @cvs-id $Id: content-extlink-procs.tcl,v 1.7 2009/02/13 22:13:06 jeffd Exp $
+    @cvs-id $Id: content-extlink-procs.tcl,v 1.8.2.1 2015/09/10 08:21:16 gustafn Exp $
 }
 
 namespace eval ::content::extlink {}
@@ -67,10 +67,10 @@ ad_proc -public content::extlink::edit {
     is assumed that the caller will be pulling the existing values out of
     the database before editing them.
 
-    @extlink_id Optional pre-assigned object_id for the link
-    @url The URL of the external resource
-    @label Label for the extlink (defaults to the URL)
-    @description An extended description of the link (defaults to NULL)
+    @param extlink_id Optional pre-assigned object_id for the link
+    @param url The URL of the external resource
+    @param label Label for the extlink (defaults to the URL)
+    @param description An extended description of the link (defaults to NULL)
 } {
 
     set modifying_user [ad_conn user_id]
@@ -113,7 +113,13 @@ ad_proc -public content::extlink::name {
 } {
     Returns the name of an extlink
 
-    @item_id  The object id of the item to check.
+    @param item_id  The object id of the item to check.
 } {
     return [db_string get {}]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -3,7 +3,7 @@
 --
 -- @author ddao@arsdigita.com
 -- @creation-date November 09, 2000
--- @cvs-id $Id: chat-create.sql,v 1.4 2007/11/19 01:14:15 donb Exp $
+-- @cvs-id $Id: chat-create.sql,v 1.4.6.1 2016/10/28 18:57:36 antoniop Exp $
 --
 
 begin
@@ -148,7 +148,14 @@ create table chat_rooms (
 					   check (auto_flush_p in ('t', 'f')),
 	auto_transcript_p  char(1) default 'f'
 					   constraint chat_rooms_auto_transcript_ck
-					   check (auto_transcript_p in ('t', 'f'))
+					   check (auto_transcript_p in ('t', 'f')),
+	login_messages_p  char(1) default 't'
+					   constraint chat_rooms_login_messages_ck
+					   check (login_messages_p in ('t', 'f')),
+
+	logout_messages_p  char(1) default 't'
+					   constraint chat_rooms_logout_messages_ck
+					   check (logout_messages_p in ('t', 'f'))
 ); 
 
 declare
@@ -245,6 +252,8 @@ as
         archive_p      in chat_rooms.archive_p%TYPE      default 'f',
 	auto_flush_p   in chat_rooms.auto_flush_p%TYPE	 default 't',
 	auto_transcript_p in chat_rooms.auto_transcript_p%TYPE default 'f',
+	login_messages_p  in chat_rooms.login_messages_p%TYPE default  't',
+	logout_messages_p in chat_rooms.logout_messages_p%TYPE default 't',	
         context_id     in acs_objects.context_id%TYPE    default null,
         creation_date  in acs_objects.creation_date%TYPE default sysdate,
         creation_user  in acs_objects.creation_user%TYPE default null,
@@ -341,6 +350,8 @@ as
         archive_p      in chat_rooms.archive_p%TYPE      default 'f',
 	auto_flush_p   in chat_rooms.auto_flush_p%TYPE	 default 't',
 	auto_transcript_p in chat_rooms.auto_transcript_p%TYPE default 'f',
+	login_messages_p  in chat_rooms.login_messages_p%TYPE default  't',
+	logout_messages_p in chat_rooms.logout_messages_p%TYPE default 't',	
         context_id     in acs_objects.context_id%TYPE    default null,
         creation_date  in acs_objects.creation_date%TYPE default sysdate,
         creation_user  in acs_objects.creation_user%TYPE default null,
@@ -366,7 +377,9 @@ as
             active_p, 
             archive_p,
 	    auto_flush_p,
-	    auto_transcript_p)
+	    auto_transcript_p,
+	    login_messages_p,
+	    logout_messages_p)
 	values (
             v_room_id, 
             chat_room.new.pretty_name, 
@@ -375,7 +388,9 @@ as
             chat_room.new.active_p, 
             chat_room.new.archive_p,
 	    chat_room.new.auto_flush_p,
-	    chat_room.new.auto_transcript_p);
+	    chat_room.new.auto_transcript_p,
+	    chat_room.new.login_messages_p,
+	    chat_room.new.logout_messages_p);
 
         return v_room_id;
     end new;

@@ -3,10 +3,10 @@ ad_page_contract {
 
     @author Tracy Adams (teadams@alum.mit.edu)
     @creation-date 22 July 2002
-    @cvs-id $Id: object-goto.tcl,v 1.2 2003/05/17 10:54:55 jeffd Exp $
+    @cvs-id $Id: object-goto.tcl,v 1.3.2.1 2015/09/12 11:06:47 gustafn Exp $
 } {
-    object_id:notnull
-    type_id:notnull
+    object_id:naturalnum,notnull
+    type_id:naturalnum,notnull
 } 
 
 
@@ -19,6 +19,12 @@ ad_page_contract {
 
 set sc_impl_name [db_string get_notif_type {}]
 
-set url [acs_sc_call NotificationType GetURL [list $object_id] $sc_impl_name]
+set url [acs_sc::invoke -contract NotificationType -operation GetURL -call_args [list $object_id] -impl $sc_impl_name]
 
 ad_returnredirect $url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

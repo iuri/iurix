@@ -4,12 +4,12 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-24
-    @cvs-id $Id: request-new.tcl,v 1.11 2009/09/13 23:54:42 donb Exp $
+    @cvs-id $Id: request-new.tcl,v 1.12.2.2 2016/05/21 10:18:18 gustafn Exp $
 } {
-    type_id:integer,notnull
-    object_id:integer,notnull
+    type_id:naturalnum,notnull
+    object_id:naturalnum,notnull
     {pretty_name ""}
-    return_url
+    return_url:localurl
 }
 
 set user_id [auth::require_login]
@@ -20,7 +20,7 @@ notification::security::require_notify_object -object_id $object_id
 set doc(title) [_ notifications.Request_Notification]
 set context [list $doc(title)]
 
-if {[empty_string_p $pretty_name]} { 
+if {$pretty_name eq ""} { 
     set page_title [_ notifications.Request_Notification]
 } else { 
     set page_title [_ notifications.lt_Request_Notification_]
@@ -36,7 +36,7 @@ ad_form -name subscribe -export {type_id object_id return_url} -form {
     {delivery_method_id:integer(select)    
         {label "[_ notifications.Delivery_Method]"}
         {options $delivery_methods}
-        {value {[lindex [lindex $delivery_methods 0] 1]}}
+        {value {[lindex $delivery_methods 0 1]}}
     }
 } -on_submit {
 
@@ -57,3 +57,9 @@ if { [llength $delivery_methods] == 1 } {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -1,7 +1,7 @@
 ad_page_contract {
     Page for users to register themselves on the site.
 
-    @cvs-id $Id: home.tcl,v 1.26 2007/08/29 13:44:37 maltes Exp $
+    @cvs-id $Id: home.tcl,v 1.26.12.1 2015/09/10 08:21:50 gustafn Exp $
 } {
 
 }
@@ -16,3 +16,8 @@ set user_home_template [parameter::get -parameter "UserHomeTemplate" -package_id
 if {$user_home_template eq ""} {
     set user_home_template "/packages/acs-subsite/lib/home"
 }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

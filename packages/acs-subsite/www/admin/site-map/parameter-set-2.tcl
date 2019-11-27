@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date 12 September 2000
-    @cvs-id $Id: parameter-set-2.tcl,v 1.5 2009/01/06 02:25:34 gustafn Exp $
+    @cvs-id $Id: parameter-set-2.tcl,v 1.6.2.2 2015/09/18 07:27:48 gustafn Exp $
 
 } {
     package_key:notnull
@@ -14,7 +14,7 @@ ad_page_contract {
     params:array
 }
 
-ad_require_permission $package_id admin
+permission::require_permission -object_id $package_id -privilege admin
 
 if { [catch {
     db_foreach apm_parameters_set {} {
@@ -24,7 +24,13 @@ if { [catch {
     }
 } errmsg] } {
     ad_return_error "Database Error" "The parameters could not be set.  The database error was:<p>
-<blockquote><pre>[ad_quotehtml $errmsg]</pre></blockquote>."
+<blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote>."
 } else {
     ad_returnredirect $return_url
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

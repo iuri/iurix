@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2005-01-01
     @arch-tag: bc76f9ce-ed1c-49dd-a3be-617d5a78c838
-    @cvs-id $Id: parse-test-procs.tcl,v 1.6 2006/06/09 00:14:00 victorg Exp $
+    @cvs-id $Id: parse-test-procs.tcl,v 1.6.14.1 2015/09/10 08:22:08 gustafn Exp $
 }
 
 aa_register_case template_variable {
@@ -124,3 +124,9 @@ aa_register_case -cats {api smoke} expand_percentage_signs {
     aa_equals "square brackets in array key safe" $expanded_message "Test message \$two(\$three(\[__does_not_exist\]))"
    
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

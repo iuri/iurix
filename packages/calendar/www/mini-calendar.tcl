@@ -1,27 +1,30 @@
-if {![exists_and_not_null base_url]} {
+if {![info exists base_url] || $base_url eq ""} {
     set base_url [ad_conn url]
 }
 
-if {![exists_and_not_null date]} {
+if {![info exists date] || $date eq ""} {
     set date [dt_sysdate]
 }
 
-ad_form -name go-to-date -method get -has_submit 1 -action $base_url  -export [lappend list_of_vars page_num] -html {class inline-form} -form {
-    {date:text,nospell,optional
-        {label "[_ acs-datetime.Date]"}
-        {html {size 10}}
-    }
-    {btn_ok:text(submit)
-        {label "[_ calendar.Go_to_date]"}
-    } 
-    {view:text(hidden)
-        {value "day"}
-    }
-} -on_submit {}
+ad_form -name go-to-date -method get -has_submit 1 -action $base_url  \
+    -export [lappend list_of_vars page_num] \
+    -html {class inline-form} \
+    -form {
+        {date:text,nospell,optional
+            {label "[_ acs-datetime.Date]"}
+            {html {size 10}}
+        }
+        {btn_ok:text(submit)
+            {label "[_ calendar.Go_to_date]"}
+        } 
+        {view:text(hidden)
+            {value "day"}
+        }
+    } -on_submit {}
 
 
-if {[exists_and_not_null page_num]} {
-    set page_num_formvar [export_form_vars page_num]
+if {[info exists page_num] && $page_num ne ""} {
+    set page_num_formvar [export_vars -form {page_num}]
     set page_num "&page_num=$page_num"
 } else {
     set page_num_formvar ""
@@ -29,8 +32,10 @@ if {[exists_and_not_null page_num]} {
 }
 
 # Determine whether we need to pass on the period_days variable from the list view
-if {[string equal $view list]} {
-    if {![exists_and_not_null period_days] || [string equal $period_days [parameter::get -parameter ListView_DefaultPeriodDays -default 31]]} {
+if {$view eq "list"} {
+    if {(![info exists period_days] || $period_days eq "") 
+	|| $period_days eq [parameter::get -parameter ListView_DefaultPeriodDays -default 31]
+    } {
 	set url_stub_period_days ""
     } else {
 	set url_stub_period_days "&period_days=${period_days}"
@@ -49,12 +54,12 @@ array set message_key_array {
 # Create row with existing views
 multirow create views name text active_p url
 foreach viewname {list day week month} {
-    if { [string equal $viewname $view] } {
+    if {$viewname eq $view} {
         set active_p t
     } else {
         set active_p f
     }
-    if {[string equal $viewname list]} {
+    if {$viewname eq "list"} {
 	multirow append views [lang::util::localize $message_key_array($viewname)] $viewname $active_p \
 	    "[export_vars -base $base_url {date {view $viewname}}]${page_num}${url_stub_period_days}"
     } else {
@@ -73,28 +78,27 @@ if {[catch {
     dt_get_info $date
 }
 
-set now        [clock scan $date]
-set date_list [dt_ansi_to_list $date]
-set year [dt_trim_leading_zeros [lindex $date_list 0]]
-set month [dt_trim_leading_zeros [lindex $date_list 1]]
-set day [dt_trim_leading_zeros [lindex $date_list 2]]
+set now              [clock scan $date]
+set date_list        [dt_ansi_to_list $date]
+set year             [util::trim_leading_zeros [lindex $date_list 0]]
+set month            [util::trim_leading_zeros [lindex $date_list 1]]
+set day              [util::trim_leading_zeros [lindex $date_list 2]]
 
-set months_list [dt_month_names]
-set curr_month_idx  [expr [dt_trim_leading_zeros [clock format $now -format "%m"]]-1]
-set curr_day [clock format $now -format "%d"]
-set curr_month [clock format $now -format "%B"]
-set curr_year [clock format $now -format "%Y"]
+set months_list      [dt_month_names]
+set curr_month_idx   [expr [util::trim_leading_zeros [clock format $now -format "%m"]]-1]
+set curr_day         [clock format $now -format "%d"]
+set curr_month       [clock format $now -format "%B"]
+set curr_year        [clock format $now -format "%Y"]
 set curr_date_pretty [lc_time_fmt $date "%q"]
 
 set today [lc_time_fmt [dt_sysdate] "%q"]
 
-if [string equal $view month] {
+if {$view eq "month"} {
     set prev_year [clock format [clock scan "1 year ago" -base $now] -format "%Y-%m-%d"]
     set next_year [clock format [clock scan "1 year" -base $now] -format "%Y-%m-%d"]
     set prev_year_url "$base_url?view=$view&date=[ad_urlencode $prev_year]${page_num}${url_stub_period_days}"
     set next_year_url "$base_url?view=$view&date=[ad_urlencode $next_year]${page_num}${url_stub_period_days}"
-
-    set now         [clock scan $date]
+    set now       [clock scan $date]
 
     multirow create months name current_month_p new_row_p url
 
@@ -103,13 +107,7 @@ if [string equal $view month] {
         set month [lindex $months_list $i]
 
         # show 3 months in a row
-
-        set new_row_p [expr $i / 3]
-#         if {($i != 0) && ([expr $i % 3] == 0)} {
-#             set new_row_p t
-#         } else {
-#             set new_row_p f
-#         }
+        set new_row_p [expr {$i / 3}]
 
         if {$i == $curr_month_idx} {
             set current_month_p t 
@@ -117,7 +115,7 @@ if [string equal $view month] {
             set current_month_p f
         }
         set target_date [clock format \
-                             [clock scan "[expr $i-$curr_month_idx] month" -base $now] -format "%Y-%m-%d"]
+                             [clock scan "[expr {$i-$curr_month_idx}] month" -base $now] -format "%Y-%m-%d"]
         multirow append months $month $current_month_p $new_row_p  \
             "[export_vars -base $base_url {{date $target_date} view}]${page_num}${url_stub_period_days}"
         
@@ -134,23 +132,23 @@ if [string equal $view month] {
     multirow create days_of_week day_short day_num
     for {set i 0} {$i < 7} {incr i} {
         multirow append days_of_week \
-            [lindex $week_days [expr [expr $i + $first_day_of_week] % 7]] \
+            [lindex $week_days [expr {($i + $first_day_of_week) % 7}]] \
             $i
     }
 
-    multirow create days day_number beginning_of_week_p end_of_week_p today_p active_p url weekday day_num pretty_date
+    multirow create days day_number beginning_of_week_p end_of_week_p today_p active_p url weekday day_num pretty_date id
 
     set day_of_week 1
 
     # Calculate number of active days
-    set active_days_before_month [expr [expr [dt_first_day_of_month $year $month]] -1 ]
-    set active_days_before_month [expr [expr $active_days_before_month + 7 - $first_day_of_week] % 7]
+    set active_days_before_month [expr {[dt_first_day_of_month $year $month] - 1} ]
+    set active_days_before_month [expr {($active_days_before_month + 7 - $first_day_of_week) % 7}]
 
-    set calendar_starts_with_julian_date [expr $first_julian_date_of_month - $active_days_before_month]
-    set day_number [expr $days_in_last_month - $active_days_before_month + 1]
+    set calendar_starts_with_julian_date [expr {$first_julian_date_of_month - $active_days_before_month}]
+    set day_number [expr {$days_in_last_month - $active_days_before_month + 1}]
 
-    for {set julian_date $calendar_starts_with_julian_date} {$julian_date <= [expr $last_julian_date + 7]} {incr julian_date} {
-        if {$julian_date > $last_julian_date_in_month && [string equal $end_of_week_p t] } {
+    for {set julian_date $calendar_starts_with_julian_date} {$julian_date <= $last_julian_date + 7} {incr julian_date} {
+        if {$julian_date > $last_julian_date_in_month && $end_of_week_p == "t" } {
             break
         }
         set today_p f
@@ -166,7 +164,7 @@ if [string equal $view month] {
         
         if {$julian_date == $first_julian_date_of_month} {
             set day_number 1
-        } elseif {$julian_date == [expr $last_julian_date_in_month +1]} {
+        } elseif {$julian_date == $last_julian_date_in_month + 1} {
             set day_number 1
         }
 
@@ -189,13 +187,26 @@ if [string equal $view month] {
         }
 
         set weekday [lindex $long_weekdays $day_of_week]
-
+        set url "[export_vars -base $base_url {{date $ansi_date} view}]${page_num}${url_stub_period_days}"
         multirow append days $day_number $beginning_of_week_p $end_of_week_p $today_p $active_p \
-            "[export_vars -base $base_url {{date $ansi_date} view}]${page_num}${url_stub_period_days}" \
+            $url \
             $weekday \
             $day_num \
-            $pretty_date
+            $pretty_date \
+            mini-calendar-$ansi_date
 
+        template::add_body_script -script [subst {
+            var e =  document.getElementById('mini-calendar-$ansi_date');
+            e.addEventListener('click', function (event) {
+                event.preventDefault();
+                location.href = '$url#calendar';
+            });
+            e.addEventListener('keypress', function (event) {
+                event.preventDefault();
+                acs_KeypressGoto('$url#calendar',event);
+            });
+        }]
+        
         incr day_number
         incr day_of_week
     }
@@ -203,7 +214,7 @@ if [string equal $view month] {
 
 set today_url "$base_url?view=day&date=[ad_urlencode [dt_sysdate]]${page_num}${url_stub_period_days}"
 
-if { $view == "day" && [dt_sysdate] == $date } {
+if { $view eq "day" && [dt_sysdate] eq $date } {
     set today_p t
 } else {
     set today_p f
@@ -220,3 +231,9 @@ ad_form -name choose_new_date -show_required_p f -has_edit 0 -has_submit 0 -form
         {label ""}
         {format {MM DD YYYY}}}
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

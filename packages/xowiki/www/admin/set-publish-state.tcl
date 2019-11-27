@@ -3,25 +3,22 @@
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Nov 16, 2006
-  @cvs-id $Id: set-publish-state.tcl,v 1.7 2007/06/08 12:04:14 gustafn Exp $
+  @cvs-id $Id: set-publish-state.tcl,v 1.12.2.1 2015/09/10 08:10:42 gustafn Exp $
 
   @param object_type 
   @param query
 } -parameter {
   {-state:required}
-  {-revision_id:required}
+  {-revision_id:integer,required}
   {-return_url "."}
 }
 
-set item_id [db_string get_item_id \
-    {select item_id from cr_revisions where revision_id = :revision_id}]
+set page [::xo::db::CrClass get_instance_from_db -revision_id $revision_id]
+$page set_live_revision \
+    -revision_id $revision_id \
+    -publish_status $state
 
-ns_cache flush xotcl_object_cache ::$item_id
 ns_cache flush xotcl_object_cache ::$revision_id
-
-::xo::db::sql::content_item set_live_revision \
-            -revision_id $revision_id \
-            -publish_status $state
 
 if {$state ne "production"} {
   ::xowiki::notification::do_notifications -revision_id $revision_id
@@ -31,3 +28,9 @@ if {$state ne "production"} {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

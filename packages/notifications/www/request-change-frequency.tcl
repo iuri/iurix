@@ -4,10 +4,10 @@ ad_page_contract {
 
     @author Tracy Adams (teadams@alum.mit.edu))
     @creation-date 2002-09-03
-    @cvs-id $Id: request-change-frequency.tcl,v 1.3 2009/09/13 23:54:42 donb Exp $
+    @cvs-id $Id: request-change-frequency.tcl,v 1.4.2.2 2016/05/21 10:18:18 gustafn Exp $
 } {
-    request_id:integer,notnull
-    return_url
+    request_id:naturalnum,notnull
+    return_url:localurl
 }
 
 set user_id [ad_conn user_id]
@@ -36,3 +36,9 @@ ad_form -name change_frequency -export {request_id return_url} -form {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

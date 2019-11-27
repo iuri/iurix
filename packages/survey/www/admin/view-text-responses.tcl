@@ -11,7 +11,7 @@ ad_page_contract {
 
 } {
 
-  question_id:integer,notnull
+  question_id:naturalnum,notnull
 
 }
 
@@ -21,17 +21,17 @@ get_survey_info -section_id $section_id
 set survey_name $survey_info(name)
 set survey_id $survey_info(survey_id)
 
-ad_require_permission $survey_id survey_admin_survey
+permission::require_permission -object_id $survey_id -privilege survey_admin_survey
 
 set abstract_data_type [db_string abstract_data_type "select abstract_data_type
 from survey_questions q
 where question_id = :question_id"]
 
-if { $abstract_data_type == "text" } {
+if { $abstract_data_type eq "text" } {
     set column_name "clob_answer"
-} elseif { $abstract_data_type == "shorttext" } {
+} elseif { $abstract_data_type eq "shorttext" } {
     set column_name "varchar_answer"
-} elseif { $abstract_data_type == "date" } {
+} elseif { $abstract_data_type eq "date" } {
     set column_name "date_answer"
 }
 
@@ -40,4 +40,4 @@ set results ""
 
 db_multirow responses all_responses_to_question {}
 
-set context [list [list "one?[export_url_vars survey_id]" $survey_info(name)] "[_ survey.lt_Responses_to_Question]"]
+set context [list [list [export_vars -base one {survey_id}] $survey_info(name)] "[_ survey.lt_Responses_to_Question]"]

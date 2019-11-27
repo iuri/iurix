@@ -4,7 +4,7 @@ ad_page_contract {
     @param version_id The package to be processed.
     @author kevin@caltech.edu
     @creation-date 17 May 2000
-    @cvs-id $Id: version-parameter-values.tcl,v 1.3 2007/01/10 21:21:59 gustafn Exp $
+    @cvs-id $Id: version-parameter-values.tcl,v 1.3.12.1 2015/09/10 08:21:05 gustafn Exp $
 } {
     { version_id:integer }
 }
@@ -61,3 +61,9 @@ doc_body_append "
 [ad_footer]"
 
     
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

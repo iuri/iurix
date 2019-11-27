@@ -11,7 +11,7 @@ ad_page_contract {
     @author Jeff Davis (davis@xarg.net)
     @creation-date 11/12/2003
 
-    @cvs-id $Id: ratings.tcl,v 1.1 2004/06/14 14:17:54 jeffd Exp $
+    @cvs-id $Id: ratings.tcl,v 1.1.2.1 2005/07/29 23:08:24 miguelm Exp $
 } {}
 
 if {![empty_string_p $object_id]} {
@@ -45,11 +45,16 @@ lappend elements rated {
     display_template {@ratings.rated;noquote@}
 }
 
-if {[empty_string_p $object_id]} {
+if {![empty_string_p $object_id]} {
     lappend elements object_title {
         label {Item}
         display_template {<a href="/o/@ratings.object_id@">@ratings.object_title@</a> (<a href="@ratings.object_ratings_url@">ratings</a>)}
     }
+}
+
+lappend elements dimension {
+    label { Dimension }
+    display_template {@ratings.description@ }
 }
 
 if { 0 } { 
@@ -59,10 +64,12 @@ if { 0 } {
     }
 }
 if {$admin_p} { 
-    set bulk [list     "Delete ratings" delete]
+    set bulk [list   "Delete ratings" delete]
 } else { 
     set bulk {}
 }
+
+
 
 template::list::create \
     -name ratings \
@@ -92,12 +99,13 @@ template::list::create \
 
 set now [clock_to_ansi [clock seconds]]
 db_multirow -extend {rated rating_img user_url user_ratings_url object_ratings_url url_one} ratings ratings "
-    SELECT r.rating_id, u.first_names || ' ' || u.last_name as name, u.user_id, u.email, r.owner_id, r.rating, to_char(o.last_modified,'YYYY-MM-DD HH24:MI:SS') as rated_on, acs_object__name(o2.object_id) as object_title, r.object_id, o2.title as obj_title, o2.object_type
-      FROM acs_users_all u,  ratings r, acs_objects o, acs_objects o2
+    SELECT r.rating_id, r.dimension_id, rd.description, u.first_names || ' ' || u.last_name as name, u.user_id, u.email, r.owner_id, r.rating, to_char(o.last_modified,'YYYY-MM-DD HH24:MI:SS') as rated_on, acs_object__name(o2.object_id) as object_title, r.object_id, o2.title as obj_title, o2.object_type
+      FROM acs_users_all u,  ratings r, acs_objects o, acs_objects o2, rating_dimensions rd
      WHERE r.owner_id = u.user_id 
        $clause
        and o.object_id = r.rating_id
        and o2.object_id = r.object_id
+       and r.dimension_id = rd.dimension_id
    [template::list::orderby_clause -orderby -name "ratings"]" {
        set rating_img [ratings::icon::html_fragment -rating $rating]
        set user_url [acs_community_member_url -user_id $user_id]     

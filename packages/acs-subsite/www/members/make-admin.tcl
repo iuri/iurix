@@ -1,7 +1,7 @@
 ad_page_contract {
     Make administrators.
 } {
-    {user_id:multiple ""}
+    {user_id:naturalnum,multiple ""}
 }
 
 set group_id [application_group::group_id_from_package_id]
@@ -21,3 +21,9 @@ db_transaction {
 
 ad_returnredirect .
 ad_script_abort
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

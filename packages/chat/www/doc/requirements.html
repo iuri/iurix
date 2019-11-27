@@ -101,103 +101,103 @@ V. Related Links</h3>
 
 <h3>
 VI.A. Requirements: The Data Model</h3>
-<b>10 The Data Model</b>
+<strong>10 The Data Model</strong>
 <ul>
-<li><b>10.10 Chat Rooms</b></li>
-<p><b>10.10.10</b> Chat rooms have unique display names within each instance.
-<p><b>10.10.20</b> Chat rooms have option to archive all chat messages or not archive.
-<p><b>10.10.30</b> Chat rooms have active and deactivate status.
-<p><b>10.10.40</b> Chat rooms have auditing information (creation user, creation date).
-<p><b>10.10.50</b> Chat rooms should be associated with permissions levels
+<li><strong>10.10 Chat Rooms</strong></li>
+<p><strong>10.10.10</strong> Chat rooms have unique display names within each instance.
+<p><strong>10.10.20</strong> Chat rooms have option to archive all chat messages or not archive.
+<p><strong>10.10.30</strong> Chat rooms have active and deactivate status.
+<p><strong>10.10.40</strong> Chat rooms have auditing information (creation user, creation date).
+<p><strong>10.10.50</strong> Chat rooms should be associated with permissions levels
 for message posting. "Moderated mode" chat room will be such that each
 message posted shall require approval from the administrator for that room
 before being accessible to other chat users. "Unmoderated mode" chat rooms
 will be such that messages posted to that room are immediately accessible
 to other chat users.
-<p><b>10.10.60</b> Chat rooms could either be private or public.
+<p><strong>10.10.60</strong> Chat rooms could either be private or public.
 <ul>
-<li>All register users automaticly grant permission to enter and participate in <b>public</b> chat room.
-<li>Users/groups must be explicitly grant permission to enter and particate in <b>private</b> chat room by a room admin.
+<li>All register users automatically grant permission to enter and participate in <strong>public</strong> chat room.
+<li>Users/groups must be explicitly grant permission to enter and particate in <strong>private</strong> chat room by a room admin.
 </ul>
-<p><b>10.10.70</b> Permissioning system to allow a group and/or single
+<p><strong>10.10.70</strong> Permissioning system to allow a group and/or single
 user to enter a chat room. This way will also implement banning certain
 user to a individual chat room.
-<p><b>10.10.80</b> Permissioning system to allow a group and/or single
+<p><strong>10.10.80</strong> Permissioning system to allow a group and/or single
 user to post a message to a chat room.
 <p>
-<li><b>10.20 Chat messages</b></li>
+<li><strong>10.20 Chat messages</strong></li>
 
-<p><b>10.20.10</b> Each log message has auditing information.
-<p><b>10.20.20</b> The chat room to which a message belongs shall be identified.
-<p><b>10.20.30</b> A toggle value should be in place to indicate whether
+<p><strong>10.20.10</strong> Each log message has auditing information.
+<p><strong>10.20.20</strong> The chat room to which a message belongs shall be identified.
+<p><strong>10.20.30</strong> A toggle value should be in place to indicate whether
 the message is in plain text or HTML format.
-<p><b>10.20.40</b> A toggle value should be in place to indicate whether
+<p><strong>10.20.40</strong> A toggle value should be in place to indicate whether
 the message has been approved by the moderator.
-<p><b>10.20.50</b> A private message never get log.
+<p><strong>10.20.50</strong> A private message never get log.
 <p><li>
-<b>10.30 Chat transcripts</b></li>
+<strong>10.30 Chat transcripts</strong></li>
 
-<p><b>10.30.10</b> Each chat transcript has a display name.
-<p><b>10.30.20</b> Each chat transcript has a description.
-<p><b>10.30.30</b> Treat the whole transcript content as one big text file.
-<p><b>10.30.40</b> Permissioning system to allow who able to view the transcript.</ul>
+<p><strong>10.30.10</strong> Each chat transcript has a display name.
+<p><strong>10.30.20</strong> Each chat transcript has a description.
+<p><strong>10.30.30</strong> Treat the whole transcript content as one big text file.
+<p><strong>10.30.40</strong> Permissioning system to allow who able to view the transcript.</ul>
 
 <h3>
 VI.B. Requirements: User Interface</h3>
 
 <ul>
 <li>
-<b>20.10 Chat Administration Interface</b></li>
-<p><b>20.10.10</b> Administrator should be able to create, edit, and
+<strong>20.10 Chat Administration Interface</strong></li>
+<p><strong>20.10.10</strong> Administrator should be able to create, edit, and
 delete a chat room.
-<p><b>20.10.20</b> Administrator should be able to delete all messages
+<p><strong>20.10.20</strong> Administrator should be able to delete all messages
 from a chat room.
-<p><b>20.10.40</b> Administrator should be able to add and remove moderators
+<p><strong>20.10.40</strong> Administrator should be able to add and remove moderators
 for a given room.
-<p><b>20.10.40</b> Administrator should be able to grant or revoke group/user
+<p><strong>20.10.40</strong> Administrator should be able to grant or revoke group/user
 privilege to a chat room.
-<p><b>20.10.50</b> Administrator should be able to active and deactivate
+<p><strong>20.10.50</strong> Administrator should be able to active and deactivate
 a particular chat room.
-<p><b>20.10.60</b> Administrator should be able to create, edit and delete
+<p><strong>20.10.60</strong> Administrator should be able to create, edit and delete
 a chat transcript.
 <p>
 <li>
-<b>20.20 Moderator Interface</b></li>
+<strong>20.20 Moderator Interface</strong></li>
 
-<p><b>20.20.10</b> Moderator should be able to post messages directly
+<p><strong>20.20.10</strong> Moderator should be able to post messages directly
 in a moderated chat room without the need for moderator (self-) approval.
-<p><b>20.20.20</b> Moderator should be able to accept or reject messages
+<p><strong>20.20.20</strong> Moderator should be able to accept or reject messages
 from other users in the moderate chat rooms.
-<p><b>20.20.30</b> Moderator should be able to suspend or revoke chat privileges
+<p><strong>20.20.30</strong> Moderator should be able to suspend or revoke chat privileges
 from chat room users.
 <p>
 <li>
-<b>20.30 Regular User HTML Interface</b></li>
-<p><b>20.30.10</b> User should only be able to enter a public chat
+<strong>20.30 Regular User HTML Interface</strong></li>
+<p><strong>20.30.10</strong> User should only be able to enter a public chat
 room accessible to this user's user group.
-<p><b>20.30.20</b> User should be able to automatically invite another
+<p><strong>20.30.20</strong> User should be able to automatically invite another
 user to join them in a chat room by supplying an email address.
-<p><b>20.30.30</b> User should be able to do a private chat with other user.
-<p><b>20.30.40</b> If a chat room is moderated, then the user's message
+<p><strong>20.30.30</strong> User should be able to do a private chat with other user.
+<p><strong>20.30.40</strong> If a chat room is moderated, then the user's message
 will not go live immediately.
-<p><b>20.30.50</b> There is a refresh link to ensure they receive the latest messages.
-<p><b>20.30.60</b> The user should see all other users that post messages
+<p><strong>20.30.50</strong> There is a refresh link to ensure they receive the latest messages.
+<p><strong>20.30.60</strong> The user should see all other users that post messages
 in the last specified number of minutes and all Java chatters.
-<p><b>20.30.70</b> Users should be able to chat privately with another
+<p><strong>20.30.70</strong> Users should be able to chat privately with another
 user.
 <p>
-<li><b>20.40 Regular User Java Interface</b></li>
-<p><b>20.40.10</b> See a list of all Java chatters in the room and 
+<li><strong>20.40 Regular User Java Interface</strong></li>
+<p><strong>20.40.10</strong> See a list of all Java chatters in the room and 
 HTML chatters who post message within a specified number of minutes.
-<p><b>20.40.20</b> See a list of all chat rooms accessible by this user.
-<p><b>20.40.30</b> A different pop up windows for each private conversation.
-<p><b>20.40.40</b> User A could not has a private conversation with user B, 
+<p><strong>20.40.20</strong> See a list of all chat rooms accessible by this user.
+<p><strong>20.40.30</strong> A different pop up windows for each private conversation.
+<p><strong>20.40.40</strong> User A could not has a private conversation with user B, 
 if user B put user A on ignore list.
-<p><b>20.40.50</b> Optional audio alert for each new chat message.
-<p><b>20.40.60</b> Each user can have customize icon for his screen name.
-<p><b>20.40.70</b> Support smilie faces in chat area.
-<p><b>20.40.80</b> Able to ignore messages from a specific user.
-<p><b>20.40.90</b> Disallow duplicate screen name from Java chatter in the same chat room.
+<p><strong>20.40.50</strong> Optional audio alert for each new chat message.
+<p><strong>20.40.60</strong> Each user can have customize icon for his screen name.
+<p><strong>20.40.70</strong> Support smilie faces in chat area.
+<p><strong>20.40.80</strong> Able to ignore messages from a specific user.
+<p><strong>20.40.90</strong> Disallow duplicate screen name from Java chatter in the same chat room.
 
 
 <h3>

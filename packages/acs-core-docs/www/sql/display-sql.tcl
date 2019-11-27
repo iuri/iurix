@@ -17,11 +17,11 @@ ad_page_contract {
 
     @author philg@mit.edu
     @creation-date 12/19/98
-    @cvs-id $Id: display-sql.tcl,v 1.5 2007/01/10 21:22:03 gustafn Exp $
+    @cvs-id $Id: display-sql.tcl,v 1.8.2.2 2016/05/28 15:39:53 gustafn Exp $
 } {
     url:notnull
-    {package_key ""}
-    {db ""}
+    {package_key:token ""}
+    {db:word ""}
 }
 
 # This is normally a password-protected page, but to be safe let's
@@ -31,12 +31,8 @@ ad_page_contract {
 # for example
 
 if { [string match "*..*" $url] || [string match "*..*" $package_key] } {
-    ad_return_error "Can't back up beyond the pageroot" "You can't use display-sql.tcl to look at files underneath the pageroot."
+    ad_return_warning "Can't back up beyond the pageroot" "You can't use display-sql.tcl to look at files underneath the pageroot."
     ad_script_abort
-}
-
-if {[exists_and_not_null package_key]} {
-    set safe_p [regexp {/?(.*)} $url package_url]
 }
 
 
@@ -48,7 +44,9 @@ if {$db eq ""} {
     set files [glob -nocomplain "[acs_package_root_dir $package_key]/sql/*/$url" "[acs_package_root_dir $package_key]/sql/$url"]
     foreach f $files { 
         regexp {([^/]*)/([^/]*)$} $f match db url
-        append text "<li> <a href=\"display-sql?[export_url_vars db url package_key]\">$db</a></li>"
+        append text [subst {
+	    <li> <a href="[ns_quotehtml [export_vars -base display-sql {db url package_key}]]">$db</a></li>
+	}]
     }
     if {$files eq ""} { 
         append text "<li> No sql file found."
@@ -60,19 +58,31 @@ if {$db eq ""} {
 
     # we have a db.  
 
+
     if {$db eq "sql"} { 
         set files [glob -nocomplain "[acs_package_root_dir $package_key]/sql/$url"]       
     } else { 
         set files [glob -nocomplain "[acs_package_root_dir $package_key]/sql/$db/$url"]       
     }
-        
+
+    if {$package_key ne ""} {
+        set safe_p [regexp {/?(.*)} $url package_url]
+    } else {
+        set safe_p 0
+    }
 
     if { $safe_p && [llength $files] > 0 } {
         ns_returnfile 200 text/plain $files
     } else {
-        ad_return_error "Invalid file location" "Can only display files in package or doc directory."
+        ad_return_warning "Invalid file location" "Can only display files in package or doc directory."
     }
     ad_script_abort
 }
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -5,17 +5,17 @@ ad_page_contract {
     @author Dirk Gomez (openacs@dirkgomez.de)
     @author Ben Adida (ben@openforce.net)
     @creation-date May 29, 2002
-    @cvs-id $Id: cal-item-new.tcl,v 1.38 2008/09/08 20:13:37 donb Exp $
+    @cvs-id $Id: cal-item-new.tcl,v 1.39.2.5 2016/12/01 13:47:18 antoniop Exp $
 } {
-    {calendar_id:integer ""}
-    cal_item_id:integer,optional
-    item_type_id:integer,optional
+    {calendar_id:naturalnum ""}
+    cal_item_id:naturalnum,optional
+    item_type_id:naturalnum,optional
     {date ""}
     {julian_date ""}
     {start_time ""}
     {end_time ""}
     {view "day"}
-    {return_url "./"}
+    {return_url:localurl "./"}
 }
 auth::require_login
 
@@ -32,7 +32,7 @@ set calendar_list [calendar::calendar_list]
 set calendar_options [calendar::calendar_list -privilege create]
 
 # Header stuff
-template::add_body_handler -event "onload" -script "TimePChanged()"
+template::add_body_handler -event "load" -script "TimePChanged();"
 template::head::add_css -href "/resources/calendar/calendar.css" -media all
 template::head::add_css -alternate -href "/resources/calendar/calendar-hc.css" -title "highContrast"
 
@@ -44,10 +44,10 @@ if { ![ad_form_new_p -key cal_item_id] } {
         where  cal_item_id = :cal_item_id
     } -default ""]
 } else {
-    set calendar_id [lindex [lindex $calendar_options 0] 1]
+    set calendar_id [lindex $calendar_options 0 1]
 }
 # TODO: Move into ad_form
-if { [exists_and_not_null cal_item_id] } {
+if { [info exists cal_item_id] && $cal_item_id ne "" } {
     set page_title [_ calendar.Calendar_Edit_Item]
     set ad_form_mode display
 } else {
@@ -65,10 +65,10 @@ ad_form -name cal_item  -export { return_url } -form {
     {date:date
         {label "[_ calendar.Date_1]"}
         {format "YYYY MM DD"}
-        {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" onclick ="return showCalendarWithDateWidget('date', 'y-m-d');" > \[<b>[_ calendar.y-m-d]</b>\]} } }
+        {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" id='cal_item.date-button'> \[<b>[_ calendar.y-m-d]</b>\]} }
+    }
     {time_p:text(radio)     
         {label "&nbsp;"}
-        {html {onClick "javascript:TimePChanged(this);"}} 
         {options {{"[_ calendar.All_Day_Event]" 0}
                   {"[_ calendar.Use_Hours_Below]" 1} }}
     }
@@ -92,6 +92,22 @@ ad_form -name cal_item  -export { return_url } -form {
         {options $calendar_options}
     }
 }
+
+template::add_body_script -script {
+    function TimePChanged(elm) {
+      var form_name = "cal_item";
+
+      if (elm == null) return;
+      if (document.forms == null) return;
+      if (document.forms[form_name] == null) return;
+      if (elm.value == 0) {
+         disableTime(form_name);
+      } else {
+         enableTime(form_name);
+      }
+    }
+}
+
 
 if { [ad_form_new_p -key cal_item_id] } {
     ad_form -extend -name cal_item -form {
@@ -121,7 +137,7 @@ set format_string [lc_get formbuilder_time_format]
 
 multirow create time_format_elms name
 
-while { ![empty_string_p $format_string] } {
+while { $format_string ne "" } {
     # Snip off the next token
     regexp {([^/\-.: ]*)([/\-.: ]*)(.*)} \
           $format_string match word sep format_string
@@ -174,11 +190,11 @@ ad_form -extend -name cal_item -validate {
     
     set date [calendar::from_sql_datetime -sql_date $ansi_date  -format "YYY-MM-DD"]
     set repeat_p 0
-    if {[info exists start_time] && ![empty_string_p $start_time] && $start_time != 0} {
+    if {[info exists start_time] && $start_time ne "" && $start_time != 0} {
 	# Set the start time
 	set start_hour $start_time
 	set start_time "{} {} {} $start_time 0 {} {HH24:MI}"
-	set end_time "{} {} {} [expr $start_hour + 1] 0 {} {HH24:MI}"
+	set end_time "{} {} {} [expr {$start_hour + 1}] 0 {} {HH24:MI}"
 	set time_p 1 
     } else {
 	set time_p 0 
@@ -188,7 +204,7 @@ ad_form -extend -name cal_item -validate {
         set js "disableTime('cal_item');"
     }
     # set the calendar_id before setting item_types form element (see top of script) DAVEB
-    set calendar_id [lindex [lindex $calendar_options 0] 1]
+    set calendar_id [lindex $calendar_options 0 1]
 } -edit_request {
     calendar::item::get -cal_item_id $cal_item_id -array cal_item
 
@@ -214,7 +230,7 @@ ad_form -extend -name cal_item -validate {
     } else {
 	set js "enableTime('cal_item');"
     }
-    if { [empty_string_p $repeat_p] } {
+    if { $repeat_p eq "" } {
         set repeat_p 0
     } else {
         set repeat_p 1
@@ -263,7 +279,7 @@ ad_form -extend -name cal_item -validate {
     if {$repeat_p} {
         ad_returnredirect [export_vars -base cal-item-create-recurrence { return_url cal_item_id}]
     } else {
-        if { [string compare $return_url "./"] } {
+        if {$return_url ne "./"  } {
     		ad_returnredirect $return_url
     	} else {
 		ad_returnredirect [export_vars -base cal-item-view { cal_item_id }]	
@@ -320,12 +336,33 @@ ad_form -extend -name cal_item -validate {
         -edit_past_events_p $edit_past_events_p \
         -calendar_id $calendar_id
 
-    if { [string compare $return_url "./"] } {
+    if {$return_url ne "./"  } {
     	ad_returnredirect $return_url
     } else {
 	ad_returnredirect [export_vars -base cal-item-view { cal_item_id }]
     }
     ad_script_abort
+    
+} -on_request {
+    template::add_event_listener -id cal_item:elements:time_p:0 -script {TimePChanged(this);}
+    template::add_event_listener -id cal_item:elements:time_p:1 -script {TimePChanged(this);}
+    template::add_event_listener -id cal_item.date-button -script {showCalendarWithDateWidget('date', 'y-m-d');}
+
+    template::add_body_script -script {
+        if (document.forms["cal_item"].time_p[0].checked == true ) {
+            // All day event
+            disableTime("cal_item");
+        } else {
+            enableTime("cal_item");
+        }
+    }
 }
 
 
+
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

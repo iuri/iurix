@@ -2,11 +2,11 @@ ad_page_contract {
   @author Guenter Ernst guenter.ernst@wu-wien.ac.at
   @author Gustaf Neumann neumann@wu-wien.ac.at
   @creation-date 13.10.2005
-  @cvs-id $Id: file-selector.tcl,v 1.13 2010/03/18 10:03:56 gustafn Exp $
+  @cvs-id $Id: file-selector.tcl,v 1.18.2.3 2016/11/17 16:19:57 antoniop Exp $
 } {     
-  {fs_package_id:integer,notnull,optional}
-  {folder_id:integer,optional}
-  {orderby:optional}
+  {fs_package_id:naturalnum,notnull,optional}
+  {folder_id:naturalnum,optional}
+  {orderby:token,optional}
   {selector_type "image"}
   {file_types "*"}
 } 
@@ -27,6 +27,16 @@ switch -- $selector_type {
     set HTML_UploadTitle [_ acs-templating.HTMLArea_SelectFileUploadTitle]
     set HTML_Context "COMMUNITY NAME"
   }
+}
+
+template::add_event_listener -id "body" -event "blur" -script {
+  myFocus();
+}
+template::add_event_listener -id "ok_button" -script {
+  onOK();
+}
+template::add_event_listener -id "cancel_button" -script {
+  onCancel();
 }
 
 if {![info exists fs_package_id]} {
@@ -89,7 +99,6 @@ if {![fs_folder_p $folder_id]} {
   ad_complain $error_msg
   return
 }
-
 
 # now we have at least a valid folder_id and a valid fs_package_id
 if {![info exists root_folder_id]} {
@@ -212,8 +221,7 @@ template::list::create \
         display_template {
           <if @contents.folder_p@ eq 0>
           <input type="radio" name="linktarget" value="@contents.object_id@" 
-             id="oi@contents.object_id@" 
-             onclick="onPreview('@contents.file_url@','@contents.type@');" />
+             id="oi@contents.object_id@" />
           <input type="hidden" name="@contents.object_id@_file_url" 
              id="@contents.object_id@_file_url" value="@contents.file_url@" />
           <input type="hidden" name="@contents.object_id@_file_name" 
@@ -221,9 +229,8 @@ template::list::create \
           <input type="hidden" name="@contents.object_id@_file_title" 
              id="@contents.object_id@_file_title" value="@contents.title@" />
           </if>
-          <img src="@contents.icon@"  border=0 
-          alt="#file-storage.@contents.type@#" /> 
-          <a href="@contents.file_url@" <if @contents.folder_p@ eq 0>onclick="selectImage('@contents.object_id@','@contents.file_url@','@contents.type@');return false;"</if>>@contents.name@</a>
+          <img src="@contents.icon@"  border="0" alt="#file-storage.@contents.type@#" /> 
+          <a href="@contents.file_url@" id="link@contents.object_id@">@contents.name@</a>
         }
         orderby_desc {name desc}
         orderby_asc {name asc}
@@ -247,7 +254,7 @@ template::list::create \
       }
     }
 
-set order_by_clause [expr {[exists_and_not_null orderby] ?
+set order_by_clause [expr {([info exists orderby] && $orderby ne "") ?
                            [template::list::orderby_clause -orderby -name contents] :
                            " order by fs_objects.sort_key, fs_objects.name asc"}]
 
@@ -262,9 +269,9 @@ set fs_sql "select object_id, name, live_revision, type, title,
            to_char(last_modified, 'YYYY-MM-DD HH24:MI:SS') as last_modified_ansi,
            content_size, url, sort_key, file_upload_name,
            case
-             when :folder_path is null
+             when :folder_path::text is null
              then fs_objects.name
-             else :folder_path || '/' || name
+             else :folder_path::text || '/' || name
            end as file_url,
            case
              when last_modified >= (now() - cast('99999' as interval))
@@ -273,11 +280,7 @@ set fs_sql "select object_id, name, live_revision, type, title,
            end as new_p
         from fs_objects
         where parent_id = :folder_id
-        and exists (select 1
-           from acs_object_party_privilege_map m
-           where m.object_id = fs_objects.object_id
-             and m.party_id = :user_id
-             and m.privilege = 'read')
+        and acs_permission__permission_p(fs_objects.object_id,:user_id,'read')='t'
          $filter_clause
          $order_by_clause"
 
@@ -285,9 +288,9 @@ db_multirow -extend {
   icon last_modified_pretty content_size_pretty 
   properties_link properties_url folder_p title
 } contents get_fs_contents $fs_sql {
-  set last_modified_ansi [lc_time_system_to_conn $last_modified_ansi]
+  set last_modified_ansi   [lc_time_system_to_conn $last_modified_ansi]
   set last_modified_pretty [lc_time_fmt $last_modified_ansi "%x %X"]
-  set content_size_pretty [lc_numeric $content_size]
+  set content_size_pretty  [lc_numeric $content_size]
 
   if {$type eq "folder"} {
     # append content_size_pretty " [_ file-storage.items]"
@@ -295,11 +298,13 @@ db_multirow -extend {
   } else {
     append content_size_pretty " [_ file-storage.bytes]"
   }
-  if {$title eq ""} {set title $name}
+  if {$title eq ""} {
+    set title $name
+  }
 
   set file_upload_name [fs::remove_special_file_system_characters \
                             -string $file_upload_name]
-  
+
   if { $content_size ne "" } {
     incr content_size_total $content_size
   }
@@ -326,14 +331,29 @@ db_multirow -extend {
     }
   }
   
-  
   # We need to encode the hashes in any i18n message keys (.LRN plays 
   # this trick on some of its folders). If we don't, the hashes will cause
   # the path to be chopped off (by ns_conn url) at the leftmost hash.
   regsub -all {\#} $file_url {%23} file_url
+
+  #
+  # Register listeners
+  #
+  template::add_event_listener -id "oi$object_id" -script [subst {
+    onPreview('$file_url','$type');
+  }]
+  if {$folder_p == 0} {
+    template::add_event_listener -id "link$object_id" -script [subst {
+      selectImage('$object_id','$file_url','$type');
+    }]
+  }
 }
 
 
-
-
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

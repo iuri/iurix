@@ -3,7 +3,7 @@ ad_library {
      Test the Blogger API
      @author Vinod Kurup [vinod@kurup.com]
      @creation-date Wed Oct 15 22:39:03 2003
-     @cvs-id $Id: blogger-api-procs.tcl,v 1.3 2005/02/23 15:28:57 jeffd Exp $
+     @cvs-id $Id: blogger-api-procs.tcl,v 1.4 2013/10/30 17:37:09 gustafn Exp $
 }
 
 aa_register_init_class create_blog_and_user {
@@ -34,7 +34,7 @@ aa_register_init_class create_blog_and_user {
                         -last_name $ln \
                         -password $password]
     
-    if { [string equal $user(creation_status) ok] } {
+    if {$user(creation_status) eq "ok"} {
         set user_id $user(user_id)
         permission::grant -party_id $user_id \
             -object_id $blog_id \

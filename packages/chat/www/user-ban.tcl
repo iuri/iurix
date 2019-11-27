@@ -5,9 +5,9 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 22, 2000
-    @cvs-id $Id: user-ban.tcl,v 1.3 2006/03/14 12:16:09 emmar Exp $
+    @cvs-id $Id: user-ban.tcl,v 1.3.12.1 2016/06/20 08:40:23 gustafn Exp $
 } {
-    room_id:integer,notnull
+    room_id:naturalnum,notnull
 } -properties {
     context_bar:onevalue
     title:onevalue
@@ -18,7 +18,7 @@ ad_page_contract {
     parties:multirow
 }
 
-ad_require_permission $room_id chat_user_ban
+permission::require_permission -object_id $room_id -privilege chat_user_ban
 
 set context_bar [list "[_ chat.Ban_user]"]
 set submit_label "[_ chat.Ban]"

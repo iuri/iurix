@@ -21,13 +21,9 @@ if {!$admin_p} {
 # Expires: now
 ns_set update [ns_conn outputheaders] "Expires" "now"
 
-set output ""
-set title "Show Caches"
-set context [list "Cache Statistics"]
-
 if { $flush ne "0" } {
   ns_cache flush $cache $flush
-  ad_returnredirect "[ns_conn url]?cache=$cache"
+  ad_returnredirect [export_vars -base [ns_conn url] {cache}]
   ad_script_abort
 } 
 
@@ -35,15 +31,22 @@ if {$flushall == 1} {
   foreach i [ns_cache names $cache] {
     ns_cache flush $cache $i
   }
-  ad_returnredirect "[ns_conn url]?cache=$cache"
+  ad_returnredirect [export_vars -base [ns_conn url] {cache}]
   ad_script_abort
 }
 
-if { $cache == 0 } {
+set title "Show Caches"
+set context [list [list "./cache" cache]]
 
-  TableWidget t1 \
+set output ""
+
+
+if { $cache == 0 } {
+  set context ""
+  
+  TableWidget create t1 \
       -actions [subst {
-	Action new -label Refresh -url [ad_conn url] -tooltip "Reload this page"
+        Action new -label Refresh -url [ad_conn url] -tooltip "Reload this page"
       }] \
       -columns {
         AnchorField name    -label "Name"
@@ -54,7 +57,7 @@ if { $cache == 0 } {
 
   foreach item [lsort [ns_cache_names]] {
     t1 add -name $item \
-        -name.href "?cache=$item" \
+        -name.href "?cache=[ns_quotehtml $item]" \
         -stats [ns_cache_stats $item] \
         -size [lindex [ns_cache_size $item] 1]
 
@@ -67,14 +70,19 @@ if { $cache == 0 } {
 } else {
   set item_list [ns_cache names $cache]
   set item_count [llength $item_list]
-  append output "<a href='?cache=$cache&flushall=1'>flush all</a> items of $cache"
-
+  set href [export_vars -base [ns_conn url] {cache {flushall 1}}]
+  
   append output "<h3>Items in cache $cache ($item_count) with size [ns_cache_size $cache]</h3>\n"
   append output "<form>
     <input type='hidden' name='cache' value='$cache'>
-    Filter: <input name='filter' value='$filter'>
+    <a href='[ns_quotehtml $href]' class='button'>flush all</a>
+    Filter: <input name='filter' value='$filter'> 
     </form>
   "
+
+
+  #append output "<a href='[ns_quotehtml $href]'>flush all</a> items of [ns_quotehtml $cache]"
+
   set entries "<ul>"
   set count 0
   foreach name [lsort -dictionary $item_list] {
@@ -83,7 +91,10 @@ if { $cache == 0 } {
     incr count
     set n ""
     regexp -- {-set name ([^\\]+)\\} $entry _ n
-    append entries "<li><a href='?cache=$cache&item=$name'>$name</a> $n ([string length $entry] bytes, <a href='?cache=$cache&flush=$name'>flush</a>)</li>"
+    set show_url  [export_vars -base [ns_conn url] [list cache [list item $name]]]
+    set flush_url [export_vars -base [ns_conn url] [list cache [list flush $name]]]
+    append entries "<li><a href=\"[ns_quotehtml $show_url]\">$name</a> $n ([string length $entry] bytes, " \
+        "<a href=\"[ns_quotehtml $flush_url]\">flush</a>)</li>"
   }
   append entries "</ul>"
   if {$filter ne ""} {
@@ -93,4 +104,12 @@ if { $cache == 0 } {
   append output "<a href='?'>All Caches</a>"
 }
 
+lappend context "Cache Statistics"
 
+
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

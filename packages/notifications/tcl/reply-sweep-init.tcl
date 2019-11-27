@@ -2,7 +2,7 @@ ad_library {
 
     notifications reply init - sets up scheduled procs
 
-    @cvs-id $Id: reply-sweep-init.tcl,v 1.5 2006/08/08 21:27:07 donb Exp $
+    @cvs-id $Id: reply-sweep-init.tcl,v 1.5.12.1 2015/09/12 11:06:46 gustafn Exp $
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-27
 
@@ -18,3 +18,9 @@ if { $scan_replies_p == 1 } {
     ad_schedule_proc -thread t 60 notification::reply::sweep::scan_all_replies
     ad_schedule_proc -thread t 60 notification::reply::sweep::process_all_replies
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

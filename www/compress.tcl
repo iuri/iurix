@@ -1,4 +1,6 @@
-ad_page_contract {}
+ad_page_contract {} {
+    {str ""}
+}
 
 ad_proc -public compress {
     {-str ""}
@@ -49,31 +51,48 @@ ad_proc -public decompress {
 	}
 	incr i		       
     } 
+
     ns_log Notice "OUTPUT RESULT $result"
     
     return $result    
 }
+
 ad_proc -private compress_not_cached  {
     {-str ""}
 } {
     Compresses string
 } {
+
     while $str ne "" {
+
 	 # Mem_cache ns_cache  NAVISERVER api
+
+
     }
+
+
     return $result
 }
+
 ad_proc -public  decompress_not_cached {
     {-str ""}
 } {
     Decompresses string
 } {
+
     while $str ne "" {
        
     }
+
+
     return $result
 }
+
+
+
 # Compress string
-compress -str "aaaabbb"
+set result [compress -str $str]
+
 # decompress string
-decompress -str "a44b6"
+#decompress -str "a44b6"
+

@@ -8,7 +8,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
     @arch-tag: da21d1e8-0729-4f3b-8bef-3b847a979fec
-    @cvs-id $Id: content-permission-procs.tcl,v 1.3 2004/06/26 17:06:47 jeffd Exp $
+    @cvs-id $Id: content-permission-procs.tcl,v 1.3.18.2 2017/04/21 14:53:08 gustafn Exp $
 }
 
 namespace eval ::content::permission {}
@@ -27,14 +27,14 @@ ad_proc -public content::permission::grant_permission {
     -object_id:required
     -holder_id:required
     -privilege:required
-    -recepient_id:required
+    -recipient_id:required
     {-is_recursive ""}
     {-object_type ""}
 } {
     @param object_id
     @param holder_id
     @param privilege
-    @param recepient_id
+    @param recipient_id
     @param is_recursive
     @param object_type
 } {
@@ -42,7 +42,7 @@ ad_proc -public content::permission::grant_permission {
         [list object_id $object_id ] \
         [list holder_id $holder_id ] \
         [list privilege $privilege ] \
-        [list recepient_id $recepient_id ] \
+        [list recipient_id $recipient_id ] \
         [list is_recursive $is_recursive ] \
         [list object_type $object_type ] \
     ] content_permission grant_permission]
@@ -184,3 +184,9 @@ ad_proc -public content::permission::revoke_permission_h {
         [list privilege $privilege ] \
     ] content_permission revoke_permission_h]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

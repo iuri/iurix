@@ -3,7 +3,7 @@ ad_page_contract {
     @author Todd Nightingale (tnight@arsdigita.com)
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date 10 September 2000
-    @cvs-id $Id: parameter-edit-2.tcl,v 1.6 2007/09/25 15:22:33 donb Exp $
+    @cvs-id $Id: parameter-edit-2.tcl,v 1.7.2.2 2015/09/18 07:39:03 gustafn Exp $
 } {
     version_id:naturalnum,notnull
     parameter_id:naturalnum,notnull
@@ -17,7 +17,7 @@ ad_page_contract {
     {max_n_values:integer 1}
 } -validate {
     datatype_type_ck {
-	if {$datatype != "number" && $datatype != "string" && $datatype != "text"} {
+	if {$datatype ne "number" && $datatype ne "string" && $datatype ne "text"} {
 	    ad_complain
 	}
     }
@@ -35,11 +35,11 @@ db_transaction {
 } on_error {
     ad_return_error "Database Error" "The parameter could not be updated.  
 The database returned the following error:<p>
- <blockquote><pre>[ad_quotehtml $errmsg]</pre></blockquote>"
+ <blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote>"
 } 
 
 # LARS hack
-set sections [lindex [lindex [apm_parameter_section_slider $package_key] 0] 3]
+set sections [lindex [apm_parameter_section_slider $package_key] 0 3]
 foreach section $sections {
     if {$section_name eq [lindex $section 1]} {
         set section_name [lindex $section 0]
@@ -49,3 +49,9 @@ foreach section $sections {
 
 ad_returnredirect [export_vars -base "version-parameters" { version_id section_name }]
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

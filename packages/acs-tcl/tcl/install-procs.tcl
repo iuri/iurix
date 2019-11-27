@@ -5,7 +5,7 @@ ad_library {
 
     @creation-date 2004-06-16
     @author Lee Denison (lee@thaum.net)
-    @cvs-id $Id: install-procs.tcl,v 1.29 2010/03/31 23:33:24 donb Exp $
+    @cvs-id $Id: install-procs.tcl,v 1.30.2.2 2017/04/22 18:11:54 gustafn Exp $
 }
 
 namespace eval install {}
@@ -21,7 +21,7 @@ ad_proc -public install::xml::action::text { node } {
 }
 
 ad_proc -private ::install::xml::action::source { node } {
-    Source an install.xml file, sql file or tcl script during execution of 
+    Source an install.xml file, sql file or Tcl script during execution of 
     the current install.xml.
 
     If no type attribute is specified then this tag will attempt to guess 
@@ -66,11 +66,11 @@ ad_proc -private ::install::xml::action::source { node } {
 
     switch -exact $type {
         tcl {
-            set code [template::util::read_file [acs_root_dir]$src]
+            set code [template::util::read_file $::acs::rootdir$src]
             set out [eval $code]
         }
         sql {
-            db_source_sql_file [acs_root_dir]$src
+            db_source_sql_file $::acs::rootdir$src
             set out "$src completed"
         }
         install.xml {
@@ -102,6 +102,7 @@ ad_proc -public install::xml::action::mount { node } {
 
     <p>&lt;mount package=&quot;<em>package-key</em> instance-name=&quot;<em>name</em>&quot; mount-point=&quot;<em>url</em>&quot; /&gt;</p>
 } { 
+
     set package_key [apm_required_attribute_value $node package]
     set instance_name [apm_required_attribute_value $node instance-name]
     set id [apm_attribute_value -default "" $node id]
@@ -353,7 +354,7 @@ ad_proc -public install::xml::action::register-parameter { node } {
         }
     }
 
-    eval $command
+    {*}$command
     return
 }
 
@@ -365,24 +366,25 @@ ad_proc -public install::xml::action::set-parameter { node } {
     variable ::install::xml::ids
 
     set name [apm_required_attribute_value $node name]
+    set type [apm_attribute_value -default "literal" $node type]
     set value [apm_attribute_value -default {} $node value]
 
-    set package_id [install::xml::object_id::package $node]
+    set package_ids [install::xml::object_id::package $node]
 
-    set type [apm_attribute_value -default "literal" $node type]
+    foreach package_id $package_ids {
+	switch -- $type {
+	    literal {
+		parameter::set_value -package_id $package_id \
+		    -parameter $name \
+		    -value $value
+	    }
 
-    switch -- $type {
-      literal {
-        parameter::set_value -package_id $package_id \
-            -parameter $name \
-            -value $value
-
-      }
-      id {
-        parameter::set_value -package_id $package_id \
-            -parameter $name \
-            -value $ids($value)
-      }
+	    id {
+		parameter::set_value -package_id $package_id \
+		    -parameter $name \
+		    -value $ids($value)
+	    }
+	}
     }
     return
 }
@@ -436,7 +438,8 @@ ad_proc -public install::xml::action::set-permission { node } {
 }
 
 ad_proc -public install::xml::action::unset-permission { node } {
-    Revokes a permissions on an object - has no effect if the permission is not granted directly (ie does not act as negative permissions).
+    Revokes a permissions on an object - has no effect if the permission is not granted directly 
+    (ie does not act as negative permissions).
 
     <p>&lt;unset-permissions grantee=&quot;<em>party</em>&quot; privilege=&quot;<em>package-key</em> /&gt;</p>
 } { 
@@ -976,7 +979,7 @@ ad_proc -private ::install::xml::action::call-tcl-proc { node } {
         }
     }
 
-    set result [eval $cmd]
+    set result [{*}$cmd]
     set id [apm_attribute_value -default "" $node id]
     if {$id ne ""} {
         set ::install::xml::ids($id) $result
@@ -1053,7 +1056,7 @@ ad_proc -public install::xml::object_id::package { node } {
             return [install::xml::util::get_id $id]
         }
     } elseif { $package_key ne "" } {
-        return [apm_package_id_from_key $package_key]
+        return [apm_package_ids_from_key -package_key $package_key]
 
     } else {
         return [site_node::get_object_id \
@@ -1166,3 +1169,9 @@ ad_proc -public install::xml::util::get_id { id } {
     
     return $result
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

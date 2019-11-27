@@ -14,7 +14,7 @@ ad_library {
     Attachments
 
     @author Arjun Sanyal (arjun@openforce.net)
-    @cvs-id $Id: attachments-procs.tcl,v 1.17 2009/05/29 18:13:24 emmar Exp $
+    @cvs-id $Id: attachments-procs.tcl,v 1.18.2.1 2015/09/10 08:30:12 gustafn Exp $
 }
 
 namespace eval attachments {
@@ -31,7 +31,7 @@ namespace eval attachments {
         {-package_id ""}
     } {
     } {
-        if {[empty_string_p $package_id]} {
+        if {$package_id eq ""} {
             # Get the package ID from the parent URL
             array set parent_node [site_node::get_parent -node_id [ad_conn node_id]]
             set package_id $parent_node(object_id)
@@ -91,7 +91,7 @@ namespace eval attachments {
     } {
         toggle approved_p for attachment
     } {
-        if {[empty_string_p $approved_p]} {
+        if {$approved_p eq ""} {
             set approved_p [ad_decode [db_string select_attachment_approved_p {}] f t f]
         }
 
@@ -222,3 +222,9 @@ namespace eval attachments {
     }
     
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

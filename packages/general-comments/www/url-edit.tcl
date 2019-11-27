@@ -6,11 +6,11 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: url-edit.tcl,v 1.4 2002/11/07 08:32:49 peterm Exp $
+    @cvs-id $Id: url-edit.tcl,v 1.5.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    attach_id:integer,notnull
-    parent_id:integer,notnull
-    { return_url {} }
+    attach_id:naturalnum,notnull
+    parent_id:naturalnum,notnull
+    { return_url:localurl {} }
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -21,7 +21,7 @@ ad_page_contract {
 }
 
 # check to see if the user can edit this attachment
-ad_require_permission $attach_id write
+permission::require_permission -object_id $attach_id -privilege write
 
 # get the values from the database
 if { ![db_0or1row get_comment {
@@ -38,3 +38,9 @@ set context [list [list "view-comment?comment_id=$parent_id" "[_ general-comment
 set target "url-edit-2"
 
 ad_return_template "url-ae"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

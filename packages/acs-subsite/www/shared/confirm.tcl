@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author lars@pinds.com
     @creation-date 5 Jun 2000
-    @cvs-id $Id: confirm.tcl,v 1.1.1.1 2001/03/13 22:59:26 ben Exp $
+    @cvs-id $Id: confirm.tcl,v 1.1.1.1.30.1 2015/09/10 08:21:52 gustafn Exp $
 } {
     { header "Confirm" } 
     message
@@ -36,3 +36,9 @@ set export_vars_yes [export_ns_set_vars form {} $yes_args_set]
 set export_vars_no [export_ns_set_vars form {} $no_args_set]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

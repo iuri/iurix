@@ -6,7 +6,7 @@
 -- @author Jeff Davis <davis@xarg.net>
 -- @creation-date 10/22/2003
 --
--- @cvs-id $Id: ratings-procs.sql,v 1.3 2004/05/21 22:53:02 lars Exp $
+-- @cvs-id $Id: ratings-procs.sql,v 1.3.2.1 2005/07/29 23:08:24 miguelm Exp $
 --
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -23,7 +23,6 @@ declare
     p_range_high                          alias for $6;
     p_label_low                           alias for $7;
     p_label_high                          alias for $8;
-
     p_package_id                          alias for $9;
     p_creation_date                       alias for $10;       -- default now()
     p_creation_user                       alias for $11;       -- default null
@@ -41,8 +40,8 @@ begin
                            p_context_id,
                            ''t'');
 
-    insert into rating_dimensions (dimension_id,dimension_key,description,range_low,range_high,label_low,label_high)
-    values (v_dimension_id,p_dimension_key,p_description,p_range_low,p_range_high,p_label_low,p_label_high);
+    insert into rating_dimensions (dimension_id,dimension_key,description,range_low,range_high,label_low,label_high,title)
+    values (v_dimension_id,p_dimension_key,p_description,p_range_low,p_range_high,p_label_low,p_label_high,p_title);
 
     return v_dimension_id;
 
@@ -82,6 +81,9 @@ begin
         raise NOTICE ''rating_dimension__delete object_id % does not exist or is not a rating_dimension'',p_dimension_id;
         return 0;
     end if;
+
+    delete from rating_dimensions where dimension_id = p_dimension_id;
+
 end;' language 'plpgsql';
 
 

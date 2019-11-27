@@ -7,7 +7,7 @@ ad_library {
     @author Malte Sussdorff (sussdorff@sussdorff.de)
     @creation-date 2005-06-15
     @arch-tag: 200d82ba-f8e7-4f19-9740-39117474766f
-    @cvs-id $Id: project-manager-callback-procs.tcl,v 1.18 2007/07/06 12:13:25 gustafn Exp $
+    @cvs-id $Id: project-manager-callback-procs.tcl,v 1.19 2018/11/30 11:37:38 hectorr Exp $
 }
 
 ad_proc -public -callback pm::project_new {
@@ -234,7 +234,7 @@ ad_proc -public -callback acs_mail_lite::incoming_object_email -impl pm_task {
 } {
 
     # Check if the object_id is a task
-    if {[content::item::content_type -item_id $object_id] eq "pm_task"} {
+    if {[content::item::get_content_type -item_id $object_id] eq "pm_task"} {
 	
 	set task_item_id $object_id
 

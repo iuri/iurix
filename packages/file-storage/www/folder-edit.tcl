@@ -3,12 +3,12 @@ ad_page_contract {
 
     @author Andrew Grumet (aegrumet@alum.mit.edu)
     @creation-date 24 Jun 2002
-    @cvs-id $Id: folder-edit.tcl,v 1.4 2007/06/15 17:40:29 matthewg Exp $
+    @cvs-id $Id: folder-edit.tcl,v 1.5.2.1 2015/09/12 11:06:19 gustafn Exp $
 } {
-    folder_id:integer,notnull
+    folder_id:naturalnum,notnull
 } -validate {
     valid_folder -requires {parent_id:integer} {
-	if ![fs_folder_p $folder_id] {
+	if {![fs_folder_p $folder_id]} {
 	    ad_complain "[_ file-storage.lt_The_specified_folder_]"
 	}
     }
@@ -17,7 +17,7 @@ ad_page_contract {
     context_bar:onevalue
 }
 
-ad_require_permission $folder_id admin
+permission::require_permission -object_id $folder_id -privilege admin
 
 # set templating datasources
 
@@ -60,3 +60,9 @@ ad_form -extend -form {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

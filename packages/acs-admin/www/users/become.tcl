@@ -5,6 +5,12 @@ ad_page_contract {
     @creation-date 27 Jan 2000
 
 } {
-    user_id
+    user_id:naturalnum,notnull
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

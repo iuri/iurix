@@ -9,10 +9,10 @@ ad_page_contract {
   @author raj@alum.mit.edu
   @author nstrug@arsdigita.com
   @date   February 9, 2000
-  @cvs-id $Id: survey-create.tcl,v 1.7 2005/01/21 17:24:28 jeffd Exp $
+  @cvs-id $Id: survey-create.tcl,v 1.9 2014/10/27 16:41:58 victorg Exp $
 
 } {
-    survey_id:optional
+    survey_id:naturalnum,optional
     {name ""}
     {description:html ""}
     {variable_names ""}
@@ -22,7 +22,7 @@ ad_page_contract {
 set package_id [ad_conn package_id]
 
 # bounce the user if they don't have permission to admin surveys
-ad_require_permission $package_id survey_create_survey
+permission::require_permission -object_id $package_id -privilege survey_create_survey
 set user_id [ad_conn user_id]
 
 # use ad_form --DaveB
@@ -50,7 +50,7 @@ ad_form -name create_survey -confirm_template survey-create-confirm -form {
     
 } -new_data {
         
-    if {[string compare $desc_html "html"] == 0} {
+    if {$desc_html eq "html" } {
 	set description_html_p "t"
     } else {
 	set description_html_p "f"

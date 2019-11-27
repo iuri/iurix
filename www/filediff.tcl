@@ -3,14 +3,42 @@ ad_page_contract {} {
     file_old.tmpfile:tmpfile,optional
     file_new:trim,optional
     file_new.tmpfile:tmpfile,optional
+} -validate {
+    max_size1 -requires {file_old} {
+	set n_bytes [file size ${file_old.tmpfile}]
+	if { $n_bytes > 1024} {
+	    ad_complain "Your file is larger than the maximum file size allowed on this system ([util_commify_number $max_bytes] bytes)"
+	    ad_script_abort
+	}
+    }
+    max_size2 -requires {file_new} {
+	set n_bytes [file size ${file_new.tmpfile}]
+	if { $n_bytes > 1024} {
+	    ad_complain "Your file is larger than the maximum file size allowed on this system ([util_commify_number 1024] bytes)"
+	    ad_script_abort
+	}
+    }
+    empty_size1 -requires {file_old} {
+	set n_bytes [file size ${file_old.tmpfile}]
+	if { $n_bytes eq 0} {
+	    ad_complain "Your file is empty!"
+	}
+    }
+    empty_size2 -requires {file_new} {
+	set n_bytes [file size ${file_new.tmpfile}]
+	if { $n_bytes eq 0} {
+	    ad_complain "Your file is empty!"
+	}
+    }
 }
+
 
 ad_form -name filediff -html {enctype multipart/form-data} -form {
     {inform:text(inform) {label ""}  {value "<h1>File diff<h1/>"}}
     {file_old:file {label "Upload old file"} {html "size 30"}}
     {file_new:file {label "Upload new file"} {html "size 30"}}    
 } -on_submit {
-    
+
     # to get old_file's filesize
     set filesize1 [file size ${file_old.tmpfile}]
     # to get new_file's filesize is greater than 0 
@@ -72,4 +100,9 @@ ad_form -name filediff -html {enctype multipart/form-data} -form {
 
     # once execution is completed, finish it
     ad_script_abort
+
+
 }
+
+    
+    

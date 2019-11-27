@@ -5,7 +5,7 @@ ad_page_contract {
     @author Lars Pind (lars@collaboraid.biz)
 
     @creation-date 26 October 2001
-    @cvs-id $Id: message-list.tcl,v 1.14 2008/04/18 06:48:43 victorg Exp $
+    @cvs-id $Id: message-list.tcl,v 1.17.2.2 2015/09/10 08:21:29 gustafn Exp $
 } {
     locale
     package_key
@@ -38,7 +38,7 @@ set import_messages_url [export_vars -base "import-messages" { package_key local
 # We let you create new messages keys if you're in the default locale
 set create_p [string equal $current_locale $default_locale]
 
-set new_message_url "localized-message-new?[export_vars { locale package_key }]"
+set new_message_url [export_vars -base localized-message-new { locale package_key }]
 
 
 
@@ -62,17 +62,15 @@ db_1row counts {
             (select count(*) 
              from lang_messages 
              where package_key = :package_key 
-             and locale = :locale 
+             and locale = :default_locale 
              and deleted_p = 't') as num_deleted
     from dual
 }
 set num_untranslated [expr {$num_messages - $num_translated}]
-set num_messages_pretty [lc_numeric $num_messages]
+set num_messages_pretty [lc_numeric [expr {$num_messages + $num_deleted}]]
 set num_translated_pretty [lc_numeric $num_translated]
 set num_untranslated_pretty [lc_numeric $num_untranslated]
-
-
-
+set num_deleted_pretty [lc_numeric $num_deleted]
 
 
 #####
@@ -116,8 +114,8 @@ db_multirow -extend {
     delete_url
     message_key_pretty
 } messages select_messages {} {
-    set edit_url "edit-localized-message?[export_vars { locale package_key message_key show {return_url {[ad_return_url]}} }]"
-    set delete_url "message-delete?[export_vars { locale package_key message_key show {return_url {[ad_return_url]}} }]"
+    set edit_url [export_vars -base edit-localized-message { locale package_key message_key show {return_url [ad_return_url]} }]
+    set delete_url [export_vars -base message-delete { locale package_key message_key show {return_url [ad_return_url]} }]
     set message_key_pretty "$package_key.$message_key"
 }
 
@@ -125,7 +123,7 @@ db_multirow -extend {
 # TODO: Create message
 
 
-set batch_edit_url "batch-editor?[export_vars { locale package_key show }]"
+set batch_edit_url [export_vars -base batch-editor { locale package_key show }]
 
 
 #####
@@ -139,16 +137,16 @@ multirow create show_opts value label count
 multirow append show_opts "all" "All" $num_messages_pretty
 multirow append show_opts "translated" "Translated" $num_translated_pretty
 multirow append show_opts "untranslated" "Untranslated" $num_untranslated_pretty
-multirow append show_opts "deleted" "Deleted" $num_deleted
+multirow append show_opts "deleted" "Deleted" $num_deleted_pretty
 
 multirow extend show_opts url selected_p 
 
 multirow foreach show_opts {
     set selected_p [string equal $show $value]
     if {$value eq "all"} {
-        set url "[ad_conn url]?[export_vars { locale package_key }]"
+        set url [export_vars -base [ad_conn url] { locale package_key }]
     } else { 
-        set url "[ad_conn url]?[export_vars { locale package_key {show $value} }]"
+        set url [export_vars -base [ad_conn url] { locale package_key {show $value} }]
     }
 }
 
@@ -161,3 +159,9 @@ ad_form -name locale_form -action [ad_conn url] -export { tree_id category_id } 
 }
 
 set form_vars [export_ns_set_vars form {locale form:mode form:id __confirmed_p __refreshing_p formbutton:ok} [ad_conn form]]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

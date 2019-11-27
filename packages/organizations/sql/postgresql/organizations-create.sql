@@ -1,4 +1,4 @@
--- @cvs-id $Id: organizations-create.sql,v 1.7 2006/12/18 14:10:47 maltes Exp $
+-- @cvs-id $Id: organizations-create.sql,v 1.8 2018/04/12 07:47:22 hectorr Exp $
 
 create table organization_types (
     organization_type_id  serial
@@ -31,7 +31,7 @@ insert into organization_types (type) values ('Other');
 
 -- organization
 -- this will be a party
--- probably should be it's own package
+-- probably should be its own package
 
 create table organizations (
     organization_id   integer
@@ -45,9 +45,9 @@ create table organizations (
     -- this can be ein/ssn/vat
     reg_number        varchar(100),
     -- The internal client_id. You should have your own sequence for that.
-    client_id	      varchar(100) constraint orga_client_id_un unique,
+    client_id         varchar(100) constraint orga_client_id_un unique,
     notes             text
-); 
+);
 
 create index organization_name_ix on organizations(name);
 create index organization_cliend_idx on organizations(client_id);

@@ -4,7 +4,7 @@ ad_library {
     
     @creation-date 4:th of April 2003
     @author Peter Marklund (peter@collaboraid.biz)
-    @cvs-id $Id: entry-procs.tcl,v 1.13 2006/11/23 12:39:44 maltes Exp $
+    @cvs-id $Id: entry-procs.tcl,v 1.15 2018/05/09 15:33:31 hectorr Exp $
 }
 
 namespace eval logger::entry {}

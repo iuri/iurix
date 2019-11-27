@@ -15,13 +15,19 @@ ad_proc -public lars_blogger::entry::new {
     {-content_format "text/plain"}
     {-entry_date ""}
     {-draft_p "t"}
+    {-creation_user ""}
+    {-creation_ip ""}
 } {
 	Add the blog entry and then flush the cache so that the new entry shows up.
 } {
-    set creation_user [ad_conn user_id]
-    set creation_ip [ns_conn peeraddr]
-
-    if { [empty_string_p $package_id] } {
+    ns_log Notice "Running lars_blogger::entry::new "
+    if {$creation_user eq ""} {
+	set creation_user [ad_conn user_id]
+    }
+    if {$creation_ip eq ""} {
+	set creation_ip [ns_conn peeraddr]
+    }
+    if { $package_id eq "" } {
         set package_id [ad_conn package_id]
     }
 
@@ -36,7 +42,10 @@ ad_proc -public lars_blogger::entry::new {
         lars_blogger::entry::publish \
             -entry_id $entry_id \
             -package_id $package_id \
-            -no_update
+            -no_update \
+	    -creation_user $creation_user \
+	    -creation_ip $creation_ip
+	
     }
 
     lars_blog_flush_cache $package_id
@@ -106,8 +115,10 @@ ad_proc -public lars_blogger::entry::publish {
     {-package_id ""}
     {-no_update:boolean}
     {-redirect_url ""}
+    {-creation_user ""}
+    {-creation_ip ""}
 } {
-    if { [empty_string_p $package_id] } {
+    if { $package_id eq "" } {
 	# can't just use ad_conn package_id since the 
 	# request may be coming via XML-RPC
 	lars_blogger::entry::get -entry_id $entry_id -array entry
@@ -121,13 +132,13 @@ ad_proc -public lars_blogger::entry::publish {
         lars_blog_flush_cache
     }
     
-    if { ![empty_string_p $redirect_url] } {
+    if { $redirect_url ne "" } {
         ad_returnredirect $redirect_url
         ns_conn close
     }
     
     # Setup instance/user feeds if needed
-    lars_blog_setup_feed -package_id $package_id
+    lars_blog_setup_feed -package_id $package_id -creation_user $creation_user -creation_ip $creation_ip 
     
     # Notifications
     lars_blogger::entry::do_notifications -entry_id $entry_id
@@ -217,14 +228,14 @@ ad_proc -public lars_blogger::entry::do_notifications {
     get -entry_id $entry_id -array blog
 
     set blog_url "[ad_url][lars_blog_public_package_url -package_id $blog(package_id)]"
-    set entry_url "[ad_url][lars_blog_public_package_url -package_id $blog(package_id)]one-entry?[export_vars { entry_id }]"
+    set entry_url [export_vars -base "[ad_url][lars_blog_public_package_url -package_id $blog(package_id)]one-entry" { entry_id }]
     set blog_name [lars_blog_name -package_id $blog(package_id)]
 
     set new_content ""
 
     append new_content "$blog_name: $blog_url<p>"
 
-    if { ![empty_string_p $blog(title_url)] } {
+    if { $blog(title_url) ne "" } {
         append new_content "<a href=\"$blog(title_url)\">$blog(title)</a>"
     } else {
 	append new_content "$blog(title)"

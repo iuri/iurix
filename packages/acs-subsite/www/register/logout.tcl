@@ -3,10 +3,10 @@
 ad_page_contract {
     Logs a user out
 
-    @cvs-id $Id: logout.tcl,v 1.4 2007/01/10 21:22:09 gustafn Exp $
+    @cvs-id $Id: logout.tcl,v 1.4.12.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    {return_url ""}
+    {return_url:localurl ""}
 }
 
 if { $return_url eq "" } {
@@ -22,3 +22,9 @@ db_release_unused_handles
 
 ad_returnredirect $return_url
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

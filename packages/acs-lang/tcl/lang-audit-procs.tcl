@@ -5,7 +5,7 @@ ad_library {
 
     @creation-date 3 December 2002
     @author Peter Marklund (peter@collaboraid.biz)
-    @cvs-id $Id: lang-audit-procs.tcl,v 1.5 2003/12/11 21:39:53 jeffd Exp $
+    @cvs-id $Id: lang-audit-procs.tcl,v 1.5.22.1 2015/09/10 08:21:25 gustafn Exp $
 }
 
 namespace eval lang::audit {
@@ -30,3 +30,9 @@ namespace eval lang::audit {
         db_dml lang_message_audit {} -clobs [list $old_message $comment]
     }    
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -6,9 +6,15 @@ ad_page_contract {
     
     @author Ben Adida (ben@openforce.net)
     @creation-date May 28, 2002
-    @cvs-id $Id: cal-item-outlook.tcl,v 1.4 2006/08/08 21:26:18 donb Exp $
+    @cvs-id $Id: cal-item-outlook.tcl,v 1.5.2.1 2015/09/10 08:30:15 gustafn Exp $
 } {
-    cal_item_id:integer
+    cal_item_id:naturalnum,notnull
 }
 
 ad_returnredirect "ics/${cal_item_id}.ics"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

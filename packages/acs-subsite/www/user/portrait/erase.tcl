@@ -1,10 +1,10 @@
 ad_page_contract {
     Erases a portrait
 
-    @cvs-id $Id: erase.tcl,v 1.7 2009/03/31 14:39:45 emmar Exp $
+    @cvs-id $Id: erase.tcl,v 1.9.2.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    {return_url "" }
-    {user_id ""}
+    {return_url:localurl "" }
+    {user_id:naturalnum ""}
 } -properties {
     context:onevalue
     export_vars:onevalue
@@ -20,13 +20,13 @@ if {$user_id eq "" || $user_id eq $current_user_id} {
     set admin_p 1
 }
 
-ad_require_permission $user_id "write"
+permission::require_permission -object_id $user_id -privilege "write"
 
 set doc(title) [_ acs-subsite.Erase]
 if {$admin_p} {
     set context [list \
                      [list [ad_pvt_home] [ad_pvt_home_name]] \
-                     [list "./?[export_vars user_id]" [_ acs-subsite.User_Portrait]] \
+                     [list [export_vars -base ./ user_id] [_ acs-subsite.User_Portrait]] \
                      $doc(title)]
 } else {
     set context [list \
@@ -77,3 +77,9 @@ ad_form -name "portrait_erase" -export {user_id return_url} -form {} -on_submit 
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

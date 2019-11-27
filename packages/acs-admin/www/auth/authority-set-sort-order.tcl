@@ -3,9 +3,9 @@ ad_page_contract {
 
     @author Simon Carstensen (simon@collaboraid.biz)
     @creation-date 2003-09-09
-    @cvs-id $Id: authority-set-sort-order.tcl,v 1.3 2007/01/10 21:22:00 gustafn Exp $
+    @cvs-id $Id: authority-set-sort-order.tcl,v 1.4.2.1 2015/09/10 08:21:06 gustafn Exp $
 } {
-    authority_id:integer
+    authority_id:naturalnum,notnull
     direction
 }
 
@@ -60,3 +60,9 @@ if { $direction eq "up" } {
 
 ad_returnredirect .
 ad_script_abort
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

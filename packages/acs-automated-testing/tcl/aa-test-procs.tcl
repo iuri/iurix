@@ -1,4 +1,3 @@
-
 ##############################################################################
 #
 #   Copyright 2001, OpenACS, Peter Harper.
@@ -6,7 +5,6 @@
 #   This file is part of acs-automated-testing
 #
 ##############################################################################
-
 
 ad_library {
     Procs to support the acs-automated-testing package.
@@ -16,7 +14,7 @@ ad_library {
     
     @author Peter Harper (peter.harper@open-msg.com)
     @creation-date 21 June 2001
-    @cvs-id $Id: aa-test-procs.tcl,v 1.38 2009/09/17 15:57:01 daveb Exp $
+    @cvs-id $Id: aa-test-procs.tcl,v 1.40.2.7 2017/06/30 17:23:06 gustafn Exp $
 }
 
 # LARS: We do this here, because if we do it in the -init file, then we cannot register 
@@ -32,6 +30,61 @@ if { ![nsv_exists aa_test cases] } {
     } else {
         nsv_lappend aa_test exclusion_categories "selenium"
     }    
+}
+
+proc aa_proc_copy {proc_name_old proc_name_new {new_body ""}} {
+    #
+    # This is a single proc handling all stub management requirements
+    # from aa-testing. Since the arglist nsf::procs is not simply "args"
+    # (like for proc based ad_procs), but the real argument/parameter
+    # list, we address these differences here for all needed cases.
+    #
+    if {[info procs $proc_name_old] ne ""} {
+        #
+        # We copy a regular Tcl proc
+        #
+        set args {}
+        foreach arg [info args $proc_name_old] {
+            if { [info default $proc_name_old $arg default_value] } {
+                lappend args [list $arg $default_value]
+            } else {
+                lappend args $arg
+            }
+        }
+        set old_body [info body $proc_name_old]
+        if {$new_body eq ""} {
+            set new_body $old_body
+        }
+        set arg_parser "[namespace tail $proc_name_old]__arg_parser"
+        #
+        # In case a arg-parser was used in the old body, but is
+        # missing in the new version, add it automatically to the new
+        # body.
+        #
+        if {[string match *$arg_parser* $old_body]} {
+            if {![string match *$arg_parser* $new_body]} {
+                set new_body $arg_parser\n$new_body
+                #ns_log notice "... auto added arg_parser for '$proc_name_new' ====> new_body $new_body"
+            }
+        }
+        ::proc $proc_name_new $args $new_body
+    } elseif {$::acs::useNsfProc && [info commands $proc_name_old] ne ""} {
+        #
+        # We copy a nsf::proc
+        #
+        # Use an absolute name to reference to a nsf::proc
+        # unambiguously
+        #
+        set proc_name [namespace which $proc_name_old]
+        if {$new_body eq ""} {
+            set new_body [::nsf::cmd::info body $proc_name]
+        }
+        nsf::proc -ad $proc_name_new \
+            [::nsf::cmd::info parameter $proc_name] \
+            $new_body
+    } else {
+        error "no such proc $proc_name_old"
+    }
 }
 
 ad_proc -public aa_stub {
@@ -56,23 +109,13 @@ ad_proc -public aa_stub {
         # If a stub for this procedure hasn't already been defined, take a copy
         # of the original procedure and add it to the aa_stub_names list.
         #
-        if {[lsearch -exact $aa_stub_names $proc_name] == -1} {
+        if {$proc_name ni $aa_stub_names} {
             lappend aa_stub_names $proc_name
-            proc ${proc_name}_unstubbed [info args $proc_name] [info body $proc_name]
+            aa_proc_copy $proc_name ${proc_name}_unstubbed
         }
         set aa_stub_sequence($proc_name) 1
         
-        set args [list]
-        set counter 0
-        foreach arg [info args $proc_name] {
-            if { [info default $proc_name $arg default_value] } {
-                lappend args [list $arg $default_value]
-            } else {
-                lappend args $arg
-            }
-        }
-
-        proc $proc_name $args "
+        aa_proc_copy $proc_name $proc_name "
       global aa_stub_sequence
       global aa_testcase_id
       set sequence_id \$aa_stub_sequence\($proc_name\)
@@ -85,9 +128,9 @@ ad_proc -public aa_stub {
         # File wide stub.
         #
         if {![nsv_exists aa_file_wide_stubs [info script]]} {
-            nsv_set aa_file_wide_stubs "[info script]" {}
+            nsv_set aa_file_wide_stubs [info script] {}
         }
-        nsv_lappend aa_file_wide_stubs "[info script]" [list $proc_name $new_body]
+        nsv_lappend aa_file_wide_stubs [info script] [list $proc_name $new_body]
     }
 }
 
@@ -97,17 +140,7 @@ ad_proc -public aa_unstub {
     @author Peter Harper
     @creation-date 24 July 2001
 } {
-    set args [list]
-    set counter 0
-    foreach arg [info args $proc_name] {
-        if { [info default $proc_name $arg default_value] } {
-            lappend args [list $arg $default_value]
-        } else {
-            lappend args $arg
-        }
-    }
-
-    proc $proc_name $args [info body ${proc_name}_unstubbed]
+    aa_proc_copy ${proc_name}_unstubbed $proc_name
     return
 }
 
@@ -125,7 +158,7 @@ ad_proc -public aa_register_init_class {
     running a set of testcases, and the descructor called <strong>once</strong>
     upon completion of running a set of testcases.<p>
     The idea behind this is that it could be used to perform data intensive
-    operations that shared amoungst a set if testcases.  For example, mounting
+    operations that shared amongst a set if testcases.  For example, mounting
     an instance of a package.  This could be performed by each testcase
     individually, but this would be highly inefficient if there are any
     significant number of them.
@@ -144,7 +177,7 @@ ad_proc -public aa_register_init_class {
     #
     # Work out the package key
     #
-    set package_root [file join [acs_root_dir] packages]
+    set package_root [file join $::acs::rootdir packages]
     set package_rel [string replace [info script] \
                          0 [string length $package_root]]
     if {![info exists package_key]} {
@@ -215,7 +248,7 @@ ad_proc -public aa_register_component {
     #
     # Work out the package key
     #
-    set package_root [file join [acs_root_dir] packages]
+    set package_root [file join $::acs::rootdir packages]
     set package_rel [string replace [info script] \
                          0 [string length $package_root]]
     set package_key [lindex [file split $package_rel] 0]
@@ -302,28 +335,28 @@ ad_proc -public aa_register_case {
 } {
     Registers a testcase with the acs-automated-testing system.  Whenever possible, cases that fail to register are replaced with 'metatest' log cases, so that the register-time errors are visible at test time.
 
-    See <a href="/doc/tutorial-debug.html">the tutorial</a> for examples.
+    See <a href="/doc/tutorial-debug">the tutorial</a> for examples.
 
     @param libraries A list of keywords of additional code modules to load.  The entire test case will fail if any package is missing.  Currently includes <b>tclwebtest</b>.
 
     @param cats Properties of the test case.  Must be zero or more of the following:
     <ul>
     <li><b>db</b>: Tests the database directly
-    <li><b>api</b>: tests the TCL API
+    <li><b>api</b>: tests the Tcl API
     <li><b>web</b>: tests HTTP interface
     <li><b>smoke</b>: Minimal test to assure functionality and catch basic errors.
     <li><b>stress</b>: Puts heavy load on server or creates large numbers of records.  Intended to simulate maximal production load. 
     <li><b>security_risk</b>: May introduce a security risk.
     <li><b>populator</b>: Creates sample data for future use.
     <li><b>production_safe</b>: Can be used on a live production site, ie for sanity checking or keepalive purposes.  Implies: no risk of adding or deleting data; no risk of crashing; minimal cpu/db/net load.
-</ul>
+    </ul>
     @param error_level Force all test failures to this error level.  One of 
-<ul>
-<li><b>notice</b>: Informative.  Does not indicate an error.
-<li><b>warning</b>: May indicate an problem.  Example: a non-critical bug repro case that hasn't been fixed.
-<li><b>error</b>: normal error
-<li><b>metatest</b>: Indicates a problem with the test framework, execution, or reporting.  Suggests that current test results may be invalid.  Use this for test cases that test the tests.  Also used, automatically, for errors sourcing test cases.  
-</ul>
+    <ul>
+    <li><b>notice</b>: Informative.  Does not indicate an error.
+    <li><b>warning</b>: May indicate an problem.  Example: a non-critical bug repro case that hasn't been fixed.
+    <li><b>error</b>: normal error
+    <li><b>metatest</b>: Indicates a problem with the test framework, execution, or reporting.  Suggests that current test results may be invalid.  Use this for test cases that test the tests.  Also used, automatically, for errors sourcing test cases.  
+    </ul>
     @param bugs A list of integers correspending to openacs.org bug numbers which relate to this test case.
     @param procs A list of OpenACS procs which are tested by this case.
 
@@ -339,14 +372,14 @@ ad_proc -public aa_register_case {
     set case_error ""
 
     set allowed_error_levels { notice warning metatest error }
-    if { [lsearch $allowed_error_levels $error_level] == -1 } {
+    if {$error_level ni $allowed_error_levels} {
         set error_level metatest
         append case_error "error_level must be one of following: $allowed_error_levels.\n\n"
     }
 
     set allowed_categories [nsv_get aa_test categories]
     foreach cat $cats {
-        if { [lsearch $allowed_categories $cat] == -1 } {
+        if {$cat ni $allowed_categories} {
             set error_level metatest
             append case_error "cats must contain only the following: $allowed_categories. You had a '$cat' in there.\n\n"
         }
@@ -355,7 +388,7 @@ ad_proc -public aa_register_case {
     #
     # Work out the package_key.
     #
-    set package_root [file join [acs_root_dir] packages]
+    set package_root [file join $::acs::rootdir packages]
     set package_rel [string replace [info script] \
                          0 [string length $package_root]]
     set package_key [lindex [file split $package_rel] 0]
@@ -365,7 +398,7 @@ ad_proc -public aa_register_case {
         if { $library eq "tclwebtest" } {
 
             # kludge: until tclwebtest installs itself in the proper
-            # place following the tcl way, we use this absolute path
+            # place following the Tcl way, we use this absolute path
             # hack.
             set tclwebtest_absolute_path "/usr/local/tclwebtest/lib"
             if { ![info exists ::auto_path] || [lsearch $::auto_path $tclwebtest_absolute_path] == -1 } {
@@ -480,8 +513,7 @@ ad_proc -public aa_register_case {
       aa_log \"Running testcase body \$body_count\"
       set catch_val \[catch \"eval \[list \$testcase_body\]\" msg\]
       if {\$catch_val != 0 && \$catch_val != 2} {
-        global errorInfo
-          aa_log_result \"fail\" \"$testcase_id (body \$body_count): Error during execution: \${msg}, stack trace: \n\$errorInfo\"
+          aa_log_result \"fail\" \"$testcase_id (body \$body_count): Error during execution: \${msg}, stack trace: \n\$::errorInfo\"
       }
       incr body_count
     }
@@ -517,8 +549,8 @@ ad_proc -public aa_runseries {
     {-security_risk 0}
     -quiet:boolean
     {-testcase_id ""}
-    by_package_key
-    by_category
+    {by_package_key ""}
+    {by_category ""}
 } {
     Runs a series of testcases.
 
@@ -559,22 +591,22 @@ ad_proc -public aa_runseries {
             # try to disqualify the test case
 
             # if category is specified, 
-            if { [exists_and_not_null by_package_key] && $by_package_key != $package_key } {
+            if { $by_package_key ne "" && $by_package_key ne $package_key } {
                 continue
             }
 
             # is it the wrong category?
-            if { [exists_and_not_null by_category] && [lsearch $categories $by_category] < 0 } {
+            if { $by_category ne "" && $by_category ni $categories } {
                 continue
             }
 
             # if we don't want stress, then the test must not be stress
-            if { ! $stress && [lsearch $categories "stress"] >= 0 } {
+            if { ! $stress && "stress" in $categories } {
                 continue
             }
             
             # if we don't want security risks, then the test must not be stress
-            if { ! $security_risk && [lsearch $categories "security_risk"] >= 0 } {
+            if { ! $security_risk && "security_risk" in $categories } {
                 continue
             }
             
@@ -901,11 +933,7 @@ ad_proc -public aa_log_final {
         ns_log Bug "aa_log_final: FAILED: $aa_testcase_id, $test_fails tests failed"
     }
 
-    db_dml testcase_result_insert {
-        insert into aa_test_final_results
-        (testcase_id, package_key, timestamp, passes, fails)
-        values (:aa_testcase_id, :aa_package_key, sysdate, :test_passes, :test_fails)
-    }
+    db_dml testcase_result_insert {}
 }
 
 ad_proc -public aa_run_with_teardown {
@@ -942,24 +970,21 @@ ad_proc -public aa_run_with_teardown {
 
             aa_execute_rollback_tests
 
-            if { !\[empty_string_p \$errmsg\] && !\[string equal \$errmsg \"rollback tests\"\] } {
-                global errorInfo
-                error \"\$errmsg \n\n \$errorInfo\"
+            if { \$errmsg ne {} && \$errmsg ne \"rollback tests\"\ } {
+                error \"\$errmsg \n\n \$::errorInfo\"
             }
         "
     }
 
     # Testing
     set setup_error_p [catch {uplevel $test_code} setup_error]
-    global errorInfo
-    set setup_error_stack $errorInfo
+    set setup_error_stack $::errorInfo
 
     # Teardown
     set teardown_error_p 0
     if { $teardown_code ne "" } {
         set teardown_error_p [catch {uplevel $teardown_code} teardown_error]
-        global errorInfo
-        set teardown_error_stack $errorInfo
+        set teardown_error_stack $::errorInfo
     }
 
     # Provide complete error message and stack trace
@@ -1103,10 +1128,11 @@ ad_proc -public aa_test::parse_install_file {
     }
 
     # TODO: Not working
-    set service(admin_login_url) "$service(url)register/?[export_vars { { email $service(adminemail) } { password $service(adminpassword) } }]"
-
+    set service(admin_login_url) [export_vars -base $service(url)register/ {
+        { email $service(adminemail) }
+        { password $service(adminpassword) }
+    }]
     set service(auto_test_url) "$service(url)test/admin"
-
     set service(rebuild_cmd) "sh [file join $service(script_path) recreate.sh]"
 }
 
@@ -1125,7 +1151,7 @@ ad_proc -private aa_test::get_test_doc {} {
 
     db_foreach result_counts {
         select result,
-               count(*) as result_count
+        count(*) as result_count
         from aa_test_results
         group by result
     } {
@@ -1138,7 +1164,7 @@ ad_proc -private aa_test::get_test_doc {} {
 
     db_foreach failure_counts {
         select testcase_id,
-               count(*) as failure_count
+        count(*) as failure_count
         from aa_test_results
         where result = 'fail'
         group by testcase_id
@@ -1173,7 +1199,7 @@ ad_proc -private aa_test::write_test_file {} {
         set file_path "$report_dir/${hostname}-${server}-testreport.xml"
 
         set xml_doc [get_test_doc]
-    
+        
         if { [catch {template::util::write_file $file_path $xml_doc} errmsg] } {
             ns_log Error "Failed to write xml test report to path $file_path - $errmsg"
         }
@@ -1218,15 +1244,15 @@ ad_proc -public aa_test::parse_test_file {
 ad_proc -public aa_get_first_url {
     {-package_key:required}
 } {
-  Procedure for geting the url of a mounted package with the package_key. It uses the first instance that it founds. This is usefull for tclwebtest tests.
+    Procedure for geting the url of a mounted package with the package_key. It uses the first instance that it founds. This is useful for tclwebtest tests.
 } {
 
-    if {![db_0or1row first_url { *SQL* }]} {
+    if {![db_0or1row first_url {}]} {
         site_node::instantiate_and_mount -package_key $package_key
-	db_1row first_url {*SQL*}
-}
+        db_1row first_url {}
+    }
 
- return $url
+    return $url
 
 }
 
@@ -1242,9 +1268,9 @@ ad_proc -public aa_display_result {
     @param explanation An explanation accompanying the response.
 } {
     if {$response} {
-	aa_log_result "pass" $explanation
+        aa_log_result "pass" $explanation
     } else {
-	aa_log_result "fail" $explanation
+        aa_log_result "fail" $explanation
     }
 }
 
@@ -1264,7 +1290,7 @@ ad_proc -public aa_selenium_init {} {
         # request.
         return $_acs_automated_testing_selenium_init
     }
-            
+    
     set server_url [parameter::get_from_package_key \
                         -package_key acs-automated-testing \
                         -parameter "SeleniumRcServer" \
@@ -1294,3 +1320,10 @@ aa_register_init_class \
     "Init Class for Selenium Remote Control" \
     {aa_selenium_init} \
     {catch {Se stop} errmsg}
+
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

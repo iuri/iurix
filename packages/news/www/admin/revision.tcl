@@ -5,12 +5,12 @@ ad_page_contract {
     Page to view one news item in an arbitrary revision
     @author Stefan Deusch (stefan@arsdigita.com)
     @creation-date 2000-12-20
-    @cvs-id $Id: revision.tcl,v 1.10 2009/12/23 22:19:53 donb Exp $
+    @cvs-id $Id: revision.tcl,v 1.12.2.1 2015/09/12 11:06:44 gustafn Exp $
     
 } {
 
-    item_id:notnull
-    revision_id:notnull
+    item_id:naturalnum,notnull
+    revision_id:naturalnum,notnull
 
 } -properties {
 
@@ -36,7 +36,7 @@ set item_exist_p [db_0or1row one_item {}]
 if { $item_exist_p } {
 
     set title [_ news.Revision]
-    set context [list [list "item?[export_vars -url item_id]" [_ news.One_Item]] $title]
+    set context [list [list [export_vars -base item item_id] [_ news.One_Item]] $title]
 
     set creation_date_pretty [lc_time_fmt $creation_date %q]
     set publish_date_pretty [lc_time_fmt $publish_date %q]
@@ -47,3 +47,9 @@ if { $item_exist_p } {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

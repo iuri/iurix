@@ -3,7 +3,7 @@ ad_library {
 
     @author Lars Pind (lars@collaobraid.biz)
     @creation-date 2003-09-03
-    @cvs-id $Id: password-procs.tcl,v 1.18 2010/01/13 10:53:00 emmar Exp $
+    @cvs-id $Id: password-procs.tcl,v 1.19.2.9 2017/08/04 08:55:50 gustafn Exp $
 }
 
 
@@ -64,8 +64,7 @@ ad_proc -public auth::password::can_change_p {
     with_catch errmsg { 
         set result_p [auth::password::CanChangePassword -authority_id $authority_id]
     } {
-        global errorInfo
-        ns_log Error "Error invoking CanChangePassword operation for authority_id $authority_id:\n$errorInfo"
+        ns_log Error "Error invoking CanChangePassword operation for authority_id $authority_id:\n$::errorInfo"
     }
     return $result_p
 }
@@ -109,8 +108,7 @@ ad_proc -public auth::password::change {
     } {
         set result(password_status) failed_to_connect
         set result(password_message) $errmsg
-        global errorInfo
-        ns_log Error "Error invoking password management driver for authority_id = $user(authority_id):\n$errorInfo"
+        ns_log Error "Error invoking password management driver for authority_id = $user(authority_id):\n$::errorInfo"
     }
     
     # Check the result code and provide canned responses
@@ -124,11 +122,11 @@ ad_proc -public auth::password::change {
             # Refresh the current user's cookies, so he doesn't get logged out, 
             # if this user was logged in before changing password
             if { [ad_conn isconnected] && $user_id == $connection_user_id } {
-                ad_user_login -account_status [ad_conn account_status] $user_id
+                auth::issue_login -account_status [ad_conn account_status] -user_id $user_id
             }
         } 
         no_account - not_supported - old_password_bad - new_password_bad - change_error - failed_to_connect {
-            if { ![exists_and_not_null result(password_message)] } {
+            if { ![info exists result(password_message)] || $result(password_message) eq "" } {
                 array set default_message {
                     no_account {Unknown username}
                     not_supported {This operation is not supported}
@@ -180,7 +178,7 @@ ad_proc -public auth::password::recover_password {
             }
             return [array get result]
         }
-        set user_id [cc_lookup_email_user $email]
+        set user_id [party::get_by_email -email $email]
         if { $user_id eq "" } {
             set result(password_status) "failed_to_connect"
             set result(password_message) "Unknown email"
@@ -250,7 +248,7 @@ ad_proc -public auth::password::get_forgotten_url {
             set authority_id [auth::authority::local]
         }
     } else {
-        set user_id [cc_lookup_email_user $email]
+        set user_id [party::get_by_email -email $email]
         if { $user_id ne "" } {
             acs_user::get -user_id $user_id -array user
             set authority_id $user(authority_id)
@@ -295,8 +293,7 @@ ad_proc -public auth::password::can_retrieve_p {
         set result_p [auth::password::CanRetrievePassword \
                     -authority_id $authority_id]
     } {
-        global errorInfo
-        ns_log Error "Error invoking CanRetrievePassword operation for authority_id $authority_id:\n$errorInfo"
+        ns_log Error "Error invoking CanRetrievePassword operation for authority_id $authority_id:\n$::errorInfo"
         return 0
     }
     return $result_p
@@ -337,14 +334,13 @@ ad_proc -public auth::password::retrieve {
     } {
         set result(password_status) failed_to_connect
         set result(password_message) "Error invoking the password management driver."
-        global errorInfo
-        ns_log Error "Error invoking password management driver for authority_id = $authority_id: $errorInfo"
+        ns_log Error "Error invoking password management driver for authority_id = $authority_id: $::errorInfo"
     }
     
     # Check the result code and provide canned responses
     switch $result(password_status) {
         ok {
-            if { [exists_and_not_null result(password)] } {
+            if { [info exists result(password)] && $result(password) ne "" } {
                 # We have retrieved or reset a forgotten password that we should email to the user
                 with_catch errmsg {
                     auth::password::email_password \
@@ -357,16 +353,15 @@ ad_proc -public auth::password::retrieve {
                     # We could not inform the user of his email - we failed
                     set result(password_status) "failed_to_connect"
                     set result(password_message) [_ acs-subsite.Error_sending_mail]
-                    global errorInfo
-                    ns_log Error "We had an error sending out email with new password to username $username, authority $authority_id:\n$errorInfo"
+                    ns_log Error "We had an error sending out email with new password to username $username, authority $authority_id:\n$::errorInfo"
                 }
             } 
-            if { ![exists_and_not_null result(password_message)] } {
+            if { ![info exists result(password_message)] || $result(password_message) eq "" } {
                 set result(password_message) [_ acs-subsite.Check_Your_Inbox]
             }
         } 
         no_account - not_supported - retrieve_error - failed_to_connect {
-            if { ![exists_and_not_null result(password_message)] } {
+            if { ![info exists result(password_message)] || $result(password_message) eq "" } {
                 array set default_message {
                     no_account {Unknown username}
                     not_supported {This operation is not supported}
@@ -399,8 +394,7 @@ ad_proc -public auth::password::can_reset_p {
         set result_p [auth::password::CanResetPassword \
                     -authority_id $authority_id]
     } {
-        global errorInfo
-        ns_log Error "Error invoking CanResetPassword operation for authority_id $authority_id:\n$errorInfo"
+        ns_log Error "Error invoking CanResetPassword operation for authority_id $authority_id:\n$::errorInfo"
     }
     return $result_p
 }
@@ -449,18 +443,18 @@ ad_proc -public auth::password::reset {
     } {
         set result(password_status) failed_to_connect
         set result(password_message) "Error invoking the password management driver."
-        global errorInfo
-        ns_log Error "Error invoking password management driver for authority_id = $authority_id: $errorInfo"
+        ns_log Error "Error invoking password management driver for authority_id = $authority_id: $::errorInfo"
     }
     
     # Check the result code and provide canned responses
     switch $result(password_status) {
         ok {
-            if { [exists_and_not_null result(password)] && \
-                     (!$admin_p || [parameter::get \
-                                        -parameter EmailChangedPasswordP \
-                                        -package_id [ad_conn subsite_id] \
-                                        -default 1]) } {
+            if { [info exists result(password)] && $result(password) ne ""
+                 && (!$admin_p || [parameter::get \
+                                       -parameter EmailChangedPasswordP \
+                                       -package_id [ad_conn subsite_id] \
+                                       -default 1])
+             } {
                 # We have retrieved or reset a forgotten password that we should email to the user
                 with_catch errmsg {
                     auth::password::email_password \
@@ -473,16 +467,15 @@ ad_proc -public auth::password::reset {
                     # We could not inform the user of his email - we failed
                     set result(password_status) "failed_to_connect"
                     set result(password_message) [_ acs-subsite.Error_sending_mail]
-                    global errorInfo
-                    ns_log Error "We had an error sending out email with new password to username $username, authority $authority_id:\n$errorInfo"
+                    ns_log Error "We had an error sending out email with new password to username $username, authority $authority_id:\n$::errorInfo"
                 }
             }
-            if { ![exists_and_not_null result(password_message)] } {
+            if { ![info exists result(password_message)] || $result(password_message) eq "" } {
                 set result(password_message) [_ acs-subsite.Check_Your_Inbox]
             }
         } 
         no_account - not_supported - retrieve_error - failed_to_connect {
-            if { ![exists_and_not_null result(password_message)] } {
+            if { (![info exists result(password_message)] || $result(password_message) eq "") } {
                 array set default_message {
                     no_account {Unknown username}
                     not_supported {This operation is not supported}
@@ -519,7 +512,7 @@ ad_proc -private auth::password::email_password {
     {-body_msg_key "acs-subsite.email_body_Forgotten_password"}
     {-from ""}
 } {
-    Send an email to ther user with given username and authority with the new password.
+    Send an email to the user with given username and authority with the new password.
 
     @param from             The email's from address. Can be in email@foo.com <Your Name> format.
                             Defaults to ad_system_owner.
@@ -537,6 +530,16 @@ ad_proc -private auth::password::email_password {
 
     # Set up variables for use in message key
     set reset_password_url [export_vars -base "[ad_url]/user/password-update" {user_id {old_password $password}}]
+    set forgotten_password_url [auth::password::get_forgotten_url \
+                                    -authority_id $authority_id \
+                                    -username $user(username) \
+                                    -email $user(email)]
+    set subsite_info [security::get_register_subsite]
+    if {[dict get $subsite_info url] ne "/"} {
+        set forgotten_password_url [dict get $subsite_info url]$forgotten_password_url
+    }
+    set forgotten_password_url [security::get_qualified_url $forgotten_password_url]
+
     set system_owner [ad_system_owner]
     set system_name [ad_system_name]
     set system_url [ad_url]
@@ -771,3 +774,9 @@ ad_proc -private auth::password::ResetPassword {
 				$parameters \
 			        $authority_id]]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

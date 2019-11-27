@@ -69,7 +69,6 @@
   <msg key="Album_Name">Nome do Álbum</msg>
   <msg key="Caption">Legenda</msg>
   <msg key="Caption_1">Legenda:</msg>
-  <msg key="Clean_this_album">Apagar todas as fotos do álbum</msg>
   <msg key="Clipboard">Mural de Fotos:</msg>
   <msg key="clipboard">mural de fotos</msg>
   <msg key="Clipboard_addedit">&quot;Adicionar/editar mural&quot;</msg>
@@ -100,7 +99,6 @@
   <msg key="lt_Are_you_sure_you_want">Deseja mesmo excluir o álbum &quot;%title%&quot;? Esta ação é irreversível.</msg>
   <msg key="lt_Are_you_sure_you_want_1">Deseja mesmo excluir a pasta &quot;%title%&quot;? Esta ação é irreversível.</msg>
   <msg key="lt_Are_you_sure_you_want_2">Deseja mesmo excluir a foto &quot;%title%&quot;? Esta ação é irreversível.</msg>
-  <msg key="lt_Are_you_sure_you_want_album">Tem certeza que deseja excluir todas essas fotos? A operação não pode ser desfeita.</msg>
   <msg key="lt_Click_on_the_small_ph">Clique nas imagens reduzidas para exibir versões maiores, os números para exibir outras páginas, ou &quot;Próxima&quot; e &quot;Anterior&quot; para avançar ou retroceder. Abrindo uma imagem individual, é possível também imprimí-las ou enviá-las por e-mail.</msg>
   <msg key="lt_clipboardsphotos_phot">(%clipboards.photos% fotos) [</msg>
   <msg key="lt_Description_descripti">Descrição: %description%</msg>
@@ -143,7 +141,6 @@
   <msg key="Move">Mover</msg>
   <msg key="Name">Nome</msg>
   <msg key="Name_title">Nome: %title%</msg>
-  <msg key="Navigate_through_albums">Navegar pelos Albuns</msg>
   <msg key="Netx">Próximo</msg>
   <msg key="OPTIONAL">OPCIONAL</msg>
   <msg key="or">ou</msg>
@@ -151,7 +148,6 @@
   <msg key="Photographer">Fotógrafo</msg>
   <msg key="Photographer_">Fotógrafo</msg>
   <msg key="photos">fotos</msg>
-  <msg key="Photos">Fotos</msg>
   <msg key="Prev">Ant</msg>
   <msg key="register">cadastro</msg>
   <msg key="remove">remover</msg>
@@ -169,7 +165,6 @@
   <msg key="Title_1">Título:</msg>
   <msg key="Upload_a_Photo">Enviar uma Foto</msg>
   <msg key="Upload_photos">Enviar fotos do diretório do servidor</msg>
-  <msg key="Unsorted_Photos">Fotos Sortidas</msg>
   <msg key="You_will_have_to">Você terá que</msg>
   <msg key="Your_clipboards">Seus murais</msg>
 </message_catalog>

@@ -3,7 +3,7 @@ ad_library {
 
     @creation-date 20050129
     @author Jeff Davis davis@xarg.net
-    @cvs-id $Id: lang-install-procs.tcl,v 1.4 2005/05/06 16:25:04 richardh Exp $
+    @cvs-id $Id: lang-install-procs.tcl,v 1.4.18.1 2015/09/10 08:21:25 gustafn Exp $
 }
 
 namespace eval ::install::xml::action {}
@@ -35,3 +35,9 @@ ad_proc -private ::install::xml::action::disable-locale { node } {
     set locale [apm_required_attribute_value $node locale]
     lang::system::locale_set_enabled -locale $locale -enabled_p f
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -3,7 +3,7 @@ ad_library {
 
   @author Gustaf Neumann
   @creation-date 2007-10-11
-  @cvs-id $Id: 04-library-procs.tcl,v 1.3 2009/09/18 12:00:38 gustafn Exp $
+  @cvs-id $Id: 04-library-procs.tcl,v 1.3.8.4 2017/04/21 14:00:24 gustafn Exp $
 }
 
 #
@@ -18,7 +18,7 @@ ad_library {
 #
 # Load a required file:
 #
-#   Source a file, which is requred by the current file
+#   Source a file, which is required by the current file
 #   Filename is without path and .tcl
 #
 #     ::xo::library require filename
@@ -82,6 +82,7 @@ namespace eval ::xo {
     if {![nsv_exists [self]-loaded $otherfile]} {
       my log "--sourcing $otherfile"
       apm_source $otherfile
+      nsv_set [self]-loaded $otherfile 1
     }
   }
 
@@ -103,11 +104,15 @@ namespace eval ::xo {
     #my log "--check nsv_exists $vn $dirname/$myfile [nsv_exists $vn $dirname/$myfile]"
     if {[nsv_exists $vn $dirname/$myfile]} {
       foreach file [nsv_get $vn $dirname/$myfile] {
-        #my log "--sourcing dependent $dirname/$file"
-        #apm_source $dirname/$file
-        #my log "--sourcing dependent $file"
+        my log "--sourcing dependent $file"
         apm_source $file
       }
     }
   }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

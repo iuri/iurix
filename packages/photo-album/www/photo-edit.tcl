@@ -6,10 +6,10 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 12/11/2000
-    @cvs-id $Id: photo-edit.tcl,v 1.5 2007/10/07 22:37:03 donb Exp $
+    @cvs-id $Id: photo-edit.tcl,v 1.8 2014/08/07 07:59:51 gustafn Exp $
 } {
     {hide:integer 0}
-    {photo_id:integer 0}
+    {photo_id:naturalnum,notnull 0}
     d:array,integer,optional
 } -properties {
     path:onevalue
@@ -25,12 +25,10 @@ ad_page_contract {
 #     }
 # }
 
-ad_require_permission $photo_id "write"
+permission::require_permission -object_id $photo_id -privilege "write"
 
 set user_id [ad_conn user_id]
 set context_list [pa_context_bar_list -final "[_ photo-album._Edit_2]" $photo_id]
-
-set community_options [photo_album::get_community_options]
 
 #clear the cached value 
 util_memoize_flush $photo_id
@@ -40,7 +38,6 @@ foreach id [array names d] {
         pa_rotate $photo_id $d($photo_id)
     }
 }
-
 
 template::form create edit_photo
 
@@ -53,11 +50,8 @@ template::element create edit_photo revision_id -label "revision ID" \
 template::element create edit_photo previous_revision -label "previous_revision" \
   -datatype integer -widget hidden
 
-template::element create edit_photo photographer -html { size 30 } \
-  -label "<#_Photographer#>" -help_text "Author of the photo" -optional -datatype text
-
-template::element create edit_photo community_id \
-  -label "<#_Community#>" -help_text "The community the photo belongs" -optional -datatype integer -widget select -options $community_options
+template::element create edit_photo title -html { size 30 } \
+  -label "<#_Title#>" -optional -datatype text
 
 template::element create edit_photo caption -html { size 30 } \
   -label "<#_Caption#>" -help_text "Displayed on the thumbnail page" -optional -datatype text
@@ -68,9 +62,6 @@ template::element create edit_photo description -html { size 50} \
 template::element create edit_photo story -html { cols 50 rows 4 } \
   -label "<#_Story#>" -optional -datatype text  -help_text "Displayed when viewing the photo" -widget textarea
 
-template::element create edit_photo tags -html { size 30 } \
-  -label "<#_Tags#>" -help_text "Tags to use on search" -optional -datatype text
-
 template::element create edit_photo submit_b -widget submit \
         -label submit -optional -datatype text
 
@@ -80,7 +71,7 @@ template::element create edit_photo submit_b -widget submit \
 db_1row get_photo_info { *SQL* }
 db_1row get_thumbnail_info { *SQL* }
 
-if [empty_string_p $live_revision] {
+if {$live_revision eq ""} {
     set checked_string "checked"
 } else {
     set checked_string ""
@@ -93,34 +84,22 @@ if { [template::form is_request edit_photo] } {
     template::element set_properties edit_photo revision_id -value $revision_id
     template::element set_properties edit_photo photo_id -value $photo_id
     template::element set_properties edit_photo previous_revision -value $previous_revision
-    template::element set_properties edit_photo photographer -value $photographer
-    template::element set_properties edit_photo community_id -value $community_id
+    template::element set_properties edit_photo title -value $title
     template::element set_properties edit_photo description -value $description
     template::element set_properties edit_photo story -value $story
     template::element set_properties edit_photo caption -value $caption
- 
- 
-    ns_log Notice "is_request"
-    ns_log Notice "**********************  $photographer | $community_id"
-
-   
 }
 
 if { [template::form is_valid edit_photo] } {
     set photo_id [template::element::get_value edit_photo photo_id]
     set revision_id [template::element::get_value edit_photo revision_id]
-    set new_photographer [template::element set_properties edit_photo photographer]
-    set new_community_id [template::element set_properties edit_photo community_id]
+    set new_title [template::element::get_value edit_photo title]
     set new_desc [template::element::get_value edit_photo description]
     set new_story [template::element::get_value edit_photo story]
     set new_caption [template::element::get_value edit_photo caption]
     set previous_revision [template::element::get_value edit_photo previous_revision]
-    set new_tags [template::element::get_value edit_photo tags]
     set peeraddr [ad_conn peeraddr]
     
-    ns_log Notice "is_valid"
-    ns_log Notice "################ $photographer | $new_photographer |  $new_community_id"
-
     db_transaction {
 	db_exec_plsql update_photo_attributes {} 
 	db_dml insert_photo_attributes { *SQL* }
@@ -129,11 +108,11 @@ if { [template::form is_valid edit_photo] } {
 	# not allowing users to modify the binary yet
 	# will need to modify thumb and view binaries when photo binary is changed 
 
-	# db_dml update_photo_user_filename {} 
+#	db_dml update_photo_user_filename {} 
 
 	db_exec_plsql set_live_revision {} 
 
-	if $hide {
+	if {$hide} {
 	    db_dml update_hides { *SQL* }
 	} 
     } on_error {

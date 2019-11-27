@@ -1,13 +1,17 @@
-# Documentation procedures for the ArsDigita Templating System
+ad_library {
+    Documentation procedures for the ArsDigita Templating System
+
+    @author Simon Huynh (shuynh@arsdigita.com)
+
+    @cvs-id $Id: doc-tcl-procs.tcl,v 1.11.2.5 2017/04/22 18:15:50 gustafn Exp $
+}
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
-# Authors: Simon Huynh (shuynh@arsdigita.com)
-
-# $Id: doc-tcl-procs.tcl,v 1.10 2007/01/10 21:22:12 gustafn Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
 # http://www.fsf.org/copyleft/gpl.html
+
 
 namespace eval doc {}
 namespace eval doc::util {}
@@ -42,9 +46,8 @@ ad_proc -private doc::sort_@see { list_ref directive_comments } {
     procedure to deal with @see comments
 } {
   upvar $list_ref see_list
-  set type [lindex $directive_comments 0]
-  set see_name [lindex $directive_comments 1]
-  set url [lindex $directive_comments 2]
+
+  lassign $directive_comments type see_name url
 
   if {$url eq "" } {
     switch -exact $type {
@@ -57,7 +60,7 @@ ad_proc -private doc::sort_@see { list_ref directive_comments } {
 	  set split_name $see_name
 	  doc::util::text_divider split_name ::
 	  set name_length [llength $split_name]
-	  set see_namespace [join [lrange $split_name 0 [expr {$name_length - 2}]] ""]
+	  set see_namespace [join [lrange $split_name 0 $name_length-2] ""]
 	  set url "[doc::util::dbl_colon_fix $see_namespace].html#[set see_name]"
 	}
     }
@@ -92,7 +95,7 @@ ad_proc -private doc::util::find_marker_indices { text marker } {
    
   while { [regexp -indices $marker $text marker_idx] } {
     lappend indices_list [expr {[lindex $marker_idx 0] + $last_index}]
-    set text [string range $text [expr {[lindex $marker_idx 1] + 1}]  end]
+    set text [string range $text [lindex $marker_idx 1]+1 end]
     set last_index [expr {[lindex $marker_idx 1] + $last_index + 1}]
   }
 
@@ -137,10 +140,12 @@ ad_proc -private doc::util::text_divider { text_ref marker } {
     return 1
 }
 
-ad_proc -private template::util::server_root {} {
+ad_proc -private -deprecated template::util::server_root {} {
     uses ns_library to find the server root, may not always be accurate
-    because it essentially asks for the tcl library path and
-    strips off the last /tcl directory
+    because it essentially asks for the Tcl library path and
+    strips off the last /tcl directory.
+
+    @see use $::acs::rootdir instead
 } {
 
   set path_length [expr [llength [file split [ns_library private]]] - 1]
@@ -168,24 +173,28 @@ ad_proc -private template::util::write_from_template { template file_name} {
 
 }
 
-ad_proc -private template::util::display_value { ref } {
+ad_proc -private -deprecated template::util::display_value { ref } {
     a proc used for debugging, just prints out a value to the error log
+
+    @see use simple "ns_log ...." instead
 } {
     upvar $ref value
-    ns_log notice "$ref: $value
-"
+    ns_log notice "$ref: $value"
 }
 
 
-ad_proc -private template::util::proper_noun { string_ref } {
+ad_proc -private -deprecated template::util::proper_noun { string_ref } {
     capitalizes the first letter of a string
     @return returns formatted string (UNFINISHED. FIXME.)
+    @see use "string totitle ..."
 } {
 
 }
 
 
-ad_proc -private template::util::string_range { string indices } {
+ad_proc -private -deprecated template::util::string_range { string indices } {
+    @see use "string range instead"
+} {
     return [string range $string [lindex $indices 0] [lindex $indices 1]]
 }
 
@@ -273,9 +282,7 @@ ad_proc -private template::util::alphabetized_index {list entry} {
 ad_proc -private template::util::proc_element_compare { element1 element2 } {
     used to compare two different elements in a list of parsed data for public or private procs
 } {
-
-    return [string compare -nocase [lindex [lindex [lindex $element2 1] 0] 1] [lindex [lindex [lindex $element1 1] 0] 1]]
-
+    return [string compare -nocase [lindex $element2 1 0 1] [lindex $element1 1 0 1]]
 }
 
 ad_proc -private doc::set_proc_name_source_text_comment_text { proc_block } {
@@ -386,7 +393,7 @@ ad_proc -private doc::parse_comment_text { proc_block } {
 }
 
 ad_proc -private doc::parse_namespace { text_lines }  {
-    text between two namespace markers in a tcl library file and 
+    text between two namespace markers in a Tcl library file and 
     parses out procedure source and comments
 
     @author simon
@@ -453,7 +460,7 @@ ad_proc -private doc::parse_namespace { text_lines }  {
     # as would be expected if the namespace were being described 
     # for the first time; otherwise
     # it is set to 0;  the problem i'm trying to resolve here is multiple uses 
-    # of the @namespace directive and determining which occurance of the 
+    # of the @namespace directive and determining which occurrence of the 
     # directive is followed by comments
     # by comments we want to parse into our static files
 
@@ -468,9 +475,9 @@ ad_proc -private doc::parse_namespace { text_lines }  {
 
         set namespace_entry [lindex $total_result_listing [lsearch -exact $namespace_list $namespace_name]]
 
-	set namespace_info [lindex [lindex $namespace_entry 0] 1]
-	set namespace_public [lindex [lindex $namespace_entry 1] 1]
-	set namespace_private [lindex [lindex $namespace_entry 2] 1]
+	set namespace_info [lindex $namespace_entry 0 1]
+	set namespace_public [lindex $namespace_entry 1 1]
+	set namespace_private [lindex $namespace_entry 2 1]
 		
     } else {
         set namespace_info [list name "$namespace_name" overview "$namespace_description" author "$namespace_author" see "$namespace_see"]
@@ -482,7 +489,7 @@ ad_proc -private doc::parse_namespace { text_lines }  {
     if { $has_comments } {
 	
 	# this check determines whether or not we want the comments
-	# following this occurrance of the @namespace directive for 
+	# following this occurrence of the @namespace directive for 
 	# this namespace to be included in our static files
 
         set namespace_info [list name "$namespace_name" overview "$namespace_description" author "$namespace_author" see "$namespace_see"]
@@ -580,7 +587,7 @@ ad_proc -private doc::parse_file { path } {
 }
 
 ad_proc -private doc::parse_tcl_library { dir_list } {
-    takes the absolute path of the tcl library directory and parses through it
+    takes the absolute path of the Tcl library directory and parses through it
 
     @see doc::parse_file 
     @see template::util::comment_text_normalize
@@ -602,17 +609,17 @@ ad_proc -private doc::parse_tcl_library { dir_list } {
 
   foreach dir $dir_list {
 
-  #debug
-  template::util::display_value dir
+      #debug
+      #template::util::display_value dir
 
-  # using this lame hack since most aD servers are running an earlier version of Tcl than 8.3,
-  # which supports the -directory switch that this hack emulates
-  append file_list [glob -nocomplain $dir/*.tcl $dir/*/*.tcl $dir/*/*/*.tcl $dir/*/*/*/*.tcl ]
-  append file_list " "
+      # using this lame hack since most aD servers are running an earlier version of Tcl than 8.3,
+      # which supports the -directory switch that this hack emulates
+      append file_list [glob -nocomplain $dir/*.tcl $dir/*/*.tcl $dir/*/*/*.tcl $dir/*/*/*/*.tcl ]
+      append file_list " "
   }
 
   #debugging
-  template::util::display_value file_list
+  #template::util::display_value file_list
 
   foreach tcl_file $file_list {
       ns_log notice "doc::parse_tcl_library: parsing through $tcl_file for documentation"
@@ -630,3 +637,9 @@ ad_proc -private doc::parse_tcl_library { dir_list } {
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

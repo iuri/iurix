@@ -7,13 +7,13 @@ ad_page_contract {
     
     @author mbryzek@arsdigita.com
     @creation-date Thu Jan  4 11:02:15 2001
-    @cvs-id $Id: constraints-create-2.tcl,v 1.2 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: constraints-create-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    group_id:notnull,integer
+    group_id:notnull,naturalnum
     rel_type:notnull
     { operation "" }
-    { return_url "" }
+    { return_url:localurl "" }
 }
 
 set operation [string trim [string tolower $operation]]
@@ -22,13 +22,19 @@ if {$operation eq "yes"} {
     if { $return_url eq "" } {
 	# Setup return_url to send up back to the group admin page
 	# when we're all done
-	set return_url "[ad_conn package_url]/admin/groups/one?[ad_export_vars group_id]"
+	set return_url [export_vars -base [ad_conn package_url]/admin/groups/one group_id]
     }
-    ad_returnredirect "../rel-segments/new?[ad_export_vars {group_id rel_type return_url}]"
+    ad_returnredirect [export_vars -base ../rel-segments/new {group_id rel_type return_url}]
 } else {
     if { $return_url eq "" } {
-	set return_url "one?[ad_export_vars group_id]"
+	set return_url [export_vars -base one group_id]
     }
     ad_returnredirect $return_url
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

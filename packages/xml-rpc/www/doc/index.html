@@ -23,7 +23,7 @@ href="http://xml-rpc.com">XML-RPC.com</a> for more information.
 <p>
 Some XML-RPC protocols have become popular in the web world. The <a
 href="http://www.blogger.com/developers/api/1_docs/">Blogger API</a> and
-the <a href="http://www.xmlrpc.com/metaWeblogApi">Metaweblog API</a> allow
+the <a href="https://web.archive.org/web/20160809165901/http://xmlrpc.scripting.com:80/metaWeblogApi.html">Metaweblog API</a> allow
 users to manage their blogs using tools of their choice and these have
 become widespread enough that users expect to find this functionality in
 any blogging software. For this reason, it's important to provide this
@@ -224,9 +224,9 @@ This package also implements a simple XML-RPC client. Any package that
 needs to make XML-RPC calls can simply add a dependency to this package and
 then call <code>xmlrpc::remote_call</code>. As an example, the
 <code>system.add</code> method sums a variable number of ints. To call the 
-<code>system.add</code> method on http://example.com/RPC2, do this:
+<code>system.add</code> method on http://example.com/RPC2/, do this:
 <pre>
-catch {xmlrpc::remote_call http://example.com/RPC2 system.add -int 4 -int 44 -int 23} result
+catch {xmlrpc::remote_call http://example.com/RPC2/ system.add -int 4 -int 44 -int 23} result
 set result ==> 71
 </pre>
 
@@ -243,7 +243,7 @@ requests to other servers. The util_httppost proc in
 acs-tcl/tcl/utilities-procs.tcl doesn't work because it doesn't let you
 specify the Content-Type, which needs to be text/xml, and it doesn't add
 Host headers, which are required if the server you're POSTing to is using
-virtual hosting. So, this package implemements its own HTTP POST proc
+virtual hosting. So, this package implements its own HTTP POST proc
 (which was stolen from lars-blogger's weblogs.com XML-RPC ping).
 </p>
 

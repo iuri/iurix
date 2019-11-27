@@ -6,10 +6,9 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 12/8/2000
-    @cvs-id $Id: folder-edit.tcl,v 1.6 2004/06/01 22:54:19 donb Exp $
+    @cvs-id $Id: folder-edit.tcl,v 1.9 2018/03/29 08:19:43 gustafn Exp $
 } {
-    folder_id:integer,notnull
-    return_url:optional
+    folder_id:naturalnum,notnull
 } -validate {
     valid_folder -requires {folder_id:integer} {
 	if [string equal [pa_is_folder_p $folder_id] "f"] {
@@ -21,7 +20,7 @@ ad_page_contract {
 }
 
 # check for permission
-ad_require_permission $folder_id write
+permission::require_permission -object_id $folder_id -privilege write
 
 set context_list [pa_context_bar_list -final "[_ photo-album._Edit_1]" $folder_id]
 
@@ -45,7 +44,7 @@ if { [template::form is_request folder_edit] } {
 }
 
 if { [template::form is_valid folder_edit] } {
-    # vaild new sub-folder submission so create new subfolder
+    # valid new sub-folder submission so create new subfolder
 
     set folder_id [template::element::get_value folder_edit folder_id]
     set label [template::element::get_value folder_edit label]
@@ -71,13 +70,7 @@ if { [template::form is_valid folder_edit] } {
     }
     #redirect back to index page with parent_id
 
-    # HAM : added return_url
-    if { ![exists_and_not_null return_url] } {
-        #redirect back to index page with parent_id
-        ad_returnredirect "?folder_id=$parent_id"
-    } else {
-        ad_returnredirect $return_url
-    }
+    ad_returnredirect "?folder_id=$folder_id"
 
     ad_script_abort
 }

@@ -4,18 +4,26 @@
 --
 -- @author  jon@jongriffin.com
 -- @created 2000-12-04
--- @cvs-id  $Id: ref-timezones-drop.sql,v 1.4 2003/05/17 11:11:11 jeffd Exp $
+-- @cvs-id  $Id: ref-timezones-drop.sql,v 1.5 2013/03/30 18:50:28 gustafn Exp $
 
-create function inline_0() returns integer as '
-declare
+
+
+--
+-- procedure inline_0/0
+--
+CREATE OR REPLACE FUNCTION inline_0(
+
+) RETURNS integer AS $$
+DECLARE
     rec        acs_reference_repositories%ROWTYPE;
-begin
-    for rec in select * from acs_reference_repositories where upper(table_name) = ''TIMEZONES'' loop
-	 execute ''drop table '' || rec.table_name;
+BEGIN
+    for rec in select * from acs_reference_repositories where upper(table_name) = 'TIMEZONES' loop
+	 execute 'drop table ' || rec.table_name;
          perform acs_reference__delete(rec.repository_id);
     end loop;
     return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0();
 drop function inline_0();

@@ -7,17 +7,17 @@ ad_page_contract {
     @author philg@mit.edu
     @author nstrug@arsdigita.com
     @date   28th September 2000
-    @cvs-id $Id: survey-preview.tcl,v 1.4 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id $Id: survey-preview.tcl,v 1.7.2.1 2016/05/21 11:04:16 gustafn Exp $
 
 } {
     
-    survey_id:integer,notnull
-    {section_id:integer ""}
-    return_url:optional
+    survey_id:naturalnum,notnull
+    {section_id:naturalnum ""}
+    return_url:localurl,optional
 
 } -validate {
     survey_exists -requires {survey_id} {
-	if ![db_0or1row survey_exists {}] {
+	if {![db_0or1row survey_exists {}]} {
 	    ad_complain "[_ survey.lt_Survey_survey_id_does]"
 	}
     }
@@ -32,7 +32,7 @@ ad_page_contract {
     return_url:onerow
 }
 
-ad_require_permission $survey_id survey_take_survey
+permission::require_permission -object_id $survey_id -privilege survey_take_survey
 
     get_survey_info -survey_id $survey_id
     set name $survey_info(name)
@@ -63,7 +63,7 @@ db_foreach survey_sections {} {
 
     }
 
-set return_url "one?[export_vars survey_id]"
-set form_vars [export_form_vars section_id survey_id]
+set return_url [export_vars -base one survey_id]
+set form_vars [export_vars -form {section_id survey_id}]
 ad_return_template
 

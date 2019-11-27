@@ -1,4 +1,4 @@
-# $Id: session-history.tcl,v 1.3 2007/01/10 21:22:00 gustafn Exp $
+# $Id: session-history.tcl,v 1.4.2.2 2016/01/02 21:14:10 gustafn Exp $
 
 append whole_page "[ad_admin_header "Session History"]
 
@@ -22,10 +22,16 @@ append whole_page "[ad_admin_header "Session History"]
 # we have to query for pretty month and year separately because Oracle pads
 # month with spaces that we need to trim
 
-set selection [ns_db select $db "select to_char(entry_date,'YYYYMM') as sort_key, rtrim(to_char(entry_date,'Month')) as pretty_month, to_char(entry_date,'YYYY') as pretty_year, sum(session_count) as total_sessions, sum(repeat_count) as total_repeats
-from session_statistics
-group by to_char(entry_date,'YYYYMM'), to_char(entry_date,'Month'), to_char(entry_date,'YYYY')
-order by 1"]
+set selection [ns_db select $db {
+    select to_char(entry_date,'YYYYMM') as sort_key,
+       rtrim(to_char(entry_date,'Month')) as pretty_month,
+       to_char(entry_date,'YYYY') as pretty_year,
+       sum(session_count) as total_sessions,
+       sum(repeat_count) as total_repeats
+    from session_statistics
+    group by to_char(entry_date,'YYYYMM'), to_char(entry_date,'Month'), to_char(entry_date,'YYYY')
+    order by 1
+}]
 
 set last_year ""
 while { [ns_db getrow $db $selection] } {
@@ -37,12 +43,12 @@ while { [ns_db getrow $db $selection] } {
 	}
 	set last_year $pretty_year
     }
-    append whole_page "<tr>
-<td><a href=\"sessions-one-month?[export_url_vars pretty_month pretty_year]\">$pretty_month $pretty_year</a>
-<td align=right>[util_commify_number $total_sessions]</td>
-<td align=right>[util_commify_number $total_repeats]</td>
-</tr>
-"
+    set href [export_vars -base sessions-one-month {pretty_month pretty_year}]
+    append whole_page [subst {<tr>
+<td><a href="[ns_quotehtml $href]">$pretty_month $pretty_year</a>
+<td align="right">[util_commify_number $total_sessions]</td>
+<td align="right">[util_commify_number $total_repeats]</td>
+</tr>\n}]
 }
 
 append whole_page "
@@ -57,3 +63,9 @@ inflated to the extent that users have disabled cookies."]
 "
 db_release_unused_handles
 ns_return 200 text/html $whole_page
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

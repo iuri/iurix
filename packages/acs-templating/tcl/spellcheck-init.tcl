@@ -2,7 +2,7 @@ ad_library {
 
     Set up the path to the spell-checker in an nsv cache.
 
-    @cvs-id $Id: spellcheck-init.tcl,v 1.16 2008/01/21 13:21:26 gustafn Exp $
+    @cvs-id $Id: spellcheck-init.tcl,v 1.16.12.1 2015/09/10 08:22:07 gustafn Exp $
     @author Ola Hansson (ola@polyxena.net)
     @creation-date 2003-10-04
 
@@ -109,3 +109,9 @@ db_transaction {
 nsv_set spellchecker path $bin
 nsv_set spellchecker lang_options $wanted_dicts
 nsv_set spellchecker default_lang $default_lang
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

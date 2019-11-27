@@ -3,9 +3,9 @@ ad_page_contract {
 
     @author Jeff Davis (davis@xarg.net)
     @creation-date 2002-10-30
-    @cvs-id $Id: clipboard-view.tcl,v 1.7 2004/05/01 08:27:36 jeffd Exp $
+    @cvs-id $Id: clipboard-view.tcl,v 1.8 2014/08/07 07:59:50 gustafn Exp $
 } { 
-    collection_id:integer,notnull
+    collection_id:naturalnum,notnull
 } -properties { 
     context:onevalue
     title:onevalue

@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author John Lowry (lowry@ardigita.com)
     @creation-date 29 September 2000
-    @cvs-id $Id: catalog-test.tcl,v 1.2 2005/02/26 16:00:10 jeffd Exp $
+    @cvs-id $Id: catalog-test.tcl,v 1.2.18.3 2017/04/22 18:21:46 gustafn Exp $
 } { }
 
 set title "Test acs-lang package message catalog and locale API"
@@ -31,3 +31,8 @@ set language_name [ad_locale_language_name $language]
 
 
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

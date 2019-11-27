@@ -7,7 +7,7 @@ ad_library {
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2009-03-13
-    @cvs-id $Id: extra-args-procs.tcl,v 1.1 2009/03/13 18:57:19 daveb Exp $
+    @cvs-id $Id: extra-args-procs.tcl,v 1.1.10.1 2015/09/12 19:00:45 gustafn Exp $
 }
 
 ad_proc -callback search::extra_arg -impl object_type {
@@ -34,3 +34,8 @@ ad_proc -callback search::extra_arg -impl package_ids {
     }
     return [list from_clause {} where_clause "$object_table_alias.package_id in ([template::util::tcl_to_sql_list $value])"]
 }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

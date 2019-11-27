@@ -1,34 +1,0 @@
-9
-
-dir
-1584
-http://svn.softwarepublico.gov.br/svn/openacs/trunk/packages/chat/sql
-http://svn.softwarepublico.gov.br/svn/openacs
-
-
-
-2011-03-02T19:36:29.926003Z
-1579
-iuri.sampaio@gmail.com
-
-
-svn:special svn:externals svn:needs-lock
-
-
-
-
-
-
-
-
-
-
-
-65270c51-0825-0410-a41e-fc8022ce9244
-
-postgresql
-dir
-
-oracle
-dir
-

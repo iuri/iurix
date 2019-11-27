@@ -1,10 +1,10 @@
 ad_page_contract {
     @author Mark Dettinger (mdettinger@arsdigita.com)
     @creation-date 2000-10-24
-    @cvs-id $Id: delete.tcl,v 1.3 2003/05/17 10:00:22 jeffd Exp $
+    @cvs-id $Id: delete.tcl,v 1.4.2.1 2015/09/10 08:21:43 gustafn Exp $
 } {
     host
-    node_id:integer
+    node_id:naturalnum,notnull
 }
 
 # Flush the cache
@@ -17,3 +17,9 @@ db_dml host_node_delete {
 }
 
 ad_returnredirect index
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

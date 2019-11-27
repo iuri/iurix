@@ -5,10 +5,10 @@ ad_page_contract {
     
     @author Jeff Davis davis@xarg.net
     @creation-date 10/30/2002
-    @cvs-id $Id: clipboard-remove.tcl,v 1.3 2005/03/01 00:01:40 jeffd Exp $
+    @cvs-id $Id: clipboard-remove.tcl,v 1.4 2014/08/07 07:59:50 gustafn Exp $
 } {
-    photo_id:integer,notnull
-    collection_id:integer,notnull
+    photo_id:naturalnum,notnull
+    collection_id:naturalnum,notnull
 }
 
 auth::require_login

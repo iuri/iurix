@@ -8,7 +8,7 @@ ad_page_contract {
     
     @author stefan@arsdigita.com
     @creation-date 2000-12-20
-    @cvs-id $Id: process-2.tcl,v 1.4 2002/10/29 08:01:15 peterm Exp $
+    @cvs-id $Id: process-2.tcl,v 1.4.22.2 2016/01/02 20:34:50 gustafn Exp $
 
 } {
  
@@ -29,17 +29,17 @@ switch $action {
     }
     
     "archive now" {
-	set when [db_string archive_now "select sysdate from dual"]
+	set when [db_string archive_now {}]
 	news_items_archive $n_items $when
     }
     
     "archive next week" {
-	set when [db_string archive_next_week "select next_day(sysdate,'Monday') from dual"]
+	set when [db_string archive_next_week {}]
 	news_items_archive $n_items $when
     }
 
     "archive next month" {
-	set when [db_string archive_next_month "select last_day(sysdate)+1 from dual"]
+	set when [db_string archive_next_month {}]
 	news_items_archive $n_items $when
     }
 
@@ -138,3 +138,9 @@ ad_returnredirect ""
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

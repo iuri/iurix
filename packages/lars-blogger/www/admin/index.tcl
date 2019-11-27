@@ -5,7 +5,7 @@ ad_page_contract {} {
 
 set package_id [ad_conn package_id]
 
-set admin_p [ad_require_permission $package_id admin]
+set admin_p [permission::require_permission -object_id $package_id -privilege admin]
 
 set context [list]
 
@@ -30,6 +30,6 @@ set rss_setup_url "rss-setup"
 
 set rss_manage_url "[apm_package_url_from_key "rss-support"]my-subscrs"
 
-if { ![empty_string_p [parameter::get -parameter "rss_file_name"]] } {
+if { [parameter::get -parameter "rss_file_name"] ne "" } {
     set rss_file_url "[ad_conn package_url]rss/[parameter::get -parameter "rss_file_name"]"
 }

@@ -1,11 +1,11 @@
 ad_page_contract {
     Interface for specifying a list of users to sign up as a batch
-    @cvs-id $Id: user-batch-add-2.tcl,v 1.5 2009/07/12 01:08:30 donb Exp $
+    @cvs-id $Id: user-batch-add-2.tcl,v 1.6.2.3 2016/01/02 20:57:57 gustafn Exp $
 } -query {
     userlist
     from
     subject
-    message:allhtml
+    message:html
 } -properties {
     title:onevalue
     success_text:onevalue
@@ -29,7 +29,7 @@ set group_id [application_group::group_id_from_package_id]
 while {[regexp {(.[^\n]+)} $userlist match_fodder row] } {
     # remove each row as it's handled
     set remove_count [string length $row]
-    set userlist [string range $userlist [expr {$remove_count + 1}] end]
+    set userlist [string range $userlist $remove_count+1 end]
     set row [split $row ,]
     set email [string trim [lindex $row 0]]
     set first_names [string trim [lindex $row 1]]
@@ -39,7 +39,7 @@ while {[regexp {(.[^\n]+)} $userlist match_fodder row] } {
 	append exception_text "<li>Couldn't find a valid email address in ($row).</li>\n"
 	continue
     } else {
-	set user_exists_p [db_0or1row user_id "select party_id from parties where email = lower(:email)"]
+	set user_exists_p [db_0or1row user_id {select party_id from parties where email = lower(:email)}]
 	
 	if {$user_exists_p > 0} {
 
@@ -102,7 +102,7 @@ while {[regexp {(.[^\n]+)} $userlist match_fodder row] } {
     if {[catch {acs_mail_lite::send -send_immediately -to_addr $email -from_addr $from -subject $subject -body $sub_message} errmsg]} {
         ad_return_error "Mail Failed" "<p>The system was unable to send email.  Please notify the user personally.  This problem is probably caused by a misconfiguration of your email system.  Here is the error:</p>
 <div><code>
-[ad_quotehtml $errmsg]
+[ns_quotehtml $errmsg]
 </code></div>"
         return
     }
@@ -112,3 +112,9 @@ while {[regexp {(.[^\n]+)} $userlist match_fodder row] } {
 ad_return_template
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

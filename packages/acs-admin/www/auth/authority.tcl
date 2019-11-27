@@ -4,12 +4,12 @@ ad_page_contract {
     @author Peter Marklund
     @creation-date 2003-09-08
 } {
-    authority_id:integer,optional
+    authority_id:naturalnum,optional
     {ad_form_mode display}
 }
 
 set page_title ""
-if { [exists_and_not_null authority_id] } {
+if { [info exists authority_id] && $authority_id ne "" } {
     # Initial request in display or edit mode or a submit of the form
     set authority_exists_p [db_string authority_exists_p {
         select count(*)
@@ -137,7 +137,7 @@ if { $local_authority_p } {
     foreach element $form_widgets_full {
         regexp {^[a-zA-Z_]+} [lindex $element 0] element_name
 
-        if { [lsearch -exact $local_editable_elements $element_name] != -1 } {
+        if {$element_name in $local_editable_elements} {
             lappend form_widgets $element
         }
     }
@@ -273,7 +273,6 @@ if { $display_batch_history_p } {
         set end_time_pretty [lc_time_fmt $end_time_ansi "%x %X"]
 
         set interactive_pretty [ad_decode $interactive_p "t" "Yes" "No"]
-        
         set short_message [string_truncate -len 30 -- $message]
 
         set actions_per_minute {}
@@ -282,8 +281,12 @@ if { $display_batch_history_p } {
         }
         set run_time [util::interval_pretty -seconds $run_time_seconds]
     }
-    if { [exists_and_not_null get_doc_impl_id] && [exists_and_not_null process_doc_impl_id] } {
+    if { ([info exists get_doc_impl_id] && $get_doc_impl_id ne "")
+         && ([info exists process_doc_impl_id] && $process_doc_impl_id ne "") } {
         set batch_sync_run_url [export_vars -base batch-job-run { authority_id }]
+        template::add_confirm_handler \
+            -id batch-sync-run \
+            -message "Are you sure you want to run a batch job to sync the user database now?"
     } else {
         # If there's neither a driver, nor any log history to display, hide any mention of batch jobs
         if { ${batch_jobs:rowcount} == 0 } {
@@ -294,8 +297,10 @@ if { $display_batch_history_p } {
 
 set context [list [list "." "Authentication"] $page_title]
 
-if { [exists_and_not_null authority_id] } {
-    set num_users [lc_numeric [db_string num_users_in_auhtority { select count(*) from users where authority_id = :authority_id }]]
+if { [info exists authority_id] && $authority_id ne "" } {
+    set num_users [lc_numeric [db_string num_users_in_auhtority {
+        select count(*) from users where authority_id = :authority_id
+    }]]
 } else {
     set num_users 0
 }
@@ -305,7 +310,7 @@ set show_users_url [export_vars -base ../users/complex-search { authority_id { t
 # This code should be executed for non-local authorities in the following types of requests:
 # - initial request of the form (display mode)
 # - The form is being submitted (display mode)
-set initial_request_p [empty_string_p [form get_action authority]]
+set initial_request_p [expr {[form get_action authority] eq ""}]
 set submit_p [form is_valid authority]
 if { ($initial_request_p || $submit_p) && !$local_authority_p } {
 
@@ -313,11 +318,17 @@ if { ($initial_request_p || $submit_p) && !$local_authority_p } {
     foreach element_name [auth::authority::get_sc_impl_columns] {
         # Only offer link if there is an implementation chosen and that implementation has
         # parameters to configure
-        if { [exists_and_not_null element_array($element_name)] && 
-             ![empty_string_p [auth::driver::get_parameters -impl_id $element_array($element_name)]]} {
+        if { ([info exists element_array($element_name)] && $element_array($element_name) ne "") && 
+             [auth::driver::get_parameters -impl_id $element_array($element_name)] ne ""} {
             
             set configure_url [export_vars -base authority-parameters { authority_id }]
             break
         }
     }    
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

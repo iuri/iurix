@@ -8,16 +8,17 @@
 
             begin
 	        :1 := chat_room.new (
-	            pretty_name   => :pretty_name,
-	            moderated_p   => :moderated_p,
-                    description   => :description,
-	            active_p      => :active_p,
-                    archive_p     => :archive_p,
-	            context_id    => :context_id,
-	            creation_user => :creation_user,
-	            creation_ip   => :creation_ip
+	            pretty_name       => :pretty_name,
+	            moderated_p       => :moderated_p,
+                    description       => :description,
+	            active_p          => :active_p,
+	            login_messages_p  => :login_messages_p,
+	            logout_messages_p => :logout_messages_p,
+                    archive_p         => :archive_p,
+	            context_id        => :context_id,
+	            creation_user     => :creation_user,
+	            creation_ip       => :creation_ip
 	        );
-
 	    end;
 
       </querytext>
@@ -47,18 +48,9 @@
 <fullquery name="chat_room_name.get_room_name">
       <querytext>
           select pretty_name from chat_rooms where room_id = :room_id
-	
+
       </querytext>
 </fullquery>
-
- <fullquery name="chat_user_name.get_chat_user_name">
-      <querytext>
-       begin
-	    :1 := person.name(:user_id);
-	end;
-      </querytext>
-</fullquery>
-
 
 <fullquery name="chat_user_grant.grant_user">
       <querytext>
@@ -116,14 +108,16 @@
       <querytext>
          begin
 	    chat_room.edit (
-	        room_id       => :room_id,
-	        pretty_name   => :pretty_name,
-                description   => :description,
-	        moderated_p   => :moderated_p,
-	        active_p      => :active_p,
-                archive_p     => :archive_p,
-		auto_flush_p  => :auto_flush_p,
-            	auto_transcript_p => :auto_transcript_p
+	        room_id           => :room_id,
+	        pretty_name       => :pretty_name,
+                description       => :description,
+	        moderated_p       => :moderated_p,
+	        active_p          => :active_p,
+                archive_p         => :archive_p,
+		auto_flush_p      => :auto_flush_p,
+            	auto_transcript_p => :auto_transcript_p,
+	        login_messages_p  => :login_messages_p,
+	        logout_messages_p => :logout_messages_p
 	    );
 	end;
      </querytext>

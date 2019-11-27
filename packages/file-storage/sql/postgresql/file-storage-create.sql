@@ -3,7 +3,7 @@
 --
 -- @author Kevin Scaldeferri (kevin@arsdigita.com)
 -- @creation-date 6 Nov 2000
--- @cvs-id $Id: file-storage-create.sql,v 1.23 2009/10/12 22:46:16 daveb Exp $
+-- @cvs-id $Id: file-storage-create.sql,v 1.24 2013/03/30 22:50:45 gustafn Exp $
 --
 
 -- JS: I changed the way file storage uses the CR:  cr_items will store
@@ -66,35 +66,36 @@ select content_type__create_type (
        'file_storage__get_title' -- name_method
 );
 
-create or replace function inline_0 ()
-returns integer as'
-declare
+CREATE OR REPLACE FUNCTION inline_0 ()
+RETURNS integer AS $$
+DECLARE
     template_id integer;
-begin
+BEGIN
 
     -- Create the (default) file_storage_object content type template
 
     template_id := content_template__new( 
-      ''file-storage-default'', -- name
-      ''<master>
+      'file-storage-default', -- name
+      '<master>
 <property name="title">@title;noquote@</property>
 <property name="context">@context;noquote@</property>
 <property name="displayed_object_id">@item_id;noquote@</property>
-@text;noquote@'',               -- text
+@text;noquote@',               -- text
       true                      -- is_live
     );
 
     -- Register the template for the file_storage_object content type
 
     perform content_type__register_template(
-      ''file_storage_object'', -- content_type
+      'file_storage_object', -- content_type
       template_id,             -- template_id
-      ''public'',              -- use_context
-      ''t''                    -- is_default
+      'public',              -- use_context
+      't'                    -- is_default
     );
 
     return null;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0();
 drop function inline_0();

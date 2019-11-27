@@ -6,10 +6,9 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 12/11/2000
-    @cvs-id $Id: album-edit.tcl,v 1.4.10.1 2007/06/14 09:12:49 emmar Exp $
+    @cvs-id $Id: album-edit.tcl,v 1.7 2014/08/07 07:59:50 gustafn Exp $
 } {
-    album_id:integer,notnull
-    return_url:optional
+    album_id:naturalnum,notnull
 } -validate {
     valid_album -requires {album_id:integer} {
 	if [string equal [pa_is_album_p $album_id] "f"] {
@@ -20,7 +19,7 @@ ad_page_contract {
     context_list:onevalue
 }
 
-ad_require_permission $album_id "write"
+permission::require_permission -object_id $album_id -privilege "write"
 
 set user_id [ad_conn user_id]
 set context_list [pa_context_bar_list -final "[_ photo-album._Edit]" $album_id]
@@ -91,13 +90,7 @@ if { [template::form is_valid edit_album] } {
 	
 	ad_script_abort
     }
-    
-    # HAM : added return_url
-    if { ![exists_and_not_null return_url] } {
-        ad_returnredirect "album?album_id=$album_id"
-    } else {
-        ad_returnredirect $return_url
-    }
+    ad_returnredirect "album?album_id=$album_id"
     ad_script_abort
 }
 

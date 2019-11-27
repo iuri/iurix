@@ -3,10 +3,10 @@ ad_page_contract {
 
     @author Peter Marklund (peter@collaboraid.biz)
     @creation-date 23 October 2002
-    @cvs-id $Id: version-i18n-import.tcl,v 1.4 2003/10/22 11:39:21 lars Exp $  
+    @cvs-id $Id: version-i18n-import.tcl,v 1.5.2.3 2016/05/20 19:52:59 gustafn Exp $  
 } {
-    version_id:integer,notnull    
-    {return_url {[export_vars -base "version-i18n-index" { version_id }]}}
+    version_id:naturalnum,notnull    
+    {return_url:localurl {[export_vars -base "version-i18n-index" { version_id }]}}
 }
 
 db_1row package_version_info { 
@@ -24,3 +24,9 @@ set context [list \
 set catalog_dir [lang::catalog::package_catalog_dir $package_key]
 
 lang::catalog::import -package_key $package_key
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

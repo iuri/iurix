@@ -4,7 +4,7 @@ ad_library {
 
     @author ben@openforce.net
     @creation-date 2000-12-02
-    @cvs-id $Id: acs-private-data-procs.tcl,v 1.7 2009/01/30 03:24:59 donb Exp $
+    @cvs-id $Id: acs-private-data-procs.tcl,v 1.8.2.1 2015/09/10 08:21:55 gustafn Exp $
 }
 
 namespace eval acs_privacy {
@@ -32,7 +32,7 @@ namespace eval acs_privacy {
         check if a user can access an object's private data
     } {
         if {[privacy_control_enabled_p]} {
-            return [ad_permission_p -user_id $user_id $object_id read_private_data]
+            return [permission::permission_p -party_id $user_id -object_id $object_id -privilege read_private_data]
         } else {
             # backwards compatibility
             return 1
@@ -47,9 +47,15 @@ namespace eval acs_privacy {
         grant permission to access private data
     } {
         if { [template::util::is_true $value] } {
-            ad_permission_grant $user_id $object_id read_private_data
+            permission::grant -party_id $user_id -object_id $object_id -privilege read_private_data
         } else {
-            ad_permission_revoke $user_id $object_id read_private_data
+            permission::revoke -party_id $user_id -object_id $object_id -privilege read_private_data
         }
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

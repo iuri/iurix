@@ -3,157 +3,8 @@
 --
 -- @author yon (yon@openforce.net)
 -- @creation-date 2002-04-03
--- @version $Id: file-storage-package-create.sql,v 1.16 2006/08/08 21:26:48 donb Exp $
+-- @version $Id: file-storage-package-create.sql,v 1.16.10.1 2017/04/21 17:14:16 antoniop Exp $
 --
-
-create or replace package file_storage
-as
-
-    function get_root_folder(
-        --
-        -- Returns the root folder corresponding to a particular
-        -- package instance.
-        --
-        package_id in apm_packages.package_id%TYPE
-    ) return fs_root_folders.folder_id%TYPE;
-
-    function get_package_id(
-        item_id in cr_items.item_id%TYPE
-    ) return fs_root_folders.package_id%TYPE;
-
-    function new_root_folder(
-        --
-        -- Creates a new root folder
-        --
-        package_id in apm_packages.package_id%TYPE,
-        folder_name in cr_folders.label%TYPE default null,
-        folder_url in cr_items.name%TYPE default null,
-        description in cr_folders.description%TYPE default null
-    ) return fs_root_folders.folder_id%TYPE;
-
-    function new_file(
-        --
-        -- Create a file in CR in preparation for actual storage
-        -- Wrapper for content_item.new
-        --
-        item_id in cr_items.item_id%TYPE default null,
-        title in cr_items.name%TYPE,
-        folder_id in cr_items.parent_id%TYPE,
-        creation_user in acs_objects.creation_user%TYPE,
-        creation_ip in acs_objects.creation_ip%TYPE,
-        indb_p in char default 't',
-        package_id in acs_objects.package_id%TYPE default null
-    ) return cr_items.item_id%TYPE;
-
-    procedure delete_file(
-        --
-        -- Delete a file and all its version
-        -- Wrapper to content_item.delete
-        --
-        file_id in cr_items.item_id%TYPE
-    );
-
-    procedure rename_file(
-        --
-        -- Rename a file and all
-        -- Wrapper to content_item__edit_name
-        --
-        file_id in cr_items.item_id%TYPE,
-        title in cr_items.name%TYPE
-    );
-
-    function copy_file(
-        --
-        -- Copy a file, but only copy the live_revision
-        --
-        file_id in cr_items.item_id%TYPE,
-        target_folder_id in cr_items.parent_id%TYPE,
-        creation_user in acs_objects.creation_user%TYPE,
-        creation_ip in acs_objects.creation_ip%TYPE
-    ) return cr_revisions.revision_id%TYPE;
-
-    procedure move_file(
-        --
-        -- Move a file, and all its versions, to a new folder
-        --
-        file_id in cr_items.item_id%TYPE,
-        target_folder_id in cr_items.parent_id%TYPE,
-        creation_user in acs_objects.creation_user%TYPE,
-        creation_ip in acs_objects.creation_ip%TYPE
-    );
-
-    function get_title(
-        --
-        -- Unfortunately, title in the file-storage context refers
-        -- to the name attribute in cr_items, not the title attribute in
-        -- cr_revisions
-        item_id in cr_items.item_id%TYPE
-    ) return varchar;
-
-    function get_parent_id(
-	item_id in cr_items.item_id%TYPE
-    ) return cr_items.item_id%TYPE;
-
-    function get_content_type(
-        --
-        -- Wrapper for content_item. get_content_type
-        --
-        item_id in cr_items.item_id%TYPE
-    ) return cr_items.content_type%TYPE;
-
-    function get_folder_name(
-       --
-       -- Wrapper for content_folder.get_label
-       --
-       folder_id in cr_folders.folder_id%TYPE
-    ) return cr_folders.label%TYPE;
-
-    function new_version(
-        --
-        -- Create a new version of a file
-        -- Wrapper for content_revision.new
-        --
-        filename in cr_revisions.title%TYPE,
-        description in cr_revisions.description%TYPE,
-        mime_type in cr_revisions.mime_type%TYPE,
-        item_id in cr_items.item_id%TYPE,
-        creation_user in acs_objects.creation_user%TYPE,
-        creation_ip in acs_objects.creation_ip%TYPE
-    ) return cr_revisions.revision_id%TYPE;
-
-    function delete_version(
-        --
-        -- Delete a version of a file
-        --
-        file_id in cr_items.item_id%TYPE,
-        version_id in cr_revisions.revision_id%TYPE
-    ) return cr_items.parent_id%TYPE;
-
-    function new_folder(
-        --
-        -- Create a folder
-        --
-        name in cr_items.name%TYPE,
-        folder_name in cr_folders.label%TYPE,
-        parent_id in cr_items.parent_id%TYPE,
-        creation_user in acs_objects.creation_user%TYPE,
-        creation_ip in acs_objects.creation_ip%TYPE
-    ) return cr_folders.folder_id%TYPE;
-
-    procedure delete_folder(
-        --
-        -- Delete a folder
-        -- adding cascade_p but defaulting to false
-	-- this will fail if a folder contains anything
-	-- but just in case some other application uses
-	-- this api it will not change the behavior
-        folder_id in cr_folders.folder_id%TYPE,
-	cascade_p in char default 'f'
-    );
-
-end file_storage;
-/
-show errors
 
 create or replace package body file_storage
 as
@@ -308,10 +159,12 @@ as
         --
         -- Copy a file, but only copy the live_revision
         --
-        file_id in cr_items.item_id%TYPE,
+        file_id          in cr_items.item_id%TYPE,
         target_folder_id in cr_items.parent_id%TYPE,
-        creation_user in acs_objects.creation_user%TYPE,
-        creation_ip in acs_objects.creation_ip%TYPE
+        creation_user    in acs_objects.creation_user%TYPE,
+        creation_ip      in acs_objects.creation_ip%TYPE,
+	name             in cr_items.name%TYPE default null,
+	title            in cr_revisions.title%TYPE default null
     ) return cr_revisions.revision_id%TYPE
     is
         v_title                 cr_items.name%TYPE;
@@ -338,6 +191,9 @@ as
         where r.item_id = i.item_id
         and r.revision_id = i.live_revision
         and i.item_id = file_storage.copy_file.file_id;
+
+	v_filename := nvl(copy.name, v_filename);
+	v_title    := nvl(copy.title, v_title);
 
         -- We should probably use the copy functions of CR
         -- when we optimize this function

@@ -5,11 +5,11 @@ ad_page_contract {
     
     @author Michael Bryzek (mbryzek@arsdigita.com)
     @creation-date 2000-12-16
-    @cvs-id $Id: remove-2.tcl,v 1.2 2007/01/10 21:22:08 gustafn Exp $
+    @cvs-id $Id: remove-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    rel_id:integer,notnull
+    rel_id:naturalnum,notnull
     { operation "" }
-    { return_url "" }
+    { return_url:localurl "" }
 } -validate {
     permission_p -requires {rel_id:notnull} {
 	if { ![relation_permission_p -privilege delete $rel_id] } {
@@ -28,10 +28,16 @@ if {$operation eq "Yes, I really want to remove this relation"} {
 } else {
     if { $return_url eq "" } {
 	# redirect to the relation by default, if we haven't deleted it
-	set return_url "one?[ad_export_vars rel_id]"
+	set return_url [export_vars -base one rel_id]
     }
 }
 
 db_release_unused_handles
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -2,20 +2,28 @@
 --
 -- @author jon@jongriffi.com
 -- @creation-date 2002-08-02
--- @cvs-id $Id: upgrade-4.5-4.5.1.sql,v 1.4 2003/10/12 22:20:28 tilmanns Exp $
+-- @cvs-id $Id: upgrade-4.5-4.5.1.sql,v 1.5 2013/03/30 18:50:29 gustafn Exp $
 --
 
 -- search-packages-create.sql
 
 drop function search_observer__dequeue(integer,timestamp with time zone,varchar);
 
-create function search_observer__dequeue(integer,timestamp with time zone,varchar)
-returns integer as '
-declare
-    p_object_id                 alias for $1;
-    p_event_date                alias for $2;
-    p_event                     alias for $3;
-begin
+
+
+-- added
+select define_function_args('search_observer__dequeue','object_id,event_date,event');
+
+--
+-- procedure search_observer__dequeue/3
+--
+CREATE OR REPLACE FUNCTION search_observer__dequeue(
+   p_object_id integer,
+   p_event_date timestamp with time zone,
+   p_event varchar
+) RETURNS integer AS $$
+DECLARE
+BEGIN
 
     delete from search_observer_queue
     where object_id = p_object_id
@@ -24,7 +32,8 @@ begin
 
     return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 -- 
 

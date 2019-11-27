@@ -7,12 +7,12 @@ ad_library {
 
   @author Gustaf Neumann (neumann@wu-wien.ac.at)
   @creation-date 2006-08-06
-  @cvs-id $Id: context-procs.tcl,v 1.56 2011/02/23 12:32:43 gustafn Exp $
+  @cvs-id $Id: context-procs.tcl,v 1.65.2.7 2017/04/21 14:00:24 gustafn Exp $
 }
 
 namespace eval ::xo {
 
-  Class create Context -ad_doc {
+  ::xotcl::Class create Context -ad_doc {
     This class provides a context for evaluation, somewhat similar to an 
     activation record in programming languages. It combines the parameter
     declaration (e.g. of a page, an includelet) with the actual parameters
@@ -22,10 +22,12 @@ namespace eval ::xo {
     {parameter_declaration ""} 
     {actual_query " "}
     {package_id 0}
+    {invoke_object}
     locale
   }
 
-  # syntactic sugar for includelets, to allow the same syntax as 
+  #
+  # Syntactic sugar for includelets, to allow the same syntax as 
   # for "Package initialize ...."; however, we do not allow currently
   # do switch user or package id etc., just the parameter declaration
   Context instproc initialize {{-parameter ""}} {
@@ -46,20 +48,25 @@ namespace eval ::xo {
       set ([lindex [split [lindex $v 0] :] 0]) 1
     }
     if {$actual_query eq " "} {
-      set actual_query [ns_conn query]
+      if {[ns_conn isconnected]} {
+        set actual_query [ns_conn query]
+      }
       #my log "--CONN ns_conn query = <$actual_query>"
     }
+
+    set decodeCmd ns_urldecode
+    if {$::xo::naviserver} {lappend decodeCmd --}
 
     # get the query parameters (from the url)
     #my log "--P processing actual query $actual_query"
     foreach querypart [split $actual_query &] {
       set name_value_pair [split $querypart =]
-      set att_name [ns_urldecode [lindex $name_value_pair 0]]
+      set att_name [{*}$decodeCmd [lindex $name_value_pair 0]]
       if {$att_name eq ""} continue
       if {[llength $name_value_pair] == 1} { 
         set att_value 1 
       }  else {
-        set att_value [ns_urldecode [lindex $name_value_pair 1]]
+        set att_value [{*}$decodeCmd [lindex $name_value_pair 1]]
       }
       if {[info exists (-$att_name)]} {
         lappend passed_args(-$att_name) $att_value
@@ -71,13 +78,13 @@ namespace eval ::xo {
     # get the query parameters (from the form if necessary)
     if {[my istype ::xo::ConnectionContext]} {
       foreach param [array names ""] {
-	#my log "--cc check $param [info exists passed_args($param)]"
-	set name [string range $param 1 end]
-	if {![info exists passed_args($param)] &&
-	    [my exists_form_parameter $name]} {
-	  #my log "--cc adding passed_args(-$name) [my form_parameter $name]"
-	  set passed_args($param) [my form_parameter $name]
-	}
+        #my log "--cc check $param [info exists passed_args($param)]"
+        set name [string range $param 1 end]
+        if {![info exists passed_args($param)] &&
+            [my exists_form_parameter $name]} {
+          #my log "--cc adding passed_args(-$name) [my form_parameter $name]"
+          set passed_args($param) [my form_parameter $name]
+        }
       }
     }
     
@@ -85,7 +92,7 @@ namespace eval ::xo {
     if {[info exists caller_parameters]} {
       #my log "--cc caller_parameters=$caller_parameters"
       array set caller_param $caller_parameters
-    
+      
       foreach param [array names caller_param] {
         if {[info exists ($param)]} { 
           set passed_args($param) $caller_param($param) 
@@ -101,7 +108,10 @@ namespace eval ::xo {
     }
     
     #my log "--cc calling parser eval [self] __parse $parse_args"
-    eval [self] __parse $parse_args
+    if {[catch {[self] __parse {*}$parse_args} errorMsg]} {
+      ad_return_complaint 1 [ns_quotehtml $errorMsg]
+      ad_script_abort
+    }
     #my msg "--cc qp [array get queryparm] // $actual_query"
   }
 
@@ -117,8 +127,12 @@ namespace eval ::xo {
 
   Context instproc query_parameter {name {default ""}} {
     my instvar queryparm
-    return [expr {[info exists queryparm($name)] ? $queryparm($name) : $default}]
+    if {[info exists queryparm($name)]} {
+      return $queryparm($name)
+    } 
+    return $default
   }
+  
   Context instproc exists_query_parameter {name} {
     #my log "--qp my exists $name => [my exists queryparm($name)]"
     my exists queryparm($name)
@@ -134,8 +148,8 @@ namespace eval ::xo {
     my instvar queryparm package_id
 
     foreach p [my array names queryparm] {
-      set value [my set queryparm($p)]
-      uplevel $level [list set $p [my set queryparm($p)]]
+      regsub -all : $p _ varName
+      uplevel $level [list set $varName [my set queryparm($p)]]
     }
     uplevel $level [list set package_id $package_id]
     #::xo::show_stack
@@ -171,11 +185,12 @@ namespace eval ::xo {
   # ConnectionContext, a context with user and url-specific information
   #
 
-  Class ConnectionContext -superclass Context -parameter {
+  Class create ConnectionContext -superclass Context -parameter {
     user_id
     requestor
     user
     url
+    mobile
   }
   
   ConnectionContext proc require_package_id_from_url {{-package_id 0} url} {
@@ -205,19 +220,23 @@ namespace eval ::xo {
   }
 
   ConnectionContext proc require {
-    -url
-    {-package_id 0} 
-    {-parameter ""}
-    {-user_id -1}
-    {-actual_query " "}
-    {-keep_cc false}
-  } {
+                                  -url
+                                  {-package_id 0} 
+                                  {-parameter ""}
+                                  {-user_id -1}
+                                  {-actual_query " "}
+                                  {-keep_cc false}
+                                } {
     set exists_cc [my isobject ::xo::cc]
 
     # if we have a connection context and we want to keep it, do
     # nothing and return.
     if {$exists_cc && $keep_cc} {
       return
+    }
+
+    if {[info exists ::ds_show_p] && [ds_database_enabled_p]} {
+      ::xo::dc profile on
     }
 
     if {![info exists url]} {
@@ -242,8 +261,8 @@ namespace eval ::xo {
       my create ::xo::cc \
           -package_id $package_id \
           [list -parameter_declaration $parameter] \
-	  -user_id $user_id \
-	  -actual_query $actual_query \
+          -user_id $user_id \
+          -actual_query $actual_query \
           -locale $locale \
           -url $url
       #::xo::show_stack
@@ -253,7 +272,7 @@ namespace eval ::xo {
       #my msg "--cc ::xo::cc reused $url -package_id $package_id"
       ::xo::cc configure \
           -url $url \
-	  -actual_query $actual_query \
+          -actual_query $actual_query \
           -locale $locale \
           [list -parameter_declaration $parameter]
       #if {$package_id ne ""} {
@@ -263,6 +282,14 @@ namespace eval ::xo {
       ::xo::cc set_user_id $user_id
       ::xo::cc process_query_parameter
     }
+
+    # simple mobile detection
+    ::xo::cc mobile 0
+    if {[ns_conn isconnected]} {
+      set user_agent [string tolower [ns_set get [ns_conn headers] User-Agent]]
+      ::xo::cc mobile [regexp (android|webos|iphone|ipad) $user_agent]
+    }
+
     if {![info exists ::ad_conn(charset)]} {
       set ::ad_conn(charset) [lang::util::charset_for_locale $locale] 
       set ::ad_conn(language) [::xo::cc lang]
@@ -282,13 +309,13 @@ namespace eval ::xo {
       } else {
         my set user_id 0
         my set untrusted_user_id 0
-	array set ::ad_conn [list user_id $user_id untrusted_user_id $user_id session_id ""]
+        array set ::ad_conn [list user_id $user_id untrusted_user_id $user_id session_id ""]
       }
     } else {
       my set user_id $user_id
       my set untrusted_user_id $user_id
       if {![info exists ::ad_conn(user_id)]} {
-	array set ::ad_conn [list user_id $user_id untrusted_user_id $user_id session_id ""]
+        array set ::ad_conn [list user_id $user_id untrusted_user_id $user_id session_id ""]
       }
     }
   }
@@ -324,12 +351,7 @@ namespace eval ::xo {
       # for requests bypassing the ordinary connection setup (resources in oacs 5.2+)
       # we have to get the user_id by ourselves
       if { [catch {
-        if {[info command ad_cookie] ne ""} {
-          # we have the xotcl-based cookie code
-          set cookie_list [ad_cookie get_signed_with_expr "ad_session_id"]
-        } else {
-          set cookie_list [ad_get_signed_cookie_with_expr "ad_session_id"]
-        }
+        set cookie_list [ad_get_signed_cookie_with_expr "ad_session_id"]
         set cookie_data [split [lindex $cookie_list 0] {,}]
         set untrusted_user_id [lindex $cookie_data 1]
         set requestor $untrusted_user_id
@@ -343,7 +365,8 @@ namespace eval ::xo {
       set requestor $pa
       set user "client from $pa"
     } else {
-      set user "<a href='/acs-admin/users/one?user_id=$requestor'>$requestor</a>"
+      set user_url [acs_community_member_admin_url -user_id $requestor]
+      set user "<a href='$user_url'>$requestor</a>"
     }
     #my log "--i requestor = $requestor"
     
@@ -393,7 +416,7 @@ namespace eval ::xo {
                           -package_id $package_id]]
   }
   ConnectionContext instproc role=community_member {-user_id:required -package_id} {
-    if {[info command ::dotlrn_community::get_community_id] ne ""} {
+    if {[info commands ::dotlrn_community::get_community_id] ne ""} {
       set community_id [my cache [list [dotlrn_community::get_community_id -package_id $package_id]]]
       if {$community_id ne ""} {
         return [my cache [list dotlrn::user_is_community_member_p \
@@ -441,30 +464,32 @@ namespace eval ::xo {
     #my set $key
   }
   
-#   ConnectionContext instproc destroy {} {
-#     my log "--i destroy [my url]"
-#     #::xo::show_stack
-#     next
-#   }
+  #   ConnectionContext instproc destroy {} {
+  #     my log "--i destroy [my url]"
+  #     #::xo::show_stack
+  #     next
+  #   }
 
-
-  ConnectionContext instproc load_form_parameter {} {
-    my instvar form_parameter
-    if {[ns_conn isconnected]} {
-      #array set form_parameter [ns_set array [ns_getform]]
-      foreach {att value} [ns_set array [ns_getform]] {
-        # For some unknown reasons, Safari 3.* returns sometimes
-        # entries with empty names... We ignore these for now
-        if {$att eq ""} continue
-        if {[info exists form_parameter($att)]} {
-          my set form_parameter_multiple($att) 1
-        }
-        lappend form_parameter($att) $value
+  ConnectionContext instproc load_form_parameter_from_values {values} {
+    foreach {att value} $values {
+      # For some unknown reasons, Safari 3.* returns sometimes
+      # entries with empty names... We ignore these for now
+      if {$att eq ""} continue
+      if {[my exists form_parameter($att)]} {
+        my set form_parameter_multiple($att) 1
       }
-    } else {
-      array set form_parameter {}
+      my lappend form_parameter($att) $value
     }
   }
+
+  ConnectionContext instproc load_form_parameter {} {
+    if {[ns_conn isconnected] && [ns_conn method] eq "POST"} {
+      my load_form_parameter_from_values [ns_set array [ns_getform]]
+    } else {
+      my array set form_parameter {}
+    }
+  }
+
   ConnectionContext instproc form_parameter {name {default ""}} {
     my instvar form_parameter form_parameter_multiple
     if {![info exists form_parameter]} {
@@ -490,6 +515,17 @@ namespace eval ::xo {
   ConnectionContext instproc get_all_form_parameter {} {
     return [my array get form_parameter]
   }
+
+  #
+  # Version of query_parameter respecting set-parameter
+  #
+  ConnectionContext instproc query_parameter {name {default ""}} {
+    if {[my exists_parameter $name]} {
+      return [my get_parameter $name]
+    }
+    next
+  }
+
   
   ConnectionContext instproc set_parameter {name value} {
     set key [list get_parameter $name]
@@ -510,32 +546,46 @@ namespace eval ::xo {
   
   proc ::xo::update_query_variable {old_query var value} {
     #
-    # Replace in a url-query old occurances of var with new value.
+    # Replace in a url-query old occurrences of var with new value.
     #
     # @return pairs in a form suitable for export_vars
     #
+    set decodeCmd ns_urldecode
+    if {$::xo::naviserver} {lappend decodeCmd --}
+
     set query [list [list $var $value]]
     foreach pair [split $old_query &] {
-      foreach {key value} [split $pair =] break
+      lassign [split $pair =] key value
       if {$key eq $var} continue
-      lappend query [list [ns_urldecode $key] [ns_urldecode $value]]
+      lappend query [list [{*}$decodeCmd $key] [{*}$decodeCmd $value]]
     }
     return $query
   }
 
   proc ::xo::update_query {old_query var value} {
     #
-    # Replace in a url-query old occurances of var with new value.
+    # Replace in a url-query old occurrences of var with new value.
     #
     # @return encoded HTTP query
     #
-    set query [ns_urlencode $var]=[ns_urlencode $value]
+    set decodeCmd ns_urldecode
+    set encodeCmd ns_urlencode
+    if {$::xo::naviserver} {lappend decodeCmd --; lappend encodeCmd --}
+
+    set query [{*}$encodeCmd $var]=[{*}$encodeCmd $value]
     foreach pair [split $old_query &] {
-      foreach {key value} [split $pair =] break
-      if {[ns_urldecode $key] eq $var} continue
+      lassign [split $pair =] key value
+      if {[{*}$decodeCmd $key] eq $var} continue
       append query &$pair
     }
     return $query
   }
 
 }
+
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

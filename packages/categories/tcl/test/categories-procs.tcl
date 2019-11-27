@@ -3,7 +3,7 @@ ad_library {
 
     @author Simon Carstensen
     @creation-date 15 November 2003
-    @cvs-id $Id: categories-procs.tcl,v 1.1 2003/11/15 16:00:41 simonc Exp $
+    @cvs-id $Id: categories-procs.tcl,v 1.1.20.3 2017/04/22 18:20:26 gustafn Exp $
 }
 
 aa_register_case category_tree_add {
@@ -21,7 +21,7 @@ aa_register_case category_tree_add {
                 select 1 from category_trees where tree_id = :tree_id
             } -default "0"]
 
-            aa_equals "tree was created succesfully" $success_p 1
+            aa_equals "tree was created successfully" $success_p 1
         }
 }
 
@@ -46,7 +46,7 @@ aa_register_case category_add {
                 select 1 from categories where category_id = :category_id
             } -default "0"]
 
-            aa_equals "category was created succesfully" $success_p 1
+            aa_equals "category was created successfully" $success_p 1
         }
 }
 
@@ -74,6 +74,12 @@ aa_register_case category_delete {
                 select 0 from categories where category_id = :category_id
             } -default "1"]
 
-            aa_equals "category was deleted succesfully" $success_p 1
+            aa_equals "category was deleted successfully" $success_p 1
         }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

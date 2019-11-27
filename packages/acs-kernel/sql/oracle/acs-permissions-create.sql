@@ -10,7 +10,7 @@
 --
 -- @creation-date 2000-08-13
 --
--- @cvs-id $Id: acs-permissions-create.sql,v 1.13 2007/05/14 20:30:20 donb Exp $
+-- @cvs-id $Id: acs-permissions-create.sql,v 1.13.12.1 2016/07/01 14:04:39 gustafn Exp $
 --
 
 
@@ -194,8 +194,10 @@ where c.ancestor_id = p.object_id
   and pdm.privilege = p.privilege
   and pamm.party_id = p.grantee_id;
 
+--
 -- Kept to avoid breaking existing code, should eventually go away.
-
+-- Obsolete and deprecated view.
+--
 create or replace view all_object_party_privilege_map as
 select * from acs_object_party_privilege_map;
 

@@ -5,7 +5,7 @@
 # Copyright (C) 1999-2000 ArsDigita Corporation
 # Authors: Christian Brechbuehler <christian@arsdigita.com
 
-# $Id: acs-integration-procs.tcl,v 1.1 2007/09/08 14:21:22 hamiltonc Exp $
+# $Id: acs-integration-procs.tcl,v 1.3.2.2 2017/06/30 17:35:25 gustafn Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
@@ -23,7 +23,7 @@ ad_proc -public ad_return_template {
     @param string If specified, will return the resulting page to the caller
                   string instead sending it to the connection.
 } {
-    if {![empty_string_p $template]} {
+    if {$template ne ""} {
 	template::set_file \
 	    [template::util::url_to_file $template [ad_conn file]]
     }
@@ -88,20 +88,20 @@ ad_proc -public ad_return_exception_template {
 ad_proc -public get_server_root {} {
     Get the server root directory (supposing we run under ACS)
 } {
-    file dir [ns_info tcllib]
+    file dirname $::acs::tcllib
 }
 
 
 ad_proc adp_parse_ad_conn_file {} {
-    handle a request for an adp and/or tcl file in the template system.
+    handle a request for an adp and/or Tcl file in the template system.
 } {
     namespace eval template variable parse_level ""
-    #ns_log debug "adp_parse_ad_conn_file => file '[file root [ad_conn file]]'"
+    #ns_log debug "adp_parse_ad_conn_file => file '[file rootname [ad_conn file]]'"
     template::reset_request_vars
 
-    set parsed_template [template::adp_parse [file root [ad_conn file]] {}]
+    set parsed_template [template::adp_parse [file rootname [ad_conn file]] {}]
 
-    if {![empty_string_p $parsed_template]} {
+    if {$parsed_template ne ""} {
         
         #
         # acs-lang translator mode
@@ -110,32 +110,32 @@ ad_proc adp_parse_ad_conn_file {} {
         if { [lang::util::translator_mode_p] } {
             
             # Attempt to move all message keys outside of tags
-            while { [regsub -all {(<[^>]*)(\x002\(\x001[^\x001]*\x001\)\x002)([^>]*>)} $parsed_template {\2\1\3} parsed_template] } {}
+            while { [regsub -all {(<[^>]*)(\x02\(\x01[^\x01]*\x01\)\x02)([^>]*>)} $parsed_template {\2\1\3} parsed_template] } {}
             
             # Attempt to move all message keys outside of <select>...</select> statements
-            regsub -all -nocase {(<option\s[^>]*>[^<]*)(\x002\(\x001[^\x001]*\x001\)\x002)([^<]*</option[^>]*>)} $parsed_template {\2\1\3} parsed_template
+            regsub -all -nocase {(<option\s[^>]*>[^<]*)(\x02\(\x01[^\x01]*\x01\)\x02)([^<]*</option[^>]*>)} $parsed_template {\2\1\3} parsed_template
 
-            while { [regsub -all -nocase {(<select[^>]*>[^<]*)(\x002\(\x001[^\x001]*\x001\)\x002)} $parsed_template {\2\1} parsed_template] } {}
+            while { [regsub -all -nocase {(<select[^>]*>[^<]*)(\x02\(\x01[^\x01]*\x01\)\x02)} $parsed_template {\2\1} parsed_template] } {}
 
             set start 0
-            while { [regexp -nocase -indices -start $start {(<select[^\x002]*)(\x002\(\x001[^\x001]*\x001\)\x002)} $parsed_template indices select_idx message_idx] } {
+            while { [regexp -nocase -indices -start $start {(<select[^\x02]*)(\x02\(\x01[^\x01]*\x01\)\x02)} $parsed_template indices select_idx message_idx] } {
                 set select [string range $parsed_template [lindex $select_idx 0] [lindex $select_idx 1]]
 
                 if { [string first "</select" [string tolower $select]] != -1 } {
                     set start [lindex $indices 1]
                 } else {
-                    set before [string range $parsed_template 0 [expr [lindex $indices 0]-1]]
+                    set before [string range $parsed_template 0 [lindex $indices 0]-1]
                     set message [string range $parsed_template [lindex $message_idx 0] [lindex $message_idx 1]]
-                    set after [string range $parsed_template [expr [lindex $indices 1] + 1] end]
+                    set after [string range $parsed_template [lindex $indices 1]+1 end]
                     set parsed_template "${before}${message}${select}${after}"
                 }
             }
 
             # TODO: We could also move message keys out of <head>...</head>
 
-            while { [regexp -indices {\x002\(\x001([^\x001]*)\x001\)\x002} $parsed_template indices key] } {
-                set before [string range $parsed_template 0 [expr [lindex $indices 0] - 1]]
-                set after [string range $parsed_template [expr [lindex $indices 1] + 1] end]
+            while { [regexp -indices {\x02\(\x01([^\x01]*)\x01\)\x02} $parsed_template indices key] } {
+                set before [string range $parsed_template 0 [lindex $indices 0]-1]
+                set after [string range $parsed_template [lindex $indices 1]+1 end]
 
                 set key [string range $parsed_template [lindex $key 0] [lindex $key 1]]
 

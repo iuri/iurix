@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author John Lowry (lowry@ardigita.com)
     @creation-date 29 September 2000
-    @cvs-id $Id: test.tcl,v 1.3 2007/01/10 21:22:04 gustafn Exp $
+    @cvs-id $Id: test.tcl,v 1.3.12.3 2017/04/22 18:21:46 gustafn Exp $
 } { }
 
 set title "Test lang package"
@@ -76,3 +76,8 @@ set us_time [lc_time_fmt $system_time "%c" en_US]
 set fr_time [lc_time_fmt $system_time "%c" fr_FR]
 
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

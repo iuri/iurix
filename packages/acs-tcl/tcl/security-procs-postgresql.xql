@@ -14,6 +14,12 @@
           property_name = :name
       </querytext>
 </fullquery>
+
+<fullquery name="ad_set_client_property.prop_upsert">      
+  <querytext>
+    select sec_session_property__upsert(:session_id, :module, :name, :value, :secure, :last_hit) from dual
+  </querytext>
+</fullquery>
  
 
 <fullquery name="sec_update_user_session_info.update_last_visit">      
@@ -25,20 +31,6 @@
             n_sessions = n_sessions + 1
         where user_id = :user_id
     
-      </querytext>
-</fullquery>
-
- 
-<fullquery name="ad_maybe_redirect_for_registration.sql_test_1">      
-      <querytext>
-      select test_sql('select 1  where 1=[DoubleApos $value]') 
-      </querytext>
-</fullquery>
-
- 
-<fullquery name="ad_maybe_redirect_for_registration.sql_test_2">      
-      <querytext>
-      select test_sql('select 1  where 1=[DoubleApos "'$value'"]') 
       </querytext>
 </fullquery>
 

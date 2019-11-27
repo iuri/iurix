@@ -7,12 +7,12 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Mon Dec 11 13:51:21 2000
-    @cvs-id $Id: new-2.tcl,v 1.4 2002/12/05 13:11:01 peterm Exp $
+    @cvs-id $Id: new-2.tcl,v 1.6.2.4 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     group_id:integer,notnull
     rel_type:notnull
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     export_vars:onevalue
@@ -35,21 +35,22 @@ ad_page_contract {
 set subsite_group_id [application_group::group_id_from_package_id]
 
 
-ad_require_permission $group_id "read"
+permission::require_permission -object_id $group_id -privilege "read"
 
 set context [list [list "[ad_conn package_url]admin/rel-segments/" "Relational segments"] "Add segment"]
 
-set export_vars [ad_export_vars -form {group_id rel_type return_url}]
+set export_vars [export_vars -form {group_id rel_type return_url}]
 
-db_1row select_basic_info {
-    select acs_group.name(:group_id) as group_name,
-    nvl(acs_rel_type.role_pretty_plural(t.role_two),'Elements') as role_pretty_plural
-      from acs_rel_types t
-     where t.rel_type = :rel_type
-}
+db_1row select_basic_info {}
 
 # The role pretty names can be message catalog keys that need
 # to be localized before they are displayed
 set role_pretty_plural [lang::util::localize $role_pretty_plural]    
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

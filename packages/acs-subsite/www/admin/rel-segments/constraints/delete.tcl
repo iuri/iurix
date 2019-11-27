@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Fri Dec 15 11:22:34 2000
-    @cvs-id $Id: delete.tcl,v 1.3 2002/09/18 12:16:42 jeffd Exp $
+    @cvs-id $Id: delete.tcl,v 1.5.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     constraint_id:naturalnum,notnull
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     constraint_name:onevalue
@@ -18,7 +18,7 @@ ad_page_contract {
     export_vars:onevalue
 }
 
-set context [list [list one?[ad_export_vars constraint_id] "One constraint"] "Delete constraint"]
+set context [list [list [export_vars -base one constraint_id] "One constraint"] "Delete constraint"]
 
 set package_id [ad_conn package_id]
 
@@ -37,4 +37,10 @@ if { ![db_0or1row select_constraint_props {
     ad_script_abort
 }
 
-set export_vars [ad_export_vars -form {constraint_id return_url}]
+set export_vars [export_vars -form {constraint_id return_url}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

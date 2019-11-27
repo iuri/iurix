@@ -2,7 +2,7 @@
 --
 -- @author Gary Jin (gjin@arsdigita.com)
 -- @creation-date Nov 17, 2000
--- @cvs-id $Id: cal-item-create.sql,v 1.11 2006/08/08 21:26:16 donb Exp $
+-- @cvs-id $Id: cal-item-create.sql,v 1.11.10.1 2017/04/22 12:25:25 gustafn Exp $
 --
 
 
@@ -193,7 +193,7 @@ as
         is
 
         begin
-                  -- Erase the cal_item assoicated with the id
+                  -- Erase the cal_item associated with the id
                 delete from     cal_items
                 where           cal_item_id = cal_item.del.cal_item_id;
                 

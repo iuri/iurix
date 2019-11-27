@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="sv_SE" charset="ISO-8859-1">
+<message_catalog package_key="survey" locale="sv_SE" charset="ISO-8859-1">
 
   <msg key="-__Created_by">- Skapad av</msg>
   <msg key="_on_creation_date">, %creation_date%</msg>
@@ -80,7 +80,7 @@
   <msg key="lt_Cancel_and_return_to__1">Avbryt och återvänd till enkätadministrationen</msg>
   <msg key="lt_Completely_delete">Fullständigt radera %user_name_var%s svar från %response_date_var%? (Obs! Detta kan inte ångras.)</msg>
   <msg key="lt_Confirm_Survey_Detail">Konfirmera enkätdetaljerna</msg>
-  <msg key="lt_Copying_a_survey_will">Kopierandet av en enkät ger en ny enkät med kopior av alla frågorna. &lt;br /&gt; Inga av svaren kommer att dupliceras.</msg>
+  <msg key="lt_Copying_a_survey_will">Kopierandet av en enkät ger en ny enkät med kopior av alla frågorna. &lt;br&gt; Inga av svaren kommer att dupliceras.</msg>
   <msg key="lt_Could_not_find_a_surv">Kunde inte hitta en enkätfråga</msg>
   <msg key="lt_Could_not_find_the_re">Kunde inte hitta svaret</msg>
   <msg key="lt_Couldnt_find_attachment">Kunde inte hitta bifogad fil. Kunde inte hitta en bifogad fil motsvarande de angivna response_id %response_id%, question_id %question_id%.</msg>
@@ -94,7 +94,7 @@
   <msg key="lt_Everyone_eligible_to_">Alla som har rätt att fylla i denna enkät</msg>
   <msg key="lt_Everyone_who_has_alre">Alla som redan har fyllt i denna enkät</msg>
   <msg key="lt_Everyone_who_has_not_">Alla som inte redan har fyllt i denna enkät</msg>
-  <msg key="lt_For_Multiple_Choicebr">För flervalsfrågor&lt;br /&gt;Skriv in en lista med giltiga svar&lt;br /&gt; (skriv in ett val per rad)</msg>
+  <msg key="lt_For_Multiple_Choicebr">För flervalsfrågor&lt;br&gt;Skriv in en lista med giltiga svar&lt;br&gt; (skriv in ett val per rad)</msg>
   <msg key="lt_had_to_say_in_respons">hade a säga som svar på %survey_name%:</msg>
   <msg key="lt_Here_is_how_your_surv">Så här kommer din enkätbeskrivning se ut:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Administrera enkäter&quot;&gt;</msg>

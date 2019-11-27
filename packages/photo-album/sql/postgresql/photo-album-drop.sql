@@ -4,7 +4,7 @@
 
 \i pa-clip-drop.sql
 
-drop view all_photo_images cascade;
+drop view all_photo_images;
 
 create function tmp_pa_revoke () 
 returns integer as '
@@ -199,41 +199,11 @@ drop function pa_photo__delete (integer);
 drop function pa_photo__delete_revision (integer);
 drop function pa_photo__new (varchar,integer,integer,integer,timestamptz, integer, varchar, varchar, integer, varchar, varchar, boolean, timestamptz, varchar, varchar, text);
 
--- these drop tables pa_photo as well
-PERFORM content_type__drop_attribute('pa_photo','photographer','t');
-PERFORM content_type__drop_attribute('pa_photo','sha256','t');
-PERFORM content_type__drop_attribute('pa_photo','metering','t');
-PERFORM content_type__drop_attribute('pa_photo','focus_distance','t');
-PERFORM content_type__drop_attribute('pa_photo','aperture','t');
-PERFORM content_type__drop_attribute('pa_photo','exposure_time','t');
-PERFORM content_type__drop_attribute('pa_photo','flash','t');
-PERFORM content_type__drop_attribute('pa_photo','date_taken','t');
-PERFORM content_type__drop_attribute('pa_photo','camera_model','t');
-PERFORM content_type__drop_attribute('pa_photo','user_filename','t');
-PERFORM content_type__drop_attribute('pa_photo','caption','t');
-PERFORM content_type__drop_attribute('pa_photo','story','t');
+-- these drop tables as well
+select content_type__drop_type('pa_photo','f','t');
 
-select content_type__drop_type('pa_photo','t','t','t');
+select content_type__drop_type('pa_album','f','t');
 
-
-drop view pa_photosi cascade;
-drop view pa_photosx cascade;
-drop table pa_photos cascade;
-
-
-
--- these drop tables pa_albums as well
-PERFORM content_type__drop_attribute('pa_album','photographer','t');
-PERFORM content_type__drop_attribute('pa_album','story','t');
-
-select content_type__drop_type('pa_album','t','t','t');
-
-drop view pa_albumsi cascade;
-drop view pa_albumsx cascade;
-drop table pa_albums cascade;
-
-
- 
 -- delete all the folders under the root folders of photo album instances
 -- replacing a connect by with the tree_sort business
 create function tmp_pa_folder_delete2 () returns integer as '
@@ -259,48 +229,5 @@ end; ' language 'plpgsql';
 select tmp_pa_folder_delete2 ();
 
 drop function tmp_pa_folder_delete2 ();
-
-
-create function pa_folder_delete3 () returns integer as '
-declare 
-
-  folder_rec RECORD;
-  v_package_id integer;
-
-begin	     
-
-  select package_id into v_package_id from apm_packages where package_key = ''photo-album'';
-	
-  for folder_rec in 
-      select object_id from acs_objects where context_id = v_package_id 
-  loop
-      PERFORM content_folder_delete(folder_rec.object_id);	
-  end loop;
-
-  return 0;
-end; ' language 'plpgsql';
-
-
-
-
-drop function pa_collection__title (integer);
-drop function pa_collection__delete (integer);
-drop function pa_collection__new (integer,integer,varchar,timestamptz,integer,varchar,integer);
-
-select acs_object_type__create_type('photo_collection','t');
-
-drop table pa_collection_photo_map cascade;
-drop table pa_collections cascade;
-
-
-
-delete from cr_mime_types where label ='JPEG image' and mime_type='image/jpeg' and file_extension = 'jpeg';
-delete from cr_mime_types where label ='GIF image' and mime_type='image/gif' and file_extension = 'gif';
-delete from cr_mime_types where label ='PNG image' and mime_type='image/png' and file_extension = 'png';
-delete from cr_mime_types where label ='TIFF image' and mime_type='image/tiff' and file_extension = 'tiff';
-
-
-drop table pa_package_root_folder_map cascade;
-
-
-
+  
+drop table pa_package_root_folder_map;

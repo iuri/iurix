@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author nstrug@arsdigita.com
     @date September 13, 2000
-    @cvs-id $Id: survey-create-choice.tcl,v 1.2 2003/03/12 01:05:52 daveb Exp $
+    @cvs-id $Id: survey-create-choice.tcl,v 1.4 2014/10/27 16:41:58 victorg Exp $
 
 } {
 
@@ -14,24 +14,20 @@ ad_page_contract {
 }
 
 set package_id [ad_conn package_id]
-ad_require_permission $package_id survey_create_survey
+permission::require_permission -object_id $package_id -privilege survey_create_survey
 
-set whole_page "[ad_header "[_ survey.Choose_Survey_Type]"]
+set title [_ survey.Choose_a_Survey_Type]
+set context [list [_ survey.Choose_Type]]
 
-<h2>[_ survey.Choose_a_Survey_Type]</h2>
+set body [subst {
+    <hr>
+    <dl>
+    <dt><a href="survey-create?type=scored">[_ survey.Scored_Survey]</a>
+    <dd>[_ survey.lt_This_is_a_multiple_ch]</dd>
+    <dt><a href="survey-create?type=general">[_ survey.General_Survey]</a>
+    <dd>[_ survey.lt_This_survey_allows_yo]</dd>
+    </dl>
+}]
 
-[ad_context_bar "[_ survey.Choose_Type]"]
+ad_return_template generic
 
-<hr>
-
-<dl>
-<dt><a href=\"survey-create?type=scored\">[_ survey.Scored_Survey]</a>
-<dd>[_ survey.lt_This_is_a_multiple_ch]</dd>
-<dt><a href=\"survey-create?type=general\">[_ survey.General_Survey]</a>
-<dd>[_ survey.lt_This_survey_allows_yo]</dd>
-</dl>
-
-[ad_footer]
-"
-
-doc_return 200 text/html $whole_page

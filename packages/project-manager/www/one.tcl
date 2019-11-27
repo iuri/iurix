@@ -4,7 +4,7 @@
 
     @author jader@bread.com, ncarroll@ee.usyd.edu.au
     @creation-date 2003-05-15
-    @cvs-id $Id: one.tcl,v 1.14 2007/08/02 11:34:37 maltes Exp $
+    @cvs-id $Id: one.tcl,v 1.15 2018/04/05 14:44:09 hectorr Exp $
 
     @return context Context bar.
     @return versions a multirow holding versions of the project
@@ -95,6 +95,6 @@
 }
 
 
-# Retrieving the value of the parameter to know wich include to call
+# Retrieving the value of the parameter to know which include to call
 set template_src [parameter::get -parameter "ProjectOne"]
 # ------------------------- END OF FILE ------------------------- #

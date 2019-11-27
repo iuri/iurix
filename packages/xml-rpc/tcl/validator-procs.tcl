@@ -9,7 +9,7 @@ ad_library {
         xml-rpc client validator test implementation
 
     @creation-date Thu Oct  9 22:14:04 2003
-    @cvs-id $Id: validator-procs.tcl,v 1.3 2008/04/10 15:29:34 gustafn Exp $
+    @cvs-id $Id: validator-procs.tcl,v 1.7 2019/06/18 13:37:26 antoniop Exp $
 }
 
 ############################################################
@@ -60,7 +60,7 @@ proc validator1.countTheEntities {args} {
 # Return the sum of the values larry, curly and moe.
 
 proc validator1.easyStructTest {struct} {
-    # De-list-ify the stuct:
+    # De-list-ify the struct:
     array set bigStruct $struct
     # Return the sum as an integer:
     return [list -int [expr \
@@ -96,7 +96,7 @@ proc validator1.manyTypesTest {
                [list -boolean $boolean] \
                [list -text $string] \
                [list -double $double] \
-               [list -date [clock format $dateTime]] \
+               [list -date [clock format $dateTime -format %Y%m%dT%T]] \
                [list -base64 $base64]]]
 }
 

@@ -8,15 +8,15 @@ ad_page_contract {
     @author  cmceniry@arsdigita.com
     @author  nstrug@arsdigita.com
     @date    Jun 16, 2000
-    @cvs-id  $Id: question-modify-text.tcl,v 1.4 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id  $Id: question-modify-text.tcl,v 1.7 2015/06/27 20:46:15 gustafn Exp $
 } {
 
-    question_id:integer
-    section_id:integer
+    question_id:naturalnum,notnull
+    section_id:naturalnum,notnull
 
 }
 
-ad_require_permission $section_id survey_modify_question
+permission::require_permission -object_id $section_id -privilege survey_modify_question
 
 get_survey_info -section_id $section_id
 set survey_name $survey_info(name)
@@ -35,6 +35,6 @@ ad_form -name modify_question -form {
 
 }
 
-set context [list [list "one?[export_url_vars survey_id]" $survey_info(name)] "[_ survey.lt_Modify_a_Questions_Te]"]
+set context [list [list [export_vars -base one {survey_id}] $survey_info(name)] "[_ survey.lt_Modify_a_Questions_Te]"]
 
 ad_return_template

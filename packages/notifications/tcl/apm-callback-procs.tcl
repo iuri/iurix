@@ -4,7 +4,7 @@ ad_library {
     
     @creation-date 2003-06-12
     @author Lars Pind (lars@collaboraid.biz)
-    @cvs-id $Id: apm-callback-procs.tcl,v 1.5 2008/06/07 20:29:01 donb Exp $
+    @cvs-id $Id: apm-callback-procs.tcl,v 1.5.10.1 2015/09/12 11:06:45 gustafn Exp $
 }
 
 namespace eval notification::apm {}
@@ -243,3 +243,9 @@ ad_proc -public notification::apm::delete_notification_type_contract {} {
 } {
     acs_sc::contract::delete -name "NotificationType"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

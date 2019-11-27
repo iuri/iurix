@@ -61,6 +61,7 @@
   <msg key="From">De:</msg>
   <msg key="From_1">De</msg>
   <msg key="General_Survey">Encuesta General</msg>
+  <msg key="goto_surveys_name">Ir a %surveys.name%</msg>
   <msg key="Here_is_what">Aqui esta lo que</msg>
   <msg key="inactive">[inactiva]</msg>
   <msg key="Integer">Entero</msg>
@@ -84,7 +85,7 @@
   <msg key="lt_Cancel_and_return_to__1">Cancelar y volver a la administración de la encuesta</msg>
   <msg key="lt_Completely_delete">Borrar las respuestas de %user_name_var% del día %response_date_var%? (Nota: No se puede deshacer.)</msg>
   <msg key="lt_Confirm_Survey_Detail">Confirmar detalles de Encuesta</msg>
-  <msg key="lt_Copying_a_survey_will">Copiar una encuesta creará una nueva encuesta con copia de todas las preguntas.&lt;br /&gt; Ninguna de las respuestas copiada.</msg>
+  <msg key="lt_Copying_a_survey_will">Copiar una encuesta creará una nueva encuesta con copia de todas las preguntas.&lt;br&gt; Ninguna de las respuestas copiada.</msg>
   <msg key="lt_Could_not_find_a_surv">No se puede encontrar la pregunta</msg>
   <msg key="lt_Could_not_find_the_re">No se puede encontrar la respuesta</msg>
   <msg key="lt_Couldnt_find_attachment">No se puede encontrar el archivo adjunto. No se ha podido encontrar el archivo que corresponde a response_id %response_id% y question_id %question_id% dados.</msg>
@@ -191,6 +192,7 @@
   <msg key="No_data_found">No se encontraron datos</msg>
   <msg key="No_Responses">No hay respuestas</msg>
   <msg key="No_surveys_active">No hay encuestas activas</msg>
+  <msg key="No_unanswered_surveys">Ninguna encuesta sin responder</msg>
   <msg key="non-">no-</msg>
   <msg key="Not_Found">No encontrado</msg>
   <msg key="Number">Número</msg>
@@ -244,6 +246,8 @@
   <msg key="Type_of_Response">Tipo de Respuesta</msg>
   <msg key="Uploaded_file">Archivo Cargado:</msg>
   <msg key="View">Ver</msg>
+  <msg key="view_edit_previous_responses">Ver/editar respuestas anteriores</msg>
+  <msg key="view_edit_previous_responses_for_surveys_in_this_group">ver/editar respuestas anteriores para las encuestas de este grupo</msg>
   <msg key="View_Response">Ver Respuesta</msg>
   <msg key="View_Responses">Ver Respuestas:</msg>
   <msg key="View_responses">Ver respuestas</msg>

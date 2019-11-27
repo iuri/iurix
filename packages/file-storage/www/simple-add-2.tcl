@@ -3,15 +3,15 @@ ad_page_contract {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 6 Nov 2000
-    @cvs-id $Id: simple-add-2.tcl,v 1.8 2009/02/13 22:13:06 jeffd Exp $
+    @cvs-id $Id: simple-add-2.tcl,v 1.9.2.1 2015/09/12 11:06:20 gustafn Exp $
 } {
-    folder_id:integer,notnull
+    folder_id:naturalnum,notnull
     title:notnull,trim
     description
     url:notnull,trim
 } -validate {
     valid_folder -requires {folder_id:integer} {
-	if ![fs_folder_p $folder_id] {
+	if {![fs_folder_p $folder_id]} {
 	    ad_complain "[_ file-storage.lt_The_specified_parent_]"
 	}
     }
@@ -21,7 +21,7 @@ ad_page_contract {
 set user_id [ad_conn user_id]
 
 # Check for write permission on this folder
-ad_require_permission $folder_id write
+permission::require_permission -object_id $folder_id -privilege write
 
 set item_id [content::extlink::new -url $url -label $title -description $description -parent_id $folder_id]
 
@@ -38,3 +38,9 @@ fs::do_notifications -folder_id $folder_id -filename $url -item_id $item_id -act
 
 ad_returnredirect "?folder_id=$folder_id"
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

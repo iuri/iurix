@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Nov  7 12:14:42 2000
-    @cvs-id $Id: enum-add.tcl,v 1.3 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: enum-add.tcl,v 1.5.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    attribute_id:integer,notnull
-    { return_url "" }
+    attribute_id:naturalnum,notnull
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     export_vars:onevalue
@@ -49,8 +49,14 @@ db_1row select_attr_name {
      where a.attribute_id = :attribute_id
 }
 
-set context [list [list one?[export_url_vars attribute_id] "One attribute"] "Add values"]
+set context [list [list [export_vars -base one {attribute_id}] "One attribute"] "Add values"]
 
-set export_vars [ad_export_vars -form {attribute_id return_url}]
+set export_vars [export_vars -form {attribute_id return_url}]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

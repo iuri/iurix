@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="da_DK" charset="ISO-8859-1">
+<message_catalog package_key="survey" locale="da_DK" charset="ISO-8859-1">
 
   <msg key="-__Created_by">- Oprettet af</msg>
   <msg key="_on_creation_date"> på %creation_date%</msg>

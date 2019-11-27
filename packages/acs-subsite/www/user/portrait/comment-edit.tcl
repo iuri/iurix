@@ -3,10 +3,10 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date 22 Jun 2000
-    @cvs-id $Id: comment-edit.tcl,v 1.8 2009/03/31 14:39:45 emmar Exp $
+    @cvs-id $Id: comment-edit.tcl,v 1.9.2.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    {return_url "" }
-    {user_id ""}
+    {return_url:localurl "" }
+    {user_id:naturalnum ""}
 } -properties {
     context:onevalue
     export_vars:onevalue
@@ -21,7 +21,7 @@ if {$user_id eq ""} {
     set user_id $current_user_id
 }
 
-ad_require_permission $user_id "write"
+permission::require_permission -object_id $user_id -privilege "write"
 
 if {![db_0or1row user_info {}]} {
     ad_return_error "Account Unavailable" "We can't find you (user #$user_id) in the users table.  Probably your account was deleted for some reason."
@@ -62,3 +62,9 @@ ad_form -name comment_edit -export {user_id return_url} -form {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

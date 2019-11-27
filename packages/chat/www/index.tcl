@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 13, 2000
-    @cvs-id $Id: index.tcl,v 1.11 2009/07/13 16:35:29 emmar Exp $
+    @cvs-id $Id: index.tcl,v 1.11.4.1 2016/06/20 08:40:23 gustafn Exp $
 } {
 } -properties {
     context_bar:onevalue
@@ -36,9 +36,9 @@ db_multirow -extend { active_users last_activity room_url room_html_url} rooms r
 
     if { $active_p } {
         set room_url [export_vars -base "room-enter" {room_id {client $default_client}}]
-        set room_url [ad_quotehtml $room_url]
+        set room_url [ns_quotehtml $room_url]
         set room_html_url [export_vars -base "room-enter" {room_id {client html}}]
-        set room_html_url [ad_quotehtml $room_html_url]
+        set room_html_url [ns_quotehtml $room_html_url]
     }
 }
 

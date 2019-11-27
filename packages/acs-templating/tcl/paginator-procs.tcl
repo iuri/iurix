@@ -1,13 +1,17 @@
-# Query paginator for the ArsDigita Templating System
+ad_library {
+    Query paginator for the ArsDigita Templating System
+
+    @author Karl Goldstein    (karlg@arsdigita.com)
+
+    @cvs-id $Id: paginator-procs.tcl,v 1.22.2.7 2017/04/21 16:50:29 gustafn Exp $
+}
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
-# Authors: Karl Goldstein    (karlg@arsdigita.com)
-
-# $Id: paginator-procs.tcl,v 1.18 2007/11/21 14:08:44 emmar Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
 # http://www.fsf.org/copyleft/gpl.html
+
 
 namespace eval template {}
 namespace eval template::paginator {}
@@ -35,7 +39,7 @@ ad_proc -public template::paginator { command args } {
     @see template::paginator::get_row_last
     @see template::paginator::reset
 } {
-  eval paginator::$command $args
+  paginator::$command {*}$args
 }
 
 ad_proc -public template::paginator::create { statement_name name query args } {
@@ -97,27 +101,49 @@ ad_proc -public template::paginator::create { statement_name name query args } {
 
   set cache_key	$name:$query
   set row_ids [cache get $cache_key:row_ids]
+  
+  # full number of rows returned by original paginator query
+  set full_row_count [cache get $cache_key:full_row_count]
 
-    if { ($row_ids eq {} && ![nsv_exists __template_cache_timeout $cache_key]) || ([info exists opts(flush_p)] && $opts(flush_p) eq "t") } {
+    #
+    # GN: In the following line, we had instead of [::cache exists
+    # $cache_key] the commdand [nsv_exists __template_cache_timeout
+    # $cache_key] It is not clear, what the intended semantic was, and
+    # why not the API working on the nsv was used. See as well
+    # below. In general, using a test for a cache entry and a code
+    # depening on the cached entry is NOT AN GOOD idea, since the
+    # operations are not atomic. Between the check and the later code,
+    # the cache entry might be deleted.  refactoring of this code is
+    # recommended. Unfortunately, several places in OpenACS have this
+    # problem.
+    #
+    if { ($row_ids eq {} && ![::cache exists $cache_key])
+	 || ([info exists opts(flush_p)] && $opts(flush_p) == "t")
+     } {
       if { [info exists opts(printing_prefs)] && $opts(printing_prefs) ne "" } {
-	  ReturnHeaders "text/html"
-	  ns_write "
-<html>
-<head>"
 	  set title [lindex $opts(printing_prefs) 0]
-	  ns_write "<title>$title</title>
-          <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">"
 	  set stylesheet [lindex $opts(printing_prefs) 1]
 	  if { $stylesheet ne "" } {
-	      ns_write "<link rel=\"stylesheet\" href=\"$stylesheet\" type=\"text/css\">"
+	      set css_link [subst {<link rel="stylesheet" href="[ns_quotehtml $stylesheet]" type="text/css">}]
+	  } else {
+	      set css_link ""
 	  }
-	  ns_write "</head>"
-	  ns_write "<body "
 	  set background [lindex $opts(printing_prefs) 2]
 	  if { $background ne "" } {
-	      ns_write "background=\"$background\""
+	      set bg "background=\"$background\""
+	  } else {
+	      set bg ""
 	  }
-	  ns_write ">"
+
+	  ad_return_top_of_page [subst {
+<html>
+<head>
+<title>$title</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+$css_link
+</head>
+<body $bg>
+	  }]
 	  set header_file [lindex $opts(printing_prefs) 3]
 	  if { $header_file ne "" } {
 	      ns_write [ns_adp_parse -file $header_file]
@@ -131,26 +157,24 @@ ad_proc -public template::paginator::create { statement_name name query args } {
 	  }
 	  set return_url [lindex $opts(printing_prefs) 5]
 	  if { $return_url ne "" } {
-	      if { [llength $opts(row_ids)]==0 } {
-		  nsv_set __template_cache_timeout $cache_key $opts(timeout)
-	      }
-	      ns_write "
-          <SCRIPT type=\"text/javascript\">
-          <!-- Begin
-          document.location.href=\"$return_url\";
-          // End -->
+	      # Not sure, what the intended semantics of this command was...
+	      #if { [llength $opts(row_ids)]==0 } {
+	      #	  nsv_set __template_cache_timeout $cache_key $opts(timeout)
+	      #}
+	      ns_write [subst {
+          <script type="text/javascript" nonce="$::__csp_nonce">
+	  document.location.href="[ns_quotehtml $return_url]";
           </script>
-          <noscript>
-          <a href=\"$return_url\">Click here to Continue</a>
-          </noscript>"
+	  <noscript><a href="[ns_quotehtml $return_url]">Click here to continue.</a></noscript>
+	      }]
 	  }
-	  ns_write [ad_footer]
 	  ad_script_abort
       } else {
 	  init $statement_name $name $query
       }
   } else {
     set opts(row_ids) $row_ids
+    set opts(full_row_count) $full_row_count
     set opts(context_ids) [cache get $cache_key:context_ids]
   }
 
@@ -169,17 +193,43 @@ ad_proc -private template::paginator::init { statement_name name query {print_p 
 
   upvar 2 __paginator_ids ids
   set ids [list]
+  
+  set full_statement_name [uplevel 2 "db_qd_get_fullname $statement_name"]
+  
+  # Antonio Pisano 2015-11-17: to get the full rowcount of the records,
+  # we need to wrap the original query into a count(*). The problem comes
+  # with template::list, that builds the paginator query tampering with
+  # the original one, so if we come here from a template::list we cannot
+  # retrieve the real count anymore. I had to come out with a solution
+  # that wouldn't break existing contract for public procs, or this would
+  # have caused unpredictable regressions. Below is the strategy to get
+  # the original query.
+  
+  # If query comes from an xql we get it from there...
+  set original_query [db_map $full_statement_name]
+  # ...otherwise we try to see if we come from a template::list...
+  if {$original_query eq ""} {
+      # ...which was slightly modified to keep the original query untampered.
+      set list_name [lindex [split $name ,] 0]
+      if {[info exists ::[template::list::get_refname -name $list_name]]} {
+          template::list::get_reference -name $list_name
+          set original_query $list_properties(page_query_original)
+      }
+  }
+  # If any of the previous fail, we go for the explicit query
+  if {$original_query eq ""} {
+      set original_query $query
+  }
+      
 
   if { [info exists properties(contextual)] } {
 
       # query contains two columns, one for ID and one for context cue
 
       uplevel 2 "
-      set full_statement_name \[db_qd_get_fullname $statement_name\]
-
       # Can't use db_foreach here, since we need to use the ns_set directly.
       db_with_handle db {
-	set selection \[db_exec select \$db \$full_statement_name {$query}\]
+	set selection \[db_exec select \$db $full_statement_name {$query}\]
  
         set __paginator_ids \[list\]
         set total_so_far 1
@@ -211,12 +261,13 @@ ad_proc -private template::paginator::init { statement_name name query {print_p 
       set i 0
       set page_size $properties(pagesize)
       set context_ids [list]
-      
+      set row_ids ""
+
       foreach row $ids {
 
           lappend row_ids [lindex $row 0]
 
-          if { [expr {$i % $page_size}] == 0 } {
+          if { $i % $page_size == 0 } {
               lappend context_ids [lindex $row 1]
           }
           incr i
@@ -224,11 +275,6 @@ ad_proc -private template::paginator::init { statement_name name query {print_p 
 
       set properties(context_ids) $context_ids
       cache set $name:$query:context_ids $context_ids $properties(timeout)
-
-
-      if { [template::util::is_nil row_ids] } {
-          set row_ids ""
-      }
 
       set properties(row_ids) $row_ids
 
@@ -269,6 +315,11 @@ ad_proc -private template::paginator::init { statement_name name query {print_p 
       set properties(row_ids) $ids
       cache set $name:$query:row_ids $ids $properties(timeout)
   }
+  
+  # Get full number of rows retrieved by original paginator query
+  set full_row_count [uplevel 3 [list db_string query [db_map count_query]]]
+  set properties(full_row_count) $full_row_count
+  cache set $name:$query:full_row_count $full_row_count $properties(timeout)
 }
 
 ad_proc -public template::paginator::get_page { name rownum } {
@@ -496,7 +547,7 @@ ad_proc -public template::paginator::get_context { name datasource pages } {
 
     set row(rownum) $rowcount
     set row(page) $page
-    set row(context) [lindex $context_ids [expr {$page - 1}]]
+    set row(context) [lindex $context_ids $page-1]
   }
 }
 
@@ -546,6 +597,20 @@ ad_proc -public template::paginator::get_row_count { name } {
   return $properties(row_count)
 }
 
+ad_proc -public template::paginator::get_full_row_count { name } {
+    Gets the total number of records returned by the original 
+    paginator query. This is the 'true' row_count, which won't
+    be limited to number_of_pages * rows_per_page.
+
+    @param name    The reference to the paginator object.
+
+    @return A number representing the full row count.
+} {
+  get_reference
+
+  return $properties(full_row_count)
+}
+
 ad_proc -public template::paginator::get_page_count { name } {
     Gets the total number of pages in the paginated query
 
@@ -580,7 +645,7 @@ ad_proc -public template::paginator::get_display_info { name datasource page } {
     </tr>
     <tr>
       <td>previous_page:</td>
-                 <td>preceeding page or empty string if at beginning</td>
+                 <td>preceding page or empty string if at beginning</td>
     </tr>
     <tr>
       <td>next_group:</td>
@@ -650,8 +715,8 @@ ad_proc -public template::paginator::get_display_info { name datasource page } {
   # If the paginator is contextual, set the context
   if { [info exists properties(context_ids)] } {
     foreach elm { next_page previous_page next_group previous_group } {
-      if { [exists_and_not_null info($elm)] } {
-        set info(${elm}_context) [lindex $properties(context_ids) [expr {$info($elm) -1}]]
+      if { ([info exists info($elm)] && $info($elm) ne "") } {
+        set info(${elm}_context) [lindex $properties(context_ids) $info($elm)-1]
       }
     }
   }
@@ -800,3 +865,9 @@ ad_proc -private template::paginator::get_reference {} {
   }
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

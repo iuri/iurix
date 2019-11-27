@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
     @arch-tag: a2fad1c8-17eb-412c-a62e-9704d346b27b
-    @cvs-id $Id: content-template-procs.tcl,v 1.7 2005/01/06 16:52:25 daveb Exp $
+    @cvs-id $Id: content-template-procs.tcl,v 1.8.2.1 2015/09/10 08:21:17 gustafn Exp $
 }
 
 namespace eval ::content::template {}
@@ -44,7 +44,7 @@ ad_proc -public content::template::new {
         [list creation_ip $creation_ip ] \
         [list package_id $package_id ] \
     ]
-    if {[exists_and_not_null creation_date]} {
+    if {([info exists creation_date] && $creation_date ne "")} {
         lappend arg_list [list creation_date $creation_date ]
     }
     return [package_exec_plsql -var_list  $arg_list content_template new]
@@ -69,7 +69,6 @@ ad_proc -public content::template::get_path {
 } {
     @param template_id
     @param root_folder_id
-    @throws -20000: Invalid item ID: %'', get_path__item_id;
 
     @return "/" delimited path from root to supplied template_id
 } {
@@ -103,3 +102,9 @@ ad_proc -public content::template::is_template {
 }
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

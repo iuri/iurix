@@ -1,7 +1,7 @@
 ad_page_contract {
     Unsubscribes from the site
 
-    @cvs-id $Id: unsubscribe-2.tcl,v 1.2 2003/09/19 15:00:44 lars Exp $
+    @cvs-id $Id: unsubscribe-2.tcl,v 1.2.24.1 2015/09/10 08:21:51 gustafn Exp $
 } {} -properties {
     system_name:onevalue
 }
@@ -18,3 +18,9 @@ set system_name [ad_system_name]
 set login_url [ad_get_login_url]
 
 auth::verify_account_status
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

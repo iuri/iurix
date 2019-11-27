@@ -6,15 +6,15 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Fri Dec 15 11:27:27 2000
-    @cvs-id $Id: delete-2.tcl,v 1.4 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: delete-2.tcl,v 1.6.2.4 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     constraint_id:naturalnum,notnull
     { operation "" }
-    { return_url "" }
+    { return_url:localurl "" }
 }
 
-ad_require_permission $constraint_id delete
+permission::require_permission -object_id $constraint_id -privilege delete
 
 set package_id [ad_conn package_id]
 
@@ -25,7 +25,7 @@ if {$operation eq "Yes, I really want to delete this constraint"} {
 	if { [db_0or1row select_segment_id {
 	    select c.rel_segment as segment_id from rel_constraints c where c.constraint_id = :constraint_id
 	}] } {
-	    set return_url "../one?[ad_export_vars {segment_id}]"
+	    set return_url [export_vars -base ../one {segment_id}]
 	}
     }
 
@@ -44,15 +44,19 @@ if {$operation eq "Yes, I really want to delete this constraint"} {
         ad_script_abort
     }
     
-    db_exec_plsql delete_constraint {
-	begin rel_constraint.del(constraint_id => :constraint_id); end;
-    }
+    db_exec_plsql delete_constraint {}
     db_release_unused_handles
 
 } elseif { $return_url eq "" } {
     # if we're not deleting, redirect to the constraint page
-    set return_url one?[ad_export_vars constraint_id]
+    set return_url [export_vars -base one constraint_id]
 }
 
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -3,7 +3,7 @@ ad_library {
     
     @creation-date 2003-09-22
     @author Lars Pind (lars@collaboraid.biz)
-    @cvs-id $Id: apm-callback-procs.tcl,v 1.5.2.1 2010/04/22 08:17:07 victorg Exp $
+    @cvs-id $Id: apm-callback-procs.tcl,v 1.6.6.2 2017/04/22 18:15:50 gustafn Exp $
 }
 
 namespace eval template {}
@@ -86,7 +86,7 @@ ad_proc -private template::apm::after_upgrade {
             5.3.0d1 5.3.0d2 {
                 db_transaction {
                     # mount acs-templating so we can address
-                    # executable tcl scripts under www with a url
+                    # executable Tcl scripts under www with a url
                     set package_id [apm_package_id_from_key acs-templating]
                     array set main_subsite \
                         [site_node::get_from_url \
@@ -107,3 +107,9 @@ ad_proc -private template::apm::after_upgrade {
             }
         }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -4,7 +4,7 @@ ad_library {
     @author Timo Hentschel (timo@timohentschel.de)
 
     @creation-date 04 February 2004
-    @cvs-id $Id: category-links-procs.tcl,v 1.2 2007/10/06 13:51:43 gustafn Exp $
+    @cvs-id $Id: category-links-procs.tcl,v 1.2.8.1 2015/09/10 08:30:18 gustafn Exp $
 }
 
 namespace eval category_link {}
@@ -34,3 +34,9 @@ ad_proc -public category_link::delete { link_id } {
 } {
     db_exec_plsql delete_category_link ""
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

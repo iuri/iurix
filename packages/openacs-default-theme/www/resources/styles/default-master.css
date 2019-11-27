@@ -11,7 +11,6 @@
 #main-navigation ul {
 	margin:0;
 	padding:10px 10px 0;
-	list-style:none;
 }
  
 #main-navigation li {
@@ -19,6 +18,7 @@
 	background:url("/resources/openacs-default-theme/images/left.gif") no-repeat left top;
 	margin:0;
 	padding:0 0 0 9px;
+	list-style: none;
 }
  
 #main-navigation a {
@@ -291,11 +291,11 @@ tr.table-header {
 }
 
 tr.even {
-  background-color: #f0f0f0;
+  background-color: #ffffff;
 }
 
 tr.odd {
-  background-color: #e0e0e0;
+  background-color: #f0eff0;
 }
 
 /* Replace deprecated center tags in forms. Eventually all forms should use form builder and this tag should not be used */
@@ -407,7 +407,7 @@ a.subsite-name:hover {
 #content-wrapper {
   clear: both;
   border-top: 1px solid #fff;
-  padding-bottom: 75px;
+  /*padding-bottom: 10px;*/
 }
 
 
@@ -630,7 +630,7 @@ ul.action-links li {
 /* CONTEXT BAR ---- */
 
 #breadcrumbs {
-  clear: right;
+  clear: both;
   padding-left: 0.4em;
 }
 
@@ -713,6 +713,14 @@ ul.compact li, .action-list ul li {
   padding: 6px 8px 6px 8px;
   clear:left;
 }
+
+.dimensional-table tr th {
+    background-color: #ECECEC;
+}
+.dimensional-table tr td {
+    text-align: center;
+}
+
 
 /**********************************************************************
 /* DEPRECATED CLASSES

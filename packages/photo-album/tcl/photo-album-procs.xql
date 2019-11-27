@@ -9,31 +9,16 @@
 </fullquery>
 
 <fullquery name="pa_all_photos_in_album_internal.get_photo_ids">      
-    <querytext>
-      select 
-      ci.item_id
-      from cr_items ci,
-      cr_child_rels ccr
-      where ci.latest_revision is not null
-      and ci.content_type = 'pa_photo'
-      and ccr.parent_id = :album_id
-      and ci.item_id = ccr.child_id
-      order by ccr.order_n
-    </querytext>
-</fullquery>
-
-
-<fullquery name="pa_all_photos_not_cached.get_all_photo_ids">      
       <querytext>
-	select 
-	ci.item_id
-	from cr_items ci,
-	cr_child_rels ccr
-	where ci.latest_revision is not null
-	and ci.content_type = 'pa_photo'
-	and ci.item_id = ccr.child_id
-	order by ccr.order_n
-	limit :limit
+      select 
+  ci.item_id
+from cr_items ci,
+  cr_child_rels ccr
+where ci.latest_revision is not null
+  and ci.content_type = 'pa_photo'
+  and ccr.parent_id = :album_id
+  and ci.item_id = ccr.child_id
+order by ccr.order_n
       </querytext>
 </fullquery>
 
@@ -42,7 +27,7 @@
       <querytext>
       
 	select 
-	ceil(count(*) / [ad_parameter ThumbnailsPerPage])
+	ceil(count(*) / [parameter::get -parameter ThumbnailsPerPage])
 	from
 	($sql)
 	
@@ -78,9 +63,8 @@
             focal_length = :tmp_exif_Focallength,
             exposure_time = :tmp_exif_Exposuretime,
             focus_distance = :tmp_exif_FocusDist,
-            sha256 = :base_sha256,
-	    photographer = :photographer
-	WHERE pa_photo_id = :photo_rev_id
+            sha256 = :base_sha256
+        WHERE pa_photo_id = :photo_rev_id
 
     </querytext>
 </fullquery>

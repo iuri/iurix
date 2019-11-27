@@ -6,7 +6,7 @@
     @cvs-id $Id: noactive.adp,v 0.1d 2004/10/10
 -->
 <master>
-<property name="context">@context_bar;noquote@</property>
-<property name="title">#chat.Room_no_active#</property>
+<property name="context">@context_bar;literal@</property>
+<property name="doc(title)">#chat.Room_no_active#</property>
 
 #chat.Room_no_active#.

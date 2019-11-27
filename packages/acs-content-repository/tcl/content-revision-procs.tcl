@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-04
     @arch-tag: ddc736fb-cb5f-41fe-a854-703df26e8e03
-    @cvs-id $Id: content-revision-procs.tcl,v 1.25 2009/07/12 01:08:23 donb Exp $
+    @cvs-id $Id: content-revision-procs.tcl,v 1.26.2.4 2017/04/21 14:53:08 gustafn Exp $
 }
 
 namespace eval ::content::revision {}
@@ -92,10 +92,10 @@ ad_proc -public ::content::revision::new {
 	set creation_ip [ad_conn peeraddr]
     }
 
-    if {![exists_and_not_null content_type]} {
+    if {![info exists content_type] || $content_type eq ""} {
 	set content_type [::content::item::content_type -item_id $item_id]
     }
-    if {![exists_and_not_null storage_type]} {
+    if {$storage_type eq ""} {
 	set storage_type [db_string get_storage_type ""]
     }
     if {![info exists package_id]} {
@@ -104,7 +104,7 @@ ad_proc -public ::content::revision::new {
     set attribute_names ""
     set attribute_values ""
 
-    if { [exists_and_not_null attributes] } {
+    if { [info exists attributes] && $attributes ne "" } {
 	set type_attributes [package_object_attribute_list $content_type]
 	set valid_attributes [list]
 	# add in extended attributes for this type, ingore
@@ -112,14 +112,15 @@ ad_proc -public ::content::revision::new {
 	# parameters to this procedure
 	
 	foreach type_attribute $type_attributes {
-	    if {"cr_revisions" ne [lindex $type_attribute 1] \
-                && "acs_objects" ne [lindex $type_attribute 1] } {
+	    if {"cr_revisions" ne [lindex $type_attribute 1] 
+                && "acs_objects" ne [lindex $type_attribute 1] 
+	    } {
 		lappend valid_attributes [lindex $type_attribute 2]
 	    }
 	}
 	foreach attribute_pair $attributes {
-            foreach {attribute_name attribute_value} $attribute_pair {break}
-	    if {[lsearch $valid_attributes $attribute_name] > -1}  {
+            lassign $attribute_pair attribute_name attribute_value
+	    if {$attribute_name in $valid_attributes}  {
 
                 # first add the column name to the list
 		append attribute_names  ", ${attribute_name}"		
@@ -130,8 +131,15 @@ ad_proc -public ::content::revision::new {
 	}
     }
     
-    set table_name [db_string get_table_name "select table_name from acs_object_types where object_type=:content_type"]
+    set table_name [db_string get_table_name {
+        select table_name from acs_object_types where object_type = :content_type
+    }]
 
+    set mime_type [cr_check_mime_type \
+                       -filename  $title \
+                       -mime_type $mime_type \
+                       -file      $tmp_filename]
+    
     set query_text "insert into ${table_name}i
                     (revision_id, object_type, creation_user, creation_date, creation_ip, title, description, item_id, object_package_id, mime_type $attribute_names)
             values (:revision_id, :content_type, :creation_user, :creation_date, :creation_ip, :title, :description, :item_id, :package_id, :mime_type $attribute_values)"
@@ -171,7 +179,7 @@ ad_proc -public ::content::revision::update_content {
     
 } {
     
-    Update content column seperately. Oracle does not allow insert
+    Update content column separately. Oracle does not allow insert
     into a BLOB.
     
     This assumes that if storage type is lob and no file is specified
@@ -480,3 +488,9 @@ ad_proc -public content::revision::get_cr_file_path {
     return [cr_fs_path $storage_area_key]${filename}
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

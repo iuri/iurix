@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-05-28
-    @cvs-id $Id: application-new.tcl,v 1.5 2007/01/10 21:22:08 gustafn Exp $
+    @cvs-id $Id: application-new.tcl,v 1.6.2.1 2015/09/10 08:21:47 gustafn Exp $
 }
 
 set page_title "New Application"
@@ -27,8 +27,8 @@ ad_form -name application -cancel_url . -form {
         {help_text "This should be a short string, all lowercase, with hyphens instead of spaces, whicn will be used in the URL of the new application. If you leave this blank, we will generate one for you from name of the application."}
         {html {size 30}}
         {validate {
-            empty_or_not_exists 
-            {expr \[empty_string_p \$value\] || \[catch { site_node::get_from_url -url "[ad_conn package_url]\$value/" -exact }\]}
+            check_exists
+            {expr \[catch { site_node::get_from_url -url "[ad_conn package_url]\$value/" -exact }\]}
             {This folder name is already used.}
         }}
     }
@@ -73,3 +73,9 @@ ad_form -name application -cancel_url . -form {
     ad_returnredirect .
     ad_script_abort
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

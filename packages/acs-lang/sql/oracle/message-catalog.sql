@@ -6,7 +6,7 @@
 -- @author Bruno Mattarollo (bruno.mattarollo@ams.greenpeace.org)
 --
 -- @creation-date 2000-09-10
--- @cvs-id $Id: message-catalog.sql,v 1.14 2006/09/26 14:58:56 byronl Exp $
+-- @cvs-id $Id: message-catalog.sql,v 1.14.14.1 2017/04/21 16:06:05 gustafn Exp $
 --
 
 create table lang_user_timezone (
@@ -116,7 +116,7 @@ create sequence lang_messages_audit_id_seq;
 create table lang_translate_columns (   
         column_id integer 
 	    constraint ltc_column_id_pk primary key,
-        -- cant do references on user_tables cause oracle sucks
+        -- can't do references on user_tables cause oracle sucks
         on_which_table varchar2(50),
         on_what_column varchar2(50),
         --

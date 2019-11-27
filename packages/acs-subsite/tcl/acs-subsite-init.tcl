@@ -2,7 +2,7 @@ ad_library {
     
     Initializes mappings of package directories to URLs.
 
-    @cvs-id $Id: acs-subsite-init.tcl,v 1.2 2002/09/10 22:22:11 jeffd Exp $
+    @cvs-id $Id: acs-subsite-init.tcl,v 1.2.28.1 2015/09/10 08:21:35 gustafn Exp $
     @author Richard Li
     @creation-date 12 August 2000
 
@@ -28,3 +28,9 @@ ad_library {
 # security filters
 
 # ad_register_filter -sitewide preauth * "/doc/*" ad_restrict_to_administrator
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

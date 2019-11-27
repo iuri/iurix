@@ -3,10 +3,10 @@ ad_page_contract {
     
     @author Ben Adida (ben@openforce.net)
     @creation-date April 09, 2002
-    @cvs-id $Id: cal-item-view.tcl,v 1.24 2009/03/06 23:28:05 donb Exp $
+    @cvs-id $Id: cal-item-view.tcl,v 1.25.2.2 2016/05/20 20:14:43 gustafn Exp $
 } {
-    cal_item_id:integer
-    {return_url [ad_return_url]}
+    cal_item_id:naturalnum,notnull
+    {return_url:localurl [ad_return_url]}
 }
 
 set user_id [ad_conn user_id]
@@ -18,7 +18,7 @@ calendar::item::get -cal_item_id $cal_item_id -array cal_item
 
 # Honor the related link redirection facility long implemented in acs-events, but
 # ignored by calendar.
-if { $cal_item(redirect_to_rel_link_p) eq "t" &&
+if { $cal_item(redirect_to_rel_link_p) == "t" &&
      $cal_item(related_link_url) ne "" } {
     ad_returnredirect $cal_item(related_link_url)
     ad_script_abort
@@ -58,3 +58,9 @@ template::head::add_css -alternate -href "/resources/calendar/calendar-hc.css" -
 
 ad_return_template 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

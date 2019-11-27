@@ -5,10 +5,10 @@ ad_page_contract {
     @param write_p Set to 1 if you want the specification file written to disk.
     @author Jon Salz [jsalz@arsdigita.com]
     @creation-date 9 May 2000
-    @cvs-id $Id: version-generate-info.tcl,v 1.3 2002/09/18 11:54:42 jeffd Exp $
+    @cvs-id $Id: version-generate-info.tcl,v 1.5.2.1 2015/09/10 08:21:04 gustafn Exp $
 } {
-    {version_id:integer}
-    {write_p 0}
+    {version_id:naturalnum,notnull}
+    {write_p:boolean 0}
 }
 
 if { $write_p } {
@@ -26,3 +26,9 @@ if { $write_p } {
 }
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

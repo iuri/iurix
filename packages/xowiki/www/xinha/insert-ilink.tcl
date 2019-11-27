@@ -2,10 +2,10 @@ ad_page_contract {
   @author Guenter Ernst guenter.ernst@wu-wien.ac.at, 
   @author Gustaf Neumann neumann@wu-wien.ac.at
   @creation-date 13.07.2004
-  @cvs-id $Id: insert-ilink.tcl,v 1.4 2006/08/17 01:44:27 gustafn Exp $
+  @cvs-id $Id: insert-ilink.tcl,v 1.7.2.2 2016/11/28 17:29:07 antoniop Exp $
 } {
-  {fs_package_id:integer,optional}
-  {folder_id:integer,optional}
+  {fs_package_id:naturalnum,optional}
+  {folder_id:naturalnum,optional}
   {file_types *}
 }
  
@@ -14,8 +14,27 @@ set file_selector_link [export_vars -base file-selector \
                             {fs_package_id folder_id selector_type file_types}]
 set fs_found 1
 
-#set user_id [ad_verify_and_get_user_id]
-#permission::require_permission -party_id $user_id -object_id $fs_package_id \
-#    -privilege "admin"
 
-ad_return_template
+## Add event handlers
+
+template::add_event_listener -id "body" -event "load" -script {
+  Init();
+}
+template::add_event_listener -id "file_selector_button" -script {
+  openFileSelector();
+}
+template::add_event_listener -id "ok_button" -script {
+  onOK();
+}
+template::add_event_listener -id "cancel_button" -script {
+  onCancel();
+}
+
+##
+
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

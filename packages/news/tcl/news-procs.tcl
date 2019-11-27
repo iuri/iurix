@@ -4,7 +4,7 @@ ad_library {
 
     @author stefan@arsdigita.com
     @creation-date 12-14-00
-    @cvs-id $Id: news-procs.tcl,v 1.33 2010/02/02 18:57:30 emmar Exp $
+    @cvs-id $Id: news-procs.tcl,v 1.35.2.3 2016/01/02 20:34:49 gustafn Exp $
 }
 
 # News specific db-API wrapper functions and interpreters
@@ -17,13 +17,7 @@ ad_proc news_items_archive { id_list when } {
 } {
 
     foreach id $id_list {
-	db_exec_plsql news_item_archive {
-	    begin
-	    news.archive(
-	        item_id => :id,
-	        archive_date => :when);
-	    end;
-	}
+	db_exec_plsql news_item_archive {}
     }
 
 }
@@ -37,11 +31,7 @@ ad_proc news_items_make_permanent { id_list } {
 } {
 
     foreach id  $id_list {
-	db_exec_plsql news_item_make_permanent {
-	    begin
-	        news.make_permanent(:id);
-	    end;
-	}
+	db_exec_plsql news_item_make_permanent {}
     }
 
 }
@@ -54,11 +44,7 @@ ad_proc news_items_delete { id_list } {
 } { 
 
     foreach id $id_list {
-	db_exec_plsql news_item_delete {
-	    begin
-	        news.del(:id);
-	    end;
-	}
+	db_exec_plsql news_item_delete {}
     }
 
 }
@@ -72,12 +58,7 @@ ad_proc news_util_get_url {
 
     set url_stub ""
 
-    db_0or1row get_url_stub "
-        select site_node__url(node_id) as url_stub
-        from site_nodes
-        where object_id=:package_id
-    "
-
+    db_0or1row get_url_stub {}
     return $url_stub
 
 }
@@ -108,7 +89,7 @@ ad_proc news__datasource {
     set url_stub [news_util_get_url $package_id]
     set url "[ad_url]${url_stub}item/$item_id"
 
-    if {[empty_string_p $publish_lead]} {
+    if {$publish_lead eq ""} {
         set publish_lead $publish_body
     }
 
@@ -116,7 +97,7 @@ ad_proc news__datasource {
                      [list \
                           item_id $object_id \
                           publish_title $publish_title \
-                          publish_title $publish_lead \
+                          publish_lead $publish_lead \
                           publish_body $publish_body \
                           publish_format $publish_format \
                           publish_image {} \
@@ -174,23 +155,23 @@ ad_proc news_pretty_status {
     set now_seconds [clock scan now]
     set n_days_until_archive {}
 
-    if { ![empty_string_p $archive_date] } { 
+    if { $archive_date ne "" } { 
         set archive_date_seconds [clock scan $archive_date]
 
         if { $archive_date_seconds > $now_seconds } {
             # Scheduled for archive
-            set n_days_until_archive [expr ($archive_date_seconds - $now_seconds) / 86400]
+            set n_days_until_archive [expr {($archive_date_seconds - $now_seconds) / 86400}]
         }
     }
 
-    if { ![empty_string_p $publish_date] } {
+    if { $publish_date ne "" } {
         # The item has been published or is scheduled to be published
 
         set publish_date_seconds [clock scan $publish_date]
         if { $publish_date_seconds > $now_seconds } {
             # Will be published in the future
 
-            set n_days_until_publish [expr ($publish_date_seconds - $now_seconds) / 86400]
+            set n_days_until_publish [expr {($publish_date_seconds - $now_seconds) / 86400}]
         }
     }
 
@@ -238,7 +219,7 @@ ad_proc -public news__last_updated {
 
     @error
 } {
-    return [db_string get_last_updated ""]
+    return [db_string get_last_updated {}]
 }
 
 ad_proc -private news__rss_datasource {
@@ -338,8 +319,10 @@ ad_proc -public news_do_notification {
     set instance_name [application_group::closest_ancestor_element  -include_self  -node_id $node_id  -element "instance_name"]
 
     # get the title and teaser for latest news item for the given package id
-    if { [db_0or1row "get_news" "select item_id, publish_date, publish_title as title, publish_lead as lead, publish_body, publish_format from news_items_live_or_submitted where news_id =
- :news_id"] } {
+    if { [db_0or1row get_news {
+        select item_id, publish_date, publish_title as title, publish_lead as lead, publish_body, publish_format
+        from news_items_live_or_submitted where news_id = :news_id
+    }] } {
         set new_content "$title\n\n$lead\n\n[ad_html_text_convert -from $publish_format -to text/plain -- $publish_body]"
         set html_content [ad_html_text_convert -from $publish_format -to text/html -- $publish_body]
         append new_content "\n\n[string repeat - 70]"
@@ -358,3 +341,9 @@ ad_proc -public news_do_notification {
         -notif_date $publish_date
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -4,7 +4,7 @@ ad_library {
 
     @author yon (yon@openforce.net)
     @creation-date May 12, 2002
-    @cvs-id $Id: parameter-procs.tcl,v 1.18 2010/03/25 01:02:16 donb Exp $
+    @cvs-id $Id: parameter-procs.tcl,v 1.19.4.4 2017/07/28 02:45:26 gustafn Exp $
 
 }
 
@@ -62,6 +62,7 @@ ad_proc -public parameter::get_global_value {
     @param default what to return if we don't find a value. Defaults to returning the empty string.
 
     @return The string trimmed (leading and trailing spaces removed) parameter value
+    @see parameter::get
 } {
 
     # Is there a parameter by this name in the parameter file?  If so, it takes precedence.
@@ -98,8 +99,7 @@ ad_proc -public parameter::get_global_value {
                 set value 0
             }
         } errmsg] } {
-            global errorInfo
-            ns_log Error "Parameter $parameter not a boolean:\n$errorInfo"
+                        ns_log Error "Parameter $parameter not a boolean:\n$::errorInfo"
             set value $default
         }
     }
@@ -145,36 +145,38 @@ ad_proc -public parameter::get {
     @param default what to return if we don't find a value. Defaults to returning the empty string.
 
     @return The string trimmed (leading and trailing spaces removed) parameter value
+    @see parameter::get_global_value
 } {
 
     if {$package_id eq ""} {
         set package_id [ad_requested_object_id]
     }
-
-    set package_key ""
     set value ""
+
+    # 1. check whether there is a parameter by this name specified for
+    # the packagin in the parameter file.  The name
+    # ad_parameter_from_file is a misnomer, since the it checks
+    # ns_config values
+    #
     if {$package_id ne ""} {
+	set package_key ""
         # This can fail at server startup--OpenACS calls parameter::get to
         # get the size of the util_memoize cache so it can setup the cache.
         # apm_package_key_from_id needs that cache, but on server start 
         # when the toolkit tries to get the parameter for the cache size
         # the cache doesn't exist yet, so apm_package_key_from_id fails
-        catch {
+        if {![catch {
             set package_key [apm_package_key_from_id $package_id]
-        }
-    }
-
-    # If I convert the package_id to a package_key, is there a parameter by this
-    # name in the parameter file?  If so, it takes precedence.
-    # 1. use the parameter file
-    if {$package_key ne ""} {
-        set value [ad_parameter_from_file $parameter $package_key]
+        }]} {
+	    set value [ad_parameter_from_file $parameter $package_key]
+	}
     }
 
     # 2. check the parameter cache
     if {$value eq ""} {
         set value [ad_parameter_cache $package_id $parameter]
     }
+
     # 3. use the default value
     if {$value eq ""} {
         set value $default
@@ -184,9 +186,6 @@ ad_proc -public parameter::get {
         # Replace message keys in hash marks with localized texts
         set value [lang::util::localize $value]
     }
-
-    # Trimming the value as people may have accidentally put in trailing spaces
-    set value [string trim $value]
 
     # Special parsing for boolean parameters, true and false can be written
     # in many different ways
@@ -198,8 +197,7 @@ ad_proc -public parameter::get {
                 set value 0
             }
         } errmsg] } {
-            global errorInfo
-            ns_log Error "Parameter $parameter not a boolean:\n$errorInfo"
+                        ns_log Error "Parameter $parameter not a boolean:\n$::errorInfo"
             set value $default
         }
     }
@@ -268,3 +266,9 @@ ad_proc -public parameter::get_from_package_key {
 
     return $value
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

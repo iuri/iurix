@@ -3,7 +3,7 @@ ad_library {
     
     @author Neophytos Demetriou
     @creation-date 2001-09-01
-    @cvs-id $Id: acs-service-contract-procs.tcl,v 1.23 2007/01/10 21:22:05 gustafn Exp $
+    @cvs-id $Id: acs-service-contract-procs.tcl,v 1.26.2.3 2017/06/30 17:27:41 gustafn Exp $
 }
 
 namespace eval acs_sc {}
@@ -22,11 +22,12 @@ ad_proc -public acs_sc::invoke {
     {-call_args {}}
     {-error:boolean}
 } {
-    A wrapper for the acs_sc_call procedure, with explicitly named
-    parameters so it's easier to figure out how to use it.
-    You must supply either contract and impl, or just impl_id.
+    A replacement of the former acs_sc_call procedure.
+    One must supply either contract and impl, or just impl_id.
     If you supply impl_id and contract, we throw an error if the impl_id's contract doesn't match
     the contract you passed in. If you supply both impl_id and impl, we throw an error.
+
+    Additional documentation and commentary at http://openacs.org/forums/message-view?message_id=108614.
     
     @param contract_name The name of the contract you wish to use.
     @param operation_name The name of the operation in the contract you wish to call.
@@ -34,12 +35,13 @@ ad_proc -public acs_sc::invoke {
     @param impl_id The ID of the implementation you wish to use.
     @param args The arguments you want to pass to the proc.
     @param error If specified, will throw an error if the operation isn't implemented.
+
     
     @author Lars Pind (lars@collaboraid.biz)
     @see acs_sc_call
 } {
-    if { [exists_and_not_null impl_id] } {
-        if { [exists_and_not_null impl] } {
+    if { $impl_id ne "" } {
+        if { $impl ne "" } {
             error "Cannot supply both impl and impl_id"
         }
         acs_sc::impl::get -impl_id $impl_id -array impl_info
@@ -49,10 +51,22 @@ ad_proc -public acs_sc::invoke {
         }
         set contract $impl_info(impl_contract_name)
     }
-    if { ![exists_and_not_null impl] || ![exists_and_not_null contract] } {
+    if { $impl eq "" || $contract eq "" } {
         error "You must supply either impl_id, or contract and impl to acs_sc::invoke"
     }
-    return [acs_sc_call -error=$error_p $contract $operation $call_args $impl]
+
+    set proc_name [acs_sc_generate_name $contract $impl $operation]
+
+    if { [info commands $proc_name] ne "" } {
+	return [ad_apply $proc_name $call_args]
+    } 
+
+    if { $error_p } {
+	error "Operation $operation is not implemented in '$impl' implementation of contract '$contract'"
+    } else {
+	ns_log warning "ACS-SC: Function Not Found: $proc_name [info commands $proc_name]"
+    }
+    return
 }
 
 
@@ -77,7 +91,7 @@ ad_proc -public acs_sc_binding_exists_p {
     @author Neophytos Demetriou
 } {
 
-    return [db_string binding_exists_p {*SQL*}]
+    return [db_string binding_exists_p {}]
 
 }
 
@@ -108,18 +122,15 @@ ad_proc -private acs_sc_get_alias {
     # LARS
     set exists_p [acs_sc_binding_exists_p $contract $impl]
 
-    #set exists_p [util_memoize "acs_sc_binding_exists_p $contract $impl"]
+    #set exists_p [util_memoize [list acs_sc_binding_exists_p $contract $impl]]
 
     if {![set exists_p]} {return ""}
     
-    db_0or1row get_alias {*SQL*}
+    db_0or1row get_alias {}
 
     return [list $impl_alias $impl_pl]
 
 }
-
-
-
 
 ad_proc -private acs_sc_proc {
     contract
@@ -128,7 +139,7 @@ ad_proc -private acs_sc_proc {
     {impl_alias {}}
     {impl_pl {}}
 } {
-    Builds the proc used by acs_sc_call, generally only called 
+    Builds the proc used by acs_sc::invoke, generally only called 
     in acs-service-contract-init.tcl at startup.
 
     @return 0 on failure, 1 on success.
@@ -142,21 +153,21 @@ ad_proc -private acs_sc_proc {
     acs_sc_log SCDebug "ACS_SC_PROC: proc_name = $proc_name"
     
     if { $impl_alias eq "" } {
-        foreach {impl_alias impl_pl} [acs_sc_get_alias $contract $operation $impl] break 
+        lassign [acs_sc_get_alias $contract $operation $impl] impl_alias impl_pl 
     }
 
     if { $impl_alias eq "" } {
 	error "ACS-SC: Cannot find alias for $proc_name"
     }
 
-    if {![db_0or1row get_operation_definition {*SQL*}]} { 
+    if {![db_0or1row get_operation_definition {}]} { 
         ns_log warning "ACS-SC: operation definition not found for contract $contract operation $operation"
         return 0
     }
 
-    append docblock "\n<b>acs-service-contract operation.  Call via acs_sc_call.</b>\n\n$operation_desc\n\n"
+    append docblock "\n<b>acs-service-contract operation.  Call via acs_sc::invoke.</b>\n\n$operation_desc\n\n"
 
-    db_foreach operation_inputtype_element {*SQL*} {
+    db_foreach operation_inputtype_element {} {
 	lappend arguments "$element_name"
 	append docblock "\n@param $element_name $element_msg_type_name"
 	if { $element_msg_type_isset_p } {
@@ -164,14 +175,14 @@ ad_proc -private acs_sc_proc {
 	}
     }
 
-    db_foreach operation_outputtype_element {*SQL*} {
+    db_foreach operation_outputtype_element {} {
 	append docblock "\n@return <b>$element_name</b> - $element_msg_type_name"
 	if { $element_msg_type_isset_p } {
 	    append docblock " \[\]"
 	}
     }
 
-    append docblock "\n@see $impl_alias\n@see acs_sc_call"
+    append docblock "\n@see $impl_alias\n@see acs_sc::invoke"
 
     set full_statement [acs_sc_get_statement $impl_alias $impl_pl $arguments]
 
@@ -198,7 +209,7 @@ ad_proc -private acs_sc_get_statement {
 } {
     Builds the statement to call from the provided metadata.
 
-    @param impl_alias tcl or plpgsql proc to call
+    @param impl_alias Tcl or plpgsql proc to call
     @param impl_pl programmimg language of the proc to call (TCL or PLPGSQL)
     @param arguments list of argument names
 
@@ -230,9 +241,6 @@ ad_proc -private acs_sc_get_statement {
     return $full_statement
 }
 
-
-
-
 ad_proc -private -deprecated acs_sc_call {
     {-error:boolean}
     contract
@@ -252,19 +260,9 @@ ad_proc -private -deprecated acs_sc_call {
 
     @see acs_sc::invoke
 } {
-    set proc_name [acs_sc_generate_name $contract $impl $operation]
+    acs_sc::invoke -contract $contract -operation $operation -impl $impl -call_args $arguments -error=$error_p
+} 
 
-    if { [llength [info procs $proc_name]] == 1 } {
-	return [apply $proc_name $arguments]
-    } else {
-        if { $error_p } {
-            error "Operation $operation is not implemented in '$impl' implementation of contract '$contract'"
-        } else {
-            ns_log warning "ACS-SC: Function Not Found: $proc_name [info procs $proc_name]"
-        }
-	return
-    }
-}
 
 
 ##
@@ -280,3 +278,9 @@ proc acs_sc_log {level msg} {
         # ns_log Debug "$msg"
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

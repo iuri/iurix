@@ -6,7 +6,7 @@ ad_library {
 
     @creation-date 2002-05-27
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: notifications-security-procs.tcl,v 1.4 2002/11/30 17:40:18 jeffd Exp $
+    @cvs-id $Id: notifications-security-procs.tcl,v 1.4.24.1 2015/09/12 11:06:46 gustafn Exp $
 
 }
 
@@ -64,3 +64,9 @@ namespace eval notification::security {
     
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

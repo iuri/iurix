@@ -1,6 +1,6 @@
 <master>
-<property name=title>#chat.Add_user_to_room#</property>
-<property name="context">@context;noquote@</property>
+<property name="doc(title)">#chat.Add_user_to_room#</property>
+<property name="context">@context;literal@</property>
 
 <FORM METHOD=get ACTION=search-2>
   <div>

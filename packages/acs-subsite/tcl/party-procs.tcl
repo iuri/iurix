@@ -6,7 +6,7 @@ ad_library {
 
     @author oumi@arsdigita.com
     @creation-date 2001-02-06
-    @cvs-id $Id: party-procs.tcl,v 1.7.6.1 2010/05/23 14:02:58 gustafn Exp $
+    @cvs-id $Id: party-procs.tcl,v 1.9.2.2 2016/01/02 13:47:26 gustafn Exp $
 
 }
 
@@ -25,7 +25,7 @@ namespace eval party {
 	@creation-date 10/2000
 
     } {
-	return [ad_permission_p -user_id $user_id $party_id $privilege]
+	return [permission::permission_p -party_id $user_id -object_id $party_id -privilege $privilege]
     }
 
 
@@ -45,13 +45,13 @@ namespace eval party {
 	
 	<p> 
 	There are now several ways to create a party of a given
-	type. You can use this TCL API with or without a form from the form
+	type. You can use this Tcl API with or without a form from the form
 	system, or you can directly use the PL/SQL API for the party type.
 
 	<p><b>Examples:</b>
 	<pre>
 
-	# OPTION 1: Create the party using the TCL Procedure. Useful if the
+	# OPTION 1: Create the party using the Tcl Procedure. Useful if the
 	# only attribute you need to specify is the party name
 	
 	db_transaction {
@@ -59,7 +59,7 @@ namespace eval party {
 	}
 	
 	
-	# OPTION 2: Create the party using the TCL API with a templating
+	# OPTION 2: Create the party using the Tcl API with a templating
 	# form. Useful when there are multiple attributes to specify for the
 	# party
 	
@@ -174,36 +174,9 @@ namespace eval party {
 	    set start_with_clause [db_map start_with_clause]
 	}
 
-	db_foreach select_sub_rel_types "
-	select 
-	    types.pretty_name, 
-	    types.object_type, 
-	    types.tree_level, 
-	    types.indent,
-	    decode(valid_types.object_type, null, 0, 1) as valid_p
-	from 
-	    (select
-	        t.pretty_name, t.object_type, level as tree_level,
-	        replace(lpad(' ', (level - 1) * 4), 
-	                ' ', '&nbsp;') as indent,
-	        rownum as tree_rownum
-	     from 
-	        acs_object_types t
-	     connect by 
-	        prior t.object_type = t.supertype
-	     start with 
-	        $start_with_clause ) types,
-	    (select 
-	        object_type 
-	     from 
-	        rel_types_valid_obj_two_types
-	     where 
-	        rel_type = :rel_type ) valid_types
-	where 
-	    types.object_type = valid_types.object_type(+)
-	order by tree_rownum
-	" {
-	    template::multirow append $datasource_name $object_type [ad_urlencode $object_type] $indent $pretty_name $valid_p
+	db_foreach select_sub_rel_types {} {
+	    template::multirow append $datasource_name $object_type \
+                [ad_urlencode $object_type] $indent $pretty_name $valid_p
 	}
 
     }
@@ -285,3 +258,9 @@ namespace eval party {
     }
     
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

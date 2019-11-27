@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Jon Salz <jsalz@mit.edu>
     @creation-date 28 Nov 1999
-    @cvs-id $Id: 1pixel.tcl,v 1.4 2005/02/26 17:52:20 jeffd Exp $
+    @cvs-id $Id: 1pixel.tcl,v 1.6.2.3 2017/03/27 10:49:05 gustafn Exp $
 } {
     r:integer
     g:integer
@@ -15,7 +15,7 @@ ad_page_contract {
 ReturnHeaders "image/gif"
 
 if { [catch {
-    set file [open "[acs_package_root_dir "acs-subsite"]/www/shared/1pixel.header"]
+    set file [open [acs_package_root_dir "acs-subsite"]/www/shared/1pixel.header]
     ns_writefp $file
     close $file
 
@@ -23,17 +23,17 @@ if { [catch {
     # insist on UTF8-encoding it). So we write to a file, then dump
     # the file's contents.
 
-    set file_name [ns_tmpnam]
+    set file_name [ad_tmpnam]
     ns_log "Notice" "logging to $file_name"
     set file [open $file_name w+]
     fconfigure $file -encoding binary -translation binary
-    puts -nonewline $file "[format "%c%c%c" $r $g $b]"
+    puts -nonewline $file [format "%c%c%c" $r $g $b]
     seek $file 0
     ns_writefp $file
     close $file
-    ns_unlink $file_name
+    file delete -- $file_name
 
-    set file [open "[acs_package_root_dir "acs-subsite"]/www/shared/1pixel.footer"]
+    set file [open [acs_package_root_dir "acs-subsite"]/www/shared/1pixel.footer]
     ns_writefp $file
     close $file
 
@@ -41,7 +41,12 @@ if { [catch {
     # Ignore simple i/o errors, which probably just mean that the user surfed on 
     # to some other page before we finished serving 
     if { ![string equal $errMsg {i/o failed}] } {
-        global errorInfo
-        ns_log Error "$errMsg\n$errorInfo"
+        ns_log Error "$errMsg\n$::errorInfo"
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

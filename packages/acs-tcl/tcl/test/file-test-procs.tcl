@@ -3,11 +3,11 @@ ad_library {
 
     @author Jeff Davis
     @creation-date 2005-02-28
-    @cvs-id $Id: file-test-procs.tcl,v 1.8.4.1 2010/05/23 14:02:58 gustafn Exp $
+    @cvs-id $Id: file-test-procs.tcl,v 1.10.2.4 2017/04/22 18:11:54 gustafn Exp $
 }
 
 aa_register_case -cats {smoke production_safe} files__tcl_file_syntax_errors {
-    Test all known tcl files for successful parsing "(in the [info complete] sense at least)" and other common errors.
+    Test all known Tcl files for successful parsing "(in the [info complete] sense at least)" and other common errors.
 
     @author Jeff Davis davis@xarg.net
 } {
@@ -18,12 +18,12 @@ aa_register_case -cats {smoke production_safe} files__tcl_file_syntax_errors {
         return [expr {[string match {*.tcl} $file] || [file isdirectory $file]}]
     }
 
-    # if startdir is not [acs_root_dir]/packages, then somebody checked in the wrong thing by accident
-    set startdir [acs_root_dir]/packages
+    # if startdir is not $::acs::rootdir/packages, then somebody checked in the wrong thing by accident
+    set startdir $::acs::rootdir/packages
 
     aa_log "Checks starting from $startdir"
 
-    #inspect every tcl file in the directory tree starting with $startdir
+    #inspect every Tcl file in the directory tree starting with $startdir
     foreach file [ad_find_all_files -check_file_func ::tcl_p $startdir] { 
         incr nfiles
 
@@ -51,15 +51,15 @@ aa_register_case -cats {smoke production_safe} -error_level error files__tcl_fil
         return [expr {[string match {*.tcl} $file] || [file isdirectory $file]}]
     }
 
-    # if startdir is not [acs_root_dir]/packages, then somebody checked in the wrong thing by accident
-    set startdir [acs_root_dir]/packages
+    # if startdir is not $::acs::rootdir/packages, then somebody checked in the wrong thing by accident
+    set startdir $::acs::rootdir/packages
 
     aa_log "Checks starting from $startdir"
     set count 0
-    #inspect every tcl file in the directory tree starting with $startdir
+    #inspect every Tcl file in the directory tree starting with $startdir
     foreach file [ad_find_all_files -check_file_func ::tcl_p $startdir] { 
 
-        if {[string match */acs-tcl/tcl/test/file-test-procs.tcl $file]} continue
+        if {[string match "*/acs-tcl/tcl/test/file-test-procs.tcl" $file]} continue
 
         set fp [open $file "r"]
         set data [read $fp]
@@ -71,7 +71,7 @@ aa_register_case -cats {smoke production_safe} -error_level error files__tcl_fil
 
     }
 
-    aa_log "Checked $count tcl files"
+    aa_log "Checked $count Tcl files"
 }
 
 aa_register_case -cats {smoke production_safe} files__check_info_files {
@@ -80,14 +80,14 @@ aa_register_case -cats {smoke production_safe} files__check_info_files {
 
     @author Jeff Davis davis@xarg.net
 } {
-    foreach spec_file [glob -nocomplain "[acs_root_dir]/packages/*/*.info"] {
+    foreach spec_file [glob -nocomplain "$::acs::rootdir/packages/*/*.info"] {
         set errp 0
         if {  [catch {array set version [apm_read_package_info_file $spec_file]} errMsg] } {
             aa_log_result fail "$spec_file returned $errMsg"
             set errp 1
         } else {
             regexp {packages/([^/]*)/} $spec_file match key
-            if {![string equal $version(package.key) $key]} {
+            if {$version(package.key) ne $key } {
                 aa_log_result fail "MISMATCH DIRECTORY/PACKAGE KEY: $spec_file $version(package.key) != $key"
                 set errp 1
             }
@@ -97,11 +97,11 @@ aa_register_case -cats {smoke production_safe} files__check_info_files {
                 aa_log_result fail "$spec_file SERVICE MISSING PROVIDES: $key"
                 set errp 1
             } elseif { $version(provides) ne ""} {
-                if { ![string equal $version(name) [lindex [lindex $version(provides) 0] 1]]} {
+                if { $version(name) ne [lindex $version(provides) 0 1] } {
                     aa_log_result fail "$spec_file: MISMATCH PROVIDES VERSION: $version(provides) $version(name)"
                     set errp 1
                 }
-                if { ![string equal $key [lindex [lindex $version(provides) 0] 0]]} {
+                if { $key ne [lindex $version(provides) 0 0] } {
                     aa_log_result fail "$spec_file MISMATCH PROVIDES KEY: $key $version(provides)"
                     set errp 1
                 }
@@ -129,7 +129,7 @@ aa_register_case -cats {smoke production_safe} files__check_upgrade_ordering {
 
     @author Jeff Davis davis@xarg.net
 } {
-    foreach dir [lsort [glob -nocomplain -types f "[acs_root_dir]/packages/*/*.info"]] {
+    foreach dir [lsort [glob -nocomplain -types f "$::acs::rootdir/packages/*/*.info"]] {
 
         set error_p 0
 
@@ -190,9 +190,9 @@ aa_register_case -cats {smoke production_safe} files__check_upgrade_ordering {
 
 aa_register_case -cats {smoke} files__check_xql_files {
     Check for some common errors in the xql files like 
-    missing rdbms, missing corresponding tcl files, etc.
+    missing rdbms, missing corresponding Tcl files, etc.
 
-    Not production safe since malformed xql can crass aolserver in the parse.
+    Not production safe since malformed xql can crass AOLserver in the parse.
 
     @author Jeff Davis davis@xarg.net
 } {
@@ -201,12 +201,12 @@ aa_register_case -cats {smoke} files__check_xql_files {
         return [expr {[string match {*.xql} $file] || [file isdirectory $file]}]
     }
     
-    # if startdir is not [acs_root_dir]/packages, then somebody checked in the wrong thing by accident
-    set startdir [acs_root_dir]/packages
+    # if startdir is not $::acs::rootdir/packages, then somebody checked in the wrong thing by accident
+    set startdir $::acs::rootdir/packages
     
     aa_log "Checks starting from $startdir"
 
-    #inspect every tcl file in the directory tree starting with $startdir
+    #inspect every Tcl file in the directory tree starting with $startdir
     foreach file [ad_find_all_files -check_file_func ::xql_p $startdir] { 
 
         set fp [open $file "r"]
@@ -217,7 +217,7 @@ aa_register_case -cats {smoke} files__check_xql_files {
 
         if { [catch {set parse [xml_parse $data]} errMsg] } {
             ns_log warning "acs_tcl__check_xql_files: failed parse $file $errMsg"
-            aa_log_result fail "XML Parse Error: $file [ad_quotehtml $errMsg]"
+            aa_log_result fail "XML Parse Error: $file [ns_quotehtml $errMsg]"
         } else {
             # lets walk the nodes and check they are what we want to see.
 
@@ -276,7 +276,7 @@ aa_register_case -cats {smoke} files__check_xql_files {
         if {![file exists ${xql}.tcl]
             && ![file exists ${xql}.vuh]} {
             # JCD: Hack to exclude calendar/www/views which is the only current file which has
-            # no associated tcl file.
+            # no associated Tcl file.
             if {[string first calendar/www/views $allxql($xql)] <  0} {
                 aa_log_result fail "missing .tcl or .vuh file for $allxql($xql)"
             }
@@ -301,3 +301,9 @@ aa_register_case -cats {smoke} files__check_xql_files {
     }
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

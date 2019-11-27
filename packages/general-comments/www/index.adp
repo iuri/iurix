@@ -1,16 +1,13 @@
 <master>
-<property name="title">@page_title;noquote@</property>
-<property name="context">@context;noquote@</property>
+<property name="doc(title)">@page_title;literal@</property>
+<property name="context">@context;literal@</property>
 
-<if @admin_p@ eq 1>
-  [ <a href="admin/">#general-comments.Administer#</a> ]
+<if @admin_p;literal@ true>
+  <div style="float: right;">[ <a href="admin/">#general-comments.Administer#</a> ]</div>
 </if>
+<h1>#general-comments.Comments_of#</h1>
 <p>
 @dimensional_bar;noquote@
 <p>
-@comments_table;noquote@
 
-
-
-
-
+<listtemplate name="comments_list"></listtemplate>

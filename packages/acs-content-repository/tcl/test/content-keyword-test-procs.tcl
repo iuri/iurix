@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2005-03-20
     @arch-tag: b66524da-fe12-4bd9-ae32-f635b0b3949b
-    @cvs-id $Id: content-keyword-test-procs.tcl,v 1.2 2007/01/10 21:22:03 gustafn Exp $
+    @cvs-id $Id: content-keyword-test-procs.tcl,v 1.2.12.1 2015/09/10 08:21:19 gustafn Exp $
 }
 
 aa_register_case content_keyword {
@@ -37,3 +37,8 @@ aa_register_case content_keyword {
                 [string equal [db_string confirm_delete "" -default ""] ""]
      }
 }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

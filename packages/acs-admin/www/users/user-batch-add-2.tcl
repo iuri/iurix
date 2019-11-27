@@ -1,6 +1,6 @@
 ad_page_contract {
     Interface for specifying a list of users to sign up as a batch
-    @cvs-id $Id: user-batch-add-2.tcl,v 1.6 2009/07/12 01:08:22 donb Exp $
+    @cvs-id $Id: user-batch-add-2.tcl,v 1.7.2.3 2016/01/02 21:14:10 gustafn Exp $
 } -query {
     userlist
     from
@@ -25,7 +25,7 @@ set title "Adding new users in bulk"
 while {[regexp {(.[^\n]+)} $userlist match_fodder row] } {
     # remove each row as it's handled
     set remove_count [string length $row]
-    set userlist [string range $userlist [expr {$remove_count + 1}] end]
+    set userlist [string range $userlist $remove_count+1 end]
     set row [split $row ,]
     set email [string trim [lindex $row 0]]
     set first_names [string trim [lindex $row 1]]
@@ -35,8 +35,11 @@ while {[regexp {(.[^\n]+)} $userlist match_fodder row] } {
 	append exception_text "<li>Couldn't find a valid email address in ($row).</li>\n"
 	continue
     } else {
-	set email_count [db_string unused "select count(email)
-from parties where email = lower(:email)"]
+	set email_count [db_string unused {
+            select count(email)
+            from parties
+            where email = lower(:email)
+        }]
 	
 	if {$email_count > 0} {
 	    append exception_text "<li> $email was already in the database.</li>\n"
@@ -83,7 +86,7 @@ from parties where email = lower(:email)"]
     if {[catch {acs_mail_lite::send -send_immediately -to_addr $email -from_addr $from -subject $subject -body $sub_message} errmsg]} {
 	ad_return_error "Mail Failed" "<p>The system was unable to send email.  Please notify the user personally.  This problem is probably caused by a misconfiguration of your email system.  Here is the error:</p> 
 <div><code>
-[ad_quotehtml $errmsg]
+[ns_quotehtml $errmsg]
 </code></div>"
         return
     }
@@ -93,3 +96,9 @@ from parties where email = lower(:email)"]
 ad_return_template
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

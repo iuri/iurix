@@ -10,18 +10,18 @@ ad_page_contract {
     @param  return_url   url to redirect to after submission 
     @author teadams@alum.mit
     @date   March 27, 2003
-    @cvs-id $Id: respond.tcl,v 1.3 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id $Id: respond.tcl,v 1.5.2.2 2017/06/30 17:55:10 gustafn Exp $
 } {
 
-    user_id:integer
-    survey_id:integer
-    {section_id:integer 0}
-    {response_id:integer 0} 
-    return_url:optional
+    user_id:naturalnum,notnull
+    survey_id:naturalnum,notnull
+    {section_id:naturalnum,notnull 0}
+    {response_id:naturalnum,notnull 0} 
+    return_url:localurl,optional
 
 } -validate {
     survey_exists -requires {survey_id} {
-	if ![db_0or1row survey_exists {}] {
+	if {![db_0or1row survey_exists {}]} {
 	    ad_complain "Survey $survey_id does not exist"
 	}
     }
@@ -38,7 +38,7 @@ ad_page_contract {
 
 # Added by request from a professor at Sloan.
 
-ad_require_permission $survey_id survey_admin_survey
+permission::require_permission -object_id $survey_id -privilege survey_admin_survey
 
 get_survey_info -survey_id $survey_id
 set survey_name $survey_info(name)
@@ -58,7 +58,7 @@ if { !$user_exists_p } {
 # XXX TODO - person name
 set context $survey_name
 
-# XXX TODO - check how the correct reponse get's filled
+# XXX TODO - check how the correct response get's filled
 #  with the correct response esp if there is more than
 #  one response to a survey.
 
@@ -82,13 +82,13 @@ db_foreach survey_sections {} {
     # rather than executing the survey associated with the logic
     # after the survey is completed
     
-    if ![info exists return_url] {
+    if {![info exists return_url]} {
 	set return_url {}
     }
 }
 
 set edited_response_id $response_id
-set form_vars [export_form_vars section_id survey_id new_response_id user_id edited_response_id]  
+set form_vars [export_vars -form {section_id survey_id new_response_id user_id edited_response_id}]  
 
 ad_return_template
 

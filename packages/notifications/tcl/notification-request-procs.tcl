@@ -8,7 +8,7 @@ ad_library {
 
     @creation-date 2002-05-24
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: notification-request-procs.tcl,v 1.11 2006/09/12 18:13:38 maltes Exp $
+    @cvs-id $Id: notification-request-procs.tcl,v 1.12.2.1 2015/09/12 11:06:46 gustafn Exp $
 
 }
 
@@ -28,7 +28,7 @@ namespace eval notification::request {
     } {
         set request_id [get_request_id -type_id $type_id -object_id $object_id -user_id $user_id]
 
-        if {[empty_string_p $request_id]} {
+        if {$request_id eq ""} {
             # Set up the vars
             set extra_vars [ns_set create]
             oacs_util::vars_to_ns_set -ns_set $extra_vars -var_list {request_id type_id user_id object_id interval_id delivery_method_id format dynamic_p}
@@ -117,3 +117,9 @@ namespace eval notification::request {
         db_exec_plsql delete_all_for_user {}
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

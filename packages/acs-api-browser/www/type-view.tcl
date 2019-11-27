@@ -2,10 +2,10 @@ ad_page_contract {
 
     Displays information about a type.
 
-    @cvs-id $Id: type-view.tcl,v 1.3 2004/01/26 15:39:41 jeffd Exp $
+    @cvs-id $Id: type-view.tcl,v 1.4.2.1 2015/09/10 08:21:12 gustafn Exp $
 
 } {
-    version_id:optional
+    version_id:naturalnum,optional
     type
 } -properties {
     title:onevalue
@@ -13,8 +13,9 @@ ad_page_contract {
     documentation:onevalue
 }
 
-if { ![info exists version_id] && \
-        [regexp {^([^ /]+)/} $type "" package_key] } {
+if { ![info exists version_id] 
+     && [regexp {^([^ /]+)/} $type "" package_key] 
+ } {
     db_0or1row version_id_from_package_key {
         select version_id 
           from apm_enabled_package_versions 
@@ -23,7 +24,7 @@ if { ![info exists version_id] && \
 }
  
 
-set public_p [api_set_public $version_id]
+set public_p [::apidoc::set_public $version_id]
 
 
 set context [list]
@@ -41,3 +42,9 @@ lappend context $type
 
 set title $type
 set documentation [api_type_documentation $type]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

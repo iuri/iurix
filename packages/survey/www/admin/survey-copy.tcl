@@ -4,15 +4,15 @@ ad_page_contract {
     @date    August 3, 2002
     @cvs-id $Id:
 } {
-    survey_id:integer,notnull
+    survey_id:naturalnum,notnull
     name:optional
-    new_survey_id:optional
+    new_survey_id:naturalnum,optional
 }
 
 set package_id [ad_conn package_id]
-set user_id [ad_get_user_id]
+set user_id [ad_conn user_id]
 
-ad_require_permission $package_id survey_create_question
+permission::require_permission -object_id $package_id -privilege survey_create_question
 db_1row get_survey_info {}
 set title_name $name
 set name "[_ survey.Copy_of] $name"
@@ -28,7 +28,7 @@ ad_form -name copy_survey -form {
 
     set survey_id $new_survey_id
  
-    ad_returnredirect "one?[export_vars survey_id]"
+    ad_returnredirect [export_vars -base one survey_id]
     ad_script_abort
 }
 

@@ -8,7 +8,6 @@
   <msg key="Add_A_Question">Adicionar uma Pergunta</msg>
   <msg key="Add_New">Adicionar Novo</msg>
   <msg key="add_new_question">adicionar nova pergunta</msg>
-  <msg key="Admin">Admin</msg>
   <msg key="Admin_This_Survey">Administrar este Questionário</msg>
   <msg key="allow_multiple">permitir múltiplo</msg>
   <msg key="Answer_Survey">Responder Questionário</msg>
@@ -19,11 +18,9 @@
   <msg key="Boolean">Booleano</msg>
   <msg key="By_user">Por usuário</msg>
   <msg key="Choose_a_Survey_Type">Escolha um Tipo de Questionário</msg>
-  <msg key="Choose_members_to_receive">Escolha os membros para receber o email</msg>
   <msg key="Choose_Survey_Type">Escolha o Tipo de Questionário</msg>
   <msg key="Choose_Type">Escolha do tipo</msg>
-  <msg key="Compose_bulk_message">Compor nova mensagem</msg>
-  <msg key="Continue_with_Delete">Prosseguir com a exclusão</msg>
+  <msg key="Continue_with_Delete">Contunuar a Deletar</msg>
   <msg key="Copy">Copiar</msg>
   <msg key="Copy_of">Cópia de</msg>
   <msg key="Copy_this_survey">Copiar este questionário</msg>
@@ -31,7 +28,7 @@
   <msg key="Could_not_find_user">Não foi possível localizar o usuário</msg>
   <msg key="Create_Survey">Criar Questionário</msg>
   <msg key="CSV_Export">Exportar CVS</msg>
-  <msg key="CSV_file">Arquivo CSV</msg>
+  <msg key="CSV_file">Arquivo CVS</msg>
   <msg key="Database_Error">Erro de Base de Dados</msg>
   <msg key="Database_error">Erro de base de dados</msg>
   <msg key="Date">Data</msg>
@@ -56,7 +53,6 @@
   <msg key="Edited">editável</msg>
   <msg key="Email_Address">Endereço Eletrônico</msg>
   <msg key="Email_Options">Opções de Email:</msg>
-  <msg key="Email_this_survey">Enviar enquete por email</msg>
   <msg key="enable">habilitar</msg>
   <msg key="Enter_Message">Entre a Mensagem</msg>
   <msg key="Extreme_Actions">Ações Extremas:</msg>
@@ -65,9 +61,6 @@
   <msg key="From">Remetente:</msg>
   <msg key="From_1">Remetente</msg>
   <msg key="General_Survey">Questionário Geral</msg>
-  <msg key="goto_surveys_name">Vá ao</msg>
-  <msg key="Group">Grupo</msg>
-  <msg key="Group_Name">Nome do Grupo</msg>
   <msg key="Here_is_what">É aqui que</msg>
   <msg key="inactive">[inativo]</msg>
   <msg key="Integer">Inteiro</msg>
@@ -75,7 +68,6 @@
   <msg key="Large">Grande</msg>
   <msg key="Last_Name">Sobrenome</msg>
   <msg key="limit_to_one">limitar a uma</msg>
-  <msg key="Line_answer">Uma por linha</msg>
   <msg key="list">lista</msg>
   <msg key="lt_-_Lets_you_use_this_s">- Usar este questionário como modelo para criar um novo questionário</msg>
   <msg key="lt_-_Removes_all_questio">- Remover todas as perguntas e respotas</msg>
@@ -86,7 +78,7 @@
   <msg key="lt_Already_Responsed_view">Ver estes usuários</msg>
   <msg key="lt_Answers_to_survey_nam">Respostas para %survey_name%</msg>
   <msg key="lt_Awaiting_a_response_n">Aguardando resposta: %n_awaiting users% Exibir usuários. &lt;%community_url%/survey/admin/respondents?response_type=not_responded&gt; Spam para os usuários. &lt;%community_url%/survey/admin/send-mail?survey_id=%survey_id%&amp;to=not_responded&gt; Todo o grupo: %n_members% Exibir usuários. &lt;%community_url%/survey/admin/respondents?response_type=all&gt; Spam para os usuários. &lt;%community_url%/survey/admin/send-mail?survey_id=%survey_id%&amp;to=all&gt; Respostas: </msg>
-  <msg key="lt_Cancel_and_return_to_">Cancelar e retornar às respostas do questionário</msg>
+  <msg key="lt_Cancel_and_return_to_">Cancelar e retornar às respotas do questionário</msg>
   <msg key="lt_Cancel_and_return_to__1">Cancelar e retornar para a administração do Questionário</msg>
   <msg key="lt_Completely_delete">Apagar completamente as respostas de %user_name_var% de %response_date_var%? (Obs.: Não pode ser desfeito)</msg>
   <msg key="lt_Confirm_Survey_Detail">Confirmar Detalhes do Questionário</msg>
@@ -97,20 +89,18 @@
   <msg key="lt_DELETE_survey_infonam">DELETAR: %survey_info.name%</msg>
   <msg key="lt_DELETE_Survey_Respons">DELETAR: Resposta do Questionário</msg>
   <msg key="lt_Deleting_this_surve">Deletar este questionário irá apagra todas %questions_count% perguntas e todas %responses_count% respostas associadas a este questionário!</msg>
-  <msg key="lt_denotes_a_required_qu">indica que é uma pergunta obrigatória</msg>
+  <msg key="lt_denotes_a_required_qu">indica que é uma perguta requerida</msg>
   <msg key="lt_Description_must_be_l">Descrição deve ser menor que 4000 caracteres</msg>
   <msg key="lt_Edit_and_submit_to_ch">Editar e submeter a mudança de nome deste questionário:</msg>
   <msg key="lt_Essay_Answer_Text_Are">Resposta (Área de Texto)</msg>
   <msg key="lt_Everyone_eligible_to_">Todos podem responder este questionário</msg>
   <msg key="lt_Everyone_who_has_alre">Todos que já responderam este questionário</msg>
   <msg key="lt_Everyone_who_has_not_">Todos que ainda não responderam este questionário</msg>
-  <msg key="lt_For_Multiple_Choicebr">Para mútiplas escolhas &lt;br /&gt; Entre com uma lista de respostas válidas &lt;br /&gt; (Uma escolha por linha)</msg>
-  <msg key="lt_Group_Web_Addres">Endereço do Site do grupo</msg>
+  <msg key="lt_For_Multiple_Choicebr">Para mútiplas escolhas &lt;br&gt; Entre com uma lista de respostas válidas &lt;br&gt; (Uma escolha por linha)</msg>
   <msg key="lt_had_to_say_in_respons">tiveram a dizer em resposta ao questionário %survey_name%:</msg>
   <msg key="lt_Here_is_how_your_surv">Assim é como a descição do questionário irá aparecer:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Administrar Questionário&quot;&gt; </msg>
   <msg key="lt_img_srcgraphicsadming_1">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Admin&quot;&gt;</msg>
-  <msg key="lt_Lets_email_this_s">Enviar enquete por email</msg>
   <msg key="lt_Main_Survey_Administr">Administração Principal de Questionarios</msg>
   <msg key="lt_Modify_a_Questions_Te">Modificar o Texto da Questão</msg>
   <msg key="lt_Modify_previous_respo">Modificar respostas prévias</msg>
@@ -131,7 +121,6 @@
   <msg key="lt_Preview_One_Survey_na">Prever Questionário: %name%  </msg>
   <msg key="lt_Previous_response_on_">Resposta anterior em: %surveys.creation_date%</msg>
   <msg key="lt_Previous_response_on__1">Resposta anterior em: %survey_details.creation_date%</msg>
-  <msg key="lt_Recipients_First_Name">Nome do Destinatário</msg>
   <msg key="lt_regarding_this_survey">sobre este questionário</msg>
   <msg key="lt_Requested_survey_does">Questionário requisitado não existe</msg>
   <msg key="lt_Response_on_response_">Resposta em %response_date%</msg>
@@ -142,7 +131,6 @@
   <msg key="lt_Return_to_survey_admi">Retornar para a administração do questionário</msg>
   <msg key="lt_Section_section_id_do">Seção %section_id% não existe</msg>
   <msg key="lt_Send_Mail_Re_survey_n">Enviar Mail Re: %survey_name%</msg>
-  <msg key="lt_Senders_Email_Address">Endereço de Email do Remetente</msg>
   <msg key="lt_Survey_Administration">Administração do Questionário</msg>
   <msg key="lt_Survey_Administration_1">Administração do Questionário: Adicionar Pergunta (cont.)</msg>
   <msg key="lt_Survey_Administration_2">Administração de Questionário. Criar Novo Questionário</msg>
@@ -164,7 +152,6 @@
   <msg key="lt_Survey_survey_notif_intro">Aqui está o que %user_name% tem a dizer a respeito de %survey_name%:</msg>
   <msg key="lt_Survey_survey_Res">Respondente: %user_name%</msg>
   <msg key="lt_The_Above_Description">A descrição acima é</msg>
-  <msg key="lt_The_following_variabl">As seguintes variáveis podem ser usadas para inserir dados específidos do(a) usuário/comunidade:</msg>
   <msg key="lt_The_response_to_ques_i">A resposta para %question_text% deve ser um inteiro. Sua resposta foi %response_value%.</msg>
   <msg key="lt_The_response_to_ques_n">A resposta para %question_text% deve ser um número. Sua resposta foi %response_value%.</msg>
   <msg key="lt_There_has_been_1_resp">Houve 1 resposta.</msg>
@@ -187,10 +174,8 @@
   <msg key="lt_Your_file_is_zero-len">Seu arquivo tem tamanho zero. Ou você tentou enviar um arquivo de tamanho nulo, o que não existe, ou ocorreu um erro durante a transferência.</msg>
   <msg key="lt_Your_response________">Sua resposta em %responses.pretty_submission_date%</msg>
   <msg key="make">tornar</msg>
-  <msg key="Max_number_answers">O número máximo de respostas permitido é %max_answers% e você escolheu %num_answers%</msg>
   <msg key="Mean">Média:</msg>
   <msg key="Medium">Médio</msg>
-  <msg key="Message">Mensagem</msg>
   <msg key="Message_Subject">Assunto da Mensagem</msg>
   <msg key="Modify_Question">Modificar Pergunta</msg>
   <msg key="Modify_Responses">Modificar Respostas</msg>
@@ -198,16 +183,12 @@
   <msg key="Move_Up">Mover Acima</msg>
   <msg key="Multiple_Choice">Múltipla Escolha</msg>
   <msg key="multiple_responses">múltiplas respostas</msg>
-  <msg key="N_Respostas">Número máximo de respostas</msg>
-  <msg key="N_Respostas_Help">Número máximo de respostas permitido ao usuário. Deixe em branco para não haver máximo.</msg>
-  <msg key="Name">Nome</msg>
   <msg key="Name_copy">Nome</msg>
   <msg key="New_Survey">Novo Questionário</msg>
   <msg key="No">Não</msg>
   <msg key="No_data_found">Dados não encontrados</msg>
   <msg key="No_Responses">Não há Respostas</msg>
   <msg key="No_surveys_active">Não há questionários ativados</msg>
-  <msg key="No_unanswered_surveys">Não há questionários a responder</msg>
   <msg key="non-">não-</msg>
   <msg key="Not_Found">Não Encontrado</msg>
   <msg key="Number">Número</msg>
@@ -217,7 +198,6 @@
   <msg key="oops">opa</msg>
   <msg key="Original">Original</msg>
   <msg key="paragraph">parágrafo</msg>
-  <msg key="Personal">Pessoal</msg>
   <msg key="Plain_Text">Texto Simples</msg>
   <msg key="Preformatted_Text">Texto pré-formatado</msg>
   <msg key="Presentation_Type">Tipo de Apresentação</msg>
@@ -225,8 +205,6 @@
   <msg key="Question">Pergunta</msg>
   <msg key="Question_Text">Texto da Pergunta</msg>
   <msg key="Questions">Questões</msg>
-  <msg key="Recipients_Email">Email do Destinatário</msg>
-  <msg key="Recipients_Last_Name">Sobrenome do Destinatário</msg>
   <msg key="Required">Requerida?</msg>
   <msg key="Respondents">Participantes</msg>
   <msg key="response">resposta</msg>
@@ -234,30 +212,18 @@
   <msg key="Response_Options">Opções de Resposta:</msg>
   <msg key="Response_Submitted">Resposta Enviada</msg>
   <msg key="Response_to">Resposta para</msg>
-  <msg key="Response_type">Tipo de resposta</msg>
-  <msg key="Response_type_help">&lt;p&gt;Selecione sua opção de acordo com as regras:&lt;/p&gt;
-&lt;b&gt;Pessoal:&lt;/b&gt; Construa seu próprio checkbox, colocando as opções de valor no seguinte formato &lt; input type=&quot;checkbox&quot; value=&quot;Seu_valor&quot;&gt;
-&lt;br&gt;
-&lt;b&gt;Padrão&lt;/b&gt;: Uma opção por linha</msg>
   <msg key="Responses">Respostas</msg>
   <msg key="responses">respostas</msg>
   <msg key="Return">Retornar</msg>
   <msg key="Score">Pontuação</msg>
   <msg key="Scored_Survey">Questionário com pontuação</msg>
-  <msg key="Select_One">Selecione Um</msg>
   <msg key="Send_bulkmail">Enviar email em massa</msg>
-  <msg key="Send_Date">Data de Envio</msg>
   <msg key="Send_Mail">Enviar Mail</msg>
   <msg key="Send_mail_to">Enviar email para</msg>
-  <msg key="Send_to_all">Enviar para todos</msg>
-  <msg key="Send_to_groups">Enviar para Grupos</msg>
-  <msg key="Send_to_people">Enviar para Pessoas</msg>
   <msg key="Short_Text">Texto Curto</msg>
   <msg key="Size">Tamanho</msg>
   <msg key="Small">Pequeno</msg>
-  <msg key="Spam">Spam</msg>
   <msg key="Standard_Dev">Desvio Padrão</msg>
-  <msg key="Subject">Assunto</msg>
   <msg key="Submit">Enviar</msg>
   <msg key="Submit_response">Enviar respostas</msg>
   <msg key="Summary">Resumo</msg>
@@ -276,7 +242,6 @@
   <msg key="Type_of_Response">Tipo de Resposta</msg>
   <msg key="Uploaded_file">Enviar arquivo:</msg>
   <msg key="View">Ver</msg>
-  <msg key="view_edit_previous_responses">Ver/Alterar respostas anteriores</msg>
   <msg key="View_Response">Ver Resposta</msg>
   <msg key="View_Responses">Ver Respostas:</msg>
   <msg key="View_responses">Ver respostas</msg>

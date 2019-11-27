@@ -13,11 +13,11 @@ ad_proc -public email_image::update_private_p {
     -level:required
 } {
     Changes the priv_email field from the users table
-    @user_id 
-    @level   Change to this level
+    @param user_id 
+    @param level   Change to this level
 } {
     db_transaction {
-        db_dml update_users {  }
+        db_dml update_users {}
     }
 }
 
@@ -25,9 +25,8 @@ ad_proc -public email_image::get_priv_email {
     -user_id:required
 } {
     Returns the priv_email field of the user from the users table.
-    @user_id
 } {
-    set priv_level [db_string get_private_email {  }]
+    set priv_level [db_string get_private_email {}]
     if {$priv_level eq "5"} {
       set priv_level [parameter::get_from_package_key -package_key "acs-subsite" \
       -parameter "PrivateEmailLevelP" -default 4]
@@ -41,16 +40,15 @@ ad_proc -public email_image::get_user_email {
     {-bgcolor "" }
     {-transparent "" }
 } {
-    Returns the email in differnet diferent ways (text level 4, image or text and image level 3, link level 2, ...)
+    Returns the email in differnet different ways (text level 4, image or text and image level 3, link level 2, ...)
     according to the priv_email field in the users table. To create an image the ImageMagick software is required, 
     if ImageMagick is not present then the @ symbol in the email will be shown as an image. When creating an image 
     you can choose the background color (In this format \#xxxxxx). Also you can make the background color transparent 
     (1 or 0).
     
-    @user_id
-    @return_url   The url to return when the email is shown as a link
-    @bgcolor      The Background color of the image. Default to \#ffffff
-    @transparent  If the bgcolor is transparent. Default to 1
+    @param return_url   The url to return when the email is shown as a link
+    @param bgcolor      The Background color of the image. Default to \#ffffff
+    @param transparent  If the bgcolor is transparent. Default to 1
 } {
     set email [email_image::get_email -user_id $user_id]
     set user_level [email_image::get_priv_email -user_id $user_id]
@@ -62,18 +60,18 @@ ad_proc -public email_image::get_user_email {
         # We use the privacy level that the user select
         set priv_level $user_level
     }
-    set send_email_url [ad_quotehtml "/shared/send-email?sendto=$user_id&return_url=$return_url"]
+    set send_email_url [ns_quotehtml "/shared/send-email?sendto=$user_id&return_url=$return_url"]
     switch $priv_level {
         "4" {
-            return "<a href=\"mailto:$email\" title=\"#acs-subsite.Send_email_to_this_user#\">$email</a>"
+            return [subst {<a href="mailto:$email" title="#acs-subsite.Send_email_to_this_user#">$email</a>}]
         }
         "3" {
             set email_image_id [email_image::get_related_item_id -user_id $user_id]
             if { $email_image_id != "-1" } {
                 # The user has an email image stored in the content repository
                 set revision_id [content::item::get_latest_revision -item_id $email_image_id]
-                set img_src [ad_quotehtml "/shared/email-image-bits.tcl?user_id=$user_id&revision_id=$revision_id"]
-                set email_image "<a href=\"$send_email_url\"><img style=\"border:0\" src=\"$img_src\" alt=\"#acs-subsite.Email#\"></a>"
+                set img_src [ns_quotehtml "/shared/email-image-bits.tcl?user_id=$user_id&revision_id=$revision_id"]
+		return [subst {<a href="$send_email_url"><img style="border:0" src="$img_src" alt="#acs-subsite.Email#"></a>}]
             } else {
                 # Create a new email_image
                 if { [catch { set email_image [email_image::new_item -user_id $user_id -return_url $return_url -bgcolor $bgcolor -transparent $transparent] } errmsg ] } {
@@ -82,13 +80,13 @@ ad_proc -public email_image::get_user_email {
                     # an image replacing the "@" symbol
                     set email_user [lindex [split $email '@'] 0]
                     set email_domain [lindex [split $email '@'] 1]
-                    set email_image "<a href=\"$send_email_url\">${email_user}<img style=\"border:0\" src=\"/shared/images/at.gif\" alt=\"@\">${email_domain}</a>"
+                    set email_image [subst {<a href="$send_email_url">$email_user<img style="border:0" src="/shared/images/at.gif" alt="@">$email_domain</a>}]
                 }
             }
             return $email_image
         }
         "2" {
-            return "<a href=\"$send_email_url\">\#acs-subsite.Send_email_to_this_user\#</a>"
+            return [subst {<a href="$send_email_url">#acs-subsite.Send_email_to_this_user#</a>}]
         }
         "1" { 
             #Do not show e-mail
@@ -103,9 +101,8 @@ ad_proc -public email_image::get_email {
 } {
     Returns the email of the user
 
-    @user_id
 } {
-    return [db_string get_email {  }]
+    return [db_string get_email {}]
 }
 
 
@@ -119,9 +116,8 @@ ad_proc -public email_image::new_item {
     Creates the email_image of the user with his/her email on it and store it
     in the content repository under the Email_Images folder.
 
-    @user_id       
-    @bgcolor       The background color of the image in the format \#xxxxxx, default to \#ffffff
-    @transparent   If you want the background color transparent set it to 1. Default to 1
+    @param bgcolor       The background color of the image in the format \#xxxxxx, default to \#ffffff
+    @param transparent   If you want the background color transparent set it to 1. Default to 1
 } {
     
     # First we create a type and a folder in the content repository 
@@ -177,17 +173,17 @@ ad_proc -public email_image::new_item {
                              -description "User email image"  -creation_ip $creation_ip ]
         
         email_image::add_relation -user_id $user_id -item_id $item_id
-        db_dml update_cr_items {  }
-        db_dml lob_content {  } -blob_files [list ${dest_path}]
-        db_dml lob_size {  }
+        content::item::set_live_revision -revision_id $revision_id
+        db_dml new_lob_content {} -blob_files [list ${dest_path}]
+        db_dml lob_size {}
     }
     
     # Delete the temporary file created by ImageMagick
-    catch { file delete  $dest_path } errMsg
+    catch { file delete -- $dest_path } errMsg
     
-    set img_src [ad_quotehtml "/shared/email-image-bits.tcl?user_id=$user_id&revision_id=$revision_id"]
-    set send_email_url [ad_quotehtml "/shared/send-email?sendto=$user_id&return_url=$return_url"]
-    set email_image "<a href=\"$send_email_url\"><img style=\"border:0\" src=\"$img_src\" alt=\"#acs-subsite.Email#\"></a>"
+    set img_src [ns_quotehtml "/shared/email-image-bits.tcl?user_id=$user_id&revision_id=$revision_id"]
+    set send_email_url [ns_quotehtml "/shared/send-email?sendto=$user_id&return_url=$return_url"]
+    set email_image [subst {<a href="$send_email_url"><img style="border:0" src="$img_src" alt="#acs-subsite.Email#"></a>}
 
     return "$email_image"
 }
@@ -205,9 +201,8 @@ ad_proc -public email_image::edit_email_image {
     stored it makes a new revision of the image, if not, it creates a new item with the new
     image.
 
-    @user_id       
-    @bgcolor       The background color of the image in the format \#xxxxxx, default to \#ffffff
-    @transparent   If you want the background color transparent set it to 1. Default to 1
+    @param bgcolor       The background color of the image in the format \#xxxxxx, default to \#ffffff
+    @param transparent   If you want the background color transparent set it to 1. Default to 1
 } {
     if { $new_email == [email_image::get_email -user_id $user_id] } {
         # Email didn't change
@@ -255,9 +250,9 @@ ad_proc -public email_image::edit_email_image {
             set revision_id [content::revision::new -item_id $item_id -title $image_name \
                                  -mime_type $mime_type  \
                                  -description "User email image" -creation_ip $creation_ip ]
-            db_dml update_cr_items { }
-            db_dml lob_content { } -blob_files [list ${dest_path}]
-            db_dml lob_size { }
+            content::item::set_live_revision -revision_id $revision_id
+            db_dml lob_content {} -blob_files [list ${dest_path}]
+            db_dml lob_size {}
         }
     } else {
         db_transaction {
@@ -270,13 +265,13 @@ ad_proc -public email_image::edit_email_image {
 
             email_image::add_relation -user_id $user_id -item_id $item_id
 
-            db_dml update_cr_items {  }
-            db_dml lob_content {  } -blob_files [list ${dest_path}]
-            db_dml lob_size {  }
+            db_dml update_cr_items {}
+            db_dml lob_content {} -blob_files [list ${dest_path}]
+            db_dml lob_size {}
         }
     }
     # Delete the temporary file created by ImageMagick
-    catch { file delete  $dest_path } errMsg
+    catch { file delete -- $dest_path } errMsg
 }
 
 
@@ -284,7 +279,7 @@ ad_proc -public email_image::edit_email_image {
 ad_proc -public email_image::get_folder_id { } {
     Returns the folder_id of the folder with the name "Email_Images"
 } {
-    return [db_string check_folder_name {  } ]
+    return [db_string check_folder_name {} ]
 }
 
 ad_proc -public email_image::add_relation {
@@ -292,10 +287,10 @@ ad_proc -public email_image::add_relation {
     -item_id:required
 } {
     Add a new relation between user_id and item_id
-    @user_id
-    @item_id the item_id of the image in the content repository
+
+    @param item_id the item_id of the image in the content repository
 } {
-    db_exec_plsql add_relation {  }
+    db_exec_plsql add_relation {}
 }
 
 ad_proc -public email_image::get_related_item_id {
@@ -303,9 +298,8 @@ ad_proc -public email_image::get_related_item_id {
 } {
     Returns the item_id of the email_image stored in the content repository for
     user_id.
-    @user_id
 } {
-    return [db_string get_rel_item {  } -default -1 ]
+    return [db_string get_rel_item {} -default -1 ]
 }
 
 
@@ -324,3 +318,9 @@ ad_proc -public email_image::create_type_folder_rel { } {
 
     rel_types::new email_image_rel "Email Image" "Email Images" user 0 1 content_item 0 1
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

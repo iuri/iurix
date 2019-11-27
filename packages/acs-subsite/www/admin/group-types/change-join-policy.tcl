@@ -6,10 +6,10 @@ ad_page_contract {
     @author Oumi Mehrotra (oumi@arsdigita.com)
 
     @creation-date 2001-02-23
-    @cvs-id $Id: change-join-policy.tcl,v 1.4 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: change-join-policy.tcl,v 1.6.2.5 2016/05/20 20:02:44 gustafn Exp $
 } {
     group_type:notnull
-    {return_url ""}
+    {return_url:localurl ""}
 } -properties {
     context:onevalue
     group_type:onevalue
@@ -23,25 +23,24 @@ ad_page_contract {
 
 set context [list \
         [list "[ad_conn package_url]admin/group-types/" "Group types"] \
-	[list "one?[ad_export_vars group_type]" "One type"] \
+	[list [export_vars -base one group_type] "One type"] \
 	"Edit default join policy"]
 
-if { ![db_0or1row select_pretty_name {
-    select t.pretty_name as group_type_pretty_name, t.dynamic_p,
-           nvl(gt.default_join_policy, 'open') as default_join_policy
-      from acs_object_types t, group_types gt
-     where t.object_type = :group_type
-       and t.object_type = gt.group_type(+)
-}] } {
+if { ![db_0or1row select_pretty_name {}] } {
     ad_return_error "Group type doesn't exist" "Group type \"$group_type\" doesn't exist"
     return
 }
 
-if {$dynamic_p ne "t" } {
+if {$dynamic_p != "t" } {
     ad_return_error "Cannot administer group type" "Group type \"$group_type\" can only be administered by programmers"
 }
 
 set possible_join_policies [list open "needs approval" closed]
-set QQreturn_url [ad_quotehtml $return_url]
-set QQgroup_type [ad_quotehtml $group_type]
+set QQreturn_url [ns_quotehtml $return_url]
+set QQgroup_type [ns_quotehtml $group_type]
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

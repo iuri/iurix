@@ -16,20 +16,6 @@
 </fullquery>
 
  
-<fullquery name="ad_maybe_redirect_for_registration.sql_test_1">      
-      <querytext>
-      select test_sql('select 1 from dual where 1=[DoubleApos $value]') from dual
-      </querytext>
-</fullquery>
-
- 
-<fullquery name="ad_maybe_redirect_for_registration.sql_test_2">      
-      <querytext>
-      select test_sql('select 1 from dual where 1=[DoubleApos "'$value'"]') from dual
-      </querytext>
-</fullquery>
-
- 
 <fullquery name="populate_secret_tokens_db.insert_random_token">      
       <querytext>
       
@@ -78,7 +64,16 @@
            property_name = :name
       </querytext>
 </fullquery>
- 
+
+<fullquery name="ad_set_client_property.prop_upsert">      
+  <querytext>
+      begin
+         sec_session_property.upsert(:session_id, :module, :name, :value, :secure, :last_hit);
+      end;
+      </querytext>
+</fullquery>
+
+
 <fullquery name="ad_change_password.password_update">      
       <querytext>
         update users 

@@ -2,26 +2,34 @@
 -- @author Simon Carstensen (simon@collaboraid.biz)
 -- @creation_date 2003-09-10
 --
--- $Id: upgrade-4.7d2-4.7d3.sql,v 1.2 2003/09/16 08:29:59 lars Exp $
+-- $Id: upgrade-4.7d2-4.7d3.sql,v 1.3 2013/03/30 17:40:53 gustafn Exp $
 
 -- add column impl_pretty_name
 alter table acs_sc_impls add column impl_pretty_name varchar(200);
 
 update acs_sc_impls set impl_pretty_name = impl_name;
 
-create or replace function acs_sc_impl__new(varchar,varchar,varchar,varchar)
-returns integer as '
-declare
-    p_impl_contract_name        alias for $1;
-    p_impl_name                 alias for $2;
-    p_impl_pretty_name          alias for $3;
-    p_impl_owner_name           alias for $4;
+
+
+-- added
+select define_function_args('acs_sc_impl__new','impl_contract_name,impl_name,impl_pretty_name,impl_owner_name');
+
+--
+-- procedure acs_sc_impl__new/4
+--
+CREATE OR REPLACE FUNCTION acs_sc_impl__new(
+   p_impl_contract_name varchar,
+   p_impl_name varchar,
+   p_impl_pretty_name varchar,
+   p_impl_owner_name varchar
+) RETURNS integer AS $$
+DECLARE
     v_impl_id                   integer;
-begin
+BEGIN
 
     v_impl_id := acs_object__new(
                 null,
-                ''acs_sc_implementation'',
+                'acs_sc_implementation',
                 now(),
                 null,
                 null,
@@ -44,7 +52,8 @@ begin
 
     return v_impl_id;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 drop view valid_uninstalled_bindings;

@@ -10,7 +10,7 @@ ad_library {
 
     @author peter.harper@open-msg.com
     @creation-date 2001-11-18
-    @cvs-id $Id: news-db-test-init.tcl,v 1.9 2010/11/08 11:44:42 victorg Exp $
+    @cvs-id $Id: news-db-test-init.tcl,v 1.12.2.3 2017/04/21 20:00:51 gustafn Exp $
 }
 
 
@@ -45,7 +45,7 @@ aa_register_init_class "mount-news-package" {
         switch [string trim $url] {
             "/_test/news/" {
                 set _news_node_id $node_id
-                if {$object_id != ""} {
+                if {$object_id ne ""} {
                     set _news_package_id $object_id
                 }
             }
@@ -470,7 +470,7 @@ aa_register_component "db-news-archive" {
     p_archive_date<br>
 } {
     aa_export_vars {p_item_id p_archive_date}
-    if {$p_archive_date == ""} {
+    if {$p_archive_date eq ""} {
         db_exec_plsql archive-default {
             begin
             news.archive(:p_item_id, null);
@@ -525,14 +525,14 @@ aa_register_case -cats {
     # Extract the list of all privileges and privilege heirachies.
     #
     set priv_list {}
-    db_foreach "get-privileges" {
+    db_foreach get-privileges {
         select privilege from acs_privileges
     } {
         lappend priv_list $privilege
     }
 
     set priv_h_list {}
-    db_foreach "get-privilege-heirarchys" {
+    db_foreach get-privilege-hierarchies {
         select privilege, child_privilege from acs_privilege_hierarchy
     } {
         lappend priv_h_list "$privilege,$child_privilege"
@@ -561,9 +561,9 @@ aa_register_case -cats {
 
     aa_log "Check the correct groups have the right privileges."
     aa_true "Check public have news_read privilege" \
-        [ad_permission_p $the_public_id news_read]
+        [permission::permission_p -object_id $the_public_id -privilege news_read]
     aa_true "Check registered_users have news_create privilege" \
-        [ad_permission_p $registered_users_id news_read]
+        [permission::permission_p -object_id $registered_users_id -privilege news_read]
 }
 
 
@@ -666,7 +666,7 @@ aa_register_case -cats {
 } "check-object-type" {
     Checks the news object type.
 } {
-    set news_type_exists_p [db_0or1row "get-news-type-info" {
+    set news_type_exists_p [db_0or1row get-news-type-info {
         select supertype
         from acs_object_types
         where object_type = 'news'
@@ -677,7 +677,7 @@ aa_register_case -cats {
     if {$news_type_exists_p} {
         aa_equals "Check the supertype is content_revision" $supertype "content_revision"
 
-        db_foreach "get-news-type-attribs" {
+        db_foreach get-news-type-attribs {
             select attribute_name
             from acs_attributes
             where object_type = 'news'
@@ -692,7 +692,7 @@ aa_register_case -cats {
             aa_true "Check $attribute_name exists" {[lsearch $attribs $attribute_name] != -1}
         }
 
-        set news_folder_exists_p [db_0or1row "get-news-cr-folder" {
+        set news_folder_exists_p [db_0or1row get-news-cr-folder {
             select folder_id
             from cr_folders
             where label = 'news'
@@ -769,11 +769,11 @@ aa_register_case -cats {
         } else {
             aa_equals "Check package_id correct"    $package_id $_news_package_id
             aa_equals "Check archive_date correct"  \
-                [string range $archive_date 0 [expr [string length $p_archive_date]-1]] \
+                [string range $archive_date 0 [string length $p_archive_date]-1] \
                 $p_archive_date
             aa_equals "Check approval_user correct" $approval_user $p_approval_user
             aa_equals "Check approval_date correct" \
-                [string range $approval_date 0 [expr [string length $p_approval_date] - 1]] \
+                [string range $approval_date 0 [string length $p_approval_date]-1] \
                 $p_approval_date
             aa_equals "Check approval_ip correct"   $approval_ip $p_approval_ip
         }
@@ -934,11 +934,11 @@ aa_register_case -cats {
             aa_log "Check the cr_news fields for the second revision"
             aa_equals "Check package_id correct"    $package_id $_news_package_id
             aa_equals "Check archive_date correct"  \
-                [string range $archive_date 0 [expr [string length $p_archive_date]-1]] \
+                [string range $archive_date 0 [string length $p_archive_date]-1] \
                 $p_archive_date
             aa_equals "Check approval_user correct" $approval_user $p_approval_user
             aa_equals "Check approval_date correct" \
-                [string range $approval_date 0 [expr [string length $p_approval_date] - 1]] \
+                [string range $approval_date 0 [string length $p_approval_date]-1] \
                 $p_approval_date
             aa_equals "Check approval_ip correct"   $approval_ip $p_approval_ip
 
@@ -1074,7 +1074,7 @@ aa_register_case -cats {
         set p_news_id $news_id
         aa_call_component db-get-cr-news-row
         aa_equals "Check the explicitly set archive_date is $p_archive_date" \
-            [string range $archive_date 0 [expr [string length $p_archive_date] - 1]] \
+            [string range $archive_date 0 [string length $p_archive_date]-1] \
             $p_archive_date
 
         #
@@ -1096,7 +1096,7 @@ aa_register_case -cats {
         aa_true "Check the cr_news row was found" $retrieval_ok_p
         set todays_date [clock format [clock seconds] -format "%Y-%m-%d"]
         aa_equals "Check the explicitly set archive_date is $todays_date" \
-            [string range $archive_date 0 [expr [string length $todays_date] - 1]] \
+            [string range $archive_date 0 [string length $todays_date]-1] \
             $todays_date
     }
 } {
@@ -1227,16 +1227,16 @@ aa_register_case -cats {
             aa_error "cr_news row not found for new revision news_id $revision1_id"
         } else {
             aa_equals "Check the archive_date is correct" \
-                [string range $archive_date 0 [expr [string length $p_archive_date]-1]] \
+                [string range $archive_date 0 [string length $p_archive_date]-1] \
                 $p_archive_date
             aa_equals "Check the approval_date is correct" \
-                [string range $approval_date 0 [expr [string length $p_approval_date]-1]] \
+                [string range $approval_date 0 [string length $p_approval_date]-1] \
                 $p_approval_date
             aa_equals "Check the aprroval_user is correct" \
-                [string range $approval_user 0 [expr [string length $p_approval_user]-1]] \
+                [string range $approval_user 0 [string length $p_approval_user]-1] \
                 $p_approval_user
             aa_equals "Check the approval_ip is correct" \
-                [string range $approval_ip 0 [expr [string length $p_approval_ip]-1]] \
+                [string range $approval_ip 0 [string length $p_approval_ip]-1] \
                 $p_approval_ip
         }
 
@@ -1249,7 +1249,7 @@ aa_register_case -cats {
             aa_error "cr_revisions row not found for new revision revision_id $revision1_id"
         } else {
             aa_equals "Check revision 1 publish_date is null" \
-                [string range $publish_date 0 [expr [string length $p_publish_date]-1]] \
+                [string range $publish_date 0 [string length $p_publish_date]-1] \
                 $p_publish_date
         }
     }
@@ -1443,3 +1443,9 @@ aa_register_case -cats {
         aa_call_component db-news-item-delete
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

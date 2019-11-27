@@ -3,9 +3,9 @@ ad_page_contract {
 
     @author Peter Marklund (peter@collaboraid.biz)
     @creation-date 23 October 2002
-    @cvs-id $Id: version-i18n-index.tcl,v 1.5 2003/12/11 21:39:45 jeffd Exp $  
+    @cvs-id $Id: version-i18n-index.tcl,v 1.6.2.1 2015/09/10 08:21:05 gustafn Exp $  
 } {
-    version_id:integer,notnull    
+    version_id:naturalnum,notnull    
 } -properties {
     page_title
     context_bar
@@ -28,3 +28,9 @@ set localize_url [export_vars -base "[apm_package_url_from_key "acs-lang"]admin/
 
 set import_url [export_vars -base "/acs-lang/admin/import-messages" { package_key {return_url {[ad_return_url]}} }]
 set export_url [export_vars -base "/acs-lang/admin/export-messages" { package_key {return_url {[ad_return_url]}} }]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

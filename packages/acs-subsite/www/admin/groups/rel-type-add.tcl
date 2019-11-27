@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Jan  2 12:08:12 2001
-    @cvs-id $Id: rel-type-add.tcl,v 1.3 2002/09/06 21:49:59 jeffd Exp $
+    @cvs-id $Id: rel-type-add.tcl,v 1.5.2.4 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    group_id:integer,notnull
-    { return_url "" }
+    group_id:naturalnum,notnull
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     export_vars:onevalue
@@ -18,7 +18,7 @@ ad_page_contract {
     primary_rels:multirow
 }
 
-set context [list [list "[ad_conn package_url]admin/groups/" "Groups"] [list "one?[ad_export_vars group_id]" "One Group"] "Add relation type"]
+set context [list [list "[ad_conn package_url]admin/groups/" "Groups"] [list [export_vars -base one group_id] "One Group"] "Add relation type"]
 set return_url_enc [ad_urlencode "[ad_conn url]?[ad_conn query]"]
 
 # Select out all the relationship types that are not currently
@@ -33,22 +33,14 @@ db_1row select_group_type {
      where o.object_id = :group_id
 }
 
-db_multirow primary_rels select_primary_relations {
-    select replace(lpad(' ', (t.type_level - 1) * 4), ' ', '&nbsp;') as indent,
-           t.pretty_name, t.rel_type
-      from (select t.pretty_name, t.object_type as rel_type, level as type_level
-              from acs_object_types t
-             where t.object_type not in (select g.rel_type 
-                                           from group_rels g 
-                                          where g.group_id = :group_id)
-           connect by prior t.object_type = t.supertype
-             start with t.object_type in ('membership_rel', 'composition_rel')) t,
-           acs_rel_types rel_type
-     where t.rel_type = rel_type.rel_type
-       and (rel_type.object_type_one = :group_type 
-            or acs_object_type.is_subtype_p(rel_type.object_type_one, :group_type) = 't')
-}
+db_multirow primary_rels select_primary_relations {}
 
-set export_vars [ad_export_vars -form {group_id return_url}]
+set export_vars [export_vars -form {group_id return_url}]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

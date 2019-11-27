@@ -5,7 +5,7 @@ ad_page_contract {
     regression tests for the secure_tokens ns_cache.a
 
     @author Richard Li (richardl@arsdigita.com)
-    @cvs-id $Id: signed-cookies-test-2.tcl,v 1.2 2007/01/10 21:22:00 gustafn Exp $
+    @cvs-id $Id: signed-cookies-test-2.tcl,v 1.3.2.1 2015/09/10 08:21:08 gustafn Exp $
     @creation-date 19 October 2000
 
 } 
@@ -15,16 +15,16 @@ set cookie_value [ad_get_cookie testcookie]
 set cookie_data [split $cookie_value {,}]
 set cookie_data_length [llength $cookie_data]
 
-set hash [lindex $cookie_data [expr {$cookie_data_length - 1}]]
-set max_age [lindex $cookie_data [expr {$cookie_data_length - 2}]]
-set token_id [lindex $cookie_data [expr {$cookie_data_length - 3}]]
+set hash [lindex $cookie_data $cookie_data_length-1]
+set max_age [lindex $cookie_data $cookie_data_length-2]
+set token_id [lindex $cookie_data $cookie_data_length-3]
 
 if { $cookie_data_length == 4 } {
     # no commas in data
     set data [lindex $cookie_data 0]
 } else {
     # join the data using commas
-    set data [join [lrange $cookie_data 0 [expr {$cookie_data_length - 4}]] {,}]
+    set data [join [lrange $cookie_data 0 $cookie_data_length-4] {,}]
 }
 
 set secret_token hello
@@ -122,3 +122,8 @@ ns_write "
 [ad_footer]
 
 "
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

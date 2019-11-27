@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author Stefan Deusch (stefan@arsdigita.com)
     @creation-date 2000-12-20
-    @cvs-id $Id: index.tcl,v 1.8 2005/02/24 13:33:23 jeffd Exp $
+    @cvs-id $Id: index.tcl,v 1.8.16.1 2015/09/12 11:06:43 gustafn Exp $
 
 } {
   {orderby: "item_id"}
@@ -77,3 +77,9 @@ set rss_exists [rss_support::subscription_exists \
                     -impl_name news]
 set rss_feed_url [news_util_get_url $package_id]rss/rss.xml
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

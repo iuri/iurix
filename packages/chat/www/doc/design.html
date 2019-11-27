@@ -26,7 +26,7 @@ TCL procedures: <a href="/api-doc/procs-file-view?path=packages/chat/tcl/chat-pr
 Requirements document: <a href="/doc/chat/requirements.html">/doc/chat/requirements.html</a></li>
 
 <li>
-Data model: <a href="/doc/sql/display-sql?url=chat-create.sql&package_key=chat">chat-create.sql</a></li>
+Data model: <a href="/doc/sql/display-sql?url=chat-create.sql&amp;package_key=chat">chat-create.sql</a></li>
 </ul>
 
 <h3>
@@ -47,7 +47,7 @@ security system.</li>
 
 <li>
 We want something that can be extended and maintained by any ArsDigita
-programmer, <i>i.e.</i>, something that requires only AOLserver, Tcl, Oracle,
+programmer, <em>i.e.</em>, something that requires only AOLserver, Tcl, Oracle,
 and Java skills.</li>
 
 <li>
@@ -246,7 +246,7 @@ doesn't have proper permissions for the chat room.
 </code></pre>
 
 To construct a public message that will broadcast to everyone in the
-chat room, the <i><b>to_user_id</b></i> and <i><b>to</b></i> fields
+chat room, the <em><strong>to_user_id</strong></em> and <em><strong>to</strong></em> fields
 need to be excluded from the message. When these two fields are present in
 the message then the message will only send to a specific
 user. Sending private messages to HTML users is not yet supported.
@@ -316,18 +316,18 @@ our from the server.
 
 <h4>API</h4>
 
-<p>All chat functionalities accessable from the browser are available
+<p>All chat functionalities accessible from the browser are available
 as an API. Providing these API allows different applications to modify
 chat without an application-specific user interface.&nbsp;&nbsp; These
 API will throw errors if their corresponding PL/SQL statement fail, so
 all applications employing them need to 'catch error' to display a
-nice error message to the user.  <p><b><a
-href="/api-doc/proc-view?proc=chat%5fmessage%5fpost">chat_message_post</a></b>
+nice error message to the user.  <p><strong><a
+href="/api-doc/proc-view?proc=chat%5fmessage%5fpost">chat_message_post</a></strong>
 - This API inserts chat message to the database depend whether a chat
 room archive mode.  It is also broadcast the message to all Java
 clients in the room.
 
-<p><b><a href="/api-doc/proc-view?proc=chat%5fmessage%5fretrieve">chat_message_retrieve</a></b>
+<p><strong><a href="/api-doc/proc-view?proc=chat%5fmessage%5fretrieve">chat_message_retrieve</a></strong>
 - This API is only used by the HTML client, and is used each time the HTML
 client refreshes. The API does not require database call, messages will be retrieve
 from AOL Server cache.
@@ -347,12 +347,12 @@ Types of chat we need to support</h4>
 
 <ul>
 <li>
-<b>Public chat rooms</b>. These are open to everyone in the
-<tt>users_active</tt>
+<strong>Public chat rooms</strong>. These are open to everyone in the
+<kbd>users_active</kbd>
 view.</li>
 
 <li>
-<b>Private chat rooms</b>. These are open to people in particular user
+<strong>Private chat rooms</strong>. These are open to people in particular user
 parties. We check permissions using permissioning for each room.</li>
 </ul>
 For either kind of chat room, we should support moderated chat. That is,
@@ -415,13 +415,13 @@ IX. Configuration/Parameters</h3>
 
 <ul>
 <li>
-<b>AppletHeight</b> - Height of display Java applet.</li>
+<strong>AppletHeight</strong> - Height of display Java applet.</li>
 
 <li>
-<b>AppletWidth</b> - Width of display Java applet.</li>
+<strong>AppletWidth</strong> - Width of display Java applet.</li>
 
 <li>
-<b>ServerPort</b> - Port will be listen for Java client connection.</li>
+<strong>ServerPort</strong> - Port will be listen for Java client connection.</li>
 </ul>
 
 <h3>

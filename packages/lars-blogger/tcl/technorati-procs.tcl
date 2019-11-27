@@ -98,11 +98,12 @@ ad_proc -private lars_blogger::technorati::parse_xml {
     }
     
     if { [catch {
-        set doc [dom parse $xml]
-        
-        set root [$doc documentElement]
+
+        dom parse $xml doc
+        $doc documentElement root
+
         set root_name [$root nodeName]
-        if { ![string equal $root_name "tapi"] } {
+        if { $root_name ne "tapi" } {
             error "Root element is not tapi"
         }
         
@@ -161,18 +162,18 @@ ad_proc -private lars_blogger::technorati::fetch_xml {
     set type "weblog"
     set version "0.9"
     
-    if { [string equal $key ""] } {
+    if {$key eq ""} {
         error "No Technorati API key available"
     }
     
-    if { [string equal $url ""] } {
+    if {$url eq ""} {
         set url "[ad_url][lars_blog_public_package_url]"
     }
     
-    set api_url "http://api.technorati.com/cosmos?[export_vars -url [list key url type version]]"
+    set api_url [export_vars -base http://api.technorati.com/cosmos [list key url type version]]
     
     array set f [ad_httpget -url $api_url -timeout 60]
-    if { [string equal $f(status) "200"] } {
+    if {$f(status) == 200} {
         return $f(page)
     } else {
         error "ad_httpget error"

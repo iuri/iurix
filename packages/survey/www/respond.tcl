@@ -7,18 +7,18 @@ ad_page_contract {
     @author philg@mit.edu
     @author nstrug@arsdigita.com
     @date   28th September 2000
-    @cvs-id $Id: respond.tcl,v 1.8 2005/03/01 00:01:44 jeffd Exp $
+    @cvs-id $Id: respond.tcl,v 1.10.2.1 2016/05/21 11:04:16 gustafn Exp $
 
 } {
     
-    survey_id:integer,notnull
-    {section_id:integer 0}
-    {response_id:integer 0}
-    return_url:optional
+    survey_id:naturalnum,notnull
+    {section_id:naturalnum,notnull 0}
+    {response_id:naturalnum,notnull 0}
+    return_url:localurl,optional
 
 } -validate {
     survey_exists -requires {survey_id} {
-	if ![db_0or1row survey_exists {}] {
+	if {![db_0or1row survey_exists {}]} {
 	    ad_complain "[_ survey.lt_Survey_survey_id_do_no]"
 	}
     set user_id [auth::require_login]
@@ -28,7 +28,7 @@ ad_page_contract {
         if {$section_id==0 && $single_section_p=="t"} {
             set section_id $survey_info(section_id)
         }
-    set name [list $survey_info(name)]
+    set name $survey_info(name)
     set description $survey_info(description)
     set description_html_p $survey_info(description_html_p)
     set single_response_p $survey_info(single_response_p)
@@ -56,7 +56,7 @@ ad_page_contract {
     return_url:onerow
 }
 
-ad_require_permission $survey_id survey_take_survey
+permission::require_permission -object_id $survey_id -privilege survey_take_survey
 
 set context $name
 set button_label "[_ survey.Submit_response]"
@@ -65,12 +65,6 @@ if {$editable_p == "t"} {
 	set button_label "[_ survey.lt_Modify_previous_respo]"
 	db_1row get_initial_response ""
     }
-}
-
-# Set the max numvber of answers for the javascript code
-set javascript_load ""
-db_foreach select_max_answers {} {
-	append javascript_load "disableHandler('responses', $num_answers, $question_id); "
 }
 
 # build a list containing the HTML (generated with survey_question_display) for each question
@@ -82,7 +76,7 @@ set questions [list]
 db_foreach survey_sections {} {
 
     db_foreach question_ids_select {} {
-		lappend questions [survey_question_display $question_id $response_id]
+	lappend questions [survey_question_display $question_id $response_id]
     }
 
     # return_url is used for infoshare - if it is set
@@ -90,10 +84,10 @@ db_foreach survey_sections {} {
     # executing the survey associated with the logic
     # after the survey is completed
     #
-    if ![info exists return_url] {
-		set return_url {}
+    if {![info exists return_url]} {
+	set return_url {}
     }
 }
-set form_vars [export_form_vars section_id survey_id new_response_id]
+set form_vars [export_vars -form {section_id survey_id new_response_id}]
 ad_return_template
 

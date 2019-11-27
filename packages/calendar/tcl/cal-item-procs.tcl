@@ -8,7 +8,7 @@ ad_library {
     @author Gary Jin (gjin@arsdigita.com)
     @author Ben Adida (ben@openforce.net)
     @creation-date Jan 11, 2001
-    @cvs-id $Id: cal-item-procs.tcl,v 1.25 2009/02/26 02:12:15 donb Exp $
+    @cvs-id $Id: cal-item-procs.tcl,v 1.26.2.1 2015/09/10 08:30:14 gustafn Exp $
 
 }
 
@@ -23,7 +23,7 @@ ad_proc -private calendar::item::dates_valid_p {
 } {
     set dates_valid_p [db_string dates_valid_p_select {}]
 
-    if {[string equal $dates_valid_p 1]} {
+    if {$dates_valid_p eq "1"} {
         return 1
     } else {
         return 0
@@ -37,13 +37,20 @@ ad_proc -public calendar::item::new {
     {-description:required}
     {-calendar_id ""}
     {-item_type_id ""}
+    {-creation_user ""}
+    {-package_id ""}
 } {
     if {[dates_valid_p -start_date $start_date -end_date $end_date]} {
-        set creation_ip [ad_conn peeraddr]
-        set creation_user [ad_conn user_id]
-
-        set activity_id [db_exec_plsql insert_activity {} ]
+        # set creation_ip [ad_conn peeraddr]
+        set creation_ip "127.0.0.1"
         
+        if {$creation_user eq ""} {
+            set creation_user [ad_conn user_id]
+        }
+        
+        set activity_id [db_exec_plsql insert_activity {} ]
+
+        ns_log Notice "Running ad_proc calendar::item::new ..."
         # Convert from user timezone to system timezone
         if { $start_date ne $end_date } {
 
@@ -55,6 +62,8 @@ ad_proc -public calendar::item::new {
         }
 
         set timespan_id [db_exec_plsql insert_timespan {}]
+
+        ns_log Notice "TIMESPAN."
         
         # create the cal_item
         # we are leaving the name and description fields in acs_event
@@ -64,20 +73,21 @@ ad_proc -public calendar::item::new {
         # by default, the cal_item permissions 
         # are going to be inherited from the calendar permissions
         set cal_item_id [db_exec_plsql cal_item_add {}]
-	
+
+        ns_log Notice "AFTER cal_item_add plsql"
 	db_dml set_item_type_id "update cal_items set item_type_id=:item_type_id where cal_item_id=:cal_item_id"
 
         # removing inherited permissions
-        if { $calendar_id ne "" && [calendar::personal_p -calendar_id $calendar_id] } {
+        if { $calendar_id ne "" && [calendar::personal_p -calendar_id $calendar_id -user_id $creation_user] } {
             permission::set_not_inherit -object_id $cal_item_id
         }
+        assign_permission $cal_item_id $creation_user read
+        assign_permission $cal_item_id $creation_user write
+        assign_permission $cal_item_id $creation_user delete
+        assign_permission $cal_item_id $creation_user admin
+        ns_log Notice "BEFORE NOTIFCATIONS "
 
-        assign_permission  $cal_item_id  $creation_user read
-        assign_permission  $cal_item_id  $creation_user write
-        assign_permission  $cal_item_id  $creation_user delete
-        assign_permission  $cal_item_id  $creation_user admin
-
-        calendar::do_notifications -mode New -cal_item_id $cal_item_id
+#        calendar::do_notifications -mode New -cal_item_id $cal_item_id -url "[export_vars -base "http://iurix.com/nevessouza/agenda/cal-item-add" {$cal_item_id}]" -package_id $package_id
         return $cal_item_id
 
     } else {
@@ -127,7 +137,7 @@ ad_proc -public calendar::item::get {
     set row(start_date) [lc_time_fmt $row(start_date_ansi) "%Y-%m-%d"]
     set row(end_date) [lc_time_fmt $row(end_date_ansi) "%Y-%m-%d"]
 
-    set row(day_of_week) [expr [lc_time_fmt $row(start_date_ansi) "%w"] + 1]
+    set row(day_of_week) [expr {[lc_time_fmt $row(start_date_ansi) "%w"] + 1}]
     set row(pretty_day_of_week) [lc_time_fmt $row(start_date_ansi) "%A"]
     set row(day_of_month) [lc_time_fmt $row(start_date_ansi) "%d"]
     set row(pretty_short_start_date) [lc_time_fmt $row(start_date_ansi) "%x"]
@@ -178,7 +188,7 @@ ad_proc -public calendar::item::edit {
             set recurrence_id [db_string select_recurrence_id {}]
 
             # If the recurrence id is NULL, then we stop here and just do the normal update
-            if {![empty_string_p $recurrence_id]} {
+            if {$recurrence_id ne ""} {
                 calendar::item::edit_recurrence \
                     -event_id $cal_item_id \
                     -start_date $start_date \
@@ -216,7 +226,7 @@ ad_proc -public calendar::item::edit {
             # Update the item_type_id and calendar_id
             set colspecs [list]
             lappend colspecs "item_type_id = :item_type_id"
-            if { ![empty_string_p $calendar_id] } {
+            if { $calendar_id ne "" } {
                 lappend colspecs "on_which_calendar = :calendar_id"
 
                 db_dml update_context_id {
@@ -256,12 +266,12 @@ ad_proc calendar::item::assign_permission { cal_item_id
     update the permission of the specific cal_item
     if revoke is set to revoke, then we revoke all permissions
 } {
-    if { ![string equal $revoke "revoke"] } {
-	if { ![string equal $permission "cal_item_read"] } {
+    if { $revoke ne "revoke" } {
+	if { $permission ne "cal_item_read" } {
             permission::grant -object_id $cal_item_id -party_id $party_id -privilege cal_item_read
 	}
         permission::grant -object_id $cal_item_id -party_id $party_id -privilege $permission
-    } elseif { [string equal $revoke "revoke"] } {
+    } elseif {$revoke eq "revoke"} {
         permission::revoke -object_id $cal_item_id -party_id $party_id -privilege $permission
 
     }
@@ -309,7 +319,7 @@ ad_proc -public calendar::item::edit_recurrence {
         }
 	set colspecs [list]
         lappend colspecs {item_type_id = :item_type_id}
-        if { ![empty_string_p $calendar_id] } {
+        if { $calendar_id ne "" } {
             lappend colspecs {on_which_calendar = :calendar_id}
 
             db_dml update_context_id {
@@ -343,3 +353,9 @@ ad_proc -public calendar_item_add_recurrence {
         select event_id, (select on_which_calendar as calendar_id from cal_items where cal_item_id = :cal_item_id) from acs_events where recurrence_id= :recurrence_id and event_id <> :cal_item_id"
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

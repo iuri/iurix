@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="hi_IN" charset="utf-8">
+<message_catalog package_key="survey" locale="hi_IN" charset="utf-8">
 
   <msg key="-__Created_by">-द्वारा निर्मित</msg>
   <msg key="_on_creation_date">%creation_date% पर</msg>
@@ -103,7 +103,7 @@
   <msg key="lt_Everyone_eligible_to_">प्रत्येक व्यक्ति इस सर्वेक्षण के लिये योग्य है।</msg>
   <msg key="lt_Everyone_who_has_alre">प्रत्येक वह व्यक्ति जिसका सर्वेक्षण पहले से ही किया गया है। </msg>
   <msg key="lt_Everyone_who_has_not_">प्रत्येक व्यक्ति जिसका सर्वेक्षण नही किया गया है।</msg>
-  <msg key="lt_For_Multiple_Choicebr">बहुचुनाव के लिये &lt;br /&gt; वैध प्रत्युतरो की सूची दाखिल कीजिए &lt;br /&gt; (प्रत्येक पन्क्ति मे एक चुनाव दाखिल कीजिए)</msg>
+  <msg key="lt_For_Multiple_Choicebr">बहुचुनाव के लिये &lt;br&gt; वैध प्रत्युतरो की सूची दाखिल कीजिए &lt;br&gt; (प्रत्येक पन्क्ति मे एक चुनाव दाखिल कीजिए)</msg>
   <msg key="lt_had_to_say_in_respons">%survey_name% के प्रत्युतर मे कहना पडा</msg>
   <msg key="lt_Here_is_how_your_surv">आपका सर्वेक्षण विवरण इस तरह प्रस्तुत होगा:</msg>
   <msg key="lt_img_srcgraphicsadming">&amp;lt;प्रतिरुप स्रोत्र =&amp;quot;रेखाचित्रिय/admin.gif&amp;quot; किनारा =&amp;quot;0&amp;quot; alt=&amp;quot;सन्चालन सर्वेक्षण  &amp;quot;&amp;gt;</msg>

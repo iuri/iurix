@@ -7,7 +7,7 @@ ad_page_contract {
     @author Jade Rubick (jader@bread.com)
     @creation-date 2004-04-30
     @arch-tag: 339a6143-11a3-4f1b-902d-a3cd71f7d531
-    @cvs-id $Id: project-revisions.tcl,v 1.3 2005/05/26 09:34:29 maltes Exp $
+    @cvs-id $Id: project-revisions.tcl,v 1.5 2018/05/09 15:33:33 hectorr Exp $
 
 } {
     project_item_id:integer

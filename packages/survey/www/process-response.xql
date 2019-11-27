@@ -1,25 +1,6 @@
 <?xml version="1.0"?>
 <queryset>
 
-<fullquery name="survey_exists">      
-      <querytext>
-     
-	    select 1 from surveys where survey_id = :survey_id
-	
-      </querytext>
-</fullquery>
-
-<fullquery name="count_responses">      
-      <querytext>
-      select count(*) from survey_responses, 
-	acs_objects
-	where survey_id=:survey_id
-	and survey_responses.response_id=acs_objects.object_id
-	and acs_objects.creation_user=:user_id
-	and initial_response_id is null
-      </querytext>
-</fullquery>
-
 <fullquery name="get_response_count">
     <querytext>
 	select count(*) from survey_responses
@@ -31,6 +12,19 @@
       <querytext>
       
 	    select 1 from survey_sections where section_id = :section_id
+	
+      </querytext>
+</fullquery>
+
+ 
+<fullquery name="survey_question_info_list">      
+      <querytext>
+      
+	    select question_id, question_text, abstract_data_type, presentation_type, required_p
+	    from survey_questions
+	    where section_id = :section_id
+	    and active_p = 't'
+	    order by sort_order
 	
       </querytext>
 </fullquery>
@@ -119,14 +113,6 @@
        values
       (:response_id, :question_id, :revision_id)
       </querytext>
-</fullquery>
-
-<fullquery name="get_max_answers">
-	<querytext>
-		select num_answers
-		from survey_questions
-		where question_id = :question_id
-	</querytext>
 </fullquery>
 
 </queryset>

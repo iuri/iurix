@@ -1,4 +1,4 @@
--- $Id: upgrade-4.7d3-5.0d1.sql,v 1.1 2003/10/08 16:59:22 mohanp Exp $
+-- $Id: upgrade-4.7d3-5.0d1.sql,v 1.1.24.1 2017/04/21 16:21:48 gustafn Exp $
 
 
 create or replace package acs_sc_msg_type
@@ -372,7 +372,7 @@ as
        impl_name		acs_sc_impls.impl_name%TYPE
    );
 
-   /* Next 2 functions are deprecated but left here for backwards compatability */
+   /* Next 2 functions are deprecated but left here for backwards compatibility */
 
    function new_alias (
        impl_contract_name	acs_sc_contracts.contract_name%TYPE,

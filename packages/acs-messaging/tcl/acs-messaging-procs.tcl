@@ -3,7 +3,7 @@ ad_library {
 
     @author John Prevost <jmp@arsdigita.com>
     @creation-date 2000-09-01
-    @cvs-id $Id: acs-messaging-procs.tcl,v 1.7 2009/07/12 01:08:30 donb Exp $
+    @cvs-id $Id: acs-messaging-procs.tcl,v 1.8.2.3 2016/01/02 17:21:32 gustafn Exp $
 }
 
 ad_proc -public acs_message_p {
@@ -11,11 +11,7 @@ ad_proc -public acs_message_p {
 } {
     Check if an integer is a valid OpenACS message id.
 } {
-    return [string equal [db_exec_plsql acs_message_p {
-	begin
-	    :1 := acs_message.message_p(:message_id);
-	end;
-    }] "t"]
+    return [string equal [db_exec_plsql acs_message_p {}] "t"]
 }
 
 ad_page_contract_filter acs_message_id { name value } {
@@ -44,7 +40,7 @@ ad_proc -public acs_messaging_format_as_html {
     @param content   Text to view
 } {
     if {$mime_type eq "text/plain"} {
-	set result "<pre>[ad_quotehtml $content]</pre>"
+	set result "<pre>[ns_quotehtml $content]</pre>"
     } elseif {$mime_type eq "text/plain; format=flowed"} {
 	set result [ad_text_to_html -- $content]
     } elseif {$mime_type eq "text/html"} {
@@ -63,9 +59,7 @@ ad_proc -public acs_messaging_first_ancestor {
     the message_id of the first ancestor message (i.e. the message
     that originated the thread).
 } {
-    db_1row acs_message_first_ancestor {
-	select acs_message.first_ancestor(:message_id) as ancestor_id from dual
-    }
+    db_1row acs_message_first_ancestor {}
 
     return $ancestor_id
 }
@@ -133,7 +127,7 @@ ad_proc -private acs_messaging_timezone_offset {
 } {
     Returns a best guess of the timezone offset for the machine.
 } {
-    return [format "%+05d" [expr ([lindex [ns_localtime] 2] - [lindex [ns_gmtime] 2]) * 100]]
+    return [format "%+05d" [expr {([lindex [ns_localtime] 2] - [lindex [ns_gmtime] 2]) * 100]}]
 }
 
 ad_proc -private acs_messaging_process_queue {
@@ -155,3 +149,9 @@ ad_proc -private acs_messaging_process_queue {
         }
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

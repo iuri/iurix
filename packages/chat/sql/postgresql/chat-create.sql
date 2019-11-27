@@ -3,7 +3,7 @@
 --
 -- @author ddao@arsdigita.com
 -- @creation-date November 09, 2000
--- @cvs-id $Id: chat-create.sql,v 1.8 2010/12/14 15:04:43 victorg Exp $
+-- @cvs-id $Id: chat-create.sql,v 1.8.2.6 2017/04/21 20:21:49 gustafn Exp $
 --
 
 
@@ -65,8 +65,7 @@ select acs_privilege__add_child('admin', 'chat_room_admin');
 
 
 -- create chat room object type
-CREATE FUNCTION inline_0()
-RETURNS integer
+CREATE FUNCTION inline_0() returns integer
 AS 'declare
        attr_id acs_attributes.attribute_id%TYPE;
     begin
@@ -176,7 +175,7 @@ AS 'declare
 
     end;'
 
-LANGUAGE 'plpgsql';
+language 'plpgsql';
 SELECT inline_0();
 DROP function inline_0();
 
@@ -204,16 +203,22 @@ create table chat_rooms (
                         default 't'
                        constraint chat_rooms_archive_p_ck
                         check (archive_p in ('t', 'f')),
-    -- flush the rooms messages every night at 00:05                    
+    -- flush the rooms messages every night at 00:05
     auto_flush_p        boolean default 't',
     -- automatically create a transcript after flushing the room
-    auto_transcript_p   boolean default 'f'
+    auto_transcript_p   boolean default 'f',
+    -- allow to set whether we want login/logout messages or not
+    login_messages_p    boolean default 't',
+    logout_messages_p   boolean default 't',
+    -- set how much in the past users will see when entering a chat in
+    -- seconds this is needed to specify, for example, that users will
+    -- see only the previous 10 minutes of the conversation
+    messages_time_window integer default 600
 );
 
 
 -- create chat transcript object type
-CREATE FUNCTION inline_0()
-RETURNS integer
+CREATE FUNCTION inline_0() returns integer
 AS 'declare
        attr_id acs_attributes.attribute_id%TYPE;
     begin
@@ -289,7 +294,7 @@ AS 'declare
 
     end;'
 
-LANGUAGE 'plpgsql';
+language 'plpgsql';
 SELECT inline_0();
 DROP function inline_0();
 
@@ -342,100 +347,37 @@ create table chat_msgs (
 
 ---------------------------------
 
-create or replace function chat_room__new (integer, varchar, varchar, boolean, boolean, boolean, boolean, boolean, integer, timestamptz, integer, varchar, varchar)
-returns integer as '
-declare
-   p_room_id        alias for $1;
-   p_pretty_name    alias for $2;
-   p_description    alias for $3;
-   p_moderated_p    alias for $4;
-   p_active_p       alias for $5;
-   p_archive_p      alias for $6;
-   p_auto_flush_p      alias for $7;
-   p_auto_transcript_p      alias for $8;
-   p_context_id     alias for $9;
-   p_creation_date  alias for $10;
-   p_creation_user  alias for $11;
-   p_creation_ip    alias for $12;
-   p_object_type    alias for $13;
-   v_room_id        chat_rooms.room_id%TYPE;
-begin
-   v_room_id := acs_object__new (
-     null,
-     ''chat_room'',
-     now(),
-     p_creation_user,
-     p_creation_ip,
-     p_context_id
-   );
 
-   insert into chat_rooms
-       (room_id, pretty_name, description, moderated_p, active_p, archive_p, auto_flush_p, auto_transcript_p)
-   values
-       (v_room_id, p_pretty_name, p_description, p_moderated_p, p_active_p, p_archive_p, p_auto_flush_p, p_auto_transcript_p);
+-- added
+select define_function_args('chat_room__delete_all_msgs','room_id');
 
-return v_room_id;
-
-end;' language 'plpgsql';
-
-
-
-
-
----------------------------------
-
-create function chat_room__name (integer)
-returns varchar as '
-declare
-   p_room_id         alias for $1;
-   v_pretty_name     chat_rooms.pretty_name%TYPE;
-begin
-     select into v_pretty_name pretty_name from chat_rooms where room_id =  p_room_id;
-     return v_pretty_name;
-end;' language 'plpgsql';
-
-
-
-
--------------------------------
-
-
-
-create function chat_room__message_count (integer)
-returns integer as '
-declare
-   p_room_id        alias for $1;
-   v_count integer;
-begin
-   select count(*) as total into v_count
-   from chat_msgs
-   where room_id = p_room_id;
-   return v_count;
-
-end;' language 'plpgsql';
-
----------------------------------
-
-
-
-create function chat_room__delete_all_msgs (integer)
-returns integer as '
-declare
-   p_room_id        alias for $1;
-begin
+--
+-- procedure chat_room__delete_all_msgs/1
+--
+CREATE OR REPLACE FUNCTION chat_room__delete_all_msgs(
+   p_room_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
    delete from chat_msgs where room_id = p_room_id;
    return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 ---------------------------------
 
 
+-- added
+select define_function_args('chat_room__del','room_id');
 
-create function chat_room__del (integer)
-returns integer as '
-declare
-   p_room_id        alias for $1;
-begin
+--
+-- procedure chat_room__del/1
+--
+CREATE OR REPLACE FUNCTION chat_room__del(
+   p_room_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
 
     --TO DO: delete transcriptions?
 
@@ -452,50 +394,24 @@ begin
      PERFORM acs_object__delete(p_room_id);
 
    return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 ---------------------------------
 
 
-create function chat_transcript__new (varchar, varchar, varchar, integer, integer, timestamptz, integer,  varchar, varchar)
-returns integer as '
-declare
+-- added
+select define_function_args('chat_transcript__del','transcript_id');
 
-   p_pretty_name      alias for $1;
-   p_contents         alias for $2;
-   p_description      alias for $3;
-   p_room_id          alias for $4;
-   p_context_id       alias for $5;
-   p_creation_date    alias for $6;
-   p_creation_user    alias for $7;
-   p_creation_ip      alias for $8;
-   p_object_type      alias for $9;
-   v_transcript_id    chat_transcripts.transcript_id%TYPE;
-begin
-   v_transcript_id := acs_object__new (
-     null,
-     ''chat_transcript'',
-     now(),
-     p_creation_user,
-     p_creation_ip,
-     p_context_id
-   );
-
-   insert into chat_transcripts (transcript_id,   pretty_name,   contents,   description,   room_id)
-                        values  (v_transcript_id, p_pretty_name, p_contents, p_description, p_room_id);
-
-   return v_transcript_id;
-end;' language 'plpgsql';
-
-
-
------------------------------
-create function chat_transcript__del (integer)
-returns integer as '
-declare
-   p_transcript_id      alias for $1;
-begin
+--
+-- procedure chat_transcript__del/1
+--
+CREATE OR REPLACE FUNCTION chat_transcript__del(
+   p_transcript_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
 
         -- Delete all privileges associate with this transcript
         delete from acs_permissions where object_id = p_transcript_id;
@@ -505,67 +421,41 @@ begin
 
         PERFORM acs_object__delete(p_transcript_id);
         return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 ----------------------------
 
 
-create or replace function chat_room__edit (integer, varchar, varchar, boolean, boolean, boolean, boolean, boolean)
-returns integer as '
-declare
-   p_room_id        alias for $1;
-   p_pretty_name    alias for $2;
-   p_description    alias for $3;
-   p_moderated_p    alias for $4;
-   p_active_p       alias for $5;
-   p_archive_p      alias for $6;
-   p_auto_flush_p      alias for $7;
-   p_auto_transcript_p      alias for $8;
-begin
+-- added
+select define_function_args('chat_room__message_post','room_id,msg,creation_user,creation_ip');
 
-        update chat_rooms set
-            pretty_name = p_pretty_name,
-            description = p_description,
-            moderated_p = p_moderated_p,
-            active_p    = p_active_p,
-            archive_p   = p_archive_p,
-            auto_flush_p   = p_auto_flush_p,
-            auto_transcript_p   = p_auto_transcript_p
-        where
-            room_id = p_room_id;
-        return 0;
-end;' language 'plpgsql';
-
-
----------------------------
-
-create function chat_room__message_post (integer, varchar, integer, varchar)
-returns integer as '
-declare
-   p_room_id        alias for $1;
-   p_msg            alias for $2;
-   p_creation_user  alias for $3;
-   p_creation_ip    alias for $4;
-   -- p_html_p         alias for $3;
-   -- p_approved_p     alias for $4;
+--
+-- procedure chat_room__message_post/4
+--
+CREATE OR REPLACE FUNCTION chat_room__message_post(
+   p_room_id integer,
+   p_msg varchar,
+   p_creation_user integer,
+   p_creation_ip varchar
+) RETURNS integer AS $$
+DECLARE
    v_msg_id chat_msgs.msg_id%TYPE;
    v_msg_archive_p chat_rooms.archive_p%TYPE;
    v_msg chat_msgs.msg%TYPE;
-begin
+BEGIN
     -- Get msg id from the global acs_object sequence.
-    select nextval(''t_acs_object_id_seq'') into v_msg_id from dual;
-
+    select nextval('t_acs_object_id_seq') into v_msg_id from dual;
 
     select archive_p into v_msg_archive_p from chat_rooms where room_id = p_room_id;
 
-    if v_msg_archive_p = ''t'' then
+    if v_msg_archive_p = 't' then
             v_msg := p_msg;
         else
             v_msg := null;
         end if;
 
-    -- TO DO: aproved_p, Hhtml_p and lengh
-    -- Insert into chat_msgs table.
-        insert into chat_msgs (
+     -- Insert into chat_msgs table.
+     insert into chat_msgs (
             msg_id,
             room_id,
             msg,
@@ -583,202 +473,7 @@ begin
 
 
 return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 ---------------------------
-
-
-create function chat_transcript__edit (integer, varchar, varchar, varchar )
-returns integer as '
-declare
-    p_transcript_id   alias for $1;
-    p_pretty_name     alias for $2;
-    p_contents        alias for $3;
-    p_description     alias for $4;
-begin
-    update chat_transcripts
-        set pretty_name = p_pretty_name,
-            contents    = p_contents,
-            description = p_description
-        where
-            transcript_id = p_transcript_id;
-
-
-return 0;
-end;' language 'plpgsql';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE TABLE chat_invitation_queue (
-       id serial primary key,
-       sender_user_id integer NOT NULL REFERENCES users(user_id),
-       target_user_id integer NOT NULL REFERENCES users(user_id),
-       room_id	      integer NOT NULL REFERENCES chat_rooms(room_id),
-       ip 	      character varying (50),
-       date_time      timestamptz,
-       content	      text
-);
-       	
-
-CREATE TABLE chat_instant_rooms (
-       id serial primary key,
-       user_id integer NOT NULL REFERENCES users(user_id),
-       room_id integer NOT NULL REFERENCES chat_rooms(room_id)
-);
-
-
-
-
-CREATE TABLE chat_availability (
-       id serial primary key,
-       user_id integer NOT NULL REFERENCES users(user_id),
-       active_p boolean DEFAULT 'f'
-);
-
-
-
-CREATE OR REPLACE FUNCTION chat_availability_switch (integer) 
-RETURNS integer AS '
-DECLARE
-	p_user_id	ALIAS FOR $1;
-	v_status	boolean;
-	v_user_id	integer;
-BEGIN 
-      SELECT user_id INTO v_user_id FROM chat_availability WHERE user_id = p_user_id;
-      IF v_user_id IS NULL THEN
-      	 INSERT INTO chat_availability (user_id, active_p) VALUES (p_user_id,''f'');
-      END IF;
-      
-
-      SELECT active_p INTO v_status FROM chat_availability WHERE user_id = p_user_id;
-
-      IF v_status THEN
-      	 UPDATE chat_availability SET active_p = ''f'' WHERE user_id = p_user_id;
-      ELSE 
-      	 UPDATE chat_availability SET active_p = ''t'' WHERE user_id = p_user_id;
-      END IF; 
-      
-      RETURN 0;
-      
-END;' language 'plpgsql';
-
-
-CREATE OR REPLACE FUNCTION chat_invitation__new (integer,integer,integer,varchar,timestamptz,varchar)
-RETURNS integer AS '
-DECLARE
-
-	p_room_id		ALIAS for $1;
-	p_sender_user_id	ALIAS for $2;
-	p_target_user_id	ALIAS for $3;
-	p_ip_addr		ALIAS for $4;
-	p_date			ALIAS for $5;
-	p_content		ALIAS for $6;
-	
-BEGIN
-	INSERT INTO chat_invitation_queue (
-		id, sender_user_id, target_user_id, ip, date, content
-	) VALUES (
-	  	p_room_id, p_sender_user_id, p_target_user_id, p_ip_addr, p_date, p_content
-	);
-
-	RETURN 0;
-
-END;' language 'plpgsql';
-
-CREATE OR REPLACE FUNCTION chat_invitation__delete (integer)
-RETURNS integer AS '
-DECLARE
-	p_id	integer;
-BEGIN
-	DELETE FROM chat_invitation_queue WHERE id = p_id;
-	
-	RETURN 0;
-END;' language 'plpgsql';
-
-create or replace function chat_room__del (integer)
-returns integer as '
-declare
-   p_room_id        alias for $1;
-begin
-
-    -- First erase all the messages relate to this chat room.
-    delete from chat_msgs where room_id = p_room_id;
-
-     -- Delete all privileges associate with this room
-     delete from acs_permissions where object_id = p_room_id;
-
-    -- Delete all transcripts  related to this chat room
-    delete from chat_transcripts where room_id = p_room_id;
-
-     -- Now delete the chat room itself.
-     delete from chat_rooms where room_id = p_room_id;
-
-     PERFORM acs_object__delete(p_room_id);
-
-   return 0;
-end;' language 'plpgsql';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

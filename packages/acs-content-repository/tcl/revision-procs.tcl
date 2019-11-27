@@ -30,7 +30,7 @@ ad_proc -public cr_write_content {
 } {
 
     if { [info exists revision_id] && [info exists item_id] } {
-        ad_return -code error "Both revision_id and item_id were specfied"
+	error "Both revision_id and item_id were specfied"
     }
 
     if { [info exists item_id] } {
@@ -42,13 +42,14 @@ ad_proc -public cr_write_content {
             error "There is no content that matches revision_id '$revision_id'" {} NOT_FOUND
         }
     } else {
-        ad_return -code error "Either revision_id or item_id must be specified"
+        error "Either revision_id or item_id must be specified"
     }
 
-    if { $storage_type ne "file" && \
-         $storage_type ne "text" && \
-         $storage_type ne "lob" } {
-        ad_return -code error "Storage type '$storage_type' is invalid."
+    if { $storage_type ne "file" 
+	 && $storage_type ne "text" 
+	 && $storage_type ne "lob" 
+     } {
+        error "Storage type '$storage_type' is invalid."
     }
 
     # I set content length to 0 here because otherwise I need to do
@@ -63,14 +64,17 @@ ad_proc -public cr_write_content {
             if { $string_p } {
                 return $text
             }
-            ReturnHeaders $mime_type
-            ns_write $text
+            ns_return 200 $mime_type $text
         }
         file {
             set path [cr_fs_path $storage_area_key]
             set filename [db_string write_file_content ""]
 	    if {$filename eq ""} {
-		ad_return -code error "No content for the revision $revision_id. This seems to be an error which occured during the upload of the file"
+		error "No content for the revision $revision_id.\
+		This seems to be an error which occurred during the upload of the file"
+	    } elseif {![file readable $filename]} {
+	      ns_log Error "Could not read file $filename. Maybe the content repository is (partially) missing?"
+	      ns_return 404 text/plain {}
 	    } else {
 		if { $string_p } {
 		    set fd [open $filename "r"]
@@ -92,7 +96,7 @@ ad_proc -public cr_write_content {
 			ns_set put [ns_conn outputheaders] "Content-Length" 0
 			ns_return 200 text/plain {}
 		    } else {
-                        if {[info procs ad_returnfile_background] eq "" || [security::secure_conn_p]} {
+                        if {[info commands ad_returnfile_background] eq "" || [security::secure_conn_p]} {
                             ns_returnfile 200 $mime_type $filename
                         } else {
                             ad_returnfile_background 200 $mime_type $filename
@@ -106,11 +110,27 @@ ad_proc -public cr_write_content {
             if { $string_p } {
                 return [db_blob_get write_lob_content ""]
             }
-	    # need to set content_length header here
-	    ns_set put [ns_conn outputheaders] "Content-Length" $content_length
-            ReturnHeaders $mime_type
-	    # also need to check for HEAD method and skip sending
-	    # actual content
+
+            #
+	    # Need to set content_length header here.
+            #
+            # Unfortunately, old versions of OpenACS did not set the
+            # content_length correctly, so we fix this here locally.
+            #
+            if {$content_length eq "0" && [db_driverkey ""] eq "postgresql"} {
+                set content_length [db_string get_lob_length {
+                    select sum(byte_len)
+                    from cr_revisions, lob_data
+                    where revision_id = :revision_id and lob_id = cr_revisions.lob
+                }]
+            }
+            
+            ns_set put [ns_conn outputheaders] "Content-Length" $content_length
+            
+            ReturnHeaders $mime_type $content_length
+            #
+	    # In a HEAD request, just send headers and no content
+            #
 	    if {![string equal -nocase "head" [ns_conn method]]} {
 		db_write_blob write_lob_content ""
 	    } else {
@@ -217,7 +237,7 @@ ad_proc -public cr_import_content {
 
     db_transaction {
 
-        if { [empty_string_p [db_string is_registered "" -default ""]] } {
+        if { [db_string is_registered "" -default ""] eq "" } {
             db_dml mime_type_insert ""
             db_exec_plsql mime_type_register ""
         }
@@ -225,29 +245,28 @@ ad_proc -public cr_import_content {
         switch $content_type {
             image {
 
-                if { [db_string image_subclass ""] eq "f" } {
-                    ad_return -code error "Image file must be stored in an image object"
+                if { [db_string image_subclass ""] == "f" } {
+                    error "Image file must be stored in an image object"
                 }
     
-                set what_aolserver_told_us ""
+                set what_nsd_told_us ""
                 if {$mime_type eq "image/jpeg"} {
-                    catch { set what_aolserver_told_us [ns_jpegsize $tmp_filename] }
+                    catch { set what_nsd_told_us [ns_jpegsize $tmp_filename] }
                 } elseif {$mime_type eq "image/gif"} {
-                    catch { set what_aolserver_told_us [ns_gifsize $tmp_filename] }
-                } elseif {$mime_type eq "image/png"} { 
-		    # we don't have built in png size detection
-		    # but we want to allow upload of png images
+                    catch { set what_nsd_told_us [ns_gifsize $tmp_filename] }
+                } elseif {$mime_type eq "image/png"} {
+                    catch { set what_nsd_told_us [ns_pngsize $tmp_filename] }
 		} else {
-                    ad_return -code error "Unknown image type"
+                    error "Unknown image type"
                 }
 
-                # the AOLserver jpegsize command has some bugs where the height comes 
-                # through as 1 or 2 
-                if { $what_aolserver_told_us ne "" && \
-                      [lindex $what_aolserver_told_us 0] > 10 && \
-                      [lindex $what_aolserver_told_us 1] > 10 } {
-                    set original_width [lindex $what_aolserver_told_us 0]
-                    set original_height [lindex $what_aolserver_told_us 1]
+                # The AOLserver/ jpegsize command has some bugs where the height comes 
+                # through as 1 or 2, so trust the valuesresult only on larger values.
+                if { $what_nsd_told_us ne "" 
+		     && [lindex $what_nsd_told_us 0] > 10
+		     && [lindex $what_nsd_told_us 1] > 10 
+		 } {
+                    lassign $what_nsd_told_us original_width original_height
                 } else {
                     set original_width ""
                     set original_height ""
@@ -264,11 +283,11 @@ ad_proc -public cr_import_content {
             default {
 
                 if { $image_only_p } {
-                    ad_return -code error "The file you uploaded was not an image (.gif, .jpg or .jpeg) file"
+                    error "The file you uploaded was not an image (.gif, .jpg or .jpeg) file"
                 }
 
-                if { [db_string content_revision_subclass ""] eq "f" } {
-                    ad_return -code error "Content must be stored in a content revision object"
+                if { [db_string content_revision_subclass ""] == "f" } {
+                    error "Content must be stored in a content revision object"
                 }
 
                 if { !$old_item_p } {
@@ -306,8 +325,8 @@ ad_proc cr_set_imported_content_live {
 } {
     @param image_sql Optional SQL to extend the base image type
     @param other_sql Optional SQL to extend the base content revision type
-    @mime_type Mime type of the new revision
-    @revision_id The revision we're setting live
+    @param mime_type Mime type of the new revision
+    @param revision_id The revision we're setting live
 
     If provided execute the appropriate SQL in the caller's context, then
     set the given revision live.
@@ -332,11 +351,58 @@ ad_proc cr_registered_type_for_mime_type {
 } {
     Return the type registered for this mime type.
 
-    @mime_type param The mime type
+    @param mime_type param The mime type
 } {
     return [db_string registered_type_for_mime_type "" -default ""]
 }
 
+ad_proc cr_check_mime_type {
+    -mime_type
+    {-filename ""}
+    {-file ""}
+} {
+    Check whether the mimetype is registered. If not, check whether it
+    can be guessed from the filename. If guessed mimetype is not
+    registered optionally insert it.
+
+    @param mime_type param The mime type
+    @param filename the filename
+    @param file the actual file being saved. This option currently
+           doesn't have any effect, but in the future would be better
+           to inspect the actual file content instead of trusting the user.
+
+    @return the mapped mimetype
+} {
+    #
+    # Check if the provided mime_type is already in our cr_mime_types
+    # table. If so, accept it.
+    #
+    if {$mime_type ne "*/*" && [db_0or1row check_given_mime_type {
+        select 1 from cr_mime_types where mime_type = :mime_type
+    }]} {
+        return $mime_type
+    }
+    
+    # TODO: we use only the extension to get the mimetype. Something
+    # better should be done, like inspecting the actual content of the
+    # file and never trust the user on this regard, but as this
+    # involves changes also in the data model, we leave this for the
+    # future. Usages of this proc in the systems are already set to
+    # give us the path to the file here.
+    set extension [string tolower [string trimleft [file extension $filename] "."]]
+    if {[db_0or1row lookup_mimetype {}]} {
+        return $mime_type
+    }
+    set mime_type [string tolower [ns_guesstype $filename]]
+    if {[db_0or1row lookup_mimetype {}]} {
+        return $mime_type
+    }
+    set allow_mimetype_creation_p \
+        [parameter::get \
+             -parameter AllowMimeTypeCreationP -default 0]
+    return [cr_filename_to_mime_type -create=$allow_mimetype_creation_p \
+                $filename]
+}
 
 ad_proc -public cr_filename_to_mime_type { 
     -create:boolean
@@ -360,10 +426,11 @@ ad_proc -public cr_filename_to_mime_type {
         return "*/*"
     } 
     
-    if {[db_0or1row lookup_mimetype { select mime_type from cr_extension_mime_type_map where extension = :extension }]} { 
+    if {[db_0or1row lookup_mimetype {}]} {
         return $mime_type
     } else { 
         set mime_type [string tolower [ns_guesstype $filename]]
+        
         ns_log Debug "guessed mime \"$mime_type\" create_p $create_p" 
         if {(!$create_p) || $mime_type eq "*/*" || $mime_type eq ""} {
             # we don't have anything meaningful for this mimetype 
@@ -425,3 +492,9 @@ ad_proc -public cr_create_mime_type {
 }
 
                                
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

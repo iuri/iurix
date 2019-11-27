@@ -3,20 +3,28 @@
 -- 
 -- @author Stan Kaufman (skaufman@epimetrics.com)
 -- @creation-date 2004-07-08
--- @cvs-id $Id: upgrade-5.1.0d2-5.1.0d3.sql,v 1.2 2004/07/24 08:34:44 jeffd Exp $
+-- @cvs-id $Id: upgrade-5.1.0d2-5.1.0d3.sql,v 1.3 2013/03/30 18:50:28 gustafn Exp $
 --
 -- based on Peter's upgrade script:
 -- Add on delete cascade foreign key constraints
 -- see Bug http://openacs.org/bugtracker/openacs/bug?filter%2estatus=resolved&filter%2eactionby=6815&bug%5fnumber=260
 -- @author Peter Marklund
 
-create or replace function safe_drop_cosntraint(name, name)
-returns integer as '
-declare
-    p_table_name          alias for $1;
-    p_constraint_name     alias for $2;
+
+
+-- added
+select define_function_args('safe_drop_cosntraint','table_name,constraint_name');
+
+--
+-- procedure safe_drop_cosntraint/2
+--
+CREATE OR REPLACE FUNCTION safe_drop_cosntraint(
+   p_table_name name,
+   p_constraint_name name
+) RETURNS integer AS $$
+DECLARE
     v_constraint_p        integer;
-begin
+BEGIN
     select count(*)
     into   v_constraint_p
     from   pg_constraint con, pg_class c
@@ -25,11 +33,12 @@ begin
     and    c.relname = p_table_name;
 
     if v_constraint_p > 0 then
-        execute ''alter table '' || p_table_name || '' drop constraint '' || p_constraint_name;
+        execute 'alter table ' || p_table_name || ' drop constraint ' || p_constraint_name;
     end if;
 
     return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 -- Add on delete cascade to notifications.notif_notif_id_fk foreign key constraint
 

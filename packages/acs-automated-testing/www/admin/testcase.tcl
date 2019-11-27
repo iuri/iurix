@@ -1,10 +1,11 @@
 ad_page_contract {
-    @cvs-id $Id: testcase.tcl,v 1.9 2007/11/30 18:16:42 daveb Exp $
+    @cvs-id $Id: testcase.tcl,v 1.13.2.5 2016/12/05 11:33:15 michaela Exp $
 } {
-    testcase_id:nohtml
-    package_key:nohtml
-    {showsource 0}
-    {quiet 1}
+    testcase_id:word,notnull
+    package_key:token
+    {showsource:boolean 0}
+    {quiet:boolean 1}
+    {return_url ""}
 } -properties {
     title:onevalue
     context_bar:onevalue
@@ -47,11 +48,9 @@ if {![db_0or1row acs-automated-testing.get_testcase_fails_count {
 
 set testcase_bodys {}
 foreach testcase [nsv_get aa_test cases] {
-    if {$testcase_id == [lindex $testcase 0] &&
-        $package_key == [lindex $testcase 3]} {
+    if {$testcase_id eq [lindex $testcase 0] && $package_key eq [lindex $testcase 3]} {
         set testcase_desc     [lindex $testcase 1]
         set testcase_file     [lindex $testcase 2]
-        set package_key       [lindex $testcase 3]
         set testcase_cats     [join [lindex $testcase 4] ", "]
         set testcase_inits    [join [lindex $testcase 5] ", "]
         set testcase_on_error [lindex $testcase 6]
@@ -64,14 +63,16 @@ foreach testcase [nsv_get aa_test cases] {
 
 set bug_list [list]
 foreach bug $testcase_bugs {
-    lappend bug_list "<a href=\"[export_vars -base "http://openacs.org/bugtracker/openacs/bug" [list [list bug_number $bug]]]\">$bug</a>"
+    set href [export_vars -base "http://openacs.org/bugtracker/openacs/bug" {{bug_number $bug}}]
+    lappend bug_list [subst {<a href="[ns_quotehtml $href]">$bug</a>}]
 }
 set bug_blurb [join $bug_list ", "]
 
 set proc_list [list]
-foreach proc $testcase_procs {                             
-                              lappend proc_list "<a href=\"[export_vars -base "/api-doc/proc-view" { proc }]\">$proc</a>"
-                          }
+foreach p $testcase_procs {
+    set href [export_vars -base "/api-doc/proc-view" { {proc $p} }]
+    lappend proc_list [subst {<a href="[ns_quotehtml $href]">$p</a>}]
+}
 set proc_blurb [join $proc_list ", "]
 
 
@@ -85,7 +86,7 @@ if {[llength $testcase_bodys] == 0} {
     #
     # Work out the URL for this directory (stripping off the file element).
     #
-    set url "[ad_conn url]"
+    set url [ad_conn url]
     regexp {(.*)/[^/]*} $url {\\1} url
     append url "/component?package_key=${package_key}"
 
@@ -95,15 +96,22 @@ if {[llength $testcase_bodys] == 0} {
         # <component_id> element is a link.
         #
         regsub -all {aa_call_component\s+(["]?)([^\s]*)(["]?)} $body \
-            "aa_call_component <a href=\"${url}\\&component_id=\\2\">\\1\\2\\3</a>" body
+            "aa_call_component <a href='$url\\&component_id=\\2'>\\1\\2\\3</a>" body
         template::multirow append bodys $body_count $body
         incr body_count
     }
 }
 
-set resource_file_url "init-file-resource?[export_vars -url { {return_url {[ad_return_url]} } {absolute_file_path $testcase_file}}]"
+set resource_file_url [export_vars -base init-file-resource {
+    {return_url [ad_return_url]}
+    {absolute_file_path $testcase_file}
+}]
 
-set return_url [export_vars -base . { { view_by testcase } quiet { by_package_key $package_key } }]
+set rerun_url [export_vars -base rerun {testcase_id package_key quiet {return_url [ad_return_url]}}]
+
+if {$return_url eq ""} {
+  set return_url [export_vars -base . { { view_by testcase } quiet { by_package_key $package_key } }]
+}
 
 set quiet_url "[export_vars -base testcase -entire_form -exclude {quiet}]&quiet=1"
 set verbose_url "[export_vars -base testcase -entire_form -exclude {quiet}]&quiet=0"
@@ -127,3 +135,9 @@ th {
 "
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

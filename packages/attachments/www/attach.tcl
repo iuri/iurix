@@ -4,13 +4,13 @@ ad_page_contract {
 
     @author arjun@openforce.net
     @author ben@openforce
-    @cvs-id $Id: attach.tcl,v 1.11 2009/05/29 18:13:24 emmar Exp $
+    @cvs-id $Id: attach.tcl,v 1.12.2.2 2017/02/01 16:04:17 gustafn Exp $
 
 } -query {
-    {object_id:notnull}
-    {folder_id ""}
+    {object_id:naturalnum,notnull,notnull}
+    {folder_id:integer ""}
     {pretty_object_name ""}
-    {return_url:notnull}
+    {return_url:localurl,notnull}
 }
 
 set user_id [ad_conn user_id]
@@ -25,17 +25,17 @@ set to_object_id $object_id
 permission::require_permission -object_id $to_object_id -privilege write
 
 # Give the object a nasty name if it doesn't have a pretty name
-if {[empty_string_p $pretty_object_name]} {
+if {$pretty_object_name eq ""} {
     set pretty_object_name "[_ attachments.Object] #$to_object_id"
 }
 
 # Load up file storage information
-if {[empty_string_p $folder_id]} {
+if {$folder_id eq ""} {
     set folder_id [attachments::get_root_folder]
 } 
 
 # sanity check
-if {[empty_string_p $folder_id]} {
+if {$folder_id eq ""} {
     ad_return_complaint 1 "[_ attachments.lt_Error_empty_folder_id]"
     ad_script_abort
 }
@@ -83,3 +83,9 @@ template::head::add_style -style "
 set file_add_url [export_vars -base "file-add" { {object_id $to_object_id} folder_id return_url pretty_object_name}]
 
 set simple_add_url [export_vars -base "simple-add" { {object_id $to_object_id} folder_id return_url pretty_object_name}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

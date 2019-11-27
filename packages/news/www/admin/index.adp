@@ -1,7 +1,7 @@
 <master>
-<property name="context">@context;noquote@</property>
+<property name="context">@context;literal@</property>
 <p>
-<property name="title">@title;noquote@</property>
+<property name="doc(title)">@title;literal@</property>
 
 <ul>
   <li><a href="../item-create">#news.Create_a_news_item#</a></li>
@@ -14,14 +14,14 @@
 
 @view_link;noquote@
 <if @news_items:rowcount@ eq 0>
- <i>#news.lt_There_are_no_items_av#</i><p>
+ <em>#news.lt_There_are_no_items_av#</em><p>
 </if>
 <else>
 <p>	
- <table border=0>
+ <table border="0">
    <tr><td>
     <form method=post action=process>
-      <table border=0 cellspacing=5 cellpadding=5>
+      <table border="0" cellspacing="5" cellpadding="5">
         <tr>
           <th>#news.Select#</th>
           <th>ID#</th>
@@ -38,7 +38,7 @@
         <else>
         <tr class="even">
         </else>
-          <td align=center><input type=checkbox name=n_items  value=@news_items.item_id@></td>
+          <td align="center"><input type="checkbox" name="n_items"  value="@news_items.item_id@"></td>
           <td><a href="item?item_id=@news_items.item_id@">@news_items.item_id@</a></td>
           <td class="adminLink">@news_items.publish_title@ (#news.rev# @news_items.revision_no@) <a href="revision-add?item_id=@news_items.item_id@">#news.revise#</a></td>
           <td><a href="/shared/community-member?user_id=@news_items.creation_user@">@news_items.item_creator@</a></td>
@@ -56,7 +56,7 @@
 	@select_actions;noquote@
        <option value=delete>#news.Delete#</option>	
        </select>
-       <input type=submit value="#news.Go#">
+       <input type="submit" value="#news.Go#">
        </p>
      </if>
        </form>

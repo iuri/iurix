@@ -7,9 +7,9 @@ ad_page_contract {
 
     @author dhogaza@pacifier.com
     @creation-date 2008-01-13
-    @cvs-id $Id: subscribers.tcl,v 1.4 2008/10/27 16:14:16 daveb Exp $
+    @cvs-id $Id: subscribers.tcl,v 1.6.2.1 2015/09/12 11:06:48 gustafn Exp $
 } {
-    object_id:notnull
+    object_id:naturalnum,notnull
 }
 
 permission::require_permission -object_id $object_id -privilege "admin"
@@ -25,7 +25,8 @@ if { ![db_0or1row select_name {}] } {
 # if objects have multiple types we may need to separate them
 # with different links to their respective objects.
 
-set notice "<a href=\"[export_vars -base object-goto -url {object_id type_id}]\">$name</a> - [_ notifications.Notifications]"
+set url [export_vars -base object-goto -url {object_id type_id}]
+set notice "<a href=\"[ns_quotehtml $url]\">$name</a> - [_ notifications.Notifications]"
 
 
 
@@ -57,3 +58,9 @@ template::list::create \
         }
     }
         
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

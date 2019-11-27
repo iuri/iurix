@@ -13,7 +13,7 @@ ad_page_contract {
   @author Lee Denison (lee@xarg.co.uk)
   @author Don Baccus (dhogaza@pacifier.com)
 
-  $Id: plain-master.tcl,v 1.4 2009/02/23 20:53:37 jeffd Exp $
+  $Id: plain-master.tcl,v 1.5.2.1 2015/09/12 19:00:43 gustafn Exp $
 }
 
 if { ![info exists main_content_p] } {
@@ -32,7 +32,7 @@ if {[ad_conn url] eq "/"} {
     set system_url [ad_url]
 }
 
-if {[template::util::is_nil title]} {
+if {![info exists title]} {
     # TODO: decide how best to set the lang attribute for the title
     set title [ad_conn instance_name]
 }
@@ -47,7 +47,7 @@ if { [template::multirow exists navigation] } {
     }
     for {set i 1} {$i <= [template::multirow size navigation]} {incr i} {
         template::multirow get navigation $i
-        if { [lsearch -exact $navigation_groups $navigation(group)] < 0} {
+        if {$navigation(group) ni $navigation_groups} {
             lappend navigation_groups $navigation(group)
         }
     }
@@ -163,3 +163,9 @@ set curriculum_bar_p [expr {
 if {![info exists skip_link]} {
     set skip_link "#content-wrapper"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -6,14 +6,14 @@ ad_page_contract {
 
     @author rhs@mit.edu
     @creation-date 2000-09-30
-    @cvs-id $Id: toggle-inherit.tcl,v 1.5 2006/06/04 00:45:45 donb Exp $
+    @cvs-id $Id: toggle-inherit.tcl,v 1.6.2.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    object_id:integer,notnull
+    object_id:naturalnum,notnull
     {application_url ""}
-    {return_url {[export_vars -base "one" {application_url object_id}]}}
+    {return_url:localurl {[export_vars -base "one" {application_url object_id}]}}
 }
 
-ad_require_permission $object_id admin
+permission::require_permission -object_id $object_id -privilege admin
 
 permission::toggle_inherit -object_id $object_id
 
@@ -28,3 +28,9 @@ if { ![permission::permission_p -object_id $object_id -privilege admin] } {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

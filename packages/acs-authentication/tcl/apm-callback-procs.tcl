@@ -3,7 +3,7 @@ ad_library {
 
     @author Lars Pind (lars@collaobraid.biz)
     @creation-date 2003-05-13
-    @cvs-id $Id: apm-callback-procs.tcl,v 1.19 2008/09/19 17:05:20 gustafn Exp $
+    @cvs-id $Id: apm-callback-procs.tcl,v 1.19.10.1 2015/09/10 08:21:12 gustafn Exp $
 }
 
 namespace eval auth {}
@@ -665,3 +665,9 @@ ad_proc -private auth::search::delete_contract {} {
 } {
     acs_sc::contract::delete -name "auth_search"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

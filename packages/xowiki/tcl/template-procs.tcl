@@ -20,9 +20,8 @@ ad_proc -public ::template::adp_include {
                   [list &book "bookdata" base $base style feed]]
   </pre>
 
-  The [list &book "bookdata" ...] tells adp_include to pass the book array by reference to the adp in
-clude, where it is
-  refered to via @book.field@.
+  The [list &book "bookdata" ...] tells adp_include to pass the book array by
+  reference to the adp include, where it is referred to via @book.field@.
 
   @param uplevel how far up the stack should the adp_level be set to
                  (default is the calling procedures level)
@@ -40,14 +39,18 @@ clude, where it is
 } {
   # set the stack frame at which the template is being parsed so that
   # other procedures can reference variables cleanly
-  variable parse_level
-  lappend parse_level [expr {[info level] - $uplevel}]
+  lappend ::template::parse_level [expr {[info level] - $uplevel}]
 
   set __adp_out [template::adp_parse [template::util::url_to_file $src] $varlist]
 
   # pop off parse level
-  template::util::lpop parse_level
+  template::util::lpop ::template::parse_level
 
   return $__adp_out
 }
 }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

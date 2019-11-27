@@ -1,26 +1,31 @@
-# Initialize namespaces, global macros and filters for ArsDigita Templating
-# System
+ad_library {
+    Initialize namespaces, global macros and filters for ArsDigita Templating
+    System
+
+    @author Karl Goldstein (karlg@arsdigita.com)
+
+    @cvs-id $Id: 0-acs-templating-procs.tcl,v 1.3.2.3 2016/10/03 18:52:07 antoniop Exp $
+}
+
+# Initialize namespaces used by template procs
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
-# Author: Karl Goldstein (karlg@arsdigita.com)
-# $Id: 0-acs-templating-procs.tcl,v 1.1 2003/10/15 12:35:51 dirkg Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
 # http://www.fsf.org/copyleft/gpl.html
 
-# Initialize namespaces used by template procs
 
 ad_proc -public template_tag { name arglist body } {
     Generic wrapper for registered tag handlers.
 } {
 
   # LARS:
-  # We only ns_register_adptag the tag if it hasn't already been registered
+  # We only ns_adp_registerscript the tag if it hasn't already been registered
   # (if the proc doesn't exist).
   # This makes debugging templating tags so much easier, because you don't have
   # to restart the server each time.
-  set exists_p [llength [info procs template_tag_$name]]
+  set exists_p [llength [info commands template_tag_$name]]
 
   switch [llength $arglist] {
 
@@ -37,7 +42,7 @@ ad_proc -public template_tag { name arglist body } {
       }"
 
       if { !$exists_p } {
-        ns_register_adptag $name template_tag_$name 
+        ns_adp_registerscript $name template_tag_$name 
       }
     }
 
@@ -59,10 +64,16 @@ ad_proc -public template_tag { name arglist body } {
       }"
 
       if { !$exists_p } {
-        ns_register_adptag $name /$name template_tag_$name 
+        ns_adp_registerscript $name /$name template_tag_$name 
       }
     }
 
     default { error [_ acs-templating.Tag_handler_invalid_number_of_args] }
   }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

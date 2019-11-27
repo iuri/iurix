@@ -1,20 +1,26 @@
 <master>
-<property name="context">@context;noquote@</property>
-<property name="title">Create relation type</property>
+<property name="context">@context;literal@</property>
+<property name="doc(title)">#acs-subsite.Create_relation_type#</property>
 
-First, select the supertype for the new relationship type:
+<h1>#acs-subsite.Create_relation_type#</h1>
 
-<form method=get action=new-2>
-@export_vars;noquote@
+<p>#acs-subsite.First_select_the_supertype#</p>
 
-Supertype: <select name=supertype>
-<multiple name="supertypes">
-  <option value="@supertypes.object_type@"> @supertypes.name;noquote@
-</multiple>
-</select>
+<form method="get" action="new-2">
+<div>@export_vars;noquote@</div>
 
-<p>
-<center><input type=submit value="Continue"></center>
+<div>
+<label for="supertype">
+  #acs-subsite.Supertype#
+  <select name="supertype" id="supertype">
+  <multiple name="supertypes">
+    <option value="@supertypes.object_type@">@supertypes.name;noquote@</option>
+  </multiple>
+  </select>
+</label>
+
+<input type="submit" value="Continue">
+</div>
 
 </form>
 

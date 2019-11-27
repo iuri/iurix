@@ -2,26 +2,6 @@
 <queryset>
 <rdbms><type>oracle</type><version>8.1.6</version></rdbms>
 
-
-<fullquery name="list_moderators">
-  <querytext>
-    select party_id, acs_object.name(party_id) as name
-    from acs_object_party_privilege_map
-    where object_id = :room_id
-    and privilege = 'chat_room_moderate'
-  </querytext>
-</fullquery>
-
-<fullquery name="list_user_allow">
-  <querytext>
-    select distinct party_id, acs_object.name(party_id) as name
-    from acs_object_party_privilege_map
-    where object_id = :room_id
-    and (privilege = 'chat_read' or privilege = 'chat_write')
- </querytext>
-</fullquery>
-
-
 <fullquery name="list_user_ban">
   <querytext>
    select m.party_id, p.last_name || ', ' || p.first_names as name, pa.email

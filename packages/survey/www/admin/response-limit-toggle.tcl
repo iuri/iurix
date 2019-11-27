@@ -9,13 +9,13 @@ ad_page_contract {
 
 } {
 
-    survey_id:integer
+    survey_id:naturalnum,notnull
 
 }
 
-ad_require_permission $survey_id survey_admin_survey
+permission::require_permission -object_id $survey_id -privilege survey_admin_survey
 
 db_dml survey_response_toggle ""
 
 db_release_unused_handles
-ad_returnredirect "one?[export_url_vars survey_id]"
+ad_returnredirect [export_vars -base one {survey_id}]

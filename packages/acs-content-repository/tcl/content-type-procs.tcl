@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
     @arch-tag: 4a8a3652-fd5d-49aa-86fc-fade683f06ce
-    @cvs-id $Id: content-type-procs.tcl,v 1.11 2007/09/18 20:04:21 gustafn Exp $
+    @cvs-id $Id: content-type-procs.tcl,v 1.13.2.1 2015/09/10 08:21:17 gustafn Exp $
 }
 
 namespace eval ::content::type {}
@@ -54,7 +54,7 @@ ad_proc -public content::type::delete {
     @param drop_table_p
     @param drop_objets_p Drop the objects of this content type along with all entries in cr_items and cr_revisions. Will not be done by default.
 } {
-    if {$drop_objects_p eq "f"} {
+    if {$drop_objects_p == "f"} {
 	return [package_exec_plsql -var_list [list \
 						  [list content_type $content_type ] \
 						  [list drop_children_p $drop_children_p ] \
@@ -286,7 +286,7 @@ ad_proc -public content::type::rotate_template {
 ad_proc -public content::type::set_default_template {
     -content_type:required
     -template_id:required
-    {use_context: "public"}
+    {use_context "public"}
 } {
     @param content_type
     @param template_id
@@ -397,3 +397,9 @@ ad_proc -public content::type::content_type_p_not_cached {
 } {
     return [db_string content_type_p "" -default 0]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -1,6 +1,6 @@
 <master>
-  <property name=title>@title;noquote@</property>
-  <property name="context">@context;noquote@</property>
+  <property name="doc(title)">@title;literal@</property>
+  <property name="context">@context;literal@</property>
 
   @script_documentation;noquote@
 
@@ -13,8 +13,9 @@
     </ul>
   </if>
 
+<if @source_link@ ne 0>
   <p>
-    <if @source_p@ eq 0>
+    <if @source_p;literal@ false>
       [ <a href="content-page-view?@url_vars@&amp;source_p=1">show source</a> ]
     </if>
     <else>
@@ -27,10 +28,10 @@
         the default</a> ]
     </if>
 
-    <if @source_p@ eq 1>
+    <if @source_p;literal@ true>
       <h4>Content File Source</h4>
 
       <!-- directly display file contents var to avoid translating i18n strings etc -->
-      <pre><%= $file_contents %></pre>
+      <blockquote><pre class='code'>@file_contents;literal@</pre></blockquote>
     </if>
-
+</if>

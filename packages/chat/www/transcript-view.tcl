@@ -4,9 +4,9 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 28, 2000
-    @cvs-id $Id: transcript-view.tcl,v 1.3 2006/03/14 12:16:09 emmar Exp $
+    @cvs-id $Id: transcript-view.tcl,v 1.3.12.1 2016/06/20 08:40:23 gustafn Exp $
 } {
-    transcript_id:integer,notnull
+    transcript_id:naturalnum,notnull
 } -properties {
     context_bar:onevalue
     transcript_name:onevalue
@@ -16,7 +16,7 @@ ad_page_contract {
     contents:onevalue
 }
 
-ad_require_permission $transcript_id chat_transcript_view
+permission::require_permission -object_id $transcript_id -privilege chat_transcript_view
 
 set context_bar [list "[_ chat.View_transcript]"]
 db_1row get_transcript {

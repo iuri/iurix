@@ -1,13 +1,5 @@
-/* Emulate getElementById on document.all only browsers. Requires
-   that IDs are unique to the page and do not coincide with NAME
-   attributes on other elements:-
-   Source: http://www.litotes.demon.co.uk/js_info/faq_notes/alt_dynwrite.html#getEl
-*/
-if((!document.getElementById) && document.all){
-    document.getElementById = function(id){return document.all[id];};
-}
 
-
+/* The function acs_Focus is included in blank-master.tcl
 function acs_Focus(form_name, element_name) {
     if (document.forms == null) return;
     if (document.forms[form_name] == null) return;
@@ -15,8 +7,7 @@ function acs_Focus(form_name, element_name) {
     if (document.forms[form_name].elements[element_name].type == 'hidden') return;
 
     document.forms[form_name].elements[element_name].focus();
-}
-
+} */
 
 function acs_FormRefresh(form_name) {
     if (document.forms == null) return;
@@ -623,9 +614,9 @@ Calendar.dayMouseDown = function(ev) {
 		cal._dragStart(ev);
 	}
 	if (el.navtype == -1 || el.navtype == 1) {
-		cal.timeout = setTimeout("Calendar.showMonthsCombo()", 250);
+	    cal.timeout = setTimeout(function() {Calendar.showMonthsCombo();}, 250);
 	} else if (el.navtype == -2 || el.navtype == 2) {
-		cal.timeout = setTimeout((el.navtype > 0) ? "Calendar.showYearsCombo(true)" : "Calendar.showYearsCombo(false)", 250);
+	    cal.timeout = setTimeout((el.navtype > 0) ? function() {Calendar.showYearsCombo(true);} : function() {Calendar.showYearsCombo(false);}, 250);
 	} else {
 		cal.timeout = null;
 	}
@@ -1119,6 +1110,7 @@ Calendar.prototype._init = function (mondayFirst, date) {
 	}
 	this.ar_days = ar_days;
 	this.title.firstChild.data = Calendar._MN[month] + ", " + year;
+        this._hideCombos();
 	// PROFILE
 	// this.tooltips.firstChild.data = "Generated in " + ((new Date()) - today) + " ms";
 };
@@ -1730,7 +1722,7 @@ function showCalendarWithDateWidget(id,fmt) {
     // first-time call, create the calendar
     var cal = new Calendar(true, null, selectwidget, closeHandler);
     calendar = cal;             // remember the calendar in the global
-    cal.setRange(2000, 2010);   // min/max year allowed
+    cal.setRange(1900, 2050);   // min/max year allowed
     calendar.create();          // create a popup calendar
     calendar.parseDate(calval,fmt); // set it to a new date
   }

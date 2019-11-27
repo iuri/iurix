@@ -4,27 +4,19 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 16, 2000
-    @cvs-id $Id: room-delete-2.tcl,v 1.5 2007/11/19 01:14:16 donb Exp $
+    @cvs-id $Id: room-delete-2.tcl,v 1.5.6.2 2017/06/09 17:47:19 antoniop Exp $
 } {
-    room_id:notnull
-    {return_url "/chat/index"}
-    {cancel.x:optional}
+    room_id:naturalnum,notnull
 }
 
-if {![info exists cancel.x]} {
+permission::require_permission -object_id $room_id -privilege chat_room_delete
 
-    
-    foreach element $room_id {    
-	ad_require_permission $element chat_room_delete
-	chat_room_file_delete $element 
-	chat_flush_invitation_queue -room_id $element
-	if { [catch {chat_room_delete $element} errmsg] } {
-	    ad_return_complaint 1 "[_ chat.Delete_room_failed]: $errmsg"
-	}
-    }
+if { [catch {chat_room_delete $room_id} errmsg] } {
+    ad_return_complaint 1 "[_ chat.Delete_room_failed]: $errmsg"
+    ad_script_abort
 }
-ad_returnredirect $return_url
 
+ad_returnredirect . 
 
 
 

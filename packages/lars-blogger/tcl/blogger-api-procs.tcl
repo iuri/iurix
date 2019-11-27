@@ -5,7 +5,7 @@ ad_library {
 
      @author Vinod Kurup [vinod@kurup.com]
      @creation-date Fri Oct  3 21:26:11 2003
-     @cvs-id $Id: blogger-api-procs.tcl,v 1.6 2004/07/12 11:33:19 jeffd Exp $
+     @cvs-id $Id: blogger-api-procs.tcl,v 1.10 2018/05/09 15:33:31 hectorr Exp $
 }
 
 # Helper procs
@@ -17,7 +17,7 @@ ad_proc lars_blog_auth_for_xmlrpc {
     Authenticate a user based on info from XML-RPC client. Not sure if we're
     getting email or username, so test for @ and decide.
 
-    @return user_id if successful authentication. errors if unsuccesful.
+    @return user_id if successful authentication. errors if unsuccessful.
     @author Vinod Kurup
 } {
     if { [string first "@" $username] != -1 } {
@@ -30,7 +30,7 @@ ad_proc lars_blog_auth_for_xmlrpc {
                             -password $password]
     }
 
-    if { $auth(auth_status) != "ok" } {
+    if { $auth(auth_status) ne "ok" } {
         return -code error $auth(auth_message)
     }
 

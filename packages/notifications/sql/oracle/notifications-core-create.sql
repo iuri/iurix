@@ -2,7 +2,7 @@
 -- The Notifications
 --
 -- @author Ben Adida (ben@openforce.net)
--- @version $Id: notifications-core-create.sql,v 1.15 2007/06/28 17:23:41 matthewg Exp $
+-- @version $Id: notifications-core-create.sql,v 1.15.12.1 2017/04/22 12:04:41 gustafn Exp $
 --
 -- Copyright (C) 2000 MIT
 --
@@ -155,7 +155,7 @@ create table notifications (
                                     constraint notif_notif_date_nn
                                     not null,
     -- this is to allow responses to notifications
-    response_id                     constraint notif_reponse_id_fk
+    response_id                     constraint notif_response_id_fk
                                     references acs_objects (object_id)
                                     on delete cascade,
     notif_user                      integer

@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Nov 12 17:50:04 2000
-    @cvs-id $Id: add.tcl,v 1.3 2002/09/06 21:50:03 jeffd Exp $
+    @cvs-id $Id: add.tcl,v 1.5.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     object_type:notnull
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     export_form_vars:onevalue
@@ -20,8 +20,8 @@ ad_page_contract {
 
 set context [list "Add relation type"]
 set constraint_id [db_nextval "acs_object_id_seq"]
-set export_form_vars [export_form_vars constraint_id object_type return_url]
-set export_url_vars [export_url_vars constraint_id object_type return_url]
+set export_form_vars [export_vars -form {constraint_id object_type return_url}]
+set export_url_vars [export_vars {constraint_id object_type return_url}]
 
 db_multirow primary_rels select_primary_relations {
     select o.object_type as rel_type, o.pretty_name
@@ -31,3 +31,9 @@ db_multirow primary_rels select_primary_relations {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

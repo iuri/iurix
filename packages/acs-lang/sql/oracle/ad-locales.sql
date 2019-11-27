@@ -3,7 +3,7 @@
 --
 -- @author Jeff Davis (davis@xarg.net)
 -- @creation-date 2000-09-10
--- @cvs-id $Id: ad-locales.sql,v 1.36.2.1 2010/05/14 13:15:45 emmar Exp $
+-- @cvs-id $Id: ad-locales.sql,v 1.37.6.1 2017/04/21 16:06:05 gustafn Exp $
 --
 
 -- ****************************************************************************
@@ -385,7 +385,7 @@ insert into ad_locales
 insert into ad_locales
        (locale, label, language, country, nls_language, nls_territory,
         nls_charset, mime_charset, default_p, enabled_p)
- values ('uk_UA', 'Ukranian (UA)', 'uk', 'UA', 'Ukranian', 'Ukraine', 'UTF8', 'UTF-8', 'f', 'f');
+ values ('uk_UA', 'Ukrainian (UA)', 'uk', 'UA', 'Ukrainian', 'Ukraine', 'UTF8', 'UTF-8', 'f', 'f');
 
 insert into ad_locales
        (locale, label, language, country, nls_language, nls_territory,

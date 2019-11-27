@@ -1,19 +1,19 @@
 <master>
-  <property name="title">@page_title;noquote@</property>
-  <property name="context">@context;noquote@</property>
+  <property name="doc(title)">@page_title;literal@</property>
+  <property name="context">@context;literal@</property>
 
 
 <listfilters name="packages" style="inline-filters"></listfilters>
 <if @packages:rowcount@ eq 0>
-  <if @upgrade_p@ true>
+  <if @upgrade_p;literal@ true>
     <p> No packages on your system need upgrading. </p>
   </if>
   <else>
     <if @repository_url@ nil>
-      <p> There are no un-installed applications in your file system. </p>
+      <p> There are no un-installed applications in your file system meeting the filter criteria.</p>
     </if>
     <else>
-      <p> There are no un-installed applications in the OpenACS repository. </p>
+      <p> There are no un-installed applications in the OpenACS repository meeting the filter criteria. </p>
     </else>
   </else>
 </if>
@@ -21,4 +21,4 @@
   <listtemplate name="packages"></listtemplate>
 </else>
 
-<p> <b>&raquo;</b> <a href=".">Go back to software installation</a>
+<p> <strong>&raquo;</strong> <a href=".">Go back to software installation</a>

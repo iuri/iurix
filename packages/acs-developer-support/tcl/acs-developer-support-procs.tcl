@@ -1,26 +1,24 @@
- # $Id: acs-developer-support-procs.tcl,v 1.51 2010/01/22 17:05:20 daveb Exp $
- # File:        developer-support-procs.tcl
- # Author:      Jon Salz <jsalz@mit.edu>
- # Date:        22 Apr 2000
- # Description: Provides routines used to aggregate request/response information for debugging.
+ad_library {
+
+    Provides routines used to aggregate request/response information for debugging.
+
+    @author Jon Salz <jsalz@mit.edu>
+    @creation-date 22 Apr 2000
+}
 
  ad_proc -private ds_instance_id {} {
 
      @return The instance of a running acs developer support.
 
  } {
-     return [util_memoize [list db_string acs_kernel_id_get {
-         select package_id from apm_packages
-         where package_key = 'acs-developer-support'
-         and rownum=1
-     } -default 0]]
+     return [util_memoize [list db_string acs_kernel_id_get {} -default 0]]
  }
 
  ad_proc -public ds_permission_p {} {
      Do we have permission to view developer support stuff.
  } {
      set party_id [ds_ad_conn user_id]
-     if {$party_id == 0} {
+     if {$party_id == 0 || $party_id eq ""} {
          # set up a fake id in order to make user_switching mode work
          # with
          # non logged users, if not it will enter into a infinite loop
@@ -45,7 +43,7 @@
      } else {
        ns_log Warning "$user_id doesn't have $privilege on object $object_id"
        ad_return_forbidden "Permission Denied" "<blockquote>
-       <p>You don't have permission to $privilege [db_string name {select acs_object.name(:object_id) from dual}].</p>
+       <p>You don't have permission to $privilege [db_string name {}].</p>
        </blockquote>"
      }
      ad_script_abort
@@ -55,29 +53,38 @@
  ad_proc -public ds_enabled_p {} { 
      Returns true if developer-support facilities are enabled.
  } {
-     if { ![nsv_exists ds_properties enabled_p] || ![nsv_get ds_properties enabled_p] } {
-         return 0
+     #
+     # On busy sites, frequent calls to [ds_enabled_p] leads to huge
+     # number of mutex locks for the nsv ds_properties. Therefore,
+     # cache its results in a per-thead variable.
+     #
+     if {[info exists ::ds_enabled_p]} {
+         return $::ds_enabled_p
      }
-     return 1
+     if { ![nsv_exists ds_properties enabled_p] || ![nsv_get ds_properties enabled_p] } {
+         set ::ds_enabled_p 0
+     } else {
+         set ::ds_enabled_p 1
+     }
+     return $::ds_enabled_p
  }
 
  ad_proc -public ds_collection_enabled_p {} {
      Returns whether we're collecting information about this request
  } {
-     global ad_conn
-     if { [info exists ad_conn(ds_collection_enabled_p)] } {
-         return $ad_conn(ds_collection_enabled_p)
+     if { [info exists ::ad_conn(ds_collection_enabled_p)] } {
+         return $::ad_conn(ds_collection_enabled_p)
      }
-     if { ![info exists ad_conn(request)] } {
+     if { ![info exists ::ad_conn(request)] } {
          return 0
      }
      foreach pattern [nsv_get ds_properties enabled_ips] {
          if { [string match $pattern [ad_conn peeraddr]] } {
-             set ad_conn(ds_collection_enabled_p) 1
+             set ::ad_conn(ds_collection_enabled_p) 1
              return 1
          }
      }
-     set ad_conn(ds_collection_enabled_p) 0
+     set ::ad_conn(ds_collection_enabled_p) 0
      return 0
  }
 
@@ -147,10 +154,10 @@
  } {
     Appends adp start box if the show toggle is true
  } {
-     template::adp_append_code "if { \[::ds_show_p\] } {"
-     template::adp_append_code "    set __apidoc_path \[string range $stub \[string length \[::acs_root_dir\]\] end\].adp"
+     template::adp_append_code "if { \[info exists ::ds_show_p\] } {"
+     template::adp_append_code "    set __apidoc_path \[string range $stub \[string length \$::acs::rootdir\] end\].adp"
      template::adp_append_code "    set __stub_path \[join \[split $stub /\] \" / \"\]"
-     template::adp_append_code "    append __adp_output \"<div class=\\\"\[::ds_adp_box_class\]\\\"><span class=\\\"\[::ds_adp_file_class\]\\\"><a href=\\\"/api-doc/content-page-view?source_p=1&path=\$__apidoc_path\\\" style=\\\"text-decoration: none;\\\">\$__stub_path</a></span><div class=\\\"\[::ds_adp_output_class\]\\\">\""
+     template::adp_append_code "    append __adp_output \"<div class=\\\"\[::ds_adp_box_class\]\\\"><span class=\\\"\[::ds_adp_file_class\]\\\"><a href=\\\"/api-doc/content-page-view?source_p=1&amp;path=\$__apidoc_path\\\" style=\\\"text-decoration: None;\\\">\$__stub_path</a></span><div class=\\\"\[::ds_adp_output_class\]\\\">\""
      template::adp_append_code "}"
  }
 
@@ -160,7 +167,7 @@
  } {
     Appends adp end box if the show toggle is true
  } {
-     template::adp_append_code "if { \[::ds_show_p\] } {"
+     template::adp_append_code "if { \[info exists ::ds_show_p\] } {"
      template::adp_append_code "    append __adp_output \"</div></div><!-- END\n$stub (lvl \[info level\])-->\""
      template::adp_append_code "}"
  }
@@ -174,7 +181,7 @@
      @return A link to the first instance of the developer-support information available in the site node, \
              the empty_string if none are available.
  } {
-     return "[ad_url][apm_package_url_from_key "acs-developer-support"]"
+     return [apm_package_url_from_key acs-developer-support]
  }
 
  ad_proc ds_link {} { 
@@ -189,53 +196,62 @@
          return ""
      }
 
-     set out "<div class=\"developer-support\">"
+     set out "<div class='developer-support'>"
      if { [ds_enabled_p] && [ds_collection_enabled_p] } {
-         global ad_conn
 
          set ds_url [ds_support_url]
-         if {![empty_string_p $ds_url]} {
-             append out "<a href=\"${ds_url}\">Developer Support Home</a> - <a href=\"${ds_url}request-info?request=$ad_conn(request)\">Request Information</a><br>"
+         if {$ds_url ne ""} {
+             append out [subst {
+		 <a href="$ds_url">Developer Support Home</a> -
+		 <a href="${ds_url}request-info?request=$::ad_conn(request)">Request Information</a><br>
+	     }]
          } else {
              ns_log Error "ACS-Developer-Support: Unable to offer link to Developer Support \
                      because it is not mounted anywhere."
          }
 
-         if { [nsv_exists ds_request "$ad_conn(request).db"] } {
+         if { [nsv_exists ds_request $::ad_conn(request).db] } {
              set total 0
              set counter 0
-             foreach { handle command statement_name sql start end errno error } [nsv_get ds_request "$ad_conn(request).db"] {
-                 incr total [expr { $end - $start }]
-                 if { [lsearch { dml exec 1row 0or1row select } [lindex $command 0]] >= 0 } {
+             foreach { handle command statement_name sql start end errno error } [nsv_get ds_request $::ad_conn(request).db] {
+                 set total [expr { $total + ($end - $start) }]
+                 if { [lindex $command 0] in { dml exec 1row 0or1row select } } {
                      incr counter
                  }
              }
              if { $counter > 0 } {
-                 append out "$counter database command[ad_decode $counter 1 " taking" "s totalling"] [format "%.f" [expr { $total }]] ms<br>"
+                 append out "$counter database command[ad_decode $counter 1 " taking" "s totalling"] [format {%.f} $total] ms<br>"
              }
          }
 
-         if { [nsv_exists ds_request "$ad_conn(request).conn"] } {
-             array set conn [nsv_get ds_request "$ad_conn(request).conn"]
+         if { [nsv_exists ds_request $::ad_conn(request).conn] } {
+             array set conn [nsv_get ds_request $::ad_conn(request).conn]
              if { [info exists conn(startclicks)] } {
-                 append out "Page served in [format "%.f" [expr { ([clock clicks -milliseconds] - $conn(startclicks)) }]] ms<br>\n"
+                 set time [format "%.f" [expr { ([clock clicks -microseconds] - $conn(startclicks))/1000.0 }]]
+                 append out "Page served in $time ms<br>\n"
              }
          }
 
          if { [parameter::get -package_id [ds_instance_id] -parameter ShowCommentsInlineP -default 0] } {
-             append out "Comments: <b>On</b> | <a href=\"[export_vars -base "${ds_url}comments-toggle" { { return_url [ad_return_url] } }]\">Off</a><br>"
-             if { [nsv_exists ds_request "$ad_conn(request).comment"] } {
-                 foreach comment [nsv_get ds_request "$ad_conn(request).comment"] {
+	     set href [export_vars -base ${ds_url}comments-toggle { { return_url [ad_return_url] } }]
+             append out [subst {
+		 Comments: <b>On</b> | <a href="[ns_quotehtml $href]">Off</a><br>
+	     }]
+             if { [nsv_exists ds_request $::ad_conn(request).comment] } {
+                 foreach comment [nsv_get ds_request $::ad_conn(request).comment] {
                      append out "<b>Comment:</b> $comment<br>\n"
                  }
              }
          } else {
-             append out "Comments: <a href=\"[export_vars -base "${ds_url}comments-toggle" { { return_url [ad_return_url] } }]\">On</a> | <b>Off</b><br>"
+	     set href [export_vars -base ${ds_url}comments-toggle { { return_url [ad_return_url] } }]
+             append out [subst {
+		 Comments: <a href="[ns_quotehtml $href]">On</a> | <b>Off</b><br>
+	     }]
          }
      }
 
      if { [ds_user_switching_enabled_p] } {
-         append out "[ds_user_select_widget]<br>"
+         append out [ds_user_select_widget] "<br>"
      }
 
      return $out
@@ -258,11 +274,10 @@
  } {
      set result {}
      if { [ds_enabled_p] && [ds_collection_enabled_p] } {
-         global ad_conn
-         if { [nsv_exists ds_request "$ad_conn(request).conn"] } {
-             array set conn [nsv_get ds_request "$ad_conn(request).conn"]
+         if { [nsv_exists ds_request $::ad_conn(request).conn] } {
+             array set conn [nsv_get ds_request $::ad_conn(request).conn]
              if { [info exists conn(startclicks)] } {
-                 set result [format "%.f" [expr { ([clock clicks -milliseconds] - $conn(startclicks)) }]]
+                 set result [format "%.f" [expr { ([clock clicks -microseconds] - $conn(startclicks))/1000.0 }]]
              }
          }
      }
@@ -272,17 +287,16 @@
  ad_proc -public ds_get_db_command_info {} {
      Get a Tcl list with { num_commands total_ms } for the database commands for the request.
 
-     Returns the empty string if the information is not available.
+     @return list containing num_commands and total_ms, or empty string if the information is not available.
  } { 
      set result {}
      if { [ds_enabled_p] && [ds_collection_enabled_p] } {
-         global ad_conn
-         if { [nsv_exists ds_request "$ad_conn(request).db"] } {
+         if { [nsv_exists ds_request $::ad_conn(request).db] } {
              set total 0
              set counter 0
-             foreach { handle command statement_name sql start end errno error } [nsv_get ds_request "$ad_conn(request).db"] {
-                 incr total [expr { $end - $start }]
-                 if { [lsearch { dml exec 1row 0or1row select } [lindex $command 0]] >= 0 } {
+             foreach { handle command statement_name sql start end errno error } [nsv_get ds_request $::ad_conn(request).db] {
+                 set total [expr { $total + ($end - $start) }]
+                 if { [lindex $command 0] in { dml exec 1row 0or1row select } } {
                      incr counter
                  }
              }
@@ -303,6 +317,7 @@
 
          ds_add start [ns_time]
          ds_add conn startclicks [ad_conn start_clicks]
+
          for { set i 0 } { $i < [ns_set size [ad_conn headers]] } { incr i } {
              ds_add headers [ns_set key [ad_conn headers] $i] [ns_set value [ad_conn headers] $i]
          }
@@ -322,7 +337,7 @@
 
          # JCD: don't bind if there was an error since this can potentially mess up the traceback 
          # making bugs much harder to track down 
-         if { ($errno == 0 || $errno == 2) && [string equal [db_type] "postgresql"] } {
+         if { ($errno == 0 || $errno == 2) && [db_type] eq "postgresql" } {
              upvar bind bind
              set _errno [catch {
                  if { [info exists bind] && [llength $bind] != 0 } {
@@ -347,25 +362,23 @@
              }
          }
 
-         ds_add db $db $command $statement_name $bound_sql $start_time [clock clicks -milliseconds] $errno $error
+         ds_add db $db $command $statement_name $bound_sql $start_time [expr {[clock clicks -microseconds]/1000.0}] $errno $error
      }
  }
 
  ad_proc -private ds_add { name args } { 
      Sets a developer-support property for the current request. 
  } {
-
-     if { [ds_enabled_p] && [ds_collection_enabled_p] } { 
+     if { [ds_enabled_p] && [ds_collection_enabled_p] } {
          if { [catch { nsv_exists ds_request . }] } {
              ns_log "Warning" "ds_request NSVs not initialized"
              return
          }
 
-         global ad_conn
-         if { ![info exists ad_conn(request)] } {
-             set ad_conn(request) [nsv_incr rp_properties request_count]
+         if { ![info exists ::ad_conn(request)] } {
+             set ::ad_conn(request) [nsv_incr rp_properties request_count]
          }
-         eval [concat [list nsv_lappend ds_request "$ad_conn(request).$name"] $args]
+         nsv_lappend ds_request $::ad_conn(request).$name {*}$args
      }
  }
 
@@ -387,7 +400,7 @@
      foreach name $names {
          if { [regexp {^([0-9]+)\.start$} $name match request] 
               && $now - [lindex [nsv_get ds_request $name] 0] > $lifetime } {
-             if {[expr {$request > $max_request}]} { 
+             if {$request > $max_request} { 
                  set max_request $request
              }
          }
@@ -398,7 +411,8 @@
      set kill_count 0
      foreach name $names {
          if { [regexp {^([0-9]+)\.} $name "" request]
-              && [expr {$request <= $max_request}] } {
+              && $request <= $max_request
+          } {
              incr kill_count
              nsv_unset ds_request $name
          }
@@ -409,7 +423,7 @@
 
  ad_proc -private ds_trace_filter { conn args why } { Adds developer-support information about the end of sessions.} {
      if { [ds_enabled_p] && [ds_collection_enabled_p] } {
-         ds_add conn end [ns_time] endclicks [clock clicks -milliseconds]
+         ds_add conn end [ns_time] endclicks [clock clicks -microseconds]
 
          for { set i 0 } { $i < [ns_set size [ad_conn outputheaders]] } { incr i } {
              ds_add oheaders [ns_set key [ad_conn outputheaders] $i] [ns_set value [ad_conn outputheaders] $i]
@@ -428,15 +442,16 @@
 
  ad_proc -public ds_user_select_widget {} {
      Build a select widget for all users in the system, for quick user switching.  Very
-     expensive (returns a big file) for openacs instances with a large number of users,
+     expensive (returns a big file) for OpenACS instances with a large number of users,
      so perhaps best used on test instances.
  } {
-     set user_id [ad_get_user_id]
+     set user_id [ad_conn user_id]
      set real_user_id [ds_get_real_user_id]
 
      set return_url [ad_conn url]
-     if { ![empty_string_p [ad_conn query]] } {
-         append return_url "?[ad_conn query]"
+     set query [ad_conn query]
+     if { $query ne "" } {
+         append return_url "?$query"
      }
 
      set you_are {}
@@ -472,13 +487,16 @@
      }
 
      set ds_url [ds_support_url]
-     if {![empty_string_p $ds_url]} {
-         return "<form action=\"${ds_url}/set-user\" method=\"get\">
-         $you_are
-         $you_are_really
-         Change user: <select name=\"user_id\">
-         $options
-         </select>[export_form_vars return_url]<input type=submit value=\"Go\"></form>"
+     if {$ds_url ne ""} {
+         return [subst {
+	     <form action="${ds_url}set-user" method="get">
+	     $you_are
+	     $you_are_really
+	     Change user: <select name="user_id">
+	     $options
+	     </select>[export_vars -form {return_url}]
+	     <input type="submit" value="Go"></form>
+	 }]
      } else {
          ns_log Error "ACS-Developer-Support: Unable to offer link to Developer Support \
                  because it is not mounted anywhere."
@@ -495,10 +513,10 @@
  ad_proc -private ds_ad_conn { args } { 
      Get the "real" user id.
  } {
-     if { [llength [info proc orig_ad_conn]] == 1 } {
-         return [eval orig_ad_conn $args]
+     if {[info commands orig_ad_conn] ne ""} {
+       return [orig_ad_conn {*}$args]
      } else {
-         return [eval ad_conn $args]
+       return [ad_conn {*}$args]
     }
 }
 
@@ -519,12 +537,12 @@ ad_proc -public ds_conn { args } {
     delegates to ad_conn in all other cases.
 } {
     foreach elm { user_id untrusted_user_id } {
-        if { [string equal [lindex $args 0] $elm] || 
-             ([string equal [lindex $args 0] "-get"] && [string equal [lindex $args 1] $elm]) } {
+        if { [lindex $args 0] eq $elm || 
+             ([lindex $args 0] eq "-get" && [lindex $args 1] eq $elm) } {
             return [ds_get_user_id]
         }
     }
-    return [eval orig_ad_conn $args]
+    return [orig_ad_conn {*}$args]
 }
 
 ad_proc -public ds_set_user_switching_enabled { enabled_p } {
@@ -533,7 +551,7 @@ ad_proc -public ds_set_user_switching_enabled { enabled_p } {
     @author Lars Pind (lars@pinds.com)
     @creation-date 31 August 2000
 } {
-    ns_log Notice "Developer-support user-switching [ad_decode $enabled_p 1 "enabled" "disabled"]"
+    ns_log Notice "Developer-support user-switching [ad_decode $enabled_p 1 enabled disabled]"
     nsv_set ds_properties user_switching_enabled_p $enabled_p
 }
 
@@ -571,44 +589,28 @@ ad_proc -private ds_replace_get_user_procs { enabled_p } {
     Replace the ad_get_user procs with our own versions
 } {
     if { $enabled_p } {
-	if { [llength [info proc orig_ad_get_user_id]] == 0 } {
-            #ds_comment "Enabling user-switching2"
-
-	    # let the user stay who he is now (but ignore any error trying to do so)
+	if { [info commands orig_ad_conn] eq ""} {
+            #ds_comment "Enabling user-switching"
+            # let the user stay who he is now (but ignore any error trying to do so)
 	    catch {
-		ad_set_client_property developer-support user_id [ad_get_user_id]
+		ad_set_client_property developer-support user_id [ad_conn user_id]
 	    }
             rename ad_conn orig_ad_conn
-	    rename ad_get_user_id orig_ad_get_user_id
-	    rename ad_verify_and_get_user_id orig_ad_verify_and_get_user_id
-	    
             proc ad_conn { args } {
-                eval ds_conn $args
+	        ds_conn {*}$args
             }
-	    proc ad_get_user_id {} {
-                ds_get_user_id
-	    }
-	    proc ad_verify_and_get_user_id {} {
-                ds_get_user_id
-	    }
 	}
     } else {
         #ds_comment "Disabling user-switching"
-	if { [llength [info proc orig_ad_get_user_id]] == 1 } {
+	if { [info commands orig_ad_conn] ne ""} {
             rename ad_conn {}
             rename orig_ad_conn ad_conn
-
-	    rename ad_get_user_id {}
-	    rename orig_ad_get_user_id ad_get_user_id
-
-	    rename ad_verify_and_get_user_id {}
-	    rename orig_ad_verify_and_get_user_id ad_verify_and_get_user_id
 	}
     }
 }
 
 ad_proc -private ds_watch_packages {} {
-    Watch tcl libraries and xql files for packages listed
+    Watch Tcl libraries and xql files for packages listed
     in the PackageWatchList parameter on server startup.
 
     @author Peter Marklund
@@ -637,9 +639,8 @@ ad_proc -public ds_get_comments {} {
     Get comments for the current request
 } {
     set comments [list]
-    global ad_conn
-    if { [nsv_exists ds_request "$ad_conn(request).comment"] } {
-        set comments [nsv_get ds_request "$ad_conn(request).comment"]
+    if { [nsv_exists ds_request $::ad_conn(request).comment] } {
+        set comments [nsv_get ds_request $::ad_conn(request).comment]
     }
     return $comments
 }
@@ -663,20 +664,19 @@ ad_proc -public ds_profile { command {tag {}} } {
     if {![ds_enabled_p]} { 
         error "DS not enabled"
     }
-    global ds_profile__start_clock
     switch $command {
         start {
-            if { [empty_string_p $tag] } {
+            if { $tag eq "" } {
                 error "Tag parameter is required"
             }
-            set ds_profile__start_clock($tag) [clock clicks -milliseconds]
+            set ::ds_profile__start_clock($tag) [clock clicks -microseconds]
         }
         stop {
-            if { [info exists ds_profile__start_clock($tag)] 
-                 && ![empty_string_p $ds_profile__start_clock($tag)] } {
+            if { [info exists ::ds_profile__start_clock($tag)] 
+                 && $::ds_profile__start_clock($tag) ne "" } {
                 ds_add prof $tag \
-                    [expr [clock clicks -milliseconds] - $ds_profile__start_clock($tag)]
-                unset ds_profile__start_clock($tag)
+                    [expr {[clock clicks -microseconds] - $::ds_profile__start_clock($tag)}]
+                unset ::ds_profile__start_clock($tag)
             } else {
                 ns_log Warning "ds_profile stop called without a corresponding call to ds_profile start, with tag $tag"
             }
@@ -686,3 +686,30 @@ ad_proc -public ds_profile { command {tag {}} } {
         }
     }
 }
+
+ad_proc -public ds_init { } {
+
+    Perform setup for the developer support for a single request.  We
+    save the state in global variables to avoid highly redundant
+    computations (up to 50 times per page on openacs.org)
+
+} {
+    #ns_log notice "ds_init called [::ds_enabled_p]"
+
+    if {[::ds_enabled_p] } {
+	#
+	# Save current setup for developer support in global
+	# variables, which are deleted automatically after every
+	# request.
+	#
+	if {[::ds_collection_enabled_p] } {set ::ds_collection_enabled_p 1}
+	if {[::ds_profiling_enabled_p] } {set ::ds_profiling_enabled_p 1}
+	if {[::ds_show_p]} {set ::ds_show_p 1}
+    }
+}
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -4,7 +4,7 @@ ad_library {
 
     @creation-date 15 Apr 2000
     @author Jon Salz (jsalz@arsdigita.com)
-    @cvs-id $Id: 00-database-procs.tcl,v 1.79.2.1 2010/04/24 20:17:17 victorg Exp $
+    @cvs-id $Id: 00-database-procs.tcl,v 1.88.2.20 2017/08/01 10:18:02 gustafn Exp $
 }
 
 # Database caching.
@@ -68,7 +68,7 @@ ad_library {
 
 # (JoelA, 27 Dec 2004 - replaced example config.tcl with link)
 #
-# see http://openacs.org/doc/openacs-5-1/tutorial-second-database.html
+# see http://openacs.org/doc/openacs-5-1/tutorial-second-database
 # for config and usage examples
 
 # TODO: The "driverkey_" overrides in the config file are NOT
@@ -76,14 +76,14 @@ ad_library {
 #
 # --atp@piskorski.com, 2003/03/16 21:30 EST
 
-# NOTE: don't forget to add your new pools into the 
-# ns_section ns/db/pools  
+# NOTE: don't forget to add your new pools into the
+# ns_section ns/db/pools
 
 
 # The "driverkey" indirection layer:
 #
 # Note that in the AOLserver config file, you may optionally add one
-# entry for each database definining its "driver key".  If you do NOT
+# entry for each database defining its "driver key".  If you do NOT
 # specify a driver key in the AOLserver config file, the appropriate
 # key will be determined for you by calling "ns_db driver" once on
 # startup for the first pool defined in each database.  Therefore,
@@ -113,10 +113,12 @@ ad_library {
 # We now use the following global variables:
 #
 # Server-Wide NSV arrays, keys:
-#     db_default_database  .
 #     db_available_pools   $dbn
 #     db_driverkey         $dbn
 #     db_pool_to_dbn       $pool
+#
+# Global Variables
+#    ::acs::default_database
 #
 # Per-thread Tcl global variables:
 #   One Tcl Array per Database Name:
@@ -143,7 +145,9 @@ ad_library {
 # --atp@piskorski.com, 2003/03/16 21:30 EST
 
 
-ad_proc -private db_state_array_name_is {{ -dbn "" }} {
+ad_proc -private db_state_array_name_is {
+    {-dbn ""}
+} {
     @return the name of the global db_state array for the given
     database name.
 
@@ -154,15 +158,16 @@ ad_proc -private db_state_array_name_is {{ -dbn "" }} {
     @creation-date 2003/03/16
 } {
     if { $dbn eq "" } {
-        set dbn [nsv_get {db_default_database} .]
+        set dbn $::acs::default_database
     }
     return "db_state_${dbn}"
 }
 
 
-ad_proc -private db_driverkey {{
-    -handle_p 0
-} dbn } {
+ad_proc -private db_driverkey {
+    {-handle_p 0}
+    dbn
+} {
     Normally, a dbn is passed to this proc.  Unfortunately, there are
     one or two cases where a proc that needs to call this one has only
     a db handle, not the dbn that handle came from.  Therefore, they
@@ -179,8 +184,8 @@ ad_proc -private db_driverkey {{
         set handle $dbn ; set dbn {}
         set pool [ns_db poolname $handle]
 
-        if { [nsv_exists {db_pool_to_dbn} $pool] } {
-            set dbn [nsv_get {db_pool_to_dbn} $pool]
+        if { [nsv_exists db_pool_to_dbn $pool] } {
+            set dbn [nsv_get db_pool_to_dbn $pool]
         } else {
             # db_pool_to_dbn_init runs on startup, so other than some
             # broken code deleting the nsv key (very unlikely), the
@@ -192,7 +197,12 @@ ad_proc -private db_driverkey {{
         }
     }
 
-    if { ![nsv_exists {db_driverkey} $dbn] } {
+    set key ::acs::db_driverkey($dbn)
+    if {[info exists $key]} {
+        return [set $key]
+    }
+
+    if { ![nsv_exists db_driverkey $dbn] } {
         # This ASSUMES that any overriding of this default value via
         # "ns_param driverkey_dbn" has already been done:
 
@@ -209,39 +219,52 @@ ad_proc -private db_driverkey {{
 
         if { [string match "Oracle*" $driver] } {
             set driverkey {oracle}
-        } elseif { [string equal $driver {PostgreSQL}] } {
-            set driverkey {postgresql}
-        } elseif { [string equal $driver {ODBC}] } {
-            set driverkey {nsodbc}
+        } elseif { $driver eq "PostgreSQL" } {
+            set driverkey "postgresql"
+        } elseif { $driver eq "ODBC" } {
+            set driverkey "nsodbc"
         } else {
             set driverkey {}
-            ns_log Error "$proc_name: Unknown driver '$driver_type'."
+            ns_log Error "$proc_name: Unknown driver '$driver'."
         }
 
-        nsv_set {db_driverkey} $dbn $driverkey
+        nsv_set db_driverkey $dbn $driverkey
     }
 
-    return [nsv_get {db_driverkey} $dbn]
+    return [set $key [nsv_get db_driverkey $dbn]]
 }
 
 
-ad_proc -public db_type { } {
-    @return the RDBMS type (i.e. oracle, postgresql) this OpenACS installation is using.  The nsv ad_database_type is set up during the bootstrap process.
+ad_proc -public db_type {} {
+    @return the RDBMS type (i.e. oracle, postgresql) this OpenACS installation is using.
+    The nsv ad_database_type is set up during the bootstrap process.
 } {
+    #
     # Currently this should always be either "oracle" or "postgresql":
     # --atp@piskorski.com, 2003/03/16 22:01 EST
-
-    return [nsv_get ad_database_type .]
+    #
+    # First check, if the database type exists in the namespaced
+    # variable. This should be always the case. If this fail, fall
+    # back to the old-style nsv (which can be costly in tight db loops)
+    #
+    if {[info exists ::acs::database_type]} {
+        set result $::acs::database_type
+    } else {
+        set result [nsv_get ad_database_type .]
+        ns_log Warning "db_type '$result' had to be obtained from the nsv 'ad_database_type'"
+        set ::acs::database_type $result
+    }
+    return $result
 }
 
 ad_proc -public db_compatible_rdbms_p { db_type } {
-    @return 1 if the given db_type is compatible with the current RDBMS.  
+    @return 1 if the given db_type is compatible with the current RDBMS.
 } {
     return [expr { $db_type eq "" || [db_type] eq $db_type }]
 }
 
 ad_proc -deprecated db_package_supports_rdbms_p { db_type_list } {
-    @return 1 if db_type_list contains the current RDMBS type.  A package intended to run with a given RDBMS must note this in it's package info file regardless of whether or not it actually uses the database. 
+    @return 1 if db_type_list contains the current RDMBS type.  A package intended to run with a given RDBMS must note this in it's package info file regardless of whether or not it actually uses the database.
 
     @see apm_package_supports_rdbms_p
 } {
@@ -262,35 +285,35 @@ ad_proc -deprecated db_package_supports_rdbms_p { db_type_list } {
 ad_proc -private db_legacy_package_p { db_type_list } {
     @return 1 if the package is a legacy package.  We can only tell for certain if it explicitly supports Oracle 8.1.6 rather than the OpenACS more general oracle.
 } {
-    if { [lsearch $db_type_list "oracle-8.1.6"] != -1 } {
+    if {"oracle-8.1.6" in $db_type_list} {
         return 1
     }
     return 0
 }
 
-ad_proc -public db_version { } {
+ad_proc -public db_version {} {
     @return the RDBMS version (i.e. 8.1.6 is a recent Oracle version; 7.1 a
-    recent PostgreSQL version.
+                               recent PostgreSQL version)
 } {
     return [nsv_get ad_database_version .]
 }
 
-ad_proc -public db_current_rdbms { } {
+ad_proc -public db_current_rdbms {} {
     @return the current rdbms type and version.
 } {
     return [db_rdbms_create [db_type] [db_version]]
 }
 
-ad_proc -public db_known_database_types { } {
+ad_proc -public db_known_database_types {} {
     @return a list of three-element lists describing the database engines known
     to OpenACS.  Each sublist contains the internal database name (used in file
-    paths, etc), the driver name, and a "pretty name" to be used in selection
+                                                                   paths, etc), the driver name, and a "pretty name" to be used in selection
     forms displayed to the user.
 
     The nsv containing the list is initialized by the bootstrap script and should
     never be referenced directly by user code.
 } {
-    return [nsv_get ad_known_database_types .]
+    return $::acs::known_database_types
 }
 
 
@@ -299,7 +322,7 @@ ad_proc -public db_known_database_types { } {
 # can't hurt anything to have them defined in when OpenACS is using
 # Postgres too.  --atp@piskorski.com, 2003/04/08 05:34 EDT
 
-ad_proc db_null { } {
+ad_proc db_null {} {
     @return an empty string, which Oracle thinks is null.  This routine was
     invented to provide an RDBMS-specific null value but doesn't actually
     work.  I (DRB) left it in to speed porting - we should really clean up
@@ -308,7 +331,9 @@ ad_proc db_null { } {
     return ""
 }
 
-ad_proc -public db_quote { string } { Quotes a string value to be placed in a SQL statement. } {
+ad_proc -public db_quote { string } {
+    Quotes a string value to be placed in a SQL statement.
+} {
     regsub -all {'} "$string" {''} result
     return $result
 }
@@ -334,13 +359,16 @@ ad_proc -public db_boolean { bool } {
     }
 }
 
-ad_proc -public db_nextval {{ -dbn "" } sequence } {
+ad_proc -public db_nextval {
+    { -dbn "" }
+    sequence
+} {
 
     Example:
 
-     <pre>
-     set new_object_id [db_nextval acs_object_id_seq]
-     </pre>
+    <pre>
+    set new_object_id [db_nextval acs_object_id_seq]
+    </pre>
 
     @return the next value for a sequence. This can utilize a pool of
     sequence values.
@@ -349,7 +377,7 @@ ad_proc -public db_nextval {{ -dbn "" } sequence } {
 
     @param dbn The database name to use.  If empty_string, uses the default database.
 
-    @see <a href="/doc/db-api-detailed.html">/doc/db-api-detailed.html</a>
+    @see <a href="/doc/db-api-detailed">/doc/db-api-detailed</a>
 } {
     set driverkey [db_driverkey $dbn]
 
@@ -359,98 +387,113 @@ ad_proc -public db_nextval {{ -dbn "" } sequence } {
     switch $driverkey {
 
         postgresql {
-#             # the following query will return a nextval if the sequnce
-#             # is of relkind = 'S' (a sequnce).  if it is not of relkind = 'S'
-#             # we will try querying it as a view:
+            #             # the following query will return a nextval if the sequnce
+            #             # is of relkind = 'S' (a sequnce).  if it is not of relkind = 'S'
+            #             # we will try querying it as a view:
 
-#             if { [db_0or1row -dbn $dbn nextval_sequence "
-#                 select nextval('${sequence}') as nextval
-#                 where (select relkind 
-#                        from pg_class 
-#                        where relname = '${sequence}') = 'S'
-#             "]} {
-#                 return $nextval
-#             } else {
-#                 ns_log debug "db_nextval: sequence($sequence) is not a real sequence.  perhaps it uses the view hack."
-#                 db_0or1row -dbn $dbn nextval_view "select nextval from ${sequence}"
-#                 return $nextval
-#             }
-          #
-          # The code above is just for documentation, how it worked
-          # before the change below. We keep now a per-thread table of
-          # the "known" sequences to avoid at runtime the query,
-          # whether the specified sequence is a real sequence or a
-          # view. This change makes this function more than a factor
-          # of 2 faster than before. 
-          #
-          # Note, that solely the per-thread information won't work for
-          # freshly created sequences. Therefore, we keep the old
-          # code for checking at runtime in the database for such
-          # occurrences.
-          #
-          # Note, that the sequence handling in OpenACS is quite a
-          # mess.  Some sequences are named t_SEQUENCE (10 in dotlrn),
-          # others are are called just SEQUENCE (18 in dotlrn), for
-          # some sequences, additional views are defined with an
-          # attribute 'nextval', and on top of this, db_nextval is
-          # called sometimes with the view name and sometimes with the
-          # sequence name. Checking this at runtime is unnecessary
-          # complex and costly.
-          #
-          # The best solution would certainly be to call db_nextval
-          # only with real sequence names. In that case, the whole
-          # function would for postgres would collapse to a single
-          # line, without any need for sequence name caching.
-          #
-          # - gustaf neumann (18.5.2008)
-          #
-          if {![info exists ::db::sequences]} {
-            ns_log notice "-- creating per thread sequence table"
-            namespace eval ::db {}
-            foreach s [db_list -dbn $dbn relnames "select relname, relkind  from pg_class where relkind = 'S'"] {
-              set ::db::sequences($s) 1
+            #             if { [db_0or1row -dbn $dbn nextval_sequence "
+            #                 select nextval('${sequence}') as nextval
+            #                 where (select relkind
+            #                        from pg_class
+            #                        where relname = '${sequence}') = 'S'
+            #             "]} {
+            #                 return $nextval
+            #             } else {
+            #                 ns_log debug "db_nextval: sequence($sequence) is not a real sequence.  perhaps it uses the view hack."
+            #                 db_0or1row -dbn $dbn nextval_view "select nextval from ${sequence}"
+            #                 return $nextval
+            #             }
+            #
+            # The code above is just for documentation, how it worked
+            # before the change below. We keep now a per-thread table of
+            # the "known" sequences to avoid at runtime the query,
+            # whether the specified sequence is a real sequence or a
+            # view. This change makes this function more than a factor
+            # of 2 faster than before.
+            #
+            # Note, that solely the per-thread information won't work for
+            # freshly created sequences. Therefore, we keep the old
+            # code for checking at runtime in the database for such
+            # occurrences.
+            #
+            # Note, that the sequence handling in OpenACS is quite a
+            # mess.  Some sequences are named t_SEQUENCE (10 in dotlrn),
+            # others are are called just SEQUENCE (18 in dotlrn), for
+            # some sequences, additional views are defined with an
+            # attribute 'nextval', and on top of this, db_nextval is
+            # called sometimes with the view name and sometimes with the
+            # sequence name. Checking this at runtime is unnecessary
+            # complex and costly.
+            #
+            # The best solution would certainly be to call "db_nextval"
+            # only with real sequence names (as defined in SQL). In that
+            # case, the whole function would for postgres would collapse
+            # to a single line, without any need for sequence name
+            # caching. But in that case, one should rename the sequences
+            # from t_SEQUENCE to SEQUENCE for postgres.
+            #
+            # However, since Oracle uses the pseudo column ".nextval",
+            # which is emulated via the view, it is not clear, how
+            # feasible this is to remove all such views without breaking
+            # installed applications.  We keep for such cases the view,
+            # but nevertheless, the function "db_nextval" should always
+            # be called with names without the "t_" prefix to achieve
+            # Oracle compatibility.
+
+            if {![info exists ::db::sequences]} {
+                ns_log notice "-- creating per thread sequence table"
+                namespace eval ::db {}
+                foreach s [db_list -dbn $dbn relnames "select relname, relkind  from pg_class where relkind = 'S'"] {
+                    set ::db::sequences($s) 1
+                }
             }
-          }
-          if {[info exists ::db::sequences(t_$sequence)]} {
-            #ns_log notice "-- found t_$sequence"
-            set nextval [db_string -dbn $dbn "nextval" "select nextval('t_$sequence')"]
-          } elseif {[info exists ::db::sequences($sequence)]} {
-            #ns_log notice "-- found $sequence"
-            set nextval [db_string -dbn $dbn "nextval" "select nextval('$sequence')"]
-          } elseif { [db_0or1row -dbn $dbn nextval_sequence "
+            if {[info exists ::db::sequences(t_$sequence)]} {
+                #ns_log notice "-- found t_$sequence"
+                set nextval [db_string -dbn $dbn nextval "select nextval('t_$sequence')"]
+            } elseif {[info exists ::db::sequences($sequence)]} {
+                #ns_log notice "-- found $sequence"
+                set nextval [db_string -dbn $dbn nextval "select nextval('$sequence')"]
+                if {[string match t_* $sequence]} {
+                    ad_log Warning "For portability, db_nextval should be called without the leading 't_' prefix: 't_$sequence'"
+                }
+            } elseif { [db_0or1row -dbn $dbn nextval_sequence "
                  select nextval('${sequence}') as nextval
-                 where (select relkind 
-                        from pg_class 
+                 where (select relkind
+                        from pg_class
                         where relname = '${sequence}') = 'S'
              "]} {
-            #
-            # We do not have an according sequence-table. Use the system catalog to check
-            # for the sequence
-            #
-            # ... the query sets nextval if it succeeds
-            #
-          } else {
-            #
-            # finally, there might be a view with a nextval
-            #
-            ns_log debug "db_nextval: sequence($sequence) is not a real sequence.  perhaps it uses the view hack."
-            set nextval [db_string -dbn $dbn "nextval" "select nextval from $sequence"]
-          }
+                #
+                # We do not have an according sequence-table. Use the system catalog to check
+                # for the sequence
+                #
+                # ... the query sets nextval if it succeeds
+                #
+                ad_log Warning "Probably deprecated sequence name '$sequence' is used (no sequence table found)"
+            } else {
+                #
+                # finally, there might be a view with a nextval
+                #
+                ns_log debug "db_nextval: sequence($sequence) is not a real sequence.  perhaps it uses the view hack."
+                set nextval [db_string -dbn $dbn nextval "select nextval from $sequence"]
+                ad_log Warning "Using deprecated sequence view hack for '$sequence'. Is there not real sequence?"
+            }
 
-          return $nextval
+            return $nextval
         }
 
         oracle -
         nsodbc -
         default {
-            return [db_string -dbn $dbn "nextval" "select $sequence.nextval from dual"]
+            return [db_string -dbn $dbn nextval "select $sequence.nextval from dual"]
         }
     }
 }
 
-ad_proc -public db_nth_pool_name {{ -dbn "" } n } { 
-    @return the name of the pool used for the nth-nested selection (0-relative). 
-
+ad_proc -public db_nth_pool_name {
+    { -dbn "" }
+    n
+} {
+    @return the name of the pool used for the nth-nested selection (0-relative).
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     set available_pools [db_available_pools $dbn]
@@ -464,7 +507,10 @@ ad_proc -public db_nth_pool_name {{ -dbn "" } n } {
 }
 
 
-ad_proc -public db_with_handle {{ -dbn "" } db code_block } {
+ad_proc -public db_with_handle {
+    { -dbn "" }
+    db code_block
+} {
 
     Places a usable database handle in <i>db</i> and executes <i>code_block</i>.
 
@@ -482,15 +528,14 @@ ad_proc -public db_with_handle {{ -dbn "" } db code_block } {
     }
     if { $db_state(n_handles_used) >= [llength $db_state(handles)] } {
         set pool [db_nth_pool_name -dbn $dbn $db_state(n_handles_used)]
-        set start_time [clock clicks -milliseconds]
+        set start_time [expr {[clock clicks -microseconds]/1000.0}]
         set errno [catch {
             set db [ns_db gethandle $pool]
         } error]
         ds_collect_db_call $db gethandle "" $pool $start_time $errno $error
         lappend db_state(handles) $db
         if { $errno } {
-            global errorInfo errorCode
-            return -code $errno -errorcode $errorCode -errorinfo $errorInfo $error
+            return -code $errno -errorcode $::errorCode -errorinfo $::errorInfo $error
         }
     }
     set my_dbh [lindex $db_state(handles) $db_state(n_handles_used)]
@@ -505,40 +550,40 @@ ad_proc -public db_with_handle {{ -dbn "" } db code_block } {
     set db_state(last_used) $my_dbh
 
     # Unset dbh, so any subsequence use of this variable will bomb.
-    if { [info exists dbh] } {
-        unset dbh
-    }
-
+    unset -nocomplain dbh
 
     # If errno is 1, it's an error, so return errorCode and errorInfo;
     # if errno = 2, it's a return, so don't try to return errorCode/errorInfo
     # errno = 3 or 4 give undefined results
 
     if { $errno == 1 } {
-        
         # A real error occurred
-        global errorInfo errorCode
-        return -code $errno -errorcode $errorCode -errorinfo $errorInfo $error
+        return -code $errno -errorcode $::errorCode -errorinfo $::errorInfo $error
     }
 
     if { $errno == 2 } {
-        
+
         # The code block called a "return", so pass the message through but don't try
         # to return errorCode or errorInfo since they may not exist
-        
+
         return -code $errno $error
     }
 }
 
 
-ad_proc -public db_exec_plsql {{ -dbn "" } statement_name sql args } {
+ad_proc -public db_exec_plsql {
+    {-dbn ""}
+    statement_name
+    sql
+    args
+} {
 
-    <strong>Oracle:</strong>  
+    <strong>Oracle:</strong>
     Executes a PL/SQL statement, and returns the variable of bind
     variable <code>:1</code>.
 
     <p>
-    <strong>PostgreSQL:</strong>  
+    <strong>PostgreSQL:</strong>
     Performs a pl/pgsql function or procedure call.  The caller must
     perform a select query that returns the value of the function.
 
@@ -567,13 +612,13 @@ ad_proc -public db_exec_plsql {{ -dbn "" } statement_name sql args } {
     set new_note_id [db_exec_plsql create_note {
         begin
         :1 := note.new(
-          owner_id => :user_id,
-          title    => :title,
-          body     => :body,
-          creation_user => :user_id,
-          creation_ip   => :peeraddr,
-          context_id    => :package_id
-        );
+                       owner_id => :user_id,
+                       title    => :title,
+                       body     => :body,
+                       creation_user => :user_id,
+                       creation_ip   => :peeraddr,
+                       context_id    => :package_id
+                       );
         end;
     }]
 
@@ -616,7 +661,7 @@ ad_proc -public db_exec_plsql {{ -dbn "" } statement_name sql args } {
     </pre>
 
     If you are using xql files then put the body of the query in a
-    <code>yourfilename-oracle.xql</code> or <code>yourfilename-postgresql.xql</code> file, as appropriate. E.g. the first example 
+    <code>yourfilename-oracle.xql</code> or <code>yourfilename-postgresql.xql</code> file, as appropriate. E.g. the first example
     transformed to use xql files looks like this:
 
 
@@ -624,34 +669,34 @@ ad_proc -public db_exec_plsql {{ -dbn "" } statement_name sql args } {
     <code>yourfilename.tcl</code>:<br>
     <p>
     <pre>
-    db_exec_plsql delete_note { }</pre>
+    db_exec_plsql delete_note {}</pre>
 
     <p>
     <code>yourfilename-oracle.xql</code>:<br>
     <p>
     <pre>
-    &lt;fullquery name="delete_note">      
-      &lt;querytext>
-        begin
-        note.del(:note_id);
-        end;
-      &lt;/querytext>
+    &lt;fullquery name="delete_note">
+    &lt;querytext>
+    begin
+    note.del(:note_id);
+    end;
+    &lt;/querytext>
     &lt;/fullquery></pre>
 
     <p>
     <code>yourfilename-postgresql.xql</code>:<br>
     <p>
     <pre>
-    &lt;fullquery name="delete_note">      
-      &lt;querytext>
-        select note__delete(:note_id);
-      &lt;/querytext>
+    &lt;fullquery name="delete_note">
+    &lt;querytext>
+    select note__delete(:note_id);
+    &lt;/querytext>
     &lt;/fullquery></pre>
 
 
     @param dbn The database name to use.  If empty_string, uses the default database.
 
-    @see <a href="/doc/db-api-detailed.html">/doc/db-api-detailed.html</a>
+    @see <a href="/doc/db-api-detailed">/doc/db-api-detailed</a>
 } {
     ad_arg_parser { bind_output bind } $args
 
@@ -659,7 +704,7 @@ ad_proc -public db_exec_plsql {{ -dbn "" } statement_name sql args } {
     set full_statement_name [db_qd_get_fullname $statement_name]
 
     if { [info exists bind_output] } {
-	return -code error "the -bind_output switch is not currently supported"
+        return -code error "the -bind_output switch is not currently supported"
     }
 
     set driverkey [db_driverkey $dbn]
@@ -708,21 +753,20 @@ ad_proc -public db_exec_plsql {{ -dbn "" } statement_name sql args } {
         }
 
         db_with_handle -dbn $dbn db {
-            # plsql calls that are simple selects bypass the plpgsql 
+            # plsql calls that are simple selects bypass the plpgsql
             # mechanism for creating anonymous functions (OpenACS - Dan).
             # if a table is being created, we need to bypass things, too (OpenACS - Ben).
             set test_sql [db_qd_replace_sql $full_statement_name $sql]
             if {[regexp -nocase -- {^\s*select} $test_sql match]} {
                 # ns_log Debug "PLPGSQL: bypassed anon function"
                 set selection [db_exec 0or1row $db $full_statement_name $sql]
-            } elseif {[regexp -nocase -- {^\s*create table} $test_sql match] || [regexp -nocase -- {^\s*drop table} $test_sql match]} {
+            } elseif {[regexp -nocase -- {^\s*(create|drop) table} $test_sql match]} {
                 ns_log Debug "PLPGSQL: bypassed anon function for create/drop table"
                 set selection [db_exec dml $db $full_statement_name $sql]
                 return ""
             } else {
                 # ns_log Debug "PLPGSQL: using anonymous function"
-                set selection [db_exec_plpgsql $db $full_statement_name $sql \
-                                   $statement_name]
+                set selection [db_exec_plpgsql $db $full_statement_name $sql $statement_name]
             }
             return [ns_set value $selection 0]
         }
@@ -741,14 +785,14 @@ ad_proc -private db_exec_plpgsql { db statement_name pre_sql fname } {
 
     <p>
     Low level replacement for db_exec which replaces inline code with a proc.
-    db proc is dropped after execution.  This is a temporary fix until we can 
+    db proc is dropped after execution.  This is a temporary fix until we can
     port all of the db_exec_plsql calls to simple selects of the inline code
     wrapped in function calls.
 
     <p>
-    emulation of plsql calls from oracle.  This routine takes the plsql 
+    emulation of plsql calls from oracle.  This routine takes the plsql
     statements and wraps them in a function call, calls the function, and then
-    drops the function. Future work might involve converting this to cache the 
+    drops the function. Future work might involve converting this to cache the
     function calls
 
     <p>
@@ -757,7 +801,7 @@ ad_proc -private db_exec_plpgsql { db statement_name pre_sql fname } {
     @see db_exec_plsql
 
 } {
-    set start_time [clock clicks -milliseconds]
+    set start_time [expr {[clock clicks -microseconds]/1000.0}]
 
     set sql [db_qd_replace_sql $statement_name $pre_sql]
 
@@ -765,55 +809,54 @@ ad_proc -private db_exec_plpgsql { db statement_name pre_sql fname } {
 
     set function_name "__exec_${unique_id}_${fname}"
 
-    # insert tcl variable values (Openacs - Dan)
+    # insert Tcl variable values (OpenACS - Dan)
     if {$sql ne $pre_sql } {
         set sql [uplevel 2 [list subst -nobackslashes $sql]]
     }
     ns_log Debug "PLPGSQL: converted: $sql to: select $function_name ()"
 
-    # create a function definition statement for the inline code 
+    # create a function definition statement for the inline code
     # binding is emulated in tcl. (OpenACS - Dan)
 
     set errno [catch {
-	upvar bind bind
-	if { [info exists bind] && [llength $bind] != 0 } {
-	    if { [llength $bind] == 1 } {
+        upvar bind bind
+        if { [info exists bind] && [llength $bind] != 0 } {
+            if { [llength $bind] == 1 } {
                 set bind_vars [list]
                 set len [ns_set size $bind]
                 for {set i 0} {$i < $len} {incr i} {
                     lappend bind_vars [ns_set key $bind $i] \
-                                      [ns_set value $bind $i]
+                        [ns_set value $bind $i]
                 }
                 set proc_sql [db_bind_var_substitution $sql $bind_vars]
-	    } else {
+            } else {
                 set proc_sql [db_bind_var_substitution $sql $bind]
-	    }
-	} else {
+            }
+        } else {
             set proc_sql [uplevel 2 [list db_bind_var_substitution $sql]]
-	}
+        }
 
         ns_db dml $db "create function $function_name () returns varchar as '
                       [DoubleApos $proc_sql]
                       ' language 'plpgsql'"
 
         set ret_val [ns_db 0or1row $db "select $function_name ()"]
-        
+
         # drop the anonymous function (OpenACS - Dan)
         # JCD: ignore return code -- maybe we should be smarter about this though.
-        catch {ns_db dml $db "drop function $function_name ()"} 
+        catch {ns_db dml $db "drop function $function_name ()"}
 
         return $ret_val
 
     } error]
 
-    global errorInfo errorCode
-    set errinfo $errorInfo
-    set errcode $errorCode
+    set errinfo $::errorInfo
+    set errcode $::errorCode
 
     ds_collect_db_call $db 0or1row $statement_name $sql $start_time $errno $error
 
     if { $errno == 2 } {
-	return $error
+        return $error
     } else {
         catch {ns_db dml $db "drop function $function_name ()"}
     }
@@ -827,11 +870,11 @@ ad_proc -private db_get_quote_indices { sql } {
     not attempt bind var substitution inside quotes. Examples:
 
     <pre>
-        sql          return value
-       {'a'}           {0 2}      
-       {'a''}           {}
-      {'a'a'a'}       {0 2 4 6}
-      {a'b'c'd'}      {1 3 5 7}
+    sql          return value
+    {'a'}           {0 2}
+    {'a''}           {}
+    {'a'a'a'}       {0 2 4 6}
+    {a'b'c'd'}      {1 3 5 7}
     </pre>
 
     @see db_bind_var_subsitution
@@ -844,8 +887,7 @@ ad_proc -private db_get_quote_indices { sql } {
     set all_indices [regexp -inline -indices -all -- {(?:^|[^'])(')(?:[^']|'')+(')(?=$|[^'])} $sql]
 
     for {set i 0} { $i < [llength $all_indices] } { incr i 3 } {
-        lappend quote_indices [lindex [lindex $all_indices [expr {$i + 1}]] 0]
-        lappend quote_indices [lindex [lindex $all_indices [expr {$i + 2}]] 0]
+        lappend quote_indices [lindex $all_indices $i+1 0] [lindex $all_indices $i+2 0]
     }
 
     return $quote_indices
@@ -855,7 +897,7 @@ ad_proc -private db_bind_var_quoted_p { sql bind_start_idx bind_end_idx} {
 
 } {
     foreach {quote_start_idx quote_end_idx} [db_get_quote_indices $sql] {
-        if { [expr {$bind_start_idx > $quote_start_idx}] && [expr {$bind_end_idx < $quote_end_idx}]} {
+        if { $bind_start_idx > $quote_start_idx && $bind_end_idx < $quote_end_idx } {
             return 1
         }
     }
@@ -866,7 +908,7 @@ ad_proc -private db_bind_var_quoted_p { sql bind_start_idx bind_end_idx} {
 ad_proc -private db_bind_var_substitution { sql { bind "" } } {
 
     This proc emulates the bind variable substitution in the postgresql driver.
-    Since this is a temporary hack, we do it in tcl instead of hacking up the 
+    Since this is a temporary hack, we do it in Tcl instead of hacking up the
     driver to support plsql calls.  This is only used for the db_exec_plpgsql
     function.
 
@@ -874,12 +916,12 @@ ad_proc -private db_bind_var_substitution { sql { bind "" } } {
     if {$bind eq ""} {
         upvar __db_sql lsql
         set lsql $sql
-        uplevel {            
+        uplevel {
             set __db_lst [regexp -inline -indices -all -- {:?:\w+} $__db_sql]
             for {set __db_i [expr {[llength $__db_lst] - 1}]} {$__db_i >= 0} {incr __db_i -1} {
-                set __db_ws [lindex [lindex $__db_lst $__db_i] 0]
-                set __db_we [lindex [lindex $__db_lst $__db_i] 1]
-                set __db_bind_var [string range $__db_sql $__db_ws $__db_we]                
+                set __db_ws [lindex $__db_lst $__db_i 0]
+                set __db_we [lindex $__db_lst $__db_i 1]
+                set __db_bind_var [string range $__db_sql $__db_ws $__db_we]
                 if {![string match "::*" $__db_bind_var] && ![db_bind_var_quoted_p $__db_sql $__db_ws $__db_we]} {
                     set __db_tcl_var [string range $__db_bind_var 1 end]
                     set __db_tcl_var [set $__db_tcl_var]
@@ -889,7 +931,7 @@ ad_proc -private db_bind_var_substitution { sql { bind "" } } {
                         set __db_tcl_var "'[DoubleApos $__db_tcl_var]'"
                     }
                     set __db_sql [string replace $__db_sql $__db_ws $__db_we $__db_tcl_var]
-                }                
+                }
             }
         }
     } else {
@@ -899,8 +941,8 @@ ad_proc -private db_bind_var_substitution { sql { bind "" } } {
         set lsql $sql
         set lst [regexp -inline -indices -all -- {:?:\w+} $sql]
         for {set i [expr {[llength $lst] - 1}]} {$i >= 0} {incr i -1} {
-            set ws [lindex [lindex $lst $i] 0]
-            set we [lindex [lindex $lst $i] 1]
+            set ws [lindex $lst $i 0]
+            set we [lindex $lst $i 1]
             set bind_var [string range $sql $ws $we]
             if {![string match "::*" $bind_var] && ![db_bind_var_quoted_p $lsql $ws $we]} {
                 set tcl_var [string range $bind_var 1 end]
@@ -911,7 +953,7 @@ ad_proc -private db_bind_var_substitution { sql { bind "" } } {
                     set val "'[DoubleApos $val]'"
                 }
                 set lsql [string replace $lsql $ws $we $val]
-            }                
+            }
         }
     }
 
@@ -919,7 +961,7 @@ ad_proc -private db_bind_var_substitution { sql { bind "" } } {
 }
 
 
-ad_proc -public db_release_unused_handles {{ -dbn "" }} {
+ad_proc -public db_release_unused_handles {{-dbn ""}} {
 
     Releases any database handles that are presently unused.
 
@@ -936,12 +978,13 @@ ad_proc -public db_release_unused_handles {{ -dbn "" }} {
             set db [lindex $db_state(handles) $index_to_examine]
 
             # Stop now if the handle is part of a transaction.
-            if { [info exists db_state(transaction_level,$db)] && \
-                     $db_state(transaction_level,$db) > 0 } {
+            if { [info exists db_state(transaction_level,$db)]
+                 && $db_state(transaction_level,$db) > 0
+             } {
                 break
             }
 
-            set start_time [clock clicks -milliseconds]
+            set start_time [expr {[clock clicks -microseconds]/1000.0}]
             ns_db releasehandle $db
             ds_collect_db_call $db releasehandle "" "" $start_time 0 ""
             incr index_to_examine -1
@@ -957,14 +1000,13 @@ ad_proc -private db_getrow { db selection } {
     routines as necessary.
 
 } {
-    set start_time [clock clicks -milliseconds]
+    set start_time [expr {[clock clicks -microseconds]/1000.0}]
     set errno [catch { return [ns_db getrow $db $selection] } error]
     ds_collect_db_call $db getrow "" "" $start_time $errno $error
     if { $errno == 2 } {
         return $error
     }
-    global errorInfo errorCode
-    return -code $errno -errorinfo $errorInfo -errorcode $errorCode $error
+    return -code $errno -errorinfo $::errorInfo -errorcode $::errorCode $error
 }
 
 
@@ -975,8 +1017,7 @@ ad_proc -private db_exec { type db statement_name pre_sql {ulevel 2} args } {
     (if set).
 
 } {
-    set start_time [clock clicks -milliseconds]
-    set start_time_fine [clock seconds]
+    set start_time [expr {[clock clicks -microseconds]/1000.0}]
     set driverkey [db_driverkey -handle_p 1 $db]
 
     # Note: Although marked as private, db_exec is in fact called
@@ -988,7 +1029,7 @@ ad_proc -private db_exec { type db statement_name pre_sql {ulevel 2} args } {
 
     set sql [db_qd_replace_sql $statement_name $pre_sql]
 
-    # insert tcl variable values (Openacs - Dan)
+    # insert Tcl variable values (OpenACS - Dan)
     if {$sql ne $pre_sql } {
         set sql [uplevel $ulevel [list subst -nobackslashes $sql]]
     }
@@ -1002,13 +1043,13 @@ ad_proc -private db_exec { type db statement_name pre_sql {ulevel 2} args } {
 
                 switch $driverkey {
                     oracle {
-                        return [eval [list ns_ora $type $db -bind $bind $sql] $args]
+                        return [ns_ora $type $db -bind $bind $sql {*}$args]
                     }
                     postgresql {
-                        return [eval [list ns_pg_bind $type $db -bind $bind $sql]]
+                        return [ns_pg_bind $type $db -bind $bind $sql]
                     }
                     nsodbc {
-                        return [eval [list ns_odbc_bind $type $db -bind $bind $sql]]
+                        return [ns_odbc_bind $type $db -bind $bind $sql]
                     }
                     default {
                         error "Unknown database driver.  Bind variables not supported for this database."
@@ -1032,13 +1073,13 @@ ad_proc -private db_exec { type db statement_name pre_sql {ulevel 2} args } {
                     # hard to know.  Document or fix.
                     # --atp@piskorski.com, 2003/04/09 15:33 EDT
 
-                    return [eval [list ns_ora $type $db -bind $bind_vars $sql] $args]
+                    return [ns_ora $type $db -bind $bind_vars $sql {*}$args]
                 }
                 postgresql {
-                    return [eval [list ns_pg_bind $type $db -bind $bind_vars $sql]]
+                    return [ns_pg_bind $type $db -bind $bind_vars $sql]
                 }
                 nsodbc {
-                    return [eval [list ns_odbc_bind $type $db -bind $bind_vars $sql]]
+                    return [ns_odbc_bind $type $db -bind $bind_vars $sql]
                 }
                 default {
                     error "Unknown database driver.  Bind variables not supported for this database."
@@ -1070,11 +1111,13 @@ ad_proc -private db_exec { type db statement_name pre_sql {ulevel 2} args } {
     } error]
 
     # JCD: we log the clicks, dbname, query time, and statement to catch long running queries.
-    # If we took more than 5 seconds yack about it.
-    if { [expr {[clock clicks -milliseconds] - $start_time}] > 5000} {
-        ns_log Warning "db_exec: longdb [expr {[clock seconds] - $start_time_fine}] seconds $db $type $statement_name"
-    } else { 
-        ns_log Debug "db_exec: timing [expr {[clock seconds] - $start_time_fine}] seconds $db $type $statement_name"
+    # If we took more than 3 seconds yack about it.
+    if { [clock clicks -milliseconds] - $start_time > 3000 } {
+        set duration [format %.2f [expr {[clock clicks -milliseconds] - $start_time}]]
+        ns_log Warning "db_exec: longdb $duration seconds $db $type $statement_name"
+    } else {
+        #set duration [format %.2f [expr {[clock clicks -milliseconds] - $start_time}]]
+        #ns_log Debug "db_exec: timing $duration seconds $db $type $statement_name"
     }
 
     ds_collect_db_call $db $type $statement_name $sql $start_time $errno $error
@@ -1082,22 +1125,21 @@ ad_proc -private db_exec { type db statement_name pre_sql {ulevel 2} args } {
         return $error
     }
 
-    global errorInfo errorCode
-    return -code $errno -errorinfo $errorInfo -errorcode $errorCode $error
+    return -code $errno -errorinfo $::errorInfo -errorcode $::errorCode $error
 }
 
 
 ad_proc -public db_string {
-    { -dbn "" }
-     -cache_key
+    {-dbn ""}
+    -cache_key
     {-cache_pool db_cache_pool}
     statement_name
     sql
     args
- } {
+} {
 
     Usage: <b>db_string</b> <i>statement-name sql</i> [ <tt>-default</tt> <i>default</i> ] [ <tt>-bind</tt> <i>bind_set_id</i> | <tt>-bind</tt> <i>bind_value_list</i> ]
-  
+
     @return the first column of the result of the SQL query <i>sql</i>.  If the query doesn't return a row, returns <i>default</i> or raises an error if no <i>default</i> is provided.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -1144,7 +1186,7 @@ ad_proc -public db_string {
 
 
 ad_proc -public db_list {
-    { -dbn "" }
+    {-dbn ""}
     -cache_key
     {-cache_pool db_cache_pool}
     statement_name
@@ -1154,7 +1196,7 @@ ad_proc -public db_list {
 
     Usage: <b>db_list</b> <i>statement-name sql</i> [ <tt>-bind</tt> <i>bind_set_id</i> | <tt>-bind</tt> <i>bind_value_list</i> ]
 
-    @return a Tcl list of the values in the first column of the result of SQL query <tt>sql</tt>. 
+    @return a Tcl list of the values in the first column of the result of SQL query <tt>sql</tt>.
     If <tt>sql</tt> doesn't return any rows, returns an empty list.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -1170,17 +1212,17 @@ ad_proc -public db_list {
 
     if { [info exists cache_key] } {
         return [ns_cache eval $cache_pool $cache_key {
-                   db_with_handle -dbn $dbn db {
-                       set selection [db_exec select $db $full_statement_name $sql]
-                       set result [list]
-                       while { [db_getrow $db $selection] } {
-                           lappend result [ns_set value $selection 0]
-                       }
-                   }
-                   set result
-               }]
+            db_with_handle -dbn $dbn db {
+                set selection [db_exec select $db $full_statement_name $sql]
+                set result [list]
+                while { [db_getrow $db $selection] } {
+                    lappend result [ns_set value $selection 0]
+                }
+            }
+            set result
+        }]
     }
-        
+
     db_with_handle -dbn $dbn db {
         set selection [db_exec select $db $full_statement_name $sql]
         set result [list]
@@ -1194,7 +1236,7 @@ ad_proc -public db_list {
 
 
 ad_proc -public db_list_of_lists {
-    { -dbn "" }
+    {-dbn ""}
     -cache_key
     {-cache_pool db_cache_pool}
     statement_name
@@ -1204,9 +1246,9 @@ ad_proc -public db_list_of_lists {
 
     Usage: <b>db_list_of_lists</b> <i>statement-name sql</i> [ <tt>-bind</tt> <i>bind_set_id</i> | <tt>-bind</tt> <i>bind_value_list</i> ]
 
-    @return a Tcl list, each element of which is a list of all column 
-    values in a row of the result of the SQL query<tt>sql</tt>. If 
-    <tt>sql</tt> doesn't return any rows, returns an empty list. 
+    @return a Tcl list, each element of which is a list of all column
+    values in a row of the result of the SQL query<tt>sql</tt>. If
+    <tt>sql</tt> doesn't return any rows, returns an empty list.
 
     It checks if the element is I18N and replaces it, thereby
     reducing the need to do this with every single package
@@ -1230,7 +1272,7 @@ ad_proc -public db_list_of_lists {
                 while { [db_getrow $db $selection] } {
                     set this_result [list]
                     for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
-		        lappend this_result  [ns_set value $selection $i]
+                        lappend this_result  [ns_set value $selection $i]
                     }
                     lappend result $this_result
                 }
@@ -1245,7 +1287,7 @@ ad_proc -public db_list_of_lists {
         while { [db_getrow $db $selection] } {
             set this_result [list]
             for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
-		lappend this_result  [ns_set value $selection $i]
+                lappend this_result  [ns_set value $selection $i]
             }
             lappend result $this_result
         }
@@ -1256,7 +1298,7 @@ ad_proc -public db_list_of_lists {
 
 
 ad_proc -public db_list_of_ns_sets {
-    { -dbn "" }
+    {-dbn ""}
     statement_name
     sql
     args
@@ -1291,20 +1333,25 @@ ad_proc -public db_list_of_ns_sets {
 }
 
 
-ad_proc -public db_foreach {{ -dbn "" } statement_name sql args } {
+ad_proc -public db_foreach {
+    {-dbn ""}
+    statement_name
+    sql
+    args
+} {
 
-    Usage: 
+    Usage:
     <blockquote>
     db_foreach <em><i>statement-name sql</i></em> [ -bind <em><i>bind_set_id</i></em> | -bind <em><i>bind_value_list</i></em> ] \
         [ -column_array <em><i>array_name</i></em> | -column_set <em><i>set_name</i></em> ] \
-            <em><i>code_block</i></em> [ if_no_rows <em><i>if_no_rows_block</i> ]</em>
+        <em><i>code_block</i></em> [ if_no_rows <em><i>if_no_rows_block</i> ]</em>
 
     </blockquote>
 
     <p>Performs the SQL query <em><i><tt>sql</tt></i></em>, executing
     <em><i><tt>code_block</tt></i></em> once for each row with variables set to
     column values (or a set or array populated if <tt>-column_array</tt> or
-    <tt>column_set</tt> is specified). If the query returns no rows, executes
+                   <tt>column_set</tt> is specified). If the query returns no rows, executes
     <em><i><tt>if_no_rows_block</tt></i></em> (if provided). </p>
 
     <p>Example:
@@ -1330,7 +1377,9 @@ ad_proc -public db_foreach {{ -dbn "" } statement_name sql args } {
         set code_block [lindex $args 0]
     } elseif { $arglength == 3 } {
         # Should have code block + if_no_rows + code block.
-        if { [lindex $args 1] ne "if_no_rows" && [lindex $args 1] ne "else" } {
+        if { [lindex $args 1] ne "if_no_rows"
+             && [lindex $args 1] ne "else"
+         } {
             return -code error "Expected if_no_rows as second-to-last argument"
         }
         set code_block [lindex $args 0]
@@ -1357,9 +1406,8 @@ ad_proc -public db_foreach {{ -dbn "" } statement_name sql args } {
         set counter 0
         while { [db_getrow $db $selection] } {
             incr counter
-            if { [info exists array_val] } {
-                unset array_val
-            }
+            unset -nocomplain array_val
+
             if { ![info exists column_set] } {
                 for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
                     if { [info exists column_array] } {
@@ -1380,8 +1428,7 @@ ad_proc -public db_foreach {{ -dbn "" } statement_name sql args } {
                 }
                 1 {
                     # TCL_ERROR
-                    global errorInfo errorCode
-                    error $error $errorInfo $errorCode
+                    error $error $::errorInfo $::errorCode
                 }
                 2 {
                     # TCL_RETURN
@@ -1412,7 +1459,7 @@ proc db_multirow_helper {} {
     uplevel 1 {
         if { !$append_p || ![info exists counter]} {
             set counter 0
-        } 
+        }
 
         db_with_handle -dbn $dbn db {
             set selection [db_exec select $db $full_statement_name $sql]
@@ -1424,10 +1471,8 @@ proc db_multirow_helper {} {
             # the multirow generation
             # Also make the 'next_row' array available as a magic __db_multirow__next_row variable
             upvar 1 __db_multirow__next_row next_row
-            if { [info exists next_row] } {
-                unset next_row
-            }
-            
+            unset -nocomplain next_row
+
             set more_rows_p 1
             while { 1 } {
 
@@ -1436,7 +1481,7 @@ proc db_multirow_helper {} {
                 } else {
                     break
                 }
-                
+
                 # Setup the 'columns' part, now that we know the columns in the result set
                 # And save variables which we might clobber, if '-unclobber' switch is specified.
                 if { $local_counter == 0 } {
@@ -1449,7 +1494,7 @@ proc db_multirow_helper {} {
                         set columns $local_columns
                     } else {
                         # Check that the columns match, if not throw an error
-                        if { ![string equal [join [lsort -ascii $local_columns]] [join [lsort -ascii $columns]]] } {
+                        if { [join [lsort -ascii $local_columns]] ne [join [lsort -ascii $columns]] } {
                             error "Appending to a multirow with differing columns.
     Original columns     : [join [lsort -ascii $columns] ", "].
     Columns in this query: [join [lsort -ascii $local_columns] ", "]" "" "ACS_MULTIROW_APPEND_COLUMNS_MISMATCH"
@@ -1493,22 +1538,18 @@ proc db_multirow_helper {} {
                     # There is a code block to execute
 
                     # Copy next_row to this_row, if it exists
-                    if { [info exists this_row] } {
-                        unset this_row 
-                    }
+                    unset -nocomplain this_row
                     set array_get_next_row [array get next_row]
                     if { $array_get_next_row ne "" } {
                         array set this_row [array get next_row]
                     }
 
                     # Pull values from the query into next_row
-                    if { [info exists next_row] } {
-                        unset next_row 
-                    }
+                    unset -nocomplain next_row
                     if { $more_rows_p } {
                         for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
                             set next_row([ns_set key $selection $i]) [ns_set value $selection $i]
-                        }   
+                        }
                     }
 
                     # Process the row
@@ -1537,8 +1578,7 @@ proc db_multirow_helper {} {
                             }
                             1 {
                                 # TCL_ERROR
-                                global errorInfo errorCode
-                                error $error $errorInfo $errorCode
+                                error $error $::errorInfo $::errorCode
                             }
                             2 {
                                 # TCL_RETURN
@@ -1557,7 +1597,7 @@ proc db_multirow_helper {} {
                                 error "Unknown return code: $errno"
                             }
                         }
-                     
+
                         # Pull the local variables back out and into the array.
                         incr counter
                         upvar $level_up "$var_name:$counter" array_val
@@ -1578,9 +1618,7 @@ proc db_multirow_helper {} {
                 upvar 1 $col column_value __saved_$col column_save
 
                 # Unset it first, so the road's paved to restoring
-                if { [info exists column_value] } {
-                    unset column_value
-                }
+                unset -nocomplain column_value
 
                 # Restore it
                 if { [info exists column_save] } {
@@ -1589,16 +1627,14 @@ proc db_multirow_helper {} {
                     } else {
                         set column_value $column_save
                     }
-                    
+
                     # And then remove the saved col
                     unset column_save
                 }
             }
         }
         # Unset the next_row variable, just in case
-        if { [info exists next_row] } {
-            unset next_row
-         }
+        unset -nocomplain next_row
     }
 }
 
@@ -1614,17 +1650,17 @@ ad_proc -public db_multirow {
     var_name
     statement_name
     sql
-    args 
+    args
 } {
     @param dbn The database name to use.  If empty_string, uses the default database.
     @param cache_key Cache the result using given value as the key.  Default is to not cache.
     @param cache_pool Override the default db_cache_pool
 
     @param unclobber If set, will cause the proc to not overwrite local variables. Actually, what happens
-    is that the local variables will be overwritten, so you can access them within the code block. However, 
+    is that the local variables will be overwritten, so you can access them within the code block. However,
     if you specify -unclobber, we will revert them to their original state after execution of this proc.
 
-   Usage:
+    Usage:
     <blockquote>
     db_multirow [ -local ] [ -upvar_level <em><i>n_levels_up</i></em> ] [ -append ] [ -extend <em><i>column_list</i></em> ] \
         <em><i>var-name statement-name sql</i></em> [ -bind <em><i>bind_set_id</i></em> | -bind <em><i>bind_value_list</i></em> ] \
@@ -1637,7 +1673,7 @@ ad_proc -public db_multirow {
     <code><i>var_name</i>:1</code>, <code><i>var_name</i>:2</code>, etc,
     setting <code><i>var_name</i>:rowcount</code> to the total number
     of rows, and setting <code><i>var_name</i>:columns</code> to a
-    list of column names. 
+    list of column names.
 
     <p>
 
@@ -1654,7 +1690,7 @@ ad_proc -public db_multirow {
 
     <p>
 
-    Each row also has a column, rownum, automatically 
+    Each row also has a column, rownum, automatically
     added and set to the row number, starting with 1. Note that this will
     override any column in the SQL statement named 'rownum', also if you're
     using the Oracle rownum pseudo-column.
@@ -1663,15 +1699,15 @@ ad_proc -public db_multirow {
 
     If the <code>-local</code> is passed, the variables defined
     by db_multirow will be set locally (useful if you're compiling dynamic templates
-    in a function or similar situations). Use the <code>-upvar_level</code>
+                                        in a function or similar situations). Use the <code>-upvar_level</code>
     switch to specify how many levels up the variable should be set.
 
     <p>
 
-    You may supply a code block, which will be executed for each row in 
-    the loop. This is very useful if you need to make computations that 
-    are better done in Tcl than in SQL, for example using ns_urlencode 
-    or ad_quotehtml, etc. When the Tcl code is executed, all the columns 
+    You may supply a code block, which will be executed for each row in
+    the loop. This is very useful if you need to make computations that
+    are better done in Tcl than in SQL, for example using ns_urlencode
+    or ad_quotehtml, etc. When the Tcl code is executed, all the columns
     from the SQL query will be set as local variables in that code. Any
     changes made to these local variables will be copied back into the
     multirow.
@@ -1679,14 +1715,14 @@ ad_proc -public db_multirow {
     <p>
 
     You may also add additional, computed columns to the multirow, using the
-    <code>-extend { <i>col_1</i> <i>col_2</i> ... }</code> switch. This is 
-    useful for things like constructing a URL for the object retrieved by 
+    <code>-extend { <i>col_1</i> <i>col_2</i> ... }</code> switch. This is
+    useful for things like constructing a URL for the object retrieved by
     the query.
 
     <p>
 
-    If you're constructing your multirow through multiple queries with the 
-    same set of columns, but with different rows, you can use the 
+    If you're constructing your multirow through multiple queries with the
+    same set of columns, but with different rows, you can use the
     <code>-append</code> switch. This causes the rows returned by this query
     to be appended to the rows already in the multirow, instead of starting
     a clean multirow, as is the normal behavior. The columns must match the
@@ -1694,26 +1730,26 @@ ad_proc -public db_multirow {
 
     <p>
 
-    Your code block may call <code>continue</code> in order to skip a row 
+    Your code block may call <code>continue</code> in order to skip a row
     and not include it in the multirow. Or you can call <code>break</code>
     to skip this row and quit looping.
 
     <p>
 
     Notice the nonstandard numbering (everything
-    else in Tcl starts at 0); the reason is that the graphics designer, a non
+                                      else in Tcl starts at 0); the reason is that the graphics designer, a non
     programmer, may wish to work with row numbers.
 
     <p>
 
-    Example: 
-<pre>db_multirow -extend { user_url } users users_query {
-    select user_id first_names, last_name, email from cc_users
-} {
-    set user_url [acs_community_member_url -user_id $user_id]
-}</pre>
+    Example:
+    <pre>db_multirow -extend { user_url } users users_query {
+        select user_id first_names, last_name, email from cc_users
+    } {
+        set user_url [acs_community_member_url -user_id $user_id]
+    }</pre>
 
-   @see template::multirow
+    @see template::multirow
 } {
     # Query Dispatcher (OpenACS - ben)
     set full_statement_name [db_qd_get_fullname $statement_name]
@@ -1736,8 +1772,9 @@ ad_proc -public db_multirow {
         set code_block [lindex $args 0]
     } elseif { $arglength == 3 } {
         # Should have code block + if_no_rows + code block.
-        if {   [lindex $args 1] ne "if_no_rows" \
-            && [lindex $args 1] ne "else" } {
+        if { [lindex $args 1] ne "if_no_rows"
+             && [lindex $args 1] ne "else"
+         } {
             return -code error "Expected if_no_rows as second-to-last argument"
         }
         set code_block [lindex $args 0]
@@ -1749,8 +1786,10 @@ ad_proc -public db_multirow {
     upvar $level_up "$var_name:rowcount" counter
     upvar $level_up "$var_name:columns" columns
 
-    if { [info exists cache_key] && $append_p &&
-         [info exists counter] && $counter > 0 } {
+    if { [info exists cache_key]
+         && $append_p
+         && [info exists counter] && $counter > 0
+     } {
         return -code error "Can't append and cache a non-empty multirow datasource simultaneously"
     }
 
@@ -1769,16 +1808,13 @@ ad_proc -public db_multirow {
             return [list $counter $columns $values]
         }]
 
-        set counter [lindex $value 0]
-        set columns [lindex $value 1]
-        set values [lindex $value 2]
+        lassign $value counter columns values
 
         set count 1
-
         foreach value $values {
-           upvar $level_up "$var_name:[expr {$count}]" array_val
-           array set array_val $value
-           incr count
+            upvar $level_up "$var_name:[expr {$count}]" array_val
+            array set array_val $value
+            incr count
         }
     } else {
         db_multirow_helper
@@ -1791,15 +1827,15 @@ ad_proc -public db_multirow {
     }
 }
 
-ad_proc -public db_multirow_group_last_row_p { 
+ad_proc -public db_multirow_group_last_row_p {
     {-column:required}
 } {
-    Used inside the code_block to db_multirow to ask whether this row is the last row 
+    Used inside the code_block to db_multirow to ask whether this row is the last row
     before the value of 'column' changes, or the last row of the result set.
 
     <p>
 
-    This is useful when you want to build up a multirow for a master/slave table pair, 
+    This is useful when you want to build up a multirow for a master/slave table pair,
     where you only want one row per row in the master table, but you want to include
     data from the slave table in a column of the multirow.
 
@@ -1813,13 +1849,13 @@ ad_proc -public db_multirow_group_last_row_p {
 
     # Start building the multirow. We add the dynamic column 'lines_pretty', which will
     # contain the pretty summary of the order lines.
-    db_multirow -extend { lines_pretty } orders select_orders_and_lines { 
-        select o.order_id, 
-               o.customer_name,
-               l.item_name,
-               l.quantity
+    db_multirow -extend { lines_pretty } orders select_orders_and_lines {
+        select o.order_id,
+        o.customer_name,
+        l.item_name,
+        l.quantity
         from   orders o,
-               order_lines l
+        order_lines l
         where  l.order_id = o.order_id
         order  by o.order_id, l.item_name
     } {
@@ -1837,7 +1873,7 @@ ad_proc -public db_multirow_group_last_row_p {
             continue
         }
     }
-</pre>
+    </pre>
 
     @author Lars Pind (lars@collaboraid.biz)
 
@@ -1852,11 +1888,11 @@ ad_proc -public db_multirow_group_last_row_p {
     }
     upvar 1 $column column_value
     # Otherwise, it's the last row in the group if the next row has a different value than this row
-    return [expr {$column_value ne $next_row($column) }] 
+    return [expr {$column_value ne $next_row($column) }]
 }
 
 
-ad_proc -public db_dml {{ -dbn "" } statement_name sql args } {
+ad_proc -public db_dml {{-dbn ""} statement_name sql args } {
     Do a DML statement.
 
     <p>
@@ -1865,7 +1901,7 @@ ad_proc -public db_dml {{ -dbn "" } statement_name sql args } {
 
     @param dbn The database name to use.  If empty_string, uses the default database.
 
-    @see <a href="/doc/db-api-detailed.html">/doc/db-api-detailed.html</a>
+    @see <a href="/doc/db-api-detailed">/doc/db-api-detailed</a>
 } {
     ad_arg_parser { clobs blobs clob_files blob_files bind } $args
     set driverkey [db_driverkey $dbn]
@@ -1895,27 +1931,27 @@ ad_proc -public db_dml {{ -dbn "" } statement_name sql args } {
     set lob_argv [list]
     set command "dml"
     if { [info exists clobs] } {
-	set command "clob_dml"
-	set lob_argv $clobs
-	incr lob_argc
+        set command "clob_dml"
+        set lob_argv $clobs
+        incr lob_argc
     }
     if { [info exists blobs] } {
-	set command "blob_dml"
-	set lob_argv $blobs
-	incr lob_argc
+        set command "blob_dml"
+        set lob_argv $blobs
+        incr lob_argc
     }
     if { [info exists clob_files] } {
-	set command "clob_dml_file"
-	set lob_argv $clob_files
-	incr lob_argc
+        set command "clob_dml_file"
+        set lob_argv $clob_files
+        incr lob_argc
     }
     if { [info exists blob_files] } {
-	set command "blob_dml_file"
-	set lob_argv $blob_files
-	incr lob_argc
+        set command "blob_dml_file"
+        set lob_argv $blob_files
+        incr lob_argc
     }
     if { $lob_argc > 1 } {
-	error "Only one of -clobs, -blobs, -clob_files, or -blob_files may be specified as an argument to db_dml"
+        error "Only one of -clobs, -blobs, -clob_files, or -blob_files may be specified as an argument to db_dml"
     }
 
     if { ! $postgres_p } {
@@ -1936,20 +1972,20 @@ ad_proc -public db_dml {{ -dbn "" } statement_name sql args } {
     } elseif {$command eq "blob_dml_file"} {
         # PostgreSQL:
         db_with_handle -dbn $dbn db {
-            # another ugly hack to avoid munging tcl files.
+            # another ugly hack to avoid munging Tcl files.
             # __lob_id needs to be set inside of a query (.xql) file for this
-            # to work.  Say for example that you need to create a lob. In 
+            # to work.  Say for example that you need to create a lob. In
             # Oracle, you would do something like:
 
-            # db_dml update_photo  "update foo set bar = empty_blob() 
-            #                       where bar = :bar 
+            # db_dml update_photo  "update foo set bar = empty_blob()
+            #                       where bar = :bar
             #                       returning foo into :1" -blob_files [list $file]
             # for postgresql we can do the equivalent by placing the following
             # in a query file:
             # update foo set bar = [set __lob_id [db_string get_id "select empty_lob()"]]
             # where bar = :bar
 
-            # __lob_id acts as a flag that signals that blob_dml_file is 
+            # __lob_id acts as a flag that signals that blob_dml_file is
             # required, and it is also used to pass along the lob_id.  It
             # is unsert afterwards to avoid name clashes with other invocations
             # of this routine.
@@ -1971,7 +2007,7 @@ ad_proc -public db_dml {{ -dbn "" } statement_name sql args } {
 }
 
 
-ad_proc -public db_resultrows {{ -dbn "" }} {
+ad_proc -public db_resultrows {{-dbn ""}} {
     @return the number of rows affected by the last DML command.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -2003,19 +2039,19 @@ ad_proc -public db_0or1row {
     statement_name
     sql
     args
-} { 
+} {
 
-    Usage: 
+    Usage:
     <blockquote>
     db_0or1row <i>statement-name sql</i> [ -bind <i>bind_set_id</i> | -bind <i>bind_value_list</i> ] \
         [ -column_array <i>array_name</i> | -column_set <i>set_name</i> ]
-        
+
     </blockquote>
 
-    <p>Performs the SQL query sql. If a row is returned, sets variables 
-    to column values (or a set or array populated if -column_array 
-    or column_set is specified) and returns 1. If no rows are returned, 
-    returns 0. 
+    <p>Performs the SQL query sql. If a row is returned, sets variables
+    to column values (or a set or array populated if -column_array
+                      or column_set is specified) and returns 1. If no rows are returned,
+    returns 0.
 
     @return 1 if variables are set, 0 if no rows are returned.  If more than one row is returned, throws an error.
 
@@ -2034,16 +2070,14 @@ ad_proc -public db_0or1row {
 
     if { [info exists column_array] } {
         upvar 1 $column_array array_val
-        if { [info exists array_val] } {
-            unset array_val
-        }
+        unset -nocomplain array_val
     }
 
     if { [info exists column_set] } {
         upvar 1 $column_set selection
     }
 
-    if { [info exists cache_key] } { 
+    if { [info exists cache_key] } {
         set values [ns_cache eval $cache_pool $cache_key {
             db_with_handle -dbn $dbn db {
                 set selection [db_exec 0or1row $db $full_statement_name $sql]
@@ -2062,7 +2096,7 @@ ad_proc -public db_0or1row {
 
         if { $values eq "" } {
             set selection ""
-        } else { 
+        } else {
             set selection [ns_set create]
 
             foreach value $values {
@@ -2080,13 +2114,10 @@ ad_proc -public db_0or1row {
     }
 
     if { [info exists column_array] } {
-        for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
-            set array_val([ns_set key $selection $i]) [ns_set value $selection $i]
-        }
+        array set array_val [ns_set array $selection]
     } elseif { ![info exists column_set] } {
         for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
-            upvar 1 [ns_set key $selection $i] return_value
-            set return_value [ns_set value $selection $i]
+            uplevel 1 [list set [ns_set key $selection $i] [ns_set value $selection $i]]
         }
     }
 
@@ -2095,16 +2126,16 @@ ad_proc -public db_0or1row {
 
 
 ad_proc -public db_1row { args } {
-    Usage: 
+    Usage:
     <blockquote>
     db_1row <i>statement-name sql</i> [ -bind <i>bind_set_id</i> | -bind <i>bind_value_list</i> ] \
         [ -column_array <i>array_name</i> | -column_set <i>set_name</i> ]
-        
+
     </blockquote>
 
-    <p>Performs the SQL query sql. If a row is returned, sets variables 
-    to column values (or a set or array populated if -column_array 
-    or column_set is specified). If no rows are returned, 
+    <p>Performs the SQL query sql. If a row is returned, sets variables
+    to column values (or a set or array populated if -column_array
+                      or column_set is specified). If no rows are returned,
     throws an error.
 
     @return 1 if variables are set.
@@ -2113,7 +2144,7 @@ ad_proc -public db_1row { args } {
     @param cache_pool Override the default db_cache_pool
 
 } {
-    if { ![uplevel db_0or1row $args] } {
+    if { ![uplevel ::db_0or1row $args] } {
         return -code error "Query did not return any rows."
     }
 }
@@ -2126,7 +2157,7 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
     within transaction_code are committed to the database or none of them are.  Multiple <code>db_transaction</code>s may be
     nested (end transaction is transparently ns_db dml'ed when the outermost transaction completes).<p>
 
-    To handle errors, use <code>db_transaction {transaction_code} on_error {error_code_block}</code>.  Any error generated in 
+    To handle errors, use <code>db_transaction {transaction_code} on_error {error_code_block}</code>.  Any error generated in
     <code>transaction_code</code> will be caught automatically and process control will transfer to <code>error_code_block</code>
     with a variable <code>errmsg</code> set.  The error_code block can then clean up after the error, such as presenting a usable
     error message to the user.  Following the execution of <code>error_code_block</code> the transaction will be aborted.
@@ -2151,7 +2182,7 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
         db_dml test {insert into footest values(1)}
         nonsense
         db_dml test {insert into footest values(2)}
-    } 
+    }
     </pre>
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -2180,7 +2211,7 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
     db_with_handle -dbn $dbn db {
         # Preserve the handle, since db_with_handle kills it after executing
         # this block.
-        set dbh $db     
+        set dbh $db
         # Remember that there's a transaction happening on this handle.
         if { ![info exists db_state(transaction_level,$dbh)] } {
             set db_state(transaction_level,$dbh) 0
@@ -2192,7 +2223,7 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
     }
     # Execute the transaction code.
     set errno [catch {
-        uplevel 1 $transaction_code 
+        uplevel 1 $transaction_code
     } errmsg]
     incr db_state(transaction_level,$dbh) -1
 
@@ -2220,18 +2251,18 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
     }
 
     if { $err_p || [db_abort_transaction_p -dbn $dbn]} {
-        # An error was triggered or the transaction has been aborted.  
+        # An error was triggered or the transaction has been aborted.
         db_abort_transaction -dbn $dbn
         if { [info exists on_error] && $on_error ne "" } {
 
-            if {"postgresql" eq [db_type]} { 
+            if {"postgresql" eq [db_type]} {
 
-                # JCD: with postgres we abort the transaction prior to 
-                # executing the on_error block since there is nothing 
-                # you can do to "fix it" and keeping it meant things like 
+                # JCD: with postgres we abort the transaction prior to
+                # executing the on_error block since there is nothing
+                # you can do to "fix it" and keeping it meant things like
                 # queries in the on_error block would then fail.
-                # 
-                # Note that the semantics described in the proc doc 
+                #
+                # Note that the semantics described in the proc doc
                 # are not possible to support on postresql.
 
                 # DRB: I removed the db_release_unused_handles call that
@@ -2263,7 +2294,7 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
                 0 {
                     # TCL_OK
                 }
-                
+
                 2 {
                     # TCL_RETURN
                 }
@@ -2288,10 +2319,9 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
                     # We're at the top level, so we abort the transaction.
                     set db_state(db_abort_p,$dbh) 0
                     ns_db dml $dbh "abort transaction"
-                } 
+                }
                 # We throw this error because it was thrown from the error handling code that the programmer must fix.
-                global errorInfo errorCode
-                error $on_errmsg $errorInfo $errorCode
+                error $on_errmsg $::errorInfo $::errorCode
             } else {
                 # Good, no error thrown by the on_error block.
                 if { [db_abort_transaction_p -dbn $dbn] } {
@@ -2300,11 +2330,10 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
                         set db_state(db_abort_p,$dbh) 0
                         ns_db dml $dbh "abort transaction"
                         # We still have the transaction generated error.  We don't want to throw it, so we log it.
-                        ns_log Error "Aborting transaction due to error:\n$errmsg" 
+                        ns_log Error "Aborting transaction due to error:\n$errmsg"
                     } else {
                         # Propagate the error up to the next level.
-                        global errorInfo errorCode
-                        error $errmsg $errorInfo $errorCode
+                        error $errmsg $::errorInfo $::errorCode
                     }
                 } else {
                     # The on_error block has resolved the transaction error.  If we're at the top, commit and exit.
@@ -2319,22 +2348,20 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
             if { $level == 1 } {
                 set db_state(db_abort_p,$dbh) 0
                 ns_db dml $dbh "abort transaction"
-                global errorInfo errorCode
-                error "Transaction aborted: $errmsg" $errorInfo $errorCode
-            } else {            
+                error "Transaction aborted: $errmsg" $::errorInfo $::errorCode
+            } else {
                 db_abort_transaction -dbn $dbn
-                global errorInfo errorCode
-                error $errmsg $errorInfo $errorCode
+                error $errmsg $::errorInfo $::errorCode
             }
         }
     } else {
-        # There was no error from the transaction code.   
+        # There was no error from the transaction code.
         if { [db_abort_transaction_p -dbn $dbn] } {
             # The user requested the transaction be aborted.
             if { $level == 1 } {
                 set db_state(db_abort_p,$dbh) 0
                 ns_db dml $dbh "abort transaction"
-            } 
+            }
         } elseif { $level == 1 } {
             # Success!  No errors and no requested abort.  Commit.
             ns_db dml $dbh "end transaction"
@@ -2343,10 +2370,10 @@ ad_proc -public db_transaction {{ -dbn ""} transaction_code args } {
 }
 
 
-ad_proc -public db_abort_transaction {{ -dbn "" }} {
+ad_proc -public db_abort_transaction {{-dbn ""}} {
 
-    Aborts all levels of a transaction. That is if this is called within 
-    several nested transactions, all of them are terminated. Use this 
+    Aborts all levels of a transaction. That is if this is called within
+    several nested transactions, all of them are terminated. Use this
     instead of db_dml "abort" "abort transaction".
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -2360,13 +2387,13 @@ ad_proc -public db_abort_transaction {{ -dbn "" }} {
 }
 
 
-ad_proc -private db_abort_transaction_p {{ -dbn "" }} {
+ad_proc -private db_abort_transaction_p {{-dbn ""}} {
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     upvar "#0" [db_state_array_name_is -dbn $dbn] db_state
 
     db_with_handle -dbn $dbn db {
-        if { [info exists db_state(db_abort_p,$db)] } { 
+        if { [info exists db_state(db_abort_p,$db)] } {
             return $db_state(db_abort_p,$db)
         } else {
             # No abort flag registered, so we assume everything is ok.
@@ -2376,7 +2403,7 @@ ad_proc -private db_abort_transaction_p {{ -dbn "" }} {
 }
 
 
-ad_proc -public db_name {{ -dbn "" }} {
+ad_proc -public db_name {{-dbn ""}} {
 
     @return the name of the database as reported by the driver.
 
@@ -2389,17 +2416,17 @@ ad_proc -public db_name {{ -dbn "" }} {
 }
 
 
-ad_proc -public db_get_username {{ -dbn "" }} {
+ad_proc -public db_get_username {{-dbn ""}} {
     @return the username parameter from the driver section of the
     first database pool for the dbn.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     set pool [lindex [db_available_pools $dbn] 0]
-    return [ns_config "ns/db/pool/$pool" User]    
+    return [ns_config "ns/db/pool/$pool" User]
 }
 
-ad_proc -public db_get_password {{ -dbn "" }} {
+ad_proc -public db_get_password {{-dbn ""}} {
     @return the password parameter from the driver section of the
     first database pool for the dbn.
 
@@ -2409,7 +2436,7 @@ ad_proc -public db_get_password {{ -dbn "" }} {
     return [ns_config "ns/db/pool/$pool" Password]
 }
 
-ad_proc -public db_get_sql_user {{ -dbn "" }} {
+ad_proc -public db_get_sql_user {{-dbn ""}} {
     <strong>Oracle only.</strong>
 
     <p>
@@ -2423,15 +2450,15 @@ ad_proc -public db_get_sql_user {{ -dbn "" }} {
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     set pool [lindex [db_available_pools $dbn] 0]
-    set datasource [ns_config "ns/db/pool/$pool" DataSource]    
+    set datasource [ns_config "ns/db/pool/$pool" DataSource]
     if { $datasource ne "" && ![string is space $datasource] } {
-	return "[ns_config ns/db/pool/$pool User]/[ns_config ns/db/pool/$pool Password]@$datasource"
+        return "[ns_config ns/db/pool/$pool User]/[ns_config ns/db/pool/$pool Password]@$datasource"
     } else {
-	return "[ns_config ns/db/pool/$pool User]/[ns_config ns/db/pool/$pool Password]"
+        return "[ns_config ns/db/pool/$pool User]/[ns_config ns/db/pool/$pool Password]"
     }
 }
 
-ad_proc -public db_get_pgbin {{ -dbn "" }} {
+ad_proc -public db_get_pgbin {{-dbn ""}} {
     <strong>PostgreSQL only.</strong>
 
     <p>
@@ -2440,12 +2467,12 @@ ad_proc -public db_get_pgbin {{ -dbn "" }} {
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     set pool [lindex [db_available_pools $dbn] 0]
-    set driver [ns_config "ns/db/pool/$pool" Driver]    
+    set driver [ns_config "ns/db/pool/$pool" Driver]
     return [ns_config "ns/db/driver/$driver" pgbin]
 }
 
 
-ad_proc -public db_get_port {{ -dbn "" }} {
+ad_proc -public db_get_port {{-dbn ""}} {
     <strong>PostgreSQL only.</strong>
 
     <p>
@@ -2465,60 +2492,63 @@ ad_proc -public db_get_port {{ -dbn "" }} {
     }
     set first_colon_pos [string first ":" $datasource]
 
-    if { $first_colon_pos == $last_colon_pos || [expr {$last_colon_pos - $first_colon_pos}] == 1 } {
-	# No port specified
-	return ""
+    if { $first_colon_pos == $last_colon_pos || ($last_colon_pos - $first_colon_pos) == 1 } {
+        # No port specified
+        return ""
     }
 
-    return [string range $datasource [expr {$first_colon_pos + 1}] [expr {$last_colon_pos - 1}] ]
+    return [string range $datasource $first_colon_pos+1 $last_colon_pos-1]
 }
 
 
-ad_proc -public db_get_database {{ -dbn "" }} {
+ad_proc -public db_get_database {{-dbn ""}} {
     <strong>PostgreSQL only.</strong>
 
     <p>
-    @return the database name from the first database pool.  It assumes the 
+    @return the database name from the first database pool.  It assumes the
     datasource is properly formatted since we've already verified that we
     can connect to the pool.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     set pool [lindex [db_available_pools $dbn] 0]
-    set datasource [ns_config "ns/db/pool/$pool" DataSource]    
+    set datasource [ns_config "ns/db/pool/$pool" DataSource]
     set last_colon_pos [string last ":" $datasource]
     if { $last_colon_pos == -1 } {
         ns_log Error "datasource contains no \":\"? datasource = $datasource"
         return ""
     }
-    return [string range $datasource [expr {$last_colon_pos + 1}] end]
+    return [string range $datasource $last_colon_pos+1 end]
 }
 
- 
-ad_proc -public db_get_dbhost {{ -dbn "" }} {
+
+ad_proc -public db_get_dbhost {
+    {-dbn ""}
+} {
     <strong>PostgreSQL only.</strong>
 
     <p>
-    @return the name of the database host from the first database pool.  
-    It assumes the datasource is properly formatted since we've already 
+    @return the name of the database host from the first database pool.
+    It assumes the datasource is properly formatted since we've already
     verified that we can connect to the pool.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     set pool [lindex [db_available_pools $dbn] 0]
-    set datasource [ns_config "ns/db/pool/$pool" DataSource]    
+    set datasource [ns_config "ns/db/pool/$pool" DataSource]
     set first_colon_pos [string first ":" $datasource]
     if { $first_colon_pos == -1 } {
         ns_log Error "datasource contains no \":\"? datasource = $datasource"
         return ""
     }
-    return [string range $datasource 0 [expr {$first_colon_pos - 1}]]
+    return [string range $datasource 0 $first_colon_pos-1]
 }
 
-ad_proc -public db_source_sql_file {{
-    -dbn ""
-    -callback apm_ns_write_callback
-} file } {
+ad_proc -public db_source_sql_file {
+    {-dbn ""}
+    {-callback apm_ns_write_callback}
+    file
+} {
     Sources a SQL file into Oracle (SQL*Plus format file) or
     PostgreSQL (psql format file).
 
@@ -2530,22 +2560,22 @@ ad_proc -public db_source_sql_file {{
     switch $driverkey {
 
         oracle {
-            global env
             set user_pass [db_get_sql_user -dbn $dbn]
             cd [file dirname $file]
-            set fp [open "|[file join $env(ORACLE_HOME) bin sqlplus] $user_pass @$file" "r"]
-
+            set fp [open "|[file join $::env(ORACLE_HOME) bin sqlplus] $user_pass @$file" "r+"]
+            fconfigure $fp -buffering line
+            puts $fp "exit"
+            
             while { [gets $fp line] >= 0 } {
                 # Don't bother writing out lines which are purely whitespace.
                 if { ![string is space $line] } {
-                    apm_callback_and_log $callback "[ad_quotehtml $line]\n"
+                    apm_callback_and_log $callback "[ns_quotehtml $line]\n"
                 }
             }
             close $fp
         }
 
         postgresql {
-            global tcl_platform 
             set file_name [file tail $file]
 
             set pguser [db_get_username]
@@ -2568,54 +2598,60 @@ ad_proc -public db_source_sql_file {{
             # patch checked for a blank hostname, which fails in the driver.  Arguably the
             # driver's wrong but a lot of non-OpenACS folks use it, and even though I'm the
             # maintainer we shouldn't break existing code over such trivialities...
+            # GN: windows requires $pghost "-h ..."
 
-            if { [string equal [db_get_dbhost] "localhost"] || [string equal [db_get_dbhost] ""] } {
+            if { ([db_get_dbhost] eq "localhost" || [db_get_dbhost] eq "")
+                 && $::tcl_platform(platform) ne "windows"
+             } {
                 set pghost ""
             } else {
                 set pghost "-h [db_get_dbhost]"
             }
 
-            cd [file dirname $file]
-            if { $tcl_platform(platform) eq "windows" } {
-                set fp [open "|[file join [db_get_pgbin] psql] $pghost $pgport $pguser -f $file_name [db_get_database] $pgpass" "r"]
+            set errno [catch {
+                cd [file dirname $file]
+                set fp [open "|[file join [db_get_pgbin] psql] $pghost $pgport $pguser -f $file [db_get_database] $pgpass" "r"]
+            } errorMsg]
+
+            if {$errno > 0} {
+                set error_found 1
+                set error_lines $errorMsg
             } else {
-                set fp [open "|[file join [db_get_pgbin] psql] $pghost $pgport $pguser -f $file_name [db_get_database] $pgpass" "r"]
-            }
-
-            while { [gets $fp line] >= 0 } {
-                # Don't bother writing out lines which are purely whitespace.
-                if { ![string is space $line] } {
-                    apm_callback_and_log $callback "[ad_quotehtml $line]\n"
+                while { [gets $fp line] >= 0 } {
+                    # Don't bother writing out lines which are purely whitespace.
+                    if { ![string is space $line] } {
+                        apm_callback_and_log $callback "[ns_quotehtml $line]\n"
+                    }
                 }
-            }
 
-            # PSQL dumps errors and notice information on stderr, and has no option to turn
-            # this off.  So we have to chug through the "error" lines looking for those that
-            # really signal an error.
+                # PSQL dumps errors and notice information on stderr, and has no option to turn
+                # this off.  So we have to chug through the "error" lines looking for those that
+                # really signal an error.
 
-            set errno [ catch {
-                close $fp
-            } error]
+                set errno [ catch {
+                    close $fp
+                } error]
 
-            if { $errno == 2 } {
-                return $error
-            }
+                if { $errno == 2 } {
+                    return $error
+                }
 
-            # Just filter out the "NOTICE" lines, so we get the stack dump along with real
-            # ERRORs.  This could be done with a couple of opaque-looking regexps...
+                # Just filter out the "NOTICE" lines, so we get the stack dump along with real
+                # ERRORs.  This could be done with a couple of opaque-looking regexps...
 
-            set error_found 0
-            foreach line [split $error "\n"] {
-                if { [string first NOTICE $line] == -1 } {
-                    append error_lines "$line\n"
-                    set error_found [expr { $error_found || [string first ERROR $line] != -1 || \
-                                                [string first FATAL $line] != -1 } ]
+                set error_found 0
+                foreach line [split $error "\n"] {
+                    if { [string first NOTICE $line] == -1 } {
+                        append error_lines "$line\n"
+                        set error_found [expr { $error_found
+                                                || [string first ERROR $line] != -1
+                                                || [string first FATAL $line] != -1 } ]
+                    }
                 }
             }
 
             if { $error_found } {
-                global errorCode
-                return -code error -errorinfo $error_lines -errorcode $errorCode $error_lines
+                return -code error -errorinfo $error_lines -errorcode $::errorCode $error_lines
             }
 
         }
@@ -2629,11 +2665,11 @@ ad_proc -public db_source_sql_file {{
     }
 }
 
-ad_proc -public db_load_sql_data {{
-    -dbn ""
-    -callback apm_ns_write_callback
-} file } {
-
+ad_proc -public db_load_sql_data {
+    {-dbn ""}
+    {-callback apm_ns_write_callback}
+    file
+} {
     Loads a CSV formatted file into a table using PostgreSQL's COPY command or
     Oracle's SQL*Loader utility.  The file name format consists of a sequence
     number used to control the order in which tables are loaded, and the table
@@ -2642,46 +2678,42 @@ ad_proc -public db_load_sql_data {{
     packages are installed.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
-    @file Filename in the format dd-table-name.ctl where 'dd' is a sequence number
-          used to control the order in which data is loaded.  This file is an
-          RDBMS-specific data loader control file.
+    @param file Filename in the format dd-table-name.ctl where 'dd' is a sequence number
+    used to control the order in which data is loaded.  This file is an
+    RDBMS-specific data loader control file.
 
 } {
 
     switch [db_driverkey $dbn] {
 
         oracle {
-            global env
-
             set user_pass [db_get_sql_user -dbn $dbn]
-            set tmpnam [ns_tmpnam]
+            set tmpnam [ad_tmpnam]
 
             set fd [open $file r]
             set file_contents [read $fd]
             close $fd
 
             set file_contents [subst $file_contents]
-            
+
             set fd1 [open "${tmpnam}.ctl" w]
             puts $fd1 $file_contents
             close $fd1
 
             cd [file dirname $file]
 
-            set fd [open "|[file join $env(ORACLE_HOME) bin sqlldr] userid=$user_pass control=$tmpnam" "r"]
+            set fd [open "|[file join $::env(ORACLE_HOME) bin sqlldr] userid=$user_pass control=$tmpnam" "r"]
 
             while { [gets $fd line] >= 0 } {
                 # Don't bother writing out lines which are purely whitespace.
                 if { ![string is space $line] } {
-                    apm_callback_and_log $callback "[ad_quotehtml $line]\n"
+                    apm_callback_and_log $callback "[ns_quotehtml $line]\n"
                 }
             }
             close $fd
         }
 
         postgresql {
-            global tcl_platform 
-
             set pguser [db_get_username]
             if { $pguser ne "" } {
                 set pguser "-U $pguser"
@@ -2697,12 +2729,12 @@ ad_proc -public db_load_sql_data {{
                 set pgpass "<<$pgpass"
             }
 
-            if { [string equal [db_get_dbhost] "localhost"] || [string equal [db_get_dbhost] ""] } {
+            if { [db_get_dbhost] eq "localhost" || [db_get_dbhost] eq "" } {
                 set pghost ""
             } else {
                 set pghost "-h [db_get_dbhost]"
             }
-            
+
             set fd [open $file r]
             set copy_command [subst -nobackslashes [read $fd]]
             close $fd
@@ -2710,17 +2742,17 @@ ad_proc -public db_load_sql_data {{
             set fd [open $copy_file "CREAT EXCL WRONLY" 0600]
             puts $fd $copy_command
             close $fd
-            
-            if { $tcl_platform(platform) eq "windows" } {
-                set fp [open "|[file join [db_get_pgbin] psql] -f $copy_file $pghost $pgport $pguser  [db_get_database]" "r"]
+
+            if { $::tcl_platform(platform) eq "windows" } {
+                set fp [open "|[file join [db_get_pgbin] psql] -f $copy_file $pghost $pgport $pguser [db_get_database]" "r"]
             } else {
                 set fp [open "|[file join [db_get_pgbin] psql] -f $copy_file $pghost $pgport $pguser [db_get_database] $pgpass" "r"]
             }
-            
+
             while { [gets $fp line] >= 0 } {
                 # Don't bother writing out lines which are purely whitespace.
                 if { ![string is space $line] } {
-                    apm_callback_and_log $callback "[ad_quotehtml $line]\n"
+                    apm_callback_and_log $callback "[ns_quotehtml $line]\n"
                 }
             }
 
@@ -2733,7 +2765,7 @@ ad_proc -public db_load_sql_data {{
             } error]
 
             # remove the copy file.
-            file delete -force $copy_file
+            file delete -force -- $copy_file
 
             if { $errno == 2 } {
                 return $error
@@ -2746,14 +2778,14 @@ ad_proc -public db_load_sql_data {{
             foreach line [split $error "\n"] {
                 if { [string first NOTICE $line] == -1 } {
                     append error_lines "$line\n"
-                    set error_found [expr { $error_found || [string first ERROR $line] != -1 || \
-                                                [string first FATAL $line] != -1 } ]
+                    set error_found [expr { $error_found
+                                            || [string first ERROR $line] != -1
+                                            || [string first FATAL $line] != -1 } ]
                 }
             }
 
             if { $error_found } {
-                global errorCode
-                return -code error -errorinfo $error_lines -errorcode $errorCode $error_lines
+                return -code error -errorinfo $error_lines -errorcode $::errorCode $error_lines
             }
 
         }
@@ -2767,33 +2799,33 @@ ad_proc -public db_load_sql_data {{
     }
 }
 
-ad_proc -public db_source_sqlj_file {{
-    -dbn ""
-    -callback apm_ns_write_callback
-} file } {
+ad_proc -public db_source_sqlj_file {
+    {-dbn ""}
+    {-callback apm_ns_write_callback}
+    file
+} {
     <strong>Oracle only.</strong>
     <p>
     Sources a SQLJ file using loadjava.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
-    global env
     set user_pass [db_get_sql_user -dbn $dbn]
-    set fp [open "|[file join $env(ORACLE_HOME) bin loadjava] -verbose -user $user_pass $file" "r"]
+    set fp [open "|[file join $::env(ORACLE_HOME) bin loadjava] -verbose -user $user_pass $file" "r"]
 
     # Despite the fact that this works, the text does not get written to the stream.
     # The output is generated as an error when you attempt to close the input stream as
     # done below.
     while { [gets $fp line] >= 0 } {
-	# Don't bother writing out lines which are purely whitespace.
-	if { ![string is space $line] } {
-	    apm_callback_and_log $callback "[ad_quotehtml $line]\n"
-	}
+        # Don't bother writing out lines which are purely whitespace.
+        if { ![string is space $line] } {
+            apm_callback_and_log $callback "[ns_quotehtml $line]\n"
+        }
     }
     if { [catch {
-	close $fp
+        close $fp
     } errmsg] } {
-	apm_callback_and_log $callback "[ad_quotehtml $errmsg]\n"
+        apm_callback_and_log $callback "[ns_quotehtml $errmsg]\n"
     }
 }
 
@@ -2853,20 +2885,20 @@ ad_proc -public db_tables {
     if { [info exists pattern] } {
         db_foreach -dbn $dbn table_names_with_pattern \
             $sql_table_names_with_pattern {
-            lappend tables $table_name
-        }
+                lappend tables $table_name
+            }
     } else {
         db_foreach -dbn $dbn table_names_without_pattern \
             $sql_table_names_without_pattern {
-            lappend tables $table_name
-        }
+                lappend tables $table_name
+            }
     }
 
     return $tables
 }
 
 
-ad_proc -public db_table_exists {{ -dbn "" } table_name } {
+ad_proc -public db_table_exists {{-dbn ""} table_name } {
     @return 1 if a table with the specified name exists in the database, otherwise 0.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -2889,7 +2921,7 @@ ad_proc -public db_table_exists {{ -dbn "" } table_name } {
             set n_rows [db_string -dbn $dbn table_count {
                 select count(*) from pg_class
                 where relname = lower(:table_name) and
-                    relname !~ '^pg_' and relkind = 'r'
+                relname !~ '^pg_' and relkind = 'r'
             }]
         }
 
@@ -2903,7 +2935,7 @@ ad_proc -public db_table_exists {{ -dbn "" } table_name } {
 }
 
 
-ad_proc -public db_columns {{ -dbn "" } table_name } {
+ad_proc -public db_columns {{-dbn ""} table_name } {
     @return a Tcl list of all the columns in the table with the given name.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -2927,7 +2959,7 @@ ad_proc -public db_columns {{ -dbn "" } table_name } {
 }
 
 
-ad_proc -public db_column_exists {{ -dbn "" } table_name column_name } {
+ad_proc -public db_column_exists {{-dbn ""} table_name column_name } {
     @return 1 if the row exists in the table, 0 if not.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -2938,17 +2970,17 @@ ad_proc -public db_column_exists {{ -dbn "" } table_name column_name } {
 
     # Works for both Oracle and PostgreSQL:
     set n_rows [db_string -dbn $dbn column_exists {
-	select count(*) 
-	from user_tab_columns
-	where table_name = upper(:table_name)
-	and column_name = upper(:column_name)
+        select count(*)
+        from user_tab_columns
+        where table_name = upper(:table_name)
+        and column_name = upper(:column_name)
     }]
 
     return [expr {$n_rows > 0}]
 }
 
 
-ad_proc -public db_column_type {{ -dbn "" } table_name column_name } {
+ad_proc -public db_column_type {{-dbn ""} table_name column_name } {
 
     @return the Oracle Data Type for the specified column.
     @return -1 if the table or column doesn't exist.
@@ -2958,27 +2990,27 @@ ad_proc -public db_column_type {{ -dbn "" } table_name column_name } {
     @author Yon Feldman (yon@arsdigita.com)
 
     @change-log 10 July, 2000: changed to return error
-                               if column name doesn't exist  
-                               (mdettinger@arsdigita.com)
+    if column name doesn't exist
+    (mdettinger@arsdigita.com)
 
-    @change-log 11 July, 2000: changed to return lower case data types 
-                               (yon@arsdigita.com)
+    @change-log 11 July, 2000: changed to return lower case data types
+    (yon@arsdigita.com)
 
     @change-log 11 July, 2000: changed to return error using the db_string default clause
-                               (yon@arsdigita.com)
+    (yon@arsdigita.com)
 
 } {
     # Works for both Oracle and PostgreSQL:
     return [db_string -dbn $dbn column_type_select "
-	select data_type as data_type
-	  from user_tab_columns
-	 where upper(table_name) = upper(:table_name)
-	   and upper(column_name) = upper(:column_name)
+    select data_type as data_type
+      from user_tab_columns
+     where upper(table_name) = upper(:table_name)
+       and upper(column_name) = upper(:column_name)
     " -default "-1"]
 }
 
 
-ad_proc -public ad_column_type {{ -dbn "" } table_name column_name } {
+ad_proc -public ad_column_type {{-dbn ""} table_name column_name } {
 
     @return 'numeric' for number type columns, 'text' otherwise
     Throws an error if no such column exists.
@@ -2991,16 +3023,16 @@ ad_proc -public ad_column_type {{ -dbn "" } table_name column_name } {
     set column_type [db_column_type -dbn $dbn $table_name $column_name]
 
     if { $column_type == -1 } {
-	return "Either table $table_name doesn't exist or column $column_name doesn't exist"
+        return "Either table $table_name doesn't exist or column $column_name doesn't exist"
     } elseif {$column_type ne "NUMBER"  } {
-	return "numeric"
+        return "numeric"
     } else {
-	return "text"
+        return "text"
     }
 }
 
 
-ad_proc -public db_write_clob {{ -dbn "" } statement_name sql args } {
+ad_proc -public db_write_clob {{-dbn ""} statement_name sql args } {
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     ad_arg_parser { bind } $args
@@ -3033,18 +3065,18 @@ ad_proc -public db_write_clob {{ -dbn "" } statement_name sql args } {
 }
 
 
-ad_proc -public db_write_blob {{ -dbn "" } statement_name sql args } {
+ad_proc -public db_write_blob {{-dbn ""} statement_name sql args } {
     @param dbn The database name to use.  If empty_string, uses the default database.
 } {
     ad_arg_parser { bind } $args
     set full_statement_name [db_qd_get_fullname $statement_name]
-    db_with_handle -dbn $dbn db { 
-	db_exec_lob write_blob $db $full_statement_name $sql
+    db_with_handle -dbn $dbn db {
+        db_exec_lob write_blob $db $full_statement_name $sql
     }
 }
 
 
-ad_proc -public db_blob_get_file {{ -dbn "" } statement_name sql args } {
+ad_proc -public db_blob_get_file {{-dbn ""} statement_name sql args } {
     @param dbn The database name to use.  If empty_string, uses the default database.
 
     <p>
@@ -3067,7 +3099,7 @@ ad_proc -public db_blob_get_file {{ -dbn "" } statement_name sql args } {
     switch $driverkey {
         oracle {
             db_with_handle -dbn $dbn db {
-                eval [list db_exec_lob blob_get_file $db $full_statement_name $sql $file]
+                db_exec_lob blob_get_file $db $full_statement_name $sql $file
             }
         }
 
@@ -3085,7 +3117,7 @@ ad_proc -public db_blob_get_file {{ -dbn "" } statement_name sql args } {
 }
 
 
-ad_proc -public db_blob_get {{ -dbn "" } statement_name sql args } {
+ad_proc -public db_blob_get {{-dbn ""} statement_name sql args } {
     <strong>PostgreSQL only.</strong>
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -3108,8 +3140,8 @@ ad_proc -public db_blob_get {{ -dbn "" } statement_name sql args } {
             set pre_sql $sql
             set full_statement_name [db_qd_get_fullname $statement_name]
             set sql [db_qd_replace_sql $full_statement_name $pre_sql]
-  
-            # insert tcl variable values (borrowed from Dan W - olah)
+
+            # insert Tcl variable values (borrowed from Dan W - olah)
             if {$sql ne $pre_sql } {
                 set sql [uplevel 2 [list subst -nobackslashes $sql]]
             }
@@ -3126,10 +3158,14 @@ ad_proc -public db_blob_get {{ -dbn "" } statement_name sql args } {
 }
 
 
-ad_proc -private db_exec_lob {{
-    -ulevel 2
-} type db statement_name pre_sql { file "" } } {
-
+ad_proc -private db_exec_lob {
+    {-ulevel 2}
+    type
+    db
+    statement_name
+    pre_sql
+    {file ""}
+} {
     A helper procedure to execute a SQL statement, potentially binding
     depending on the value of the $bind variable in the calling environment
     (if set).
@@ -3170,23 +3206,27 @@ ad_proc -private db_exec_lob {{
 }
 
 
-ad_proc -private db_exec_lob_oracle {{
-    -ulevel 2
-} type db statement_name pre_sql { file "" } } {
-
+ad_proc -private db_exec_lob_oracle {
+    {-ulevel 2}
+    type
+    db
+    statement_name
+    pre_sql
+    {file ""}
+} {
     A helper procedure to execute a SQL statement, potentially binding
     depending on the value of the $bind variable in the calling environment
     (if set).
 } {
-    set start_time [clock clicks -milliseconds]
+    set start_time [expr {[clock clicks -microseconds]/1000.0}]
 
     set sql [db_qd_replace_sql $statement_name $pre_sql]
 
-    # insert tcl variable values (Openacs - Dan)
+    # insert Tcl variable values (OpenACS - Dan)
     if {$sql ne $pre_sql } {
         set sql [uplevel $ulevel [list subst -nobackslashes $sql]]
     }
- 
+
     set file_storage_p 0
     upvar $ulevel storage_type storage_type
 
@@ -3201,7 +3241,7 @@ ad_proc -private db_exec_lob_oracle {{
     }
 
     set errno [catch {
-	upvar bind bind
+        upvar bind bind
 
         # Below, note that 'ns_ora blob_get_file' takes 3 parameters,
         # while 'ns_ora write_blob' takes only 2.  So if file is empty
@@ -3209,33 +3249,34 @@ ad_proc -private db_exec_lob_oracle {{
         # write_blob), we must not pass any 3rd parameter to the
         # ns_ora command: --atp@piskorski.com, 2003/04/09 15:10 EDT
 
-	if { [info exists bind] && [llength $bind] != 0 } {
-	    if { [llength $bind] == 1 } {
+        if { [info exists bind] && [llength $bind] != 0 } {
+            if { [llength $bind] == 1 } {
                 if { $file eq "" } {
+                    # gn: not sure, why the eval was ever needed (4 times)
                     set selection [eval [list ns_ora $qtype $db -bind $bind $sql]]
                 } else {
                     set selection [eval [list ns_ora $qtype $db -bind $bind $sql $file]]
                 }
 
-	    } else {
-		set bind_vars [ns_set create]
-		foreach { name value } $bind {
-		    ns_set put $bind_vars $name $value
-		}
+            } else {
+                set bind_vars [ns_set create]
+                foreach { name value } $bind {
+                    ns_set put $bind_vars $name $value
+                }
                 if { $file eq "" } {
                     set selection [eval [list ns_ora $qtype $db -bind $bind_vars $sql]]
                 } else {
                     set selection [eval [list ns_ora $qtype $db -bind $bind_vars $sql $file]]
                 }
-	    }
+            }
 
-	} else {
+        } else {
             if { $file eq "" } {
                 set selection [uplevel $ulevel [list ns_ora $qtype $db $sql]]
             } else {
                 set selection [uplevel $ulevel [list ns_ora $qtype $db $sql $file]]
             }
-	}
+        }
 
         if {$file_storage_p} {
             set content [ns_set value $selection 0]
@@ -3255,7 +3296,7 @@ ad_proc -private db_exec_lob_oracle {{
                     } else {
                         error "file: $content doesn't exist"
                     }
-                 }
+                }
 
                 write_blob {
 
@@ -3278,18 +3319,21 @@ ad_proc -private db_exec_lob_oracle {{
 
     ds_collect_db_call $db $type $statement_name $sql $start_time $errno $error
     if { $errno == 2 } {
-	return $error
+        return $error
     }
 
-    global errorInfo errorCode
-    return -code $errno -errorinfo $errorInfo -errorcode $errorCode $error
+    return -code $errno -errorinfo $::errorInfo -errorcode $::errorCode $error
 }
 
 
-ad_proc -private db_exec_lob_postgresql {{
-    -ulevel 2
-} type db statement_name pre_sql { file "" } } {
-
+ad_proc -private db_exec_lob_postgresql {
+    {-ulevel 2}
+    type
+    db
+    statement_name
+    pre_sql
+    {file ""}
+} {
     A helper procedure to execute a SQL statement, potentially binding
     depending on the value of the $bind variable in the calling environment
     (if set).
@@ -3297,38 +3341,38 @@ ad_proc -private db_exec_lob_postgresql {{
     Low level replacement for db_exec which emulates blob handling.
 
 } {
-    set start_time [clock clicks -milliseconds]
+    set start_time [expr {[clock clicks -microseconds]/1000.0}]
 
     # Query Dispatcher (OpenACS - ben)
     set sql [db_qd_replace_sql $statement_name $pre_sql]
 
-    # insert tcl variable values (Openacs - Dan)
+    # insert Tcl variable values (OpenACS - Dan)
     if {$sql ne $pre_sql } {
         set sql [uplevel $ulevel [list subst -nobackslashes $sql]]
     }
-    # create a function definition statement for the inline code 
+    # create a function definition statement for the inline code
     # binding is emulated in tcl. (OpenACS - Dan)
 
     set errno [catch {
-	upvar bind bind
-	if { [info exists bind] && [llength $bind] != 0 } {
-	    if { [llength $bind] == 1 } {
+        upvar bind bind
+        if { [info exists bind] && [llength $bind] != 0 } {
+            if { [llength $bind] == 1 } {
                 set bind_vars [list]
                 set len [ns_set size $bind]
                 for {set i 0} {$i < $len} {incr i} {
                     lappend bind_vars [ns_set key $bind $i] \
-                                      [ns_set value $bind $i]
+                        [ns_set value $bind $i]
                 }
                 set lob_sql [db_bind_var_substitution $sql $bind_vars]
-	    } else {
+            } else {
                 set lob_sql [db_bind_var_substitution $sql $bind]
-	    }
-	} else {
+            }
+        } else {
             set lob_sql [uplevel $ulevel [list db_bind_var_substitution $sql]]
-	}
+        }
 
         # get the content - asssume it is in column 0, or optionally it can
-        # be returned as "content" with the storage type indicated by the 
+        # be returned as "content" with the storage type indicated by the
         # "storage_type" column.
 
         set selection [ns_db 1row $db $lob_sql]
@@ -3483,14 +3527,13 @@ ad_proc -private db_exec_lob_postgresql {{
 
     } error]
 
-    global errorInfo errorCode
-    set errinfo $errorInfo
-    set errcode $errorCode
+    set errinfo $::errorInfo
+    set errcode $::errorCode
 
     ds_collect_db_call $db 0or1row $statement_name $sql $start_time $errno $error
 
     if { $errno == 2 } {
-	return $error
+        return $error
     }
 
     return -code $errno -errorinfo $errinfo -errorcode $errcode $error
@@ -3503,18 +3546,26 @@ ad_proc -public db_flush_cache {
 
     Flush the given cache of entries with keys that match the given pattern.
 
-    @param cache_key_pattern The "string match" pattern used to flush keys (default is
-           to flush all entries)
+    @param cache_key_pattern The "string match" pattern used to flush keys (default is to flush all entries)
     @param cache_pool The pool to flush (default is to flush db_cache_pool)
     @author Don Baccus (dhogasa@pacifier.com)
 
 } {
-    foreach key [ns_cache names $cache_pool $cache_key_pattern] {
-        ns_cache flush $cache_pool $key
+    #
+    # If the key pattern has meta characters, iterate over the entries.
+    # Otherwise, make a direct lookup, without retrieving the all keys
+    # from the cache, which can cause large mutex lock times.
+    #
+    if {[regexp {[*\]\[]} $cache_key_pattern]} {
+        foreach key [ns_cache names $cache_pool $cache_key_pattern] {
+            ns_cache flush $cache_pool $key
+        }
+    } else {
+        ns_cache flush $cache_pool $cache_key_pattern
     }
 }
 
-ad_proc -public db_bounce_pools {{ -dbn "" }} { 
+ad_proc -public db_bounce_pools {{-dbn ""}} {
     @return Call ns_db bouncepool on all pools for the named database.
     @param dbn The database name to use.  Uses the default database if not supplied.
 } {
@@ -3522,3 +3573,9 @@ ad_proc -public db_bounce_pools {{ -dbn "" }} {
         ns_db bouncepool $pool
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

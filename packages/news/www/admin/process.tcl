@@ -9,7 +9,7 @@ ad_page_contract {
 
     @author Stefan Deusch (stefan@arsdigita.com)
     @creation-date 12-14-00
-    @cvs-id $Id: process.tcl,v 1.8 2005/03/01 13:47:02 jeffd Exp $
+    @cvs-id $Id: process.tcl,v 1.11.2.1 2015/09/12 11:06:43 gustafn Exp $
     
 } {
     n_items:multiple,notnull
@@ -28,9 +28,9 @@ ad_page_contract {
 
 
 # in the case of (Re-)Publish, redirect to approve
-if {[string equal "publish" $action]} {
+if {"publish" eq $action} {
     
-    ad_returnredirect "approve?[export_url_vars n_items]"
+    ad_returnredirect [export_vars -base approve {n_items}]
     ad_script_abort
 }
 
@@ -92,6 +92,12 @@ if { ![info exist halt_p] || $halt_p==0 } {
 	
 }
 
-set hidden_vars [export_form_vars action n_items item_id]
+set hidden_vars [export_vars -form {action n_items item_id}]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

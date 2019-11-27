@@ -7,7 +7,7 @@ ad_page_contract {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2005-01-23
     @arch-tag: 4ff5628c-77f1-40ef-86c7-ef247a1ffe4f
-    @cvs-id $Id: rss.tcl,v 1.2 2005/02/24 13:33:23 jeffd Exp $
+    @cvs-id $Id: rss.tcl,v 1.2.16.1 2015/09/12 11:06:44 gustafn Exp $
 } {
 } -properties {
 } -validate {
@@ -42,3 +42,8 @@ if {[rss_support::subscription_exists \
 }
 
 ad_returnredirect -message $message "./"
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

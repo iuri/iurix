@@ -7,10 +7,10 @@ ad_page_contract {
     @author Jin Choi (jsc@arsdigita.com) 
     @author nstrug@arsdigita.com
     @date   February 16, 2000
-    @cvs-id $Id: name-edit.tcl,v 1.5 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id $Id: name-edit.tcl,v 1.8 2015/06/27 20:46:15 gustafn Exp $
 } {
 
-    survey_id:integer
+    survey_id:naturalnum,notnull
     {name ""}
     {description:html ""}
 }
@@ -18,7 +18,7 @@ ad_page_contract {
 get_survey_info -survey_id $survey_id
 set survey_name "$survey_info(name)"
 
-ad_require_permission $survey_id survey_modify_survey
+permission::require_permission -object_id $survey_id -privilege survey_modify_survey
 
 ad_form -name edit-name -form {
     survey_id:key
@@ -41,7 +41,7 @@ ad_form -name edit-name -form {
     set description_html_p "$survey_info(description_html_p)"
 } -edit_data {
     db_dml survey_update ""
-    ad_returnredirect "one?[export_vars survey_id]"
+    ad_returnredirect [export_vars -base one survey_id]
     ad_script_abort
 }
 

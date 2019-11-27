@@ -1,14 +1,14 @@
 <master>
-<property name="title">@title;noquote@</property>
-<property name="context">@context;noquote@</property>
+<property name="doc(title)">@title;literal@</property>
+<property name="context">@context;literal@</property>
 
 <h1>@title;noquote@</h1>
 
-<include src=news
-    publish_title = "@publish_title;noquote@"
-    publish_body = "@publish_body;noquote@"
-    publish_format = "@publish_format;noquote@"
-    creator_link = "@creator_link;noquote@">
+<include src="/packages/news/lib/news"
+    publish_title="@publish_title;literal@"
+    publish_body="@publish_body;literal@"
+    publish_format="@publish_format;literal@"
+    creator_link="@creator_link;literal@">
 
 <if @comments@ ne "">
   <h2>#news.Comments#</h2>

@@ -40,18 +40,5 @@ where survey_id=:survey_id
       </querytext>
 </fullquery>
 
-	<fullquery name="select_max_answers">
-	  <querytext>
-
-		select question_id, num_answers
-	    from survey_questions  
-	    where section_id = :section_id
-	    and active_p = 't'
-		and num_answers is not null
-	    order by sort_order
-
-	  </querytext>
-	</fullquery>
-
 
 </queryset>

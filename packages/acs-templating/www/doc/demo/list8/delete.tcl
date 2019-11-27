@@ -4,13 +4,13 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-10-23
-  @cvs-id $Id: delete.tcl,v 1.5 2006/02/13 14:09:56 jiml Exp $
+  @cvs-id $Id: delete.tcl,v 1.6.2.1 2015/09/10 08:22:15 gustafn Exp $
 } {
-  template_demo_note_id:integer,notnull,multiple
+  template_demo_note_id:naturalnum,notnull,multiple
 }
 
 foreach template_demo_note_id $template_demo_note_id {
-    ad_require_permission $template_demo_note_id delete
+    permission::require_permission -object_id $template_demo_note_id -privilege delete
 
     package_exec_plsql \
 	-var_list [list [list template_demo_note_id $template_demo_note_id]] \
@@ -19,3 +19,9 @@ foreach template_demo_note_id $template_demo_note_id {
 }
 
 ad_returnredirect "./"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

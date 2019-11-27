@@ -1,8 +1,17 @@
-form create pay_bill -section required -elements {
+ad_page_contract {
+
+    @author unknown
+    @creation-date unknown
+
+} -query {
+    {payee ""}
+    {amount:integer ""}
+}
+
+form create pay_bill -section required -sec_legendtext Payment -elements {
   payee -label "Payee" -datatype text -widget text 
   amount -label "Amount" -datatype integer -widget text 
 } 
-template::form::section pay_bill optional
 template::element::create pay_bill note -label "Note" -datatype text -widget text -optional
 
     
@@ -25,7 +34,13 @@ if { [form is_valid pay_bill] } {
   set confirm_data [form export]
 
   # add the form:confirm element
-  append confirm_data "<input type=hidden name=\"form:confirm\" value=confirm>"
+  append confirm_data "<input type='hidden' name='form:confirm' value='confirm'>"
 
-  template::set_file "[file dir $__adp_stub]/pay-confirm"
+  template::set_file "[file dirname $__adp_stub]/pay-confirm"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -7,7 +7,7 @@ ad_page_contract {
     @author Jade Rubick (jader@bread.com)
     @creation-date 2004-04-30
     @arch-tag: 339a6143-11a3-4f1b-902d-a3cd71f7d531
-    @cvs-id $Id: task-revisions.tcl,v 1.4 2005/09/13 15:25:31 alexk Exp $
+    @cvs-id $Id: task-revisions.tcl,v 1.6 2018/05/09 15:33:33 hectorr Exp $
 
     @param orderby_revisions specifies how the revisions table will be sorted
 

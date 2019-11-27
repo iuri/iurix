@@ -4,9 +4,9 @@ ad_page_contract {
     @param version_id The package version to be processed.
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date 9 May 2000
-    @cvs-id $Id: version-generate-tarball.tcl,v 1.4 2003/12/11 21:39:45 jeffd Exp $
+    @cvs-id $Id: version-generate-tarball.tcl,v 1.5.2.2 2015/09/18 07:39:04 gustafn Exp $
 } {
-    {version_id:integer}
+    {version_id:naturalnum,notnull}
 }
 db_transaction {
     apm_generate_tarball $version_id
@@ -14,10 +14,16 @@ db_transaction {
     ad_return_complaint 1 "APM Generation Error: The database returned the following error message:
 <pre>
 <blockquote>
-[ad_quotehtml $errmsg]
+[ns_quotehtml $errmsg]
 </blockquote>
 </pre>
 "
 }
 
 ad_returnredirect "version-view?version_id=$version_id"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

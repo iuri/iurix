@@ -11,7 +11,7 @@ ad_page_contract {
     @author Bryan Quinn (bquinn@arsdigita.com)
     @author Richard Li (richardl@arsdigita.com)
     @creation-date Mon Oct  9 15:19:31 2000
-    @cvs-id $Id: index.tcl,v 1.27 2009/01/17 12:17:12 miguelc Exp $
+    @cvs-id $Id: index.tcl,v 1.30.2.8 2017/04/22 18:26:04 gustafn Exp $
 } {
 
 }
@@ -41,10 +41,9 @@ The installation program has encounted an error.  Please drop your OpenACS table
 and the OpenACS username, recreate them, and try again.  You can log this as a bug
 using the <a href=\"http://openacs.org/bugtracker/openacs\">OpenACS Bug Tracker</a>. 
 "
-    return
+   return
   }
   return
-
 }
 
 set body "
@@ -54,7 +53,7 @@ a suite of fully-integrated enterprise-class solutions
 for collaborative commerce.
 This is the OpenACS Installer which performs all the steps necessary
 to get the OpenACS Community System running on your server.<p>
-Please read the <a href=\"/doc/release-notes.html\">Release Notes</a> 
+Please read the <a href=\"/doc/release-notes\">Release Notes</a> 
 before proceeding to better understand what is contained in this release.
 
 "
@@ -78,10 +77,10 @@ application after the basic OpenACS tookit has been installed.
 "
 
     if { $acs_application(home) ne "" } {
-        append body "<p>
+        append body [subst {<p>
 For more information about the $acs_application(pretty_name) application visit the
-<a href=\"$acs_application(home)\">$acs_application(pretty_name) home page</a>
-"
+<a href="[ns_quotehtml $acs_application(home)]">$acs_application(pretty_name) home page</a>
+	}
     }
 } else {
     set acs_application(name) openacs
@@ -113,6 +112,11 @@ Once you're sure everything is installed and configured correctly, restart AOLse
     return
 } 
 
+#
+# Unset array errors, in case it exists
+#
+if {[array exists errors]} {array unset errors}
+
 # Perform database-specific checks
 db_installer_checks errors error_p
 
@@ -125,44 +129,24 @@ if { !$error_p } {
 if { [catch { ns_sha1 quixotusishardcore }] } {
     append errors "<li><p><b>The ns_sha1 function is missing. This function is
     required in OpenACS 4.x so that passwords can be securely stored in
-    the database. This function is available in the nssha1 module that is part of the <a
-    href=\"http://www.arsdigita.com/aol3/\">ArsDigita server
-    distribution</a>.</b></p>"
+    the database.</b></p>"
 
     set error_p 1
 }
 
 # OpenNSD must support Tcl 8.x
-if { [string range [info tclversion] 0 0] < 8 } {
-    append errors " <li><p><strong> You are using a version of Tcl less than 8.0.  You must use Tcl version 8.0
-    for OpenACS to work.  Probably your <code>nsd</code> executable is linked to <code>nsd76</code>.  Please
-    link it to <code>nsd8x</code> to fix this problem.  Please refer to the 
-    <a href=\"/doc/install-guide/\">Installation Guide</a>.
-    <blockquote><pre>
-    ln -s /home/aol30/bin/nsd8x /home/aol30/nsd
-    </pre></blockquote>
+if { [info tclversion] < 8.5 } {
+    append errors " <li><p><strong> You are using a version of Tcl less than 8.5.  You must use Tcl version 8.5
+    or newer for OpenACS to work.  Probably your <code>nsd</code> executable is linked to an older version of Tcl.
     "
     set error_p 1
 }
  
 # AOLserver must support ns_cache.
 if {[llength [info commands ns_cache]] < 1} {
-    append errors "<li><p><strong>The <code>ns_cache</code> module is not installed.  This
-is required to support the OpenACS Security system.  Please make sure that <code>ns_cache</code>
-is included in your module list.  An example module list is shown below:
-file (usually in <code>/home/aol30/yourservername.ini</code>) or see the 
-<a href=\"/doc/install-guide/\">Installation Guide</a> for more information.<p>
-<blockquote><pre>
-\[ns/server/bquinn/modules\] 
-nssock=nssock.so 
-nslog=nslog.so 
-nssha1=nssha1.so
-nscache=nscache.so
-</blockquote></pre>
-After adding <code>ns_cache</code>, please restart your web server.
-</strong></p>"
+    append errors "<li><p><strong>The <code>ns_cache</code> module is not installed.  This is required for OpenACS."
     set error_p 1
-} 
+}
 
 # AOLserver must have XML parsing.
 if {![xml_support_ok xml_status_msg]} {
@@ -172,7 +156,7 @@ if {![xml_support_ok xml_status_msg]} {
 
 # AOLserver must support the "fancy" ADP parser.
 set adp_support [ns_config "ns/server/[ns_info server]/adp" DefaultParser]
-if {$adp_support ne "fancy"  } {
+if {$adp_support ne "fancy" && [ns_info name] ne "NaviServer"} {
     append errors "<li><p><strong>The fancy ADP parser is not enabled.  This is required to support 
 the OpenACS Templating System.  Without this templating system, none of the OpenACS pages installed by default
 will display.  Please add the following to your AOLserver configuration file (usually in 
@@ -193,8 +177,9 @@ After adding support for the fancy ADP parser, please restart your web server.
 
 set stacksize [ns_config "ns/threads" StackSize]
 
-if { ![string is integer $stacksize] ||
-     $stacksize < [expr {$acs_application(min_stack_size) * 1024}] } {
+if { ![string is integer $stacksize]
+     || $stacksize < $acs_application(min_stack_size) * 1024
+ } {
     append errors "<li><p><strong>The configured AOLserver Stacksize is too small, missing, or a non-integer value.
 $acs_application(pretty_name) requires a StackSize parameter of at least
 ${acs_application(min_stack_size)}K.
@@ -211,51 +196,51 @@ After adding support the larger stacksize, please restart your web server.
 
 # APM needs to check its permissions.
 if { [catch {apm_workspace_dir} ] } {
-    append errors "<li><p><strong>The [acs_root_dir] directory has incorrect permissions.  It must be owned by
+    append errors "<li><p><strong>The $::acs::rootdir directory has incorrect permissions.  It must be owned by
 the user executing the web server, normally <code>nsadmin</code>, and the owner must have read and write privileges
 on this directory.  You can correct this by running the following script as root.
 To give another user access to the files, add them to <code>web</code> group.
 <blockquote><pre>
-groupadd web
-chown -R nsadmin:web [acs_root_dir]
-chmod -R ug+rw [acs_root_dir]
+groupadd nsadmin
+chown -R nsadmin:nsadmin $::acs::rootdir
+chmod -R ug+rw $::acs::rootdir
 </pre></blockquote>
 </strong></p>"
     set error_p 1
 }
 
 # We have the workspace dir, but what about the package root?
-if { ![file writable [file join [acs_root_dir] packages]] } {
-    append errors "<li><p><strong>The [acs_root_dir]/packages directory has incorrect permissions.  It must be owned by
+if { ![file writable [file join $::acs::rootdir packages]] } {
+    append errors "<li><p><strong>The $::acs::rootdir/packages directory has incorrect permissions.  It must be owned by
     the user executing the web server, normally <code>nsadmin</code> and the owner must have read and write 
     privileges on this directory and all of its subdirectories.  You can correct this by running the following 
     script as root.
     To give another user access to the files, add them to <code>web</code> group.
-<blockquote><pre>
-groupadd web
-chown -R nsadmin:web [acs_root_dir]/packages
-chmod -R ug+rw [acs_root_dir]/packages
-</pre></blockquote></strong></p>"
+    <blockquote><pre>
+groupadd nsadmin
+chown -R nsadmin:nsadmin $::acs::rootdir/packages
+chmod -R ug+rw $::acs::rootdir/packages
+    </pre></blockquote></strong></p>"
     set error_p 1
 }
 
 db_helper_checks errors error_p
 
-# Now that we know that the database and aolserver are set up
+# Now that we know that the database and AOLserver are set up
 # correctly, let's check out the actual db.
 if {$error_p} {
-    append body "<p>
-<strong>At least one misconfiguration was discovered that must be corrected.
-Please fix all of them, restart the web server, and try running the OpenACS installer again.
-You can proceed without resolving these errors, but the system may not function
-correctly.
-</strong>
-<p>
-<ul>
-$errors
-</ul>
-<p>
-"
+    append body [subst {<p>
+	<strong>At least one misconfiguration was discovered that must be corrected.
+        Please fix all of them, restart the web server, and try running the OpenACS installer again.
+	You can proceed without resolving these errors, but the system may not function
+	correctly.
+	</strong>
+	<p>
+	<ul>
+	$errors
+	</ul>
+	<p>
+    }]
 }
 
 # See whether the data model appears to be installed or not. The very first
@@ -266,8 +251,9 @@ if { ![db_table_exists apm_packages] } {
     # Get the default for system_url. First try to get it from the nssock
     # hostname setting - if that is not available then try ns_info
     if { [catch {
-        set system_url "http://[ns_config "ns/server/[ns_info server]/module/nssock" hostname [ns_info hostname]]"
-        set system_port [ns_config "ns/server/[ns_info server]/module/nssock" port [ns_conn port]]
+	set driversection [ns_driversection]
+        set system_url "http://[ns_config $driversection hostname [ns_info hostname]]"
+        set system_port [ns_config $driversection port [ns_conn port]]
 
         # append port number if non-standard port
         if { !($system_port == 0 || $system_port == 80) } {
@@ -278,9 +264,7 @@ if { ![db_table_exists apm_packages] } {
         set system_url "http://yourdomain.com"
     }
 
-    set email_input_widget [install_input_widget \
-                                -extra_attributes "onChange=\"updateSystemEmails()\"" \
-                                email]
+    set email_input_widget [install_input_widget -extra_attributes {id="email-addr"} email]
     append body "
 
 <h2>System Configuration</h2>
@@ -289,47 +273,35 @@ We'll need to create a site-wide administrator for your server (like the root
 user in UNIX). Please type in the email address, first and last name, and password
 for this user.
 
-<script type=\"text/javascript\">
-function updateSystemEmails() {
-    var form = document.forms\[0\];
-    
-    form.system_owner.value = form.email.value;
-    form.admin_owner.value = form.email.value;
-    form.host_administrator.value = form.email.value;
-    form.outgoing_sender.value = form.email.value;
-    form.new_registrations.value = form.email.value;
-}
-</script>
-
-<form action=\"installer/install\" method=\"POST\">
+<form action='installer/install' method='POST'>
 
 <table>
 <tr>
-  <th span=3>System Administrator</th>
+  <th span='3'>System Administrator</th>
 </tr>
 
 <tr>
-  <th align=right>Email:</th>
+  <th align='right'>Email:</th>
 <td>$email_input_widget</td>
 </tr>
 <tr>
-  <th align=right>Username:</th>
+  <th align='right'>Username:</th>
   <td>[install_input_widget username]</td>
 </tr>
 <tr>
-  <th align=right>First Name:</th>
+  <th align='right'>First Name:</th>
   <td>[install_input_widget first_names]</td>
 </tr>
 <tr>
-  <th align=right>Last Name:</th>
+  <th align='right'>Last Name:</th>
   <td>[install_input_widget last_name]</td>
 </tr>
 <tr>
-  <th align=right>Password:</th>
+  <th align='right'>Password:</th>
   <td>[install_input_widget -size 12 -type password password]</td>
 </tr>
 <tr>
-  <th align=right>Password (again):</th>
+  <th align='right'>Password (again):</th>
   <td>[install_input_widget -size 12 -type password password_confirmation]</td>
 </tr>
 
@@ -338,50 +310,50 @@ function updateSystemEmails() {
 </tr>
 
 <tr>
-  <th align=right>System URL:</th>
+  <th align='right'>System URL:</th>
   <td>[install_input_widget -value $system_url system_url]<br>
 The canonical URL of your system as visible from the outside world<br>
 Usually it should include the port if your server is not on port 80<br><br>
 </tr>
 <tr>
-  <th align=right>System Name:</th>
+  <th align='right'>System Name:</th>
   <td>[install_input_widget -value "yourdomain Network" system_name]<br>
 The name of your system.<br><br>
 </tr>
 <tr>
-  <th align=right>Publisher Name:</th>
+  <th align='right'>Publisher Name:</th>
   <td>[install_input_widget -value "Yourdomain Network, Inc." publisher_name]<br>
 The legal name of the person or corporate entity responsible for the site.<br><br>
 </tr>
 <tr>
-  <th align=right>System Owner:</th>
+  <th align='right'>System Owner:</th>
   <td>[install_input_widget system_owner]<br>
 The email address signed at the bottom of user-visible pages.<br><br>
 </tr>
 <tr>
-  <th align=right>Admin Owner:</th>
+  <th align='right'>Admin Owner:</th>
   <td>[install_input_widget admin_owner]<br>
 The email address signed on administrative pages.<br><br>
 </tr>
 <tr>
-  <th align=right>Host Administrator:</th>
+  <th align='right'>Host Administrator:</th>
   <td>[install_input_widget host_administrator]<br>
 A person whom people can contact if they experience technical problems.<br><br>
 </tr>
 <tr>
-  <th align=right>Outgoing Email Sender:</th>
+  <th align='right'>Outgoing Email Sender:</th>
   <td>[install_input_widget outgoing_sender]<br>
 The email address that will sign outgoing alerts.
 </tr>
 <tr>
-  <th align=right>New Registration Email:</th>
+  <th align='right'>New Registration Email:</th>
   <td>[install_input_widget new_registrations]<br>
 The email address to send New registration notifications.<br><br>
 </tr>
 </table>
 
 <center>
-<input type=submit value=\"Start installation ->\">
+<input type='submit' value='Start installation ->'>
 </center>
 </form>
 
@@ -392,6 +364,21 @@ The email address to send New registration notifications.<br><br>
   This is particularly useful if you're authenticating against other services, such as LDAP or the 
   local operating system, which may not use email as the basis of authentication.
 </p>
+
+<script type='text/javascript'>
+function updateSystemEmails() {
+    var form = document.forms\[0\];
+    
+    form.system_owner.value = form.email.value;
+    form.admin_owner.value = form.email.value;
+    form.host_administrator.value = form.email.value;
+    form.outgoing_sender.value = form.email.value;
+    form.new_registrations.value = form.email.value;
+}
+var elem = document.getElementById('email-addr');
+elem.addEventListener('change', function (event) {updateSystemEmails();});
+</script>
+
     "
 } else {
     # OK, apm_packages is installed - let's check out some other stuff too:
@@ -408,3 +395,9 @@ The email address to send New registration notifications.<br><br>
 }
 
 install_return 200 "Welcome" $body
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

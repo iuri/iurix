@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Dec 10 16:50:58 2000
-    @cvs-id $Id: rel-type-add.tcl,v 1.3 2002/09/06 21:49:58 jeffd Exp $
+    @cvs-id $Id: rel-type-add.tcl,v 1.6.2.4 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     group_type:trim,notnull
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     return_url_enc:onevalue
@@ -19,7 +19,9 @@ ad_page_contract {
 }
 
 set return_url_enc [ad_urlencode "[ad_conn url]?[ad_conn query]"]
-set context [list [list "[ad_conn package_url]admin/group-types/" "Group types"] [list one?[ad_export_vars {group_type}] "One type"] "Add relation type"]
+
+set doc(title) [_ acs-subsite.Add_a_permissible_relationship_type]
+set context [list [list "[ad_conn package_url]admin/group-types/" [_ acs-subsite.Group_Types]] [list [export_vars -base one {group_type}] $group_type] $doc(title)]
 
 
 # Select out all the relationship types that are not currently
@@ -30,23 +32,15 @@ set context [list [list "[ad_conn package_url]admin/group-types/" "Group types"]
 # rel type. If you can find a more efficient way to do this query,
 # please let us know! -mbryzek
 
-db_multirow primary_rels select_primary_relations {
-    select replace(lpad(' ', (t.type_level - 1) * 4), ' ', '&nbsp;') as indent,
-           t.pretty_name, t.rel_type
-      from (select t.pretty_name, t.object_type as rel_type, level as type_level
-              from acs_object_types t
-             where t.object_type not in (select g.rel_type 
-                                           from group_type_rels g 
-                                          where g.group_type = :group_type)
-           connect by prior t.object_type = t.supertype
-             start with t.object_type in ('membership_rel', 'composition_rel')) t,
-           acs_rel_types rel_type
-     where t.rel_type = rel_type.rel_type
-       and (rel_type.object_type_one = :group_type 
-            or acs_object_type.is_subtype_p(rel_type.object_type_one, :group_type) = 't')
-}
+db_multirow primary_rels select_primary_relations {}
 
 
-set export_vars [ad_export_vars -form {group_type return_url}]
+set export_vars [export_vars -form {group_type return_url}]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

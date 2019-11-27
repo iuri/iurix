@@ -4,7 +4,7 @@ ad_library {
 
   @author Peter Marklund
   @creation-date 2nd October 2003
-  @cvs-id $Id: news-test-procs.tcl,v 1.2 2003/10/06 12:11:23 peterm Exp $
+  @cvs-id $Id: news-test-procs.tcl,v 1.3.4.1 2015/09/12 11:06:42 gustafn Exp $
 }
 
 namespace eval news {}
@@ -17,11 +17,11 @@ aa_register_case news_pretty_status_key {
     @author Peter Marklund
 } {
     set now_seconds [clock scan now]
-    set offset [expr 60*60*24*10]
+    set offset [expr {60*60*24*10}]
     set date_format "%Y-%m-%d"
-    set future_seconds [expr $now_seconds + $offset]
+    set future_seconds [expr {$now_seconds + $offset}]
     set future_date [clock format $future_seconds -format $date_format]
-    set past_seconds [expr $now_seconds - $offset]
+    set past_seconds [expr {$now_seconds - $offset}]
     set past_date [clock format $past_seconds -format $date_format]
 
     # Scheduled for publish, no archive
@@ -68,7 +68,7 @@ ad_proc -private news::test::assert_status_pretty {
 } {
     set pretty_status [news_pretty_status -publish_date $publish_date -archive_date $archive_date -status $status]
     aa_true "publish_date=\"$publish_date\" archive_date=\"$archive_date\" status=\"$status\" pretty_status=\"$pretty_status\"" \
-        [expr ![empty_string_p $pretty_status]]
+        [expr {$pretty_status ne ""}] 
 
     set db_news_status [news::test::get_news_status \
                            -publish_date $publish_date \
@@ -82,3 +82,9 @@ ad_proc -private news::test::get_news_status {
 } {
     return [db_string select_status {}]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

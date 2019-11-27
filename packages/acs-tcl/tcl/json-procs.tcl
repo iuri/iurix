@@ -35,7 +35,7 @@ ad_library {
 
     @creation-date 2010/04/09
     @author Don Baccus
-    @cvs-id $Id: json-procs.tcl,v 1.1.2.1 2010/05/05 18:05:49 donb Exp $
+    @cvs-id $Id: json-procs.tcl,v 1.6.2.2 2017/04/22 18:11:54 gustafn Exp $
 }
 
 namespace eval util {
@@ -96,7 +96,7 @@ ad_proc -private util::json::validate {jsonText} {
 
 ad_proc util::json::parse {jsonText} {
 
-    Parse JSON text into a tcl list.
+    Parse JSON text into a Tcl list.
 
     @param jsonText JSON text
     @return List containing the object represented by jsonText
@@ -321,7 +321,7 @@ ad_proc -private util::json::parseValue {tokens nrTokens tokenCursorName} {
         incr tokenCursor
 
         set leadingChar [string index $token 0]
-        switch -exact $leadingChar {
+        switch -exact -- $leadingChar {
             "\{" {
                 return [parseObject $tokens $nrTokens tokenCursor]
             }
@@ -370,6 +370,11 @@ ad_proc -private util::json::gen_inner {value} {
                     && ![regexp {^(?:true|false|null)$} $value]} {
                     set value "\"$value\""
                 }
+                # Cleanup linebreaks
+                regsub -all {\r\n} $value "\n" value
+                regsub -all {\r} $value "\n" value
+                # JSON requires new line characters be escaped
+                regsub -all {\n} $value "\\n" value
                 return $value
             }
          }
@@ -445,6 +450,27 @@ ad_proc util::json::json_value_to_sql_value {value} {
         "" { return null }
         default { return "'[DoubleApos $value]'" }
     }
+}
+
+ad_proc util::json::sql_values_to_json_values {row} {
+
+    Converts empty values to "null", consistent with how oracle, mysql, and
+    the nspostgres bindvar hack treats them.
+
+    @param row A row (list) returned by a sql SELECT.
+
+    @return A new list with empty strings converted to null.
+
+} {
+    set new_row {}
+    foreach value $row {
+        if { $value eq "" } {
+            lappend new_row null
+        } else {
+            lappend new_row $value
+        }
+    }
+    return $new_row
 }
 
 ad_proc util::json::array::create {values} {
@@ -626,3 +652,9 @@ ad_proc util::json::indent {
     }
     return [join $output \n]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

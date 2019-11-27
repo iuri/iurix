@@ -5,14 +5,14 @@ ad_page_contract {
 
     @author Vinod Kurup [vinod@kurup.com]
     @creation-date Mon Sep 29 23:35:14 2003
-    @cvs-id $Id: index.tcl,v 1.2 2008/04/10 15:29:35 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.3 2018/02/16 13:23:18 gernst Exp $
 } {
 }
 
 if {[ns_conn method] eq "POST"} {
     set content [xmlrpc::get_content]
     ns_return 200 text/xml [xmlrpc::invoke $content]
-    return
+    ad_script_abort
 }
 
 # GET requests fall through to index.adp

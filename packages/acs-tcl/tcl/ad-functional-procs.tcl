@@ -20,8 +20,7 @@ ad_library {
     
     @author Mark Dettinger (mdettinger@arsdigita.com)
     @creation-date March 29, 2000
-    @last-updated July 25, 2000
-    @cvs-id $Id: ad-functional-procs.tcl,v 1.7 2009/02/12 15:38:41 jeffd Exp $
+    @cvs-id $Id: ad-functional-procs.tcl,v 1.8.2.2 2017/04/21 14:22:45 gustafn Exp $
 
     This was part of ACS 3
     Added to OpenACS by bdolicki on 11 Feb 2004
@@ -671,7 +670,7 @@ ad_proc -public unzip {xs} "unzip takes a list of tuples {x1 y1} {x2 y2} {x3 y3}
 #   drop_while p xs  returns the remaining portion of the list
 #   span p xs        = (takeWhile p xs, dropWhile p xs)
 #
-#   take_until p xs  returns the list of elements upto and including the
+#   take_until p xs  returns the list of elements up to and including the
 #                    first element of xs which satisfies p
 #
 # --------------------------------------------------------------------------------
@@ -703,7 +702,7 @@ ad_proc -public span {p xs} "splits a list using take_while and drop_while" {
     list [take_while $p $xs] [drop_while $p $xs]
 }
 
-ad_proc -public take_until {p xs} "returns the list of elements upto and including the
+ad_proc -public take_until {p xs} "returns the list of elements up to and including the
                             first element of xs which satisfies p" {
     set index 0    
     foreach x $xs {
@@ -774,3 +773,9 @@ proc multiplication_table {x} {
 namespace export *
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

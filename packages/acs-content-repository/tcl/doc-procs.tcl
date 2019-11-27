@@ -37,7 +37,7 @@ namespace eval doc {
 
 
     ad_proc -public get_proc_header { proc_name package_name doc_ref code_ref { db "" } } {
-	Retreive the function header for a specific function
+	Retrieve the function header for a specific function
 	and parse out the javadoc comment.
     } {
 
@@ -91,14 +91,14 @@ namespace eval doc {
     }
 
     # Get all the stuff that is not a tag (at the top)
-    if { [template::util::is_nil tags(header)] } {
+    if { ![info exists tags(header)] } {
       set doc_head ""
       regexp {[^@]*} $doc_block doc_head
       set tags(header) $doc_head
     }
 
     # Determine whether we have a procedure or a function
-    if { [template::util::is_nil tags(type)] } {
+    if { ![info exists tags(type)] } {
       if { [regexp -nocase -line {(procedure|function) .*$} $code_block match type] } {
         set tags(type) [string totitle $type]
       } else {
@@ -125,21 +125,21 @@ namespace eval doc {
     parse_proc_header $doc_block $code_block $param_ref $tags_ref $code_ref
 
     # Get the proc name
-    if { [template::util::is_nil tags(name)] } {
+    if { ![info exists tags(name)] } {
       set tags(name) "${package_name}.${proc_name}"
     }
 
     # Modify the "see" tag to dislplay links
     if { [info exists tags(see)] } {
-      if { [template::util::is_nil opts(link_url_stub)] } {
+      if { ![info exists opts(link_url_stub)] } {
         # Just remove the links
         regsub -all {\{([^\}]*)\}} $tags(see) {\1} new_see
         set tags(see) $new_see
       } else {
-        if { [template::util::is_nil opts(link_package_name)] } {
+        if { ![info exists opts(link_package_name)] } {
           set opts(link_package_name) package_name
 	}
-        if { [template::util::is_nil opts(link_proc_name)] } {
+        if { ![info exists opts(link_proc_name)] } {
           set opts(link_proc_name) proc_name
 	}
        
@@ -210,3 +210,9 @@ namespace eval doc {
     }
   }   
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

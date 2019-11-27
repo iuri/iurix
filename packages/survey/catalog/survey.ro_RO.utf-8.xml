@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="ro_RO" charset="utf-8">
+<message_catalog package_key="survey" locale="ro_RO" charset="utf-8">
 
   <msg key="-__Created_by">- Creeat de</msg>
   <msg key="Actions">Acţiuni</msg>
@@ -81,7 +81,7 @@
   <msg key="lt_Cancel_and_return_to__1">Anulează modificările şi întoarce-te la administrarea sondajului</msg>
   <msg key="lt_Completely_delete">Vrei să ştergi complet răspunsul lui %user_name_var% din %response_date_var%? (Atenţie: Nu se poate reveni asupra acestei decizii)</msg>
   <msg key="lt_Confirm_Survey_Detail">Confirmaţi Detaliile Sondajului</msg>
-  <msg key="lt_Copying_a_survey_will">Copierea unui sondaj va creea un nou sondaj cu copii ale tuturor întrebărilor.&lt;br /&gt; Nici unul dintre răspunsuri nu va fi duplicat</msg>
+  <msg key="lt_Copying_a_survey_will">Copierea unui sondaj va creea un nou sondaj cu copii ale tuturor întrebărilor.&lt;br&gt; Nici unul dintre răspunsuri nu va fi duplicat</msg>
   <msg key="lt_Could_not_find_a_surv">Nu poate fi găsită o întrebare de sondaj</msg>
   <msg key="lt_Could_not_find_the_re">Nu poate fi găsit răspunsul</msg>
   <msg key="lt_Couldnt_find_attachment">Fişierul tip &quot;attachment&quot; nu poate fi găsit. Nu poate fi găsit un fişier tip &quot;attachment&quot; referitor la răspunsul_id %response_id%, întrebarea_id %question_id% date.</msg>
@@ -95,7 +95,7 @@
   <msg key="lt_Everyone_eligible_to_">Oricine este eligibil sa ia parte la acest sondaj</msg>
   <msg key="lt_Everyone_who_has_alre">Oricine care a luat deja parte la acest sondaj</msg>
   <msg key="lt_Everyone_who_has_not_">Oricine care nu a luat deja parte la acest sondaj</msg>
-  <msg key="lt_For_Multiple_Choicebr">Pentru Alegeri Multiple&lt;br /&gt;Introdu o Listă de Răspunsuri Valabile&lt;br /&gt; (introdu o singură opţiune pe un rând)</msg>
+  <msg key="lt_For_Multiple_Choicebr">Pentru Alegeri Multiple&lt;br&gt;Introdu o Listă de Răspunsuri Valabile&lt;br&gt; (introdu o singură opţiune pe un rând)</msg>
   <msg key="lt_had_to_say_in_respons">a trebuit să spună în răspuns la %survey_name%:</msg>
   <msg key="lt_Here_is_how_your_surv">Aici puteţi vedea cum va apare descrierea sondajului:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Administrarea Sondajelor&quot;&gt;</msg>

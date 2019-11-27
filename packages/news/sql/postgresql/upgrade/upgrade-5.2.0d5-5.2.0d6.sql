@@ -4,16 +4,25 @@
 -- @author Roel Canicula (roel@solutiongrove.com)
 -- @creation-date 2006-02-02
 -- @arch-tag: 8de76e8b-1890-4c1f-947c-a40849ff685d
--- @cvs-id $Id: upgrade-5.2.0d5-5.2.0d6.sql,v 1.2 2006/08/08 21:27:04 donb Exp $
+-- @cvs-id $Id: upgrade-5.2.0d5-5.2.0d6.sql,v 1.3 2014/10/27 16:41:47 victorg Exp $
 --
 
-create or replace function news__clone (integer, integer)
-returns integer as '
-declare
- p_old_package_id   alias for $1;   --default null,
- p_new_package_id   alias for $2;   --default null
+
+
+-- added
+select define_function_args('news__clone','old_package_id,new_package_id');
+
+--
+-- procedure news__clone/2
+--
+CREATE OR REPLACE FUNCTION news__clone(
+   p_old_package_id integer, --default null,
+   p_new_package_id integer  --default null
+
+) RETURNS integer AS $$
+DECLARE
  one_news		record;	 
-begin
+BEGIN
         for one_news in select
                             publish_date,
                             cr.content as text,
@@ -72,5 +81,6 @@ begin
 
         end loop;
  return 0;
-end;
-' language 'plpgsql';
+END;
+
+$$ LANGUAGE plpgsql;

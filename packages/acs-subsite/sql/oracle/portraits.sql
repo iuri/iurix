@@ -3,7 +3,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Hiro Iwashima (iwashima@mit.edu)
 
--- $Id: portraits.sql,v 1.2 2006/09/26 15:19:56 byronl Exp $
+-- $Id: portraits.sql,v 1.2.14.1 2016/08/31 18:57:41 gustafn Exp $
 
 create table user_portraits (
 	user_id		constraint user_portraits_user_id_fk
@@ -29,7 +29,8 @@ begin
     max_n_rels_one => 1,
     object_type_two => 'content_item',
     min_n_rels_two => 0,
-    max_n_rels_two => 1
+    max_n_rels_two => 1,
+    composable_p => 'f'
   );
 
   commit;

@@ -6,10 +6,10 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: view-image.tcl,v 1.4 2002/11/07 08:32:49 peterm Exp $
+    @cvs-id $Id: view-image.tcl,v 1.5.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    image_id:notnull
-    { return_url {} }
+    image_id:naturalnum,notnull
+    { return_url:localurl {} }
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -20,7 +20,7 @@ ad_page_contract {
 }
 
 # check that user can view the image
-ad_require_permission $image_id read
+permission::require_permission -object_id $image_id -privilege read
 
 # get the image attributes
 db_1row get_image {
@@ -41,3 +41,9 @@ set context [list [list "$return_url" "[_ general-comments.Go_back_to_comment]"]
 
 ad_return_template
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

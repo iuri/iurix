@@ -3,7 +3,7 @@ ad_library {
 
     @author Jeff Davis (davis@xarg.net)
     @creation-date 2002-09-10
-    @cvs-id $Id: acs-core-docs-procs.tcl,v 1.4 2002/11/30 17:16:14 jeffd Exp $
+    @cvs-id $Id: acs-core-docs-procs.tcl,v 1.5.2.6 2016/09/12 11:12:18 gustafn Exp $
 }
 
 ad_proc -private core_docs_uninstalled_packages_internal {} {
@@ -14,10 +14,10 @@ ad_proc -private core_docs_uninstalled_packages_internal {} {
 } {
     set uninstalled [list]
     # Determine which spec files are not installed
-    foreach spec_file [apm_scan_packages "[acs_root_dir]/packages"] {
+    foreach spec_file [apm_scan_packages "$::acs::rootdir/packages"] {
         if { ! [catch {array set version [apm_read_package_info_file $spec_file]} errMsg] } { 
             if { ! [apm_package_registered_p $version(package.key)] } {
-                if {[empty_string_p $version(package-name)]} { 
+                if {$version(package-name) eq ""} { 
                     set version(package-name) $version(package.key)
                 }
                 lappend uninstalled [list $version(package.key) $version(package-name)]
@@ -44,3 +44,64 @@ ad_proc -public core_docs_uninstalled_packages {} {
 } { 
     return [util_memoize core_docs_uninstalled_packages_internal]
 }
+
+ad_proc -public core_docs_html_redirector {args} { 
+
+    Performs an internal redirect requests for .html-pages to .adp
+    pages if these exist.
+    
+    @author Gustaf Neumann
+} {
+    #
+    # There is no [ad_conn file] processed yet. Therefore, we have to
+    # compute the path (consider just the path after the package_url
+    # for file name construction).
+    #
+    set url [ad_conn url]
+    #
+    # For now, ignore all version info
+    #
+    regsub {^/doc/(current|openacs-[0-9-]+|HEAD)/} $url /doc/ url
+        
+    set path    [string range $url [string length [ad_conn package_url]] end]
+    set html_fn [acs_package_root_dir [ad_conn package_key]]/www/$path
+    if {[file exists $html_fn]} {
+        #
+        # true acs-core-docs
+        #
+    } elseif {[regexp {^([a-z0-9_-]+)/(.+)$} $path _ pkg path]} {
+        #
+        # package acs-core-docs
+        #
+        set html_fn [acs_package_root_dir $pkg]/www/doc/$path
+        #ns_log notice "... pkg doc <$html_fn>"
+    }
+    set adp_fn  [file rootname $html_fn].adp
+
+    if {[file readable $adp_fn]} {
+        #
+        # Perform an internal redirect to the .adp file and stop the filter chain
+        #
+        #ns_log notice "===== core_docs_html_redirector <$args> url <[ad_conn url]> <[ad_conn file]> ADP exists -> break"
+        rp_internal_redirect -absolute_path $adp_fn
+        #
+        # do NOT run any more post-authorization filters and do NOT
+        # run the function registered, but run the trace to get the
+        # entry logged in access.log
+        #
+        return filter_return
+        
+    } else {
+        #
+        # Continue with business as usual
+        #
+        return filter_ok
+    }
+}
+
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

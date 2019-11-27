@@ -6,7 +6,7 @@ ad_library {
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-05-28
-    @cvs-id $Id: content-item-test-procs.tcl,v 1.9 2010/06/19 21:20:04 daveb Exp $
+    @cvs-id $Id: content-item-test-procs.tcl,v 1.10.2.3 2017/04/21 14:53:08 gustafn Exp $
     
 }
 
@@ -67,7 +67,10 @@ aa_register_case content_item {
             aa_true "First item's revision exists" \
                 [expr \
                      {![string equal "" \
-                            [db_string get_revision "select latest_revision from cr_items, cr_revisions where latest_revision=revision_id and cr_items.item_id=:first_item_id" -default ""]]}]
+                            [db_string get_revision {
+                                select latest_revision from cr_items, cr_revisions
+                                where latest_revision=revision_id and cr_items.item_id = :first_item_id
+                            } -default ""]]}]
 
             # check the folder is not empty now.
             set is_empty [content::folder::is_empty -folder_id $first_folder_id]
@@ -103,7 +106,7 @@ aa_register_case content_item {
             # delete the evil_name item
             #########################################################
             
-            # in oracle content_item.del is not a fucntion and cannot
+            # in oracle content_item.del is not a function and cannot
             # return true or false so we have to rely on a query to
             # see if the item exists or not
             
@@ -241,7 +244,7 @@ aa_register_case content_item {
                                  -name $tmp_item_name \
                                  -title $tmp_item_name \
                                  -parent_id $first_folder_id \
-                                 -tmp_filename [acs_root_dir]/packages/acs-content-repository/tcl/test/test.html]
+                                 -tmp_filename $::acs::rootdir/packages/acs-content-repository/tcl/test/test.html]
 
             aa_true "Tmp_filename added cr_item exists" \
                 [expr {[content::item::get_id \
@@ -266,3 +269,9 @@ aa_register_case content_item {
 }
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

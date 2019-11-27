@@ -8,7 +8,7 @@ ad_page_contract {
     @author Jade Rubick (jader@bread.com)
     @creation-date 2004-06-28
     @arch-tag: 0ef1b86a-6653-4734-81b9-280c6f71f408
-    @cvs-id $Id: project-assign-task-assignees.tcl,v 1.3 2005/05/26 09:34:29 maltes Exp $
+    @cvs-id $Id: project-assign-task-assignees.tcl,v 1.5 2018/05/09 15:33:33 hectorr Exp $
 } {
     project_item_id:integer,notnull
     return_url

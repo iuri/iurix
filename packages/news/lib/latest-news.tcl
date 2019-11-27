@@ -12,7 +12,7 @@
 #
 # @author Tom Ayles (tom@beatniq.net)
 # @creation-date 2003-12-17
-# @cvs-id $Id: latest-news.tcl,v 1.2 2005/02/05 11:55:09 jeffd Exp $
+# @cvs-id $Id: latest-news.tcl,v 1.3.4.1 2015/09/12 11:06:41 gustafn Exp $
 #
 
 # parameter processing... n is interpolated into the query (as bind variables
@@ -32,16 +32,16 @@ if { [info exists max_age] } {
 foreach param {id class} { if { ![info exists $param] } { set $param {} } }
 if { ![info exists show_empty_p] } { set show_empty_p 1 }
 
-if { ![exists_and_not_null package_id]
-     && ![exists_and_not_null base_url] } {
+if { (![info exists package_id] || $package_id eq "")
+     && (![info exists base_url] || $base_url eq "") } {
     error "must supply package_id and/or base_url"
 }
 
-if { ![exists_and_not_null package_id] } {
+if { ![info exists package_id] || $package_id eq "" } {
     set package_id [site_node::get_element \
                         -url $base_url -element object_id]
 }
-if { ![exists_and_not_null base_url] } {
+if { ![info exists base_url] || $base_url eq "" } {
     set base_url [lindex [site_node::get_url_from_object_id \
                               -object_id $package_id] 0]
 }
@@ -67,3 +67,9 @@ foreach row [util_memoize $script $cache] {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -2,12 +2,12 @@
 --
 -- @author Eric Lorenzo (eric@openforce.net)
 -- @creation-date 2002-10-24
--- @cvs-id $Id: upgrade-4.6b-4.6.1b.sql,v 1.2 2003/10/12 22:12:14 tilmanns Exp $
+-- @cvs-id $Id: upgrade-4.6b-4.6.1b.sql,v 1.2.24.1 2017/04/21 15:27:49 gustafn Exp $
 
 
 -- Moving primary key constraint on host_node_map from node_id column
 -- to host column.  Fortunately, nothing references the table, so a
--- simple drop-rebuild is feasable
+-- simple drop-rebuild is feasible
 alter table host_node_map rename to host_node_map_old;
 
 create table host_node_map (

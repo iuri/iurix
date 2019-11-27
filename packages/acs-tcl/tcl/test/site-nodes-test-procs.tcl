@@ -3,7 +3,7 @@ ad_library {
      Test site node procs
      @author Vinod Kurup [vinod@kurup.com]
      @creation-date Mon Oct 20 16:16:04 2003
-     @cvs-id $Id: site-nodes-test-procs.tcl,v 1.5 2008/01/20 10:57:03 donb Exp $
+     @cvs-id $Id: site-nodes-test-procs.tcl,v 1.5.12.1 2015/09/10 08:22:04 gustafn Exp $
 }
 
 aa_register_case -cats {
@@ -148,3 +148,9 @@ aa_register_case -cats {
         
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

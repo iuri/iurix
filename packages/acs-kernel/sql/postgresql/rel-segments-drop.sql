@@ -3,7 +3,7 @@
 --
 -- @author oumi@arsdigita.com
 -- @creation-date 2000-11-22
--- @cvs-id $Id: rel-segments-drop.sql,v 1.5 2004/06/18 18:21:57 jeffd Exp $
+-- @cvs-id $Id: rel-segments-drop.sql,v 1.6 2011/07/07 10:46:02 gustafn Exp $
 \t
 create function inline_0 ()
 declare 
@@ -14,9 +14,10 @@ begin
 	PERFORM rel_segment__delete(r.segment_id);
     end loop;
 
-    PERFORM acs_object_type__drop_type(''rel_segment'');
+    PERFORM acs_object_type__drop_type('rel_segment');
     return null;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 select inline_0 ();
 
 drop view party_element_map;

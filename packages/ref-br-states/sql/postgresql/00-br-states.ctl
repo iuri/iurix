@@ -1,1 +1,0 @@
-COPY br_states FROM '/var/www/iurix/packages/ref-br-states/sql/common/br-states.dat' WITH DELIMITER ','

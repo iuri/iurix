@@ -1,1 +1,0 @@
-ad_returnredirect -allow_complete_url http://iuri.cognovis.de

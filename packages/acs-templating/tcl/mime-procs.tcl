@@ -6,7 +6,7 @@ ad_library {
 
     @author Shan Shan Huang (shuang@arsdigita.com)
     @creation-date 12 January 2001
-    @cvs-id $Id: mime-procs.tcl,v 1.7 2007/01/10 21:22:12 gustafn Exp $
+    @cvs-id $Id: mime-procs.tcl,v 1.7.12.1 2015/09/10 08:22:06 gustafn Exp $
 }
 
 ad_proc -public template::register_mime_type { mime_type file_extension header_preamble } {
@@ -59,3 +59,9 @@ ad_proc -public template::get_mime_type {} {
 
     return $mime_type
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

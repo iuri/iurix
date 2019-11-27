@@ -460,7 +460,7 @@ ul.action-links li {
 /* CONTEXT BAR ---- */
 
 #breadcrumbs {
-  clear: right;
+  clear: both;
   padding-left: 0.4em;
 }
 
@@ -625,6 +625,7 @@ html>body #tabs { bottom: 0px }
   border: solid 1px gray;
   background-color: #e1e1e1;
   margin-top: 4px;
+  width: 100%;
 }
 
 

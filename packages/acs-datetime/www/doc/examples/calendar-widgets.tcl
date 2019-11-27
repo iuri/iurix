@@ -6,12 +6,13 @@ ad_page_contract {
 
     @author  ron@arsdigita.com
     @creation-date 2000/12/01
-    @cvs-id  $Id: calendar-widgets.tcl,v 1.2 2002/09/10 22:22:08 jeffd Exp $
+    @cvs-id  $Id: calendar-widgets.tcl,v 1.3.2.1 2015/09/10 08:21:22 gustafn Exp $
 } -properties {
     dt_examples:multirow
 }
 
-set title "ACS DateTime Examples"
+set title "Calendar Widgets"
+set context [list [list . "ACS DateTime Examples"] $title]
 
 set example_list {
     "dt_widget_month_small"
@@ -28,7 +29,13 @@ set example_list {
 multirow create dt_examples "procedure" "result"
 
 foreach example $example_list {
-    multirow append dt_examples $example [eval $example]
+    multirow append dt_examples $example [{*}$example]
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

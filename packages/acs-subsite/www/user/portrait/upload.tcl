@@ -1,10 +1,10 @@
 ad_page_contract {
     Uploading user portraits
 
-    @cvs-id $Id: upload.tcl,v 1.15 2009/03/31 15:16:47 emmar Exp $
+    @cvs-id $Id: upload.tcl,v 1.17.2.4 2016/05/20 20:02:44 gustafn Exp $
 } {
-    {user_id ""}
-    {return_url ""}
+    {user_id:naturalnum ""}
+    {return_url:localurl ""}
 } -properties {
     first_names:onevalue
     last_name:onevalue
@@ -15,15 +15,15 @@ ad_page_contract {
 
 set current_user_id [ad_conn user_id]
 
-set portrait_p [db_0or1row "checkportrait" {}]
+set portrait_p [db_0or1row checkportrait {}]
 
 if { $portrait_p } {
     set doc(title) [_ acs-subsite.upload_a_replacement_por]
-	set description [db_string "getstory" {}]
+    set description [db_string getstory {}]
 } else {
     set doc(title) [_ acs-subsite.Upload_Portrait]
-	set description ""
-	set revision_id ""
+    set description ""
+    set revision_id ""
 }
 
 if {$user_id eq ""} {
@@ -34,7 +34,7 @@ if {$user_id eq ""} {
     set admin_p 1
 }
 
-ad_require_permission $user_id "write"
+permission::require_permission -object_id $user_id -privilege "write"
 
 if {![db_0or1row get_name {}]} {
     ad_return_error "Account Unavailable" "We can't find you (user #$user_id) in the users table.  Probably your account was deleted for some reason."
@@ -47,12 +47,12 @@ if { $return_url eq "" } {
 
 if {$admin_p} {
     set context [list \
-                     [list "./?[export_vars user_id]" [_ acs-subsite.User_Portrait]] \
+                     [list [export_vars -base ./ user_id] [_ acs-subsite.User_Portrait]] \
                      $doc(title)]
 } else {
     set context [list \
                      [list [ad_pvt_home] [ad_pvt_home_name]] \
-                     [list "./?[export_vars return_url]" [_ acs-subsite.Your_Portrait]] \
+                     [list [export_vars -base ./ return_url] [_ acs-subsite.Your_Portrait]] \
                      $doc(title)]
 }
 
@@ -185,3 +185,9 @@ ad_form -extend -name "portrait_upload" -validate {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

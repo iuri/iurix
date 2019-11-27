@@ -12,7 +12,7 @@ ns_cache create util_memoize -size \
 # on whether clustering is enabled and what command is available for
 # cluster-wide flushing.
 
-if {[llength [info commands ncf.send]] > 0} {
+if {[info commands ncf.send] ne ""} {
     set flush_body {
         ncf.send util_memoize $script
     }
@@ -36,3 +36,9 @@ ad_proc -public util_memoize_flush {script} {
 } $flush_body
 
 unset flush_body
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

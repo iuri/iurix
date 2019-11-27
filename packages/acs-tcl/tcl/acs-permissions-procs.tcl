@@ -4,7 +4,7 @@ ad_library {
 
     @author rhs@mit.edu
     @creation-date 2000-08-17
-    @cvs-id $Id: acs-permissions-procs.tcl,v 1.31 2010/02/09 22:39:47 emmar Exp $
+    @cvs-id $Id: acs-permissions-procs.tcl,v 1.33.2.8 2017/06/28 20:20:27 gustafn Exp $
 
 }
 
@@ -32,7 +32,7 @@ ad_proc -public permission::grant {
     grant privilege Y to party X on object Z
 } {
     db_exec_plsql grant_permission {}
-    util_memoize_flush "permission::permission_p_not_cached -party_id $party_id -object_id $object_id -privilege $privilege"
+    util_memoize_flush [list permission::permission_p_not_cached -party_id $party_id -object_id $object_id -privilege $privilege]
     permission::permission_thread_cache_flush
 }
 
@@ -72,19 +72,41 @@ ad_proc -public permission::permission_p {
 } {
     if { $party_id eq "" } {
         set party_id [ad_conn user_id]
-    }    
-
-    if { $no_cache_p } {
-        permission::permission_thread_cache_flush
     }
 
-    if { $no_cache_p || ![permission::cache_p] } {
-        util_memoize_flush [list permission::permission_p_not_cached -party_id $party_id -object_id $object_id -privilege $privilege]
-        set permission_p [permission::permission_p_not_cached -party_id $party_id -object_id $object_id -privilege $privilege]
+    set caching_activated [permission::cache_p]
+
+    if { $no_cache_p || !$caching_activated } {
+
+	if { $no_cache_p } {
+	    permission::permission_thread_cache_flush
+	}
+
+	if {$caching_activated} {
+	    # If there is no caching activated, there is no need to
+	    # flush the memoize cache. Frequent momoize cache flushing
+	    # causes a flood of intra-server talk in a cluster
+	    # configuration (see bug #2398);
+	    # 
+	    util_memoize_flush [list permission::permission_p_not_cached \
+				    -party_id $party_id \
+				    -object_id $object_id \
+				    -privilege $privilege]
+	}
+
+        set permission_p [permission::permission_p_not_cached \
+			      -party_id $party_id \
+			      -object_id $object_id \
+			      -privilege $privilege]
     } else { 
         set permission_p [util_memoize \
-                              [list permission::permission_p_not_cached -party_id $party_id -object_id $object_id -privilege $privilege] \
-                              [parameter::get -package_id [ad_acs_kernel_id] -parameter PermissionCacheTimeout -default 300]]
+                              [list permission::permission_p_not_cached \
+				   -party_id $party_id \
+				   -object_id $object_id \
+				   -privilege $privilege] \
+                              [parameter::get -package_id [ad_acs_kernel_id] \
+				   -parameter PermissionCacheTimeout \
+				   -default 300]]
     }
 
     if { 
@@ -111,9 +133,6 @@ ad_proc -public permission::permission_p {
 }
 
 
-# accepts nocache to match permission_p arguments 
-# since we alias it to permission::permission_p if
-# caching disabled.
 ad_proc -private permission::permission_p_not_cached {
     {-no_cache:boolean}
     {-party_id ""}
@@ -122,26 +141,31 @@ ad_proc -private permission::permission_p_not_cached {
 } {
     does party X have privilege Y on object Z
 
+    This function accepts "-no_cache" just to match the permission_p
+    signature since we alias it to permission::permission_p when
+    caching is disabled.
+
     @see permission::permission_p
 } {
     if { $party_id eq "" } {
         set party_id [ad_conn user_id]
     }
 
-    # We have a thread-local cache here
-    global permission__permission_p__cache
-    if { ![info exists permission__permission_p__cache($party_id,$object_id,$privilege)] } {
-        set permission__permission_p__cache($party_id,$object_id,$privilege) [db_0or1row select_permission_p {}]
+    # We have a per-request cache here
+    set key ::permission__permission_p__cache($party_id,$object_id,$privilege)
+    if { ![info exists $key] } {
+        set $key [db_string select_permission_p {
+            select acs_permission.permission_p(:object_id, :party_id, :privilege)::integer from dual
+        }]
     }
-    return $permission__permission_p__cache($party_id,$object_id,$privilege)
+    return [set $key]
 }
 
 
 ad_proc -private permission::permission_thread_cache_flush {} {
     Flush thread cache
 } {
-    global permission__permission_p__cache
-    array unset permission__permission_p__cache
+    array unset ::permission__permission_p__cache
 }
 
 ad_proc -public permission::require_permission {
@@ -156,7 +180,8 @@ ad_proc -public permission::require_permission {
     }
 
     if {![permission_p -party_id $party_id -object_id $object_id -privilege $privilege]} {
-        if {!${party_id}} {
+
+        if {!${party_id} && ![ad_conn ajax_p]} {
             auth::require_login
         } else {
             ns_log notice "permission::require_permission: $party_id doesn't have $privilege on object $object_id"
@@ -224,13 +249,13 @@ ad_proc -public permission::write_permission_p {
 
     @see permission::require_write_permission
 } {
-    if { [permission::permission_p -privilege write -object_id $object_id -party_id $party_id] } {
-        return 1
-    }
     if { $creation_user eq "" } {
         set creation_user [acs_object::get_element -object_id $object_id -element creation_user]
     }
     if { [ad_conn user_id] == $creation_user } {
+        return 1
+    }
+    if { [permission::permission_p -privilege write -object_id $object_id -party_id $party_id] } {
         return 1
     }
     return 0
@@ -246,7 +271,6 @@ ad_proc -public permission::require_write_permission {
 
     @param creation_user Optionally specify creation_user directly as an optimization. 
                          Otherwise a query will be executed.
-
     @param party_id      The party to have or not have write permission.
 
     @see permission::write_permission_p
@@ -257,61 +281,24 @@ ad_proc -public permission::require_write_permission {
     } 
 }
 
-
-
-ad_proc -deprecated ad_permission_grant {
-    user_id
-    object_id
-    privilege
+ad_proc -public permission::get_parties_with_permission {
+    {-object_id:required}
+    {-privilege "admin"}
 } {
-    Grant a permission
+    Return a list of lists of party_id and acs_object.title,
+    having a given privilege on the given object
 
-    @author ben@openforce.net
+    @param obect_id 
+    @param privilege
 
-    @see permission::grant
-} {
-    permission::grant -party_id $user_id -object_id $object_id -privilege $privilege
-}
-
-ad_proc -deprecated ad_permission_revoke {
-    user_id
-    object_id
-    privilege
-} {
-    Revoke a permission
-
-    @author ben@openforce.net
-
-    @see permission::revoke
-} {
-    permission::revoke -party_id $user_id -object_id $object_id -privilege $privilege
-}
-
-ad_proc -deprecated ad_permission_p {
-    {-user_id ""}
-    object_id
-    privilege
-} { 
     @see permission::permission_p
 } {
-    return [permission::permission_p -party_id $user_id -object_id $object_id -privilege $privilege]
+    return [db_list_of_lists get_parties {}]
 }
 
-ad_proc -deprecated ad_require_permission {
-  object_id
-  privilege
-} {
-    @see permission::require_permission
-} { 
-    permission::require_permission -object_id $object_id -privilege $privilege
-}
 
-ad_proc -private ad_admin_filter {} {
-    permission::require_permission -object_id [ad_conn object_id] -privilege "admin"
-    return filter_ok
-}
-
-ad_proc -private ad_user_filter {} {
-    permission::require_permission -object_id [ad_conn object_id] -privilege "read"
-    return filter_ok
-}
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

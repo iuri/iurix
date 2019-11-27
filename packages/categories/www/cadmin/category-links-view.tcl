@@ -5,12 +5,12 @@ ad_page_contract {
     @author Timo Hentschel (timo@timohentschel.de)
     @cvs-id $Id:
 } {
-    category_id:integer,notnull
-    tree_id:integer,notnull
+    category_id:naturalnum,notnull
+    tree_id:naturalnum,notnull
     {locale ""}
-    object_id:integer,optional
-    orderby:optional
-    ctx_id:integer,optional
+    object_id:naturalnum,optional
+    orderby:token,optional
+    ctx_id:naturalnum,optional
 } -properties {
     page_title:onevalue
     context_bar:onevalue
@@ -105,3 +105,9 @@ multirow foreach category_links {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

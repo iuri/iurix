@@ -6,9 +6,9 @@ ad_page_contract {
     
     @author Malte Sussdorff (malte.sussdorff@cognovis.de)
     @creation-date 2007-09-29
-    @cvs-id $Id: css-list.tcl,v 1.2 2010/12/05 13:45:21 jeffd Exp $
+    @cvs-id $Id: css-list.tcl,v 1.2.4.3 2016/05/20 19:55:32 gustafn Exp $
 } {
-    {return_url ""}
+    {return_url:localurl ""}
     {css_list}
 } -properties {
 } -validate {
@@ -35,3 +35,9 @@ foreach css $css_list {
     }
     template::multirow append css_multirow $css $file_location $edit_location
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

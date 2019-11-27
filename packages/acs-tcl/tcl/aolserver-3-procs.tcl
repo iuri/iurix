@@ -5,7 +5,7 @@ ad_library {
 
     @creation-date 27 Feb 2000
     @author Jon Salz [jsalz@arsdigita.com]
-    @cvs-id $Id: aolserver-3-procs.tcl,v 1.6 2010/03/11 11:03:01 gustafn Exp $
+    @cvs-id $Id: aolserver-3-procs.tcl,v 1.7.2.3 2017/04/22 18:11:54 gustafn Exp $
 }
 
 # -1 = Not there or value was ""
@@ -16,7 +16,7 @@ proc ns_dbformvalue {formdata column type valuebyref} {
 
     upvar $valuebyref value
 
-    if {[ns_set get $formdata $column.NULL] eq "t"} {
+    if {[ns_set get $formdata $column.NULL] == "t"} {
 	set value ""
 	return 0
     }
@@ -129,32 +129,19 @@ proc _http_read {timeout sock length} {
 
 } ;# _http_read
 
-# tcl page support
+# Tcl page support
 
 proc ns_putscript {conn ignored} {
 	ns_returnbadrequest $conn "Cannot PUT a script file"
 }
 
-if {[ns_info name] ne "NaviServer"} {
-  #
-  # Naviserver has dropped support for ns_share.
-  #
-  ns_share NS
-  set NS(months) [list January February March April May June \
-                      July August September October November December]
-}
-
 # _ns_dateentrywidget is not very popular and is not
-# internationalized. We keep it in Naviserver for backward
-# compatibility. It should become deprecated.
+# internationalized. We keep it for backward compatibility. It should
+# become deprecated.
 proc _ns_dateentrywidget {column} {
 
-    if {[ns_info name] ne "NaviServer"} {
-        ns_share NS
-    } else {
-        set NS(months) [list January February March April May June \
-                            July August September October November December]
-    }
+    set NS(months) [list January February March April May June \
+                        July August September October November December]
 
     set output "<select name='$column.month'>\n"
     for {set i 0} {$i < 12} {incr i} {
@@ -178,3 +165,9 @@ proc _ns_timeentrywidget {column} {
 
     return [ns_dbformvalueput $output $column time [lindex [split [ns_localsqltimestamp] " "] 1]]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -7,11 +7,11 @@ ad_page_contract {
     @author Randy O'Meara <omeara@got.net>
 
     @creation-date 2000-2-28
-    @cvs-id $Id: user-join.tcl,v 1.12 2007/01/10 21:22:09 gustafn Exp $
+    @cvs-id $Id: user-join.tcl,v 1.14.2.6 2017/06/30 17:10:08 gustafn Exp $
 } {
-    {group_id:integer {[application_group::group_id_from_package_id]}}
+    {group_id:naturalnum,notnull {[application_group::group_id_from_package_id]}}
     {rel_type:notnull "membership_rel"}
-    {return_url {}}
+    {return_url:localurl {}}
 } -properties {
     context:onevalue
     role_pretty_name:onevalue
@@ -34,8 +34,8 @@ set group_name $group_info(group_name)
 set join_policy $group_info(join_policy)
 
 
-if { [exists_and_not_null return_url] } {
-    set ret_link "<a href=\"$return_url\">Return to previous page.</a>"
+if { $return_url ne "" } {
+    set ret_link [subst {<a href="[ns_quotehtml $return_url]">Return to previous page.</a>}]
 } else {
     set ret_link ""
 }
@@ -170,19 +170,24 @@ if { $not_hidden == 0 || [template::form is_valid join] } {
             -member_state $member_state
 
     } on_error {
-        global errorInfo
-        ns_log Error "user-join: Error when adding user to group: $errmsg\n$errorInfo"
-        
-        ad_return_error "Error Joining" "We experienced an error adding you to the group."
+        ns_log Error "user-join: Error when adding user to group: $errmsg\n$::errorInfo"
+
+        ad_return_error [_ acs-subsite.Error_joining] [_ acs-subsite.Error_joining_details]
         ad_script_abort
     }
     
     switch $member_state {
-        "approved" { set message "You have joined the group \"$group_name\"." }
-        "needs approval" { set message "Your request to join group \"$group_name\" has been submitted." }
+        "approved" { set message "[_ acs-subsite.You_joined_group]." }
+        "needs approval" { set message "[_ acs-subsite.Request_join_submitted]." }
     }
 
 
     ad_returnredirect -message $message $return_url
     ad_script_abort
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

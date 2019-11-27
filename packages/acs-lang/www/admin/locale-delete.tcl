@@ -6,10 +6,10 @@ ad_page_contract {
 
     @author Bruno Mattarollo <bruno.mattarollo@ams.greenpeace.org>
     @creation-date 19 march 2002
-    @cvs-id $Id: locale-delete.tcl,v 1.5 2005/02/26 16:00:10 jeffd Exp $
+    @cvs-id $Id: locale-delete.tcl,v 1.7.2.1 2015/09/10 08:21:28 gustafn Exp $
 } {
     locale
-    confirm_p:optional
+    confirm_p:boolean,optional
 }
 
 
@@ -27,7 +27,7 @@ set context [list $page_title]
 set form_export_vars [export_vars -form { locale {confirm_p 1} }]
 
 
-if { [exists_and_not_null confirm_p] && [template::util::is_true $confirm_p] } {
+if { ([info exists confirm_p] && $confirm_p ne "") && [template::util::is_true $confirm_p] } {
 
     db_transaction {
 
@@ -42,3 +42,9 @@ if { [exists_and_not_null confirm_p] && [template::util::is_true $confirm_p] } {
     ad_returnredirect "."
     ad_script_abort
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

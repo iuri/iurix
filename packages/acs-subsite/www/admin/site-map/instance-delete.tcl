@@ -6,11 +6,10 @@ ad_page_contract {
 
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date Mon Oct 23 14:58:57 2000
-    @cvs-id $Id: instance-delete.tcl,v 1.9 2007/01/10 21:22:08 gustafn Exp $
+    @cvs-id $Id: instance-delete.tcl,v 1.10.2.4 2017/01/10 13:27:16 antoniop Exp $
 
 } {
     package_id:naturalnum
-    {root_id ""}
 }
 db_transaction {
 
@@ -25,11 +24,10 @@ db_transaction {
     # will go to the deleted node's parent page which should either be the site map page
     # you were at when you clicked "delete" or its parent (the case mentioned above).
 
-    set parent \
-        [site_node::closest_ancestor_package \
-            -node_id $node_id \
-            -package_key acs-subsite \
-            -element url]
+    set parent [site_node::closest_ancestor_package \
+		    -node_id $node_id \
+		    -package_key acs-subsite \
+		    -element url]
 
     # node_id was null so we're not deleting a mounted subsite instance
     if {$parent eq "" } {
@@ -37,13 +35,15 @@ db_transaction {
     }
 
     if { $node_id ne "" } {
-        # The package is mounted
+        # The package is mounted, unmount it and delete it together
+        # with the site node
         site_node::unmount -node_id $node_id
-        site_node::delete -node_id $node_id
+        site_node::delete -node_id $node_id \
+            -delete_subnodes -delete_package
+    } else {
+        # Delete the package
+        apm_package_instance_delete $package_id
     }
-
-    # Delete the package
-    apm_package_instance_delete $package_id
 
 } on_error {
     if {[db_string instance_delete_doubleclick_ck {
@@ -51,8 +51,14 @@ db_transaction {
 	where package_id = :package_id
     } -default 0]} {
 	ad_return_error "Error Deleting Instance" "The following error was returned:
-	<blockquote><pre>[ad_quotehtml $errmsg]</pre></blockquote>"
+	<blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote>"
     }
 }
 	
 ad_returnredirect ${parent}admin/site-map
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

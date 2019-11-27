@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Mon Dec 11 11:57:29 2000
-    @cvs-id $Id: delete.tcl,v 1.2 2002/09/06 21:50:03 jeffd Exp $
+    @cvs-id $Id: delete.tcl,v 1.4.2.5 2017/01/04 19:31:28 antoniop Exp $
 
 } {
     rel_type:notnull,rel_type_dynamic_p
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     rel_type_pretty_name:onevalue
@@ -18,7 +18,7 @@ ad_page_contract {
     counts:onerow
 }
 
-set context [list [list "" "Relationship types"] [list one?[ad_export_vars rel_type] "One type"] "Delete type"]
+set context [list [list "" "Relationship types"] [list [export_vars -base one rel_type] "One type"] "Delete type"]
 
 set rel_type_pretty_name [db_string select_pretty_name {
     select t.pretty_name
@@ -27,13 +27,7 @@ set rel_type_pretty_name [db_string select_pretty_name {
 }]
 
 
-set subtypes_exist_p [db_string number_subtypes {
-    select case when exists (select 1 
-                               from acs_object_types t
-                              where t.supertype = :rel_type) 
-                then 1 else 0 end
-      from dual
-}]
+set subtypes_exist_p [db_string number_subtypes {}]
 
 if { $subtypes_exist_p } {
     set return_url "[ad_conn url]?[ad_conn query]"
@@ -46,19 +40,21 @@ if { $subtypes_exist_p } {
           from acs_object_types t
          where t.supertype = :rel_type
     } {
-	template::multirow append subtypes $rel_type $pretty_name [ad_export_vars {rel_type return_url}]
+	template::multirow append subtypes $rel_type $pretty_name [export_vars {rel_type return_url}]
     }
     ad_return_template "delete-subtypes-exist"
     return
 }
 
 # Now let's count up the number of things we're going to delete
-db_1row select_counts {
-    select (select count(*) from rel_segments where rel_type = :rel_type) as segments,
-           (select count(*) from acs_rels where rel_type = :rel_type) as rels
-      from dual
-} -column_array counts
+db_1row select_counts {} -column_array counts
 
-set export_vars [ad_export_vars -form {rel_type return_url}]
+set export_vars [export_vars -form {rel_type return_url}]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

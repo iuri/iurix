@@ -3,7 +3,7 @@ ad_library {
   
   @author Gustaf Neumann (neumann@wu-wien.ac.at)
   @creation-date 2007-09-24
-  @cvs-id $Id: 06-package-procs.tcl,v 1.28 2010/06/25 08:46:27 gustafn Exp $
+  @cvs-id $Id: 06-package-procs.tcl,v 1.31.2.8 2017/04/21 14:00:24 gustafn Exp $
 }
 
 namespace eval ::xo {
@@ -22,16 +22,14 @@ namespace eval ::xo {
   } {
     my instvar package_key
     if {[info exists privilege]} {
-      set sql [::xo::db::sql select -vars package_id \
-                   -from "apm_packages, acs_object_party_privilege_map ppm, site_nodes s" \
+      set sql [::xo::dc select -vars package_id \
+                   -from "apm_packages, site_nodes s" \
                    -where {
                      package_key = :package_key 
-                     and s.object_id = package_id 
-                     and ppm.object_id = package_id 
-                     and ppm.party_id = :party_id
-                     and ppm.privilege = :privilege
+                     and s.object_id = package_id
+                     and acs_permission__permission_p(package_id, :party_id, :privilege)
                    } -limit 1]
-      db_string [my qn get_package_id] $sql
+      ::xo::dc get_value get_package_id $sql
     } else {
       ::xo::parameter get_package_id_from_package_key -package_key $package_key
     }
@@ -44,18 +42,18 @@ namespace eval ::xo {
   } {
     my instvar package_key
     if {$include_unmounted} {
-      set result [db_list [my qn get_xowiki_packages] {select package_id \
-        from apm_packages where package_key = :package_key}]
+      set result [::xo::dc list get_xowiki_packages {select package_id \
+                                                         from apm_packages where package_key = :package_key}]
     } else {
-      set result [db_list [my qn get_mounted_packages] {select package_id \
-        from apm_packages p, site_nodes s  \
-        where package_key = :package_key and s.object_id = p.package_id}]
+      set result [::xo::dc list get_mounted_packages {select package_id \
+                                                          from apm_packages p, site_nodes s  \
+                                                          where package_key = :package_key and s.object_id = p.package_id}]
     }
     if {$closure} {
       foreach subclass [my info subclass] {
-	foreach id [$subclass instances -include_unmounted $include_unmounted -closure true] {
-	  lappend result $id
-	}
+        foreach id [$subclass instances -include_unmounted $include_unmounted -closure true] {
+          lappend result $id
+        }
       }
     }
     return [lsort -integer $result]
@@ -72,6 +70,7 @@ namespace eval ::xo {
     {-init_url true}
     {-keep_cc false}
     {-form_parameter}
+    {-export_vars true}
   } {
     Create the connection context ::xo::cc and a package object 
     if these are none defined yet. The connection context ::xo::cc
@@ -89,6 +88,12 @@ namespace eval ::xo {
     is preserved (i.e. not altered) in case it exists already.
   } {
     #my msg "--i [self args], URL=$url, init_url=$init_url"
+
+    if {[info exists ad_doc] && [api_page_documentation_mode_p]} {
+      ad_parse_documentation_string $ad_doc doc_elements
+      set doc_elements(query) $parameter
+      error [array get doc_elements] "ad_page_contract documentation"
+    }
 
     if {$url eq "" && $init_url} {
       set url [root_of_host [ad_host]][ns_conn url]
@@ -119,7 +124,7 @@ namespace eval ::xo {
     } else {
       my require -url $url $package_id
     }
-      
+    
     #
     # In case the login expired, we can force an early login to
     # prevent later login redirects, which can cause problems
@@ -128,19 +133,22 @@ namespace eval ::xo {
     # might not require the real user_id.
     #
     #my msg "force [$package_id force_refresh_login] &&\
-    #	[::xo::cc set untrusted_user_id] != [::xo::cc user_id]"
+        #    [::xo::cc set untrusted_user_id] != [::xo::cc user_id]"
     if {[$package_id force_refresh_login] && 
-	[::xo::cc set untrusted_user_id] != [::xo::cc user_id]} {
+        [::xo::cc set untrusted_user_id] != [::xo::cc user_id]} {
       auth::require_login
     }
 
-    ::xo::cc export_vars -level 2
+    if {$export_vars} {::xo::cc export_vars -level 2}
     return $package_id
   }
 
   PackageMgr ad_proc get_package_class_from_package_key {package_key} {
     Obtain the package class from a package key
   } {
+    set key ::xo::package_class($package_key)
+    if {[info exists $key]} {return [set $key]}
+    
     foreach p [::xo::PackageMgr allinstances] {
       # Sanity check for old apps, having not set the package key.
       # TODO: remove this in future versions, when package_keys are enforced
@@ -149,16 +157,21 @@ namespace eval ::xo {
         continue
       }
       if {[$p package_key] eq $package_key} {
+        set $key $p
         return $p
       }
     }
+
     return ""
   }
 
   PackageMgr ad_instproc require {{-url ""} package_id} {
     Create package object if needed.
   } {
-    if {$package_id eq ""} {error "package_id must not be empty"}
+    if {$package_id eq ""} {
+      #::xo::show_stack
+      error "package_id must not be empty"
+    }
 
     #my log "--R $package_id exists? [my isobject ::$package_id] url='$url'"
 
@@ -179,7 +192,7 @@ namespace eval ::xo {
         # compatibility, but complain in ns_log. 
         #
         # (E.g. hypermail2xowiki uses this)
-        ns_log notice "Could not find ::xo::Package with key $package_key ($package_id)"
+        ns_log warning "Could not find ::xo::Package with key $package_key ($package_id)"
         set package_class [self]
       }
 
@@ -200,7 +213,7 @@ namespace eval ::xo {
   #
   # get apm_package class  #### missing in acs_attributes: instance_name, default_locale
   #::xo::db::Class get_class_from_db -object_type apm_package
- 
+  
   #ns_log notice [::xo::db::apm_package serialize]
   #ns_log notice =======================================
 
@@ -218,7 +231,7 @@ namespace eval ::xo {
         url 
         {context ::xo::cc}
         package_url
-	{force_refresh_login false}
+        {force_refresh_login false}
       }
 
   ::xo::Package instforward query_parameter        {%my set context} %proc
@@ -228,15 +241,37 @@ namespace eval ::xo {
   ::xo::Package instforward returnredirect         {%my set context} %proc
 
   ::xo::Package instproc get_parameter {attribute {default ""}} {
-    set param [::xo::parameter get \
+    set package_id [my id]
+    set parameter_obj [::xo::parameter get_parameter_object \
+                           -parameter_name $attribute \
+                           -package_id $package_id \
+                           -retry false]
+    set success 0
+
+    if {$parameter_obj ne "" && [$parameter_obj set scope] ne "global"} {
+      set value [$parameter_obj get -package_id $package_id]
+      #ns_log notice "core: get_param for $attribute after GET: [$parameter_obj serialize] -> '$value'"
+      #if {$value ne "" || [$parameter_obj set __success]} {return $value}
+      #
+      # The returned '$value' might be a value set for the actual
+      # package instance, or the default for the package_parameter as
+      # defined by the package parameter definition in the xml file. If
+      # the value was not specified explicitly, and the provided
+      # default for this command is not empty, return the provided
+      # default.
+      #
+      if {![$parameter_obj set __success] && $value eq "" && $default ne ""} {
+        return $default
+      } else {
+        return $value
+      }
+    }
+    return [parameter::get_global_value \
+                   -package_key [my set package_key] \
                    -parameter $attribute \
-                   -package_id [my id] \
-                   -default $default \
-                   -retry false]
-    #my log "--get_parameter <$attribute> <$default> returned <$param>"
-    return $param
+                   -default $default]
   }
- 
+  
   ::xo::Package instproc init args {
     my instvar id url
     set package_url [lindex [site_node::get_url_from_object_id -object_id $id] 0]
@@ -247,12 +282,13 @@ namespace eval ::xo {
       my package_key $info(package_key)
       my instance_name $info(instance_name)
     } else {
-      db_1row [my qn package_info] {
+      ::xo::dc 1row package_info {
         select package_key, instance_name from apm_packages where package_id = :id
       }
       my package_key $package_key
       my instance_name $instance_name
     }
+
     if {[ns_conn isconnected]} {
       # in case of of host-node map, simplify the url to avoid redirects
       # .... but ad_host works only, when we are connected.... 
@@ -277,6 +313,12 @@ namespace eval ::xo {
     if {[my info class] ne $target_class && [my isclass $target_class]} {
       my class $target_class
     }
+    
+    #
+    # Save the relation between class and package_key for fast lookup
+    #
+    set ::xo::package_class([my set package_key]) [my info class]
+
     my initialize
   }
 
@@ -325,14 +367,34 @@ namespace eval ::xo {
     #my msg "--R object set to [my set object], url=$url, [my serialize]"
   }
 
+  ::xo::Package instproc handle_http_caching {} {
+    #
+    # Subpackages can overload this method for realizing 
+    #
+    # a) package specific caching policies
+    # b) page-type specific caching policies
+    # c) page specific caching policies
+    #
+    # Items (b) and (c) can e realized via the instance variable of
+    # the package object named "invoke_object", which is set for
+    # non-error cases in e.g. xowiki.
+    #
+    ns_set put [ns_conn outputheaders] "Cache-Control" \
+        "max-age=0, no-cache, no-store"
+    # 
+  }
+
   ::xo::Package instproc reply_to_user {text} {
+
+    my handle_http_caching
+
     #my log "REPLY [::xo::cc exists __continuation]"
     if {[::xo::cc exists __continuation]} {
       #my log "REPLY [::xo::cc set __continuation]"
       eval [::xo::cc set __continuation]
     } else {
       if {[string length $text] > 1} {
-	set status_code [expr {[::xo::cc exists status_code] ? [::xo::cc set status_code] : 200}]
+        set status_code [expr {[::xo::cc exists status_code] ? [::xo::cc set status_code] : 200}]
         #my log "REPLY [my set delivery] 200 [my set mime_type]"
         [my set delivery] $status_code [my set mime_type] $text
       }
@@ -344,8 +406,15 @@ namespace eval ::xo {
     set __vars [list]
     foreach _var $variables {
       if {[llength $_var] == 2} {
+        #
+        # The variable specification is a pair of name and value
+        #
         lappend __vars [lindex $_var 0] [uplevel subst [lindex $_var 1]]
       } else {
+        #
+        # We have just a variable name, provide an linked variable to
+        # access the value.
+        #
         set localvar local.$_var
         upvar $_var $localvar
         if {[array exists $localvar]} {
@@ -364,16 +433,28 @@ namespace eval ::xo {
         upvar #$level $f $f
       }
     }
-    #my log "--before adp"   ; # $__vars
+    #
+    # Substitute the template with the themed template
+    #
+    set adp [template::themed_template $adp]
+    
     set text [template::adp_include $adp $__vars]
-    #my log "--after adp"
     if { [lang::util::translator_mode_p] } {
       set text [::xo::localize $text 1]
     }
-    #my log "--after adp"
-    return $text
+    #my log "--after adp $text"
+
+    return [::xo::remove_escapes $text]
   }
- 
+
+        
   #ns_log notice [::xo::Package serialize]
 
 }
+
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

@@ -9,23 +9,23 @@
 -- modified for dotLRN/OpenACS4.5 and renamed from "simple-survey" to "survey" 
 --    by dave@thedesignexperience.org on 13 July 2002
 --
--- $Id: survey-create.sql,v 1.9 2003/06/12 03:54:46 daveb Exp $
+-- $Id: survey-create.sql,v 1.11 2013/11/06 07:33:54 gustafn Exp $
 
-create function inline_0 ()
-returns integer as '
-begin
-        PERFORM acs_privilege__create_privilege(''survey_create_survey'', null, null);
-        PERFORM acs_privilege__create_privilege(''survey_modify_survey'', null, null);
-        PERFORM acs_privilege__create_privilege(''survey_delete_survey'', null, null);
-        PERFORM acs_privilege__create_privilege(''survey_create_question'', null, null);
-        PERFORM acs_privilege__create_privilege(''survey_modify_question'', null, null);
-        PERFORM acs_privilege__create_privilege(''survey_delete_question'', null, null);
-        PERFORM acs_privilege__create_privilege(''survey_take_survey'', null, null);
-        PERFORM acs_privilege__create_privilege(''survey_admin_survey'', null, null);
+CREATE OR REPLACE FUNCTION inline_0 () RETURNS integer AS $$
+BEGIN
+        PERFORM acs_privilege__create_privilege('survey_create_survey', null, null);
+        PERFORM acs_privilege__create_privilege('survey_modify_survey', null, null);
+        PERFORM acs_privilege__create_privilege('survey_delete_survey', null, null);
+        PERFORM acs_privilege__create_privilege('survey_create_question', null, null);
+        PERFORM acs_privilege__create_privilege('survey_modify_question', null, null);
+        PERFORM acs_privilege__create_privilege('survey_delete_question', null, null);
+        PERFORM acs_privilege__create_privilege('survey_take_survey', null, null);
+        PERFORM acs_privilege__create_privilege('survey_admin_survey', null, null);
 
         return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0 ();
 drop function inline_0 ();
@@ -47,65 +47,65 @@ end;
 
 
 
-create function inline_1 ()
-returns integer as '
-begin
+CREATE OR REPLACE FUNCTION inline_1 () RETURNS integer AS $$
+BEGIN
 
   PERFORM acs_object_type__create_type (
-    ''survey'',
-    ''Survey'',
-    ''Surveys'',
-    ''acs_object'',
-    ''surveys'',
-    ''survey_id'',
+    'survey',
+    'Survey',
+    'Surveys',
+    'acs_object',
+    'surveys',
+    'survey_id',
     null,
-    ''f'',
+    'f',
     null,
     null
    );
 
   PERFORM acs_object_type__create_type (
-    ''survey_section'',
-    ''Survey Section'',
-    ''Survey Sections'',
-    ''acs_object'',
-    ''survey_sections'',
-    ''section_id'',
+    'survey_section',
+    'Survey Section',
+    'Survey Sections',
+    'acs_object',
+    'survey_sections',
+    'section_id',
     null,
-    ''f'',
+    'f',
     null,
     null
    );
 
   PERFORM acs_object_type__create_type (
-    ''survey_question'',
-    ''Survey Question'',
-    ''Survey Questions'',
-    ''acs_object'',
-    ''survey_questions'',
-    ''question_id'',
+    'survey_question',
+    'Survey Question',
+    'Survey Questions',
+    'acs_object',
+    'survey_questions',
+    'question_id',
     null,
-    ''f'',
+    'f',
     null,
     null
   );
 
   PERFORM acs_object_type__create_type (
-    ''survey_response'',
-    ''Survey Response'',
-    ''Survey Responses'',
-    ''acs_object'',
-    ''survey_responses'',
-    ''response_id'',
+    'survey_response',
+    'Survey Response',
+    'Survey Responses',
+    'acs_object',
+    'survey_responses',
+    'response_id',
     null,
-    ''f'',
+    'f',
     null,
     null
   );
 
   return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_1 ();
 drop function inline_1 ();
@@ -293,27 +293,36 @@ create index survey_response_index on survey_question_responses (response_id, qu
 
 -- API for survey objects
 
-create or replace function survey__new (integer,varchar,text,boolean,boolean,boolean,boolean,boolean,varchar,varchar,integer,integer,integer)
-returns integer as '
-declare
-  new__survey_id                alias for $1;  -- default null
-  new__name                     alias for $2;
-  new__description              alias for $3;
-  new__description_html_p       alias for $4;  -- default f
-  new__single_response_p        alias for $5;  -- default f
-  new__editable_p               alias for $6;  -- default t
-  new__enabled_p                alias for $7;  -- default f
-  new__single_section_p         alias for $8;  -- default t
-  new__type                     alias for $9;  -- default general
-  new__display_type             alias for $10;
-  new__package_id               alias for $11;
-  new__creation_user            alias for $12; -- default null
-  new__context_id               alias for $13; -- default null
+
+
+-- added
+select define_function_args('survey__new','survey_id;null,name,description,description_html_p;f,single_response_p;f,editable_p;t,enabled_p;f,single_section_p;t,type;general,display_type,package_id,creation_user;null,context_id;null');
+
+--
+-- procedure survey__new/13
+--
+CREATE OR REPLACE FUNCTION survey__new(
+   new__survey_id integer,          -- default null
+   new__name varchar,
+   new__description text,
+   new__description_html_p boolean, -- default f
+   new__single_response_p boolean,  -- default f
+   new__editable_p boolean,         -- default t
+   new__enabled_p boolean,          -- default f
+   new__single_section_p boolean,   -- default t
+   new__type varchar,               -- default general
+   new__display_type varchar,
+   new__package_id integer,
+   new__creation_user integer,      -- default null
+   new__context_id integer          -- default null
+
+) RETURNS integer AS $$
+DECLARE
   v_survey_id                   integer;
-begin
+BEGIN
     v_survey_id := acs_object__new (
         new__survey_id,
-        ''survey'',
+        'survey',
         now(),
         new__creation_user,
         null,
@@ -331,16 +340,25 @@ begin
 
     return v_survey_id;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
  
 
-create or replace function survey__remove (integer)
-returns integer as '
-declare
-  remove__survey_id             alias for $1;
+
+
+-- added
+select define_function_args('survey__remove','survey_id');
+
+--
+-- procedure survey__remove/1
+--
+CREATE OR REPLACE FUNCTION survey__remove(
+   remove__survey_id integer
+) RETURNS integer AS $$
+DECLARE
   v_response_row                survey_responses%ROWTYPE;
   v_section_row                 survey_sections%ROWTYPE;
-begin
+BEGIN
 
     for v_response_row in SELECT
 		response_id	
@@ -365,26 +383,36 @@ begin
 
     return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- API for survey_section objects
 
-create or replace function survey_section__new (integer,integer,varchar,text,boolean,integer,integer)
-returns integer as '
-declare
-  new__section_id               alias for $1;  -- default null
-  new__survey_id                alias for $2;  -- default null
-  new__name                    alias for $3;  -- default null
-  new__description              alias for $4;  -- default null
-  new__description_html_p       alias for $5;  -- default f
-  new__creation_user            alias for $6;  -- default null
-  new__context_id               alias for $7;  -- default null
+
+
+-- added
+select define_function_args('survey_section__new','section_id;null,survey_id;null,name;null,description;null,description_html_p;f,creation_user;null,context_id;null');
+
+--
+-- procedure survey_section__new/7
+--
+CREATE OR REPLACE FUNCTION survey_section__new(
+   new__section_id integer,         -- default null
+   new__survey_id integer,          -- default null
+   new__name varchar,               -- default null
+   new__description text,           -- default null
+   new__description_html_p boolean, -- default f
+   new__creation_user integer,      -- default null
+   new__context_id integer          -- default null
+
+) RETURNS integer AS $$
+DECLARE
   v_section_id                  integer;
-begin
+BEGIN
     v_section_id := acs_object__new (
         new__section_id,
-        ''survey_section'',
+        'survey_section',
         now(),
         new__creation_user,
         null,
@@ -398,14 +426,23 @@ begin
 
     return v_section_id;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create or replace function survey_section__remove (integer)
-returns integer as '
-declare
-  remove__section_id             alias for $1;
+
+
+-- added
+select define_function_args('survey_section__remove','section_id');
+
+--
+-- procedure survey_section__remove/1
+--
+CREATE OR REPLACE FUNCTION survey_section__remove(
+   remove__section_id integer
+) RETURNS integer AS $$
+DECLARE
   v_question_row         	 survey_questions%ROWTYPE;
-begin
+BEGIN
     for v_question_row in select question_id
 		from survey_questions
 		where section_id=remove__section_id
@@ -420,28 +457,38 @@ begin
 
     return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create or replace function survey_question__new (integer,integer,integer,text,varchar,boolean,boolean,varchar,varchar,varchar,integer,integer)
-returns integer as '
-declare
-  new__question_id              alias for $1; -- default null
-  new__section_id                alias for $2; -- default null
-  new__sort_order                 alias for $3; -- default null
-  new__question_text            alias for $4; -- default null
-  new__abstract_data_type       alias for $5; -- default null
-  new__required_p               alias for $6; -- default t
-  new__active_p                 alias for $7; -- default 
-  new__presentation_type        alias for $8; -- default null
-  new__presentation_options     alias for $9; -- default null
-  new__presentation_alignment   alias for $10; -- default below
-  new__creation_user            alias for $11; -- default null
-  new__context_id               alias for $12; -- default null
+
+
+-- added
+select define_function_args('survey_question__new','question_id;null,section_id;null,sort_order;null,question_text;null,abstract_data_type;null,required_p;t,active_p,presentation_type;null,presentation_options;null,presentation_alignment;below,creation_user;null,context_id;null');
+
+--
+-- procedure survey_question__new/12
+--
+CREATE OR REPLACE FUNCTION survey_question__new(
+   new__question_id integer,            -- default null
+   new__section_id integer,             -- default null
+   new__sort_order integer,             -- default null
+   new__question_text text,             -- default null
+   new__abstract_data_type varchar,     -- default null
+   new__required_p boolean,             -- default t
+   new__active_p boolean,               -- default
+   new__presentation_type varchar,      -- default null
+   new__presentation_options varchar,   -- default null
+   new__presentation_alignment varchar, -- default below
+   new__creation_user integer,          -- default null
+   new__context_id integer              -- default null
+
+) RETURNS integer AS $$
+DECLARE
   v_question_id                 integer;
-begin
+BEGIN
     v_question_id := acs_object__new (
         new__question_id,
-        ''survey_question'',
+        'survey_question',
         now(),
         new__creation_user,
         null,
@@ -461,13 +508,22 @@ begin
 
     return v_question_id;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create or replace function survey_question__remove (integer)
-returns integer as '
-declare
-  remove__question_id           alias for $1;
-begin
+
+
+-- added
+select define_function_args('survey_question__remove','question_id');
+
+--
+-- procedure survey_question__remove/1
+--
+CREATE OR REPLACE FUNCTION survey_question__remove(
+   remove__question_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
 
 	delete from survey_question_responses
 	    where question_id=remove__question_id;
@@ -482,27 +538,37 @@ begin
 
     return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- create or replace package body survey_response
 -- procedure new
-create or replace function survey_response__new(integer,integer,varchar,boolean,integer,varchar,integer,integer)
-returns integer as '
-declare
-  new__response_id              alias for $1; -- default null
-  new__survey_id                alias for $2; -- default null
-  new__title                    alias for $3; -- default null
-  new__notify_on_comment_p      alias for $4; -- default f
-  new__creation_user            alias for $5; -- default null
-  new__creation_ip              alias for $6; -- default null
-  new__context_id               alias for $7; -- default null
-  new__initial_response_id      alias for $8; -- default null
+
+
+-- added
+select define_function_args('survey_response__new','response_id;null,survey_id;null,title;null,notify_on_comment_p;f,creation_user;null,creation_ip;null,context_id;null,initial_response_id;null');
+
+--
+-- procedure survey_response__new/8
+--
+CREATE OR REPLACE FUNCTION survey_response__new(
+   new__response_id integer,         -- default null
+   new__survey_id integer,           -- default null
+   new__title varchar,               -- default null
+   new__notify_on_comment_p boolean, -- default f
+   new__creation_user integer,       -- default null
+   new__creation_ip varchar,         -- default null
+   new__context_id integer,          -- default null
+   new__initial_response_id integer  -- default null
+
+) RETURNS integer AS $$
+DECLARE
   v_response_id                 integer;
-begin
+BEGIN
     v_response_id := acs_object__new (
         new__response_id,
-        ''survey_response'',
+        'survey_response',
         now(),
         new__creation_user,
         new__creation_ip,
@@ -516,29 +582,47 @@ begin
 
     return v_response_id;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 --function initial_response_id
-create or replace function survey_response__initial_response_id(integer)
-returns integer as '
-declare
-  p_response_id		alias for $1;
+
+
+-- added
+select define_function_args('survey_response__initial_response_id','response_id');
+
+--
+-- procedure survey_response__initial_response_id/1
+--
+CREATE OR REPLACE FUNCTION survey_response__initial_response_id(
+   p_response_id integer
+) RETURNS integer AS $$
+DECLARE
   v_initial_response_id		integer;
-begin
+BEGIN
   select into v_initial_response_id initial_response_id from
 	survey_responses where response_id = p_response_id;
   if v_initial_response_id is NULL then
 	v_initial_response_id := p_response_id;
   end if;
   return v_initial_response_id;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create or replace function survey_response__initial_user_id (integer)
-returns integer as '
-declare
-p_response_id 	alias for $1;
-v_user_id	integer;
-begin
+
+
+-- added
+select define_function_args('survey_response__initial_user_id','response_id');
+
+--
+-- procedure survey_response__initial_user_id/1
+--
+CREATE OR REPLACE FUNCTION survey_response__initial_user_id(
+   p_response_id integer
+) RETURNS integer AS $$
+DECLARE
+  v_user_id	integer;
+BEGIN
 	select into v_user_id o.creation_user
 	from acs_objects o,
 	     survey_responses s
@@ -546,15 +630,24 @@ begin
 	object_id = coalesce(s.initial_response_id, s.response_id)
 	and s.response_id = p_response_id;
 return v_user_id;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 -- procedure delete 
-create or replace function survey_response__remove(integer)
-returns integer as '
-declare
-  remove__response_id           alias for $1;
+
+
+-- added
+select define_function_args('survey_response__remove','response_id');
+
+--
+-- procedure survey_response__remove/1
+--
+CREATE OR REPLACE FUNCTION survey_response__remove(
+   remove__response_id integer
+) RETURNS integer AS $$
+DECLARE
   v_response_row                survey_responses%ROWTYPE;
-begin
+BEGIN
     for v_response_row in select response_id from survey_responses
 	where initial_response_id=remove__response_id
     loop
@@ -563,14 +656,23 @@ begin
 
     return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create or replace function survey_response__del (integer)
-returns integer as '
-declare
-	del__response_id        alias for $1;
+
+
+-- added
+select define_function_args('survey_response__del','response_id');
+
+--
+-- procedure survey_response__del/1
+--
+CREATE OR REPLACE FUNCTION survey_response__del(
+   del__response_id integer
+) RETURNS integer AS $$
+DECLARE
 	v_question_response_row record;
-begin
+BEGIN
 
 	for v_question_response_row in select item_id
 		from survey_question_responses, cr_revisions
@@ -587,7 +689,8 @@ begin
 	PERFORM acs_object__delete(del__response_id);
     return 0;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 create view survey_responses_latest as
 select sr.*, o.creation_date, 

@@ -1,6 +1,6 @@
 <master>
 <property name="context">#chat.Transcripts#</property>
-<property name="title">#chat.transcripts_of_room# "@room_name;noquote@"</property>
+<property name="doc(title)">#chat.transcripts_of_room# "@room_name;noquote@"</property>
 
 <if @active@ eq "t">
 <p><a class="button" href="chat-transcript?room_id=@room_id@">#chat.current_transcript#</a></p>

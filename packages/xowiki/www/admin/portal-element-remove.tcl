@@ -3,7 +3,7 @@
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Oct 23, 2005
-  @cvs-id $Id: portal-element-remove.tcl,v 1.1 2007/01/28 23:03:26 gustafn Exp $
+  @cvs-id $Id: portal-element-remove.tcl,v 1.3.4.1 2015/09/10 08:10:41 gustafn Exp $
 
 } -parameter {
   {-element_id}
@@ -17,3 +17,9 @@ portal::remove_element -element_id $element_id
 ad_returnredirect $referer
 ad_script_abort
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

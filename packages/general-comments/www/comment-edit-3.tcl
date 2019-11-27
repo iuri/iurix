@@ -6,23 +6,23 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-edit-3.tcl,v 1.4 2005/03/01 00:01:37 jeffd Exp $
+    @cvs-id $Id: comment-edit-3.tcl,v 1.6.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    comment_id:integer,notnull
+    comment_id:naturalnum,notnull
     title
     content:html
     comment_mime_type
-    { return_url {} }
+    { return_url:localurl {} }
 }
 
 # check to see if the user can edit this comment
-ad_require_permission $comment_id write
+permission::require_permission -object_id $comment_id -privilege write
 
 # authenticate the user
 set user_id [ad_conn user_id]
 
 # insert the revision into the database
-set is_live [ad_parameter AutoApproveCommentsP {general-comments} {t}]
+set is_live [parameter::get -parameter AutoApproveCommentsP -default {t}]
 set creation_ip [ad_conn peeraddr]
 db_transaction {
   db_exec_plsql insert_comment {
@@ -53,5 +53,11 @@ db_transaction {
 
 }
 
-ad_returnredirect "view-comment?[export_url_vars comment_id return_url]"
+ad_returnredirect [export_vars -base view-comment {comment_id return_url}]
     
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

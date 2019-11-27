@@ -29,14 +29,14 @@ if { ![info exists show_calendar_name_p] } {
     set show_calendar_name_p 1
 }
 
-if {[exists_and_not_null calendar_id_list]} {
+if {([info exists calendar_id_list] && $calendar_id_list ne "")} {
     set calendars_clause [db_map dbqd.calendar.www.views.openacs_in_portal_calendar] 
 } else {
     set calendars_clause [db_map dbqd.calendar.www.views.openacs_calendar] 
 }
 
-if {[empty_string_p $date]} {
-    # Default to todays date in the users (the connection) timezone
+if {$date eq ""} {
+    # Default to today's date in the users (the connection) timezone
     set server_now_time [dt_systime]
     set user_now_time [lc_time_system_to_conn $server_now_time]
     set date [lc_time_fmt $user_now_time "%x"]
@@ -52,7 +52,7 @@ set start_date $date
 
 set first_day_of_week [lc_get firstdayofweek]
 set first_us_weekday [lindex [lc_get -locale en_US day] $first_day_of_week]
-set last_us_weekday [lindex [lc_get -locale en_US day] [expr [expr $first_day_of_week + 6] % 7]]
+set last_us_weekday [lindex [lc_get -locale en_US day] [expr {($first_day_of_week + 6) % 7}]]
 
 db_1row select_weekday_info {}
 db_1row select_week_info {}
@@ -89,7 +89,7 @@ set order_by_clause " order by to_char(start_date, 'J'), to_char(start_date,'HH2
 set interval_limitation_clause [db_map dbqd.calendar.www.views.week_interval_limitation]
 set additional_limitations_clause ""
 set additional_select_clause [db_map dow]
-if { [exists_and_not_null cal_system_type] } {
+if { ([info exists cal_system_type] && $cal_system_type ne "") } {
     append additional_limitations_clause " and system_type = :cal_system_type "
 }
 
@@ -113,7 +113,7 @@ db_foreach dbqd.calendar.www.views.select_items {} {
     scan [lc_time_fmt $ansi_start_date "%H"] %d start_hour
     scan [lc_time_fmt $ansi_end_date "%H"] %d end_hour
 
-    set ansi_this_date [dt_julian_to_ansi [expr $first_weekday_julian + $current_weekday]]
+    set ansi_this_date [dt_julian_to_ansi [expr {$first_weekday_julian + $current_weekday}]]
 
     if { $start_time eq $end_time } {
         set no_time_p t
@@ -122,7 +122,7 @@ db_foreach dbqd.calendar.www.views.select_items {} {
     }
 
     if { $day_of_week != $loop_day_of_week } {
-        set day_width_$loop_day_of_week [expr ($day_width) + (($max_bumps+$all_day_events) * $event_bump_delta) + 5]
+        set day_width_$loop_day_of_week [expr {($day_width) + (($max_bumps+$all_day_events) * $event_bump_delta) + 5}]
         set event_left_base 0
         for {set i 0} {$i < $day_of_week} {incr i} {
             incr event_left_base [set day_width_$i]
@@ -146,27 +146,25 @@ db_foreach dbqd.calendar.www.views.select_items {} {
         set bottom_hour $end_hour
         set bottom_minutes $end_minutes
 
-        if { $start_hour < $adjusted_start_display_hour && \
-                 [string equal \
-                      [string range $ansi_start_date 0 9] \
-                      [string range $ansi_end_date 0 9]] } {
+        if { $start_hour < $adjusted_start_display_hour
+             && [string range $ansi_start_date 0 9] eq [string range $ansi_end_date 0 9]
+         } {
             set adjusted_start_display_hour $start_hour
         }
 
-        if { $end_hour > $adjusted_end_display_hour && \
-                 [string equal \
-                      [string range $ansi_start_date 0 9] \
-                      [string range $ansi_end_date 0 9]] } {
+        if { $end_hour > $adjusted_end_display_hour
+             && [string range $ansi_start_date 0 9] eq [string range $ansi_end_date 0 9]
+         } {
             set adjusted_end_display_hour $end_hour
         }
 
     }
 
-    set top [expr ($top_hour * ($hour_height_inside+$hour_height_sep)) \
-                 + ($top_minutes*$hour_height_inside/60)]
-    set bottom [expr ($bottom_hour * ($hour_height_inside+$hour_height_sep)) \
-                    + ($bottom_minutes*$hour_height_inside/60)]
-    set height [expr $bottom - $top - 3]
+    set top [expr {($top_hour * ($hour_height_inside+$hour_height_sep))
+                   + ($top_minutes*$hour_height_inside/60)}]
+    set bottom [expr {($bottom_hour * ($hour_height_inside+$hour_height_sep))
+                      + ($bottom_minutes*$hour_height_inside/60)}]
+    set height [expr {$bottom - $top - 3}]
 
     set left $event_left_base
 
@@ -184,7 +182,9 @@ db_foreach dbqd.calendar.www.views.select_items {} {
         #Regular event.
         set name "$name ($start_time - $end_time)"
         foreach {previous_start previous_end} $previous_intervals {
-            if { ($start_seconds >= $previous_start && $start_seconds < $previous_end) || ($previous_start >= $start_seconds && $previous_start < $end_seconds) } {
+            if { ($start_seconds >= $previous_start && $start_seconds < $previous_end)
+                 || ($previous_start >= $start_seconds && $previous_start < $end_seconds)
+             } {
                 incr bumps
             }
         }
@@ -192,10 +192,13 @@ db_foreach dbqd.calendar.www.views.select_items {} {
             set max_bumps $bumps
         }
     }
-    incr top [expr $bumps*5]
-    incr left [expr $bumps*$event_bump_delta]
+    incr top [expr {$bumps * 5}]
+    incr left [expr {$bumps * $event_bump_delta}]
 
-    set event_url [export_vars -base [site_node::get_url_from_object_id -object_id $cal_package_id]cal-item-view {return_url {cal_item_id $item_id}}]
+    set event_url [export_vars \
+                       -base [site_node::get_url_from_object_id -object_id $cal_package_id]cal-item-view {
+                           return_url {cal_item_id $item_id}
+                       }]
 
     multirow append items \
         "$name" \
@@ -225,26 +228,27 @@ db_foreach dbqd.calendar.www.views.select_items {} {
 }
 
 # Set day width for the final iteration of the loop
-set day_width_$loop_day_of_week [expr ($day_width) + (($max_bumps+$all_day_events) * $event_bump_delta) + 5]
+set day_width_$loop_day_of_week [expr {($day_width) + (($max_bumps+$all_day_events) * $event_bump_delta) + 5}]
 
 #Now correct the top attribute for the adjusted start.
 set num_items [multirow size items]
 for {set i 1} {$i <= $num_items } {incr i} {
     if { [multirow get items $i no_time_p] } {
         multirow set items $i height \
-            [expr ($adjusted_end_display_hour-$adjusted_start_display_hour+1)*($hour_height_inside+$hour_height_sep)]
+            [expr {($adjusted_end_display_hour - $adjusted_start_display_hour + 1)
+                   * ($hour_height_inside + $hour_height_sep)}]
     } else {
         set currval [multirow get items $i top]
         multirow set items $i top \
-            [expr $currval - ($adjusted_start_display_hour*($hour_height_inside+$hour_height_sep))]
+            [expr {$currval - ($adjusted_start_display_hour*($hour_height_inside+$hour_height_sep))}]
     }
 }
 
 # Navigation Bar
 set dates "[lc_time_fmt $first_weekday_date "%q"] - [lc_time_fmt $last_weekday_date "%q"]"
-set prev_date_ansi [ad_urlencode [dt_julian_to_ansi [expr $first_weekday_julian - 7]]]
+set prev_date_ansi [ad_urlencode [dt_julian_to_ansi [expr {$first_weekday_julian - 7}]]]
 set previous_week_url ?[export_vars {page_num {view week} {date $prev_date_ansi}}]\#calendar
-set next_date_ansi [ad_urlencode [dt_julian_to_ansi [expr $first_weekday_julian + 7]]]
+set next_date_ansi [ad_urlencode [dt_julian_to_ansi [expr {$first_weekday_julian + 7}]]]
 set next_week_url ?[export_vars {page_num {view week} {date $next_date_ansi}}]\#calendar
 
 #Calendar grid.
@@ -268,24 +272,22 @@ set week_end_year [lc_time_fmt $last_weekday_date "%Y"]
 
 set week_days [lc_get abday]
 set first_weekday_date_secs [clock scan "-24 hours" -base [clock scan "1 day" -base [clock scan $first_weekday_date]]]
-set next_week [clock format [expr $first_weekday_date_secs + (7*86400)] -format "%Y-%m-%d"]
-set last_week [clock format [expr $first_weekday_date_secs - (7*86400)] -format "%Y-%m-%d"]
+set next_week [clock format [expr {$first_weekday_date_secs + (7*86400)}] -format "%Y-%m-%d"]
+set last_week [clock format [expr {$first_weekday_date_secs - (7*86400)}] -format "%Y-%m-%d"]
 
 multirow create days_of_week width day_short monthday weekday_date weekday_url day_num
 
-set nav_url_base [ad_conn url]?[export_vars -url -entire_form -exclude {date view}]
+set nav_url_base [export_vars -base [ad_conn url] -entire_form -exclude {date view}]
 
 for {set i 0} {$i < 7} {incr i} {
-    set weekday_secs [expr $first_weekday_date_secs + ($i*86400)]
-    set trimmed_month \
-        [string trimleft [clock format $weekday_secs -format "%m"] 0]
-    set trimmed_day \
-        [string trimleft [clock format $weekday_secs -format "%d"] 0]
-    set weekday_date [clock format $weekday_secs -format "%Y-%m-%d"]
-    set weekday_url [export_vars -base [ad_conn url] -url -entire_form {{view day} {date $weekday_date}}]
+    set weekday_secs  [expr {$first_weekday_date_secs + ($i*86400)}]
+    set trimmed_month [string trimleft [clock format $weekday_secs -format "%m"] 0]
+    set trimmed_day   [string trimleft [clock format $weekday_secs -format "%d"] 0]
+    set weekday_date  [clock format $weekday_secs -format "%Y-%m-%d"]
+    set weekday_url   [export_vars -base [ad_conn url] -url -entire_form {{view day} {date $weekday_date}}]
     #TODO: localize_me
     set weekday_monthday "$trimmed_month/$trimmed_day"
-    set i_day [expr { [expr { $i + $first_day_of_week }] % 7 }]
+    set i_day [expr { ($i + $first_day_of_week) % 7 }]
     multirow append days_of_week [set day_width_$i] [lindex $week_days $i_day] $weekday_monthday $weekday_date $weekday_url $i
 }
 
@@ -294,8 +296,14 @@ for {set i 0} {$i < 7} {incr i} {
     incr week_width [set day_width_$i]
 }
 
-if { [info exists export] && [string equal $export print] } {
+if { [info exists export] && $export eq "print" } {
     set print_html [template::adp_parse [acs_root_dir]/packages/calendar/www/view-print-display [list &items items show_calendar_name_p $show_calendar_name_p]]
     ns_return 200 text/html $print_html
     ad_script_abort
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

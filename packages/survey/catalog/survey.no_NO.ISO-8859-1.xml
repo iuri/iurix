@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="no_NO" charset="ISO-8859-1">
+<message_catalog package_key="survey" locale="no_NO" charset="ISO-8859-1">
 
   <msg key="-__Created_by">- Innlagt av</msg>
   <msg key="_on_creation_date">, den %creation_date% </msg>
@@ -82,7 +82,7 @@
   <msg key="lt_Cancel_and_return_to__1">Avbryt og gå tilbake til administrasjon av spørreundersøkelsen</msg>
   <msg key="lt_Completely_delete">Slett fullstendig %user_name_var%sitt svar på %response_date_var%? (NB: Dette kan ikke gjøres om igjen.) </msg>
   <msg key="lt_Confirm_Survey_Detail">Bekreft undersøkelsesdetaljer</msg>
-  <msg key="lt_Copying_a_survey_will">Kopi av en undersøkelse vil lage en ny undersøkelse med kopi av alle spørsmålene.&lt;br /&gt;Ingen av svarene vil bli kopiert.</msg>
+  <msg key="lt_Copying_a_survey_will">Kopi av en undersøkelse vil lage en ny undersøkelse med kopi av alle spørsmålene.&lt;br&gt;Ingen av svarene vil bli kopiert.</msg>
   <msg key="lt_Could_not_find_a_surv">Kunne ikke finne et spørsmål i skjemaet</msg>
   <msg key="lt_Could_not_find_the_re">Kunne ikke finne svaret</msg>
   <msg key="lt_Couldnt_find_attachment">Kunne ikke finne vedlegg som passer til response_id %response_id%, question_id %question_id% som er gitt.</msg>
@@ -96,7 +96,7 @@
   <msg key="lt_Everyone_eligible_to_">Alle som kan ta denne undersøkelsen</msg>
   <msg key="lt_Everyone_who_has_alre">Alle som allerede har tatt denne undersøkelsen</msg>
   <msg key="lt_Everyone_who_has_not_">Alle som ikke ennå har tatt denne undersøkelsen</msg>
-  <msg key="lt_For_Multiple_Choicebr">For flervalg&lt;br /&gt;Legg inn en liste av gyldige svar&lt;br /&gt; (legg inn et valg på hver linje)</msg>
+  <msg key="lt_For_Multiple_Choicebr">For flervalg&lt;br&gt;Legg inn en liste av gyldige svar&lt;br&gt; (legg inn et valg på hver linje)</msg>
   <msg key="lt_had_to_say_in_respons">hadde å si som svar på %survey_name%:</msg>
   <msg key="lt_Here_is_how_your_surv">Slik kommer din beskrivelse av undersøkelsen til å se ut:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Administrer spørreundersøkelser&quot;&gt; </msg>

@@ -7,7 +7,7 @@ ad_page_contract {
 
     @author Stefan Deusch (stefan@arsdigita.com)
     @creation-date 2000-12-20
-    @cvs-id $Id: approve.tcl,v 1.4 2002/10/29 08:01:15 peterm Exp $
+    @cvs-id $Id: approve.tcl,v 1.7.4.2 2016/01/02 20:34:50 gustafn Exp $
 
 } {
     n_items:notnull
@@ -24,12 +24,13 @@ ad_page_contract {
 }
 
 
-set title "[_ news.Approve_items]"
+set title [_ news.Approve_items]
 set context [list $title]
 
 
 # pre-set date widgets with defaults
-set proj_archival_date [db_string week "select sysdate + [ad_parameter ActiveDays "news" 14] from dual"]
+set active_days [parameter::get -parameter ActiveDays -default 14]
+set proj_archival_date [db_string week {}]
 set publish_date_select [dt_widget_datetime -default now publish_date days]
 set archive_date_select [dt_widget_datetime -default $proj_archival_date archive_date days]
 
@@ -41,7 +42,7 @@ for {set i 0} {$i < [llength $n_items]} {incr i} {
 
 
 # get most likely revision_id if not supplied
-if {[empty_string_p $revision_id]} {
+if {$revision_id eq ""} {
     set revision_select [db_map revision_select]
 } else {
     set revision_select "'$revision_id' as revision_id,"
@@ -60,7 +61,7 @@ db_multirow items item_list "
         item_id in ([join $bind_id_list ","])"
 
 
-set hidden_vars [export_form_vars return_url]
+set hidden_vars [export_vars -form {return_url}]
 
 ad_return_template
 
@@ -69,3 +70,9 @@ ad_return_template
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

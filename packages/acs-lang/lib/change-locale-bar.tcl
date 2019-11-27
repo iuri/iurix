@@ -6,16 +6,16 @@
 set current_locale [lang::conn::locale]
 set base_lang_url [site_node::get_package_url -package_key acs-lang]
 
-if { ![exists_and_not_null return_url]} {
+if { (![info exists return_url] || $return_url eq "")} {
     # Use referer header
     set return_url [ad_return_url]
 }
 
-if { ![exists_and_not_null max_locales]} {
+if { (![info exists max_locales] || $max_locales eq "")} {
     set max_locales 8
 }
 
-if { ![exists_and_not_null avail_key] } {
+if { (![info exists avail_key] || $avail_key eq "") } {
     set avail_key "this-language"
 }
 
@@ -85,3 +85,9 @@ if { $enabled_locale_count > 1 } {
 } else {
     set lang_admin_text "Add Locales"
 }    
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -1,14 +1,25 @@
 
+set transcript_create_p [permission::permission_p -object_id $room_id -privilege chat_transcript_create]
 set transcript_delete_p [permission::permission_p -object_id $room_id -privilege chat_transcript_delete]
-set transcript_view_p [permission::permission_p -object_id $room_id -privilege chat_transcript_view]
+set transcript_view_p   [permission::permission_p -object_id $room_id -privilege chat_transcript_view]
 
 # List available chat transcript
-db_multirow -extend { creation_date_pretty viewer transcript_url} chat_transcripts list_transcripts *SQL* {
+db_multirow -extend {
+    creation_date_pretty
+    viewer
+    transcript_url
+    delete_url
+} chat_transcripts list_transcripts {} {
     set creation_date_pretty [lc_time_fmt $creation_date "%q %X"]
     set transcript_url [export_vars -base "chat-transcript" {room_id transcript_id}]
+    set delete_url [export_vars -base "transcript-delete" {room_id transcript_id}]
 }
 
-set actions [list [_ chat.Create_transcript] [export_vars -base "transcript-new" {room_id}]]
+set actions {}
+if {$transcript_create_p} {
+    lappend actions \
+	[_ chat.Create_transcript] [export_vars -base "transcript-new" {room_id}] ""
+}
 
 list::create \
     -name "chat_transcripts" \
@@ -31,9 +42,9 @@ list::create \
             html { align "center" }
             display_template {
                 <if @transcript_delete_p@ eq "1">
-                <a href="transcript-delete?transcript_id=@chat_transcripts.transcript_id@&amp;room_id=@room_id@">
-                <img src="/shared/images/Delete16.gif" alt="#chat.Delete_transcript#">
-                </a>
+                  <a href="@chat_transcripts.delete_url@">
+                    <img src="/shared/images/Delete16.gif" alt="#chat.Delete_transcript#">
+                  </a>
                 </if>
             }
         }

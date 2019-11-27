@@ -2,7 +2,7 @@
 --
 -- @author Gary Jin (gjin@arsdigita.com)
 -- @creation-date Nov 17, 2000
--- @cvs-id $Id: upgrade-1.0-2.0d1.sql,v 1.1 2003/10/08 16:59:22 mohanp Exp $
+-- @cvs-id $Id: upgrade-1.0-2.0d1.sql,v 1.1.20.1 2017/04/22 12:25:25 gustafn Exp $
 --
 
 create or replace package cal_item
@@ -127,7 +127,7 @@ as
         is
 
         begin
-                  -- Erase the cal_item assoicated with the id
+                  -- Erase the cal_item associated with the id
                 delete from     cal_items
                 where           cal_item_id = cal_item.del.cal_item_id;
                 

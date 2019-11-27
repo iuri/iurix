@@ -6,20 +6,20 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: url-edit-2.tcl,v 1.3 2005/03/01 00:01:37 jeffd Exp $
+    @cvs-id $Id: url-edit-2.tcl,v 1.5.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    attach_id:integer,notnull
-    parent_id:integer,notnull
+    attach_id:naturalnum,notnull
+    parent_id:naturalnum,notnull
     label:notnull
     url:notnull
-    { return_url {} }
+    { return_url:localurl {} }
 }
 
 # authenticate the user
 set user_id [ad_conn user_id]
 
 # check to see if the user can edit this attachment
-ad_require_permission $attach_id write
+permission::require_permission -object_id $attach_id -privilege write
 
 db_dml edit_url {
     update cr_extlinks
@@ -28,7 +28,13 @@ db_dml edit_url {
      where extlink_id = :attach_id
 }
 
-ad_returnredirect "view-comment?comment_id=$parent_id&[export_url_vars return_url]"
+ad_returnredirect [export_vars -base view-comment {{comment_id $parent_id} return_url}]
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

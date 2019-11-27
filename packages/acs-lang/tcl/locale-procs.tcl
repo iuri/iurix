@@ -10,7 +10,7 @@ ad_library {
     @creation-date 28 September 2000
     @author Henry Minsky (hqm@mit.edu)
     @author Lars Pind (lars@pinds.com)
-    @cvs-id $Id: locale-procs.tcl,v 1.37 2010/01/08 17:39:58 emmar Exp $
+    @cvs-id $Id: locale-procs.tcl,v 1.39.2.8 2016/08/18 05:02:31 gustafn Exp $
 }
 
 namespace eval lang::system {}
@@ -42,7 +42,7 @@ ad_proc -public lang::system::site_wide_locale {
 
     # Check validity of parameter setting
     set valid_locales [lang::system::get_locales]
-    if { [lsearch -exact $valid_locales $parameter_locale] == -1 } {
+    if {$parameter_locale ni $valid_locales} {
         ns_log Error "The parameter setting acs-lang.SiteWideLocale=\"$parameter_locale\" is invalid. Valid locales are: \"$valid_locales\". Defaulting to en_US locale"
         return en_US
     }
@@ -319,6 +319,12 @@ ad_proc -private lang::user::site_wide_locale_not_cached {
 
     if { $user_id == 0 } {
         set locale [ad_get_cookie "ad_locale"]
+        #
+        # Check, if someone hacked the cookie
+        #
+        if {$locale ne "" && ![lang::conn::valid_locale_p $locale]} {
+            error "invalid locale cookie '$locale'"
+        }
     } else {
         set locale [db_string get_user_site_wide_locale {} -default "$system_locale"]
     }
@@ -570,9 +576,9 @@ ad_proc -private lang::conn::browser_locale {} {
     foreach locale $conn_locales {       
         regexp {^([^_]+)(?:_([^_]+))?$} $locale locale language region 
 
-        if { [exists_and_not_null region] } {
+        if { ([info exists region] && $region ne "") } {
             # We have both language and region, e.g. en_US
-            if { [lsearch -exact $system_locales $locale] != -1 } {
+            if {$locale in $system_locales} {
                 # The locale was found in the system, a perfect match           
                 set perfect_match $locale
                 break
@@ -601,9 +607,9 @@ ad_proc -private lang::conn::browser_locale {} {
         }
     }
 
-    if { [exists_and_not_null perfect_match] } {
+    if { ([info exists perfect_match] && $perfect_match ne "") } {
         return $perfect_match
-    } elseif { [exists_and_not_null tentative_match] } {
+    } elseif { ([info exists tentative_match] && $tentative_match ne "") } {
         return $tentative_match
     } else {
         # We didn't find a match
@@ -611,17 +617,28 @@ ad_proc -private lang::conn::browser_locale {} {
     }
 }
 
-ad_proc -private lang::conn::get_accept_language_header {} {
+ad_proc -private lang::conn::valid_locale_p {locale} {
+    Check, of the provided locale is syntactically correct
+} {
+    return [regexp {^[a-zA-Z]+(_[a-zA-Z0-9]+)?$} $locale]
+}
 
+ad_proc -private lang::conn::get_accept_language_header {} {
+    Obtain a list of locals from the request headers.
+    @return a list of locales in the syntax used by OpenACS (ISO codes)
+} {
     set acclang [ns_set iget [ns_conn headers] "Accept-Language"]
 
     # Split by comma, and get rid of any ;q=0.5 parts
     # acclang is something like 'da,en-us;q=0.8,es-ni;q=0.5,de;q=0.3'
     set acclangv [list]
     foreach elm [split $acclang ","] {
-        # Get rid of trailing ;q=0.5 part
-        set elm [lindex [split $elm ";"] 0]
-
+        # Get rid of trailing ;q=0.5 part and trim spaces
+        set elm [string trimleft [lindex [split $elm ";"] 0] " "]
+        # Ignore the default catchall setting "*"
+        if {$elm eq "*"} {
+            continue
+        }
         # elm is now either like 'da' or 'en-us'
         # make it into something like 'da' or 'en_US'
         set elmv [split $elm "-"]
@@ -629,8 +646,11 @@ ad_proc -private lang::conn::get_accept_language_header {} {
         if { [llength $elmv] > 1 } {
             append elm "_[string toupper [lindex $elmv 1]]"
         }
-
-        lappend acclangv $elm
+        if {[lang::conn::valid_locale_p $elm]} {
+            lappend acclangv $elm
+        } else {
+            error "invalid locale in provided Accept-Language header field"
+        }
     }
     
     return $acclangv
@@ -640,17 +660,20 @@ ad_proc -public lang::conn::language {
     {-package_id ""}
     {-site_wide:boolean}
     {-iso6392:boolean}
+    {-locale ""}
 } {
     Get the language for this request, perhaps for a given package instance.
     
     @param package_id The package for which you want to get the language.
     @param site_wide Set this if you want to get the site-wide language.
     @param iso6392   Set this if you want to force the iso-639-2 code
+    @param locale   obtain language from provided locale
 
     @return 3 chars language code if iso6392 is set, left part of locale otherwise
 } {
-
-    set locale [locale -package_id $package_id -site_wide=$site_wide_p]
+    if {$locale eq ""} {
+	set locale [locale -package_id $package_id -site_wide=$site_wide_p]
+    }
     set conn_lang [lindex [split $locale "_"] 0]
 
     if { $iso6392_p } {
@@ -719,3 +742,9 @@ ad_proc -deprecated -warn -public ad_locale_get_label { locale } {
          where lower(locale) = lower(:locale)
     }]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

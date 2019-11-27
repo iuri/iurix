@@ -6,17 +6,17 @@ ad_page_contract {
     @author Phong Nguyen <phong@arsdigita.com>
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-add-3.tcl,v 1.9 2007/05/05 15:54:47 maltes Exp $
+    @cvs-id $Id: comment-add-3.tcl,v 1.12.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    comment_id:integer,notnull
-    object_id:integer,notnull
+    comment_id:naturalnum,notnull
+    object_id:naturalnum,notnull
     title:notnull
     content:html,notnull
     comment_mime_type
-    { context_id "$object_id" }
+    { context_id:naturalnum "$object_id" }
     { category "" }
-    { return_url "" }
-    { attach_p "f" }
+    { return_url:localurl "" }
+    { attach_p:boolean "f" }
 }    
 
 # This authentication actually is not necessary anymore due to the fact that we already check for the permission
@@ -29,11 +29,11 @@ ad_page_contract {
 set user_id [ad_conn user_id]
 
 # check to see if the user can create comments on this object
-ad_require_permission $object_id general_comments_create
+permission::require_permission -object_id $object_id -privilege general_comments_create
 
 # insert the comment into the database
 set creation_ip [ad_conn peeraddr]
-set is_live [ad_parameter AutoApproveCommentsP {general-comments} {t}]
+set is_live [parameter::get -parameter AutoApproveCommentsP -default {t}]
 
 general_comment_new \
     -object_id $object_id \
@@ -47,8 +47,14 @@ general_comment_new \
     -category $category \
     -content $content
 
-if { [string equal $attach_p "f"] && ![empty_string_p $return_url] } {
+if { $attach_p == "f" && $return_url ne "" } {
     ad_returnredirect $return_url
 } else {
-    ad_returnredirect "view-comment?[export_vars { comment_id return_url }]"
+    ad_returnredirect [export_vars -base view-comment { comment_id return_url }]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

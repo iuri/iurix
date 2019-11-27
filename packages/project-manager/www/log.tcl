@@ -3,7 +3,7 @@ ad_page_contract {
     
     @author Jade Rubick (jader@bread.com) stolen from Peter
     @creation-date 2003-04-16
-    @cvs-id $Id: log.tcl,v 1.3 2005/05/26 09:34:29 maltes Exp $
+    @cvs-id $Id: log.tcl,v 1.5 2018/05/09 15:33:33 hectorr Exp $
 }
 
 

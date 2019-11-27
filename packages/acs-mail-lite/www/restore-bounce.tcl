@@ -1,8 +1,8 @@
 ad_page_contract {
     The page restores a user from the deleted state.
-    @cvs-id $Id: restore-bounce.tcl,v 1.1 2007/04/08 08:25:14 maltes Exp $
+    @cvs-id $Id: restore-bounce.tcl,v 1.1.12.3 2016/05/20 19:55:32 gustafn Exp $
 } {
-    {return_url {[ad_pvt_home]}}
+    {return_url:localurl {[ad_pvt_home]}}
 }
 
 set page_title [_ acs-mail-lite.Restore_bounce]
@@ -14,3 +14,9 @@ set user_id [auth::require_login]
 db_dml unbounce_user "update users set email_bouncing_p = 'f' where user_id = :user_id"
 # Used in a message key
 set system_name [ad_system_name]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

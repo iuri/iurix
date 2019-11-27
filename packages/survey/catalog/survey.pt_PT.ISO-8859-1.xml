@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="pt_PT" charset="ISO-8859-1">
+<message_catalog package_key="survey" locale="pt_PT" charset="ISO-8859-1">
 
   <msg key="-__Created_by">- Criado por</msg>
   <msg key="_on_creation_date">, em %creation_date% </msg>
@@ -79,7 +79,7 @@
   <msg key="lt_Cancel_and_return_to__1">Cancelar e retornar á administração do inquérito</msg>
   <msg key="lt_Completely_delete">Eliminar completamente a resposta de %user_name_var% de %response_date_var%? (Nota: Isto não pode ser desfeito.)</msg>
   <msg key="lt_Confirm_Survey_Detail">Confirmar Detalhes do Inquérito</msg>
-  <msg key="lt_Copying_a_survey_will">Copiar um inquérito irá criar um novo inquérito com uma cópia de todas as perguntas.&lt;br /&gt; Nenhuma das respostas será duplicada.</msg>
+  <msg key="lt_Copying_a_survey_will">Copiar um inquérito irá criar um novo inquérito com uma cópia de todas as perguntas.&lt;br&gt; Nenhuma das respostas será duplicada.</msg>
   <msg key="lt_Could_not_find_a_surv">Não foi possível encontrar uma pergunta do inquérito</msg>
   <msg key="lt_Could_not_find_the_re">Não foi possível encontrar a resposta</msg>
   <msg key="lt_Couldnt_find_attachment">Não foi possível encontrar o anexo. Não foi possível encontrar um anexo que coincidi-se com o response_id %response_id%, question_id %question_id% dado.</msg>
@@ -93,7 +93,7 @@
   <msg key="lt_Everyone_eligible_to_">Toda a gente elegível para realizar este inquérito</msg>
   <msg key="lt_Everyone_who_has_alre">Toda a gente que já realizou este inquérito</msg>
   <msg key="lt_Everyone_who_has_not_">Toda a gente que ainda não realizou este inquérito</msg>
-  <msg key="lt_For_Multiple_Choicebr">Para Escolha Múltipla&lt;br /&gt;Digitar uma Lista de Respostas Válidas&lt;br /&gt; (digitar uma escolha por linha) </msg>
+  <msg key="lt_For_Multiple_Choicebr">Para Escolha Múltipla&lt;br&gt;Digitar uma Lista de Respostas Válidas&lt;br&gt; (digitar uma escolha por linha) </msg>
   <msg key="lt_had_to_say_in_respons">tem a dizer em resposta a %survey_name%:</msg>
   <msg key="lt_Here_is_how_your_surv">Eis como a descrição do seu inquérito irá aparecer:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Administrar Inquéritos&quot;&gt;</msg>

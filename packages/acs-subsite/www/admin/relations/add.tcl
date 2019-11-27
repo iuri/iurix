@@ -7,14 +7,14 @@ ad_page_contract {
 
     @author mbryzek@mit.edu
     @creation-date 2000-12-11
-    @cvs-id $Id: add.tcl,v 1.10 2007/01/10 21:22:08 gustafn Exp $
+    @cvs-id $Id: add.tcl,v 1.15.2.5 2017/04/23 20:35:22 gustafn Exp $
 } {
     group_id:integer,notnull
     rel_type:notnull
-    {party_id:integer ""}
-    { exact_p "f" }
-    { return_url "" }
-    { allow_out_of_scope_p "f" }
+    { party_id:naturalnum "" }
+    { exact_p:boolean "f" }
+    { return_url:localurl "" }
+    { allow_out_of_scope_p:boolean "f" }
 } -properties {
     context:onevalue
     role_pretty_name:onevalue
@@ -25,14 +25,14 @@ ad_page_contract {
     add_party_url:onevalue
 } -validate {
     party_in_scope_p -requires {party_id:notnull} {
-	if { $allow_out_of_scope_p eq "f" && \
-		![application_group::contains_party_p -party_id $party_id]} {
+	if { $allow_out_of_scope_p == "f" 
+	     && ![application_group::contains_party_p -party_id $party_id]} {
 	    ad_complain "The party either does not exist or does not belong to this subsite."
 	}
     }
     rel_type_valid_p -requires {group_id:notnull rel_type:notnull exact_p:notnull} {
-	if {$exact_p eq "t" && \
-	    ![relation_type_is_valid_to_group_p -group_id $group_id $rel_type]} {
+	if {$exact_p == "t" 
+	    && ![relation_type_is_valid_to_group_p -group_id $group_id $rel_type]} {
 	    ad_complain "Relations of this type to this group would violate a relational constraint."
 	}
     }
@@ -44,60 +44,26 @@ ad_page_contract {
 
 set context [list "Add relation"]
 
-set export_var_list [list group_id rel_type exact_p return_url allow_out_of_scope_p]
-
+set export_var_list {group_id rel_type exact_p return_url allow_out_of_scope_p}
 if {$party_id ne ""} {
     lappend export_var_list party_id
 }
 
-set create_p [group::permission_p -privilege create $group_id]
-
-
-db_1row group_info {
-    select group_name, join_policy
-    from groups
-    where group_id = :group_id
-}
+group::get -group_id $group_id -array group_info
 
 # We assume the group is on side 1... 
-db_1row rel_type_info {
-    select t.object_type_two, t.role_two as role, 
-           acs_rel_type.role_pretty_name(t.role_two) as role_pretty_name,
-           acs_object_type.pretty_name(t.object_type_two) as object_type_two_name,
-           ancestor_rel_types.object_type as ancestor_rel_type
-      from acs_rel_types t, acs_object_types obj_types, 
-           acs_object_types ancestor_rel_types
-     where t.rel_type = :rel_type
-       and t.rel_type = obj_types.object_type
-       and ancestor_rel_types.supertype = 'relationship'
-       and ancestor_rel_types.object_type in (
-               select object_type from acs_object_types
-               start with object_type = :rel_type
-               connect by object_type = prior supertype
-           )
-}
+db_1row rel_type_info {}
 
 # The role pretty names can be message catalog keys that need
 # to be localized before they are displayed
 set role_pretty_name [lang::util::localize $role_pretty_name]
 
-if {$ancestor_rel_type eq "membership_rel"} {
-    if {$join_policy eq "closed" && !$create_p} {
-	ad_complain "You do not have permission to add elements to $group_name"
-	return
-    }
-
-    set member_state [group::default_member_state -join_policy $join_policy -create_p $create_p]
-} else {
-    set member_state ""
-}
-
-if { $exact_p eq "f" && \
-	[subsite::util::sub_type_exists_p $rel_type] } {
+if { $exact_p == "f" 
+     && [subsite::util::sub_type_exists_p $rel_type] } {
 
     # Sub rel-types exist... select one
     set exact_p "t"
-    set export_url_vars [ad_export_vars -exclude rel_type $export_var_list ]
+    set export_url_vars [export_vars -exclude rel_type $export_var_list ]
 
     relation_types_valid_to_group_multirow \
 	    -datasource_name object_types \
@@ -126,15 +92,19 @@ set party_type $object_type_two
 set party_type_exact_p f
 set add_to_group_id $group_id
 set add_with_rel_type $rel_type
-set add_party_url "[ad_conn package_url]admin/parties/new?[ad_export_vars {add_to_group_id add_with_rel_type party_type party_type_exact_p return_url}]"
+set add_party_url [export_vars -base [ad_conn package_url]admin/parties/new {add_to_group_id add_with_rel_type party_type party_type_exact_p return_url}]
 
 # Build a url used to select an existing party from the system (as opposed
 # to limiting the selection to parties on the current subsite).
-set add_out_of_scope_url "[ad_conn url]?[ad_export_vars -exclude allow_out_of_scope_p $export_var_list]&allow_out_of_scope_p=t"
+set saved_allow_out_of_scope_p $allow_out_of_scope_p
+set allow_out_of_scope_p t
+set add_out_of_scope_url [export_vars -base [ad_conn url] $export_var_list]
 
 # Build a url used to select an existing party from the current subsite
-set add_in_scope_url "[ad_conn url]?[ad_export_vars -exclude allow_out_of_scope_p $export_var_list]&allow_out_of_scope_p=f"
+set allow_out_of_scope_p f
+set add_in_scope_url [export_vars -base [ad_conn url] $export_var_list]
 
+set allow_out_of_scope_p $saved_allow_out_of_scope_p
 
 # We select out all parties that are to not already belong to the
 # specified group with the specified rel_type. Note that we take
@@ -152,14 +122,14 @@ element::create add_relation rel_id -widget hidden -value [db_nextval "acs_objec
 
 if { [template::form is_valid add_relation] } {
 
-    db_transaction {
-	set rel_id [relation_add -form_id add_relation -member_state $member_state $rel_type $group_id $party_id]
-    } on_error {
-	ad_return_error "Error creating the relation" "We got the following error message while trying to create this relation: <pre>$errmsg</pre>"
-	ad_script_abort
+    if {[catch {
+        group::add_member -group_id $group_id -user_id $party_id -rel_type $rel_type
+    } errorMsg]} {
+        ad_complain $errorMsg
     }
+
     if { $return_url eq "" } { 
-	set return_url one?[ad_export_vars rel_id]
+	set return_url [export_vars -base one rel_id]
     }
     ad_returnredirect $return_url
     ad_script_abort
@@ -202,7 +172,7 @@ if {$party_id ne ""} {
     # the list of parties that can be added to $group_id with a relation
     # of type $rel_type.
     
-    if {$allow_out_of_scope_p eq "f"} {
+    if {$allow_out_of_scope_p == "f"} {
 	set scope_query [db_map select_parties_scope_query]
 
 	set scope_clause "
@@ -221,7 +191,7 @@ if {$party_id ne ""} {
 
     if { [llength $party_option_list] == 0 } {
 	ad_return_template add-no-valid-parties
-	ad_return
+	return
     }
     
     template::element create add_relation party_id \
@@ -232,3 +202,9 @@ if {$party_id ne ""} {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

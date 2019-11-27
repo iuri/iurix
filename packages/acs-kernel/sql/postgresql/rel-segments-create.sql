@@ -3,7 +3,7 @@
 --
 -- @author Oumi Mehrotra oumi@arsdigita.com
 -- @creation-date 2000-11-22
--- @cvs-id $Id: rel-segments-create.sql,v 1.14 2010/03/10 00:44:03 donb Exp $
+-- @cvs-id $Id: rel-segments-create.sql,v 1.16.2.2 2016/08/31 18:57:41 gustafn Exp $
 
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- This is free software distributed under the terms of the GNU Public
@@ -15,29 +15,29 @@
 -- change in the future, particularly the functions marked "EXPERIMENTAL".
 -- 
 
-create function inline_0 ()
-returns integer as '
-begin
+CREATE OR REPLACE FUNCTION inline_0 () RETURNS integer AS $$
+BEGIN
  --
  -- Relational Segment: a dynamically derived set of parties, defined
  --                     in terms of a particular type of membership or 
  --                     composition to a particular group.
  --
  PERFORM acs_object_type__create_type (
-   ''rel_segment'',
-   ''#acs-kernel.lt_Relational_Party_Segm#'',
-   ''#acs-kernel.lt_Relational_Party_Segm_1#'',
-   ''party'',
-   ''rel_segments'',
-   ''segment_id'',
-   ''rel_segment'',
-   ''f'',
+   'rel_segment',
+   '#acs-kernel.lt_Relational_Party_Segm#',
+   '#acs-kernel.lt_Relational_Party_Segm_1#',
+   'party',
+   'rel_segments',
+   'segment_id',
+   'rel_segment',
+   'f',
    null,
-   ''rel_segment__name''
+   'rel_segment__name'
    );
 
   return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0 ();
 
@@ -101,11 +101,11 @@ comment on column rel_segments.rel_type is '
 create view rel_segment_party_map
 as select rs.segment_id, gem.element_id as party_id, gem.rel_id, gem.rel_type, 
           gem.group_id, gem.container_id, gem.ancestor_rel_type
-   from rel_segments rs, group_element_map gem, acs_object_types o1, acs_object_types o2
+   from rel_segments rs, group_element_map gem, acs_object_types ot1, acs_object_types ot2
    where gem.group_id = rs.group_id
-     and o1.object_type = gem.rel_type
-     and o2.object_type = rs.rel_type
-     and o1.tree_sortkey between o2.tree_sortkey and tree_right(o2.tree_sortkey);
+     and ot1.object_type = gem.rel_type
+     and ot2.object_type = rs.rel_type
+     and ot1.tree_sortkey between ot2.tree_sortkey and tree_right(ot2.tree_sortkey);
 
 create view rel_segment_distinct_party_map
 as select distinct segment_id, party_id, ancestor_rel_type
@@ -121,11 +121,11 @@ create view rel_seg_approved_member_map
 as select rs.segment_id, gem.element_id as member_id, gem.rel_id, 
           gem.rel_type, gem.group_id, gem.container_id
     from membership_rels mr, group_element_map gem, rel_segments rs,
-         acs_object_types o1, acs_object_types o2
+         acs_object_types ot1, acs_object_types ot2
    where rs.group_id = gem.group_id 
-     and rs.rel_type = o2.object_type
-     and o1.object_type = gem.rel_type 
-     and o1.tree_sortkey between o2.tree_sortkey and tree_right(o2.tree_sortkey)
+     and rs.rel_type = ot2.object_type
+     and ot1.object_type = gem.rel_type 
+     and ot1.tree_sortkey between ot2.tree_sortkey and tree_right(ot2.tree_sortkey)
      and mr.rel_id = gem.rel_id and mr.member_state = 'approved';
 
 create view rel_seg_distinct_member_map
@@ -170,53 +170,75 @@ create table party_approved_member_map (
                     constraint party_member_member_fk
                     references parties
                     on delete cascade,
-    tag             integer
-                    constraint party_member_tag_nn
-                    not null,
+    originating_rel_id integer
+                    constraint party_member_rel_id_fk
+                    references acs_rels
+                    on delete cascade,
     constraint party_approved_member_map_pk
-    primary key (party_id, member_id, tag)
+    primary key (party_id, member_id, originating_rel_id)
 );
 
 -- Need this to speed referential integrity 
 create index party_member_member_idx on party_approved_member_map(member_id);
+create index party_member_party_idx on party_approved_member_map(party_id);
+create index party_member_originating_idx on party_approved_member_map(originating_rel_id);
 
 -- Helper functions to maintain the materialized party_approved_member_map. 
 
-create or replace function party_approved_member__add_one(integer, integer, integer) returns integer as '
-declare
-  p_party_id alias for $1;
-  p_member_id alias for $2;
-  p_rel_id alias for $3;
-begin
+
+
+
+
+select define_function_args('party_approved_member__add_one','party_id,member_id,rel_id');
+
+--
+-- procedure party_approved_member__add_one/3
+--
+CREATE OR REPLACE FUNCTION party_approved_member__add_one(
+   p_party_id integer,
+   p_member_id integer,
+   p_rel_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
 
   insert into party_approved_member_map
-    (party_id, member_id, tag)
+    (party_id, member_id, originating_rel_id)
   values
     (p_party_id, p_member_id, p_rel_id);
 
   return 1;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create or replace function party_approved_member__add(integer, integer, integer, varchar) returns integer as '
-declare
-  p_party_id alias for $1;
-  p_member_id alias for $2;
-  p_rel_id alias for $3;
-  p_rel_type alias for $4;
+
+
+select define_function_args('party_approved_member__add','party_id,member_id,rel_id,rel_type');
+
+--
+-- procedure party_approved_member__add/4
+--
+CREATE OR REPLACE FUNCTION party_approved_member__add(
+   p_party_id integer,
+   p_member_id integer,
+   p_rel_id integer,
+   p_rel_type varchar
+) RETURNS integer AS $$
+DECLARE
   v_segments record;
-begin
+BEGIN
 
   perform party_approved_member__add_one(p_party_id, p_member_id, p_rel_id);
 
   -- if the relation type is mapped to relational segments map them too
 
   for v_segments in select segment_id
-                  from rel_segments s, acs_object_types o1, acs_object_types o2
+                  from rel_segments s, acs_object_types ot1, acs_object_types ot2
                   where 
-                    o1.object_type = p_rel_type
-                    and o1.tree_sortkey between o2.tree_sortkey and tree_right(o2.tree_sortkey)
-                    and s.rel_type = o2.object_type
+                    ot1.object_type = p_rel_type
+                    and ot1.tree_sortkey between ot2.tree_sortkey and tree_right(ot2.tree_sortkey)
+                    and s.rel_type = ot2.object_type
                     and s.group_id = p_party_id
   loop
     perform party_approved_member__add_one(v_segments.segment_id, p_member_id, p_rel_id);
@@ -224,44 +246,62 @@ begin
 
   return 1;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create or replace function party_approved_member__remove_one(integer, integer, integer) returns integer as '
-declare
-  p_party_id alias for $1;
-  p_member_id alias for $2;
-  p_rel_id alias for $3;
-begin
+
+
+select define_function_args('party_approved_member__remove_one','party_id,member_id,rel_id');
+
+--
+-- procedure party_approved_member__remove_one/3
+--
+CREATE OR REPLACE FUNCTION party_approved_member__remove_one(
+   p_party_id integer,
+   p_member_id integer,
+   p_rel_id integer
+) RETURNS integer AS $$
+DECLARE
+BEGIN
 
   delete from party_approved_member_map
   where party_id = p_party_id
     and member_id = p_member_id
-    and tag = p_rel_id;
+    and originating_rel_id = p_rel_id;
 
   return 1;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
-create or replace function party_approved_member__remove(integer, integer, integer, varchar) returns integer as '
-declare
-  p_party_id alias for $1;
-  p_member_id alias for $2;
-  p_rel_id alias for $3;
-  p_rel_type alias for $4;
+
+
+select define_function_args('party_approved_member__remove','party_id,member_id,rel_id,rel_type');
+
+--
+-- procedure party_approved_member__remove/4
+--
+CREATE OR REPLACE FUNCTION party_approved_member__remove(
+   p_party_id integer,
+   p_member_id integer,
+   p_rel_id integer,
+   p_rel_type varchar
+) RETURNS integer AS $$
+DECLARE
   v_segments record;
-begin
+BEGIN
 
   perform party_approved_member__remove_one(p_party_id, p_member_id, p_rel_id);
 
   -- if the relation type is mapped to relational segments unmap them too
 
   for v_segments in select segment_id
-                  from rel_segments s, acs_object_types o1, acs_object_types o2
+                  from rel_segments s, acs_object_types ot1, acs_object_types ot2
                   where 
-                    o1.object_type = p_rel_type
-                    and o1.tree_sortkey between o2.tree_sortkey and tree_right(o2.tree_sortkey)
-                    and s.rel_type = o2.object_type
+                    ot1.object_type = p_rel_type
+                    and ot1.tree_sortkey between ot2.tree_sortkey and tree_right(ot2.tree_sortkey)
+                    and s.rel_type = ot2.object_type
                     and s.group_id = p_party_id
   loop
     perform party_approved_member__remove_one(v_segments.segment_id, p_member_id, p_rel_id);
@@ -269,30 +309,32 @@ begin
 
   return 1;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- Triggers to maintain party_approved_member_map when parties are created or
 -- destroyed.  These don't call the above helper functions because we're just
 -- creating the identity row for the party.
 
-create or replace function parties_in_tr () returns trigger as '
-begin
+CREATE OR REPLACE FUNCTION parties_in_tr () RETURNS trigger AS $$
+BEGIN
 
   insert into party_approved_member_map
-    (party_id, member_id, tag)
+    (party_id, member_id, originating_rel_id)
   values
-    (new.party_id, new.party_id, 0);
+    (new.party_id, new.party_id, -10);
 
   return new;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create trigger parties_in_tr after insert on parties
-for each row execute procedure parties_in_tr ();
+ create trigger parties_in_tr after insert on parties
+ for each row execute procedure parties_in_tr ();
 
-create or replace function parties_del_tr () returns trigger as '
-begin
+CREATE OR REPLACE FUNCTION parties_del_tr () RETURNS trigger AS $$
+BEGIN
 
   delete from party_approved_member_map
   where party_id = old.party_id
@@ -300,7 +342,8 @@ begin
 
   return old;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 create trigger parties_del_tr before delete on parties
 for each row execute procedure parties_del_tr ();
@@ -311,11 +354,11 @@ for each row execute procedure parties_del_tr ();
 -- group with that rel_type.  This was intentional on the part of the aD folks
 -- who added relational segments to ACS 4.2.
 
-create or replace function rel_segments_in_tr () returns trigger as '
-begin
+CREATE OR REPLACE FUNCTION rel_segments_in_tr () RETURNS trigger AS $$
+BEGIN
 
   insert into party_approved_member_map
-    (party_id, member_id, tag)
+    (party_id, member_id, originating_rel_id)
   select new.segment_id, element_id, rel_id
     from group_element_index
     where group_id = new.group_id
@@ -323,13 +366,14 @@ begin
 
   return new;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 create trigger rel_segments_in_tr before insert on rel_segments
 for each row execute procedure rel_segments_in_tr ();
 
-create or replace function rel_segments_del_tr () returns trigger as '
-begin
+CREATE OR REPLACE FUNCTION rel_segments_del_tr () RETURNS trigger AS $$
+BEGIN
 
   delete from party_approved_member_map
   where party_id = old.segment_id
@@ -340,7 +384,8 @@ begin
 
   return old;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 create trigger rel_segments_del_tr before delete on rel_segments
 for each row execute procedure rel_segments_del_tr ();
@@ -364,9 +409,9 @@ from rel_segments s,
       select group_id, group_id as component_id
       from groups) gcm,
      acs_rel_types,
-     acs_object_types o1, acs_object_types o2
+     acs_object_types ot1, acs_object_types ot2
 where s.group_id = gcm.group_id
-  and s.rel_type = o2.object_type
-  and o1.object_type = acs_rel_types.rel_type
-  and o1.tree_sortkey between o2.tree_sortkey and tree_right(o2.tree_sortkey);
+  and s.rel_type = ot2.object_type
+  and ot1.object_type = acs_rel_types.rel_type
+  and ot1.tree_sortkey between ot2.tree_sortkey and tree_right(ot2.tree_sortkey);
  

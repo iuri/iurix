@@ -1,1 +1,0 @@
-alter table layout_pagesets add column customize boolean default 'f';

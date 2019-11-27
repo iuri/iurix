@@ -6,13 +6,13 @@ ad_page_contract {
     @author Bruno Mattarollo <bruno.mattarollo@ams.greenpeace.org>
     @author Christian Hvid
     @creation-date 15 April 2002
-    @cvs-id $Id: localized-message-new.tcl,v 1.11 2008/04/18 06:48:43 victorg Exp $
+    @cvs-id $Id: localized-message-new.tcl,v 1.12.2.3 2016/05/20 19:55:32 gustafn Exp $
 
 } {
     locale
     package_key
     {message_key ""}
-    {return_url {[export_vars -base message-list { locale package_key }]}}
+    {return_url:localurl {[export_vars -base message-list { locale package_key }]}}
 }
 
 
@@ -24,8 +24,8 @@ set locale_label [lang::util::get_label $current_locale]
 set default_locale_label [lang::util::get_label $default_locale]
 
 set page_title "Create New Message"
-set context [list [list "package-list?[export_vars { locale }]" $locale_label] \
-                 [list "message-list?[export_vars { locale package_key show }]" $package_key] \
+set context [list [list [export_vars -base package-list { locale }] $locale_label] \
+                 [list [export_vars -base message-list { locale package_key show }] $package_key] \
                  $page_title]
 
 
@@ -114,3 +114,8 @@ if { [form is_valid message_new] } {
 set focus ""
 
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

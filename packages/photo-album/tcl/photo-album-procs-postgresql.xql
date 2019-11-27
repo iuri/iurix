@@ -110,19 +110,16 @@
           :peeraddr, -- creation_ip
           null, -- locale
           :album_id, -- context_id
-          :caption, -- title
+          :client_filename, -- title
           :description, -- description
-	  't', -- is_live
-          :date, -- publish_date
+          't', -- is_live
+          current_timestamp, -- publish_date
           null, -- nls_lang
           :caption, -- caption
-          :story, -- story
-	  :photographer,
-	  :group_id -- photographer
+          :story -- story
         )
     </querytext>
 </fullquery>
-
 
  
 <fullquery name="pa_insert_image.pa_insert_image">      
@@ -199,44 +196,10 @@
           where ci.content_type = 'pa_album'
           and ci.tree_sortkey between ci2.tree_sortkey and tree_right(ci2.tree_sortkey)
           and ci2.item_id = :root_folder_id) ci1
-where ci1.live_revision = cr.revision_id
-and exists (select 1
-            from acs_object_party_privilege_map m
-            where m.object_id = cr.revision_id
-              and m.party_id = :user_id
-              and m.privilege = 'read')
-       order by cr.title
+    where ci1.live_revision = cr.revision_id
+    and acs_permission__permission_p(cr.revision_id, :user_id, 'read')
+    order by cr.title
    </querytext>
 </fullquery>
-
-
-
-<fullquery name="pa_load_images.clear_tags">      
-   <querytext>
-     delete from tags_tags
-     where item_id = :photo_id
-     and user_id = :user_id
-   </querytext>
-</fullquery>
-
-
-<fullquery name="pa_load_images.create_tag">      
-  <querytext>
-    insert into tags_tags ( 
-    item_id,
-    user_id,
-    package_id,
-    tag,
-    time
-    ) values (
-    :photo_id,
-    :user_id,
-    :package_id,
-    :tag,
-    current_timestamp
-    )
-  </querytext>
-</fullquery>
-
 
 </queryset>

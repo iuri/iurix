@@ -1,6 +1,6 @@
 <master>
-<property name="title">@title@</property>
-<property name="context">@context@</property>
+<property name="doc(title)">@title;literal@</property>
+<property name="context">@context;literal@</property>
 
 
 <formtemplate id="grant">
@@ -46,9 +46,9 @@
 
 <p>
 
-<i>#acs-subsite.Notes#</i>
+<em>#acs-subsite.Notes#</em>
 <br>
-<i>#acs-subsite.lt_Privileges_higher_implied#</i>
+<em>#acs-subsite.lt_Privileges_higher_implied#</em>
 <br>
-<i>#acs-subsite.When_leaving_checkbox_empty#</i>
+<em>#acs-subsite.When_leaving_checkbox_empty#</em>
 

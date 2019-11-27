@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="ind_ID" charset="utf-8">
+<message_catalog package_key="survey" locale="ind_ID" charset="utf-8">
 
   <msg key="-__Created_by">- dibuat oleh</msg>
   <msg key="Actions">Aksi</msg>

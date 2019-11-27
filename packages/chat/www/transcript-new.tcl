@@ -2,7 +2,7 @@
 ad_page_contract {
     Display available all available chat messages.
 } {
-    room_id:integer,notnull
+    room_id:naturalnum,notnull
 } -properties {
     context_bar:onevalue
     title:onevalue

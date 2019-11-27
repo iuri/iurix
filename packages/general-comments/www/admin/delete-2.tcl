@@ -8,10 +8,10 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: delete-2.tcl,v 1.3 2003/09/30 12:10:07 mohanp Exp $
+    @cvs-id $Id: delete-2.tcl,v 1.4.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    comment_id:integer,notnull
-    { return_url {} }
+    comment_id:naturalnum,notnull
+    { return_url:localurl {} }
 }
 
 # There is a bug in content_item.delete that results in
@@ -36,3 +36,9 @@ db_exec_plsql delete_comment {
 
 ad_returnredirect $return_url
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

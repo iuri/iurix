@@ -1,10 +1,10 @@
 ad_page_contract {
     Let's the user reset his/her password.
 
-    @cvs-id $Id: password-reset.tcl,v 1.2 2007/01/10 21:22:11 gustafn Exp $
+    @cvs-id $Id: password-reset.tcl,v 1.3.2.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    {user_id {[ad_conn untrusted_user_id]}}
-    {return_url ""}
+    {user_id:naturalnum,notnull {[ad_conn untrusted_user_id]}}
+    {return_url:localurl ""}
     {password_hash ""}
     {message ""}
 }
@@ -98,3 +98,9 @@ ad_form -extend -name reset -form {
 
     ad_return_template /packages/acs-subsite/www/register/display-message
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

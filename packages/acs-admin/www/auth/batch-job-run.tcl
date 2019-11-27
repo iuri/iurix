@@ -4,7 +4,7 @@ ad_page_contract {
     @author Peter Marklund
     @creation-date 2003-09-11
 } {
-    authority_id:integer
+    authority_id:naturalnum,notnull
 }
 
 auth::authority::get -authority_id $authority_id -array authority
@@ -16,3 +16,9 @@ set context [list [list "." "Authentication"] [list $authority_page_url "$author
 set job_id [auth::authority::batch_sync -authority_id $authority_id]
 
 set job_url [export_vars -base batch-job { job_id }]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -6,15 +6,15 @@ ad_page_contract {
 
     @author dave@thedesignexperience.org
     @date   August 7, 2002
-    @cvs-id $Id: survey-delete.tcl,v 1.4 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id $Id: survey-delete.tcl,v 1.7 2015/06/27 20:46:16 gustafn Exp $
 } {
 
-   survey_id:integer
+   survey_id:naturalnum,notnull
 
 }
 
 set package_id [ad_conn package_id]
-ad_require_permission $package_id survey_admin_survey
+permission::require_permission -object_id $package_id -privilege survey_admin_survey
 
 get_survey_info -survey_id $survey_id
 
@@ -37,7 +37,7 @@ ad_form -name confirm_delete -form {
 	ad_returnredirect "."
         ad_script_abort
     } else {
-	ad_returnredirect "one?[export_vars survey_id]"
+	ad_returnredirect [export_vars -base one survey_id]
         ad_script_abort
     }
 }

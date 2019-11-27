@@ -8,17 +8,17 @@ ad_page_contract {
 
     @author Nick Strugnell (nstrug@arsdigita.com)
     @date   September 15, 2000
-    @cvs-id $Id: modify-responses-2.tcl,v 1.1 2002/09/16 00:00:24 daveb Exp $
+    @cvs-id $Id: modify-responses-2.tcl,v 1.4 2015/06/27 20:46:15 gustafn Exp $
 } {
-    section_id:integer,notnull
-    question_id:integer,notnull
+    section_id:naturalnum,notnull
+    question_id:naturalnum,notnull
     {responses:multiple ""}
     {scores:multiple,array,integer ""}
     {variable_id_list ""}
     {choice_id_list ""}
 }
 
-ad_require_permission $section_id survey_modify_question
+permission::require_permission -object_id $section_id -privilege survey_modify_question
 
 db_transaction {
     
@@ -46,6 +46,6 @@ db_release_unused_handles
 
 get_survey_info -section_id $section_id
 set survey_id $survey_info(survey_id)
-ad_returnredirect "one?[export_url_vars survey_id]"
+ad_returnredirect [export_vars -base one {survey_id}]
 
 	

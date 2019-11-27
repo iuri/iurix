@@ -3,7 +3,7 @@ ad_library {
 
     @author Simon Carstensen (simon@collaobraid.biz)
     @creation-date 2003-08-27
-    @cvs-id $Id: driver-procs.tcl,v 1.7 2007/01/10 21:22:01 gustafn Exp $
+    @cvs-id $Id: driver-procs.tcl,v 1.7.12.2 2015/09/10 08:21:12 gustafn Exp $
 }
 
 namespace eval auth {}
@@ -37,8 +37,7 @@ ad_proc -public auth::driver::get_parameters {
                             -impl_id $impl_id \
                             -operation GetParameters]
     } {
-        global errorInfo
-        ns_log Error "Error getting parameters for impl_id $impl_id: $errmsg\n$errorInfo"
+        ns_log Error "Error getting parameters for impl_id $impl_id: $errmsg\n$::errorInfo"
     }
     return $parameters
 }
@@ -111,3 +110,9 @@ ad_proc -public auth::driver::GetParameters {
                 -operation GetParameters]
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -5,7 +5,7 @@ ad_page_contract {
     @author Lars Pind (lars@collaboraid.biz)
 
     @creation-date 26 October 2001
-    @cvs-id $Id: package-list.tcl,v 1.9 2008/04/18 06:48:43 victorg Exp $
+    @cvs-id $Id: package-list.tcl,v 1.12.2.1 2015/09/10 08:21:29 gustafn Exp $
 } {
     locale
 } -properties {
@@ -28,7 +28,7 @@ set default_locale_label [lang::util::get_label $default_locale]
 set page_title $locale_label
 set context [list $page_title]
 
-set locale_enabled_p [expr [lsearch [lang::system::get_locales] $current_locale] != -1]
+set locale_enabled_p [expr {[lsearch [lang::system::get_locales] $current_locale] != -1}]
 set site_wide_admin_p [acs_user::site_wide_admin_p]
 
 
@@ -54,10 +54,12 @@ db_multirow -extend {
            (select count(*) 
             from   lang_messages lm 
             where  lm.package_key = q.package_key
-            and    lm.locale = :current_locale) as num_translated
+            and    lm.locale = :current_locale
+            and    lm.deleted_p = 'f') as num_translated
     from   (select lmk.package_key,
                    count(message_key) as num_messages
-            from   lang_message_keys lmk
+            from   lang_messages lmk
+            where  lmk.locale = :default_locale and lmk.deleted_p = 'f' 
             group  by package_key) q
     order  by package_key
 } {
@@ -67,10 +69,10 @@ db_multirow -extend {
     set num_translated_pretty [lc_numeric $num_translated]
     set num_untranslated_pretty [lc_numeric $num_untranslated]
 
-    set batch_edit_url "batch-editor?[export_vars { locale package_key }]"
-    set view_messages_url "message-list?[export_vars { locale package_key }]"
-    set view_translated_url "message-list?[export_vars { locale package_key { show "translated" } }]"
-    set view_untranslated_url "message-list?[export_vars { locale package_key { show "untranslated" } }]"
+    set batch_edit_url [export_vars -base batch-editor { locale package_key }]
+    set view_messages_url [export_vars -base message-list { locale package_key }]
+    set view_translated_url [export_vars -base message-list { locale package_key { show "translated" } }]
+    set view_untranslated_url [export_vars -base message-list { locale package_key { show "untranslated" } }]
 }
 
 
@@ -116,3 +118,9 @@ ad_form -extend -name search -form {
 
 set import_all_url [export_vars -base import-messages { { locale $current_locale } {return_url {[ad_return_url]}} }]
 set export_all_url [export_vars -base export-messages { { locale $current_locale } {return_url {[ad_return_url]}} }]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -7,7 +7,7 @@ ad_library {
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Dec  7 10:30:57 2000
-    @cvs-id $Id: attribute-procs.tcl,v 1.10 2007/09/19 13:29:55 gustafn Exp $
+    @cvs-id $Id: attribute-procs.tcl,v 1.12.2.5 2016/11/27 12:19:35 gustafn Exp $
 }
 
 ad_page_contract_filter attribute_dynamic_p { name value } {
@@ -25,7 +25,7 @@ ad_page_contract_filter attribute_dynamic_p { name value } {
                                     and a.object_type = t.object_type
                                     and a.attribute_id = :value)
 	            then 1 else 0 end
-	  from dual
+	  from dual        
     }] } {
 	return 1
     }
@@ -59,7 +59,7 @@ ad_proc -public exists_p {
     specified name. 0 otherwise
     
 } {
-    if { $convert_p eq "t" } {
+    if { $convert_p == "t" } {
 	set attribute [plsql_utility::generate_oracle_name $orig_attribute]
     } else {
 	set attribute $orig_attribute
@@ -71,7 +71,7 @@ ad_proc -public exists_p {
        and a.object_type = :object_type
     } -default 0]
 	
-    if { $attr_exists_p || $convert_p eq "f" } {
+    if { $attr_exists_p || $convert_p == "f" } {
 	# If the attribute exists, o
         return $attr_exists_p
     }    
@@ -131,25 +131,25 @@ ad_proc -public add {
     # the queries are empty because they are pulled out later in db_exec_plsql
     
     set plsql [list]
-    lappend plsql_drop [list "drop_attribute" "FOO" db_exec_plsql]
-    lappend plsql [list "create_attribute" "FOO" db_exec_plsql]
+    lappend plsql_drop [list db_exec_plsql "drop_attribute" "FOO"]
+    lappend plsql [list db_exec_plsql "create_attribute" "FOO"]
 
     set sql_type [datatype_to_sql_type -default $default_value $table_name $attribute_name $datatype]
     
-    lappend plsql_drop [list "drop_attr_column" "FOO" db_dml]
-    lappend plsql [list "add_column" "FOO" db_dml]
+    lappend plsql_drop [list db_dml "drop_attr_column" "FOO"]
+    lappend plsql [list db_dml "add_column" "FOO"]
     
     for { set i 0 } { $i < [llength $plsql] } { incr i } {
-        set pair [lindex $plsql $i]
-        if { [catch {eval [lindex $pair 2] [lindex $pair 0] [lindex $pair 1]} err_msg] } {
+        set cmd [lindex $plsql $i]
+        if { [catch $cmd err_msg] } {
             # Rollback what we've done so far. The loop contitionals are:
             #  start at the end of the plsql_drop list (Drop things in reverse order of creation)
             # execute drop statements until we reach position $i+1
             #  This position represents the operation on which we failed, and thus
             #  is not executed
-            for { set inner [expr {[llength $plsql_drop] - 1}] } { $inner > [expr {$i + 1}] } { set inner [expr {$inner - 1}] } {
-                set drop_pair [lindex $plsql_drop $inner]
-                if { [catch {eval [lindex $drop_pair 2] [lindex $drop_pair 0] [lindex $drop_pair 1]} err_msg_2] } {
+            for { set inner [expr {[llength $plsql_drop] - 1}] } { $inner > $i + 1 } { incr inner -1 } {
+                set drop_cmd [lindex $plsql_drop $inner]
+                if { [catch $drop_cmd err_msg_2] } {
                     append err_msg "\nAdditional error while trying to roll back: $err_msg_2"
                     return -code error $err_msg
                 }
@@ -209,7 +209,7 @@ ad_proc -private datatype_to_sql_type {
         # treat db literals appropriately - null is much different
         # than 'null' - mbryzek
         set vars [list null sysdate]
-        if { [lsearch -exact $vars [string tolower $default]] == -1 } {
+        if {[string tolower $default] ni $vars} {
             set default "'$default'"
         }
         append sql " default $default"
@@ -235,14 +235,7 @@ ad_proc -public delete { attribute_id } {
     # 2. Drop the attribute
     # 3. Return
     
-    if { ![db_0or1row select_attr_info {
-        select a.object_type, a.attribute_name, 
-               decode(a.storage,'type_specific',t.table_name,a.table_name) as table_name,
-	       nvl(a.column_name, a.attribute_name) as column_name
-          from acs_attributes a, acs_object_types t
-         where a.attribute_id = :attribute_id
-           and t.object_type = a.object_type
-    }] } {
+    if { ![db_0or1row select_attr_info {}] } {
         # Attribute doesn't exist
         return 0
     }
@@ -257,8 +250,8 @@ ad_proc -public delete { attribute_id } {
         lappend plsql [list "drop_attr_column" "FOO" "db_dml"]
     }
 
-    foreach pair $plsql {
-        eval [lindex $pair 2] [lindex $pair 0] [lindex $pair 1]
+    foreach cmd $plsql {
+        {*}$cmd
     }
     
     return 1
@@ -379,7 +372,7 @@ ad_proc -public datatype_validator_exists_p {
     if {$datatype eq "enumeration"} { 
 	return 1
     }
-    if { [empty_string_p [info procs "::template::data::validate::$datatype"]] } {
+    if { [info commands "::template::data::validate::$datatype"] eq "" } {
 	return 0
     }
     return 1
@@ -436,23 +429,9 @@ ad_proc -public array_for_type {
           and a.storage in ('[join $include_storage_types "', '"]')"
     }
 
-    db_foreach select_attributes "
-	select nvl(a.column_name, a.attribute_name) as name, 
-               a.pretty_name, a.attribute_id, a.datatype, 
-               v.enum_value, v.pretty_name as value_pretty_name
-	from acs_object_type_attributes a,
-               acs_enum_values v,
-               (select t.object_type, level as type_level
-                  from acs_object_types t
-                 start with t.object_type = :start_with
-               connect by prior t.object_type = t.supertype) t 
-         where a.object_type = :object_type
-           and a.attribute_id = v.attribute_id(+)
-           and t.object_type = a.ancestor_type $storage_clause
-        order by type_level, a.sort_order
-    " {
+    db_foreach select_attributes {} {
 	# Enumeration values show up more than once...
-	if { [lsearch -exact $attr_list $name] == -1 } {
+	if {$name ni $attr_list} {
 	    lappend attr_list $name
 	    set attr_props(pretty_name:$name) $pretty_name
 	    set attr_props(datatype:$name) $datatype
@@ -518,7 +497,7 @@ ad_proc -public multirow {
 		    # pretty name for that attribute
 		    set col_value $enum_values($key:$col_value)
 		}
-		template::multirow append $datasource_name $attr_props(pretty_name:$key) $col_value "id_column=$object_id&[ad_export_vars {attribute_id return_url}]"
+		template::multirow append $datasource_name $attr_props(pretty_name:$key) $col_value "id_column=$object_id&[export_vars {attribute_id return_url}]"
 	    }
 	}
     }
@@ -557,14 +536,10 @@ ad_proc -public add_form_elements {
     set attr_list_of_lists [package_object_attribute_list -start_with $start_with $object_type]
 
     foreach row $attr_list_of_lists {
-	set attribute_id [lindex $row 0]
-	set attribute_name [lindex $row 2]
-	set pretty_name [lindex $row 3]
+	lassign $row  attribute_id . attribute_name pretty_name datatype required_p default
 	# Might translate the datatype into one for which we have a
 	# validator (e.g. a string datatype would change into text).
-	set datatype [translate_datatype [lindex $row 4]]
-	set required_p [lindex $row 5]
-	set default [lindex $row 6]
+	set datatype [translate_datatype $datatype]
 
 	if {$datatype eq "enumeration"} {
 	    # For enumerations, we generate a select box of all the possible values
@@ -574,7 +549,7 @@ ad_proc -public add_form_elements {
 		where enum.attribute_id = :attribute_id 
 		order by enum.sort_order
 	    }]
-	    if {$required_p eq "f"} {
+	    if {$required_p == "f"} {
 		# This is not a required option list... offer a default
 		lappend option_list [list " (no value) " ""]
 	    }
@@ -596,3 +571,9 @@ ad_proc -public add_form_elements {
 
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

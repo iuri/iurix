@@ -2,10 +2,10 @@ ad_page_contract {
     Let's the user change his/her password.  Asks
     for old password, new password, and confirmation.
     
-    @cvs-id $Id: password-update.tcl,v 1.22 2009/03/31 15:06:27 emmar Exp $
+    @cvs-id $Id: password-update.tcl,v 1.23.2.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    {user_id {[ad_conn untrusted_user_id]}}
-    {return_url ""}
+    {user_id:naturalnum,notnull {[ad_conn untrusted_user_id]}}
+    {return_url:localurl ""}
     {old_password ""}
     {message ""}
 }
@@ -60,7 +60,7 @@ ad_form -name update -edit_buttons [list [list [_ acs-kernel.common_update] "ok"
         {message:text(hidden),optional}
     }
 
-if { [exists_and_not_null old_password] } {
+if { ([info exists old_password] && $old_password ne "") } {
     set focus "update.password_1"
 } else {
     ad_form -extend -name update -form {
@@ -89,7 +89,7 @@ ad_form -extend -name update -form {
     }
 } -on_submit {
     
-    if { [exists_and_not_null old_password] } {
+    if { ([info exists old_password] && $old_password ne "") } {
         set password_old $old_password
     }
     
@@ -103,7 +103,7 @@ ad_form -extend -name update -form {
             # Continue
         }
         old_password_bad {
-            if { ![exists_and_not_null old_password] } {
+            if { (![info exists old_password] || $old_password eq "") } {
                 form set_error update password_old $result(password_message)
             } else {
                 # This hack causes the form to reload as if submitted, but with the old password showing
@@ -119,7 +119,7 @@ ad_form -extend -name update -form {
     }
     
     # If old_password was supplied, handle authentication and log the user in
-    if { [exists_and_not_null old_password] } {
+    if { ([info exists old_password] && $old_password ne "") } {
         
         # We use full-scale auth::authenticate here, in order to be sure we also get account-status checked
         # Hm. What if there's a problem with timing, so the password update doesn't take effect immediately?
@@ -141,7 +141,7 @@ ad_form -extend -name update -form {
             }
         }
         
-        if { [exists_and_not_null auth_info(account_url)] } {
+        if { ([info exists auth_info(account_url)] && $auth_info(account_url) ne "") } {
             ad_returnredirect $auth_info(account_url)
             ad_script_abort
         }
@@ -173,3 +173,9 @@ ad_form -extend -name update -form {
     ad_returnredirect -message $message -- $return_url
     ad_script_abort
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

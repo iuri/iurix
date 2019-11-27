@@ -3,11 +3,17 @@ ad_page_contract {
 
     @author Simon Carstensen
     @creation-date 2003-08-29
-    @cvs-id $Id: recover-password.tcl,v 1.12 2009/11/20 21:39:09 michaels Exp $
+    @cvs-id $Id: recover-password.tcl,v 1.13.2.2 2016/05/27 22:26:49 gustafn Exp $
 } {
-    {authority_id:integer ""}
+    {authority_id:naturalnum ""}
     {username ""}
     {email ""}
+} -validate {
+    valid_email -requires email {
+        if {![regexp {^[\w.@+/=$%!*~-]+$} $email]} {
+            ad_complain "invalid email address"
+        }
+    }
 }
 
 set page_title [_ acs-subsite.Reset_Password]
@@ -30,8 +36,8 @@ if {[string is false $email_forgotten_password_p]} {
 # Display form to collect username and authority
 set authority_options [auth::authority::get_authority_options]
 
-if { ![exists_and_not_null authority_id] } {
-    set authority_id [lindex [lindex $authority_options 0] 1]
+if { (![info exists authority_id] || $authority_id eq "") } {
+    set authority_id [lindex $authority_options 0 1]
 }
 
 ad_form -name recover -edit_buttons [list [list [_ acs-kernel.common_continue] ok]] -form { {dummy:text(hidden),optional} }
@@ -60,7 +66,7 @@ if { [auth::UseEmailForLoginP] } {
     
     ad_form -extend -name recover -form [list [list username:text($username_widget) [list label "Username"]]] -validate {
         {username
-            { ![empty_string_p [acs_user::get_by_username -authority_id $authority_id -username $username]] }
+            { [acs_user::get_by_username -authority_id $authority_id -username $username] ne "" }
             { Could not find username at authority }
         }
     }
@@ -80,7 +86,7 @@ ad_form -extend -name recover -on_request {}
 
 # We handle form submission here, because otherwise we can't handle both the case where we use the form
 # and the case where we don't in one go
-if { [form is_valid recover] || (![form is_submission recover] && ([exists_and_not_null username] || [exists_and_not_null email])) } {
+if { [form is_valid recover] || (![form is_submission recover] && (([info exists username] && $username ne "") || ([info exists email] && $email ne ""))) } {
     array set recover_info [auth::password::recover_password \
                                 -authority_id $authority_id \
                                 -username $username \
@@ -90,3 +96,9 @@ if { [form is_valid recover] || (![form is_submission recover] && ([exists_and_n
 }
 
 set system_owner [ad_system_owner]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

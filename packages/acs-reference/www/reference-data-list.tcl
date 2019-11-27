@@ -3,7 +3,7 @@ ad_page_contract {
     
     @author Jon Griffin (jon@jongriffin.com)
     @creation-date 2000-10-04
-    @cvs-id $Id: reference-data-list.tcl,v 1.2 2005/03/01 00:01:22 jeffd Exp $
+    @cvs-id $Id: reference-data-list.tcl,v 1.2.18.2 2016/01/02 17:39:23 gustafn Exp $
 } {
 } -properties {
     context_bar:onevalue
@@ -19,7 +19,11 @@ set context_bar [list "$title"]
  
 set user_id [ad_conn user_id]
 
-db_multirow data data_select { 
-}
+db_multirow data data_select {}
 
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

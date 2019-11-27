@@ -13,4 +13,3 @@ nsv_set chat server_started 0
 
 ad_schedule_proc -thread t -schedule_proc ns_schedule_daily [list 0 5] chat_flush_rooms
 
-ad_schedule_proc -thread t [expr 6 * 10 * 10] chat_set_inactive_room

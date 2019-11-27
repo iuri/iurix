@@ -6,10 +6,9 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 12/8/2000
-    @cvs-id $Id: folder-add.tcl,v 1.4 2003/11/18 22:59:03 rocaelh Exp $
+    @cvs-id $Id: folder-add.tcl,v 1.7 2014/08/07 07:59:50 gustafn Exp $
 } {
-    parent_id:integer,notnull
-    return_url:optional
+    parent_id:naturalnum,notnull
 } -validate {
     valid_parent -requires {parent_id:integer} {
 	if [string equal [pa_is_folder_p $parent_id] "f"] {
@@ -21,7 +20,7 @@ ad_page_contract {
 }
 
 # check for permission
-ad_require_permission $parent_id pa_create_folder
+permission::require_permission -object_id $parent_id -privilege pa_create_folder
 
  
 set context_list [pa_context_bar_list -final "[_ photo-album._Create_1]" $parent_id]
@@ -92,11 +91,11 @@ if { [template::form is_valid folder_add] } {
     } on_error {
 	# most likely a duplicate name or a double click
         
-	if [db_string duplicate_check "
+	if {[db_string duplicate_check "
 	  select count(*)
 	  from   cr_items
 	  where  (item_id = :folder_id or name = :name)
-	  and    parent_id = :parent_id"] {
+	  and    parent_id = :parent_id"]} {
 	      ad_return_complaint 1 "[_ photo-album._Either_2]"
 	} else {
 	    ad_return_complaint 1 "[_ photo-album._We]"
@@ -105,12 +104,7 @@ if { [template::form is_valid folder_add] } {
 	ad_script_abort
     }
 
-    # HAM : added return_url
-    if { ![exists_and_not_null return_url] } {
-        #redirect back to index page with parent_id
-        ad_returnredirect "?folder_id=$parent_id"
-    } else {
-        ad_returnredirect $return_url
-    }
+    #redirect back to index page with parent_id
+    ad_returnredirect "?folder_id=$parent_id"
     ad_script_abort
 }

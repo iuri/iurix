@@ -89,9 +89,9 @@ create or replace function pa_photo__new (varchar,integer,integer,integer,timest
     );
 
     insert into pa_photos
-    (pa_photo_id, caption, story, user_filename, date_taken)
+    (pa_photo_id, caption, story, user_filename)
     values
-    (v_revision_id, new__caption, new__story, new__title, new__publish_date);
+    (v_revision_id, new__caption, new__story, new__title);
 
     if new__is_live = ''t'' then
        PERFORM content_item__set_live_revision (v_revision_id);

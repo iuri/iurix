@@ -3,7 +3,7 @@
   
   @creation-date 2006-08-08
   @author Gustaf Neumann
-  @cvs-id $Id: notification-procs.tcl,v 1.15 2010/07/15 23:55:31 gustafn Exp $
+  @cvs-id $Id: notification-procs.tcl,v 1.21.2.4 2016/11/29 22:04:46 gustafn Exp $
 }
 
 namespace eval ::xowiki {
@@ -62,11 +62,11 @@ namespace eval ::xowiki {
 namespace eval ::xowiki::notification {
 
   ad_proc -private get_url {id} {
-    if {[db_0or1row is_package_id "select 1 from apm_packages where package_id = $id"]} {
+    if {[::xo::dc 0or1row is_package_id {select 1 from apm_packages where package_id = :id}]} {
       #
       # the specified id is an package_id
       #
-      set node_id [db_string get_node_id "select node_id from site_nodes where object_id = $id"]
+      set node_id [::xo::dc get_value get_node_id {select node_id from site_nodes where object_id = :id}]
       set url [site_node::get_url -node_id $node_id]
       return $url
     }
@@ -100,36 +100,65 @@ namespace eval ::xowiki::notification {
     if {![info exists page]} {
       set page [::xowiki::Package instantiate_page_from_id -revision_id $revision_id]
       $page volatile
+    } else {
+      set revision_id [$page set revision_id]
     }
+
+    #ns_log notice "--n notification proc called for page [$page name] (revision_id $revision_id) in state [$page publish_status]"
     
     if {[$page set publish_status] eq "production"} {
-      # don't do notification for pages under construction
-      #ns_log notice "--n xowiki::notification NO NOTIFCATION due to production state"
+      #
+      # Don't do notification for pages under construction.
+      #
+      ns_log notice "--n xowiki::notification NO notification due to production state"
       return
     }
-    
+    set pretty_link [$page pretty_link]    
     $page absolute_links 1
-    if {![info exists html]} {set html [$page render]}
-    if {![info exists text]} {set text [ad_html_text_convert -from text/html -to text/plain -- $html]}
+    if {![info exists html]} {
+      set html [$page notification_render]
+    }
+    
+    if {$html eq ""} {
+      #
+      # The notification renderer returned empty. Nothing to do.
+      #
+      #ns_log notice "--n notification renderer returned emtpy for page [$page name] (revision_id $revision_id). Nothing to do"
+      return
+    }
 
-    #ns_log notice "--n xowiki::notification::do_notifications called for item_id [$page set revision_id] publish_status=[$page set publish_status] XXX"
+    #
+    # Turn relative URLs into absolute URLs in the HTML text such that
+    # links in notification still work. The function supports as well
+    # non-wiki links. Here we are able to provide an accurate
+    # pretty_link as base-url.
+    #
+    set html [ad_html_qualify_links -path [file dirname $pretty_link] $html]
+    
+    if {![info exists text]} {
+      set text [ad_html_text_convert -from text/html -to text/plain -- $html]
+    }
+
+    #ns_log notice "--n xowiki do_notifications called for revision_id $revision_id publish_status=[$page set publish_status]"
+    set details [$page notification_detail_link]
+    append html [dict get $details html]
+    append text [dict get $details text]
+
     $page instvar package_id
-    set link [$page pretty_link -absolute 1]
-    append html "<p>For more details, see <a href='$link'>[$page set title]</a></p>"
-    append text "\nFor more details, see $link ...<hr>\n"
-
     set state [expr {[$page set last_modified] eq [$page set creation_date] ? "New" : "Updated"}]
     set instance_name [::$package_id instance_name]
+
+    set notif_user_id [expr {[$page exists modifying_user] ? [$page set modifying_user] :  [$page set creation_user]}]
 
     #ns_log notice "--n per directory [$page set title] ($state)"
     notification::new \
         -type_id [notification::type::get_type_id -short_name xowiki_notif] \
         -object_id [$page set package_id] \
         -response_id [$page set revision_id] \
-        -notif_subject "\[$instance_name\] [$page set title] ($state)" \
+        -notif_subject [$page notification_subject -instance_name $instance_name -state $state] \
         -notif_text $text \
         -notif_html $html \
-        -notif_user [expr {[$page exists modifying_user] ? [$page set modifying_user] :  [$page set creation_user]}]
+        -notif_user $notif_user_id
 
     #ns_log notice "--n find categories [$page set title] ($state)"
 
@@ -138,7 +167,7 @@ namespace eval ::xowiki::notification {
       array unset cat
       array unset label
       foreach category_info [::xowiki::Category get_category_infos -tree_id $tree_id] {
-        foreach {category_id category_label deprecated_p level} $category_info {break}
+        lassign $category_info category_id category_label deprecated_p level
         set cat($level) $category_id
         set label($level) $category_label
         if {$category_id == $cat_id} break
@@ -149,10 +178,10 @@ namespace eval ::xowiki::notification {
             -type_id [notification::type::get_type_id -short_name xowiki_notif] \
             -object_id $cat($level) \
             -response_id [$page set revision_id] \
-            -notif_subject "\[$instance_name\] $label($level): [$page set title] ($state)" \
+            -notif_subject [$page notification_subject -instance_name $instance_name -category_label $label($level) -state $state] \
             -notif_text $text \
             -notif_html $html \
-            -notif_user [$page set creation_user]
+            -notif_user $notif_user_id
       }
     }
   }
@@ -173,3 +202,9 @@ namespace eval ::xowiki::notification {
 }
 ::xo::library source_dependent 
 
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

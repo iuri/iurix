@@ -3,9 +3,9 @@ ad_page_contract {
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Oct 23, 2005
-  @cvs-id $Id: revisions.tcl,v 1.5 2006/06/20 22:56:53 gustafn Exp $
+  @cvs-id $Id: revisions.tcl,v 1.6.2.1 2015/09/10 08:10:44 gustafn Exp $
 } {
-  page_id:integer,notnull
+  page_id:naturalnum,notnull
   {name ""}
 } -properties {
   name:onevalue
@@ -97,3 +97,9 @@ db_multirow -unclobber -extend {
   set author_link [acs_community_member_link -user_id $author_id -label $author]
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

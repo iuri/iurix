@@ -11,16 +11,16 @@ ad_page_contract {
   @author  jsc@arsdigita.com
   @author  nstrug@arsdigita.com
   @date    February 16, 2000
-  @cvs-id  $Id: response-drill-down.tcl,v 1.3 2005/01/21 17:24:28 jeffd Exp $
+  @cvs-id  $Id: response-drill-down.tcl,v 1.6 2015/06/27 20:46:15 gustafn Exp $
 
 } {
 
-  question_id:integer,notnull
-  choice_id:integer,notnull
-  csv:optional 
+  question_id:naturalnum,notnull
+  choice_id:naturalnum,notnull
+  
 }
 
-ad_require_permission $question_id survey_admin_survey
+permission::require_permission -object_id $question_id -privilege survey_admin_survey
 
 # get the prompt text for the question and the ID for survey of 
 # which it is part
@@ -47,43 +47,11 @@ if { !$response_exists_p } {
 # Get information of users who responded in particular manner to
 # choice question.
 
-set action_url [export_vars -base [ad_conn url] {{csv yes} question_id choice_id}]
-set actions [list "CSV" "$action_url" "[_ dotlrn.Comma_Separated_Values]"]
-
-template::list::create \
-	-name user_responses \
-	-key user_id \
-	-actions $actions \
-	-elements {
-		responder_name {
-			label "[_ acs-subsite.Name]"
-			link_url_eval $link
-		}
-		email {
-			label "[_ acs-subsite.Email]"
-			link_url_eval $link
-		}
-		creation_date {
-			label "[_ survey.Date]"
-		}
-	} -selected_format csv -formats {
-			    csv { output csv }
-	}
-
-
-set now [clock_to_ansi [clock seconds]]
-db_multirow -extend {
-	link		
-} user_responses all_users_for_response {} {
-	set link "one-respondent?user_id=$user_id&survey_id=$survey_id"
-	set creation_date [util::age_pretty -timestamp_ansi $creation_date -sysdate_ansi $now]
-}
+db_multirow user_responses all_users_for_response {}
 
 set context [list \
-     [list "one?[export_url_vars survey_id]" $survey_info(name)] \
-     [list "responses?[export_url_vars survey_id]" "[_ survey.Responses]"] \
+     [list [export_vars -base one {survey_id}] $survey_info(name)] \
+     [list [export_vars -base responses {survey_id}] "[_ survey.Responses]"] \
      "[_ survey.One_Response]"]
 
-if { [exists_and_not_null csv] } {
-    template::list::write_output -name user_responses
-}
+ad_return_template

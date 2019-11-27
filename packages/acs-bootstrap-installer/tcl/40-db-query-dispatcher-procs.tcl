@@ -16,17 +16,17 @@
 # The following code allows ad_proc to be used
 # here (a local workalike is declared if absent).
 # added 2002-09-11 Jeff Davis (davis@xarg.net)
-if {{} ne [info procs ad_library] } { 
+if {[info commands ad_library] ne "" } { 
     ad_library {
         Query Dispatching for multi-RDBMS capability
 
         @author Ben Adida (ben@openforce.net)
         @author Bart Teeuwisse (bart.teeuwisse@thecodemill.biz)
-	@cvs-id $Id: 40-db-query-dispatcher-procs.tcl,v 1.40 2007/01/10 21:22:03 gustafn Exp $
+	@cvs-id $Id: 40-db-query-dispatcher-procs.tcl,v 1.43.2.4 2017/04/22 18:26:04 gustafn Exp $
     } 
 }
 
-if { {} ne [info procs ad_proc] } {
+if { [info commands ad_proc] ne ""} {
     set remove_ad_proc_p 0
 } else { 
     set remove_ad_proc_p 1
@@ -86,7 +86,7 @@ ad_proc -public db_rdbms_compatible_p {rdbms_test rdbms_pattern} {
     # db_qd_log QDDebug "The RDBMS_PATTERN is [db_rdbms_get_type $rdbms_pattern] - [db_rdbms_get_version $rdbms_pattern]"
 
     # If the pattern is for all RDBMS, then yeah, compatible
-    if {[empty_string_p [db_rdbms_get_type $rdbms_test]]} {
+    if {[db_rdbms_get_type $rdbms_test] eq ""} {
 	return 1
     }
 
@@ -97,16 +97,16 @@ ad_proc -public db_rdbms_compatible_p {rdbms_test rdbms_pattern} {
     }
 
     # If the pattern has no version
-    if {[empty_string_p [db_rdbms_get_version $rdbms_pattern]]} {
+    if {[db_rdbms_get_version $rdbms_pattern] eq ""} {
 	return 1
     }
 
     # If the query being tested was written for a version that is older than 
     # the current RDBMS then we have compatibility. Otherwise we don't.
     foreach t [split [db_rdbms_get_version $rdbms_test   ] "\."] \
-            p [split [db_rdbms_get_version $rdbms_pattern] "\."] {
-                if {$t != $p} {return [expr {$t < $p}]}
-            }
+	p [split [db_rdbms_get_version $rdbms_pattern] "\."] {
+	    if {$t != $p} {return [expr {$t < $p}]}
+	}
     
     # Same version (though not strictly "older") is OK
     return 1
@@ -194,11 +194,11 @@ ad_proc -public db_qd_pick_most_specific_query {rdbms query_1 query_2} {
     # We ASSUME that both queries are at least compatible.
     # Otherwise this is a stupid exercise
 
-    if {[empty_string_p [db_rdbms_get_version $rdbms_1]]} {
+    if {[db_rdbms_get_version $rdbms_1] eq ""} {
 	return $query_2
     }
 
-    if {[empty_string_p [db_rdbms_get_version $rdbms_2]]} {
+    if {[db_rdbms_get_version $rdbms_2] eq ""} {
 	return $query_1
     }
 
@@ -217,13 +217,29 @@ ad_proc -public db_qd_pick_most_specific_query {rdbms query_1 query_2} {
 #
 ################################################
 
-ad_proc -public db_qd_load_query_file {file_path} {
+ad_proc -public db_qd_load_query_file {file_path {errorVarName ""}} {
     A procedure that is called from the outside world (APM) 
     to load a particular file
-} { 
-    if { [catch {db_qd_internal_load_cache $file_path} errmsg] } {
-        global errorInfo
-        ns_log Error "Error parsing queryfile $file_path:\n\n$errmsg\n\n$errorInfo"
+} {
+    if {$errorVarName ne ""} {
+	upvar $errorVarName errors
+    } else {
+	array set errors [list]
+    }
+    if { [catch {db_qd_internal_load_cache $file_path} errMsg] } {
+        set backTrace $::errorInfo
+        ns_log Error "Error parsing queryfile $file_path:\n\n$errMsg\n\n$backTrace"
+	set r_file [ad_make_relative_path $file_path]
+	set package_key ""
+	regexp {/packages/([^/]+)/} $file_path -> package_key
+	lappend errors($package_key) $r_file $backTrace
+    }
+}
+
+# small compatibility function to avoid existence checks at runtime
+if {[info commands ::nsf::strip_proc_name] eq ""} {
+    namespace eval ::nsf {
+        proc ::nsf::strip_proc_name {name} {return $name}
     }
 }
 
@@ -243,7 +259,7 @@ ad_proc -public db_qd_get_fullname {local_name {added_stack_num 1}} {
     # (eg. from bootstrap.tcl), in which case we return what we
     # were given
     if { [catch {string trimleft [info level [expr {-1 - $added_stack_num}]] ::} proc_name] } {
-	return $local_name
+	return [::nsf::strip_proc_name $local_name]
     }
 
     # If util_memoize, we have to go back up one in the stack
@@ -252,11 +268,12 @@ ad_proc -public db_qd_get_fullname {local_name {added_stack_num 1}} {
 	set proc_name [info level [expr {-2 - $added_stack_num}]]
     }
 
+    set proc_name [::nsf::strip_proc_name $proc_name]
     set list_of_source_procs {ns_sourceproc apm_source template::adp_parse template::frm_page_handler rp_handle_tcl_request}
 
     # We check if we're running the special ns_ proc that tells us
     # whether this is an URL or a Tcl proc.
-    if {[lsearch $list_of_source_procs [lindex $proc_name 0]] != -1} {
+    if { [lindex $proc_name 0] in $list_of_source_procs } {
 
 	# Means we are running inside an URL
 
@@ -276,7 +293,7 @@ ad_proc -public db_qd_get_fullname {local_name {added_stack_num 1}} {
         # added case for handling .vuh files which are sourced from 
         # rp_handle_tcl_request.  Otherwise, QD was forming fullquery path 
         # with the assumption that the query resided in the 
-        # rp_handle_tcl_request proc itself. (Openacs - DanW)
+        # rp_handle_tcl_request proc itself. (OpenACS - DanW)
 
         switch $proc_name {
 
@@ -339,14 +356,13 @@ ad_proc -public db_qd_get_fullname {local_name {added_stack_num 1}} {
         # check to see if a package proc is being called without 
         # namespace qualification.  If so, add the package qualification to the
         # proc_name, so that the correct query can be looked up. 
-        # (Openacs - DanW)
+        # (OpenACS - DanW)
 
         set calling_namespace [string range [uplevel [expr {1 + $added_stack_num}] {namespace current}] 2 end]
         # db_qd_log QDDebug "calling namespace = $calling_namespace"
 
         if {$calling_namespace ne "" && 
-            ![regexp {::} $proc_name all]} {
-
+            ![string match "*::*" $proc_name]} {
             set proc_name ${calling_namespace}::${proc_name}
         }
 	# db_qd_log QDDebug "proc_name is -$proc_name-"
@@ -387,20 +403,18 @@ ad_proc -public db_qd_get_fullname {local_name {added_stack_num 1}} {
 
     # db_qd_log QDDebug "generated fullname of $full_name"
     
+    # The following block is apparently just for debugging
     # aks - making debug output actually useable
-    if {[llength $proc_name] > 1} {
-        
-        set proc_name_with_parameters "[lindex $proc_name 0] "
-        
-        set i 1
-        foreach parameter [lrange $proc_name  1 end] {
-            append proc_name_with_parameters "parameter$i: $parameter " 
-            incr i
-        }
-    } else {
-        set proc_name_with_parameters $proc_name
-    }
-
+    # if {[llength $proc_name] > 1} {
+    #     set proc_name_with_parameters "[lindex $proc_name 0] "
+    #     set i 1
+    #     foreach parameter [lrange $proc_name  1 end] {
+    #         append proc_name_with_parameters "parameter$i: $parameter " 
+    #         incr i
+    #     }
+    # } else {
+    #     set proc_name_with_parameters $proc_name
+    # }
     # db_qd_log QDDebug "db_qd_get_fullname: following query in file: $url proc: $proc_name_with_parameters"
 
     return $full_name
@@ -526,12 +540,12 @@ ad_proc -private db_qd_internal_load_queries {file_pointer file_tag} {
 	    set new_name [db_qd_make_absolute_path $queryname_root [db_fullquery_get_name $one_query]]
 
 	    set new_fullquery [db_fullquery_create \
-		    $new_name \
-		    [db_fullquery_get_querytext $one_query] \
-		    [db_fullquery_get_bind_vars $one_query] \
-		    [db_fullquery_get_query_type $one_query] \
-		    [db_fullquery_get_rdbms $one_query] \
-		    [db_fullquery_get_load_location $one_query]]
+				   $new_name \
+				   [db_fullquery_get_querytext $one_query] \
+				   [db_fullquery_get_bind_vars $one_query] \
+				   [db_fullquery_get_query_type $one_query] \
+				   [db_fullquery_get_rdbms $one_query] \
+				   [db_fullquery_get_load_location $one_query]]
 
 	    set one_query $new_fullquery
 
@@ -543,7 +557,7 @@ ad_proc -private db_qd_internal_load_queries {file_pointer file_tag} {
     }
 
     set relative_path [string range $file_tag \
-        [expr { [string length [acs_root_dir]] + 1 }] end]
+			   [expr { [string length $::acs::rootdir] + 1 }] end]
     nsv_set apm_library_mtime $relative_path [file mtime $file_tag]
 }
 
@@ -691,18 +705,8 @@ ad_proc -private db_qd_internal_parse_one_query {parsing_state} {
 } { 
     
     # Find the index that we're looking at
-    set index [lindex $parsing_state 0]
+    lassign $parsing_state index node_list parsed_doc default_rdbms file_path
     
-    # Find the list of nodes
-    set node_list [lindex $parsing_state 1]
-
-    # Parsed Doc Pointer
-    set parsed_doc [lindex $parsing_state 2]
-
-    # Default RDBMS
-    set default_rdbms [lindex $parsing_state 3]
-    set file_path [lindex $parsing_state 4]
-
     # BASE CASE
     if {[llength $node_list] <= $index} {
 	# Clean up
@@ -722,7 +726,7 @@ ad_proc -private db_qd_internal_parse_one_query {parsing_state} {
 
     # Update the parsing state so we know
     # what to parse next 
-    set parsing_state [list $index $node_list [lindex $parsing_state 2] $default_rdbms $file_path]
+    set parsing_state [list $index $node_list $parsed_doc $default_rdbms $file_path]
 
     # Parse the actual query from XML
     set one_query [db_qd_internal_parse_one_query_from_xml_node $one_query_xml $default_rdbms $file_path]
@@ -805,7 +809,7 @@ ad_proc -private db_qd_relative_path_p {path} {
     set root_path_length [string length $root_path]
 
     # Check if the path starts with the root
-    if {[string range $path 0 [expr {$root_path_length - 1}]] == $root_path} {
+    if {[string range $path 0 $root_path_length-1] eq $root_path} {
 	return 0
     } else {
 	return 1
@@ -824,6 +828,8 @@ ad_proc -private db_qd_make_absolute_path {relative_root suffix} {
 ## Extra Utilities to Massage the system and Rub it in all the right ways
 ##
 ad_proc -private db_qd_internal_prepare_queryfile_content {file_content} {
+    Prepare raw .xql-file content form xml-parsing via quoting
+} {
     
     set new_file_content ""
 
@@ -856,13 +862,13 @@ ad_proc -private db_qd_internal_prepare_queryfile_content {file_content} {
 	append new_file_content [string range $rest_of_file_content 0 [expr {$first_querytext_open + $querytext_open_len - 1}]]
 
 	# append quoted querytext
-	append new_file_content [ns_quotehtml [string range $rest_of_file_content [expr {$first_querytext_open + $querytext_open_len}] [expr {$first_querytext_close - 1}]]]
+	append new_file_content [ns_quotehtml [string range $rest_of_file_content $first_querytext_open+$querytext_open_len $first_querytext_close-1]]
 
 	# append close querytext
 	append new_file_content $querytext_close
 
 	# Set up the rest
-	set rest_of_file_content [string range $rest_of_file_content [expr {$first_querytext_close + $querytext_close_len}] end]
+	set rest_of_file_content [string range $rest_of_file_content $first_querytext_close+$querytext_close_len end]
     }
 
     # db_qd_log QDDebug "new massaged file content: \n $new_file_content \n"
@@ -888,3 +894,10 @@ ad_proc -private db_qd_log {level msg} {
 if { $remove_ad_proc_p } { 
     rename ad_proc {}
 }
+
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

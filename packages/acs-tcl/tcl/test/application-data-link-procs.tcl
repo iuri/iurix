@@ -1,13 +1,13 @@
 ad_library {
-    Tests for applicaiton data links
+    Tests for application data links.
 }
 
 aa_register_case -cats api data_links_scan_links {
     Test scanning content for object URLs
 } {
     # get a new object_id from the sequence, this object will not exist
-    set nonexistant_object_id [db_nextval "acs_object_id_seq"]
-    set text {Some random text <img src="/o/0"> <a href="/file/0"> <img src="/image/0"> <img src="/image/${nonexistant_object_id}/"> <img src="/image/0/thumbnail"> <img src="/image/0/info"> <a href="http://example.com/o/9">
+    set nonexistent_object_id [db_nextval "acs_object_id_seq"]
+    set text {Some random text <img src="/o/0"> <a href="/file/0"> <img src="/image/0"> <img src="/image/${nonexistent_object_id}/"> <img src="/image/0/thumbnail"> <img src="/image/0/info"> <a href="http://example.com/o/9">
               Some More Random Text <a href="/o/junk"> <a href="/file/junk"> <a href="/image/junk"> /o/10 /file/11 /image/12
 	/o/[junk] /file/[junk] /image/[junk]
         /o/" /file/" /image/"
@@ -91,8 +91,8 @@ aa_register_case -cats api data_links_scan_links_with_tag {
     Test scanning content for object URLs with relation tag
 } {
     # get a new object_id from the sequence, this object will not exist
-    set nonexistant_object_id [db_nextval "acs_object_id_seq"]
-    set text {Some random text <img src="/o/0"> <a href="/file/0"> <img src="/image/0"> <img src="/image/${nonexistant_object_id}/"> <img src="/image/0/thumbnail"> <img src="/image/0/info"> <a href="http://example.com/o/9">
+    set nonexistent_object_id [db_nextval "acs_object_id_seq"]
+    set text {Some random text <img src="/o/0"> <a href="/file/0"> <img src="/image/0"> <img src="/image/${nonexistent_object_id}/"> <img src="/image/0/thumbnail"> <img src="/image/0/info"> <a href="http://example.com/o/9">
               Some More Random Text <a href="/o/junk"> <a href="/file/junk"> <a href="/image/junk"> /o/10 /file/11 /image/12
     /o/[junk] /file/[junk] /image/[junk]
         /o/" /file/" /image/"
@@ -218,20 +218,28 @@ aa_register_case -cats api data_links_with_tag {
         application_data_link::new -this_object_id $o(3) -target_object_id $o(4) -relation_tag tag2
         application_data_link::new -this_object_id $o(3) -target_object_id $o(5) -relation_tag tag2
         
-        aa_true "Verify link for tag1" [expr [llength [application_data_link::get_linked -from_object_id $o(0) \
-                                        -to_object_type [acs_object_type $o(0)] -relation_tag tag1]] == 2]
+        aa_true "Verify link for tag1" \
+	    [expr {[llength [application_data_link::get_linked -from_object_id $o(0) \
+				 -to_object_type [acs_object_type $o(0)] -relation_tag tag1]] == 2}]
 
-        aa_true "Verify link for tag2" [expr [llength [application_data_link::get_linked -from_object_id $o(3) \
-                                        -to_object_type [acs_object_type $o(3)] -relation_tag tag2]] == 3]
+        aa_true "Verify link for tag2" \
+	    [expr {[llength [application_data_link::get_linked -from_object_id $o(3) \
+				 -to_object_type [acs_object_type $o(3)] -relation_tag tag2]] == 3}]
 
-        aa_true "Verify content link" [expr [llength [application_data_link::get_linked_content -from_object_id $o(0) \
-                                                        -to_content_type content_revision -relation_tag tag1]] == 2]
+        aa_true "Verify content link" \
+	    [expr {[llength [application_data_link::get_linked_content -from_object_id $o(0) \
+				 -to_content_type content_revision -relation_tag tag1]] == 2}]
         
         aa_true "Verify links to one object with multiple link tags" \
-                                      [expr [llength [application_data_link::get -object_id $o(0) -relation_tag tag1]] == 2]
+	    [expr {[llength [application_data_link::get -object_id $o(0) -relation_tag tag1]] == 2}]
         
         aa_true "Verify links to one object with multiple link tags" \
-                                      [expr [llength [application_data_link::get -object_id $o(0) -relation_tag tag2]] == 1]
+	    [expr {[llength [application_data_link::get -object_id $o(0) -relation_tag tag2]] == 1}]
 
     }
 }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author jader@bread.com
     @creation-date 2003-07-28
-    @cvs-id $Id: task-one.tcl,v 1.12 2005/08/11 21:31:55 miguelm Exp $
+    @cvs-id $Id: task-one.tcl,v 1.13 2018/04/05 14:44:09 hectorr Exp $
 
     @return task_term Term to use for Task
     @return task_term_lower Term to use for task
@@ -95,6 +95,6 @@ if { [exists_and_not_null orderby_people] } {
     set exist_order_by_p 0
 }
 
-# Retrieving the value of the parameter to knwo wich template we call
+# Retrieving the value of the parameter to know which template we call
 set template_src [parameter::get -parameter "TaskOne"]
 # ------------------------- END OF FILE ------------------------- #

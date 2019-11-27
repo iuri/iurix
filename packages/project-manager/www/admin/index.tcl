@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author jader@bread.com
     @creation-date 2003-09-10
-    @cvs-id $Id: index.tcl,v 1.6 2005/06/06 08:11:00 timoh Exp $
+    @cvs-id $Id: index.tcl,v 1.8 2018/05/09 15:33:33 hectorr Exp $
 
     @return title Page title.
     @return context Context bar.

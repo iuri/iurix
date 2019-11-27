@@ -7,56 +7,72 @@
 --
 -- @creation-date 2000-08-05
 --
--- @cvs-id $Id: acs-core.sql,v 1.2 2001/03/23 00:21:50 danw Exp $
+-- @cvs-id $Id: acs-core.sql,v 1.3 2011/07/07 10:46:02 gustafn Exp $
 --
 
-create function test_acs_core () returns integer as '
-declare
+
+
+--
+-- procedure test_acs_core/0
+--
+CREATE OR REPLACE FUNCTION test_acs_core(
+
+) RETURNS integer AS $$
+DECLARE
  uid     users.user_id%TYPE;
  tname   varchar;
-begin
- raise notice ''Calling acs_user.new() to create user 1'';
+BEGIN
+ raise notice 'Calling acs_user.new() to create user 1';
 
  uid :=
   acs_user__new(1,
-                ''user'',
+                'user',
                 now(),
                 null,
-                ''127.0.0.1'',                
-                ''jane.doe@arsdigita.com'',
+                '127.0.0.1',                
+                'jane.doe@arsdigita.com',
                 null,
-                ''Jane'',
-                ''Doe'',
-                ''janedoerules'',
-                null,
-                null,
+                'Jane',
+                'Doe',
+                'janedoerules',
                 null,
                 null,
-                ''t'',
+                null,
+                null,
+                't',
                 null
                 );
 
 
  tname := acs_object__name(1);
 
- raise NOTICE ''Calling acs_object.name to get the name of user: %'', tname;
+ raise NOTICE 'Calling acs_object.name to get the name of user: %', tname;
 
- raise NOTICE ''Calling acs_user.delete to delete user 1'';
+ raise NOTICE 'Calling acs_user.delete to delete user 1';
 
  -- PERFORM acs_user__delete(1);
 
  return NULL;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create function test_del_user () returns integer as '
-declare
-begin
+
+
+--
+-- procedure test_del_user/0
+--
+CREATE OR REPLACE FUNCTION test_del_user(
+
+) RETURNS integer AS $$
+DECLARE
+BEGIN
   perform acs_user__delete(1);
 
   return null;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
 select test_acs_core ();

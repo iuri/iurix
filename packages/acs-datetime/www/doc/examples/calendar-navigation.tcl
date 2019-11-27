@@ -6,19 +6,34 @@ ad_page_contract {
 
     @author  ron@arsdigita.com
     @creation-date 2000-12-08
-    @cvs-id  $Id: calendar-navigation.tcl,v 1.2 2002/09/10 22:22:08 jeffd Exp $
+    @cvs-id  $Id: calendar-navigation.tcl,v 1.4.2.2 2016/05/17 19:23:16 gustafn Exp $
 } {
-    {view ""}
+    {view:word ""}
     {date ""}
 } -properties {
     title:onevalue
     calendar_widget:onevalue
+} -validate {
+    date_valid -requires date {
+        #
+        # Check for the date formats accepted by lc_time_fmt
+        #
+        if {[catch {lc_time_fmt $date %B} errorMsg]} {
+            ad_complain "Invalid date"
+        }
+    }
 }
 
-set title "dt_widget_calendar_navigation"
+set title "Calendar Navigation"
+set context [list [list . "ACS DateTime Examples"] $title]
 
 set calendar_widget [dt_widget_calendar_navigation "" $view $date]
 
 ad_return_template
 
 
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

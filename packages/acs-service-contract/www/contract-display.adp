@@ -1,10 +1,10 @@
   <master>
-    <property name="title">Contract @contract_name;noquote@</property>
+    <property name="doc(title)">Contract @contract_name;noquote@</property>
     <property name="context">{@contract_name;noquote@}</property>
 
     <ul>
       <multiple name=contract>
-        <li> <b>@contract.operation_name@</b> -
+        <li> <strong>@contract.operation_name@</strong> -
               @contract.operation_desc@ 
           <ul>
             <group column="operation_name">

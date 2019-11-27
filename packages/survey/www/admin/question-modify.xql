@@ -26,8 +26,7 @@ select
 	presentation_options,
 	sort_order as question_number,
 	required_p,
-	sort_order,
-	num_answers
+	sort_order
 from survey_questions
 where question_id = :question_id
       </querytext>

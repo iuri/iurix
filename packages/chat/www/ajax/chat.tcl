@@ -3,7 +3,7 @@ ad_page_contract {
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Jan 31, 2006
-  @cvs-id $Id: chat.tcl,v 1.4 2007/11/19 01:14:17 donb Exp $
+  @cvs-id $Id: chat.tcl,v 1.4.6.1 2016/11/22 18:34:35 antoniop Exp $
 } -query {
   m
   id
@@ -13,9 +13,12 @@ ad_page_contract {
 
 set ban_p [permission::permission_p -object_id $id -privilege "chat_ban"]
 if {$ban_p} {
-  ns_return 200 text/html "<HTML><BODY>\
-	<div id='messages'>[_ chat.You_dont_have_permission_room]</div>\
-	</BODY></HTML>"
+  ns_return 200 text/html "
+   <HTML>
+     <BODY>\
+       <div id='messages'>[_ chat.You_dont_have_permission_room]</div>\
+     </BODY>
+   </HTML>"
   ad_script_abort
 }
 
@@ -26,33 +29,23 @@ set user_output "-"
 
 switch -- $m {
   add_msg {
-    # i see no reason, why this is limited to 200 characters.... GN
-    # do not allow messages longer than 200 characters
-    #if { [string length $msg] > 200 } {
-    #  set msg [string range $msg 0 200]
-    #}
-    # do not insert empty messages, if they managed to get here
-    if { $msg ne "" } {
-        set message_output [c1 add_msg $msg]
-        if { [c1 current_message_valid] } {
-            chat_message_post $id [c1 user_id] $msg 1
-        }
-    }
+      set message_output [c1 add_msg $msg]
   }
   login - get_new - get_all {
-    set message_output [c1 $m]
+      set message_output [c1 $m]
   }
   get_updates {
       set message_output [c1 get_new]
       set user_output [c1 get_users]
   }
   get_users {
-    c1 encoder noencode
-    set user_output [c1 get_users]
+      c1 encoder noencode
+      set user_output [c1 get_users]
   }
-  default {ns_log error "--c unknown method $m called."} 
+  default {
+      ns_log error "--c unknown method $m called."
+  }
 }
-
 
 set output "
 <HTML>
@@ -71,9 +64,6 @@ set output "
 if { $message_output ne "" } {
     append output "<div id='messages'>$message_output</div>\n"
 }
-
-ns_log Notice "/ajax/chat.tcl"
-ns_log Notice "$user_output"
 
 if { $user_output ne "-" } {
     append output "<table id='users'><tbody>$user_output</tbody></table>\n"

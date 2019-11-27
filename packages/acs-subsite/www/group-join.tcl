@@ -3,9 +3,9 @@ ad_page_contract {
 
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-08-07
-    @cvs-id $Id: group-join.tcl,v 1.2 2005/03/01 00:01:23 jeffd Exp $
+    @cvs-id $Id: group-join.tcl,v 1.2.18.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    {return_url "."}
+    {return_url:localurl "."}
 }
 
 auth::require_login
@@ -35,3 +35,9 @@ if { !$member_p } {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

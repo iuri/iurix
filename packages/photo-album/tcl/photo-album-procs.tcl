@@ -6,7 +6,7 @@ ad_library {
     @author Jeff Davis (davis@xorch.net)
 
     @creation-date December 14, 2000
-    @cvs-id $Id: photo-album-procs.tcl,v 1.17 2006/08/08 21:27:08 donb Exp $
+    @cvs-id $Id: photo-album-procs.tcl,v 1.27 2018/05/09 15:33:33 hectorr Exp $
 }
 
 # wtem@olywa.net, 2001-09-19
@@ -30,7 +30,7 @@ ad_proc -public pa_get_root_folder {
     a new root folder is created automatically with appropriate permissions
     If value has be previously requested, value pulled from cache
 } { 
-    if [empty_string_p $package_id] {
+    if {$package_id eq ""} {
 	set package_id [ad_conn package_id]
     }
     return [util_memoize "pa_get_root_folder_internal $package_id"]
@@ -44,8 +44,8 @@ ad_proc -private pa_get_root_folder_internal {
     a new root folder is created automatically with appropriate permissions
 } {
     set folder_id [db_string pa_root_folder "select photo_album.get_root_folder(:package_id) from dual"]
-    
-    if { [empty_string_p $folder_id] } {
+
+    if { $folder_id eq "" } {
 	set folder_id [pa_new_root_folder $package_id]
     }
     return $folder_id
@@ -57,15 +57,15 @@ ad_proc -private pa_new_root_folder {
     Creates a new root folder for a package, and returns id.
     A hackish function to get around the fact that we can't run
     code automatically when a new package instance is created.
-    
+
 } {
-    if [empty_string_p $package_id] {
+    if {$package_id eq ""} {
 	set package_id [ad_conn package_id]
     }
-    
+
     # wtem@olywa.net, 2001-09-22
     # the PhotoDir parameter goes away with new CR storage scheme
-    
+
     # wtem@olywa.net, 2001-09-22
     # original pl/sql wrapped up in function to simplify code and porting
     db_transaction {
@@ -83,7 +83,7 @@ ad_proc -private pa_new_root_folder {
 	# the grantee can be anything that is or returns a party_id such as an integer, a subquery,
 	# or a function
 	
-	set perm_lst [split [ad_parameter DefaultRootFolderPrivileges] " "]
+	set perm_lst [split [parameter::get -parameter DefaultRootFolderPrivileges] " "]
 
 	foreach {party privilege}  $perm_lst {
 	    # wtem@olywa.net, 2001-10-15
@@ -103,7 +103,7 @@ ad_proc -private pa_new_root_folder {
     }
     # since this is executed the first time a package instance is accessed,
     # make sure the upload dir exists
-    
+
     ### probable partial change
     # wtem@olywa.net, 2001-09-19
     # this initializes corresponding directory structure in the file-system
@@ -140,22 +140,22 @@ ad_proc pa_context_bar_list {
     item_id.  If -final is specified, that string will be the last 
     item in the context bar.  Otherwise, the name corresponding to 
     item_id will be used.
-    
+
     modified from fs_context_bar
 } {
     set root_folder_id [pa_get_root_folder]
-    
+
     if {$item_id == $root_folder_id} {
-        if {![empty_string_p $final]} { 
+        if {$final ne ""} { 
             return [list $final]
         } else { 
             return {}
         }
     }
-    
-    if [empty_string_p $final] {
+
+    if {$final eq ""} {
 	# set start_id and final with a single trip to the database
-	
+
 	db_1row get_start_and_final "select parent_id as start_id,
 	  content_item.get_title(item_id,'t') as final
 	  from cr_items where item_id = :item_id"
@@ -196,9 +196,9 @@ ad_proc -public pa_make_file_name {
     {-ext ""}
     id
 } { 
-    constructs a filename for an image based on id and extention.
+    constructs a filename for an image based on id and extension.
 } {
-    if {![empty_string_p $ext] && ![regexp {^\.} $ext foo]} {
+    if {$ext ne "" && ![regexp {^\.} $ext foo]} {
 	#add back the dot
 	set ext ".${ext}"
     }
@@ -217,29 +217,29 @@ ad_proc -private pa_assert_dir {
 } {
     Ensures that dirname exists under the PhotoDir Directory  
     If -check_base_path flag specified, proc also checks if base path exists and adds it if necessary
-    
+
     Won't cause an error if the directory is already there. Better than the stardard
     mkdir because it will make all the directories leading up to dirname
     borrowed from 3.4 download code
 } {  
     if { $check_base_path_p } {
-	set dir_path "[acs_root_dir]/[ad_parameter PhotoDir]/$dir_path"
+	set dir_path "[acs_root_dir]/[parameter::get -parameter PhotoDir]/$dir_path"
 	set needed_dir ""
     } else {
-	set needed_dir "[acs_root_dir]/[ad_parameter PhotoDir]"
+	set needed_dir "[acs_root_dir]/[parameter::get -parameter PhotoDir]"
     }
     
     set dir_list [split $dir_path /]
     
     foreach dir $dir_list {
 	ns_log Debug "pa_assert_dir: Checking: $dir"
-        if [empty_string_p $dir] {
+        if {$dir eq ""} {
             continue
         }
         append needed_dir "/$dir"
-        if ![file exists $needed_dir] {
-	    ns_log Debug "pa_assert_dir: ns_mkdir $dir"
-            ns_mkdir $needed_dir
+        if {![file exists $needed_dir]} {
+	    ns_log Debug "pa_assert_dir: file mkdir $dir"
+            file mkdir $needed_dir
         }
     }
 }
@@ -283,12 +283,13 @@ ad_proc -private pa_is_type_in_package {
     else returns "f"
 } {
     set root_folder [pa_get_root_folder $package_id]
-    
-    # I check for the case that item is the root_folder first because this happens on the index page.
-    # Since index page accessed often, and the root_folder is within the package this avoids an unecessary
-    # trip to the database on a commonly accessed page.
-    
-    if {[string equal $content_type "content_folder"] && [string equal $item_id $root_folder]} {
+
+    # I check for the case that item is the root_folder first because
+    # this happens on the index page.  Since index page accessed
+    # often, and the root_folder is within the package this avoids an
+    # unnecessary trip to the database on a commonly accessed page.
+ 
+    if {$content_type eq "content_folder" && $item_id eq $root_folder} {
 	return "t"
     } else {
 	return [db_string check_is_type_in_package "select decode((select 1 
@@ -311,10 +312,10 @@ ad_proc -public pa_grant_privilege_to_creator {
     Grants a set of default privileges stored in parameter PrivilegeForCreator
     on object id to user_id.  If user_id is not specified, uses current user.
 } {
-    if {[empty_string_p $user_id]} {
+    if {$user_id eq ""} {
 	set user_id [ad_conn user_id]
     }
-    set grant_list [split [ad_parameter PrivilegeForCreator] ","]
+    set grant_list [split [parameter::get -parameter PrivilegeForCreator] ","]
     foreach privilege $grant_list {
 	db_exec_plsql grant_privilege {
 	    begin
@@ -340,14 +341,13 @@ ad_proc -public pa_image_width_height {
     I Use ImageMagick instead of aolserver function because it can handle more than
     just gifs and jpegs.  
 } {
-    set identify_string [exec [ad_parameter ImageMagickPath]/identify $filename]
+    set identify_string [exec [parameter::get -parameter ImageMagickPath]/identify $filename]
     regexp {[ ]+([0-9]+)[x]([0-9]+)[\+]*} $identify_string x width height
     uplevel "set $width_var $width"
     uplevel "set $height_var $height"
 }
 
 ad_proc -public pa_make_new_image {
-    {-package_id {}}
     base_image
     new_image
     geometry
@@ -355,25 +355,24 @@ ad_proc -public pa_make_new_image {
     Uses ImageMagick program to create a file named new_image from base_image that 
     fits within a box defined by geometry.  If geometry is just a number it will 
     be used for both width and height.
-    
+
     ImageMagick will retain the aspect ratio of the base_image when creating the new_image
-    
-    jhead -dt is called to delete any embeded thumbnail since digital camera thumbnails
-    can be quite large and imagemagick does not remove them when converting (so thumbnails
-									     can end up being 8k for the thumbnail + 32k for the embeded thumbnail). 
-    
+     
+     jhead -dt is called to delete any embedded thumbnail since digital camera thumbnails
+     can be quite large and imagemagick does not remove them when converting (so thumbnails
+     can end up being 8k for the thumbnail + 32k for the embedded thumbnail). 
+
     @param base_image original image filename 
     @param new_image new image filename 
     @param geometry string as passed to convert 
-    
+
 } {
     # If we get an old style single number
     if {[regexp {^[0-9]+$} $geometry]} { 
         set geometry ${geometry}x${geometry}
     }
-    if { ![exists_and_not_null package_id] } { set package_id [ad_conn package_id] }
     ns_log debug "pa_make_new_image: Start convert, making $new_image geometry $geometry"
-    exec [parameter::get -parameter ImageMagickPath -package_id $package_id]/convert -geometry $geometry -interlace None -sharpen 1x2 $base_image $new_image
+    exec [parameter::get -parameter ImageMagickPath]/convert -geometry $geometry -interlace None -sharpen 1x2 $base_image $new_image
     if {[catch {exec jhead -dt $new_image} errmsg]} { 
         ns_log Warning "pa_make_new_image: jhead failed with error - $errmsg"
     }
@@ -382,43 +381,7 @@ ad_proc -public pa_make_new_image {
 
 # wtem@olywa.net, 2001-09-22
 # replaced pa_delete_scheduled_files with standard cr_delete_scheduled_files
-ad_proc -public pa_all_photos {
-    limit 
-} {
-    returns a list of the photo_ids on page page of album_id
-    list is in ascending order
-} {
-    ns_log Notice "Running API pa_all_photos"
-    set page 1
-    set images_per_page [ad_parameter ThumbnailsPerPage]
-    set start_index [expr $images_per_page * ($page-1)]
-    set end_index [expr $start_index + ($images_per_page - 1)]
 
-    return [lrange [pa_all_photos_cached $limit] $start_index $end_index]
-    
-}
-
-ad_proc -public pa_all_photos_cached {
-    limit
-} {
-    returns a list of all the photo_ids sorted in ascending order
-    pull value from cache if already there, caches result and returns result if not
-} {
-    ns_log Notice "Running API pa_all_photos_cached"
-
-    return [util_memoize "pa_all_photos_not_cached $limit"]
-}
-
-ad_proc -private pa_all_photos_not_cached {
-    limit
-} {
-    queries and returns a list of all photo_ids in album_id in ascending order 
-} {
-
-    ns_log Notice "Running API pa_all_photos_not_cached"
-
-    return [db_list get_all_photo_ids {}]
-}
 
 ad_proc -public pa_all_photos_in_album {
     album_id
@@ -452,10 +415,9 @@ ad_proc -public pa_all_photos_on_page {
     returns a list of the photo_ids on page page of album_id
     list is in ascending order
 } {
-    set images_per_page [ad_parameter ThumbnailsPerPage]
-    set start_index [expr $images_per_page * ($page-1)]
-    set end_index [expr $start_index + ($images_per_page - 1)]
-
+    set images_per_page [parameter::get -parameter ThumbnailsPerPage]
+    set start_index [expr {$images_per_page * ($page-1)}]
+    set end_index [expr {$start_index + ($images_per_page - 1)}]
     return [lrange [pa_all_photos_in_album $album_id] $start_index $end_index]
 }
 
@@ -464,7 +426,7 @@ ad_proc -public pa_count_pages_in_album {
 } {
     returns the number of pages in album_id
 } {
-    return [expr int(ceil([pa_count_photos_in_album $album_id] / [ad_parameter ThumbnailsPerPage].0))]
+    return [expr int(ceil([pa_count_photos_in_album $album_id] / [parameter::get -parameter ThumbnailsPerPage].0))]
 }
 
 ad_proc -public pa_page_of_photo_in_album {
@@ -475,12 +437,12 @@ ad_proc -public pa_page_of_photo_in_album {
     If photo is not in the album returns -1
 } {
     set photo_index [lsearch [pa_all_photos_in_album $album_id] $photo_id]
-    
+
     if {$photo_index == -1 } {
 	return -1
     }
-    
-    return [expr int(ceil(($photo_index + 1)/ [ad_parameter ThumbnailsPerPage].0))]
+
+    return [expr int(ceil(($photo_index + 1)/ [parameter::get -parameter ThumbnailsPerPage].0))]
 }
 
 ad_proc -public pa_flush_photo_in_album_cache {
@@ -502,8 +464,8 @@ ad_proc -deprecated pa_pagination_paginate_query {
     takes a query and returns a query that accounts for pagination
 } {
 
-    set rows_per_page [ad_parameter ThumbnailsPerPage]
-    set start_row [expr $rows_per_page*[expr $page-1]+1]
+    set rows_per_page [parameter::get -parameter ThumbnailsPerPage]
+    set start_row [expr {$rows_per_page*($page-1) + 1}]
 
     set query "
       select *
@@ -528,7 +490,7 @@ ad_proc -deprecated pa_pagination_get_total_pages {} {
     uplevel {
 	return [db_string get_total_pages "
 	select 
-	ceil(count(*) / [ad_parameter ThumbnailsPerPage])
+	ceil(count(*) / [parameter::get -parameter ThumbnailsPerPage])
 	from
 	($sql)
 	"]
@@ -571,10 +533,10 @@ ad_proc -public pa_pagination_context_ids {
     }
 
     # what is the range about which to bracket
-    set start [expr [lsearch -exact  $ids $curr ] - $context]
+    set start [expr {[lsearch -exact  $ids $curr ] - $context}]
     
-    if {[expr $start + 2 * $context + 1] > $n_ids} { 
-        set start [expr $n_ids - 2 * $context - 1]
+    if {($start + 2 * $context + 1) > $n_ids} { 
+        set start [expr {$n_ids - 2 * $context - 1}]
     } 
     if {$start < 0} { 
         set start 0
@@ -586,7 +548,7 @@ ad_proc -public pa_pagination_context_ids {
     }
 
     # context
-    foreach id [lrange $ids $start [expr $start + 2 * $context]] { 
+    foreach id [lrange $ids $start [expr {$start + 2 * $context}]] { 
         incr start
         lappend out $id $start
     }
@@ -610,27 +572,33 @@ ad_proc -public pa_pagination_bar {
     creates an html fragment that allows user to navigate to any photo by number 
     next/previous
 } {
-    if { [empty_string_p $cur_id] || [llength $all_ids] < 2 } {
+    if { $cur_id eq "" || [llength $all_ids] < 2 } {
 	return ""
     }
 
-
-    
     set cur_index [lsearch -exact $all_ids $cur_id]
-    set prev_id [lindex $all_ids [expr $cur_index - 1]]
-    set next_id [lindex $all_ids [expr $cur_index + 1]]
+    set prev_id [lindex $all_ids $cur_index-1]
+    set next_id [lindex $all_ids $cur_index+1]
     set photo_nav_html ""
-    if {![empty_string_p $what]} { 
+    if {$what ne ""} { 
         set what "&nbsp;$what"
     }
     # append the 'prev' link
     append photo_nav_html "<div class=\"photo_album_nav\">\n"
-    if { ![empty_string_p $prev_id] } {
-	append photo_nav_html "\t<div style=\"text-align: left; float: left; margin-right: 1em; margin-bottom: 1em\">\n\t\t<a href=\"${link}$prev_id\">&lt;&lt;&nbsp;[_ photo-album.Prev]$what</a>\n\t</div>\n"
+    if { $prev_id ne "" } {
+	append photo_nav_html [subst {
+	    <div style="text-align: left; float: left; margin-right: 1em; margin-bottom: 1em">
+	    <a href="[ns_quotehtml ${link}$prev_id]">&lt;&lt;&nbsp;[_ photo-album.Prev]$what</a>
+	    </div>
+	}]
     }
     # append the 'next' link
-    if { ![empty_string_p $next_id] } {
-	append photo_nav_html "\t<div style=\"text-align: right; float: right; margin-left: 1em; margin-bottom: 1em\">\n\t\t<a href=\"${link}$next_id\">[_ photo-album.Netx]$what&nbsp;&gt;&gt;</a>\n\t</div>\n"
+    if { $next_id ne "" } {
+	append photo_nav_html [subst {
+	    <div style="text-align: right; float: right; margin-left: 1em; margin-bottom: 1em">
+	    <a href="[ns_quotehtml ${link}$next_id]">[_ photo-album.Netx]$what&nbsp;&gt;&gt;</a>
+	    </div>
+	}]
     }
 
     # append page number links for all pages except for this page
@@ -638,18 +606,17 @@ ad_proc -public pa_pagination_bar {
     set i 0
     set last {}
     foreach {id i} [pa_pagination_context_ids $cur_id $all_ids 4] {
-        if {![empty_string_p $last] && [expr $last + 1] != $i} {
+        if {$last ne "" && ($last + 1) != $i} {
             append photo_nav_html "&#8226;"
         } 
         set last $i
 	if { $cur_id == $id } {
 	    append photo_nav_html "\t\t<strong>$i</strong>\n"
 	} else {
-	    append photo_nav_html "\t\t<a href=\"${link}$id\">$i</a>\n"
+	    append photo_nav_html [subst {<a href="[ns_quotehtml ${link}$id]">$i</a>}]
 	}
 	
     }
-
     append photo_nav_html "\t</div>\n"
 
     append photo_nav_html "</div>\n"
@@ -667,7 +634,7 @@ ad_proc -public pa_expand_archive {
     of the function 
 } {
     set tmp_dir [file join [file dirname $tmpfile] [ns_mktemp "$dest_dir_base-XXXXXX"]]
-    if [catch { ns_mkdir $tmp_dir } errMsg ] {
+    if {[catch { file mkdir $tmp_dir } errMsg ]} {
         ns_log Warning "pa_expand_archive: Error creating directory $tmp_dir: $errMsg"
         return -code error "pa_expand_archive: Error creating directory $tmp_dir: $errMsg"
     }
@@ -747,17 +714,15 @@ ad_proc -public pa_walk {
 }      
 
 ad_proc -public  pa_file_info {
-    {-package_id {}}
     file 
 } {
     return the image information from a given file
 } { 
     set info [list]
-    if { ![exists_and_not_null package_id] } { set package_id [ad_conn package_id] }
     if { [catch {set size [file size $file]} errMsg] } { 
         return -code error $errMsg
     } 
-    if { [ catch {set out [exec [parameter::get -parameter ImageMagickPath -package_id $package_id]/identify -format "%w %h %m %k %q %#" $file]} errMsg]} { 
+    if { [ catch {set out [exec [parameter::get -parameter ImageMagickPath]/identify -format "%w %h %m %k %q %#" $file]} errMsg]} { 
         return -code error $errMsg
     }            
     
@@ -819,76 +784,72 @@ ad_proc -public pa_load_images {
     {-caption {}}
     {-feedback_mode 0}
     {-package_id {}}
-    {-date ""}
-    {-tags ""}
-    {-group_id ""}
-    {-photographer ""}
-    image_files
+    image_files 
     album_id 
     user_id
 } { 
     load a list of files to the provided album owned by user_id
-    
+
     @param remove 1 to delete the file after moving to the content repository
-    
+
     @param client_name provide the name of the upload file (for individual uploads)
-    
+
     @param strip_prefix the prefix to remove from the filename (for expanded archives)
-    
+
     @param image_files list of files to process
-    
+
     @param feedback_mode to provide much info of the loading process on a bulk upload
-    
+
     @param package_id Optionally specify the package_id owning the album, if this is not called
-    from a page within the photo-album package itself.
+                      from a page within the photo-album package itself.
 } { 
-    
     set new_ids [list]
     set peeraddr [ad_conn peeraddr]
-    
+
     # Create the tmp dir if needed 
-    if { [empty_string_p $package_id] } {
+    if { $package_id eq "" } {
         set package_id [ad_conn package_id]
     }
     set tmp_path [parameter::get -parameter FullTempPhotoDir -package_id $package_id]
     if { ![file exists $tmp_path] } {
         ns_log Debug "pa_load_images: Making: tmp_photo_album_dir_path $tmp_path"
-        ns_mkdir $tmp_path
+        file mkdir $tmp_path
     }
-    
+
     # Fix upload name if missing
     foreach image_file $image_files {
-	
+
+
         # Figure out what to call the file...
-        if [empty_string_p $client_name] { 
+        if {$client_name eq ""} { 
             set upload_name $image_file
         } else { 
             set upload_name $client_name
         }
-        if {![empty_string_p $strip_prefix]} { 
+        if {$strip_prefix ne ""} { 
             regsub "^$strip_prefix" $upload_name {} upload_name
         }
-	
-        if ![regexp {([^/\\]+)$} $upload_name match client_filename] {
+
+        if {![regexp {([^/\\]+)$} $upload_name match client_filename]} {
             # couldn't find a match
             set client_filename $upload_name
         }
-	
-        if {[catch {set base_info [pa_file_info -package_id $package_id $image_file]} errMsg]} {
+
+        if {[catch {set base_info [pa_file_info $image_file]} errMsg]} {
             ns_log Warning "pa_load_images: error parsing file data $image_file Error: $errMsg"
             error "pa_load_images: error parsing file data $image_file Error: $errMsg"
             continue
         }
-	
-        foreach {base_bytes base_width base_height base_type base_mime base_colors base_quantum base_sha256} $base_info { break }
+
+        lassign $base_info base_bytes base_width base_height base_type base_mime base_colors base_quantum base_sha256
         
         # If we don't have a mime type we like we try to make a jpg or png 
         #
-        if [empty_string_p $base_mime] { 
+        if {$base_mime eq ""} { 
             set new_image [file join $tmp_path "tmp-[file rootname [file tail $image_file]]"]
-            if {![empty_string_p $base_colors] && $base_colors < 257} { 
+            if {$base_colors ne "" && $base_colors < 257} { 
                 # convert it to a png
-                if {[catch {exec [parameter::get -parameter ImageMagickPath -package_id $package_id]/convert $image_file PNG:$new_image.png} errMsg]} { 
+                if {[catch {exec [parameter::get -parameter ImageMagickPath]/convert $image_file PNG:$new_image.png} errMsg]} { 
                     ns_log Warning "pa_load_images: Failed convert to PNG for $image_file (magicktype $base_type)" 
                 }
                 if { $remove } { 
@@ -896,9 +857,9 @@ ad_proc -public pa_load_images {
                 } 
                 set image_file $new_image.png
                 set remove 1
-            } elseif {![empty_string_p $base_colors] && $base_colors > 256} { 
+            } elseif {$base_colors ne "" && $base_colors > 256} { 
                 # convert it to a jpg
-                if {[catch {exec [parameter::get -parameter ImageMagickPath -package_id $package_id]/convert $image_file JPG:$new_image.jpg} errMsg]} { 
+                if {[catch {exec [parameter::get -parameter ImageMagickPath]/convert $image_file JPG:$new_image.jpg} errMsg]} { 
                     ns_log Warning "pa_load_images: failed convert to JPG for $image_file (magicktype $base_type)" 
                 }
                 if { $remove } { 
@@ -909,28 +870,28 @@ ad_proc -public pa_load_images {
             } else { 
                 ns_log Warning "pa_load_images: is this file even an image: $image_file $base_type"
             }
-	    
+
             # get info again
-            foreach {base_bytes base_width base_height base_type base_mime base_colors base_quantum base_sha256} [pa_file_info -package_id $package_id $image_file] { break }
+            lassign [pa_file_info $image_file] base_bytes base_width base_height base_type base_mime base_colors base_quantum base_sha256
         }
         
-        if {[string equal $base_mime image/jpeg]} { 
+        if {$base_mime eq "image/jpeg"} { 
             array set exif [pa_get_exif_data ${image_file}]
         } else { 
             array unset exif
         }
-	
+
         set BaseExt [string tolower $base_type]
         
-        if [empty_string_p $base_mime] { 
+        if {$base_mime eq ""} { 
             ns_log Debug "pa_load_images: invalid image type $image_file $type even after convert!"
             continue 
         } 
-	
+          
         # Get all the IDs we will need 
         #
         foreach name [list photo_id photo_rev_id base_item_id base_rev_id thumb_item_id \
-                          thumb_rev_id viewer_item_id viewer_rev_id left_item_id left_rev_id right_item_id right_rev_id] { 
+                          thumb_rev_id viewer_item_id viewer_rev_id] { 
             set $name [db_nextval "acs_object_id_seq"]
         }
         
@@ -941,10 +902,6 @@ ad_proc -public pa_load_images {
         set vw_image_name "vw_$client_filename"
         set th_image_name "th_$client_filename"
         
-	set right_image_name "right_$client_filename"
-	set left_image_name "left_$client_filename"
-	
-	
         # Handle viewer file 
         #
         set viewer_size [parameter::get -parameter ViewerSize -package_id $package_id]
@@ -952,7 +909,7 @@ ad_proc -public pa_load_images {
         set full_viewer_filename [file join ${tmp_path} ${viewer_filename}]
         pa_make_new_image $image_file ${full_viewer_filename} $viewer_size
         foreach {viewer_bytes viewer_width viewer_height viewer_type viewer_mime viewer_colors viewer_quantum viewer_sha256} [pa_file_info $full_viewer_filename] {}
-	
+
         # Handle thumb file 
         #
         set thumb_size [parameter::get -parameter ThumbnailSize -package_id $package_id]
@@ -960,36 +917,8 @@ ad_proc -public pa_load_images {
         set full_thumb_filename [file join $tmp_path $thumb_filename]
         pa_make_new_image ${full_viewer_filename} ${full_thumb_filename} $thumb_size
         foreach {thumb_bytes thumb_width thumb_height thumb_type thumb_mime thumb_colors thumb_quantum thumb_sha256} [pa_file_info $full_thumb_filename] {}
-	
-	
-	ns_log Notice "VIEW $viewer_size | $viewer_filename | $full_viewer_filename"
-	ns_log Notice "THUMB $thumb_size | $thumb_filename | $full_thumb_filename | $thumb_rev_id"
-	
-	
-	#Handle left image perspective
-	#
-	set left_size [parameter::get -parameter ThumbnailSize -package_id $package_id]
-	ns_log Notice "LEFT $left_size |  $left_rev_id"
-	set left_filename [pa_make_file_name -ext $BaseExt $left_rev_id]
-	set full_left_filename [file join $tmp_path $left_filename]
-        pa_make_new_image $image_file ${full_left_filename} $left_size
-	
-	catch {exec /var/lib/aolserver/trunk2/packages/photo-album/www/resources/rotate3D 45,0,0 $full_left_filename $full_left_filename} errMsg
-	foreach {left_bytes left_width left_height left_type left_mime left_colors left_quantum left_sha256} [pa_file_info $full_left_filename] {}
-	
-	
-	#Handle right image perspective
-	set right_size [parameter::get -parameter ThumbnailSize -package_id $package_id]
-	set right_filename [pa_make_file_name -ext $BaseExt $right_rev_id]
-	set full_right_filename [file join $tmp_path $right_filename]
-        pa_make_new_image $image_file ${full_right_filename} $right_size
-	
-	catch {exec /var/lib/aolserver/trunk2/packages/photo-album/www/resources/rotate3D -45,0,0 $full_thumb_filename $full_right_filename} errMsg
-	foreach {right_bytes right_width right_height right_type right_mime right_colors right_quantum right_sha256} [pa_file_info $full_right_filename] {}
-	
+
         # copy the tmp file to the cr's file-system
-	set left_filename_relative [cr_create_content_file -move $left_item_id $left_rev_id ${full_left_filename}]
-	set right_filename_relative [cr_create_content_file -move $right_item_id $right_rev_id ${full_right_filename}]
         set thumb_filename_relative [cr_create_content_file -move $thumb_item_id $thumb_rev_id ${full_thumb_filename}]
         set viewer_filename_relative [cr_create_content_file -move $viewer_item_id $viewer_rev_id ${full_viewer_filename}]
         if { $remove } { 
@@ -998,15 +927,7 @@ ad_proc -public pa_load_images {
             set base_filename_relative [cr_create_content_file $base_item_id $base_rev_id $image_file]
         }
 
-	
-	ns_log Notice "DATE BEFORE $date"
-	if {![exists_and_not_null date]} {
-	    set date_timestamp [dt_sysdate]
-	} else {
-	    set date_timestamp "[lindex $date 0]-[lindex $date 1]-[lindex $date 2] 00:00:00.0"
-	}
-	
-	ns_log Notice "DATE AFTER $date"
+
         # Insert the mess into the DB
         #
         db_transaction {
@@ -1014,7 +935,7 @@ ad_proc -public pa_load_images {
                 declare 
                 dummy  integer;
                 begin
-		
+
                 dummy := pa_photo.new (
                                        name            => :image_name,
                                        parent_id       => :album_id,
@@ -1023,28 +944,22 @@ ad_proc -public pa_load_images {
                                        creation_date   => sysdate,
                                        creation_user   => :user_id,
                                        creation_ip     => :peeraddr,
-				       locale          => null,
                                        context_id      => :album_id,
-                                       title           => :caption,
+                                       title           => :client_filename,
                                        description     => :description,
-			               is_live         => 't',
-				       publish_date    => :date_timestamp,
-				       nls_language    => null,
-				       caption         => :caption,
+                                       is_live         => 't',
+                                       caption         => :caption,
                                        story           => :story,
-				       photographer    => :photographer,
-				       group_id        => :group_id
-				       );
+                                       user_filename   => :upload_name
+                                       );
                 end;
-		
             }
-
             
             if {[array size exif] > 1} { 
                 foreach {key value} [array get exif] { 
                     set tmp_exif_$key $value
                 }
-		
+
                 # Check the datetime looks valid - clock scan works pretty well...
                 if {[catch {clock scan $tmp_exif_DateTime}]} { 
                     set tmp_exif_DateTime {}
@@ -1053,7 +968,7 @@ ad_proc -public pa_load_images {
                 db_dml update_photo_data {}
             }
 
-	    if $feedback_mode {
+	    if {$feedback_mode} {
 		ns_write "
                           <ul>
                             <li>Loading image <b>$client_filename</b></li>
@@ -1088,31 +1003,14 @@ ad_proc -public pa_load_images {
             pa_insert_image $base_image_name $photo_id $base_item_id $base_rev_id $user_id $peeraddr $photo_id $base_image_name "original image" $base_mime "base" "t" $base_filename_relative $base_height $base_width $base_bytes 
             pa_insert_image $th_image_name $photo_id $thumb_item_id $thumb_rev_id $user_id $peeraddr $photo_id $th_image_name "thumbnail" $thumb_mime "thumb" "t" $thumb_filename_relative $thumb_height $thumb_width $thumb_bytes 
             pa_insert_image $vw_image_name $photo_id $viewer_item_id $viewer_rev_id $user_id $peeraddr $photo_id $vw_image_name "web image" $viewer_mime "viewer" "t" $viewer_filename_relative $viewer_height $viewer_width $viewer_bytes 
-            pa_insert_image $left_image_name $photo_id $left_item_id $left_rev_id $user_id $peeraddr $photo_id $left_image_name "left image" $base_mime "left_thumb" "t" $left_filename_relative $left_height $left_width $left_bytes 
-            pa_insert_image $right_image_name $photo_id $right_item_id $right_rev_id $user_id $peeraddr $photo_id $right_image_name "right image" $base_mime "right_thumb" "t" $right_filename_relative $right_height $right_width $right_bytes 
-
+            
             pa_grant_privilege_to_creator $photo_id $user_id
 
             lappend new_ids $photo_id
         } 
-	
+
     }
 
-    if {[apm_package_installed_p "tags"]} {
-	lappend tags $caption
-	lappend tags $photographer
-	# deletes user's tags associated to item_id
-	#   db_dml clear_tags {}
-	
-	# Add Tags
-	foreach tag $tags {
-	    #create tag
-	    db_dml create_tag {}
-	}
-	 
-    }
-	 
-	 
     return $new_ids
 }
 
@@ -1198,7 +1096,7 @@ ad_proc -public pa_get_exif_data {
         set out(Flashused) 0
     }
     
-    if {![empty_string_p $out(Cameramake)]} { 
+    if {$out(Cameramake) ne ""} { 
         set out(Film) Digital
     }
     
@@ -1251,14 +1149,14 @@ ad_proc pa_rotate {id rotation} {
     @creation-date 2002-10-30
 
 } {
-    if {![empty_string_p $rotation] && ![string equal $rotation 0]} { 
+    if {$rotation ne "" && $rotation ne "0" } { 
         set flop [list]
         set files [list]
 
         # get a list of files to handle sorted by size...
         db_foreach get_image_files {} {
             ns_log Debug "pa_rotate: rotate $id by $rotation [cr_fs_path] $filename $image_id $width $height"
-            if {[catch {exec [ad_parameter ImageMagickPath]/convert -rotate $rotation [cr_fs_path]$filename [cr_fs_path]${filename}.new } errMsg]} { 
+            if {[catch {exec [parameter::get -parameter ImageMagickPath]/convert -rotate $rotation [cr_fs_path]$filename [cr_fs_path]${filename}.new } errMsg]} { 
                 ns_log Warning "pa_rotate: failed rotation of image $image_id -- $errMsg"
             }
             lappend flop $image_id
@@ -1280,7 +1178,7 @@ ad_proc pa_rotate {id rotation} {
             } errMsg
         } else { 
             # flop images that need flopping.
-            if {[string equal $rotation 90] || [string equal $rotation 270]} { 
+            if {$rotation eq "90" || $rotation eq "270"} { 
                 db_dml flop_image_size "update images set width = height, height = width where image_id in ([join $flop ,])"
             }
         }
@@ -1331,7 +1229,7 @@ ad_proc -public photo_album::photo::get {
 } {
     upvar $array row
 
-    if {[empty_string_p $user_id]} {
+    if {$user_id eq ""} {
         if {[ad_conn isconnected]} { 
             set user_id [ad_conn user_id]
         } else {
@@ -1380,291 +1278,4 @@ ad_proc -public photo_album::list_albums_in_root_folder {
     # only return albums the current user can see
     set user_id [ad_conn user_id]
     return [db_list_of_lists list_albums {} ]
-}
-
-ad_proc -public photo_album::album_create_xml {
-    -album_id
-} {
-    Create an xml file with information of all photos within the respective 
-    album 
-
-} {
-
-
-    
-# ---------------------------------------------------------------
-# Create the XML
-# ---------------------------------------------------------------
-    
-# ---------------------------------------------------------------
-# Project node
-
-    set doc [dom createDocument photogallery]
-    set root_node [$doc documentElement]
-    
-
-# minimal set of elements in case this hasn't been imported before
-    if {![info exists xml_elements] || [llength $xml_elements]==0} {
-	set xml_elements {src src_large src_center src_left src_right title subtitle}
-    }
-    
-
-
-
-
-# ---------------------------------------------------------------
-# Get information about the photos
-# ---------------------------------------------------------------
-
-    set photo_ids [pa_all_photos_in_album $album_id]
-    
-    foreach photo_id $photo_ids {
-	
-	photo_album::photo::get -photo_id $photo_id -array photo
-    
-	set photo_node [$doc createElement photo]
-	$root_node appendChild $photo_node
-	
-	foreach element $xml_elements { 
-	    
-	    switch $element {
-		"src"            { set value $photo(title) }
-		"src_large"      { set value $photo(viewer_content) }
-		"src_center"     { set value $photo(thumb_content) }
-		"src_left"       { set value $photo(left_thumb_content) }
-		"src_right"      { set value $photo(right_thumb_content) }
-		"title"          { set value $photo(title) }
-		"subtitle"       { set value "$photo(description)<br> $photo(username)" }
-		default {
-		    set attribute_name [plsql_utility::generate_oracle_name "xml_$element"]
-		    set value [expr $$attribute_name]
-		}
-	    }
-	    
-	    # the following does "<$element>$value</$element>"
-	    $photo_node appendFromList [list $element {} [list [list \#text $value]]]
-	}
-    }
-    
-    
-    set xml_content "<?xml version=\"1.0\" encoding=\"UTF-8\"?>[$doc asXML -indent 2 -escapeNonASCII]"
-    set xml_filename "/var/lib/aolserver/trunk2/packages/photo-album/www/resources/xml/photos-temp.xml"
-    set fp [open $xml_filename w]
-    puts $fp $xml_content
-    close $fp  
-
-
-    if {[file isfile $xml_filename]} { 
-	return 1;
-    } 
-    
-    return 0;
-    
-}
-
-
-ad_proc -public photo_album::get_group_options {
-} { 
-    Returns groups: community and subsite options to a select widget
-} {
-  
-    set groups [db_list_of_lists select_subsites {
-	select instance_name, package_id
-	from apm_packages ap
-	where package_key = 'acs-subsite'
-	order by lower(instance_name)
-    }]
-    
-    set dotlrn_p [apm_package_installed_p dotlrn]
-    if {$dotlrn_p} {
-	#get communities and subsites
-	
-	set groups [db_list_of_lists select_communities {
-	    select pretty_name, community_id
-	    from dotlrn_communities 
-	    where archived_p = 'f'
-	    order by lower(pretty_name)
-
-	}]
-			
-	
-	lappend $subsites $communities
-    }
-
-    lappend groups "Selecione 0"
-
-    return $groups
-}
-
-
-
-ad_proc -public photo_album::get_group_name {
-    -group_id:required
-} { 
-  
-    Returns community and subsite options to a select widget
-} {
-    
-    set instance_name [db_list_of_lists select_subsites {
-	select instance_name
-	from apm_packages ap
-	where package_key = 'acs-subsite'
-	and package_id = :community_id
-    }]
-    
-    
-    if {![exists_and_not_null instance_name]} {
-	set dotlrn_p [apm_package_installed_p dotlrn]
-	if {$dotlrn_p} {
-	    #get communities and subsites
-	    
-	    set instance_name [db_list_of_lists select_communities {
-		select pretty_name
-		from dotlrn_communities 
-		where archived_p = 'f'
-		and community_id = :community_id
-		
-	    }]		
-	}	
-    }
-    
-    return $instance_name
-}
-
-
-
-
-ad_proc photo_album::get_categories {
-    {-package_id ""}
-} {
-   Returns cateogories 
-} {
-    #ns_log Notice "Running videos::category_types"
-
-    set locale [ad_conn locale]
-    #ns_log Notice "LOCAL $locale"
-    set category_trees [category_tree::get_mapped_trees $package_id]
-    #ns_log Notice "TREES: $category_trees"
-
-
-    if {[exists_and_not_null category_trees]} {
-	
-	set tree_id [lindex [lindex $category_trees 0] 0]
-	#ns_log Notice "TREEID: $tree_id"
-	set cat_ids [category_tree::get_categories -tree_id $tree_id]
-	#ns_log Notice "cat $cat_ids"
-	set categories [list]
-	foreach cat_id $cat_ids {
-	    set cat_name [category::get_name $cat_id]
-	    lappend categories $cat_id
-	    lappend categories $cat_name
-	}
-	
-	return $categories
-    }
-
-    return
-}
-
-
-
-
-ad_proc photo_album::category_get_options {
-    {-parent_id:required}
-} {
-    @return Returns the category types for this instance as an
-    array-list of { parent_id1 heading1 parent_id2 heading2 ... }
-} {
-
-#    ns_log Notice "Running videos::category_get_options $parent_id"
-
-    set children_ids [category::get_children -category_id $parent_id]
-    
-#    ns_log Notice "CC $children_ids"
-
-    set children [list]
-    foreach child_id $children_ids {
-	set child_name [category::get_name $child_id]
-#	ns_log Notice "CHILDNAME: $child_name"
-	set temp "$child_name $child_id"
-	lappend children $temp
-    }
-
-#    ns_log Notice  "CHILDREN $children"
-    return $children
-}   
-
-ad_proc -public photo_album::get_category_child_mapped {
-    {-category_id:required}
-    {-object_id:required}
-} {
-    Return the category child  mapped to the video item 
-} {
-
-    #Get category children mapped to the object_id
-    set children_ids [db_list get_child "select category_id from category_object_map where object_id = :object_id"]
-    
-    #Verify which child has the parent category that matches with the category_id passed as argument
-    foreach child_id $children_ids {
-	if {$category_id eq [category::get_parent -category_id $child_id]} {
-	    return $child_id
-	}
-    }
-    return 
-}
-
-
-
-
-ad_proc -public photo_album::from_sql_datetime {
-    {-sql_date:required}
-    {-format:required}
-} {
-    
-} {
-    # for now, we recognize only "YYYY-MM-DD" "HH12:MIam" and "HH24:MI". 
-    set date [template::util::date::create]
-    set year [lindex $date 0] 
-    set month [lindex $date 1]
-    set day [lindex $date 2]
-  
-
-    switch -exact -- $format {
-        {YYYY-MM-DD} {
-            regexp {([0-9]*)-([0-9]*)-([0-9]*)} $sql_date all year month day
-
-            set date [template::util::date::set_property format $date {DD MONTH YYYY}]
-            set date [template::util::date::set_property year $date $year]
-            set date [template::util::date::set_property month $date $month]
-            set date [template::util::date::set_property day $date $day]
-        }
-
-        {HH12:MIam} {
-            regexp {([0-9]*):([0-9]*) *([aApP][mM])} $sql_date all hours minutes ampm
-            
-            set date [template::util::date::set_property format $date {HH12:MI am}]
-            set date [template::util::date::set_property hours $date $hours]
-            set date [template::util::date::set_property minutes $date $minutes]                
-            set date [template::util::date::set_property ampm $date [string tolower $ampm]]
-        }
-
-        {HH24:MI} {
-            regexp {([0-9]*):([0-9]*)} $sql_date all hours minutes
-
-            set date [template::util::date::set_property format $date {HH24:MI}]
-            set date [template::util::date::set_property hours $date $hours]
-            set date [template::util::date::set_property minutes $date $minutes]
-        }
-
-        {HH24} {
-            set date [template::util::date::set_property format $date {HH24:MI}]
-            set date [template::util::date::set_property hours $date $sql_date]
-            set date [template::util::date::set_property minutes $date 0]
-        }
-        default {
-            set date [template::util::date::set_property ansi $date $sql_date]
-        }
-    }
-
-    return $date
 }

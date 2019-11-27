@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Jeff Davis <davis@xarg.net>
     @creation-date 2005-02-05
-    @cvs-id $Id: binding-display.tcl,v 1.3 2008/04/24 08:02:55 gustafn Exp $
+    @cvs-id $Id: binding-display.tcl,v 1.6.2.1 2015/09/10 08:21:33 gustafn Exp $
 } {
     id
     impl_name:trim,notnull
@@ -50,10 +50,10 @@ db_multirow -extend {check} binding binding {
 } {
     if {$impl_pl eq "TCL"} {
         regsub {^::} $impl_alias {} impl_alias
-        if {[info proc ::$impl_alias] ne ""} {
+        if {[info commands ::$impl_alias] ne ""} {
             append impl_alias "</b> {[info args ::$impl_alias]}"
-        } elseif {[llength $impl_alias]>1 
-		  && [info command ::xotcl::Object] ne "" 
+        } elseif {[llength $impl_alias] > 1 
+		  && [info commands ::xotcl::Object] ne "" 
 		  && [::xotcl::Object isobject [lindex $impl_alias 0]]
 		  && [[lindex $impl_alias 0] info methods [lindex $impl_alias 1]] ne ""} {
 	    # - it looks like a method, 
@@ -62,7 +62,7 @@ db_multirow -extend {check} binding binding {
 	    # - the second word is a method for the object, 
 	    # ... so provide a link to the XOTcl api browser
 	    set href "/xotcl/show-object?object=[lindex $impl_alias 0]&show_methods=2"
-	    append impl_alias "<a href='$href'>" \
+	    append impl_alias "<a href='[ns_quotehtml $href]'>" \
 		"<img border='0' src='/resources/acs-subsite/ZoomIn16.gif'></a>"
 	} else {
             append impl_alias {</b> - <b style="color: red">NOT FOUND!</b>}
@@ -70,3 +70,9 @@ db_multirow -extend {check} binding binding {
         set impl_alias "<b>$impl_alias"
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -5,7 +5,7 @@ ad_library {
 
     @creation-date 2005-02-10
     @author Lee Denison (lee@thaum.net)
-    @cvs-id $Id: install-procs.tcl,v 1.3 2008/11/08 17:05:38 gustafn Exp $
+    @cvs-id $Id: install-procs.tcl,v 1.3.6.1 2015/09/10 08:30:19 gustafn Exp $
 }
 
 namespace eval install {}
@@ -85,3 +85,9 @@ ad_proc -public install::xml::action::map-category-tree { node } {
         }
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

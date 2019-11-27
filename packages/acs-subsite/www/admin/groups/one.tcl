@@ -6,7 +6,7 @@ ad_page_contract {
     @author Michael Bryzek (mbryzek@arsdigita.com)
 
     @creation-date 2000-12-05
-    @cvs-id $Id: one.tcl,v 1.6 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: one.tcl,v 1.8.2.4 2017/10/07 10:58:52 gustafn Exp $
 } {
     group_id:integer,notnull
 } -properties {
@@ -33,8 +33,8 @@ ad_page_contract {
 }
 
 set user_id [ad_conn user_id]
-set write_p [ad_permission_p $group_id "write"]
-set admin_p [ad_permission_p $group_id "admin"]
+set write_p [permission::permission_p -object_id $group_id -privilege "write"]
+set admin_p [permission::permission_p -object_id $group_id -privilege "admin"]
 
 set return_url "[ad_conn url]?[ad_conn query]"
 set return_url_enc [ad_urlencode $return_url]
@@ -42,13 +42,14 @@ set return_url_enc [ad_urlencode $return_url]
 # Select out the group name and the group's object type. Note we can
 # use 1row because the validate filter above will catch missing groups
 
-db_1row group_info {
+db_1row group_info_pretty {
     select g.group_name, g.join_policy,
-           o.object_type as group_type
-      from groups g, acs_objects o, acs_object_types t
-     where g.group_id = o.object_id
-       and o.object_type = t.object_type
-       and g.group_id = :group_id
+    o.object_type as group_type,
+    t.pretty_name as group_type_pretty_name
+    from groups g, acs_objects o, acs_object_types t
+    where g.group_id = o.object_id
+    and o.object_type = t.object_type
+    and g.group_id = :group_id
 }
 
 set context [list [list "[ad_conn package_url]admin/groups/" "Groups"] "One Group"]
@@ -64,7 +65,7 @@ if {[apm_package_installed_p categories]} {
 
     set mapped_trees [category_tree::get_mapped_trees $group_id]
     foreach mapped_tree $mapped_trees {
-	util_unlist $mapped_tree tree_id tree_name subtree_id
+	lassign $mapped_tree tree_id tree_name subtree_id
 	if {$subtree_id ne ""} {
 	    set tree_name "${tree_name}::[category::get_name $subtree_id]"
 	}
@@ -77,3 +78,9 @@ if {[apm_package_installed_p categories]} {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

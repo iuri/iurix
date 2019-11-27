@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Nov  7 12:14:42 2000
-    @cvs-id $Id: add.tcl,v 1.2 2002/09/06 21:49:57 jeffd Exp $
+    @cvs-id $Id: add.tcl,v 1.3.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     object_type:notnull,trim
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     export_vars:onevalue
@@ -25,7 +25,7 @@ ad_page_contract {
 }
 
 set context [list "Add attribute"]
-set export_vars [ad_export_vars -form {object_type return_url}]
+set export_vars [export_vars -form {object_type return_url}]
 
 set object_pretty_name [db_string object_pretty_name {
     select t.pretty_name 
@@ -55,3 +55,9 @@ if { $ctr == 0 } {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

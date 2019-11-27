@@ -7,15 +7,15 @@ ad_page_contract {
 
     @author Nick Strugnell (nstrug@arsdigita.com)
     @date   September 15, 2000
-    @cvs-id $Id: modify-responses.tcl,v 1.2 2003/03/12 01:05:52 daveb Exp $
+    @cvs-id $Id: modify-responses.tcl,v 1.5 2015/06/27 20:46:15 gustafn Exp $
 } {
 
-    question_id:integer
-    section_id:integer
+    question_id:naturalnum,notnull
+    section_id:naturalnum,notnull
 
 }
 
-ad_require_permission $section_id survey_modify_question
+permission::require_permission -object_id $section_id -privilege survey_modify_question
 
 get_survey_info -section_id $section_id
 set survey_id $survey_info(survey_id)
@@ -63,26 +63,24 @@ db_foreach get_choices "select choice_id, label from survey_question_choices whe
 
 append table_html "</table>\n"
 
-db_release_unused_handles
+set title [_ survey.Modify_Responses]
+set context [list [export_vars -base one {survey_id}] $survey_info(name)] [_ survey.lt_Modify_Question_Respo]
 
-doc_return 200 text/html "[ad_header "[_ survey.Modify_Responses]"]
-<h2>$survey_name</h2>
+set body [subst {
+    <h2>$survey_name</h2>
 
-[ad_context_bar [list "one?[export_url_vars survey_id]" $survey_info(name)] "[_ survey.lt_Modify_Question_Respo]"]
+    <hr>
+    [_ survey.Question]: $question_text
+    <p>
+    <form action="modify-responses-2" method=get>
+    [export_vars -form {section_id question_id choice_id_list variable_id_list}]
+    $table_html
+    <p>
+    <center>
+    <input type=submit value="[_ survey.Submit]">
+    </center>
 
-<hr>
+    </form>
+}]
 
-[_ survey.Question]: $question_text
-<p>
-<form action=\"modify-responses-2\" method=get>
-[export_form_vars section_id question_id choice_id_list variable_id_list]
-$table_html
-<p>
-<center>
-<input type=submit value=\"[_ survey.Submit]\">
-</center>
-
-</form>
-
-[ad_footer]
-"
+ad_return_template generic

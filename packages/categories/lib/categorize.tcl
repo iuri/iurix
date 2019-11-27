@@ -1,8 +1,8 @@
-if {![exists_and_not_null object_id]} {
+if {![info exists object_id] || $object_id eq ""} {
     ad_complain "You must specify an object to categorize"
 }
 
-if {![exists_and_not_null container_id]} {
+if {![info exists container_id] || $container_id eq ""} {
     set container_id [ad_conn subsite_id]
 }
 
@@ -27,3 +27,9 @@ set catass_list [category::list::get_pretty_list \
                      -remove_link_eval "remove?cat=\$__category_id&object_id=$object_id" \
                      -remove_link_text "<b style=\"color: red\">X</b>" \
                      [category::get_mapped_categories $object_id]]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

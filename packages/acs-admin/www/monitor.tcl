@@ -14,7 +14,7 @@ set context [list $page_title]
 set threads [ns_info threads]
 set connections [list]
 foreach thread $threads {
-    if { [string equal [lindex $thread 5] "ns:connthread"] && [llength [lindex $thread 6]] > 0 } {
+    if { [lindex $thread 5] eq "ns:connthread" && [llength [lindex $thread 6]] > 0 } {
 	lappend connections [lindex $thread 6]
     }
 }
@@ -63,12 +63,21 @@ template::list::create \
         }
     }
 
-set distinct [llength [array names ip_p]]
+set distinct [array size ip_p]
 
-# run standard Unix uptime command to get load average (crude measure of 
-# system health)
+# run standard GNU uptime command to get load average (crude measure
+# of system health).
+if {[set uptime [util::which uptime]] eq ""} {
+    error "'uptime' command not found on the system"
+}
 
-if [catch { set uptime_output [exec /usr/bin/uptime] } errmsg] {
+if {[catch { set uptime_output [exec $uptime] } errmsg]} {
    # whoops something wrong with uptime (check path)
    set uptime_output "ERROR running uptime, check path in script"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

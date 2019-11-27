@@ -1,14 +1,18 @@
-# Utility procedures for the ArsDigita Templating System
+ad_library {
+    Utility procedures for the ArsDigita Templating System
+
+    @author Karl Goldstein    (karlg@arsdigita.com)
+    @author Stanislav Freidin (sfreidin@arsdigita.com)
+
+    @cvs-id $Id: util-procs.tcl,v 1.28.2.15 2017/04/21 16:50:30 gustafn Exp $
+}
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
-# Authors: Karl Goldstein    (karlg@arsdigita.com)
-#          Stanislav Freidin (sfreidin@arsdigita.com)
-
-# $Id: util-procs.tcl,v 1.25 2007/01/10 21:22:12 gustafn Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
 # http://www.fsf.org/copyleft/gpl.html
+
 
 namespace eval template {}
 namespace eval template::util {}
@@ -38,8 +42,8 @@ ad_proc -public template::util::get_opts { argv } {
     # Get the next arg
     set next [lindex $argv [incr i]]
 
-    if { [string index $next 0] ne "-" ||
-         ! [regexp {[a-zA-Z*]} [string index $next 1] match] } {
+    if { [string index $next 0] ne "-" 
+	 || ![regexp {[a-zA-Z*]} [string index $next 1] match] } {
       
       # the next arg was not a switch so assume it is a parameter 
       set opts($opt) $next
@@ -134,7 +138,9 @@ ad_proc -public template::util::is_true { x } {
     @return 0 if the variable can be interpreted as false; 
             1 for true if it can't.
 } {
-  expr [lsearch -exact {0 f false n no off ""} [string tolower $x]] == -1   
+    #expr {[string tolower $x] ni {0 f false n no off ""}}
+    #ns_log notice "TRUE [expr {[string tolower $x] ni {0 f false n no off ""}}] [string is true -strict $x]"
+    string is true -strict $x
 }
 
 ad_proc -public template::util::lpop { ref } {
@@ -143,10 +149,8 @@ ad_proc -public template::util::lpop { ref } {
 
     @param ref The name of a list in the calling frame on which to operate.
 } {
-
   upvar $ref the_list
-
-  set the_list [lrange $the_list 0 [expr {[llength $the_list] - 2}]]
+  set the_list [lrange $the_list 0 end-1]
 }
 
 ad_proc -public template::util::lnest { listref value next args } {
@@ -229,7 +233,7 @@ ad_proc -public template::util::set_to_list { set args } {
   for { set i 0 } { $i < [ns_set size $set] } { incr i } {
 
     set key [ns_set key $set $i]
-    if { [lsearch -exact $args $key] != -1 } { continue }
+    if { $key in $args } { continue }
 
     lappend result $key [ns_set value $set $i]
   }
@@ -452,7 +456,7 @@ ad_proc -public template::util::read_file { path } {
 
 ad_proc -public template::util::set_file_encoding { file_channel_id } {
     Set encoding of the given file channel based on the OutputCharset
-    parameter of AOLserver. All adp, tcl, and txt files are assumed
+    parameter of AOLserver. All ADP, Tcl, and txt files are assumed
     to be in the same charset.
 
     @param file_channel_id The id of the file to set encoding for.
@@ -484,26 +488,45 @@ ad_proc -public template::util::write_file { path text } {
   close $fd
 }
 
+ad_proc -public template::util::master_to_file { url {reference_url ""} } {
+    
+    Resolve a URL into an absolute file path, but respect styled
+    master configuration for named masters
+    (e.g. acs-templating/resources/masters/... containing 2cols.adp)
+    
+} {
+    if { [string index $url 0] ne "/" } {
+	set master_stub [template::resource_path -type masters -style $url]
+
+	if {[file exists $master_stub.adp]} {
+	    set path $master_stub
+	} else {
+	    set path [file dirname $reference_url]/$url
+	}
+	
+    } else {
+	set path $::acs::rootdir/$url
+    }
+    return [ns_normalizepath $path]
+}
+
 ad_proc -public template::util::url_to_file { url {reference_url ""} } {
     Resolve a URL into an absolute file path.
 } {
 
-  if { [string index $url 0] ne "/" } {
+    if { [string index $url 0] ne "/" } {
+        set path [file dirname $reference_url]/$url
+    } else {
+        set path $::acs::rootdir/$url
+    }
 
-    set path [file dirname $reference_url]/$url
-
-  } else {
-
-    set path [get_server_root]/$url
-  }
-
-  return [ns_normalizepath $path]
+    return [ns_normalizepath $path]
 }
 
 ad_proc -public template::util::resolve_directory_url { url } {
     Resolve the file name for a directory URL
 } {
-  set path [ns_info pageroot]$url
+  set path $::acs::pageroot$url
 
   if { [file isdirectory $path] && [file exists ${path}index.adp] } {
     set url ${url}index.acs
@@ -518,7 +541,7 @@ ad_proc -public template::util::get_url_directory { url } {
 } {
   set directory $url
 
-  set lastchar [string range $url [expr {[string length $url]-1}] end]
+  set lastchar [string range $url [string length $url]-1 end]
 
   if {$lastchar ne "/" } {
 
@@ -533,12 +556,13 @@ ad_proc -public template::util::get_url_directory { url } {
   return $directory
 }
 
-ad_proc -public template::util::get_cookie { name {default_value ""} } {
+ad_proc -public -deprecated template::util::get_cookie { name {default_value ""} } {
     Retrieve the value of a cookie and return it
     Return the default if no such cookie exists
+    
+    @see ad_get_cookie
 } {
   set headers [ns_conn headers]    
-
   set cookie [ns_set iget $headers Cookie]
 
   if { [regexp "$name=(\[^;\]+)" $cookie match value] } {
@@ -548,10 +572,12 @@ ad_proc -public template::util::get_cookie { name {default_value ""} } {
   return $default_value
 }
 
-ad_proc -public template::util::set_cookie { expire_state name value { domain "" } } {
+ad_proc -public -deprecated template::util::set_cookie { expire_state name value { domain "" } } {
     Create a cookie with specified parameters.  The expiration state 
     may be persistent, session, or a number of minutes from the current
     time.
+
+    @see ad_set_cookie
 } {
 
   if { [string match $domain {}] } { 
@@ -581,8 +607,11 @@ ad_proc -public template::util::set_cookie { expire_state name value { domain ""
   ns_set put [ns_conn outputheaders] "Set-Cookie" $cookie
 }
 
-ad_proc -public template::util::clear_cookie { name { domain "" } } { 
+ad_proc -public -deprecated template::util::clear_cookie { name { domain "" } } { 
     Expires an existing cookie.
+
+    @see ad_get_cookie
+
 } {
   if { [string match $domain {}] } { 
     set path "ns/server/[ns_info server]/module/nssock"
@@ -595,15 +624,13 @@ ad_proc -public template::util::clear_cookie { name { domain "" } } {
   ns_set put [ns_conn outputheaders] "Set-Cookie" $cookie
 } 
 
-ad_proc -public template::util::quote_html {
+ad_proc -deprecated -public template::util::quote_html {
   html
 } {
   Quote possible HTML tags in the contents of the html parameter.  
 } {
 
-  regsub -all \" [ns_quotehtml $html] \\&quot\; html
-
-  return $html
+  return [ns_quotehtml $html]
 }
 
 ad_proc -public template::util::multirow_quote_html {multirow_ref column_ref} {
@@ -619,7 +646,7 @@ ad_proc -public template::util::multirow_quote_html {multirow_ref column_ref} {
 
     for { set i 1 } { $i <= $rowcount } { incr i} {
         upvar $multirow_ref:$i arr
-        set arr($column_ref) [template::util::quote_html [set arr($column_ref)]]
+        set arr($column_ref) [ns_quotehtml [set arr($column_ref)]]
     }
 
 }
@@ -673,8 +700,12 @@ ad_proc -deprecated -public template::util::multirow_foreach { name code_text } 
   
 }
 
-ad_proc -public template::util::get_param { name {section {}} {key {}} } {
-    Retreive a stored parameter, or "" if no such parameter
+ad_proc -deprecated -public template::util::get_param { 
+    name 
+    {section ""} 
+    {key ""} 
+} {
+    Retrieve a stored parameter, or "" if no such parameter
     If section/key are present, read the parameter from the specified
     section.key in the INI file, and cache them under the given name
 } {
@@ -682,10 +713,10 @@ ad_proc -public template::util::get_param { name {section {}} {key {}} } {
   if { ![nsv_exists __template_config $name] } {
 
     # Extract the parameter from the ini file if possible
-    if { ![template::util::is_nil section] } {
+    if { $section ne "" } {
 
       # Use the name if no key is specified
-      if { [template::util::is_nil key] } {
+      if { $key ne "" } {
         set key $name
       }
 
@@ -707,7 +738,7 @@ ad_proc -public template::util::get_param { name {section {}} {key {}} } {
   }
 }
 
-ad_proc -public template::util::set_param { name value } {
+ad_proc -public -deprecated  template::util::set_param { name value } {
     Set a stored parameter
 } {
   nsv_set __template_config $name $value
@@ -716,12 +747,10 @@ ad_proc -public template::util::set_param { name value } {
 ad_proc -public template::util::nvl { value value_if_null } {
     Analogous to SQL NVL
 } {
-
-  if { [template::util::is_nil value] } {
+  if {$value eq ""} {
     return $value_if_null
-  } else {
-    return $value
   }
+  return $value
 }
 
 ad_proc -public template::util::number_list { last_number {start_at 0} } {
@@ -736,7 +765,7 @@ ad_proc -public template::util::number_list { last_number {start_at 0} } {
 }
 
 ad_proc -public template::util::tcl_to_sql_list { lst } {
-    Convert a TCL list to a SQL list, for use with the "in" statement.
+    Convert a Tcl list to a SQL list, for use with the "in" statement.
     Uses DoubleApos (similar to ns_dbquotevalue) functionality to escape single quotes
 } {
 
@@ -752,14 +781,112 @@ ad_proc -public template::util::tcl_to_sql_list { lst } {
     }
 }
 
-ad_proc -public template::get_resource_path {} {
+ad_proc -deprecated template::get_resource_path {} {
     Get the template directory
     The body is doublequoted, so it is interpreted when this file is read
+    @see template::resource_path
 } "
-  return \"[file dir [file dir [info script]]]/resources\"
+  return \"[file dirname [file dirname [info script]]]/resources\"
 "
 
+ad_proc -public template::themed_template {
+    path
+} {
+    
+    Given a path like /packages/acs-admin/www/index pointing to an
+    .adp file, this function tries to locate this path in the
+    ResourceDir of the subsite (determined by the theme). If found the
+    themed template is returned, otherwse the passed template path.
 
+    @param path absolute path within the open acs tree (without extension)
+    @return path to themed template or input value (without extension)
+    
+} {
+    if {[string index $path 0] eq "/"} {
+	set style [string range $path 1 end]
+    } else {
+	set style $path
+    }
+    set stub [template::resource_path -type templates -style $style -relative]
+    if {[file readable $::acs::rootdir/$stub.adp]} {
+	return $stub
+    }
+    return $path
+}
+
+ad_proc -public template::streaming_template {
+    -subsite_id
+} {
+    Return the path of the streaming template
+    @param subsite_id id of the subsite. Defaults to [ad_conn subsite_id]
+    @return path to themed template
+} {
+    if { ![info exists subsite_id] } {
+        set subsite_id [ad_conn subsite_id]
+    }
+    set template [parameter::get -package_id $subsite_id \
+                      -parameter StreamingHead \
+                      -default "/packages/openacs-default-theme/lib/plain-streaming-head"]
+    return [template::resource_path -type masters -style $template -relative]
+}
+
+ad_proc -public template::resource_path {
+    -type:required
+    -style:required
+    -relative:boolean
+    -subsite_id
+    -theme_dir
+} {
+    
+    Process the templating "style" and return the stub (path without
+    extensions). When the style is not an abolute path, check if the
+    resource can be obtained from the theme, if not fallback to the
+    resources directory of acs-templating.
+
+    @param type type of resource (e.g. "forms" or "lists")
+    @param style name of the resource within the type (e.g. "standard")
+    @param relative return optionally the path relative to the OpenACS root directory
+    @param theme_dir theming directory (alternative to determination via subsite), higher priority
+    @param subsite_id subsite_id to determine theming information
+
+    @return path of the resource (without extension)
+    @author Gustaf Neumann
+} {
+    
+    if {![regexp {^/(.*)} $style path]} {
+
+	if { ![info exists theme_dir] } {
+	    if { ![info exists subsite_id] } {
+		set subsite_id [ad_conn subsite_id]
+	    }
+	    set theme_dir [parameter::get -parameter ResourceDir -package_id $subsite_id]
+	}
+
+	if {$theme_dir ne ""} {
+            if {![file isdir $::acs::rootdir/$theme_dir]} {
+                ns_log warning "ResourceDir '$theme_dir' does not exist under '$::acs::rootdir';\
+                    ignore parameter setting of subsite $subsite_id"
+                set theme_dir ""
+            }
+        }
+        
+	if {$theme_dir ne ""} {
+	    set path $theme_dir/$type/$style
+	    if {![file exists $::acs::rootdir/$path.adp]} {
+		unset path
+	    }
+	}
+	if {![info exists path]} {
+	    set path /packages/acs-templating/resources/$type/$style
+	}
+    }
+    
+    if {$relative_p} {
+	return $path
+    } else {
+	return $::acs::rootdir/$path
+    }
+}
 
 ad_proc -public stack_frame_values {level} {
     return the variables and arrays of one frame as HTML
@@ -783,7 +910,7 @@ ad_proc -public stack_frame_values {level} {
 	}
 	append varlist "        </ul>\n"
       } else {
-	if [catch {append varlist "'[uplevel #$level set $i]'\n"}] {
+          if {[catch {append varlist "'[uplevel #$level set $i]'\n"}]} {
 	  append varlist "<em>bad string value</em>\n"
 	}
       }
@@ -809,3 +936,9 @@ ad_proc -public stack_dump {} {
   <h2>Globals</h2>
   <ul> [stack_frame_values 0] </ul>\n"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

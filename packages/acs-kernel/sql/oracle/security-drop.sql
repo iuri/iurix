@@ -5,8 +5,9 @@
 --
 -- @author Michael Yoon (michael@arsdigita.com)
 -- @creation-date 2000-07-27
--- @cvs-id $Id: security-drop.sql,v 1.1 2001/03/20 22:51:56 donb Exp $
+-- @cvs-id $Id: security-drop.sql,v 1.2 2015/06/30 21:08:32 gustafn Exp $
 --
+drop package sec_session_property;
 
 drop sequence sec_id_seq;
 drop sequence sec_security_token_id_seq;

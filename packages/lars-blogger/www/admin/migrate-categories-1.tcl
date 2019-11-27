@@ -1,6 +1,6 @@
 ad_page_contract {
     @author bdolicki@branimir.com
-    @cvs-id $Id: migrate-categories-1.tcl,v 1.3 2006/10/16 15:21:54 maltes Exp $
+    @cvs-id $Id: migrate-categories-1.tcl,v 1.5 2013/09/29 13:35:09 gustafn Exp $
     Migrate Categories -- actual migration
 } {
 }
@@ -9,7 +9,7 @@ ad_page_contract {
 
 set package_id [ad_conn package_id]
 
-set admin_p [ad_require_permission $package_id admin]
+set admin_p [permission::require_permission -object_id $package_id -privilege admin]
 
 # Getting fancy - display progress bar
 
@@ -48,7 +48,7 @@ db_transaction {
   ns_log Notice creating site wide category \"tree\"
 
   foreach rec $category_list {
-    util_unlist $rec category_id name
+    lassign $rec category_id name
     set sw_category_id [category::add \
       -tree_id $tree_id \
       -parent_id "" \
@@ -68,7 +68,7 @@ db_transaction {
 
   set count 0
   foreach rec $oldcat_entry_list {
-    util_unlist $rec category_id entry_id
+    lassign $rec category_id entry_id
     ns_log Notice catmig $oldtonew($category_id)
     # This -remove_old thing is something you may want to customize for
     # your site.  It will remove all current site-wide categorizations

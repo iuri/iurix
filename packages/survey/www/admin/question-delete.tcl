@@ -11,11 +11,11 @@ ad_page_contract {
     @cvs-id question-delete.tcl,v 1.5.2.4 2000/07/21 04:04:15 ron Exp
 } {
 
-    question_id:integer
+    question_id:naturalnum,notnull
     {sort_order ""}
 }
 
-ad_require_permission $question_id survey_delete_question
+permission::require_permission -object_id $question_id -privilege survey_delete_question
 
 db_1row section_id_from_question_id ""
 
@@ -54,16 +54,15 @@ ad_form -extend -name confirm_delete -form {
 	    db_transaction {
 
 		db_dml survey_question_responses_delete {}
-
 		db_dml survey_question_choices_delete {}
-
 		db_exec_plsql survey_delete_question {}
-		if {![empty_string_p $sort_order]} {
+
+		if {$sort_order ne ""} {
 		    db_dml survey_renumber_questions {}
 		}
 	    } on_error {
     
-		ad_return_error "[_ survey.Database_Error]" "[_ survey.lt_There_was_an_error_wh]
+		ad_return_error [_ survey.Database_Error] "[_ survey.lt_There_was_an_error_wh]
 		<pre>
 		$errmsg
 		</pre>
@@ -75,7 +74,7 @@ ad_form -extend -name confirm_delete -form {
 	    db_release_unused_handles
 	    set sort_order [expr {$sort_order -1}]
 	}
-        ad_returnredirect "one?[export_url_vars survey_id]&#${sort_order}"
+        ad_returnredirect "[export_vars -base one {survey_id}]&#$sort_order"
         ad_script_abort
     }
 

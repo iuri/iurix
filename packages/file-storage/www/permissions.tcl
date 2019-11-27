@@ -3,9 +3,9 @@ ad_page_contract {
 
     @author Jeff Davis <davis@xarg.net>
     @creation-date 2005-03-05
-    @cvs-id $Id: permissions.tcl,v 1.2 2005/05/26 08:28:46 maltes Exp $
+    @cvs-id $Id: permissions.tcl,v 1.3.2.2 2017/08/02 07:36:06 gustafn Exp $
 } {
-    {object_id:integer}
+    {object_id:naturalnum,notnull}
 }
 set user_id [ad_conn user_id]
 
@@ -23,3 +23,9 @@ if {[fs_file_p $object_id]} {
     set page_title [fs_get_folder_name $object_id]
     set context [fs_context_bar_list -final [_ acs-subsite.Permissions] -root_folder_id $root_folder_id $object_id]
 }
+set return_url [ad_return_url]
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -8,16 +8,16 @@ ad_page_contract {
     @author nstrug@arsdigita.com
     @author dave@thedesignexperience.org
     @date   February 9, 2000
-    @cvs-id $Id: one.tcl,v 1.8 2005/01/26 21:05:13 jeffd Exp $
+    @cvs-id $Id: one.tcl,v 1.12 2015/06/27 20:46:15 gustafn Exp $
 } {
 
-    survey_id:integer
-    {section_id:integer ""}
+    survey_id:naturalnum,notnull
+    {section_id:naturalnum ""}
 }
 
 set package_id [ad_conn package_id]
 
-ad_require_permission $package_id survey_admin_survey
+permission::require_permission -object_id $package_id -privilege survey_admin_survey
 
 # Get the survey information.
 get_survey_info -survey_id $survey_id
@@ -50,9 +50,9 @@ if {$survey_info(single_response_p) == "t"} {
 
 
 # allow site-wide admins to enable/disable surveys directly from here
-set target "one?[export_url_vars survey_id]"
+set target [export_vars -base one {survey_id}]
 set enabled_p $survey_info(enabled_p)
-set toggle_enabled_url "survey-toggle?[export_vars {survey_id enabled_p target}]"
+set toggle_enabled_url [export_vars -base survey-toggle {survey_id enabled_p target}]
 if {$enabled_p == "t"} {
     append toggle_enabled_text "[_ survey.disable]"
 } else {
@@ -70,7 +70,19 @@ set survey_display_types [survey_display_types]
 
 set context [list $survey_info(name)]
 
-db_multirow -extend { question_display } questions survey_questions "" {set question_display [survey_question_display $question_id]}
+
+db_multirow -extend { question_display question_modify_url question_copy_url question_add_url question_delete_url question_swap_down_url question_swap_up_url } questions survey_questions "" {
+
+    set question_display [survey_question_display $question_id]
+    set question_modify_url [export_vars -base question-modify {{question_id $question_id} section_id survey_id}]
+    set question_copy_url [export_vars -base question-copy {{question_id $question_id} {sort_order $sort_order}}]
+    set question_add_url [export_vars -base question-add {section_id {after $sort_order}}]
+    set question_delete_url [export_vars -base question-delete {question_id survey_id}]
+    set question_swap_down_url [export_vars -base question-swap {section_id survey_id {sort_order $sort_order} {direction down}}]
+    set question_swap_up_url [export_vars -base question-swap {section_id survey_id {sort_order $sort_order} {direction up}}]
+
+}
+
 
 
 set notification_chunk [notification::display::request_widget \

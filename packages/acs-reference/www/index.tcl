@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author Jon Griffin (jon@jongriffin.com)
     @creation-date 2001-08-26
-    @cvs-id $Id: index.tcl,v 1.3 2005/03/01 00:01:22 jeffd Exp $
+    @cvs-id $Id: index.tcl,v 1.4.2.1 2015/09/10 08:21:32 gustafn Exp $
 } {
 } -properties {
   context_bar:onevalue
@@ -18,6 +18,12 @@ set package_id [ad_conn package_id]
 set context_bar [list $title]
 set user_id [ad_conn user_id]
 
-set admin_p [ad_permission_p $package_id admin]
+set admin_p [permission::permission_p -object_id $package_id -privilege admin]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

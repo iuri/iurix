@@ -2,7 +2,7 @@ ad_page_contract {
     @author Neophytos Demetriou <k2pts@yahoo.com>
     @creation-date 2001-09-02
 } {
-    note_id:integer,notnull
+    note_id:naturalnum,notnull
 } -properties {
     context:onevalue
     title:onevalue
@@ -20,3 +20,9 @@ db_1row note_select {
 set body [ad_text_to_html -- $body]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

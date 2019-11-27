@@ -8,10 +8,10 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: delete.tcl,v 1.2 2007/05/05 15:54:47 maltes Exp $
+    @cvs-id $Id: delete.tcl,v 1.3.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    comment_id:integer,notnull
-    { return_url {}}
+    comment_id:naturalnum,notnull
+    { return_url:localurl {}}
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -50,3 +50,9 @@ set page_title "[_ general-comments.Delete_a_comment]"
 set context [list "[_ general-comments.Delete_a_comment]"]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -2,7 +2,7 @@ ad_library {
 
     Sweep for expired user approvals.
 
-    @cvs-id $Id: approval-expiration-procs.tcl,v 1.2 2003/08/28 09:41:39 lars Exp $
+    @cvs-id $Id: approval-expiration-procs.tcl,v 1.2.24.1 2015/09/10 08:21:35 gustafn Exp $
     @author Lars Pind  (lars@collaboraid.biz)
     @creation-date 2003-05-28
 
@@ -35,3 +35,9 @@ ad_proc -private subsite::sweep_expired_approvals {
         # We could've sent an email to the user, but we don't
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

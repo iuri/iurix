@@ -6,11 +6,11 @@ ad_library {
 
   @author Gustaf Neumann (neumann@wu-wien.ac.at)
   @creation-date 2005-11-26
-  @cvs-id $Id: 20-Ordered-Composite-procs.tcl,v 1.20 2011/01/14 10:28:10 gustafn Exp $
+  @cvs-id $Id: 20-Ordered-Composite-procs.tcl,v 1.22.2.1 2015/12/07 16:58:07 gustafn Exp $
 }
 
 namespace eval ::xo {
-  Class OrderedComposite 
+  Class create OrderedComposite 
 
   OrderedComposite instproc show {} {
     next
@@ -69,7 +69,7 @@ namespace eval ::xo {
     if {[my exists __children]} {
       #my log "--W destroying children [my set __children]"
       foreach c [my set __children] { 
-	if {[my isobject $c]} {$c destroy}
+        if {[my isobject $c]} {$c destroy}
       }
     }
     #show_stack;my log "--W children murdered, now next, chlds=[my info children]"
@@ -80,7 +80,7 @@ namespace eval ::xo {
   OrderedComposite instproc contains cmds {
     my requireNamespace ;# legacy for older xotcl versions
     set m [Object info instmixin]
-    if {[lsearch $m [self class]::ChildManager] == -1} {
+    if {"[self class]::ChildManager" ni $m} {
       set insert 1
       Object instmixin add [self class]::ChildManager
     } else { 
@@ -91,7 +91,7 @@ namespace eval ::xo {
     # push the active composite
     lappend composite [self]
     # check, if we have Tcl's apply available
-    if {$::tcl_version >= 8.5 && [info proc ::apply] eq ""} {
+    if {$::tcl_version >= 8.5 && [info procs ::apply] eq ""} {
       set errorOccurred [catch {::apply [list {} $cmds [self]]} errorMsg]
     } else {
       set errorOccurred [catch {namespace eval [self] $cmds} errorMsg]
@@ -105,7 +105,8 @@ namespace eval ::xo {
     }
     if {$errorOccurred} {error $errorMsg}
   }
-  Class OrderedComposite::ChildManager -instproc init args {
+
+  Class create OrderedComposite::ChildManager -instproc init args {
     set r [next]
     #set parent [self callingobject] ;# not a true calling object (ns-eval), but XOTcl 1 honors it
     #set parent [my info parent] ;# is ok in XOTcl 2, since the namespace is honored correctly
@@ -121,9 +122,9 @@ namespace eval ::xo {
     return $r
   }
 
-  Class OrderedComposite::Child -instproc __after_insert {} {;}
+  Class create OrderedComposite::Child -instproc __after_insert {} {;}
 
-  Class OrderedComposite::IndexCompare
+  Class create OrderedComposite::IndexCompare
   OrderedComposite::IndexCompare instproc __compare {a b} {
     set by [my set __orderby]
     set x [$a set $by]
@@ -136,36 +137,36 @@ namespace eval ::xo {
     set yp [string first . $y]
     if {$xp == -1 && $yp == -1} {
       if {$x < $y} {
-	return -1
+        return -1
       } elseif {$x > $y} {
-	return 1
+        return 1
       } else {
-	return $def
+        return $def
       }
     } elseif {$xp == -1} {
-      set yh [string range $y 0 [expr {$yp-1}]]
+      set yh [string range $y 0 $yp-1]
       return [my __value_compare $x $yh -1]
     } elseif {$yp == -1} {
-      set xh [string range $x 0 [expr {$xp-1}]]
+      set xh [string range $x 0 $xp-1]
       return [my __value_compare $xh $y 1]
     } else {
       set xh [string range $x 0 $xp]
       set yh [string range $y 0 $yp]
       #puts "xh=$xh yh=$yh"
       if {$xh < $yh} {
-	return -1
+        return -1
       } elseif {$xh > $yh} {
-	return 1
+        return 1
       } else {
-	incr xp 
-	incr yp
-	#puts "rest [string range $x $xp end] [string range $y $yp end]"
-	return [my __value_compare [string range $x $xp end] [string range $y $yp end] $def]
+        incr xp 
+        incr yp
+        #puts "rest [string range $x $xp end] [string range $y $yp end]"
+        return [my __value_compare [string range $x $xp end] [string range $y $yp end] $def]
       }
     }
   }
 
-  Class OrderedComposite::MethodCompare
+  Class create OrderedComposite::MethodCompare
   OrderedComposite::MethodCompare instproc __compare {a b} {
     set by [my set __orderby]
     set x [$a $by]
@@ -180,3 +181,9 @@ namespace eval ::xo {
   }
 }
 
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

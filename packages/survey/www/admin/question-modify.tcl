@@ -8,12 +8,12 @@ ad_page_contract {
     @author  cmceniry@arsdigita.com
     @author  nstrug@arsdigita.com
     @date    Jun 16, 2000
-    @cvs-id  $Id: question-modify.tcl,v 1.4 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id  $Id: question-modify.tcl,v 1.6 2014/10/27 16:41:58 victorg Exp $
 } {
 
-    question_id:integer
-    section_id:integer
-    {valid_responses:html ""}
+    question_id:naturalnum,notnull
+    section_id:naturalnum,notnull
+    {valid_responses ""}
     {presentation_options ""}
     {sort_order ""}
 }
@@ -21,8 +21,8 @@ ad_page_contract {
 get_survey_info -section_id $section_id
 set survey_name $survey_info(name)
 set survey_id $survey_info(survey_id)
-ad_require_permission $survey_id survey_modify_question
-set allow_question_deactivation [ad_parameter "allow_question_deactivation_p"]
+permission::require_permission -object_id $survey_id -privilege survey_modify_question
+set allow_question_deactivation [parameter::get -parameter "allow_question_deactivation_p"]
 set n_responses [db_string survey_number_responses {} ]
 
 ad_form -name modify_question -form {
@@ -65,43 +65,21 @@ ad_form -extend -name modify_question -form {
 
 db_1row presentation {}
 
-if {($presentation_type=="checkbox" || $presentation_type=="select" || $presentation_type=="radio") && $abstract_data_type != "boolean"} {
+if {($presentation_type=="checkbox" || $presentation_type=="select" || $presentation_type=="radio") && $abstract_data_type ne "boolean"} {
     set valid_responses_list [db_list survey_question_valid_responses {}]
     set response_list ""
-	set response_type ""
     foreach response $valid_responses_list {
-		if {[regexp -all {input} $response] > 1 } {
-			set valid_responses $response
-			set response_type "personal"
-			break
-		} else {
-			set response_type "standard"
-			append valid_responses "$response\n"
-		}
+	append valid_responses "$response\n"
     }
     ad_form -extend -name modify_question -form {
         {valid_responses:text(textarea)
             {label "[_ survey.lt_For_Multiple_Choicebr]"}
             {html {rows 10 cols 50}}
             {value $valid_responses}}
-		{response_type:text(select) 
-			{label "[_ survey.Response_type]"} 
-			{help_text "[_ survey.Response_type_help]"} 
-			{options {
-				{{[_ survey.Line_answer]} {standard}} 
-				{{[_ survey.Personal]} {personal}}
-				}
-			}
-			{value $response_type}
-		}
-		{num_answers:integer(text),optional 
-			{label "[_ survey.N_Respostas]"} 
-			{help_text "[_ survey.N_Respostas_Help]"}
-		}
     } 
 } 
 
-if {$presentation_type == "textarea" || $presentation_type == "textbox"} {
+if {$presentation_type eq "textarea" || $presentation_type eq "textbox"} {
     ad_form -extend -name modify_question -form {
 	{presentation_options:text(select) {options {{[_ survey.Small] small} {[_ survey.Medium] medium} {[_ survey.Large] large}}} {value $presentation_options} {label "[string totitle $presentation_type] [_ survey.Size]"}} 
 
@@ -115,60 +93,30 @@ ad_form -extend -name modify_question -select_query_name {survey_question_detail
 
     # add new responses is choice type question
 
+
     if {[info exists valid_responses]} {
 
         set responses [split $valid_responses "\n"]
         set count 0
         set response_list ""
+        foreach response $responses {
+            set trimmed_response [string trim $response]
+            if { $trimmed_response eq "" } {
+                # skip empty lines
+                continue
+            }
 
-		if {$abstract_data_type ne "boolean" && [exists_and_equal response_type "personal"]} {
-			# Is it's type personal, update the layout option 
-			db_dml update_first_label "
-				update survey_question_choices
-				set label = :valid_responses
-				where question_id = $question_id
-				and sort_order = 0
-			"
-		    lappend response_list [list "$valid_responses" "$count"]
-			incr count
-			# The inserted list make sure we don't insert the same option twice
-			set inserted_list ""
-			foreach response $responses {
-		    	set trimmed_response [string trim $response]
-		        if { [empty_string_p $trimmed_response] } {
-			        # skip empty lines
-		            continue
-	    	    }
-				# Input type element?
-				if {[regexp {\<input(.+)\>} $trimmed_response trimmed_response] > 0} {
-					ad_parse_html_attributes -attribute_array input $trimmed_response
-					set trimmed_response $input(value)
-					if {[lsearch $inserted_list $trimmed_response] eq -1} {
-				    	lappend response_list [list "$trimmed_response" "$count"]
-						lappend inserted_list $trimmed_response
-					    incr count
-					}
-				}
-			}
-		} else {
-        	foreach response $responses {
-	    		set trimmed_response [string trim $response]
-		        if { [empty_string_p $trimmed_response] } {
-			        # skip empty lines
-		            continue
-	    	    }
-			    lappend response_list [list "$trimmed_response" "$count"]
-			    incr count
-			}
-		}
-       
+            lappend response_list [list "$trimmed_response" "$count"]
+            incr count
+        }
+        
         set choice_id_to_update_list [db_list get_choice_id {}]
         set choice_count 0
         foreach one_response $response_list {
             set choice_name [lindex $one_response 0]
             set choice_value [lindex $one_response 1]
             set choice_id_to_update [lindex $choice_id_to_update_list $choice_count]
-            if {[empty_string_p $choice_id_to_update]} {
+            if {$choice_id_to_update eq ""} {
                 db_dml insert_new_choice {}
             } else {
 
@@ -182,16 +130,11 @@ ad_form -extend -name modify_question -select_query_name {survey_question_detail
             incr choice_count
         }
 
-		if {[exists_and_not_null num_answers]} {
-			db_dml insere {
-				update survey_questions
-				set num_answers = :num_answers
-				where question_id = :question_id
-			}
-		}
-
-
     }
+
+
+    
+
 
     ad_returnredirect "one?survey_id=$survey_id&#${sort_order}"
     ad_script_abort

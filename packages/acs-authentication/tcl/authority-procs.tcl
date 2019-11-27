@@ -3,7 +3,7 @@ ad_library {
 
     @author Lars Pind (lars@collaobraid.biz)
     @creation-date 2003-05-14
-    @cvs-id $Id: authority-procs.tcl,v 1.28 2009/04/06 20:13:15 daveb Exp $
+    @cvs-id $Id: authority-procs.tcl,v 1.29.2.2 2015/09/10 08:21:12 gustafn Exp $
 }
 
 namespace eval auth {}
@@ -84,7 +84,7 @@ ad_proc -public auth::authority::create {
         # Check that the columns provided in the array are all valid 
         # Set array entries as local variables
         foreach name $names {
-            if { [lsearch -exact $all_columns $name] == -1 } {
+            if {$name ni $all_columns} {
                 error "Attribute '$name' isn't valid for auth_authorities."
             }
             set $name $row($name)
@@ -104,15 +104,15 @@ ad_proc -public auth::authority::create {
             }
         }
 
-        if { ![exists_and_not_null context_id] } {
+        if { ![info exists context_id] || $context_id eq "" } {
             set context_id [ad_conn package_id]
         }
 
-        if { ![exists_and_not_null creation_user] } {
+        if { ![info exists creation_user] || $creation_user eq "" } {
             set creation_user [ad_conn user_id]
         }
 
-        if { ![exists_and_not_null creation_ip] } {
+        if { ![info exists creation_ip] || $creation_ip eq "" } {
             set creation_ip [ad_conn peeraddr]
         }
 
@@ -151,7 +151,7 @@ ad_proc -public auth::authority::create {
     }
 
     # Flush the cache, so that if we've tried to request this short_name while it didn't exist, we will now find it
-    if { [exists_and_not_null row(short_name)] } {
+    if { [info exists row(short_name)] && $row(short_name) ne "" } {
         get_id_flush -short_name $row(short_name)
     }
 
@@ -248,7 +248,7 @@ ad_proc -public auth::authority::edit {
     # Check that the columns provided in the array are all valid 
     # Set array entries as local variables
     foreach name $names {
-        if { [lsearch -exact $columns $name] == -1 } {
+        if {$name ni $columns} {
             error "Attribute '$name' isn't valid for auth_authorities."
         }
         if {$name eq "authority_id"} {
@@ -326,8 +326,7 @@ ad_proc -public auth::authority::batch_sync {
         with_catch errmsg {
             array set doc_result [auth::sync::GetDocument -authority_id $authority_id]
         } {
-            global errorInfo
-            ns_log Error "Error getting sync document:\n$errorInfo"
+            ns_log Error "Error getting sync document:\n$::errorInfo"
             set doc_result(doc_status) failed_to_connect
             set doc_result(doc_message) $errmsg
         }
@@ -361,7 +360,7 @@ ad_proc -public auth::authority::batch_sync {
                 if { $ack_file_name ne "" } {
                     # Interpolate
                     set pairs [list \
-                                   acs_root_dir [acs_root_dir] \
+                                   acs_root_dir $::acs::rootdir \
                                    ansi_date [clock format [clock seconds] -format %Y-%m-%d] \
                                    authority $authority(short_name)]
                     foreach { var value } $pairs {
@@ -373,8 +372,7 @@ ad_proc -public auth::authority::batch_sync {
                         $ack_doc
                 }
             } {
-                global errorInfo
-                ns_log Error "Error processing sync document:\n$errorInfo"
+                ns_log Error "Error processing sync document:\n$::errorInfo"
                 set message "Error processing sync document: $errmsg"
             }
         } else {
@@ -564,3 +562,9 @@ ad_proc -public auth::authority::local {} {
 } {
     return [auth::authority::get_id -short_name "local"]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

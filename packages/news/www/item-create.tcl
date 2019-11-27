@@ -7,7 +7,7 @@ ad_page_contract {
 
     @author stefan@arsdigita.com
     @creation-date 2000-11-14
-    @cvs-id $Id: item-create.tcl,v 1.11 2009/12/30 23:13:36 donb Exp $
+    @cvs-id $Id: item-create.tcl,v 1.14.2.2 2016/08/11 12:52:38 gustafn Exp $
 
 } {
     {publish_title {}}
@@ -16,17 +16,19 @@ ad_page_contract {
     {publish_body.format {}}
     {publish_date_ansi {now}}
     {archive_date_ansi {}}
-    {permanent_p {}}
+    {permanent_p:boolean {}}
 }
 
 # Authorization by news_create
 set package_id [ad_conn package_id]
-ad_require_permission $package_id news_create
+permission::require_permission -object_id $package_id -privilege news_create
 
 
 # Furthermore, with news_admin privilege, items are approved immediately
 # or if open approval policy 
-if { [ad_permission_p $package_id news_admin] || [string equal "open" [ad_parameter ApprovalPolicy "news" "open"]] } {
+if { [permission::permission_p -object_id $package_id -privilege news_admin]
+     || [parameter::get -parameter ApprovalPolicy -default "open"] eq "open"
+ } {
     set immediate_approve_p 1
 } else {
     set immediate_approve_p 0
@@ -81,4 +83,8 @@ if { $immediate_approve_p } {
     }
 }
 
-ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

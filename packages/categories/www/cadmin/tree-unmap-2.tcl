@@ -5,10 +5,10 @@ ad_page_contract {
     @author Timo Hentschel (timo@timohentschel.de)
     @cvs-id $Id:
 } {
-    tree_id:integer,notnull
+    tree_id:naturalnum,notnull
     {locale ""}
-    object_id:integer,notnull
-    ctx_id:integer,optional
+    object_id:naturalnum,notnull
+    ctx_id:naturalnum,optional
 } 
 
 set user_id [auth::require_login]
@@ -22,3 +22,9 @@ if {$tree(site_wide_p) == "f"} {
 category_tree::unmap -tree_id $tree_id -object_id $object_id
 
 ad_returnredirect [export_vars -no_empty -base object-map {locale object_id ctx_id}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

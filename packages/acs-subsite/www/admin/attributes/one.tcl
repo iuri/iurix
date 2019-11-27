@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Nov 12 17:59:39 2000
-    @cvs-id $Id: one.tcl,v 1.3 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: one.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     attribute_id:naturalnum,notnull
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     attribute:onerow
@@ -20,7 +20,7 @@ ad_page_contract {
 }
 set context [list "One attribute"]
 
-set url_vars [ad_export_vars {attribute_id return_url}]
+set url_vars [export_vars {attribute_id return_url}]
 
 # Note we really do want all the columns here for this generic display
 # Stuff it into a column array to avoid writing all these damn column
@@ -56,3 +56,9 @@ if {$attribute(datatype) eq "enumeration"} {
 set dynamic_p $attribute(dynamic_p)
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

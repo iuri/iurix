@@ -23,12 +23,12 @@ ad_page_contract {
 
     @author bdolicki@redhat.com
     @creation-date 2000-06-20
-    @cvs-id $Id: rename.tcl,v 1.2 2003/09/10 09:38:29 lars Exp $
+    @cvs-id $Id: rename.tcl,v 1.3.2.1 2015/09/10 08:21:48 gustafn Exp $
 } {
-  node_id:integer,notnull
+  node_id:naturalnum,notnull
   instance_name:notnull
   {expand:integer,multiple {}}
-  root_id:integer,optional
+  root_id:naturalnum,optional
 }
 
 # (bran 2000-06-20) Here I am assuming that only packages can be hung
@@ -43,3 +43,9 @@ apm_package_rename \
 
 
 ad_returnredirect [export_vars -base "." { expand:multiple root_id }]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

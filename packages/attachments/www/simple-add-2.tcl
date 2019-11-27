@@ -3,17 +3,17 @@ ad_page_contract {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 6 Nov 2000
-    @cvs-id $Id: simple-add-2.tcl,v 1.5 2009/02/13 22:13:06 jeffd Exp $
+    @cvs-id $Id: simple-add-2.tcl,v 1.6.2.2 2016/05/20 20:11:45 gustafn Exp $
 } {
-    folder_id:integer,notnull
-    object_id:integer,notnull
-    return_url:notnull
+    folder_id:naturalnum,notnull
+    object_id:naturalnum,notnull
+    return_url:localurl,notnull
     title:notnull,trim
     description
     url:notnull,trim
 } -validate {
     valid_folder -requires {folder_id:integer} {
-	if ![fs_folder_p $folder_id] {
+	if {![fs_folder_p $folder_id]} {
 	    ad_complain "[_ attachments.lt_The_specified_parent_]"
 	}
     }
@@ -21,7 +21,7 @@ ad_page_contract {
 } 
 
 # Check for write permission on this folder
-ad_require_permission $folder_id write
+permission::require_permission -object_id $folder_id -privilege write
 
 db_transaction {
 
@@ -34,3 +34,9 @@ db_transaction {
 }
 
 ad_returnredirect "$return_url"
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

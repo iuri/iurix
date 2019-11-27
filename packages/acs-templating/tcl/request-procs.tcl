@@ -1,10 +1,13 @@
-# Request handling procs for the ArsDigita Templating System
+ad_library {
+    Request handling procs for the ArsDigita Templating System
+
+    @author Karl Goldstein    (karlg@arsdigita.com)
+             
+    @cvs-id $Id: request-procs.tcl,v 1.8.2.3 2016/10/03 18:52:07 antoniop Exp $
+}
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
-# Authors: Karl Goldstein    (karlg@arsdigita.com)
-#          
-# $Id: request-procs.tcl,v 1.7 2007/01/10 21:22:12 gustafn Exp $
-
+    
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
 # http://www.fsf.org/copyleft/gpl.html
@@ -19,6 +22,7 @@
 
 # @see form element
 
+
 namespace eval template {}
 namespace eval template::request {}
 
@@ -28,7 +32,7 @@ ad_proc -public template::request {
 } {
   Dispatch procedure for requests.
 } {
-  eval request::$command $args
+  request::$command {*}$args
 }
 
 ad_proc -public template::request::create { args } {
@@ -39,7 +43,7 @@ ad_proc -public template::request::create { args } {
                    Equivalent to calling set_param for each parameter, but
                    requiring slightly less typing.
 } {
-  eval template::form::create request $args
+  template::form::create request {*}$args
 
   set level [template::adp_level]
 
@@ -56,7 +60,7 @@ ad_proc -public template::request::create { args } {
       set param [string trim $param]
       if {$param eq {}} { continue }
 
-      eval set_param $param
+      set_param {*}$param
     }
   }
 }
@@ -89,7 +93,7 @@ ad_proc -public template::request::set_param { name args } {
     @see template::element::create
 } {
   set level [template::adp_level]
-  eval template::element::create request $name $args
+  template::element::create request $name {*}$args
 
   # Set a local variable with the parameter value but no
   # clobber the variable if it already exists.
@@ -157,29 +161,35 @@ ad_proc -public template::request::is_valid { { url "" } } {
 
     @return 1 if no error conditions exist, 0 otherwise.
 } {
-  set level [template::adp_level]
-  upvar #$level request:error requesterror
+    set level [template::adp_level]
+    upvar #$level request:error requesterror
 
-  if { [info exists requesterror] } {
+    if { [info exists requesterror] } {
 
-    # set requesterror as a data source
-    uplevel #$level "upvar 0 request:error requesterror"
+	# set requesterror as a data source
+	uplevel #$level "upvar 0 request:error requesterror"
 
-    if { $url ne "self" } {
+	if { $url ne "self" } {
 
-      if {$url eq {}} { 
-	set file_stub [template::get_resource_path]/messages/request-error
-      } else {
-	set file_stub [ns_url2file $url]
-      }
-      template::set_file $file_stub
+	    if {$url eq {}} { 
+		set file_stub [template::resource_path -type messages -style request-error]
+	    } else {
+		set file_stub [ns_url2file $url]
+	    }
+	    template::set_file $file_stub
+	}
+
+	return 0
+
+    } else {
+
+	return 1
     }
-
-    return 0
-
-  } else {
-
-    return 1
-  }
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

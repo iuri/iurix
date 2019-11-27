@@ -3,12 +3,12 @@ ad_page_contract {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 5 Dec 2000
-    @cvs-id $Id: file-edit.tcl,v 1.10 2009/04/21 11:08:23 emmar Exp $
+    @cvs-id $Id: file-edit.tcl,v 1.11.2.2 2016/01/02 20:13:30 gustafn Exp $
 } {
-    file_id:integer,notnull
+    file_id:naturalnum,notnull
 } -validate {
     valid_file -requires {file_id} {
-        if ![fs_file_p $file_id] {
+        if {![fs_file_p $file_id]} {
             ad_complain "[_ file-storage.lt_The_specified_file_is]"
         }
     }
@@ -21,15 +21,14 @@ ad_page_contract {
 
 #check they have write permission on this file
 
-ad_require_permission $file_id write
+permission::require_permission -object_id $file_id -privilege write
 
 set context [fs_context_bar_list -final "[_ file-storage.Rename]" $file_id]
 
 # Variable title used by message lookup
-db_1row file_info ""
+db_1row file_info {}
 
 set page_title [_ file-storage.file_edit_page_title]
-
 set title_help [_ file-storage.lt_Please_enter_the_new_]
 
 ad_form -export file_id -form {
@@ -54,9 +53,9 @@ if { [parameter::get -parameter CategoriesP -package_id $package_id -default 0] 
 ad_form -extend -form {
     {submit:text(submit) {label $submit_label}}
 } -on_submit {
-    if [catch {
+    if {[catch {
         db_dml edit_title {}
-    } errmsg] {
+    } errmsg]} {
         if { [db_string duplicate_check {}] } {
             ad_return_complaint 1 "[_ file-storage.lt_It_appears_that_there]"
         } else {
@@ -79,3 +78,9 @@ ad_form -extend -form {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

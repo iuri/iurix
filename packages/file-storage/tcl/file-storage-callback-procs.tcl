@@ -7,7 +7,7 @@ ad_library {
     @author Malte Sussdorff (sussdorff@sussdorff.de)
     @creation-date 2005-06-15
     @arch-tag: 921a2c2a-5593-495b-9a60-9d815d80a39d
-    @cvs-id $Id: file-storage-callback-procs.tcl,v 1.10 2011/01/10 23:28:43 gustafn Exp $
+    @cvs-id $Id: file-storage-callback-procs.tcl,v 1.11.2.3 2016/11/01 17:17:14 gustafn Exp $
 }
 
 namespace eval fs::folder_chunk {}
@@ -21,15 +21,6 @@ ad_proc -public -callback fs::folder_chunk::add_bulk_actions {
 } {
 }
 
-ad_proc -public -callback fs::file_delete {
-    {-package_id:required}
-    {-file_id:required}
-} {
-    Callback executed right before the file is deleted
-    This should make sure that any foreign key constraints to the file are removed
-} -
-
-
 ad_proc -public -callback fs::before_file_new {
     {-package_id:required}
     {-folder_id:required}
@@ -39,12 +30,6 @@ ad_proc -public -callback fs::before_file_new {
     this can be used to check for confirmation before upload to folder
 } -
 
-ad_proc -public -callback fs::file_new {
-    {-package_id:required}
-    {-file_id:required}
-} {
-}
-
 ad_proc -public -callback fs::file_revision_new {
     {-package_id:required}
     {-file_id:required}
@@ -53,11 +38,11 @@ ad_proc -public -callback fs::file_revision_new {
     {-creation_ip ""}
 } {
     Callback executed when a new file revision is created
-    @package_id Package_id of the file storage package
-    @file_id New file_id for the revision
-    @parent_id Usually the folder the file was uploaded to.
-    @creation_user User_id of the user creating the revision
-    @creation_ip IP Of the creation
+    @param package_id Package_id of the file storage package
+    @param file_id New file_id for the revision
+    @param parent_id Usually the folder the file was uploaded to.
+    @param creation_user User_id of the user creating the revision
+    @param creation_ip IP Of the creation
 } - 
 
 
@@ -67,7 +52,7 @@ ad_proc -public -callback search::datasource -impl file_storage_object {} {
 
     @author Dirk Gomez (openacs@dirkgomez.de)
     @author Jowell S. Sabino (jowellsabino@netscape.net)
-    @creation_date 2005-06-13
+    @creation-date 2005-06-13
 
     returns a datasource for the search package
     this is the content that will be indexed by the full text
@@ -75,22 +60,8 @@ ad_proc -public -callback search::datasource -impl file_storage_object {} {
 
 } {
     # We probably don't need the whole big query here. TODO: Review.
-    db_0or1row fs_datasource {
-	select r.revision_id as object_id,
-	       i.name as title,
-	       case i.storage_type
-		     when 'lob' then r.lob::text
-		     when 'file' then '[cr_fs_path]' || r.content
-	             else r.content
-	        end as content,
-	        r.mime_type as mime,
-	        '' as keywords,
-	        i.storage_type as storage_type
-	from cr_items i, cr_revisions r
-	where r.item_id = i.item_id
-	and   r.revision_id = :object_id
-    } -column_array datasource
-
+    db_0or1row dbqd.file-storage.tcl.file-storage-callback-procs.fs_datasource {} -column_array datasource
+    
     return [list object_id $object_id \
                 title $datasource(title) \
                 content $datasource(content) \
@@ -105,7 +76,9 @@ ad_proc -public -callback search::url -impl file_storage_object {
     Return the URL to the file_storage_object
 } {
     set item_id [content::revision::item_id -revision_id $object_id]
-    set name [db_string item "select name from cr_items where item_id = :item_id" -default ""]
+    set name [db_string item {
+        select name from cr_items where item_id = :item_id
+    } -default ""]
     return "[ad_url]/file/$item_id/$name"
 }
 
@@ -122,12 +95,6 @@ ad_proc -public -callback datamanager::copy_folder -impl datamanager {
 
     return $new_folder_id
     
-}
-
-ad_proc -public -callback fs::folder_new {
-    {-package_id:required}
-    {-folder_id:required}
-} {
 }
 
 ad_proc -public -callback pm::project_new -impl file_storage {
@@ -243,3 +210,9 @@ ad_proc -callback application-track::getApplicationName -impl file_storage {} {
 	
 	
     }      
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

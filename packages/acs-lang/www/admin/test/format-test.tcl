@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author John Lowry (lowry@ardigita.com)
     @creation-date 29 September 2000
-    @cvs-id $Id: format-test.tcl,v 1.1 2002/10/07 14:32:49 lars Exp $
+    @cvs-id $Id: format-test.tcl,v 1.1.24.1 2015/09/10 08:21:30 gustafn Exp $
 } { }
 
 set title "Test acs-lang package formatting routines"
@@ -28,3 +28,8 @@ set us_time [lc_time_fmt $system_time "%c" en_US]
 set fr_time [lc_time_fmt $system_time "%c" fr_FR]
 
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

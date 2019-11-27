@@ -5,7 +5,7 @@ ad_page_contract {
   @author malte.sussdorff@cognovis.de
 
   @creation-date 2000-09-18
-  @cvs-id $Id: index.tcl,v 1.19 2007/02/20 07:53:38 maltes Exp $
+  @cvs-id $Id: index.tcl,v 1.21 2018/05/09 15:33:33 hectorr Exp $
 } {
     {view "month"}
     {date ""}

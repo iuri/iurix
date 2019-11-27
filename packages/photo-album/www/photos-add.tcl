@@ -6,9 +6,9 @@ ad_page_contract {
 
     @author Jeff Davis (davis@xorch.net)
     @creation-date 6/28/2002
-    @cvs_id $Id: photos-add.tcl,v 1.7 2005/03/21 15:36:50 donb Exp $
+    @cvs_id $Id: photos-add.tcl,v 1.9 2014/08/07 07:59:51 gustafn Exp $
 } {
-    album_id:integer,notnull
+    album_id:naturalnum,notnull
 } -validate {
     valid_album -requires {album_id:integer} {
 	if [string equal [pa_is_album_p $album_id] "f"] {
@@ -21,11 +21,11 @@ ad_page_contract {
 }
 
 # check for read permission on folder
-ad_require_permission $album_id pa_create_photo
+permission::require_permission -object_id $album_id -privilege pa_create_photo
 
 set context [pa_context_bar_list -final "[_ photo-album._Upload]" $album_id]
 
-set photo_id [db_string get_next_object_id "select acs_object_id_seq.nextval from dual"]
+set photo_id [db_nextval "acs_object_id_seq"]
 
 ad_form -name photos_upload -action photos-add-2 -html {enctype multipart/form-data} \
     -export {album_id} -form {

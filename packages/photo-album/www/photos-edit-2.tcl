@@ -1,24 +1,16 @@
 ad_page_contract { 
     Bulk edit a set of images.
 } { 
-    album_id:integer,notnull
+    album_id:naturalnum,notnull
     {page:integer,notnull "1"}
     d:array,integer,optional
     hide:array,optional
-    delete:array,optional
     caption:array
     photo_story:array
     photo_description:array
     photo_title:array
     sequence:array,integer
 } -validate {
-	has_delete -requires {delete} {
-		foreach {key value} [array get delete] {
-			lappend export $key
-		}
-		ad_returnredirect [export_vars -base photos-delete {{photo_id {$export}}}]
-		ad_script_abort
-	}
     valid_album -requires {album_id:integer} {
 	if [string equal [pa_is_album_p $album_id] "f"] {
 	    ad_complain "The specified album is not valid."

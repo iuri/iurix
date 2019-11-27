@@ -6,15 +6,15 @@ ad_page_contract {
 
     @author oumi@arsdigita.com
     @creation-date 2000-02-07
-    @cvs-id $Id: new.tcl,v 1.6 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: new.tcl,v 1.9.2.6 2017/04/21 15:27:49 gustafn Exp $
 
 } {
     party_type:notnull
-    { party_type_exact_p t }
+    { party_type_exact_p:boolean t }
     { party_id:naturalnum "" }
     { party.email ""}
-    { return_url "" }
-    {add_to_group_id ""}
+    { return_url:localurl "" }
+    {add_to_group_id:naturalnum ""}
     {add_with_rel_type "membership_rel"}
     {group_rel_type_list ""}
 } -properties {
@@ -41,16 +41,7 @@ db_1row group_info {
 }
 
 # We assume the group is on side 1... 
-db_1row rel_type_info {
-    select object_type as ancestor_rel_type
-      from acs_object_types
-     where supertype = 'relationship'
-       and object_type in (
-               select object_type from acs_object_types
-               start with object_type = :add_with_rel_type
-               connect by object_type = prior supertype
-           )
-}
+db_1row rel_type_info {}
 
 set create_p [group::permission_p -privilege create $add_to_group_id]
 
@@ -100,7 +91,7 @@ if {$group_rel_type_list eq ""} {
 	set object_type_pretty_name $party_type_pretty_name
 	
 	# We're going to have to pass the required_group_rel_type_list to the
-	# next page.  The easiest way I see to do this is jsut encode the list
+	# next page.  The easiest way I see to do this is just encode the list
 	# in a variable, since the list is just a string anyways.
 	
 	# We don't care about the first group/rel_type combo, because we'll pass
@@ -116,7 +107,7 @@ if {$group_rel_type_list eq ""} {
 	
 	lappend export_var_list group_rel_type_list
 	
-	set export_url_vars [ad_export_vars -exclude {add_to_group_id add_with_rel_type} $export_var_list]
+	set export_url_vars [export_vars -exclude {add_to_group_id add_with_rel_type} $export_var_list]
 	
 	ad_return_template new-list-required-segments
 	return
@@ -132,9 +123,9 @@ if {$group_rel_type_list eq ""} {
 set object_type_path_list [subsite::util::object_type_path_list $party_type party]
 
 set redirects_for_type [list \
-	group "groups/new?group_id=$party_id&group_type_exact_p=$party_type_exact_p&group_type=$party_type&[ad_export_vars -exclude {party_id party_type_exact_p party_type} $export_var_list]" \
+	group "groups/new?group_id=$party_id&group_type_exact_p=$party_type_exact_p&group_type=$party_type&[export_vars -exclude {party_id party_type_exact_p party_type} $export_var_list]" \
 	rel_segment "rel-segments/new?segment_id=$party_id&group_id=$add_to_group_id" \
-	user "users/new?user_id=$party_id&[ad_export_vars -exclude {party_id party_type_exact_p party_type} $export_var_list]"]
+	user "users/new?user_id=$party_id&[export_vars -exclude {party_id party_type_exact_p party_type} $export_var_list]"]
 
 foreach {type url} $redirects_for_type {
     if {[lsearch $object_type_path_list $type] != -1} {
@@ -143,12 +134,12 @@ foreach {type url} $redirects_for_type {
 }
 
 
-if { $party_type_exact_p eq "f" && \
-	[subsite::util::sub_type_exists_p $party_type] } {
+if { $party_type_exact_p == "f" 
+     && [subsite::util::sub_type_exists_p $party_type] } {
 
     # Sub party-types exist... select one
     set party_type_exact_p "t"
-    set export_url_vars [ad_export_vars -exclude party_type $export_var_list ]
+    set export_url_vars [export_vars -exclude party_type $export_var_list ]
 
     party::types_valid_for_rel_type_multirow -datasource_name object_types -start_with $party_type -rel_type $add_with_rel_type
 
@@ -185,19 +176,28 @@ attribute::add_form_elements -form_id add_party -variable_prefix rel -start_with
 if { [template::form is_valid add_party] } {
 
     db_transaction {
-	party::new -email ${party.email} -form_id add_party -variable_prefix party -party_id $party_id -context_id [ad_conn package_id] $party_type 
+	set party_id [party::new \
+                          -email ${party.email} \
+                          -form_id add_party \
+                          -variable_prefix party \
+                          -party_id $party_id \
+                          -context_id [ad_conn package_id] \
+                          $party_type]
 
 	relation_add -member_state $member_state $add_with_rel_type $add_to_group_id $party_id
-
     }
 
     # there may be more segments to put this new party in before the
     # user's original request is complete.   So build a return_url stack
     foreach group_rel_type $group_rel_type_list {
-	set next_group_id [lindex $group_rel_type 0]
-	set next_rel_type [lindex $group_rel_type 1]
+	lassign $group_rel_type next_group_id next_rel_type
 	lappend return_url_list \
-		"../relations/add?group_id=$next_group_id&rel_type=[ad_urlencode $next_rel_type]&party_id=$party_id&allow_out_of_scope_p=t"
+	    [export_vars -base "../relations/add" {
+		{group_id $next_group_id}
+		{rel_type $next_rel_type}
+		party_id
+		{allow_out_of_scope_p t}
+	    }]
     }
 
     # Add the original return_url as the last one in the list
@@ -211,3 +211,9 @@ if { [template::form is_valid add_party] } {
 
 ad_return_template
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

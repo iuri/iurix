@@ -6,7 +6,7 @@ ad_library {
 
     @author oumi@arsdigita.com
     @creation-date 2001-02-01
-    @cvs-id $Id: application-group-procs.tcl,v 1.15 2009/09/23 21:12:11 donb Exp $
+    @cvs-id $Id: application-group-procs.tcl,v 1.16.2.3 2016/07/01 13:43:36 gustafn Exp $
 
 }
 
@@ -90,15 +90,7 @@ ad_proc -public application_group::contains_relation_p {
     # Check if the rel belongs to the application group, OR
     # the party *is* the application group.  This proc considers the
     # application group to contain itself.
-    set found_p [db_string app_group_contains_rel_p {
-        select case when exists (
-            select 1
-            from application_group_element_map
-            where package_id = :package_id
-              and rel_id = :rel_id
-        ) then 1 else 0 end
-        from dual
-    }]
+    set found_p [db_string app_group_contains_rel_p {}]
 
     return $found_p
 }
@@ -126,15 +118,7 @@ ad_proc -public application_group::contains_segment_p {
     # Check if the party is a member of the application group, OR
     # the party *is* the application group.  This proc considers the
     # applcation group to contain itself.
-    set found_p [db_string app_group_contains_segment_p {
-        select case when exists (
-            select 1
-            from application_group_segments
-            where package_id = :package_id
-              and segment_id = :segment_id
-        ) then 1 else 0 end
-        from dual
-    }]
+    set found_p [db_string app_group_contains_segment_p {}]
 
     return $found_p
 }
@@ -150,30 +134,15 @@ ad_proc -public application_group::group_id_from_package_id {
     empty string if the application group doesn't exist.
 } {
 
-    if {$no_complain_p} {
-        set no_complain_p t
-    } else {
-        set no_complain_p f
-    }
-
-    if { [ad_conn isconnected] } {
-        if {$package_id eq ""} {
+    if { [ad_conn isconnected] && $package_id eq "" } {
     	set package_id [ad_conn package_id]
-        }
     }
 
     if {$package_id eq ""} {
         error "application_group::group_id_from_package_id - no package_id specified."
     }
 
-    set group_id [db_exec_plsql application_group_from_package_id_query {
-        begin
-        :1 := application_group.group_id_from_package_id (
-            package_id => :package_id,
-            no_complain_p => :no_complain_p
-        );
-        end;
-    }]
+    set group_id [db_string application_group_from_package_id_query {}]
 
     return $group_id
 }
@@ -281,8 +250,8 @@ ad_proc -public application_group::closest_ancestor_application_group_site_node 
     @author Peter Marklund, Dave Bauer
 } {
     # Make sure we have a url to work with
-    if { [empty_string_p $url] } {
-          if { [empty_string_p $node_id] } {
+    if { $url eq "" } {
+          if { $node_id eq "" } {
               set url "/"
           } else {
               set url [site_node::get_url -node_id $node_id]
@@ -374,3 +343,9 @@ ad_proc -public application_group::child_application_groups {
     }
     return $group_list
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

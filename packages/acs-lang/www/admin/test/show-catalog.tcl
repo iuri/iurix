@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Henry Minsky (hqm@ardigita.com)
     @creation-date 29 September 2000
-    @cvs-id $Id: show-catalog.tcl,v 1.1 2002/10/07 14:32:49 lars Exp $
+    @cvs-id $Id: show-catalog.tcl,v 1.1.24.1 2015/09/10 08:21:30 gustafn Exp $
 } { }
 
 set title "Show Message Catalog"
@@ -22,3 +22,9 @@ set cat_sql "SELECT key, locale, message, registered_p
 db_multirow catalog catalog_data $cat_sql
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

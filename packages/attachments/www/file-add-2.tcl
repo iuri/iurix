@@ -3,25 +3,25 @@ ad_page_contract {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 6 Nov 2000
-    @cvs-id $Id: file-add-2.tcl,v 1.6 2009/05/29 18:59:05 emmar Exp $
+    @cvs-id $Id: file-add-2.tcl,v 1.7.2.2 2016/05/20 20:11:45 gustafn Exp $
 } {
-    folder_id:integer,notnull
+    folder_id:naturalnum,notnull
     upload_file:notnull,trim
     upload_file.tmpfile:tmpfile
-    object_id:integer,notnull
-    return_url:notnull
+    object_id:naturalnum,notnull
+    return_url:localurl,notnull
     title:notnull,trim
     description
 } -validate {
     valid_folder -requires {folder_id:integer} {
-	if ![fs_folder_p $folder_id] {
+	if {![fs_folder_p $folder_id]} {
 	    ad_complain "[_ attachments.lt_The_specified_parent_]"
 	}
     }
 
     max_size -requires {upload_file} {
 	set n_bytes [file size ${upload_file.tmpfile}]
-	set max_bytes [ad_parameter "MaximumFileSize"]
+	set max_bytes [parameter::get -parameter "MaximumFileSize"]
 	if { $n_bytes > $max_bytes } {
             # Max number of bytes is used in the error message
             set max_number_of_bytes [util_commify_number $max_bytes]
@@ -31,10 +31,10 @@ ad_page_contract {
 } 
 
 # Check for write permission on this folder
-ad_require_permission $folder_id write
+permission::require_permission -object_id $folder_id -privilege write
 
 # Get the filename part of the upload file
-if ![regexp {[^//\\]+$} $upload_file filename] {
+if {![regexp {[^//\\]+$} $upload_file filename]} {
     # no match
     set filename $upload_file
 }
@@ -76,3 +76,9 @@ set fs_package_id [db_string get_fs_package_id {}]
 
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

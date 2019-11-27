@@ -1,10 +1,10 @@
 ad_page_contract {
     Let's the admin change a user's password.
 
-    @version $Id: password-update.tcl,v 1.3 2005/02/24 13:32:58 jeffd Exp $
+    @version $Id: password-update.tcl,v 1.4.2.3 2016/05/20 19:52:59 gustafn Exp $
 } {
-    {user_id:integer}
-    {return_url ""}
+    {user_id:naturalnum,notnull}
+    {return_url:localurl ""}
     {password_old ""}
 }
 
@@ -14,3 +14,8 @@ set context [list [list "./" "Users"] [list "user.tcl?user_id=$user_id" $userinf
 set site_link [ad_site_home_link]
 
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

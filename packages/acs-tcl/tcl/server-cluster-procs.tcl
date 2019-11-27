@@ -1,7 +1,7 @@
 ad_library {
     Provides methods for communicating between load-balanced servers.
     
-    @cvs-id $Id: server-cluster-procs.tcl,v 1.8 2009/02/13 20:28:08 jeffd Exp $
+    @cvs-id $Id: server-cluster-procs.tcl,v 1.9.2.2 2017/04/22 18:11:54 gustafn Exp $
     @author Jon Salz <jsalz@mit.edu>
     @creation-date 7 Mar 2000
 }    
@@ -54,12 +54,13 @@ ad_proc server_cluster_authorized_p { ip } { Can a request coming from $ip be a 
 
 proc server_cluster_do_httpget { url timeout } {
     if { [catch {
-	set page [ns_httpget $url $timeout 0]
+	set result [util::http::get -url $url -timeout $timeout -max_depth 0]
+	set page [dict get $result page]
 	if { ![regexp -nocase successful $page] } {
-	    ns_log "Error" "Clustering: ns_httpget $url returned unexpected value. Is /SYSTEM/flush-memoized-statement.tcl set up on this host?"
+	    ns_log "Error" "Clustering: util::http::get $url returned unexpected value. Is /SYSTEM/flush-memoized-statement.tcl set up on this host?"
 	}
     } error] } {
-	ns_log "Error" "Clustering: Unable to ns_httpget $url (with timeout $timeout): $error"
+	ns_log "Error" "Clustering: Unable to get $url (with timeout $timeout): $error"
     }
 }
 
@@ -87,7 +88,7 @@ ad_proc -private ad_canonical_server_p {} {
 
     we're using IP:port to uniquely identify the canonical server, since
     hostname or IP does not always uniquely identify an instance of
-    aolserver (for instance, if we have the aolservers sitting behind a
+    AOLserver (for instance, if we have the aolservers sitting behind a
     load balancer).
 } {
     set canonical_server [parameter::get -package_id [ad_acs_kernel_id] -parameter CanonicalServer]
@@ -100,11 +101,19 @@ ad_proc -private ad_canonical_server_p {} {
 	set canonical_port 80
 	set canonical_ip $canonical_server
     }
-   
-    if { [ns_config ns/server/[ns_info server]/module/nssock Address] == $canonical_ip && \
-	    [ns_config ns/server/[ns_info server]/module/nssock Port 80] == $canonical_port } {
+
+    set driver_section [ns_driversection -driver nssock]
+    if { [ns_config $driver_section Address] == $canonical_ip 
+	 && [ns_config $driver_section Port 80] == $canonical_port 
+     } {
 	return 1
     }
 
     return 0
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

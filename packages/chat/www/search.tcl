@@ -2,7 +2,7 @@ ad_page_contract {
 
 } {
   type:notnull
-  room_id:notnull
+  room_id:naturalnum,notnull
 } 
     
 set context [list "Users"]

@@ -1,14 +1,18 @@
-# Form management for the ArsDigita Templating System
+ad_library {
+    Form management for the ArsDigita Templating System
+
+    @author Karl Goldstein    (karlg@arsdigita.com)
+    @author Stanislav Freidin (sfreidin@arsdigita.com)
+
+    @cvs-id $Id: form-procs.tcl,v 1.46.2.11 2016/12/01 15:57:05 antoniop Exp $
+}
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
-# Authors: Karl Goldstein    (karlg@arsdigita.com)
-#          Stanislav Freidin (sfreidin@arsdigita.com)
-
-# $Id: form-procs.tcl,v 1.43.2.1 2010/04/07 13:58:39 emmar Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:
 # http://www.fsf.org/copyleft/gpl.html
+
 
 # Commands for managing dynamic templated forms.
 namespace eval template {}
@@ -49,7 +53,7 @@ ad_proc -public template::form { command args } {
     @see template::form::size
     @see template::element
 } {
-  eval template::form::$command $args
+  template::form::$command {*}$args
 }
 
 ad_proc -public template::form::create { id args } {
@@ -64,9 +68,11 @@ ad_proc -public template::form::create { id args } {
 
     @option html            A list of additional name-value attribute pairs to
                             include in the HTML FORM tag at the beginning of the 
-                            rendered form. Common attributes include JavaScript 
-                            event handlers and multipart form encoding.  For example, 
-                            "-html { enctype multipart/form-data onSubmit validate() }"
+                            rendered form. Common use for this option is to set multipart
+                            form encoding by specifying "-html { enctype multipart/form-data }".
+                            Please note that to comply with newer security features, such as CSP,
+                            one should not specify javascript event handlers here, as they will
+                            be rendered inline.
     
     @option mode            If set to 'display', the form is shown in display-only mode, where 
                             the user cannot edit the fields. Each widget knows how to display its contents
@@ -124,8 +130,7 @@ ad_proc -public template::form::create { id args } {
   # bump the form_count for widgets that use javascript to navigate through
   # the form (liberated from my Greenpeace work ages ago)
 
-  global ad_conn    
-  incr ad_conn(form_count)
+  incr ::ad_conn(form_count)
 
   # keep form properties and a list of the element items
   upvar #$level $id:elements elements $id:properties opts
@@ -153,14 +158,14 @@ ad_proc -public template::form::create { id args } {
   set formbutton [get_button $id]
 
   # If the user hit a button named "cancel", redirect and about
-  if { $submission && $formbutton eq "cancel" && [exists_and_not_null opts(cancel_url)]} {
+  if { $submission && $formbutton eq "cancel" && [info exists opts(cancel_url)] && $opts(cancel_url) ne ""} {
       ad_returnredirect $opts(cancel_url)
       ad_script_abort
   }
 
   set formaction [get_action $id]
   # If we were in display mode, and a button was clicked, we should be in edit mode now
-  if { $submission && [string equal [ns_queryget "form:mode"] "display"] } {
+  if { $submission && [ns_queryget "form:mode"] eq "display" } {
     set opts(mode) "edit"
     set submission 0
   }
@@ -172,11 +177,9 @@ ad_proc -public template::form::create { id args } {
     regsub -all {\r} $opts(elements) {} element_data
 
     foreach element [split $element_data "\n"] {
-
       set element [string trim $element]
       if {$element eq {}} { continue }
-
-      eval template::element create $id $element
+      template::element create $id {*}$element
     }
   }
 }
@@ -187,10 +190,8 @@ ad_proc -public template::form::set_properties { id args } {
     @param id  The ID of an ATS form object.
     @param args Properties to set 
 } {
-  set level [template::adp_level]
-
   # form properties 
-  upvar #$level $id:properties opts
+  upvar #[template::adp_level] $id:properties opts
 
   template::util::get_opts $args
 }
@@ -200,10 +201,8 @@ ad_proc -public template::form::get_properties { id } {
 
     @param id  The ID of a form
 } {
-    set level [template::adp_level]
-
     # form properties 
-    upvar #$level $id:properties formprop
+    upvar #[template::adp_level] $id:properties formprop
 
     if { [info exists formprop] } {
         # properties exist in the form, return them
@@ -220,10 +219,8 @@ ad_proc -public template::form::get_button { id } {
     @param id  The ID of an ATS form object.
     @return the name of the button clicked
 } {
-  set level [template::adp_level]
-
   # keep form properties and a list of the element items
-  upvar #$level $id:button formbutton
+  upvar #[template::adp_level] $id:button formbutton
     
   # If we've already found the button, just return that
   if { [info exists formbutton] } {
@@ -262,10 +259,8 @@ ad_proc -public template::form::get_action { id } {
     @param id  The ID of an ATS form object.
     @return the name of the action in progress
 } {
-  set level [template::adp_level]
-
   # keep form properties and a list of the element items
-  upvar #$level $id:formaction formaction
+  upvar #[template::adp_level] $id:formaction formaction
     
   # If we've already found the action, just return that
   if { [info exists formaction] } {
@@ -284,7 +279,7 @@ ad_proc -public template::form::get_action { id } {
   set formbutton [get_button $id]
 
   # If we were in display mode, and a button was clicked, we should be in edit mode now
-  if { [string equal [ns_queryget "form:mode"] "display"] && $formbutton ne "" } {
+  if { [ns_queryget "form:mode"] eq "display" && $formbutton ne "" } {
     set formaction $formbutton
     return $formaction
   }
@@ -302,8 +297,7 @@ ad_proc -public template::form::exists { id } {
 
     @return 1 if a form with the specified ID exists. 0 if it does not.
 } {
-  set level [template::adp_level]
-  upvar #$level $id:elements elements 
+  upvar #[template::adp_level] $id:elements elements 
 
   return [info exists elements]
 }
@@ -348,22 +342,20 @@ ad_proc -private template::form::template { id { style "" } } {
                                    -default "standard-lars"]]
   }
 
-    # Added support for storing form templates outside acs-templating
-    if {[regexp {^/(.*)} $style path]} {
-        set file_stub "[acs_root_dir]$path"
-    } else {
-        set file_stub [template::get_resource_path]/forms/$style  
-    }
-  
-  if { ![file exists "${file_stub}.adp"] } {
+  set file_stub [template::resource_path -type forms -style $style]
+
+  if { ![file exists "$file_stub.adp"] } {
       # We always have a template named 'standard'
-      set file_stub "[template::get_resource_path]/forms/standard"
+      set file_stub [template::resource_path -type forms -style standard]
   }
 
-  # set the asset url for images
-  set assets "[template::get_resource_path]/assets"
-  # assume resources are under page root (not safe)
-  regsub "^[ns_info pageroot]" $assets {} assets
+  # the following block seems useless, deactivated for the time being
+  if {0} {
+      # set the asset url for images
+      set assets "[template::get_resource_path]/assets"
+      # assume resources are under page root (not safe)
+      regsub "^$::acs::pageroot" $assets {} assets
+  }
 
   # ensure that the style template has been compiled and is up-to-date
   template::adp_init adp $file_stub
@@ -397,11 +389,9 @@ ad_proc -private template::form::generate { id { style "" } } {
 
   # these variables are expected by the formwidget and formgroup tags
   set form:id $id
-  upvar #$level $id:elements $id:elements formerror formerror 
-  upvar #$level $id:properties form_properties
+  upvar #$level $id:elements $id:elements formerror formerror $id:properties form_properties
 
   foreach element_ref [set $id:elements] { 
-
     # get a reference by element ID for formwidget and formgroup tags
     upvar #$level $element_ref $element_ref
   }
@@ -425,47 +415,47 @@ ad_proc -public template::form::section {
 
     @param id          The form identifier.
     @param section     The current fieldset identifier
-	@param fieldset    A list of name-value attribute pairs for the FIELDSET tag
-	@param legendtext  The legend text
-	@param legend      A list of name-value attribute pairs for the LEGEND tag
+    @param fieldset    A list of name-value attribute pairs for the FIELDSET tag
+    @param legendtext  The legend text
+    @param legend      A list of name-value attribute pairs for the LEGEND tag
 } {
-	get_reference
+    get_reference
 
     # legend can't be empty
     if { $section ne "" && $legendtext eq "" } {
-        ns_log Warning "template::form::section (form: $id, section: $section): The section legend is empty. You must provide text for the legend otherwise the section fieldset won't be created."
+        ad_log Warning "template::form::section (form: $id, section: $section): The legend-text of this section is empty. You must provide text for the legend-text otherwise the section fieldset won't be created."
         return
     }
 
-	set properties(section) $section
-	set properties(sec_legendtext) $legendtext
+    set properties(section) $section
+    set properties(sec_legendtext) $legendtext
 
-	# fieldset attributes
-	set properties(sec_fieldset) ""
-	array set fs_attributes $fieldset
-	foreach name [array names fs_attributes] {
-		if {$fs_attributes($name) eq {}} {
-			append properties(sec_fieldset) " $name"
-		} else {
-			append properties(sec_fieldset) " $name=\"$fs_attributes($name)\""
-		}
+    # fieldset attributes
+    set properties(sec_fieldset) ""
+    array set fs_attributes $fieldset
+    foreach name [array names fs_attributes] {
+	if {$fs_attributes($name) eq ""} {
+	    append properties(sec_fieldset) " $name"
+	} else {
+	    append properties(sec_fieldset) " $name=\"$fs_attributes($name)\""
 	}
+    }
 
-	# legend attributes
-	set properties(sec_legend) ""
-	if { $legendtext ne "" } {
-		array set lg_attributes $legend
+    # legend attributes
+    set properties(sec_legend) ""
+    if { $legendtext ne "" } {
+	array set lg_attributes $legend
         if {![info exists lg_attributes(class)]} {
             append properties(sec_legend) " class=\"form-legend\""
         }
-		foreach name [array names lg_attributes] {
-			if {$lg_attributes($name) eq {}} {
-				append properties(sec_legend) " $name"
-			} else {
-				append properties(sec_legend) " $name=\"$lg_attributes($name)\""
-			}
-		}
+	foreach name [array names lg_attributes] {
+	    if {$lg_attributes($name) eq ""} {
+		append properties(sec_legend) " $name"
+	    } else {
+		append properties(sec_legend) " $name=\"$lg_attributes($name)\""
+	    }
 	}
+    }
 }
 
 ad_proc -private template::form::render { id tag_attributes } {
@@ -494,34 +484,39 @@ ad_proc -private template::form::render { id tag_attributes } {
 
   if { [info exists $id:error] } {
 
-    uplevel #$level "upvar 0 $id:error formerror"
+      uplevel #$level "upvar 0 $id:error formerror"
     
-    # There were errors on the form, force edit mode
-    set properties(mode) edit
+      # There were errors on the form, force edit mode
+      set properties(mode) edit
   }
 
   #----------------------------------------------------------------------
   # Buttons
   #----------------------------------------------------------------------
 
-  if { [exists_and_not_null form_properties(cancel_url)] && ![exists_and_not_null form_properties(cancel_label)] } {
+  if { [info exists form_properties(cancel_url)] && $form_properties(cancel_url) ne ""} {
+    if {![info exists form_properties(cancel_label)] || $form_properties(cancel_label) eq ""} {
       set form_properties(cancel_label) [_ acs-kernel.common_Cancel]
-  }
-
-  if { [exists_and_not_null form_properties(cancel_url)] } {
+    }
     lappend form_properties(edit_buttons) [list $form_properties(cancel_label) cancel]
   }
 
-  if { ![template::util::is_nil form_properties(has_submit)] && [template::util::is_true $form_properties(has_submit)] } {
-      set form_properties(edit_buttons) {}
+  if { [info exists form_properties(has_submit)] 
+       && [template::util::is_true $form_properties(has_submit)] 
+     } {
+    set form_properties(edit_buttons) {}
+  }
+  
+  if { [info exists form_properties(has_edit)] 
+       && [template::util::is_true $form_properties(has_edit)] 
+     } {
+    set form_properties(display_buttons) {}
   }
 
-  if { ![template::util::is_nil form_properties(has_edit)] && [template::util::is_true $form_properties(has_edit)] } {
-      set form_properties(display_buttons) {}
-  }
-
-  if { ![template::util::is_nil form_properties(actions)] && [template::util::is_true $form_properties(actions)] } {
-      set form_properties(display_buttons) $form_properties(actions)
+  if { [info exists form_properties(actions)] 
+       && $form_properties(actions) ne "" 
+     } {
+    set form_properties(display_buttons) $form_properties(actions)
   }
     
   # We keep this, so if anyone has an old form template that still loops over this multirow, it won't break hard
@@ -529,16 +524,15 @@ ad_proc -private template::form::render { id tag_attributes } {
   set buttons:rowcount 0
 
   foreach button $form_properties(${form_properties(mode)}_buttons) {
-      set label [lindex $button 0]
-      set name [lindex $button 1]
+    lassign $button label name
 
-      if {$name eq "ok"} {
-          # We hard-code the OK button to be wider than it otherwise would
-	  set label "       $label       "
-      }
-      set name "formbutton:$name"
-
-      template::element create $id $name -widget submit -label $label -datatype text
+    if {$name eq "ok"} {
+      # We hard-code the OK button to be wider than it otherwise would
+      set label "       $label       "
+    }
+    set name "formbutton:$name"
+    
+    template::element create $id $name -widget submit -label $label -datatype text
   }
 
   # Propagate form mode to all form elements
@@ -549,19 +543,27 @@ ad_proc -private template::form::render { id tag_attributes } {
    
     # Check if the element has an empty string mode, and in 
     # that case, set to form mode
-    if {$element(mode) eq {}} {
+    if {$element(mode) eq ""} {
       set element(mode) $properties(mode)
     }
   }
 
   # Check for errors in hidden elements
   foreach element_ref $elements { 
- 
+    
     # get a reference by element ID 
     upvar #$level $element_ref element
    
-    if { $element(widget) eq "hidden" && [exists_and_not_null $id:error($element(id))] } {
-      error "Validation error in hidden form element: '[set $id:error($element(id))]' on element '$element(id)'."
+    if { $element(widget) eq "hidden" && 
+	 [info exists $id:error($element(id))] && [set $id:error($element(id))] ne "" 
+       } {
+      # Submitting invalid data to hidden elements is a common attack vector.  
+      # This does not give them much information in the response.
+      ad_return_complaint 1 "Your request is invalid."
+      ad_log Warning "Validation error in hidden form element.\
+	This may be part of a vulnerability scan or attack reconnaissance: \
+	'[set $id:error($element(id))]' on element '$element(id)'."
+      ad_script_abort
     }
   }
 
@@ -587,9 +589,27 @@ ad_proc -private template::form::render { id tag_attributes } {
       append output " class=\"margin-form\""
   }
 
+  # make sure, that event handlers have IDs
+  foreach name [array names attributes] {
+      if {[regexp -nocase {^on(.*)%} $name . event]} {
+          if {![info exists attributes(id)]} {
+              set attributes(id) "id[clock clicks -microseconds]"
+          }
+      }
+  }
+    
   # append attributes to form tag
   foreach name [array names attributes] {
-    if {$attributes($name) eq {}} {
+    if {[regexp -nocase {^on(.*)%} $name . event]} {
+        #
+        # Convert automatically on$event attribute into event listener
+        #
+        ns_log notice "automatically adding event listener for attribute $name in form with id $id"
+        template::add_event_listener \
+            -event $event
+            -id $attributes(id) \
+            -script $attributes($name)
+    } elseif {$attributes($name) eq {}} {
       append output " $name"
     } else {
       append output " $name=\"$attributes($name)\""
@@ -601,24 +621,24 @@ ad_proc -private template::form::render { id tag_attributes } {
   ### 2/11/2007
   ### Adding Form Fieldset legend and attributes
   if { [info exists properties(fieldset)] } {
-      # Fieldset
-      append output " <fieldset"
-      array set fs_attributes [lindex $properties(fieldset) 0]
-      if {![info exists fs_attributes(class)]} {
-          append output " class=\"form-fieldset\""
+    # Fieldset
+    append output " <fieldset"
+    array set fs_attributes [lindex $properties(fieldset) 0]
+    if {![info exists fs_attributes(class)]} {
+      append output " class=\"form-fieldset\""
+    }
+    foreach name [array names fs_attributes] {
+      if {$fs_attributes($name) eq {}} {
+	append output " $name"
+      } else {
+	append output " $name=\"$fs_attributes($name)\""
       }
-      foreach name [array names fs_attributes] {
-          if {$fs_attributes($name) eq {}} {
-              append output " $name"
-          } else {
-              append output " $name=\"$fs_attributes($name)\""
-          }
-      }
-      append output ">"
+    }
+    append output ">"
 
-      # Legend
-      set fieldset_legend [lindex $properties(fieldset) 1]
-	  append output "<legend>$fieldset_legend</legend>"
+    # Legend
+    set fieldset_legend [lindex $properties(fieldset) 1]
+    append output "<legend>$fieldset_legend</legend>"
   }
 
   # Export form ID and current form mode
@@ -626,7 +646,7 @@ ad_proc -private template::form::render { id tag_attributes } {
   
   # If we're in edit mode, output the action
   upvar #$level $id:formaction formaction
-  if { $properties(mode) eq "edit" && [exists_and_not_null formaction] } {
+  if { $properties(mode) eq "edit" && ([info exists formaction] && $formaction ne "") } {
     upvar #$level $id:formaction action
     append output [export_vars -form { { form\:formaction $formaction } }]
   }
@@ -651,7 +671,7 @@ ad_proc -private template::form::check_elements { id } {
     upvar #$level $element_ref element
    
     # Check if the element has been rendered already
-    if {$element(is_rendered) eq "f"} {
+    if {$element(is_rendered) == "f"} {
 
       # If the element is hidden, render it
       if {$element(widget) eq "hidden"} {
@@ -661,7 +681,7 @@ ad_proc -private template::form::check_elements { id } {
 
       } else {
 
-        ns_log Warning "template::form::check_elements: MISSING FORMWIDGET: $id\:$element_ref"
+        ad_log Warning "template::form::check_elements: MISSING FORMWIDGET: $id\:$element_ref"
         # Throw an error ?
       }
     }
@@ -693,9 +713,7 @@ ad_proc -public template::form::is_submission { id } {
 
     @return 1 if true or 0 if false
 } {
-  set level [template::adp_level]
-
-  upvar #$level $id:submission submission
+  upvar #[template::adp_level] $id:submission submission
 
   return $submission
 }
@@ -710,15 +728,11 @@ ad_proc -public template::form::is_valid { id } {
 
     @return 1 if id is the form identifier of a valid submission or 0 otherwise
 } {
-  set level [template::adp_level]
-
-  upvar #$level $id:submission submission
+  upvar #[template::adp_level] $id:submission submission $id:error formerror
 
   if { ! $submission } { 
     return 0 
   }
-
-  upvar #$level $id:error formerror
 
   if { [info exists formerror] } {
     # errors exist in the form so it is not valid
@@ -767,8 +781,7 @@ ad_proc -public template::form::get_elements {
 
     @author Peter Marklund
 } {
-    set level [template::adp_level]
-    upvar #$level $id:properties properties
+    upvar #[template::adp_level] $id:properties properties
     set elements $properties(element_names)
 
     if { $no_api_p } {
@@ -790,9 +803,7 @@ ad_proc -public template::form::get_errors { id } {
     @param id               The form identifier
     @return the list of form errors
 } {
-  set level [template::adp_level]
-
-  upvar #$level $id:error formerror
+  upvar #[template::adp_level] $id:error formerror
 
   if { [info exists formerror] } {
     # errors exist in the form, return them
@@ -872,8 +883,7 @@ ad_proc -public template::form::export {} {
     set value [ns_set value $form $i]
 
     append export_data "
-      <div><input type=\"hidden\" name=\"$key\" 
-             value=\"[template::util::quote_html $value]\"></div>"
+      <div><input type=\"hidden\" name=\"$key\" value=\"[ns_quotehtml $value]\"></div>"
   }
 
   return $export_data
@@ -893,9 +903,10 @@ ad_proc -private template::form::get_reference {} {
 } {
   uplevel {
     set level [template::adp_level]
-
-    upvar #$level $id:elements elements $id:properties properties 
-    upvar #$level $id:properties form_properties
+    
+    # GN: why does it alias "$id:properties" to "properties" and
+    # "form_properties"?
+    upvar #$level $id:elements elements $id:properties properties $id:properties form_properties
 
     if { ! [info exists elements] } {
       error "Form $id does not exist"
@@ -922,11 +933,15 @@ ad_proc -public template::form::set_error {
 
     @param error   The error message.
 } {
-    set level [template::adp_level]
-
     # use an array to hold error messages for this form
-    upvar #$level $id:error formerror
+    upvar #[template::adp_level] $id:error formerror
     
     set formerror($element) $error
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

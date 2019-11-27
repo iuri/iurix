@@ -3,8 +3,8 @@ ad_page_contract {
 } {
     list_name
     view_name
-    return_url
-    parent_id
+    return_url:localurl
+    parent_id:naturalnum,notnull
 }
 
 set name "template:list:${list_name}:view:${view_name}"

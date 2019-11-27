@@ -6,11 +6,11 @@ ad_page_contract {
     
     @author Deds Castillo (deds@i-manila.com.ph)
     @creation-date 2006-07-13
-    @cvs-id $Id: detach.tcl,v 1.3 2007/07/06 12:13:23 gustafn Exp $
+    @cvs-id $Id: detach.tcl,v 1.4.2.2 2016/05/20 20:11:45 gustafn Exp $
 } {
-    object_id:notnull
-    attachment_id:notnull
-    {return_url ""}
+    object_id:naturalnum,notnull
+    attachment_id:naturalnum,notnull
+    {return_url:localurl ""}
 } -properties {
 } -validate {
 } -errors {
@@ -72,9 +72,16 @@ ad_form \
     } -on_request {
     } -on_submit {
 	attachments::unattach -object_id $object_id -attachment_id $attachment_id
-	if {[exists_and_not_null delete_button] && !$attached_to_other_objects_n} {
+	if {([info exists delete_button] && $delete_button ne "") 
+	    && !$attached_to_other_objects_n
+	} {
 	    fs::delete_file -item_id $attachment_id		
 	}
     } -after_submit {
 	ad_returnredirect $return_url
     }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

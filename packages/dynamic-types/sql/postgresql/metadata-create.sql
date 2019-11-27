@@ -1,5 +1,9 @@
 /* widgets.sql - metadata for form widgets */
 
+
+
+
+
 /* insert form widgets and params */
 create or replace function inline_0 ()
 returns integer as '
@@ -15,7 +19,7 @@ begin
   insert into dtype_db_datatypes (datatype, db_type)
   values (''integer'', ''integer'');
   insert into dtype_db_datatypes (datatype, db_type)
-  values (''money'', ''varchar(30)'');
+  values (''currency'', ''varchar(30)'');
   insert into dtype_db_datatypes (datatype, db_type)
   values (''date'', ''timestamp'');
   insert into dtype_db_datatypes (datatype, db_type)

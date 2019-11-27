@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Nov 12 18:03:50 2000
-    @cvs-id $Id: delete.tcl,v 1.2 2002/09/06 21:49:57 jeffd Exp $
+    @cvs-id $Id: delete.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     attribute_id:notnull,naturalnum,attribute_dynamic_p
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     attribute_id:onevalue
@@ -19,7 +19,7 @@ ad_page_contract {
     export_form_vars:onevalue
 }
 
-set context [list [list one?[ad_export_vars attribute_id] "One attribute"] "Delete attribute"]
+set context [list [list [export_vars -base one attribute_id] "One attribute"] "Delete attribute"]
 
 db_1row select_object_type {
     select a.object_type, a.pretty_name as attribute_pretty_name
@@ -27,6 +27,12 @@ db_1row select_object_type {
      where a.attribute_id = :attribute_id
 }
 
-set export_form_vars [ad_export_vars -form {attribute_id return_url}]
+set export_form_vars [export_vars -form {attribute_id return_url}]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

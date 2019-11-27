@@ -3,7 +3,7 @@
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Oct 23, 2005
-  @cvs-id $Id: portal-element-add.tcl,v 1.10 2010/07/12 15:13:19 gustafn Exp $
+  @cvs-id $Id: portal-element-add.tcl,v 1.15.2.2 2016/09/20 11:27:48 gustafn Exp $
 
   @param object_type show objects of this class and its subclasses
 } -parameter {
@@ -12,7 +12,7 @@
   {-referer .}
 }
 
-set page [my get_page_from_item_ref $page_name]
+set page [$package_id get_page_from_item_ref $page_name]
 
 if {$page eq ""} {
   #
@@ -31,11 +31,11 @@ if {$page eq ""} {
   # for the time being, we add the portlet on the first page (page 0)
   set portal_page_id [portal::get_page_id -portal_id $portal_id -sort_key 0]
   
-  if {[db_string check_unique_name_on_page {
+  if {[xo::dc get_value check_unique_name_on_page {
     select 1 from portal_element_map
     where page_id     = :portal_page_id 
     and   pretty_name = :page_title
-  } -default 0]} {
+  } 0]} {
     #
     # The name of the portal element is not unique.
     #
@@ -65,3 +65,9 @@ if {$page eq ""} {
 }
 ad_script_abort
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

@@ -9,18 +9,18 @@
     <implements-subsite-p>f</implements-subsite-p>
     <inherit-templates-p>f</inherit-templates-p>
     
-    <version name="0.3d" url="http://openacs.org/repository/download/apm/iurix-mail-0.3d.apm">
+    <version name="0.5d" url="http://openacs.org/repository/download/apm/iurix-mail-0.5d.apm">
         <owner url="mailto:iuri.sampaio@iurix.com">Iuri Sampaio</owner>
         <summary>Webail Client</summary>
         <description format="text/html">WebMail Client</description>
         <maturity>0</maturity>
 
-        <provides url="iurix-mail" version="0.3d"/>
+        <provides url="iurix-mail" version="0.5d"/>
 
         <callbacks>
         </callbacks>
         <parameters>
-        <!-- No version parameters -->
+            <parameter scope="global" datatype="number"  min_n_values="1"  max_n_values="1"  name="BlogEntryCreateEnabledP"  default="0" description="Whether 0 or 1, to disable or enabled feature to add blog entry from email"/>
         </parameters>
 
     </version>

@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author
     @creation-date
-    @cvs-id $Id: set-on-vacation-until.tcl,v 1.3 2002/11/30 17:22:53 jeffd Exp $
+    @cvs-id $Id: set-on-vacation-until.tcl,v 1.4.2.2 2016/11/27 12:19:35 gustafn Exp $
 } {
 } -properties {
     site_link:onevalue
@@ -15,12 +15,12 @@ ad_page_contract {
 }
 # 
 
-if [catch { ns_dbformvalue [ns_getform] on_vacation_until date on_vacation_until } errmsg] {
+if {[catch { ns_dbformvalue [ns_getform] on_vacation_until date on_vacation_until } errmsg]} {
     ad_return_error "Invalid date" "AOLserver didn't like the date that you entered."
     return
 }
 
-set user_id [ad_get_user_id]
+set user_id [ad_conn user_id]
 
 db_transaction {
     # We update the users table to maintain compatibility with acs installations prior to user_vacations
@@ -34,3 +34,8 @@ set site_link [ad_site_home_link]
 set pretty_date [lc_time_fmt $on_vacation_until "%q"]
 
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

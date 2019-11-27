@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2005-02-12
     @arch-tag: 89c94863-0000-485f-a889-db6922a19187
-    @cvs-id $Id: table-procs.tcl,v 1.3 2005/05/26 10:27:58 maltes Exp $
+    @cvs-id $Id: table-procs.tcl,v 1.5 2018/05/09 15:33:31 hectorr Exp $
 }
 
 namespace eval dtype {}

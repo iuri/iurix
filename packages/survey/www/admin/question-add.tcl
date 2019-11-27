@@ -8,16 +8,16 @@ ad_page_contract {
     @author  jsc@arsdigita.com
     @author  nstrug@arsdigita.com
     @date    February 9, 2000
-    @cvs-id $Id: question-add.tcl,v 1.5 2005/01/21 17:24:28 jeffd Exp $
+    @cvs-id $Id: question-add.tcl,v 1.8 2015/06/27 20:46:15 gustafn Exp $
 } {
-    section_id:integer
+    section_id:naturalnum,notnull
     {after:integer ""}
     
 }
 
 set package_id [ad_conn package_id]
-set user_id [ad_get_user_id]
-ad_require_permission $package_id survey_create_question
+set user_id [ad_conn user_id]
+permission::require_permission -object_id $package_id -privilege survey_create_question
 
 get_survey_info -section_id $section_id
 
@@ -43,9 +43,9 @@ ad_form -extend -name create_question -form {
 
 get_survey_info -section_id $section_id
 set survey_id $survey_info(survey_id)
-set context [list [list "one?[export_url_vars survey_id]" $survey_info(name)] "[_ survey.Add_A_Question]"]
+set context [list [list [export_vars -base one {survey_id}] $survey_info(name)] "[_ survey.Add_A_Question]"]
 
-if {[ad_parameter allow_question_deactivation_p] == 1} {
+if {[parameter::get -parameter allow_question_deactivation_p] == 1} {
     ad_form -extend -name create_question -form {
         {active:text(radio)     {label "[_ survey.Active]"} {options {{[_ survey.Yes] t} {[_ survey.No] f}}} {value t}}
     } 

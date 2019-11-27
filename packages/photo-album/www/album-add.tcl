@@ -6,10 +6,9 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 12/8/2000
-    @cvs-id $Id: album-add.tcl,v 1.4.10.1 2007/06/14 09:12:49 emmar Exp $
+    @cvs-id $Id: album-add.tcl,v 1.9 2018/03/29 08:19:43 gustafn Exp $
 } {
-    parent_id:integer,notnull
-    return_url:optional
+    parent_id:naturalnum,notnull
 } -validate {
     valid_parent_folder -requires {parent_id:integer} {
 	if [string equal [pa_is_folder_p $parent_id] "f"] {
@@ -20,7 +19,7 @@ ad_page_contract {
     context_list:onevalue
 }
 
-ad_require_permission $parent_id "pa_create_album"
+permission::require_permission -object_id $parent_id -privilege "pa_create_album"
 
 set context_list [pa_context_bar_list -final "[_ photo-album._Create]" $parent_id]
 
@@ -51,7 +50,7 @@ if { [template::form is_request album_add] } {
 }
 
 if { [template::form is_valid album_add] } {
-    # vaild new album submission so create new album
+    # valid new album submission so create new album
     set user_id [ad_conn user_id]
     set peeraddr [ad_conn peeraddr]
     set album_id [template::element::get_value album_add album_id]
@@ -73,11 +72,11 @@ if { [template::form is_valid album_add] } {
     } on_error {
 	# most likely a duplicate name or a double click
 
-	if [db_string duplicate_check "
+	if {[db_string duplicate_check "
 	  select count(*)
 	  from   cr_items
 	  where  (item_id = :album_id or name = :name)
-	  and    parent_id = :parent_id"] {
+	  and    parent_id = :parent_id"]} {
 	      ad_return_complaint 1 "[_ photo-album._Either]"
 	} else {
 	    ad_return_complaint 1 "[_ photo-album._We]"
@@ -87,13 +86,8 @@ if { [template::form is_valid album_add] } {
     }
     #redirect back to index page with parent_id
     
-    # HAM : added return_url
-    if { ![exists_and_not_null return_url] } {
-        #redirect back to index page with parent_id
-        ad_returnredirect "?folder_id=$parent_id"
-    } else {
-        ad_returnredirect $return_url
-    }
+    ad_returnredirect "?folder_id=$parent_id"
+    
     ad_script_abort
 }
 

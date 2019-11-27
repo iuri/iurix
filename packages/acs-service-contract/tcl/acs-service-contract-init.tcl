@@ -10,5 +10,16 @@ db_foreach impl_operation {
     where  ia.impl_id = b.impl_id
 } {
     # This creates the AcsSc.Contract.Operation.Impl wrapper proc for this implementation
-    acs_sc_proc $impl_contract_name $impl_operation_name $impl_name $impl_alias $impl_pl
+    if {[catch {
+	acs_sc_proc $impl_contract_name $impl_operation_name $impl_name $impl_alias $impl_pl
+    } errorMsg]} {
+	ns_log error "Service contract initialization failed, call was:\n\
+	acs_sc_proc $impl_contract_name $impl_operation_name $impl_name $impl_alias $impl_pl" 
+    }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

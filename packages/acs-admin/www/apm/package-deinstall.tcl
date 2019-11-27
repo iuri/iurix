@@ -4,35 +4,42 @@ ad_page_contract {
 
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date Fri Oct 13 08:45:58 2000
-    @cvs-id $Id: package-deinstall.tcl,v 1.2 2003/12/11 21:39:45 jeffd Exp $
+    @cvs-id $Id: package-deinstall.tcl,v 1.3.2.2 2015/09/18 07:39:03 gustafn Exp $
 } {
     version_id:naturalnum
 }
 
-
 apm_version_info $version_id
 
-doc_body_append "[apm_header [list "version-view?version_id=$version_id" "$pretty_name $version_name"] "Deinstall"]"
-
+set title "Deinstall"
+set context [list [list "/acs-admin/apm/" "Package Manager"] \
+		 [list "version-view?version_id=$version_id" "$pretty_name $version_name"] \
+		 $title]
 
 db_transaction {
-    doc_body_append "<ul>"
-    apm_package_deinstall -callback apm_doc_body_callback $package_key
-    doc_body_append "</ul>"
+    append body "<ul>\n"
+    set ::__apm_body ""
+    apm_package_deinstall -callback apm_body_callback $package_key
+    append body $::__apm_body
+    append body "</ul>\n"
 } on_error {
     if {![apm_version_installed_p $version_id] } {
 	ad_return_complaint 1 "Database Error: The database returned the following error
-	message <pre><blockquote>[ad_quotehtml $errmsg]</blockquote></pre>"
+	message <pre><blockquote>[ns_quotehtml $errmsg]</blockquote></pre>"
     }
 }
 
-doc_body_append "
-<p>
-Return to the <a href=\"index\">index</a>.
-[ad_footer]
-"
+append body {
+    <p>Return to the <a href='index'>index</a>
+}
+
+ad_return_template apm
 
 
 
 
-
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

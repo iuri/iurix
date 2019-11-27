@@ -6,13 +6,13 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Nov 12 18:05:09 2000
-    @cvs-id $Id: add-2.tcl,v 1.1.1.1 2001/03/13 22:59:26 ben Exp $
+    @cvs-id $Id: add-2.tcl,v 1.2.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    constraint_id:integer,notnull
+    constraint_id:naturalnum,notnull
     rel_type:notnull
     object_type:notnull
-    { return_url "" }
+    { return_url:localurl "" }
 }
 
 db_dml update_rel_type_mapping {
@@ -23,3 +23,9 @@ db_dml update_rel_type_mapping {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

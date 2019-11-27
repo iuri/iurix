@@ -4,22 +4,28 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-10-23
-  @cvs-id $Id: index.tcl,v 1.2 2006/02/13 13:05:50 jiml Exp $
+  @cvs-id $Id: index.tcl,v 1.3.2.2 2016/05/25 07:40:21 gustafn Exp $
 } -query {
-  orderby:optional
-  color_filter_value:optional
-  page:optional
+  orderby:token,notnull,optional
+  color_filter_value:optional,trim,notnull
+  page:naturalnum,optional
 } -properties {
   notes:multirow
   context:onevalue
   create_p:onevalue
+} -validate {
+    valid_color -requires color_filter_value {
+        if {$color_filter_value ni {blue green purple red orange yellow}} {
+            ad_complain "Invalid value: $color_filter_value"
+        }
+    }
 }
 
 set package_id [ad_conn package_id]
 set user_id [ad_conn user_id]
 
 set context [list]
-set create_p [ad_permission_p $package_id create]
+set create_p [permission::permission_p -object_id $package_id -privilege create]
 
 set actions [list]
 
@@ -94,3 +100,9 @@ db_multirow -extend { view_url } template_demo_notes template_demo_notes {} {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

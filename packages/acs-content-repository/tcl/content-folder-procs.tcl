@@ -6,7 +6,7 @@ ad_library {
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-05-28
-    @cvs-id $Id: content-folder-procs.tcl,v 1.14 2008/03/05 20:16:38 donb Exp $
+    @cvs-id $Id: content-folder-procs.tcl,v 1.15.2.2 2016/01/02 21:24:46 gustafn Exp $
     
 }
 
@@ -60,7 +60,7 @@ ad_proc -public ::content::folder::new {
     foreach var [list folder_id name label description parent_id context_id package_id] {
 	lappend var_list [list $var [set $var]]
     }
-    if {[exists_and_not_null creation_date]} {
+    if {[info exists creation_date] && $creation_date ne ""} {
         lappend var_list [list creation_date $creation_date]
     }
     set folder_id [package_instantiate_object \
@@ -335,5 +335,13 @@ ad_proc content::folder::get_folder_from_package_not_cached {
 
     Returns the folder_id of the package instance
 } {
-    return [db_string get_folder_id "select folder_id from cr_folders where package_id=:package_id"]
+    return [db_string get_folder_id {
+        select folder_id from cr_folders where package_id = :package_id
+    }]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

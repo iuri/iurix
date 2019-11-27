@@ -4,7 +4,7 @@
 <!-- @author Victor Guerra (guerra@galileo.edu) -->
 <!-- @creation-date 2005-02-06 -->
 <!-- @arch-tag: d0117c72-fd55-4faa-b2cb-89ec5ce0c0ef -->
-<!-- @cvs-id $Id: page-error.xql,v 1.1 2005/02/25 16:30:59 victorg Exp $ -->
+<!-- @cvs-id $Id: page-error.xql,v 1.1.18.1 2016/01/02 01:20:50 gustafn Exp $ -->
 
 <queryset>
   <fullquery name="get_user_info">
@@ -17,7 +17,7 @@
       
     </querytext>
   </fullquery>
-  <fullquery name = "search_bug">
+  <fullquery name="search_bug">
     <querytext>
       select bug_id
       from bt_auto_bugs
@@ -25,20 +25,20 @@
       and package_id = :bug_package_id
     </querytext>
   </fullquery>
-  <fullquery name = "insert_auto_bug">
+  <fullquery name="insert_auto_bug">
     <querytext>
       insert into bt_auto_bugs(bug_id, package_id, error_file)
       values (:bug_id, :bug_package_id, :error_file)
     </querytext>
   </fullquery>
-  <fullquery name = "increase_reported_times">
+  <fullquery name="increase_reported_times">
     <querytext>
         update bt_auto_bugs 
 	set times_reported = times_reported + 1 
 	where bug_id = :bug_id 
    </querytext>
   </fullquery>
-  <fullquery name = "select_times_reported">
+  <fullquery name="select_times_reported">
     <querytext>
       select times_reported 
       from bt_auto_bugs

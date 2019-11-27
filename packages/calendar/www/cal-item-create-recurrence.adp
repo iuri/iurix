@@ -3,19 +3,25 @@
 	
 	@author Gary Jin (gjin@arsidigta.com)
      	@creation-date Dec 14, 2000
-     	@cvs-id $Id: cal-item-create-recurrence.adp,v 1.13 2004/07/12 14:49:55 jeffd Exp $
+     	@cvs-id $Id: cal-item-create-recurrence.adp,v 1.14.2.2 2017/05/08 13:12:37 antoniop Exp $
 -->
 
 
 <master>
-<property name="title">#calendar.lt_Calendars_Repeating_E#</property>
+<property name="doc(title)">#calendar.lt_Calendars_Repeating_E#</property>
 <property name="context">#calendar.Repeat#</property>
 
 #calendar.lt_You_are_choosing_to_m#
 <p>
-<b>#calendar.Date#</b> @cal_item.start_date@<br>
-<b>#calendar.Time#</b> @cal_item.start_time@ - @cal_item.end_time@<br>
-<b>#calendar.Details#</b> @cal_item.description@
+<strong>#calendar.Date#</strong> @cal_item.start_date@<br>
+<strong>#calendar.Time#</strong>
+<if @cal_item.time_p@>
+  @cal_item.start_time@ - @cal_item.end_time@
+</if>
+<else>
+  #calendar.All_Day_Event#
+</else><br>
+<strong>#calendar.Details#</strong> @cal_item.description@
 <p>
 
     <formtemplate id="cal_item"></formtemplate>

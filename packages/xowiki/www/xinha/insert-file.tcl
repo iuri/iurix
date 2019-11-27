@@ -5,9 +5,9 @@ ad_page_contract {
     @author Gustaf Neumann neumann@wu-wien.ac.at
     @author Dave Bauer (dave@solutiongrove.com)
     @creation-date 13.07.2004
-    @cvs-id $Id: insert-file.tcl,v 1.2 2008/12/23 11:34:59 gustafn Exp $
+    @cvs-id $Id: insert-file.tcl,v 1.5.2.1 2015/09/10 08:10:43 gustafn Exp $
 } {
-    {parent_id:integer}
+    {parent_id:naturalnum,notnull}
     {selector_type "image"}
 }
 
@@ -143,3 +143,8 @@ if {[permission::permission_p -party_id $user_id -object_id $parent_id \
 
 set HTML_Preview "Preview"
 set HTML_UploadTitle ""
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

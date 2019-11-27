@@ -7,17 +7,17 @@ ad_page_contract {
 
     @author rhs@mit.edu
     @creation-date 2000-09-13
-    @cvs-id $Id: package-new.tcl,v 1.12 2007/01/10 21:22:08 gustafn Exp $
+    @cvs-id $Id: package-new.tcl,v 1.15.2.3 2016/01/02 20:57:57 gustafn Exp $
 
 } {
-    {new_package_id:integer ""}
-    node_id:integer,notnull
-    {new_node_p f}
+    {new_package_id:naturalnum ""}
+    node_id:naturalnum,notnull
+    {new_node_p:boolean f}
     {node_name:trim ""}
     {instance_name ""}
     package_key:notnull
     {expand:integer,multiple ""}
-    root_id:integer,optional
+    root_id:naturalnum,optional
 }
 
 if {$package_key eq "/new"} {
@@ -26,7 +26,9 @@ if {$package_key eq "/new"} {
 }
 
 if { $instance_name eq "" } {
-        set instance_name [db_string instance_default_name "select pretty_name from apm_package_types where package_key = :package_key"]
+    set instance_name [db_string instance_default_name {
+        select pretty_name from apm_package_types where package_key = :package_key
+    }]
 }
 
 db_transaction {
@@ -62,9 +64,15 @@ db_transaction {
 	ad_return_complaint 1 "Error Creating Package: The following error was generated
 		when attempting to create the package
 	<blockquote><pre>
-		[ad_quotehtml $errmsg]
+		[ns_quotehtml $errmsg]
 	</pre></blockquote>"
     }
 }
 
-ad_returnredirect ".?[export_url_vars expand:multiple root_id]"
+ad_returnredirect [export_vars -base . {expand:multiple root_id}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

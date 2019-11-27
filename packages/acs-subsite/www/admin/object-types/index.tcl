@@ -4,11 +4,17 @@ ad_page_contract {
 
     @author Yonatan Feldman (yon@arsdigita.com)
     @creation-date August 13, 2000
-    @cvs-id $Id: index.tcl,v 1.5 2006/06/04 00:45:45 donb Exp $
+    @cvs-id $Id: index.tcl,v 1.6.6.1 2015/09/10 08:21:43 gustafn Exp $
 
 } {}
 
-set page_title "Object Type Hierarchical Index"
+set doc(title) "Object Type Hierarchical Index"
 set context [list "Object Type Hierarchical Index"]
 
 set object_type_hierarchy [acs_object_type_hierarchy]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="zh_CN" charset="utf-8">
+<message_catalog package_key="survey" locale="zh_CN" charset="utf-8">
 
   <msg key="-__Created_by">—创建人</msg>
   <msg key="_on_creation_date">，%creation_date%日</msg>
@@ -82,7 +82,7 @@
   <msg key="lt_Cancel_and_return_to__1">取消并返回到调查问卷</msg>
   <msg key="lt_Completely_delete">确实要从%response_date_var%彻底删除%user_name_var%的应答吗？（注意：此操作是不可逆转的。）</msg>
   <msg key="lt_Confirm_Survey_Detail">确认问卷详细信息</msg>
-  <msg key="lt_Copying_a_survey_will">拷贝一个问卷可以创建一个包含所有问题拷贝的新问卷。&lt;br /&gt; 应答数据不会被拷贝。</msg>
+  <msg key="lt_Copying_a_survey_will">拷贝一个问卷可以创建一个包含所有问题拷贝的新问卷。&lt;br&gt; 应答数据不会被拷贝。</msg>
   <msg key="lt_Could_not_find_a_surv">找不到问卷问题</msg>
   <msg key="lt_Could_not_find_the_re">找不到回复</msg>
   <msg key="lt_Couldnt_find_attachment">找不到附件，找不到问题%question_id%解答%response_id%相应附件。</msg>
@@ -96,7 +96,7 @@
   <msg key="lt_Everyone_eligible_to_">任何人都可答此问卷</msg>
   <msg key="lt_Everyone_who_has_alre">所有答此问卷者</msg>
   <msg key="lt_Everyone_who_has_not_">还未答此问卷者</msg>
-  <msg key="lt_For_Multiple_Choicebr">对多项选择题&lt;br /&gt;输入有效的答案列表&lt;br /&gt;（每行输入一个选择）</msg>
+  <msg key="lt_For_Multiple_Choicebr">对多项选择题&lt;br&gt;输入有效的答案列表&lt;br&gt;（每行输入一个选择）</msg>
   <msg key="lt_had_to_say_in_respons">必须表示回复到%survey_name%：</msg>
   <msg key="lt_Here_is_how_your_surv">问卷描述样式：</msg>
   <msg key="lt_img_srcgraphicsadming">管理问卷</msg>

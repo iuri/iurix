@@ -14,13 +14,13 @@ set __return_url__ [ad_conn url]
 
 multirow create __form_contents__ __key__ __value__
 
-if { ![empty_string_p [set __form__ [ns_getform]]] } {
+if { [set __form__ [ns_getform]] ne "" } {
 
     set __form_size__ [ns_set size $__form__]
     set __form_counter__ 0
    
     while { $__form_counter__ < $__form_size__ } {
-        if { [string equal [ns_set key $__form__ $__form_counter__] __confirmed_p] } {
+        if { [ns_set key $__form__ $__form_counter__] eq "__confirmed_p" } {
             multirow append __form_contents__ __confirmed_p 1
         } else {
 
@@ -36,3 +36,22 @@ if { ![empty_string_p [set __form__ [ns_getform]]] } {
     }
 
 }
+
+template::add_body_script -script [subst {
+    document.getElementById('confirm-button').addEventListener('click', function (event) {
+        event.preventDefault();
+        history.back();
+        return false;
+    });
+    document.getElementById('confirm-button').addEventListener('keypress', function (event) {
+        event.preventDefault();
+        acs_KeypressGoto(document.referrer,event);
+        return false;
+    });
+}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

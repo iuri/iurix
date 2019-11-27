@@ -1,3 +1,0 @@
-ALTER TABLE mores_items3 ADD COLUMN likes integer;
-ALTER TABLE mores_items3 ADD COLUMN comments integer;
-

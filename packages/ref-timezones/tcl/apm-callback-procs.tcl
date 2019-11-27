@@ -6,7 +6,7 @@ ad_library {
     
     @author Victor Guerra (vguerra@wu-wien.ac.at)
     @creation-date 2008-12-16
-    @cvs-id $Id: apm-callback-procs.tcl,v 1.1 2009/03/19 14:04:41 victorg Exp $
+    @cvs-id $Id: apm-callback-procs.tcl,v 1.1.10.2 2015/09/29 10:21:24 gustafn Exp $
 }
 
 namespace eval ref-timezones::apm {}
@@ -26,5 +26,17 @@ ad_proc -public ref-timezones::apm::after_upgrade {
                 set entries [db_string _ "select count(*) from timezones"]
                 ns_log Notice "$entries time zones loaded"
             }
+            5.9.0b1 5.9.0b2 {
+                db_load_sql_data [acs_root_dir]/packages/ref-timezones/sql/[db_driverkey ""]/upgrade/upgrade-timezones.ctl
+                set entries [db_string _ "select count(*) from timezones"]
+                ns_log Notice "$entries time zones loaded"
+            }
+            
         }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

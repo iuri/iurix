@@ -3,7 +3,7 @@ ad_library {
 
     @author Ola Hansson (ola@polyxena.net)
     @creation-date 2003-09-21
-    @cvs-id $Id: spellcheck-procs.tcl,v 1.19 2010/01/22 14:10:30 emmar Exp $
+    @cvs-id $Id: spellcheck-procs.tcl,v 1.22.2.5 2017/04/21 16:50:29 gustafn Exp $
 }
 
 namespace eval template {}
@@ -15,7 +15,7 @@ namespace eval template::util::spellcheck {}
 ad_proc -public template::util::spellcheck { command args } {
     Dispatch procedure for the spellcheck object
 } {
-  eval template::util::spellcheck::$command $args
+    template::util::spellcheck::$command {*}$args
 }
 
 ad_proc -public template::util::spellcheck::merge_text { element_id } {
@@ -49,7 +49,7 @@ ad_proc -public template::data::transform::spellcheck {
     -element_ref:required
     -values:required
 } {
-    Tranform submitted and previously validated input into a spellcheck datastructure.
+    Transform submitted and previously validated input into a spellcheck datastructure.
 
     @param element_ref Reference variable to the form element.
     @param values The set of values for that element.
@@ -61,7 +61,8 @@ ad_proc -public template::data::transform::spellcheck {
     # case 2, submission of the page showing errors: returns the corrected text.
     set merge_text [template::util::spellcheck::merge_text $element(id)]
 
-    if { [set richtext_p [string equal "richtext" $element(datatype)]] } {
+    set richtext_p [expr {$element(datatype) eq "richtext"}]
+    if { $richtext_p } {
 	# special treatment for the "richtext" datatype.
     	set format [template::util::richtext::get_property format [lindex $values 0]]
 	if { $merge_text ne "" } {
@@ -161,6 +162,7 @@ ad_proc -public template::util::spellcheck::get_element_formtext {
     -var_to_spellcheck:required
     {-language ""}
     -error_num_ref:required
+    {-no_abort:boolean 0}
     -formtext_to_display_ref:required
     {-just_the_errwords_ref ""}
 } {
@@ -168,6 +170,7 @@ ad_proc -public template::util::spellcheck::get_element_formtext {
     @param text The string to check for spelling errors.
     
     @param html_p Does the text have html in it? If so, we strip out html tags in the string we feed to ispell (or aspell).
+    @param no_abort_p Set this tue for testing purposes (e.g. aa_test).
     
     @param var_to_spellcheck The name of the text input type or textarea that holds this text (eg., "email_body")
     
@@ -198,9 +201,30 @@ ad_proc -public template::util::spellcheck::get_element_formtext {
     # the HOME environment set, and setting env(HOME) doesn't appear
     # to work from AOLserver.
 
-    set spelling_wrapper [file join [acs_root_dir] bin webspell]
+    set spelling_wrapper [file join $::acs::rootdir bin webspell]
+
+    if {![file executable $spelling_wrapper]} {
+	#
+	# In case no_abort is given we just return the error
+	# message. Otherwise an ad_return_error is raised and the
+	# script is ad_script_aborted.
+	#
+	if {!$no_abort_p} {
+	    ad_return_error "Webspell could not be executed" \
+		"Spell-checking is enabled but the spell-check wrapper\
+		 ($::acs::rootdir/bin/webspell) returns  not be executed.\
+		 Check that the wrapper exists, and that its permissions are correct."
+	    ad_script_abort
+	} else {
+	    error $errmsg
+	}
+    }
 
     set spellchecker_path [nsv_get spellchecker path]
+
+    #
+    # Force default language to en_US
+    #set ::env(LANG) en_US.UTF-8
 
     # the --lang switch only works with aspell and if it is not present
     # aspell's (or ispell's) default language will have to do.
@@ -209,36 +233,31 @@ ad_proc -public template::util::spellcheck::get_element_formtext {
         append lang_and_enc " --lang=$language"
     }
 
-    # Caveat: The "open" arg must be a list (not a string) to allow the wrapper args to be the empty string
-    # (which $language will be when ispell is used, for instance)
+    #ns_log notice WRAPPER=[list |$spelling_wrapper [ns_info home] $spellchecker_path $lang_and_enc $dictionaryfile $tmpfile]
 
-    if { [catch { set ispell_proc [open [list |$spelling_wrapper [ns_info home] $spellchecker_path $lang_and_enc $dictionaryfile $tmpfile] r] } errmsg] } {
-	ad_return_error "Webspell could not be executed" "Spell-checking is enabled but the spell-check wrapper ([acs_root_dir]/bin/webspell) could not be executed. Check that the wrapper exists, and that its permissions are correct. <p>Here is the error message: <pre>$errmsg</pre>"
-	ad_script_abort
-    }
-    
-    # read will occasionally error out with "interrupted system call",
-    # so retry a few times in the hopes that it will go away.
-    set try 0
-    set max_retry 10
-    while { [catch { set ispell_text [read -nonewline $ispell_proc] } errmsg]
-	    && $try < $max_retry } {
-	incr try
-	ns_log warning "template::util::spellcheck::get_element_formtext: spellchecker had a problem: $errmsg"
+    if {[catch {
+	set ispell_lines [exec $spelling_wrapper [ns_info home] $spellchecker_path $lang_and_enc $dictionaryfile $tmpfile]
+    } errmsg]} {
+	#ns_log notice "errorMsg = $errmsg"
+	
+	#
+	# In case no_abort is given we just return the error
+	# message. Otherwise an ad_return_error is raised and the
+	# script is ad_script_aborted.
+	#
+	if {!$no_abort_p} {
+	    ad_return_error "No dictionary found" \
+		"Spell-checking is enabled but the spell-check dictionary\
+		 could not be reached. Check that the dictionary exists,\
+		 and that its permissions are correct.\
+		 <p>Here is the error message: <pre>$errmsg</pre>"
+	    ad_script_abort
+	} else {
+	    error $errmsg
+	}
     }
 
-    fconfigure $ispell_proc -blocking 0
-    
-    if { [catch { close $ispell_proc } errmsg] } {
-	ad_return_error "No dictionary found" "Spell-checking is enabled but the spell-check dictionary could not be reached. Check that the dictionary exists, and that its permissions are correct. <p>Here is the error message: <pre>$errmsg</pre>"
-	ad_script_abort
-    }
-
-    ns_unlink $tmpfile
-
-    if { $try == $max_retry } {
-        return -code error "webspell: Tried to execute spellchecker $max_retry times but it did not work out. Sorry!"
-    }
+    file delete -- $tmpfile
 
     ####
     #
@@ -246,7 +265,7 @@ ad_proc -public template::util::spellcheck::get_element_formtext {
     #
     ####
     
-    set ispell_lines [split $ispell_text "\n"]
+    set ispell_lines [split $ispell_lines "\n"]
     # Remove the version line.
     if { [llength $ispell_lines] > 0 } {
 	set ispell_lines [lreplace $ispell_lines 0 0]
@@ -324,7 +343,7 @@ ad_proc -public template::util::spellcheck::get_element_formtext {
     regsub -all {<a [^<]*>} $formtext_to_display "<u>" formtext_to_display
     regsub -all {</a>} $formtext_to_display "</u>" formtext_to_display
 
-    append formtext_to_display "<input type=\"hidden\" name=\"${var_to_spellcheck}.merge_text\" value=\"[ad_quotehtml $processed_text]\" >"
+    append formtext_to_display "<input type=\"hidden\" name=\"${var_to_spellcheck}.merge_text\" value=\"[ns_quotehtml $processed_text]\" >"
 
 
     ####
@@ -350,7 +369,7 @@ ad_proc -public template::util::spellcheck::spellcheck_properties {
 } {
     upvar $element_ref element
     
-    if { [empty_string_p [set spellcheck_value [ns_queryget $element(id).spellcheck]]] } {
+    if { [set spellcheck_value [ns_queryget $element(id).spellcheck]] eq "" } {
 	
 	# The user hasn't been able to state whether (s)he wants spellchecking to be performed or not.
 	# That's either because spell-checking is disabled for this element, or we're not dealing with a submit.
@@ -358,9 +377,9 @@ ad_proc -public template::util::spellcheck::spellcheck_properties {
 	
 	# Do the "cheap" checks first and then (if needed) read the parameter and do additional checks.
 
-	if { [string equal "display" $element(mode)] \
-		 || [info exists element(nospell)] \
-		 || [empty_string_p [nsv_get spellchecker path]] } {
+	if { $element(mode) eq "display" 
+	     || [info exists element(nospell)] 
+	     || [nsv_get spellchecker path] eq "" } {
 
 	    set spellcheck_p 0
 	} else {
@@ -371,9 +390,11 @@ ad_proc -public template::util::spellcheck::spellcheck_properties {
 						    -parameter SpellcheckFormWidgets \
 						    -default ""]]
 	    
-	    set spellcheck_p [expr {[array size widget_info] \
-				  && ($element(widget) eq "richtext" || $element(widget) eq "textarea" || $element(widget) eq "text") \
-				  && [lsearch -exact [array names widget_info] $element(widget)] != -1}]
+	    set spellcheck_p [expr {[array size widget_info] 
+				    && ($element(widget) eq "richtext" || 
+					$element(widget) eq "textarea" || 
+					$element(widget) eq "text") 
+				    && $element(widget) in [array names widget_info]}]
 	    
 	}
 	
@@ -419,3 +440,9 @@ ad_proc -public template::util::spellcheck::spellcheck_properties {
 
     return [array get spellcheck]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

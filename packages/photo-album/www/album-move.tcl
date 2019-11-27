@@ -5,9 +5,9 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 1/8/2000
-    @cvs-id $Id: album-move.tcl,v 1.4 2003/11/18 22:59:03 rocaelh Exp $
+    @cvs-id $Id: album-move.tcl,v 1.8 2017/05/26 18:05:37 gustafn Exp $
 } {
-    album_id:integer,notnull
+    album_id:naturalnum,notnull
 } -validate {
     valid_album -requires {album_id:integer} {
 	if [string equal [pa_is_album_p $album_id] "f"] {
@@ -22,8 +22,8 @@ set user_id [ad_conn user_id]
 # and pa_create_album on new parent folder (which is check in the is_valid block)
 
 set old_folder_id [db_string get_parent_folder "select parent_id from cr_items where item_id = :album_id"]
-ad_require_permission $album_id write
-ad_require_permission $old_folder_id write
+permission::require_permission -object_id $album_id -privilege write
+permission::require_permission -object_id $old_folder_id -privilege write
 
 db_1row get_album_info {}
 
@@ -35,7 +35,7 @@ template::element create move_album album_id -label "album ID" \
   -datatype integer -widget hidden
 
 
-# options query retreive all folders in package that user can add an album to
+# options query retrieve all folders in package that user can add an album to
 set root_folder_id [pa_get_root_folder]
 
 template::element create move_album new_folder_id -label "[_ photo-album._Choose]" \
@@ -59,7 +59,7 @@ if { [template::form is_request move_album] } {
 if { [template::form is_valid move_album] } {
     set new_folder_id [template::element::get_value move_album new_folder_id]
 
-    ad_require_permission $new_folder_id "pa_create_album"
+    permission::require_permission -object_id $new_folder_id -privilege "pa_create_album"
 
     if [string equal [pa_is_folder_p $new_folder_id] "f"] {
 	# may add some sort of error message
@@ -91,11 +91,11 @@ if { [template::form is_valid move_album] } {
 	set folder_name [db_string folder_name "
 	select name from cr_items where item_id = :album_id"]
 	
-	if [db_string duplicate_check "
+	if {[db_string duplicate_check "
 	select count(*)
 	from   cr_items
 	where  name = :folder_name
-	and    parent_id = :new_folder_id"] {
+	and    parent_id = :new_folder_id"]} {
 	    ad_return_complaint 1 "[_ photo-album._Either_1]"
 	} else {
 	    ad_return_complaint 1 "[_ photo-album._We]"

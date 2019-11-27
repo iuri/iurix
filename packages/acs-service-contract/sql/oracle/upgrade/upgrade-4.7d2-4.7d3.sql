@@ -2,7 +2,7 @@
 -- @author Simon Carstensen (simon@collaboraid.biz)
 -- @creation_date 2003-09-10
 --
--- $Id: upgrade-4.7d2-4.7d3.sql,v 1.4 2003/10/01 10:28:52 peterm Exp $
+-- $Id: upgrade-4.7d2-4.7d3.sql,v 1.4.24.1 2017/04/21 16:21:48 gustafn Exp $
 
 -- add column impl_pretty_name
 alter table acs_sc_impls add impl_pretty_name varchar2(200);
@@ -33,7 +33,7 @@ as
        impl_name		acs_sc_impls.impl_name%TYPE
    );
 
-   /* Next 2 functions are deprecated but left here for backwards compatability */
+   /* Next 2 functions are deprecated but left here for backwards compatibility */
 
    function new_alias (
        impl_contract_name	acs_sc_contracts.contract_name%TYPE,

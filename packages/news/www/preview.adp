@@ -1,6 +1,6 @@
 <master>
-<property name="context">@context;noquote@</property>
-<property name="title">@title;noquote@</property>
+<property name="context">@context;literal@</property>
+<property name="doc(title)">@title;literal@</property>
 
 <div style="position: relative;">
 <h1>@title;noquote@</h1>
@@ -9,7 +9,7 @@
 <p>
   <if @news_admin_p@ ne 0>
    #news.It_will_go_live_on# @publish_date_pretty@.   
-    <if @permanent_p@ eq "t">
+    <if @permanent_p;literal@ true>
       #news.lt_And_be_live_until_rev#
     </if>
     <else>	
@@ -25,17 +25,18 @@
 </p>
 
 <div class="news-item-preview">
-   <include src=news publish_body = "@publish_body;noquote@"
-                     publish_format = "@publish_format;noquote@"
-                     publish_lead = "@publish_lead@"
-                     publish_title = "@publish_title;noquote@"
-                     creator_link = "@creator_link;noquote@">
+   <include src="/packages/news/lib/news"
+      publish_body="@publish_body;literal@"
+      publish_format="@publish_format;literal@"
+      publish_lead="@publish_lead;literal@"
+      publish_title="@publish_title;literal@"
+      creator_link="@creator_link;literal@">
 </div>
 
 <div>
     @form_action;noquote@
      <div>@hidden_vars;noquote@</div>
-     <div class="form-button"><input type=submit value="#news.Confirm#"></div>
+     <div class="form-button"><input type="submit" value="#news.Confirm#"></div>
     </form>
 <if @action@ eq "News Item">
   @edit_action;noquote@ 

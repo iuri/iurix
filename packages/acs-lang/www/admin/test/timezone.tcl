@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author John Lowry (lowry@ardigita.com)
     @creation-date 29 September 2000
-    @cvs-id $Id: timezone.tcl,v 1.2 2007/01/10 21:22:04 gustafn Exp $
+    @cvs-id $Id: timezone.tcl,v 1.2.12.1 2015/09/10 08:21:30 gustafn Exp $
 } { }
 
 set title "Test acs-lang package timezones"
@@ -67,3 +67,9 @@ if {$system_time eq $tokyo_utc_time } {
 
 ad_return_template
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

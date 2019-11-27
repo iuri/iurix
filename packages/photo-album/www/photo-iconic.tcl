@@ -1,10 +1,10 @@
 ad_page_contract { 
     Make a given photo the cover photo for the album.
 } { 
-    photo_id:integer,notnull
+    photo_id:naturalnum,notnull
 } -validate {
     valid_photo -requires {photo_id:integer} {
-	if ![string equal [pa_is_photo_p $photo_id] "t"] {
+	if {[pa_is_photo_p $photo_id] != "t" } {
 	    ad_complain "The specified photo is not valid."
 	}
     }
@@ -21,10 +21,13 @@ set album_id [db_string get_album_id {
 
 # If we did not get an album ID 
 if {! $album_id } { 
-    ad_return_error "Photo Internal Error" "The photo is either not live or not in an album.  Please inform the webmaster of the error"
+    ad_return_error \
+	"Photo Internal Error" \
+	"The photo is either not live or not in an album.  Please inform the webmaster of the error"
+    ad_script_abort
 }
 
-ad_require_permission $album_id "write"
+permission::require_permission -object_id $album_id -privilege "write"
 
 db_dml photo_iconic {}
 

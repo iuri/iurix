@@ -9,11 +9,11 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: delete-attachment.tcl,v 1.5 2007/05/05 15:54:47 maltes Exp $
+    @cvs-id $Id: delete-attachment.tcl,v 1.6.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    attach_id:integer,notnull
-    parent_id:integer,notnull
-    { return_url {} }
+    attach_id:naturalnum,notnull
+    parent_id:naturalnum,notnull
+    { return_url:localurl {} }
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -23,10 +23,16 @@ ad_page_contract {
 }
 
 # check for permissions
-ad_require_permission $attach_id delete
+permission::require_permission -object_id $attach_id -privilege delete
 
 # set template variables
 set page_title "[_ general-comments.Delete_attachment]"
 set context "\"[_ general-comments.Delete_attachment]\""
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -8,10 +8,10 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: url-add.tcl,v 1.4 2002/11/07 08:32:49 peterm Exp $
+    @cvs-id $Id: url-add.tcl,v 1.5.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    parent_id:notnull,integer
-    { return_url {} }
+    parent_id:notnull,naturalnum
+    { return_url:localurl {} }
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -23,7 +23,7 @@ ad_page_contract {
     return_url:onevalue
 } -validate {
     allow_link_attachments {
-        set allow_links_p [ad_parameter AllowLinkAttachmentsP {general-comments} {t}]
+        set allow_links_p [parameter::get -parameter AllowLinkAttachmentsP -default {t}]
         if { $allow_links_p != "t" } {
             ad_complain "[_ general-comments.lt_Attaching_links_to_co]"
         }
@@ -31,7 +31,7 @@ ad_page_contract {
 }
 
 # check to see if the user can add an attachment
-ad_require_permission $parent_id write
+permission::require_permission -object_id $parent_id -privilege write
 
 # set variables for template
 set attach_id [db_nextval acs_object_id_seq]
@@ -45,3 +45,9 @@ ad_return_template "url-ae"
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

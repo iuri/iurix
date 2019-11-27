@@ -1,12 +1,13 @@
 <master>
-  <property name="title">@page_title@</property>
-  <property name="context">@context@</property>
+  <property name="&doc">doc</property>
+  <property name="context">@context;literal@</property>
 
-<ul class="action-links">
- <li><a href="index">View Hierarchical Index</a></li>
+ <h1>@doc.title@</h1>
+
+ <p><a href="index" class="button">View Hierarchical Index</a></p>
+
+<ul>
+  <multiple name="alpha_object_types">
+    <li><a href="one?object_type=@alpha_object_types.object_type@">@alpha_object_types.pretty_name@</a></li>
+  </multiple>
 </ul>
-<p>
-
-<multiple name="alpha_object_types">
- <a href="one?object_type=@alpha_object_types.object_type@">@alpha_object_types.pretty_name@</a><br>
-</multiple>

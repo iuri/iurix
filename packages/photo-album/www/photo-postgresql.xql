@@ -8,9 +8,6 @@
 select
  pp.caption,
  pp.story,
- pp.photographer,
- pp.group_id,
- pp.date_taken,
  cr.title,
  cr.description,
  i.height as height,

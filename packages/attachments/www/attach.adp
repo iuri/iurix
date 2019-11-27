@@ -1,12 +1,12 @@
 <master>
 <property name="&doc">doc</property>
-<property name="context">@context;noquote@</property>
+<property name="context">@context;literal@</property>
 
 <p>#attachments.lt_You_are_attaching_a_d#</p>
 
 <p>#attachments.lt_To_attach_a_file_alre#</p>
 
-<if @write_permission_p@ eq 1>
+<if @write_permission_p;literal@ true>
 #attachments.attach_new#
       &nbsp;
       <a href="@file_add_url@">#attachments.File#</a>

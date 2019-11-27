@@ -8,7 +8,7 @@ ad_library {
 
     @author avni@ucla.edu (AK)
     @creation-date 2004/10/19
-    @cvs-id $Id: tdom-procs.tcl,v 1.3 2008/03/22 18:31:32 gustafn Exp $
+    @cvs-id $Id: tdom-procs.tcl,v 1.3.10.2 2017/04/22 18:11:54 gustafn Exp $
 
     @tdom::get_node_object
     @tdom::get_parent_node_object
@@ -24,8 +24,8 @@ ad_proc -public tdom::get_node_object {
     parent_node_object
     args
 } {
-    Returns a tdom object to the args given
-    If the tdom object doesn't exist or the value is null, return null
+    Returns a tDOM object to the args given
+    If the tDOM object doesn't exist or the value is null, return null
 
     <pre>
     Example -----------------------------------------------------
@@ -56,7 +56,7 @@ ad_proc -public tdom::get_node_object {
 ad_proc -public tdom::get_parent_node_object {
     child_node_object
 } {
-    Returns a tdom object for the parent node of the child node object passed in
+    Returns a tDOM object for the parent node of the child node object passed in
 } {
     set parent_node_object ""
     catch {set parent_node_object [$child_node_object parentNode]}
@@ -117,3 +117,8 @@ ad_proc -public tdom::get_node_xml {
 
     return [string trim $node_xml]
 }
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

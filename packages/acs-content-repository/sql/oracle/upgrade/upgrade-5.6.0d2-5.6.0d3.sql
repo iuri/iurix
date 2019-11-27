@@ -3,7 +3,7 @@
 -- 
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2009-10-12
--- @cvs-id $Id: upgrade-5.6.0d2-5.6.0d3.sql,v 1.2 2009/12/07 20:19:03 daveb Exp $
+-- @cvs-id $Id: upgrade-5.6.0d2-5.6.0d3.sql,v 1.2.8.1 2017/04/21 14:53:07 gustafn Exp $
 --
 
 
@@ -277,7 +277,7 @@ begin
   -- Drop the attribute
   acs_attribute.drop_attribute(content_type, attribute_name);
 
-  -- Drop the column if neccessary
+  -- Drop the column if necessary
   if drop_column = 't' then
     begin
       execute immediate 'alter table ' || v_table || ' drop column ' ||

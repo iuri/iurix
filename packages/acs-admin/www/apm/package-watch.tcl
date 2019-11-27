@@ -3,12 +3,18 @@ ad_page_contract {
 
 
     @author Peter Marklund
-    @cvs-id $Id: package-watch.tcl,v 1.2 2003/04/04 09:19:59 peterm Exp $
+    @cvs-id $Id: package-watch.tcl,v 1.2.24.3 2016/05/20 19:52:59 gustafn Exp $
 } {
     package_key
-    {return_url "index"}
+    {return_url:localurl "index"}
 } 
 
 apm_watch_all_files $package_key
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

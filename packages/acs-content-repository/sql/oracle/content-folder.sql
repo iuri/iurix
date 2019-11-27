@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: content-folder.sql,v 1.22 2009/02/03 02:25:02 donb Exp $
+-- $Id: content-folder.sql,v 1.22.10.1 2017/04/21 17:14:16 antoniop Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -284,7 +284,8 @@ procedure copy (
   target_folder_id	in cr_folders.folder_id%TYPE,
   creation_user		in acs_objects.creation_user%TYPE,
   creation_ip		in acs_objects.creation_ip%TYPE default null,
-  name                  in cr_items.name%TYPE default null
+  name                  in cr_items.name%TYPE default null,
+  label                 in cr_folders.label%TYPE default null  
 ) is
   v_valid_folders_p     integer := 0;
   v_current_folder_id   cr_folders.folder_id%TYPE;
@@ -363,7 +364,7 @@ begin
       v_new_folder_id := content_folder.new(
 	  parent_id     => copy.target_folder_id,
           name	        => nvl(copy.name,v_name),
-	  label	        => v_label,
+	  label	        => nvl(copy.label,v_label),
 	  description   => v_description,
 	  creation_user => copy.creation_user,
 	  creation_ip   => copy.creation_ip

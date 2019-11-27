@@ -2,57 +2,64 @@ if { ![info exists period_days] } {
     ad_page_contract  {
      Some documentation.
      @author Sven Schmitt (s.lrn@gmx.net)
-     @cvs-id $Id: view-list-display.tcl,v 1.33 2009/07/16 11:31:56 emmar Exp $
+     @cvs-id $Id: view-list-display.tcl,v 1.35.2.6 2017/06/30 17:42:16 gustafn Exp $
     } {
-	{period_days:integer {[parameter::get -parameter ListView_DefaultPeriodDays -default 31]}}
+	{period_days:integer,notnull {[parameter::get -parameter ListView_DefaultPeriodDays -default 31]}}
+    } -validate {
+        valid_period_days  -requires { period_days } {
+            # Tcl allows in for relative times just 6 digits, including the "+"
+            if {$period_days > 99999} {
+                ad_complain "Invalid time period."
+            }
+        }
     }
 }
 
-if { ![info exists show_calendar_name_p] } {
+if { ![info exists show_calendar_name_p] || $show_calendar_name_p eq "" } {
     set show_calendar_name_p 1
 }
-if { ![exists_and_not_null sort_by] } {
+if { ![info exists sort_by] || $sort_by eq ""} {
     set sort_by "start_date"
 }
 
-if { ![exists_and_not_null start_date] } {
+if { ![info exists start_date] || $start_date eq "" } {
     set start_date [clock format [clock seconds] -format "%Y-%m-%d 00:00"]
+} elseif {[catch {clock scan $start_date} errorMsg]} {
+    ad_page_contract_handle_datasource_error "invalid start date"
+    ad_script_abort
 }
 
-if { ![exists_and_not_null end_date] } {
+if { ![info exists end_date] || $end_date eq "" } {
     set end_date [clock format [clock scan "+30 days" -base [clock scan $start_date]] -format "%Y-%m-%d 00:00"]
+} elseif {[catch {clock scan $end_date} errorMsg]} {
+    ad_page_contract_handle_datasource_error "invalid end date"
+    ad_script_abort
 }
 
-if {[exists_and_not_null calendar_id_list]} {
+if { [info exists calendar_id_list] && $calendar_id_list ne "" } {
     set calendars_clause [db_map dbqd.calendar.www.views.openacs_in_portal_calendar] 
 } else {
     set calendars_clause [db_map dbqd.calendar.www.views.openacs_calendar] 
 }
 
-#if { ![exists_and_not_null period_days] } {
-#    set period_days [parameter::get -parameter ListView_DefaultPeriodDays -default 31]
-#}  else {
-#    set end_date [clock format [clock scan "+${period_days} days" -base [clock scan $start_date]] -format "%Y-%m-%d 00:00"]
-#}
 set end_date [clock format [clock scan "+${period_days} days" -base [clock scan $start_date]] -format "%Y-%m-%d 00:00"]
-
 set package_id [ad_conn package_id]
 set user_id [ad_conn user_id]
 
 # The title
-if {[empty_string_p $start_date] && [empty_string_p $end_date]} {
+if {$start_date eq "" && $end_date eq ""} {
     set title ""
 }
 
-if {[empty_string_p $start_date] && ![empty_string_p $end_date]} {
+if {$start_date eq "" && $end_date ne ""} {
     set title "[_ acs-datetime.to] [lc_time_fmt $end_date "%q"]"
 }
 
-if {![empty_string_p $start_date] && [empty_string_p $end_date]} {
+if {$start_date ne "" && $end_date eq ""} {
     set title "[_ acs-datetime.Items_from] [lc_time_fmt $start_date "%q"]"
 }
 
-if {![empty_string_p $start_date] && ![empty_string_p $end_date]} {
+if {$start_date ne "" && $end_date ne ""} {
     set title "[_ acs-datetime.Items_from] [lc_time_fmt $start_date "%q"] [_ acs-datetime.to] [lc_time_fmt $end_date "%q"]"
 }
 
@@ -62,7 +69,7 @@ set today_julian_date [dt_ansi_to_julian [lindex $today_ansi_list 0] [lindex $to
 
 set view list
 set form_vars [export_vars -form -entire_form -exclude {period_days}]
-set url_vars [export_vars -url -entire_form -exclude {period_days}]
+set url_vars [export_vars -entire_form -exclude {period_days}]
 
 multirow create items \
     event_name \
@@ -84,7 +91,7 @@ set last_pretty_start_date ""
 set interval_limitation_clause [db_map dbqd.calendar.www.views.list_interval_limitation]
 set order_by_clause " order by $sort_by"
 set additional_limitations_clause ""
-if { [exists_and_not_null cal_system_type] } {
+if { ([info exists cal_system_type] && $cal_system_type ne "") } {
     append additional_limitations_clause " and system_type = :cal_system_type "
 }
 
@@ -118,15 +125,15 @@ db_foreach dbqd.calendar.www.views.select_items {} {
         set pretty_end_time "--"
     }
 
-    if {[string equal $pretty_start_time "00:00"]} {
+    if {$pretty_start_time eq "00:00"} {
         set pretty_start_time "--"
     }
 
-    if {[string equal $pretty_end_time "00:00"]} {
+    if {$pretty_end_time eq "00:00"} {
         set pretty_end_time "--"
     }
 
-    if {![string equal $pretty_start_date $last_pretty_start_date]} {
+    if {$pretty_start_date ne $last_pretty_start_date } {
         set last_pretty_start_date $pretty_start_date
     }
 
@@ -205,7 +212,7 @@ foreach i {1 7 14 21 30 60} {
     set period_url_$i "[export_vars -base $self_url -url -entire_form {{period_days $i}}]\#calendar"
 }
 
-if { [info exists export] && [string equal $export print] } {
+if { [info exists export] && $export eq "print" } {
     set print_html [template::adp_parse [acs_root_dir]/packages/calendar/www/view-print-display [list &items items show_calendar_name_p $show_calendar_name_p]]
     ns_return 200 text/html $print_html
     ad_script_abort
@@ -216,7 +223,7 @@ set noprocessing_vars [list]
 
 
     set the_form [ns_getform]
-    if { ![empty_string_p $the_form] } {
+    if { $the_form ne "" } {
 	for { set i 0 } { $i < [ns_set size $the_form] } { incr i } {
 	    set varname [ns_set key $the_form $i]
 	    set varvalue [ns_set value $the_form $i]
@@ -230,7 +237,13 @@ set noprocessing_vars [list]
 ad_form -name frmdays -has_submit 1 -html {class "inline-form"} -export $noprocessing_vars -form {
     {period_days:integer,optional
         {label "[_ calendar.days]"}
-        {html {size 3} {maxlength 3} {class "cal-input-field"}}
+        {html {size 3 maxlength 3 class "cal-input-field"}}
         {value "$period_days"}
     }
 } -on_submit { }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

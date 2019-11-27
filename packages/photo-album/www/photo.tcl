@@ -6,22 +6,18 @@ ad_page_contract {
     
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 12/10/2000
-    @cvs-id $Id: photo.tcl,v 1.9 2006/08/08 21:27:09 donb Exp $
+    @cvs-id $Id: photo.tcl,v 1.14 2018/01/20 22:49:15 gustafn Exp $
 } {
     {latest_revision 0}
-    {photo_id:integer 0}
-    {collection_id:integer,optional {}}
-    {show_html_p 0}
+    {photo_id:naturalnum,notnull 0}
+    {collection_id:naturalnum,optional {}}
+    {show_html_p:boolean 0}
 } -properties {
     context:onevalue
-    caption:onevalue
     title:onevalue
     description:onevalue
     story:onevalue
-    group:onevalue
-    tags:onevalue
-    photographer:onevalue
-    date:onevalue
+    caption:onevalue
     path:onevalue
     height:onevalue
     width:onevalue
@@ -34,7 +30,7 @@ ad_page_contract {
     clipboards:multirow
 } -validate {
      valid_photo -requires {photo_id:integer} {
-	 if { [string equal $photo_id 0] && ![string equal $latest_revision 0] } {
+	 if { $photo_id eq "0" && $latest_revision ne "0" } {
 	     set photo_id $latest_revision
 	 } 
  	 if [string equal [pa_is_photo_p $photo_id] "f"] {
@@ -43,20 +39,12 @@ ad_page_contract {
      }
 }
 
-
-ad_require_permission $photo_id "read"
+permission::require_permission -object_id $photo_id -privilege "read"
 set user_id [ad_conn user_id]
 set context [pa_context_bar_list $photo_id]
 set root_folder_id [pa_get_root_folder]
 set package_id [ad_conn package_id]
 set photo_base_url [site_node::get_url_from_object_id -object_id $package_id]
-set return_url [ad_conn url]
-
-set admin_p [permission::permission_p \
-		 -party_id $user_id \
-		 -object_id [ad_conn package_id] \
-		 -privilege "admin"]
-
 
 set system_url [ad_url]
 set node_url [site_node::get_url -node_id [ad_conn node_id]]
@@ -74,8 +62,6 @@ set album_write_p [permission::permission_p -object_id $old_album_id \
                                       -party_id $user_id \
 		 -privilege "write"]
 
-
-
 # These lines are to uncache the image in Netscape, Mozilla. 
 # IE6 & Safari (mac) have a bug with the images cache
 ns_set put [ns_conn outputheaders] "Expires" "-"
@@ -90,10 +76,7 @@ ns_set put [ns_conn outputheaders] "Cache-Control" "no-cache"
 # to shut down access to base photos an admin would need to search through
 # database and revoke all such permissions.
 
-set show_base_link [ad_parameter AllowBasePhotoAccessP]
-
-set category_id [lindex [category::get_mapped_categories $photo_id] 0]
-set category_name [category::get_name $category_id "pt_br"]
+set show_base_link [parameter::get -parameter AllowBasePhotoAccessP]
 
 # query all the photo and permission info with a single trip to database
 if {![db_0or1row get_photo_info { *SQL* }]} { 
@@ -102,6 +85,7 @@ if {![db_0or1row get_photo_info { *SQL* }]} {
                                  <li>[_ photo-album._For]</li>
                                  <li>[_ photo-album._Your]</li>
                              </ul>"
+    ad_script_abort
 } else {
     set thumb_image_id ""
     set thumb_photo_id ""
@@ -112,13 +96,11 @@ if {![db_0or1row get_photo_info { *SQL* }]} {
         db_0or1row get_thumbnail_info { *SQL* }
     }
     set path $image_id
-    set group_name [photo_album::get_group_name -group_id $group_id]
-    set date $date_taken
 
     # to move a photo need write on photo and write on parent album
-    set move_p [expr $write_p && $album_write_p]
+    set move_p [expr {$write_p && $album_write_p}]
     # build form to move the photo if move_p is 1
-    if $move_p {
+    if {$move_p} {
 	
 	template::form create move_photo
 	
@@ -141,7 +123,7 @@ if {![db_0or1row get_photo_info { *SQL* }]} {
 	
 	if { [template::form is_valid move_photo] } {
 	    set new_album_id [template::element::get_value move_photo new_album_id]
-	    ad_require_permission $new_album_id "pa_create_photo"
+	    permission::require_permission -object_id $new_album_id -privilege "pa_create_photo"
 	    
 	    if [string equal [pa_is_album_p $new_album_id] "f"] {
 		# may add some sort of error message
@@ -168,7 +150,7 @@ if {![db_0or1row get_photo_info { *SQL* }]} {
 		
 		set filename [db_string filename {}]
 		
-		if [db_string duplicate_check {}] {
+		if {[db_string duplicate_check {}]} {
 		    ad_return_complaint 1 "[_ photo-album._Either_4]"
 		} else {
 		    ad_return_complaint 1 "[_ photo-album._We_1]
@@ -192,9 +174,8 @@ if {![db_0or1row get_photo_info { *SQL* }]} {
 	}
     }
     
-    
     # to delete a photo need delete on photo and write on parent album
-    set delete_p [expr $photo_delete_p && $album_write_p]
+    set delete_p [expr {$photo_delete_p && $album_write_p}]
     
     # determine what album page the photo is on so page can present link back to thumbnail page
     set page_num [pa_page_of_photo_in_album $photo_id $album_id]

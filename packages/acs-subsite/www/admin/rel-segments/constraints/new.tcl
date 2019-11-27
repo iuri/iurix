@@ -6,14 +6,14 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Mon Dec 11 11:45:21 2000
-    @cvs-id $Id: new.tcl,v 1.4 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: new.tcl,v 1.6.2.4 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     rel_segment:notnull,integer
     constraint_name:optional
     rel_side:optional
     required_rel_segment:optional
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     segment_name:onevalue
@@ -33,20 +33,13 @@ ad_page_contract {
 
 }
 
-set return_url_enc [ad_urlencode "[ad_conn url]?[ad_export_vars {rel_segment constraint_name rel_side required_rel_segment return_url}]"]
+set return_url_enc [ad_urlencode [export_vars -base [ad_conn url] {rel_segment constraint_name rel_side required_rel_segment return_url}]]
 
-set context [list [list "../" "Relational segments"] [list "../one?segment_id=$rel_segment" "One Segment"] "Add constraint"]
+set context [list [list "../" "Relational segments"] [list [export_vars -base ../one {{segment_id $rel_segment}}] "One Segment"] "Add constraint"]
 
 set package_id [ad_conn package_id]
 
-db_1row select_rel_properties {
-    select s.segment_name, 
-           acs_rel_type.role_pretty_name(t.role_one) as role_one_name,
-           acs_rel_type.role_pretty_name(t.role_two) as role_two_name
-      from rel_segments s, acs_rel_types t
-     where s.rel_type = t.rel_type
-       and s.segment_id = :rel_segment
-}
+db_1row select_rel_properties {}
 
 template::form create constraint_new
 
@@ -104,29 +97,11 @@ if { [template::form is_valid constraint_new] } {
     set creation_ip [ad_conn peeraddr]
     set ctr 0
     db_transaction {
-	set constraint_id [db_exec_plsql add_constraint {
-	 BEGIN
-	  :1 := rel_constraint.new(constraint_name => :constraint_name,
-                                   rel_segment => :rel_segment,
-                                   rel_side => :rel_side,
-                                   required_rel_segment => :required_rel_segment,
-                                   creation_user => :creation_user,
-                                   creation_ip => :creation_ip
-                                  );
-	 END;
-	}]
+	set constraint_id [db_exec_plsql add_constraint {}]
 
 	# check for violations
 	template::multirow create violations rel_id name
-	db_foreach select_violated_rels {
-	    select viol.rel_id, acs_object.name(viol.party_id) as name
-	      from rel_constraints_violated_one viol
-	     where viol.constraint_id = :constraint_id
-	    UNION ALL
-	    select viol.rel_id, acs_object.name(viol.party_id) as name
-	      from rel_constraints_violated_two viol
-	     where viol.constraint_id = :constraint_id
-	} {
+	db_foreach select_violated_rels {} {
 	    template::multirow append violations $rel_id $name
 	    incr ctr
 	} 
@@ -154,3 +129,9 @@ if { [template::form is_valid constraint_new] } {
     ad_script_abort
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

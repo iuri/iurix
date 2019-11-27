@@ -8,7 +8,7 @@ ad_library {
 
     @creation-date 2002-05-24
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: notification-type-procs.tcl,v 1.7 2003/11/14 14:18:10 peterm Exp $
+    @cvs-id $Id: notification-type-procs.tcl,v 1.8.2.2 2017/06/30 17:52:25 gustafn Exp $
 
 }
 
@@ -81,7 +81,7 @@ namespace eval notification::type {
         {-short_name:required}
         {-column_array:required}
     } {
-	select information about the notification type into the given tcl Array
+	select information about the notification type into the given Tcl Array
     } {
         # Select the data into the upvar'ed array
         upvar $column_array row
@@ -147,7 +147,13 @@ namespace eval notification::type {
         set impl_key [get_impl_key -type_id $type_id]
 
         # Dispatch to the notification type specific reply processing
-        acs_sc_call NotificationType ProcessReply [list $reply_id] $impl_key
+        set r [acs_sc::invoke -contract NotificationType -operation ProcessReply -call_args [list $reply_id] -impl $impl_key]
     }
     
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

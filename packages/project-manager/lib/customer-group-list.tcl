@@ -30,7 +30,7 @@
 #                            In orther to the pagination work entirelly you need to provide
 #                            this variable.
 # page_size     (optional)   Number that specified how many rows will be shown on the list.
-#                            Defautl to 5.
+#                            Default to 5.
 
 set required_param_list [list group_name customer_id]
 set optional_param_list [list show_filter_p elements page page_size]
@@ -76,7 +76,7 @@ if { ![exists_and_not_null page_size] } {
     set page_size 5
 }
 
-# To see wich elements we will show on the list
+# To see which elements we will show on the list
 set rows_list [list]
 if { ![exists_and_not_null elements] } {
     set rows_list [list name email project_name deadline]

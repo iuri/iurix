@@ -13,7 +13,7 @@
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: http.tcl,v 1.1 2009/09/17 15:57:01 daveb Exp $
+# RCS: @(#) $Id: http.tcl,v 1.2.2.6 2017/06/30 17:23:07 gustafn Exp $
 
 # Rough version history:
 # 1.0	Old http_get interface
@@ -37,7 +37,7 @@ package require Tcl 8.2
 # keep this in sync with pkgIndex.tcl
 package provide http 2.6.3
 
-if {0 && [info command _proc] == {}} {
+if {0 && [info commands _proc] == {}} {
     rename proc _proc
     _proc proc {name arglist body} {
         _proc $name $arglist [concat "proc_begin;" $body ";proc_end"]
@@ -198,19 +198,18 @@ proc http::config {args} {
 proc http::Finish { token {errormsg ""} {skipCB 0}} {
     variable $token
     upvar 0 $token state
-    global errorInfo errorCode
     if {[string length $errormsg] != 0} {
-	set state(error) [list $errormsg $errorInfo $errorCode]
+	set state(error) [list $errormsg $::errorInfo $::errorCode]
 	set state(status) error
     }
-    if {[info exists state(connection)] && $state(connection) == "close"} {
+    if {[info exists state(connection)] && $state(connection) eq "close"} {
         CloseSocket $state(sock) $token
     }
     catch {after cancel $state(after)}
     if {[info exists state(-command)] && !$skipCB} {
 	if {[catch {eval $state(-command) {$token}} err]} {
-	    if {[string length $errormsg] == 0} {
-		set state(error) [list $err $errorInfo $errorCode]
+	    if {$errormsg eq ""} {
+		set state(error) [list $err $::errorInfo $::errorCode]
 		set state(status) error
 	    }
 	}
@@ -362,9 +361,10 @@ proc http::geturl { url args } {
     foreach {flag value} $args {
 	if {[regexp $pat $flag]} {
 	    # Validate numbers
-	    if {[info exists state($flag)] && \
-		    [string is integer -strict $state($flag)] && \
-		    ![string is integer -strict $value]} {
+	    if {[info exists state($flag)]
+                && [string is integer -strict $state($flag)]
+                && ![string is integer -strict $value]
+            } {
 		unset $token
 		return -code error "Bad value for $flag ($value), must be integer"
 	    }
@@ -393,7 +393,7 @@ proc http::geturl { url args } {
 	unset $token
 	return -code error "Unsupported URL: $url"
     }
-    if {[string length $proto] == 0} {
+    if {$proto eq ""} {
 	set proto http
 	set url ${proto}://$url
     }
@@ -404,13 +404,13 @@ proc http::geturl { url args } {
     set defport [lindex $urlTypes($proto) 0]
     set defcmd [lindex $urlTypes($proto) 1]
 
-    if {[string length $port] == 0} {
+    if {$port eq ""} {
 	set port $defport
     }
-    if {[string length $srvurl] == 0} {
+    if {$srvurl eq ""} {
 	set srvurl /
     }
-    if {[string length $proto] == 0} {
+    if {$proto eq ""} {
 	set url http://$url
     }
     set state(url) $url
@@ -484,7 +484,7 @@ proc http::geturl { url args } {
 	fileevent $s writable [list http::Connect $token]
 	http::wait $token
 
-	if {[string equal $state(status) "error"]} {
+	if {$state(status) eq "error"} {
 	    # something went wrong while trying to establish the connection
 	    # Clean up after events and such, but DON'T call the command
 	    # callback (if available) because we're going to throw an 
@@ -492,7 +492,7 @@ proc http::geturl { url args } {
 	    set err [lindex $state(error) 0]
 	    cleanup $token
 	    return -code error $err
-	} elseif {![string equal $state(status) "connect"]} {
+	} elseif {$state(status) ne "connect" } {
 	    # Likely to be connection timeout
 	    return $token
 	}
@@ -554,7 +554,7 @@ proc http::geturl { url args } {
 	foreach {key value} $state(-headers) {
 	    set value [string map [list \n "" \r ""] $value]
 	    set key [string trim $key]
-	    if {[string equal $key "Content-Length"]} {
+	    if {$key eq "Content-Length"} {
 		set contDone 1
 		set state(querylength) $value
 	    }
@@ -587,7 +587,7 @@ proc http::geturl { url args } {
 	# get trying to write the post data.  Having both fileevents active
 	# changes the timing and the behavior, but no two platforms
 	# (among Solaris, Linux, and NT)  behave the same, and none 
-	# behave all that well in any case.  Servers should always read thier
+	# behave all that well in any case.  Servers should always read their
 	# POST data if they expect the client to read their response.
 		
 	if {$isQuery || $isQueryChannel} {
@@ -610,7 +610,7 @@ proc http::geturl { url args } {
 	    # calls it synchronously, we just do a wait here.
 
 	    wait $token
-	    if {[string equal $state(status) "error"]} {
+	    if {$state(status) eq "error"} {
 		# Something went wrong, so throw the exception, and the
 		# enclosing catch will do cleanup.
 		return -code error [lindex $state(error) 0]
@@ -626,7 +626,7 @@ proc http::geturl { url args } {
 	
 	# if state(status) is error, it means someone's already called Finish
 	# to do the above-described clean up.
-	if {[string equal $state(status) "error"]} {
+	if {$state(status) eq "error"} {
 	    Finish $token $err 1
 	}
 	cleanup $token
@@ -713,7 +713,6 @@ proc http::cleanup {token} {
 proc http::Connect {token} {
     variable $token
     upvar 0 $token state
-    global errorInfo errorCode
     if {[eof $state(sock)] ||
 	[string length [fconfigure $state(sock) -error]]} {
 	    Finish $token "connect failed [fconfigure $state(sock) -error]" 1
@@ -827,12 +826,12 @@ proc http::Event {s token} {
         }
 	return
     }
-    if {[string equal $state(state) "header"]} {
+    if {$state(state) eq "header"} {
 	if {[catch {gets $s line} n]} {
 	    Finish $token $n
 	} elseif {$n == 0} {
             # We now have read all headers.
-            if {$state(http) == ""} {puts ">$line<"; return}
+            if {$state(http) eq ""} {puts ">$line<"; return}
 #puts "[string repeat - 60]\n$token: [array get state]\n[string repeat - 60]"
             # We ignore HTTP/1.1 100 Continue returns. RFC2616 sec 8.2.3
             if {[lindex $state(http) 1] == 100} {
@@ -844,17 +843,20 @@ proc http::Event {s token} {
             # We have to use binary translation to count bytes properly.
             fconfigure $s -translation binary
 
-	    if {$state(-binary) || ![string match -nocase text* $state(type)]
-		    || [string match *gzip* $state(coding)]
-		    || [string match *compress* $state(coding)]} {
+	    if {$state(-binary)
+                || ![string match -nocase text* $state(type)]
+                || [string match "*gzip*" $state(coding)]
+                || [string match "*compress*" $state(coding)]
+            } {
 		# Turn off conversions for non-text data
                 set state(binary) 1
 		if {[info exists state(-channel)]} {
 		    fconfigure $state(-channel) -translation binary
 		}
 	    }
-	    if {[info exists state(-channel)] && \
-		    ![info exists state(-handler)]} {
+	    if {[info exists state(-channel)]
+                && ![info exists state(-handler)]
+            } {
 		# Initiate a sequence of background fcopies
 		fileevent $s readable {}
 		CopyStart $s $token
@@ -887,7 +889,7 @@ proc http::Event {s token} {
                 }
                 lappend state(meta) $key [string trim $value]
                 
-            } elseif {[string match HTTP* $line]} {
+            } elseif {[string match "HTTP*" $line]} {
                 set state(http) $line
             }
 	}
@@ -907,11 +909,11 @@ proc http::Event {s token} {
                     Eof $token
                 }
             } elseif {[info exists state(transfer)]
-                      && $state(transfer) == "chunked"} {
+                      && $state(transfer) eq "chunked"} {
                 set size 0
                 set chunk [getTextLine $s]
 		set n [string length $chunk]
-                if {[string trim $chunk] != ""} {
+                if {[string trim $chunk] ne ""} {
                     scan $chunk %x size
                     if {$size != 0} {
 			set bl [fconfigure $s -blocking]
@@ -1003,7 +1005,7 @@ proc http::CopyStart {s token} {
 #
 # Arguments
 #	token	The token returned from http::geturl
-#	count	The amount transfered
+#	count	The amount transferred
 #
 # Side Effects
 #	Invokes callbacks
@@ -1039,7 +1041,7 @@ proc http::CopyDone {token count {error {}}} {
 proc http::Eof {token {force 0}} {
     variable $token
     upvar 0 $token state
-    if {[string equal $state(state) "header"]} {
+    if {$state(state) eq "header"} {
 	# Premature eof
 	set state(status) eof
     } else {
@@ -1054,7 +1056,7 @@ proc http::Eof {token {force 0}} {
         # how to convert what we have encodings for.
 
         set enc [CharsetToEncoding $state(charset)]
-        if {$enc != "binary"} {
+        if {$enc ne "binary"} {
             set state(body) [encoding convertfrom $enc $state(body)]
         }
 
@@ -1079,7 +1081,7 @@ proc http::wait {token} {
     variable $token
     upvar 0 $token state
 
-    if {![info exists state(status)] || [string length $state(status)] == 0} {
+    if {![info exists state(status)] || $state(status) eq ""} {
 	# We must wait on the original variable name, not the upvar alias
 	vwait $token\(status)
     }
@@ -1105,7 +1107,7 @@ proc http::formatQuery {args} {
     set sep ""
     foreach i $args {
 	append result $sep [mapReply $i]
-	if {[string equal $sep "="]} {
+	if {$sep eq "="} {
 	    set sep &
 	} else {
 	    set sep =
@@ -1131,7 +1133,7 @@ proc http::mapReply {string} {
     # The spec says: "non-alphanumeric characters are replaced by '%HH'"
     # 1 leave alphanumerics characters alone
     # 2 Convert every other character to an array lookup
-    # 3 Escape constructs that are "special" to the tcl parser
+    # 3 Escape constructs that are "special" to the Tcl parser
     # 4 "subst" the result, doing all the array substitutions
 
     regsub -all \[^$alphanumeric\] $string {$formMap(&)} string
@@ -1151,8 +1153,9 @@ proc http::mapReply {string} {
 proc http::ProxyRequired {host} {
     variable http
     if {[info exists http(-proxyhost)] && [string length $http(-proxyhost)]} {
-	if {![info exists http(-proxyport)] || \
-		![string length $http(-proxyport)]} {
+	if {![info exists http(-proxyport)]
+            || $http(-proxyport) eq ""
+        } {
 	    set http(-proxyport) 8080
 	}
 	return [list $http(-proxyhost) $http(-proxyport)]
@@ -1161,7 +1164,7 @@ proc http::ProxyRequired {host} {
 
 # http::CharsetToEncoding --
 #
-# 	Tries to map a given IANA charset to a tcl encoding.
+# 	Tries to map a given IANA charset to a Tcl encoding.
 #	If no encoding can be found, returns binary.
 #
 
@@ -1178,7 +1181,7 @@ proc http::CharsetToEncoding {charset} {
 	set encoding "shiftjis"
     } elseif {[regexp {(windows|cp)-?([0-9]+)} $charset - - num]} {
 	set encoding "cp$num"
-    } elseif {[string equal $charset "us-ascii"]} {
+    } elseif {$charset eq "us-ascii"} {
 	set encoding "ascii"
     } elseif {[regexp {(iso-?)?lat(in)?-?([0-9]+)} $charset - - - num]} {
 	switch $num {
@@ -1198,3 +1201,9 @@ proc http::CharsetToEncoding {charset} {
 	return "binary"
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

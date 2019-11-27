@@ -3,13 +3,13 @@ ad_page_contract {
 
     @author Jeff Davis davis@xarg.net
     @creation-date 2004-04-27
-    @cvs-id $Id: simple.tcl,v 1.3 2007/06/15 17:40:29 matthewg Exp $
+    @cvs-id $Id: simple.tcl,v 1.4.2.1 2015/09/12 11:06:20 gustafn Exp $
 } {
-    object_id:notnull
+    object_id:naturalnum,notnull
 }
 
 # check for write permission on the item
-ad_require_permission $object_id read
+permission::require_permission -object_id $object_id -privilege read
 set edit_p [permission::permission_p -object_id $object_id -privilege write]
 
 # Load up data 
@@ -24,3 +24,9 @@ if { $categories_p } {
     set category_links [fs::category_links -object_id $object_id -folder_id $folder_id]
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

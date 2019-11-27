@@ -2,13 +2,19 @@ ad_page_contract {
   Show classes defined in the connection threads
 
   @author Gustaf Neumann
-  @cvs-id $Id: index.tcl,v 1.7 2007/08/08 09:57:17 gustafn Exp $
+  @cvs-id $Id: index.tcl,v 1.8.2.3 2016/05/27 08:43:44 gustafn Exp $
 } -query {
-  {all_classes:optional 0}
+  {all_classes:notnull 0}
 } -properties {
   title:onevalue
   context:onevalue
   output:onevalue
+} -validate {
+  check_enum -requires all_classes {
+    if {$all_classes ni {0 1}} {
+      ad_complain "value not in enumeration domain"
+    }
+  }
 }
 
 set title "XOTcl Classes Defined in Connection Threads"
@@ -26,7 +32,7 @@ set dimensional_slider [ad_dimensional {
 
 proc local_link cl {
   upvar all_classes all_classes
-  if {$all_classes || ![string match "::xotcl::*" $cl]} {
+  if {$all_classes || (![string match "::xotcl::*" $cl] && ![string match "::nx::*" $cl])} {
     return "<a href='#$cl'>$cl</a>"
   } else {
     return $cl
@@ -36,7 +42,7 @@ proc local_link cl {
 proc info_classes {cl key {dosort 0}} {
   upvar all_classes all_classes
   set infos ""
-  set classes [$cl info $key]
+  set classes [::xo::getObjectProperty $cl $key]
   if {$dosort} {
     set classes [lsort $classes]
   }
@@ -52,20 +58,25 @@ proc info_classes {cl key {dosort 0}} {
 }
 
 set output "<ul>"
-foreach cl [lsort [::xotcl::Class allinstances]] {
-  if {!$all_classes && [string match "::xotcl::*" $cl]} \
-      continue
+set classes [::xotcl::Class allinstances]
+if {[info commands ::nx::Class] ne ""} {
+    lappend classes {*}[nx::Class info instances -closure]
+}
+foreach cl [lsort $classes] {
+  if {!$all_classes && ([string match "::xotcl::*" $cl] || [string match "::nx::*" $cl])} {
+    continue
+  }
   
-  append output "<li><b><a name='$cl'>[::xotcl::api object_link {} $cl]</b> <ul>"
+  append output "<li><b><a name='$cl'>[::xo::api object_link {} $cl]</b> <ul>"
 
   append output [info_classes $cl superclass]
   append output [info_classes $cl subclass 1]
   append output [info_classes $cl mixin]
   append output [info_classes $cl instmixin]
 
-  foreach key {procs instprocs} {
+  foreach key {proc instproc} {
     set infos ""
-    foreach i [lsort [$cl info $key]] {append infos [::xotcl::api method_link $cl $key $i] ", "}
+    foreach i [lsort [::xo::getObjectProperty $cl $key]] {append infos [::xo::api method_link $cl $key $i] ", "}
     set infos [string trimright $infos ", "]
     if {$infos ne ""} {
       append output "<li><em>$key:</em> $infos</li>\n"
@@ -74,7 +85,7 @@ foreach cl [lsort [::xotcl::Class allinstances]] {
   }
 
   set infos ""
-  foreach o [lsort [$cl info instances]] {append infos [::xotcl::api object_link {} $o] ", "}
+  foreach o [lsort [$cl info instances]] {append infos [::xo::api object_link {} $o] ", "}
   set infos [string trimright $infos ", "]
   if {$infos ne ""} {
     append output "<li><em>instances:</em> $infos</li>\n"
@@ -85,3 +96,9 @@ foreach cl [lsort [::xotcl::Class allinstances]] {
 }
 append output </ul>
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

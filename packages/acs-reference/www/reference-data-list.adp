@@ -1,9 +1,9 @@
 <master>
-<property name="context">@context_bar;noquote@</property>
-<property name="title">@title;noquote@</property>
+<property name="context">@context_bar;literal@</property>
+<property name="doc(title)">@title;literal@</property>
 
 <if @data:rowcount@ eq 0>
-<i>You have no reference data in the database right now.</i><p>
+<em>You have no reference data in the database right now.</em><p>
 </if>
 
 <else>

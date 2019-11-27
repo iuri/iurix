@@ -6,12 +6,12 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Mon Dec 11 13:51:21 2000
-    @cvs-id $Id: new.tcl,v 1.3 2007/01/10 21:22:07 gustafn Exp $
+    @cvs-id $Id: new.tcl,v 1.6.2.4 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     group_id:integer,notnull
     { rel_type:trim "" }
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     export_vars:onevalue
@@ -31,29 +31,24 @@ set subsite_group_id [application_group::group_id_from_package_id]
 
 # If the user has specified a rel_type, redirect to new-2
 if { $rel_type ne "" } {
-    ad_returnredirect new-2?[ad_export_vars {group_id rel_type return_url}]
+    ad_returnredirect [export_vars -base new-2 {group_id rel_type return_url}]
     ad_script_abort
 } 
 
-ad_require_permission $group_id "read"
+permission::require_permission -object_id $group_id -privilege "read"
 
 set context [list [list "" "Relational segments"] "Add segment"]
 
-set export_vars [ad_export_vars -form {group_id return_url}]
+set export_vars [export_vars -form {group_id return_url}]
 # Select out all relationship types
-db_multirow rel_types select_relation_types {
-    select t.pretty_name, t.object_type as rel_type,
-    replace(lpad(' ', (level - 1) * 4), ' ', '&nbsp;') as indent
-    from acs_object_types t
-    where t.object_type not in (select s.rel_type from rel_segments s where s.group_id = :group_id)
-    connect by prior t.object_type = t.supertype
-    start with t.object_type in ('membership_rel', 'composition_rel')
-    order by lower(t.pretty_name) desc
-}
+db_multirow rel_types select_relation_types {}
 
-db_1row select_basic_info {
-    select acs_group.name(:group_id) as group_name
-      from dual
-}
+db_1row select_basic_info {}
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

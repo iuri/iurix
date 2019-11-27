@@ -4,7 +4,7 @@ ad_page_contract {
     @param table_name 
     @author Jon Griffin (jon@jongriffin.com)
     @creation-date 17 Sept 2001
-    @cvs-id $Id: table-detail.tcl,v 1.3 2005/03/01 00:01:22 jeffd Exp $
+    @cvs-id $Id: table-detail.tcl,v 1.3.18.1 2015/09/10 08:21:32 gustafn Exp $
 } {
     table_name:notnull
 } -properties {
@@ -21,3 +21,8 @@ set user_id [ad_conn user_id]
 
 
 ad_return_template
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

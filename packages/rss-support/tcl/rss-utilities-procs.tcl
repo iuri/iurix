@@ -6,7 +6,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
 
     @creation-date Fri Oct 26 11:43:26 2001
-    @cvs-id $Id: rss-utilities-procs.tcl,v 1.4 2003/05/17 11:22:12 jeffd Exp $
+    @cvs-id $Id: rss-utilities-procs.tcl,v 1.5.2.1 2015/09/12 19:00:44 gustafn Exp $
 }
 
 
@@ -16,7 +16,7 @@ ad_proc -public rss_package_id {} {
     # Returns 0 otherwise.
     </pre>
 } {
-    if ![db_0or1row get_package_id {}] {
+    if {![db_0or1row get_package_id {}]} {
 	return 0
     } else {
 	return $package_id
@@ -42,7 +42,7 @@ ad_proc -public rss_first_url_for_package_id {
     relative url for that node.  Returns empty string
     if the package is not mounted.
 } {
-    return [util_memoize "rss_first_url_for_package_id_helper $package_id"]
+    return [util_memoize [list rss_first_url_for_package_id_helper $package_id]]
 }
 
 ad_proc -private rss_first_url_for_package_id_helper {
@@ -52,7 +52,7 @@ ad_proc -private rss_first_url_for_package_id_helper {
 } {
     set url ""
 
-    if [db_0or1row first_node_id {}] {
+    if {[db_0or1row first_node_id {}]} {
 	db_foreach url_parts {} {
 	    append url ${name}
 	}
@@ -60,3 +60,9 @@ ad_proc -private rss_first_url_for_package_id_helper {
 
     return $url
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -2,7 +2,7 @@
 --
 -- @author Gary Jin (gjin@arsdigita.com)
 -- @creation-date Nov 17, 2000
--- @cvs-id $Id: calendar-create.sql,v 1.14 2004/01/20 14:19:21 dirkg Exp $
+-- @cvs-id $Id: calendar-create.sql,v 1.14.18.1 2017/04/22 12:25:25 gustafn Exp $
 --
 -- ported by Charles Mok (mok_cl@eelab.usyd.edu.au)
 
@@ -53,7 +53,7 @@
   select acs_privilege__add_child('calendar_write', 'cal_item_write');
   select acs_privilege__add_child('calendar_delete', 'cal_item_delete');
        
-  select acs_privilege__create_privilege('calendar_admin', 'calendar adminstrator', null);
+  select acs_privilege__create_privilege('calendar_admin', 'calendar administrator', null);
   select acs_privilege__add_child('admin', 'calendar_admin');
   select acs_privilege__add_child('calendar_admin', 'calendar_read');
   select acs_privilege__add_child('calendar_admin', 'calendar_write');

@@ -4,10 +4,10 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 28, 2000
-    @cvs-id $Id: transcript-delete.tcl,v 1.6 2008/11/09 23:29:23 donb Exp $
+    @cvs-id $Id: transcript-delete.tcl,v 1.6.4.2 2016/11/23 19:51:16 antoniop Exp $
 } {
-    room_id:integer,notnull
-    transcript_id:integer,notnull
+    room_id:naturalnum,notnull
+    transcript_id:naturalnum,notnull
 } -properties {
     context_bar:onevalue
     room_id:onevalue
@@ -15,6 +15,11 @@ ad_page_contract {
 }
 
 permission::require_permission -object_id $transcript_id -privilege chat_transcript_delete
+
+set transcript_name [db_string query {
+    select pretty_name from chat_transcripts
+    where transcript_id = :transcript_id
+}]
 
 set context [list "[_ chat.Delete_transcript]"]
 ad_return_template

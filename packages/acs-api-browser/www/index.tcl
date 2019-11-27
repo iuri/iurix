@@ -8,9 +8,9 @@ ad_page_contract {
     @about_package_key a package-key
     @author Jon Salz (jsalz@mit.edu)
     @author Lars Pind (lars@pinds.com)
-    @cvs-id $Id: index.tcl,v 1.5 2006/07/20 10:10:31 torbenb Exp $
+    @cvs-id $Id: index.tcl,v 1.7.2.2 2016/05/14 12:38:51 gustafn Exp $
 } {
-    about_package_key:optional
+    about_package_key:token,trim,optional
 } -properties {
     title:onevalue
     context:onevalue
@@ -24,8 +24,13 @@ set context [list]
 
 if  { [info exists about_package_key] } {
 
+    # create multirows to make property-passing happy
+    multirow create installed_packages
+    multirow create disabled_packages
+    multirow create uninstalled_packages
+
     if { [db_0or1row get_local_package_version_id {} ] } {
-        rp_form_put version_id $version_id
+        rp_form_update version_id $version_id
         rp_internal_redirect package-view
     }
 
@@ -56,3 +61,9 @@ if  { [info exists about_package_key] } {
     }
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

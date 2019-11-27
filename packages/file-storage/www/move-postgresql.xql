@@ -4,7 +4,7 @@
 
 <!-- @author Dave Bauer (dave@thedesignexperience.org) -->
 <!-- @creation-date 2004-05-09 -->
-<!-- @cvs-id $Id: move-postgresql.xql,v 1.8 2008/12/09 09:02:31 gustafn Exp $ -->
+<!-- @cvs-id $Id: move-postgresql.xql,v 1.9.4.2 2017/07/17 17:49:19 trenner Exp $ -->
 
 <queryset>
   
@@ -35,19 +35,32 @@
   <fullquery name="get_folder_tree">
     <querytext>
       select
-      cf.folder_id, ci1.parent_id, cf.label, tree_level(ci1.tree_sortkey) as level_num
-      from cr_folders cf, cr_items ci1, cr_items ci2
+         cf.folder_id, ci1.parent_id, cf.label, tree_level(ci1.tree_sortkey) as level_num
+         from cr_folders cf, cr_items ci1, cr_items ci2
       where
-      ci1.tree_sortkey between ci2.tree_sortkey and
-                               tree_right(ci2.tree_sortkey)
-      and ci2.item_id=:root_folder_id
-      and ci1.item_id=cf.folder_id
-      and exists (select 1
-                   from acs_object_party_privilege_map m
-                   where m.object_id = cf.folder_id
-                     and m.party_id = :user_id
-                     and m.privilege = 'write')
+         ci1.tree_sortkey between ci2.tree_sortkey and  tree_right(ci2.tree_sortkey)
+         and ci2.item_id=:root_folder_id
+         and ci1.item_id=cf.folder_id
+         and acs_permission__permission_p(cf.folder_id, :user_id, 'write')
+
       order by ci1.tree_sortkey, cf.label
+    </querytext>
+  </fullquery>
+
+  <fullquery name="dbqd.file-storage.www.move.get_folder_tree">
+    <rdbms><type>postgresql</type><version>8.4</version></rdbms>
+    <querytext>
+    With folder_tree as (
+        select
+        cf.folder_id, ci1.parent_id, cf.label, tree_level(ci1.tree_sortkey) as level_num, acs_permission__permission_p(cf.folder_id, :user_id, 'write') as permission_p
+        from cr_folders cf, cr_items ci1, cr_items ci2
+        where
+        ci1.tree_sortkey between ci2.tree_sortkey and
+        tree_right(ci2.tree_sortkey)
+        and ci2.item_id= :root_folder_id
+        and ci1.item_id=cf.folder_id
+        order by ci1.tree_sortkey, cf.label
+    ) select folder_id, parent_id, label, level_num from folder_tree where permission_p is true;
     </querytext>
   </fullquery>
 
@@ -72,5 +85,13 @@
        ) 	 
      </querytext> 	 
    </fullquery>
-  
+
+   <fullquery name="item_exists_already_in_target_folder">
+     <querytext>
+      select count(*) from cr_items
+      where name=:name
+      and parent_id=:folder_id
+     </querytext>
+   </fullquery>
+
 </queryset>

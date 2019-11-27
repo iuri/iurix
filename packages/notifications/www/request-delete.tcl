@@ -5,10 +5,10 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-24
-    @cvs-id $Id: request-delete.tcl,v 1.3 2003/01/16 13:53:40 jeffd Exp $
+    @cvs-id $Id: request-delete.tcl,v 1.4.2.2 2016/05/21 10:18:18 gustafn Exp $
 } {
-    request_id:integer,notnull
-    return_url
+    request_id:naturalnum,notnull
+    return_url:localurl
 }
 
 # Security Check
@@ -19,3 +19,9 @@ notification::request::delete -request_id $request_id
 
 # Redirect
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

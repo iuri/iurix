@@ -69,6 +69,10 @@ select content_type__create_type (
 select content_folder__register_content_type(-100,'c_segmenttype','t');
 
 
+-- segmentVariations
+-- forSegment {f07cd2c4-46d3-7516-ec91-f618ef539437 {42e4fc57-d485-6faf-d2ed-e5b4a4f65343 {data {test description 1} rating 0 type 9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a}} 6a2f5405-4004-973b-0b83-2b4807b22016 {bc8dbc57-a087-99a4-9faa-51efd858e377 {data {test description 2} rating 0 type 9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a}}}
+
+
 
 select content_type__create_type (
        'c_segmentvariation',     -- content_type
@@ -84,8 +88,8 @@ select content_type__create_type (
        'c_segmentvariation__get_title' -- name_method
 );
 
-
-
+-- necessary to work around limitation of content repository:
+select content_folder__register_content_type(-100,'c_segmentvariation','t');
 
 
 
@@ -115,3 +119,51 @@ select content_type__create_type (
        NULL,	         -- id_column
        'c_element__get_title' -- name_method
 );
+
+
+-- necessary to work around limitation of content repository:
+select content_folder__register_content_type(-100,'c_element','t');
+
+
+-- descriptions
+-- forElement {2433fa24-3570-3e30-e032-03b81dd8ddcb {246113fd-067a-f126-f406-3fea6605049f {rating 0 segments f07cd2c4-46d3-7516-ec91-f618ef539437}} bcd09662-a73f-93ce-56e5-930a6af3ef1a {b7aa416a-b185-2c05-709c-710b140440b0 {rating 0 segments 6a2f5405-4004-973b-0b83-2b4807b22016}}}
+ 
+
+select content_type__create_type (
+       'c_description',     -- content_type
+       'c_tree',    	 -- supertype. We search revision content 
+                        -- first, before item metadata
+       'C-Tree Description',    -- pretty_name
+       'C-Tree Descriptions',   -- pretty_plural
+       NULL,        -- table_name
+       -- IURI: acs_object_types supports a null table name so we do that
+       -- instead of passing a false value so we can actually use the
+       -- content repository instead of duplicating all the code in file-storage
+       NULL,	         -- id_column
+       'c_description__get_title' -- name_method
+);
+
+-- necessary to work around limitation of content repository:
+select content_folder__register_content_type(-100,'c_description','t');
+
+
+
+-- feedback
+-- forDescription {246113fd-067a-f126-f406-3fea6605049f {18986a2d-7a73-8c4f-b4f1-110fe91bc45f {rating 0 text {test comment}}}}
+
+select content_type__create_type (
+       'c_feedback',     -- content_type
+       'c_tree',    	 -- supertype. We search revision content 
+                        -- first, before item metadata
+       'C-Tree Feedback',    -- pretty_name
+       'C-Tree Feedbacks',   -- pretty_plural
+       NULL,        -- table_name
+       -- IURI: acs_object_types supports a null table name so we do that
+       -- instead of passing a false value so we can actually use the
+       -- content repository instead of duplicating all the code in file-storage
+       NULL,	         -- id_column
+       'c_feedback__get_title' -- name_method
+);
+
+-- necessary to work around limitation of content repository:
+select content_folder__register_content_type(-100,'c_feedback','t');

@@ -1,6 +1,6 @@
 <master>
-<property name="context">@context;noquote@</property>
-<property name="title">Create a new user</property>
+<property name="context">@context;literal@</property>
+<property name="doc(title)">Create a new user</property>
 
 <blockquote>
 
@@ -12,8 +12,8 @@ groups with other relationships.
 
 <multiple name="required_segments">
 
-<if @required_segments.rownum@ eq 1>
-    You can <a href="new?@export_url_vars@&add_to_group_id=@required_segments.group_id@&add_with_rel_type=@required_segments.rel_type_enc@">begin</a>
+<if @required_segments.rownum;literal@ true>
+    You can <a href="new?@export_url_vars@&amp;add_to_group_id=@required_segments.group_id@&amp;add_with_rel_type=@required_segments.rel_type_enc@">begin</a>
     the process of adding a new @object_type_pretty_name@ and giving it the
     following relationships to the necessary groups:
 

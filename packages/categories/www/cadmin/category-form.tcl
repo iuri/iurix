@@ -4,12 +4,12 @@ ad_page_contract {
     @author Timo Hentschel (timo@timohentschel.de)
     @cvs-id $Id:
 } {
-    tree_id:integer
-    category_id:integer,optional
-    {parent_id:integer,optional [db_null]}
+    tree_id:naturalnum,notnull
+    category_id:naturalnum,optional
+    {parent_id:naturalnum,optional [db_null]}
     {locale ""}
-    object_id:integer,optional
-    ctx_id:integer,optional
+    object_id:naturalnum,optional
+    ctx_id:naturalnum,optional
 } -properties {
     context_bar:onevalue
     page_title:onevalue
@@ -20,9 +20,9 @@ set package_id [ad_conn package_id]
 permission::require_permission -object_id $tree_id -privilege category_tree_write
 
 if {[info exists category_id]} {
-    set page_title "Edit category"
+    set page_title [_ categories.Edit_category]
 } else {
-    set page_title "Add category"
+    set page_title [_ categories.Add_category]
 }
 
 set context_bar [category::context_bar $tree_id $locale \
@@ -36,14 +36,14 @@ ad_form -name category_form -action category-form \
   -export { tree_id parent_id locale object_id ctx_id } \
   -form {
     {category_id:key}
-    {name:text {label "Name"} {html {size 50 maxlength 200}}}
-    {language:text(select) {label "Language"} {value $locale} {options $languages}}
-    {description:text(textarea),optional {label "Description"} {html {rows 5 cols 80}}}
+    {name:text {label "#acs-admin.Name#"} {html {size 50 maxlength 200}}}
+    {language:text(select) {label "#categories.Language#"} {value $locale} {options $languages}}
+    {description:text(textarea),optional {label "#categories.Description#"} {html {rows 5 cols 80}}}
 } -new_request {
     set name ""
     set description ""
 } -edit_request {
-    if {![db_0or1row check_translation_existance ""]} {
+    if {![db_0or1row check_translation_existence ""]} {
 	set default_locale [parameter::get -parameter DefaultLocale -default en_US]
 	db_1row get_default_translation ""
     }
@@ -59,3 +59,9 @@ ad_form -name category_form -action category-form \
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

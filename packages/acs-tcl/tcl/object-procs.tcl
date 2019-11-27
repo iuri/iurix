@@ -4,7 +4,7 @@ ad_library {
 
     @author Jon Salz (jsalz@arsdigita.com)
     @creation-date 11 Aug 2000
-    @cvs-id $Id: object-procs.tcl,v 1.11 2007/01/29 12:25:38 maltes Exp $
+    @cvs-id $Id: object-procs.tcl,v 1.11.12.1 2015/09/10 08:21:58 gustafn Exp $
 
 }
 
@@ -151,3 +151,9 @@ ad_proc -public acs_object::set_context_id {
 } {
     db_dml update_context_id {}
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

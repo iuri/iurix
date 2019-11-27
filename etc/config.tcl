@@ -1,19 +1,18 @@
-ns_log notice "nsd.tcl: starting to read config file..."
-
 ###################################################################### 
 #
-# Instance-specific settings 
-# These default settings will only work in limited circumstances
+# Config parameter for an OpenACS site using AOLserver/NaviServer.
+#
+# These default settings will only work in limited circumstances.
 # Two servers with default settings cannot run on the same host
 #
 ###################################################################### 
+
+ns_log notice "nsd.tcl: starting to read config file..."
 
 #---------------------------------------------------------------------
 # change to 80 and 443 for production use
 set httpport                  8000
 set httpsport                 8443 
-# If setting port below 1024 with AOLServer 4, read comments in file:
-#  /var/lib/aolserver/service0/packages/etc/daemontools/run
 
 # The hostname and address should be set to actual values.
 # setting the address to 0.0.0.0 means aolserver listens on all interfaces
@@ -21,18 +20,32 @@ set hostname                  localhost
 set address                   127.0.0.1
 
 # Note: If port is privileged (usually < 1024), OpenACS must be
-# started by root, and, in AOLserver 4, the run script have a 
-# '-b address' flag which matches the address according to settings (above)
+# started by root, and the run script must contain the flag 
+# '-b address:port' which matches the address and port 
+# as specified above.
 
 set server                    "service0" 
 set servername                "New OpenACS Installation - Development"
 
 set serverroot                "/var/www/${server}"
+set logroot		      $serverroot/log/
+
+# Choose between NaviServer and AOLserver
+#
+# When using NaviServer it is recommended to use the config file
+# generated from "install-ns" from https://github.com/gustafn/install-ns
+#
+set homedir                   /usr/lib/aolserver4
+#set homedir		      /usr/local/ns
+
+set bindir		      $homedir/bin
+
+# Are we runnng behind a proxy? 
+set proxy_mode                false
 
 #---------------------------------------------------------------------
 # which database do you want? postgres or oracle
 set database              postgres 
-
 set db_name               $server
 
 if { $database eq "oracle" } {
@@ -46,13 +59,15 @@ if { $database eq "oracle" } {
 #---------------------------------------------------------------------
 # if debug is false, all debugging will be turned off
 set debug false
-
-set homedir                   /usr/lib/aolserver4
-set bindir                    ${homedir}/bin
-
+set dev   false
 
 set max_file_upload_mb        20
 set max_file_upload_min        5
+
+#---------------------------------------------------------------------
+# set environment variables HOME and LANG
+set env(HOME) $homedir
+set env(LANG) en_US.UTF-8
 
 ###################################################################### 
 #
@@ -77,11 +92,12 @@ set directoryfile             index.tcl,index.adp,index.html,index.htm
 # Global server parameters 
 #---------------------------------------------------------------------
 ns_section ns/parameters 
-    ns_param   serverlog          ${serverroot}/log/error.log 
+    ns_param   serverlog          ${logroot}/error.log 
     ns_param   home               $homedir 
     # maxkeepalive is ignored in aolserver4.x
     ns_param   maxkeepalive       0
     ns_param   logroll            on
+    ns_param   logmaxbackup       10
     ns_param   maxbackup          5
     ns_param   debug              $debug
 #    ns_param   mailhost           localhost 
@@ -94,6 +110,7 @@ ns_section ns/parameters
     ns_param   OutputCharset      utf-8
     ns_param   URLCharset         utf-8
 
+    ns_param   ReverseProxyMode   $proxy_mode
 #---------------------------------------------------------------------
 # Thread library (nsthread) parameters 
 #---------------------------------------------------------------------
@@ -184,30 +201,6 @@ ns_section ns/server/${server}/tcl
  
 #---------------------------------------------------------------------
 #
-# Rollout email support
-#
-# These procs help manage differing email behavior on 
-# dev/staging/production.
-#
-#---------------------------------------------------------------------
-ns_section ns/server/${server}/acs/acs-rollout-support
-
-    # EmailDeliveryMode can be:
-    #   default:  Email messages are sent in the usual manner.
-    #   log:      Email messages are written to the server's error log.
-    #   redirect: Email messages are redirected to the addresses specified 
-    #             by the EmailRedirectTo parameter.  If this list is absent 
-    #             or empty, email messages are written to the server's error log.
-    #   filter:   Email messages are sent to in the usual manner if the 
-    #             recipient appears in the EmailAllow parameter, otherwise they 
-    #             are logged.
-
-#    ns_param   EmailDeliveryMode redirect
-#    ns_param   EmailRedirectTo    somenerd@yourdomain.test, othernerd@yourdomain.test
-#    ns_param   EmailAllow         somenerd@yourdomain.test,othernerd@yourdomain.test
-
-#---------------------------------------------------------------------
-#
 # WebDAV Support (optional, requires oacs-dav package to be installed
 #
 #---------------------------------------------------------------------
@@ -275,10 +268,10 @@ ns_section ns/server/${server}/module/nssock
 # 
 #---------------------------------------------------------------------
 ns_section ns/server/${server}/module/nslog 
-    ns_param   debug              false
-    ns_param   dev                false
+    ns_param   debug              $debug
+    ns_param   dev                $dev
     ns_param   enablehostnamelookup false
-    ns_param   file               ${serverroot}/log/${server}.log
+    ns_param   file               ${logroot}/${server}.log
     ns_param   logcombined        true
     ns_param   extendedheaders    COOKIE
 #    ns_param   logrefer           false
@@ -333,85 +326,14 @@ ns_section ns/server/${server}/module/nspam
 
 #---------------------------------------------------------------------
 #
-# OpenSSL for Aolserver 3.3 and 4
-#
+# OpenSSL for Aolserver  4
+# 
 #---------------------------------------------------------------------
-if { [ns_info version] < 4} {
 
-    #---------------------------------------------------------------------
-    # OpenSSL for Aolserver 3.3
-    #---------------------------------------------------------------------
+ns_section "ns/server/${server}/module/nsopenssl"
 
-    ns_section "ns/server/${server}/module/nsopenssl"
-    
-        ns_param ModuleDir            ${serverroot}/etc/certs
-    
-        # NSD-driven connections:
-        ns_param ServerPort                $httpsport
-        ns_param ServerHostname            $hostname
-        ns_param ServerAddress             $address
-        ns_param ServerCertFile            certfile.pem
-        ns_param ServerKeyFile             keyfile.pem
-        ns_param ServerProtocols           "SSLv2, SSLv3, TLSv1"
-        ns_param ServerCipherSuite         "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP"
-        ns_param ServerSessionCache        true
-        ns_param ServerSessionCacheID      1
-        ns_param ServerSessionCacheSize    512
-        ns_param ServerSessionCacheTimeout 300
-        ns_param ServerPeerVerify          false
-        ns_param ServerPeerVerifyDepth     3
-        ns_param ServerCADir               ca
-        ns_param ServerCAFile              ca.pem
-        ns_param ServerTrace               false
-    
-        # For listening and accepting SSL connections via Tcl/C API:
-        ns_param SockServerCertFile              certfile.pem
-        ns_param SockServerKeyFile               keyfile.pem
-        ns_param SockServerProtocols             "SSLv2, SSLv3, TLSv1"
-        ns_param SockServerCipherSuite           "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP"
-        ns_param SockServerSessionCache          true
-        ns_param SockServerSessionCacheID        2
-        ns_param SockServerSessionCacheSize      512
-        ns_param SockServerSessionCacheTimeout   300
-        ns_param SockServerPeerVerify            false
-        ns_param SockServerPeerVerifyDepth       3
-        ns_param SockServerCADir                 internal_ca
-        ns_param SockServerCAFile                internal_ca.pem
-        ns_param SockServerTrace                 false
-    
-        # Outgoing SSL connections
-        ns_param SockClientCertFile              certfile.pem
-        ns_param SockClientKeyFile               keyfile.pem
-        ns_param SockClientProtocols             "SSLv2, SSLv3, TLSv1"
-        ns_param SockClientCipherSuite           "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP"
-        ns_param SockClientSessionCache          false
-        ns_param SockClientSessionCacheID        3
-        ns_param SockClientSessionCacheSize      512
-        ns_param SockClientSessionCacheTimeout   300
-        ns_param SockClientPeerVerify            false
-        ns_param SockServerPeerVerifyDepth       3
-        ns_param SockClientCADir                 ca
-        ns_param SockClientCAFile                ca.pem
-        ns_param SockClientTrace                 false
-    
-        # OpenSSL library support:
-    #    ns_param RandomFile          /some/file
-        ns_param SeedBytes            1024
-
-} else {
-
-    #---------------------------------------------------------------------
-    # OpenSSL for Aolserver 4
-    #---------------------------------------------------------------------    
-    ns_section "ns/server/${server}/module/nsopenssl"
-
-    # Note this portion of the configuration is not perfect, and you
-    # will get errors in the your error.log. However, it does
-    # work. Fixes welcome.
-
-        # this is used by acs-tcl/tcl/security-procs.tcl to get the 
-        # https port.
-        ns_param ServerPort                $httpsport
+    # this is used by acs-tcl/tcl/security-procs.tcl to get the https port.
+    ns_param ServerPort                $httpsport
     # setting maxinput higher than practical may leave the server vulnerable to resource DoS attacks
     # see http://www.panoptic.com/wiki/aolserver/166
     # must set maxinput for nsopenssl as well as nssock
@@ -423,100 +345,100 @@ if { [ns_info version] < 4} {
     # specificied in the driver section. The Tcl API will use the defaults as there
     # is currently no provision to specify which SSL context to use for a
     # particular connection via an ns_openssl Tcl command.
-    ns_section "ns/server/${server}/module/nsopenssl/sslcontexts"
-        ns_param users        "SSL context used for regular user access"
+ns_section "ns/server/${server}/module/nsopenssl/sslcontexts"
+    ns_param users        "SSL context used for regular user access"
     #    ns_param admins       "SSL context used for administrator access"
-        ns_param client       "SSL context used for outgoing script socket connections"
+    ns_param client       "SSL context used for outgoing script socket connections"
 
-    ns_section "ns/server/${server}/module/nsopenssl/defaults"
-        ns_param server               users
-        ns_param client               client
+ns_section "ns/server/${server}/module/nsopenssl/defaults"
+    ns_param server               users
+    ns_param client               client
     
-    ns_section "ns/server/${server}/module/nsopenssl/sslcontext/users"
-        ns_param Role                  server
-        ns_param ModuleDir             ${serverroot}/etc/certs
-        ns_param CertFile              certfile.pem 
-        ns_param KeyFile               keyfile.pem
-    #    ns_param CADir                 ca-client/dir
-    #    ns_param CAFile                ca-client/ca-client.crt
-        # for Protocols                "ALL" = "SSLv2, SSLv3, TLSv1"
-        ns_param Protocols             "SSLv3, TLSv1" 
-        ns_param CipherSuite           "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP" 
-        ns_param PeerVerify            false
-        ns_param PeerVerifyDepth       3
-        ns_param Trace                 false
+ns_section "ns/server/${server}/module/nsopenssl/sslcontext/users"
+    ns_param Role                  server
+    ns_param ModuleDir             ${serverroot}/etc/certs
+    ns_param CertFile              users-certfile.pem 
+    ns_param KeyFile               users-keyfile.pem
+    # CADir/CAFile can be commented out, if CA chain cert is appended to CA issued server cert.
+    ns_param CADir                 ${serverroot}/etc/certs
+    ns_param CAFile                users-ca.crt
+    # for Protocols                "ALL" = "SSLv2, SSLv3, TLSv1"
+    ns_param Protocols             "SSLv3, TLSv1" 
+    ns_param CipherSuite           "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP" 
+    ns_param PeerVerify            false
+    ns_param PeerVerifyDepth       3
+    ns_param Trace                 false
     
-	# following from bartt's nsd4.tcl, might help stablize openssl connections? 
-        # http://www.mail-archive.com/aolserver@listserv.aol.com/msg07092.html
-        ns_param SessionCache true
-        ns_param SessionCacheID 1
-        ns_param SessionCacheSize 512
-        ns_param SessionCacheTimeout 300
+    # following helps to stablize some openssl connections from buggy clients.
+    ns_param SessionCache true
+    ns_param SessionCacheID 1
+    ns_param SessionCacheSize 512
+    ns_param SessionCacheTimeout 300
 
 
 #    ns_section "ns/server/${server}/module/nsopenssl/sslcontext/admins"
-    #    ns_param Role                  server
-    #    ns_param ModuleDir             /path/to/dir
-    #    ns_param CertFile              server/server.crt 
-    #    ns_param KeyFile               server/server.key 
-    #    ns_param CADir                 ca-client/dir 
-    #    ns_param CAFile                ca-client/ca-client.crt
-        # for Protocols                "ALL" = "SSLv2, SSLv3, TLSv1"
-    #    ns_param Protocols             "All"
-    #    ns_param CipherSuite           "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP" 
-    #    ns_param PeerVerify            false
-    #    ns_param PeerVerifyDepth       3
-    #    ns_param Trace                 false
+#    ns_param Role                  server
+#    ns_param ModuleDir             /path/to/dir
+#    ns_param CertFile              server/server.crt 
+#    ns_param KeyFile               server/server.key 
+#    ns_param CADir                 ca-client/dir 
+#    ns_param CAFile                ca-client/ca-client.crt
+    # for Protocols                "ALL" = "SSLv2, SSLv3, TLSv1"
+#    ns_param Protocols             "All"
+#    ns_param CipherSuite           "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP" 
+#    ns_param PeerVerify            false
+#    ns_param PeerVerifyDepth       3
+#    ns_param Trace                 false
     
-    ns_section "ns/server/${server}/module/nsopenssl/sslcontext/client"
-        ns_param Role                  client
-        ns_param ModuleDir             ${serverroot}/etc/certs
-        ns_param CertFile              certfile.pem
-        ns_param KeyFile               keyfile.pem 
-    #    ns_param CADir                 ${serverroot}/etc/certs
-    #    ns_param CAFile                certfile.pem
-        # for Protocols                "ALL" = "SSLv2, SSLv3, TLSv1"
-        ns_param Protocols             "SSLv2, SSLv3, TLSv1" 
-        ns_param CipherSuite           "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP" 
-        ns_param PeerVerify            false
-        ns_param PeerVerifyDepth       3
-        ns_param Trace                 false
-    
-	# following from bartt's nsd4.tcl, might help stablize openssl connections? 
-        # http://www.mail-archive.com/aolserver@listserv.aol.com/msg07092.html
-        ns_param SessionCache true
-        ns_param SessionCacheID 1
-        ns_param SessionCacheSize 512
-        ns_param SessionCacheTimeout 300
+ns_section "ns/server/${server}/module/nsopenssl/sslcontext/client"
+    ns_param Role                  client
+    ns_param ModuleDir             ${serverroot}/etc/certs
+    ns_param CertFile              client-certfile.pem
+    ns_param KeyFile               client-keyfile.pem 
+    # CADir/CAFile can be commented out, if CA chain cert is appended to CA issued server cert.
+    ns_param CADir                 ${serverroot}/etc/certs
+    ns_param CAFile                client-ca.crt
+    # for Protocols                "ALL" = "SSLv2, SSLv3, TLSv1"
+    ns_param Protocols             "SSLv2, SSLv3, TLSv1" 
+    ns_param CipherSuite           "ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP" 
+    ns_param PeerVerify            false
+    ns_param PeerVerifyDepth       3
+    ns_param Trace                 false
 
-    # SSL drivers. Each driver defines a port to listen on and an explitictly named
-    # SSL context to associate with it. Note that you can now have multiple driver
-    # connections within a single virtual server, which can be tied to different
-    # SSL contexts.
-    ns_section "ns/server/${server}/module/nsopenssl/ssldrivers"
-        ns_param users         "Driver for regular user access"
-    #    ns_param admins        "Driver for administrator access"
-    
-    ns_section "ns/server/${server}/module/nsopenssl/ssldriver/users"
-        ns_param sslcontext            users
-        # ns_param port                  $httpsport_users
-        ns_param port                  $httpsport
-        ns_param hostname              $hostname
-        ns_param address               $address
-        # following added per
-        # http://www.mail-archive.com/aolserver@listserv.aol.com/msg07365.html
-        # Maximum File Size for uploads:
-        ns_param   maxinput           [expr {$max_file_upload_mb * 1024 * 1024}] ;# in bytes
-        # Maximum request time
-        ns_param   recvwait           [expr {$max_file_upload_min * 60}] ;# in minutes
+# following helps to stablize some openssl connections to buggy servers.
+    ns_param SessionCache true
+    ns_param SessionCacheID 1
+    ns_param SessionCacheSize 512
+    ns_param SessionCacheTimeout 300
+
+# SSL drivers. Each driver defines a port to listen on and an explitictly named
+# SSL context to associate with it. Note that you can now have multiple driver
+# connections within a single virtual server, which can be tied to different
+# SSL contexts.
+ns_section "ns/server/${server}/module/nsopenssl/ssldrivers"
+    ns_param users         "Driver for regular user access"
+#    ns_param admins        "Driver for administrator access"
+
+ns_section "ns/server/${server}/module/nsopenssl/ssldriver/users"
+    ns_param sslcontext            users
+    # ns_param port                  $httpsport_users
+    ns_param port                  $httpsport
+    ns_param hostname              $hostname
+    ns_param address               $address
+    # following added per
+    # http://www.mail-archive.com/aolserver@listserv.aol.com/msg07365.html
+    # Maximum File Size for uploads:
+    ns_param   maxinput           [expr {$max_file_upload_mb * 1024 * 1024}] ;# in bytes
+    # Maximum request time
+    ns_param   recvwait           [expr {$max_file_upload_min * 60}] ;# in minutes
 
 #    ns_section "ns/server/${server}/module/nsopenssl/ssldriver/admins"
-    #    ns_param sslcontext            admins
-    #    ns_param port                  $httpsport_admins
-    #    ns_param port                  $httpsport
-    #    ns_param hostname              $hostname
-    #    ns_param address               $address
-}
+#    ns_param sslcontext            admins
+#    ns_param port                  $httpsport_admins
+#    ns_param port                  $httpsport
+#    ns_param hostname              $hostname
+#    ns_param address               $address
+
 
 #---------------------------------------------------------------------
 # 
@@ -526,17 +448,17 @@ if { [ns_info version] < 4} {
 #
 #---------------------------------------------------------------------
 ns_section "ns/db/drivers" 
-if { $database eq "oracle" } {
-    ns_param   ora8           ${bindir}/ora8.so
-} else {
-    ns_param   postgres       ${bindir}/nspostgres.so  ;# Load PostgreSQL driver
-}
+    if { $database eq "oracle" } {
+        ns_param   ora8           ${bindir}/ora8.so
+    } else {
+        ns_param   postgres       ${bindir}/nspostgres.so  ;# Load PostgreSQL driver
+    }
 
-if { $database eq "oracle" } {
-    ns_section "ns/db/driver/ora8"
-    ns_param  maxStringLogLength -1
-    ns_param  LobBufferSize      32768
-}
+    if { $database eq "oracle" } {
+        ns_section "ns/db/driver/ora8"
+        ns_param  maxStringLogLength -1
+        ns_param  LobBufferSize      32768
+    }
 
  
 # Database Pools: This is how AOLserver  ``talks'' to the RDBMS. You need 
@@ -546,12 +468,17 @@ if { $database eq "oracle" } {
 #
 # AOLserver can have different pools connecting to different databases 
 # and even different different database servers.  See
-# http://openacs.org/doc/openacs-5-1/tutorial-second-database.html
+# http://openacs.org/doc/tutorial-second-database.html
+# An example 'other db' configuration is included (and commented out) using other1_db_name
+# set other1_db_name "yourDBname"
 
 ns_section ns/db/pools 
     ns_param   pool1              "Pool 1"
     ns_param   pool2              "Pool 2"
     ns_param   pool3              "Pool 3"
+#    ns_param   pool4              "Pool4 Other1"
+#    ns_param   pool5              "Pool5 Other1"
+#    ns_param   pool6              "Pool6 Other1"
 
 ns_section ns/db/pool/pool1
     ns_param   maxidle            0
@@ -610,9 +537,45 @@ ns_section ns/db/pool/pool3
         ns_param   password           ""
     } 
 
+# ns_section ns/db/pool/pool4
+#    ns_param   maxidle            0
+#    ns_param   maxopen            0
+#    ns_param   connections        5
+#    ns_param   verbose            $debug
+#    ns_param   extendedtableinfo  true
+#    ns_param   logsqlerrors       $debug
+#    if { $database eq "oracle" } {
+#        ns_param   driver             ora8
+#        ns_param   datasource         {}
+#        ns_param   user               $db_name
+#        ns_param   password           $db_password
+#    } else {
+#        ns_param   driver             postgres 
+#        ns_param   datasource         ${db_host}:${db_port}:${other1_db_name}
+#        ns_param   user               $db_user
+#        ns_param   password           ""
+#    } 
+
+# ns_section ns/db/pool/pool5
+# ...
+# ns_section ns/db/pool/pool6
+# ...
+
+
 ns_section ns/server/${server}/db
     ns_param   pools              pool1,pool2,pool3
+# if a second db is added, add the pools here. for example, replace above line with:
+#    ns_param   pools              pool1,pool2,pool3,pool4,pool5,pool6
     ns_param   defaultpool        pool1
+
+# following from http://openacs.org/doc/tutorial-second-database.html
+#ns_section ns/server/${server}/acs/database
+#    ns_param database_names [list main other1]
+#    ns_param pools_main [list pool1 pool2 pool3]
+#    ns_param pools_other1 [list pool4 pool5 pool6]
+# Start each pool set with pools_* 
+# The code assumes the name in database_names matches the suffix to pools_ in one of the ns_params.
+
 
 
 #---------------------------------------------------------------------
@@ -662,7 +625,7 @@ ns_section ns/server/${server}/modules
     }
 
     # nsthread library which should become standard in 5.3
-    ns_param libthread  [lindex [glob ${homedir}/lib/thread*/libthread*[info sharedlibextension]] 0]
+    ns_param libthread  [lindex [glob ${homedir}/lib/thread*/libthread*[info sharedlibextension]] end]
 
     if {[ns_info version] >= 4.5} {
         ns_limits set default -maxupload [ns_config ns/server/${server}/module/nssock maxinput]
@@ -670,6 +633,3 @@ ns_section ns/server/${server}/modules
 
 ns_log notice "nsd.tcl: using threadsafe tcl: [info exists tcl_platform(threaded)]"
 ns_log notice "nsd.tcl: finished reading config file."
-if {[ns_info version] >= 4.5} {
-    ns_limits set default -maxupload [ns_config ns/server/${server}/module/nssock maxinput]
-}

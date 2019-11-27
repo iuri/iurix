@@ -7,10 +7,10 @@ ad_page_contract {
 
     @author stefan@arsdigita.com
     @creation-date 2000-12-20
-    @cvs-id $Id: revision-add-3.tcl,v 1.10 2009/12/26 23:50:53 donb Exp $
+    @cvs-id $Id: revision-add-3.tcl,v 1.13.2.3 2016/11/27 12:19:35 gustafn Exp $
 
 } { 
-    item_id:integer
+    item_id:naturalnum,notnull
     publish_title:notnull
     publish_lead
     publish_body:allhtml,notnull,trim
@@ -18,13 +18,13 @@ ad_page_contract {
     revision_log:notnull
     publish_date_ansi:notnull
     archive_date_ansi:notnull
-    permanent_p:notnull
+    permanent_p:boolean,notnull
 }
 
 # Avoid any driver/bindvar nonsense regarding "." in a variable name
 set mime_type ${publish_body.format}
 
-if {[string equal $permanent_p "t"] } {
+if {$permanent_p == "t"} {
     set archive_date_ansi [db_null]
 } 
 
@@ -42,39 +42,24 @@ set creation_user [ad_conn "user_id"]
 set active_revision_p "t"
 
 # Insert is 2-step process, same as in item-create-3.tcl
-if [catch { 
-    set revision_id [db_exec_plsql create_news_item_revision "
-    begin
-        :1 := news.revision_new(
-            item_id       => :item_id,
-            publish_date  => :publish_date_ansi,
-            title         => :publish_title,   
-            description   => :revision_log,
-            mime_type     => :mime_type,
-            package_id    => [ad_conn package_id],
-            archive_date  => :archive_date_ansi,
-            approval_user => :approval_user,
-            approval_date => :approval_date,
-            approval_ip   => :approval_ip,
-            creation_ip   => :creation_ip,
-            creation_user => :creation_user,
-            make_active_revision_p => :active_revision_p);
-    end;"]
+if {[catch { 
+    set revision_id [db_exec_plsql create_news_item_revision {}]
 
     set content_add [db_map content_add]
     if {![string match $content_add ""]} {    
-	db_dml content_add "
-	update cr_revisions
-	set    content = empty_blob()
-	where  revision_id = :revision_id
-	returning content into :1" -blobs  [list $publish_body]
+	db_dml content_add {
+            update cr_revisions
+            set    content = empty_blob()
+            where  revision_id = :revision_id
+            returning content into :1
+        } -blobs  [list $publish_body]
     }
    
-} errmsg ] {
+} errmsg ]} {
 	
-    set complaint " [_ news.lt_The_database_did_not_]
-    [_ news.lt_See_details_for_the_e]\n\n\t<p><b>$errmsg</b>"
-    ad_return_error "[_ news.Database_Error]" "$complaint" 
+    set complaint " [_ news.lt_The_database_did_not_] \
+       [_ news.lt_See_details_for_the_e]\n\n\t<p><b>$errmsg</b>"
+    ad_return_error [_ news.Database_Error] $complaint
     ad_script_abort
 	
 } else {
@@ -82,3 +67,9 @@ if [catch {
     ad_returnredirect "item?item_id=$item_id"
 	
 }    
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

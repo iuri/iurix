@@ -3,7 +3,7 @@ ad_library {
 
     @author Peter Marklund
     @creation-date 21 August 2003
-    @cvs-id $Id: acs-authentication-procs.tcl,v 1.42 2009/02/10 18:27:08 jeffd Exp $
+    @cvs-id $Id: acs-authentication-procs.tcl,v 1.44.2.3 2016/02/13 15:22:26 gustafn Exp $
 }
 
 aa_register_case \
@@ -167,7 +167,8 @@ aa_register_case \
                 }
             }
 
-            aa_false "No creation_message for successful creation" [exists_and_not_null user_info(creation_message)]
+            aa_false "No creation_message for successful creation" \
+		[expr {[info exists user_info(creation_message)] && $user_info(creation_message) ne ""}]
             aa_true "returns user_id" [info exists user_info(user_id)]
             
             if { [info exists user_info(user_id)] } {         
@@ -187,12 +188,14 @@ aa_register_case \
 
             aa_equals "creation_status for duplicate email and username" $user_info(creation_status) "data_error"
             
-            aa_true "element_messages exists" [exists_and_not_null user_info(element_messages)]
-            if { [exists_and_not_null user_info(element_messages)] } {
+            aa_true "element_messages exists" [info exists user_info(element_messages)]
+            if { [info exists user_info(element_messages)] && $user_info(element_messages) ne "" } {
                 array unset elm_msgs
                 array set elm_msgs $user_info(element_messages)
-                aa_true "element_message for username exists" [exists_and_not_null elm_msgs(username)]
-                aa_true "element_message for email exists" [exists_and_not_null elm_msgs(email)]
+                aa_true "element_message for username exists" \
+		    [expr {[info exists elm_msgs(username)] && $elm_msgs(username) ne ""}]
+                aa_true "element_message for email exists" \
+		    [expr {[info exists elm_msgs(email)] && $elm_msgs(email) ne ""}]
             }
             set user_id [acs_user::get_by_username -username auth_create_user1]
             if { $user_id ne "" } {
@@ -212,18 +215,19 @@ aa_register_case \
             
             aa_equals "creation_status is data_error" $user_info(creation_status) "data_error" 
             
-            aa_true "element_messages exists" [exists_and_not_null user_info(element_messages)]
-            if { [exists_and_not_null user_info(element_messages)] } {
+            aa_true "element_messages exists" [info exists user_info(element_messages)]
+            if { [info exists user_info(element_messages)] && $user_info(element_messages) ne "" } {
                 array unset elm_msgs
                 array set elm_msgs $user_info(element_messages)
 
-                if { [aa_true "element_message(email) exists" [exists_and_not_null elm_msgs(email)]] } {
+                if { [aa_true "element_message(email) exists" \
+			  [expr {[info exists elm_msgs(email)] && $elm_msgs(email) ne ""}] ]} {
                     aa_log "element_message(email) = $elm_msgs(email)"
                 }
-                if { [aa_true "element_message(first_names) exists" [exists_and_not_null elm_msgs(first_names)]] } {
+                if { [aa_true "element_message(first_names) exists" [info exists elm_msgs(first_names)] ]} {
                     aa_log "element_message(first_names) = $elm_msgs(first_names)"
                 }
-                if { [aa_true "element_message(last_name) exists" [exists_and_not_null elm_msgs(last_name)]] } {
+                if { [aa_true "element_message(last_name) exists" [info exists elm_msgs(last_name)] ]} {
                     aa_log "element_message(last_name) = $elm_msgs(last_name)"
                 }
             }
@@ -245,18 +249,18 @@ aa_register_case \
             
             aa_equals "creation_status is data_error" $user_info(creation_status) "data_error" 
             
-            aa_true "element_messages exists" [exists_and_not_null user_info(element_messages)]
-            if { [exists_and_not_null user_info(element_messages)] } {
+            aa_true "element_messages exists" [info exists user_info(element_messages)]
+            if { [info exists user_info(element_messages)] && $user_info(element_messages) ne "" } {
                 array unset elm_msgs
                 array set elm_msgs $user_info(element_messages)
 
-                if { [aa_true "element_message(email) exists" [exists_and_not_null elm_msgs(email)]] } {
+                if { [aa_true "element_message(email) exists" [info exists elm_msgs(email)]] } {
                     aa_log "element_message(email) = $elm_msgs(email)"
                 }
-                if { [aa_true "element_message(first_names) exists" [exists_and_not_null elm_msgs(first_names)]] } {
+                if { [aa_true "element_message(first_names) exists" [info exists elm_msgs(first_names)]] } {
                     aa_log "element_message(first_names) = $elm_msgs(first_names)"
                 }
-                if { [aa_true "element_message(last_name) exists" [exists_and_not_null elm_msgs(last_name)]] } {
+                if { [aa_true "element_message(last_name) exists" [info exists elm_msgs(last_name)]] } {
                     aa_log "element_message(last_name) = $elm_msgs(last_name)"
                 }
             }
@@ -352,10 +356,7 @@ aa_register_case  \
     Test the auth::password::change proc.
 } {
     aa_stub acs_mail_lite::send {
-	acs_mail_lite::send__arg_parser
-
-        global ns_sendmail_to
-        set ns_sendmail_to $to_addr
+        set ::ns_sendmail_to $to_addr
     }
 
     aa_run_with_teardown \
@@ -372,8 +373,7 @@ aa_register_case  \
                     -secret_answer "no_answer"]
             set user_id $user_info(user_id)
 
-            global ns_sendmail_to
-            set ns_sendmail_to {ns_sendmail_UNCALLED}
+            set ::ns_sendmail_to {ns_sendmail_UNCALLED}
 
             parameter::set_value -parameter EmailAccountOwnerOnPasswordChangeP  -package_id [ad_acs_kernel_id] -value 1
             aa_true "Send email" [parameter::get -parameter EmailAccountOwnerOnPasswordChangeP -package_id [ad_acs_kernel_id] -default 1]
@@ -390,8 +390,8 @@ aa_register_case  \
                 "ok"
             
             # Check that user gets email about changed password
-            aa_equals "Email sent to user" $ns_sendmail_to $email
-            set ns_sendmail_to {}
+            aa_equals "Email sent to user" $::ns_sendmail_to $email
+            set ::ns_sendmail_to {}
 
             # check that the new password is actually set correctly
             set password_correct_p [ad_check_password $user_id $new_password]
@@ -655,7 +655,7 @@ aa_register_case  \
                 }
                 array unset retrieved_value $parameter
             }
-            aa_true "Only the right parameters were retrieved" [expr [llength [array names retrieved_value]] == 0]
+            aa_true "Only the right parameters were retrieved" [expr {[array size retrieved_value] == 0}]
         }
 }
 
@@ -677,13 +677,14 @@ aa_register_case  \
             aa_false "Param UseEmailForLoginP 0 -> false" [auth::UseEmailForLoginP]
 
             array set elms [auth::get_registration_elements]
-            aa_false "Registration elements do contain username" [expr [lsearch [concat $elms(required) $elms(optional)] "username"] == -1]
+            aa_false "Registration elements do contain username" [expr {"username" ni [concat $elms(required) $elms(optional)]}]
 
             parameter::set_value -parameter UseEmailForLoginP -package_id [ad_acs_kernel_id] -value {}
             aa_true "Param UseEmailForLoginP {} -> true" [auth::UseEmailForLoginP]
 
+            # "foo" is an invalid value, it can't be true
             parameter::set_value -parameter UseEmailForLoginP -package_id [ad_acs_kernel_id] -value {foo}
-            aa_true "Param UseEmailForLoginP foo -> true" [auth::UseEmailForLoginP]
+            aa_false "Param UseEmailForLoginP foo -> false" [auth::UseEmailForLoginP]
             
             # Test login/registration
             
@@ -692,7 +693,7 @@ aa_register_case  \
 
             # GetElements
             array set elms [auth::get_registration_elements]
-            aa_true "Registration elements do NOT contain username" [expr {[lsearch [concat $elms(required) $elms(optional)] "username"] == -1}]
+            aa_true "Registration elements do NOT contain username" [expr {"username" ni [concat $elms(required) $elms(optional)]}]
             
             # Create a user with no username
             set email [string tolower "[ad_generate_random_string]@foobar.com"]
@@ -727,10 +728,7 @@ aa_register_case  \
     Test acs-kernel.EmailAccountOwnerOnPasswordChangeP parameter
 } {
     aa_stub acs_mail_lite::send {
-	acs_mail_lite::send__arg_parser
-
-        global ns_sendmail_to
-        set ns_sendmail_to $to_addr
+        set ::ns_sendmail_to $to_addr
     }
 
     aa_run_with_teardown \
@@ -738,8 +736,7 @@ aa_register_case  \
         -test_code {
             parameter::set_value -parameter EmailAccountOwnerOnPasswordChangeP -package_id [ad_acs_kernel_id] -value 1
             
-            global ns_sendmail_to
-            set ns_sendmail_to {}
+            set ::ns_sendmail_to {}
            
             # Create a dummy local user
             set username [ad_generate_random_string]
@@ -775,8 +772,8 @@ aa_register_case  \
             }
             
             # Check that we get email
-            aa_equals "Email sent to user" $ns_sendmail_to $email
-            set ns_sendmail_to {ns_sendmail_UNCALLED}
+            aa_equals "Email sent to user" $::ns_sendmail_to $email
+            set ::ns_sendmail_to {ns_sendmail_UNCALLED}
 
             # Set parameter to false
             parameter::set_value -parameter EmailAccountOwnerOnPasswordChangeP -package_id [ad_acs_kernel_id] -value 0
@@ -791,7 +788,7 @@ aa_register_case  \
             aa_equals "Password change OK" $result(password_status) "ok"
             
             # Check that we do not get an email
-            aa_equals "Email NOT sent to user" $ns_sendmail_to {ns_sendmail_UNCALLED}
+            aa_equals "Email NOT sent to user" $::ns_sendmail_to {ns_sendmail_UNCALLED}
 
             ad_parameter_cache -delete [ad_acs_kernel_id] EmailAccountOwnerOnPasswordChangeP
         }
@@ -823,3 +820,9 @@ ad_proc -private auth::test::get_password_vars {
 
     db_1row select_vars {} -column_array test_vars
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -3,7 +3,7 @@ ad_library {
 
     @author Bart Teeuwisse (bart.teeuwisse@thecodemill.biz)
     @creation-date 2002-11-18
-    @cvs $Id: pinds-blog-entry-sc-procs.tcl,v 1.4 2003/12/11 21:40:05 jeffd Exp $
+    @cvs-id $Id: pinds-blog-entry-sc-procs.tcl,v 1.5 2018/06/30 22:04:28 hectorr Exp $
 }
 
 ad_proc pinds_blog_entry__datasource {

@@ -5,7 +5,7 @@ ad_library {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date April 2002
-    @cvs-id $Id: site-node-object-map-procs.tcl,v 1.4 2007/01/10 21:22:12 gustafn Exp $
+    @cvs-id $Id: site-node-object-map-procs.tcl,v 1.4.12.1 2015/09/10 08:21:59 gustafn Exp $
 }
 
 namespace eval site_node_object_map {}
@@ -49,3 +49,9 @@ ad_proc -public site_node_object_map::get_url {
     return [site_node::get_url -node_id $node_id]
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

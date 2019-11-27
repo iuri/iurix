@@ -5,7 +5,7 @@
 <!-- @author Dave Bauer (dave@thedesignexperience.org) -->
 <!-- @creation-date 2005-01-09 -->
 <!-- @arch-tag: 47baf88a-8fad-43bc-8b02-059315c80e00 -->
-<!-- @cvs-id $Id: content-item-procs.xql,v 1.4 2006/06/04 00:45:23 donb Exp $ -->
+<!-- @cvs-id $Id: content-item-procs.xql,v 1.4.14.1 2016/01/02 14:31:29 gustafn Exp $ -->
 
 <queryset>
   <fullquery name="content::item::get.get_item">
@@ -30,7 +30,7 @@
       from cr_items
      where parent_id = :parent_id
   </querytext>
-</fullquery>
+  </fullquery>
 
   <fullquery name="content::item::get.get_item_folder">
     <querytext>
@@ -50,14 +50,6 @@
     </querytext>
   </fullquery>
     
-  <fullquery name="content::item::upload_file.get_parent_existing_filenames">
-  <querytext>
-    select name
-      from cr_items
-     where parent_id = :parent_id
-  </querytext>
-</fullquery>
-
   <fullquery name="content::item::get_id_by_name.get_item_id_by_name">
   <querytext>
     select item_id

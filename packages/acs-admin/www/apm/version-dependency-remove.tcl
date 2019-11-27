@@ -2,10 +2,10 @@ ad_page_contract {
     Adds a dependency to a version of a package. 
     @author Jon Salz (jsalz@arsdigita.com)
     @creation-date 17 April 2000
-    @cvs-id $Id: version-dependency-remove.tcl,v 1.4.2.1 2010/04/10 23:00:30 donb Exp $
+    @cvs-id $Id: version-dependency-remove.tcl,v 1.8.2.2 2015/09/18 07:39:04 gustafn Exp $
 } {
-    {version_id:integer}
-    {dependency_id:integer}
+    {version_id:naturalnum,notnull}
+    {dependency_id:naturalnum,notnull}
     dependency_type:notnull
     package_key:notnull
 }
@@ -23,14 +23,20 @@ db_transaction {
 	}
 
 	default {
-	    ad_return complaint 1 "Dependency Entry Error: Depenendencies are either interfaces or requirements."
+	    ad_return_complaint 1 "Dependency Entry Error: Depenendencies are either interfaces or requirements."
 	}
     }
     apm_package_install_spec $version_id
 } on_error {
     ad_return_complaint 1 "Database Error: The database returned the following error:
-	<blockquote><pre>[ad_quotehtml $errmsg]</pre></blockquote>"
+	<blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote>"
 }
 
-ad_returnredirect "version-dependencies?[export_url_vars version_id]"
+ad_returnredirect [export_vars -base version-dependencies {version_id}]
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Todd Nightingale
     @creation-date 2000-7-14
-    @cvs-id $Id: proc-browse.tcl,v 1.4 2007/01/10 21:22:01 gustafn Exp $
+    @cvs-id $Id: proc-browse.tcl,v 1.5.2.2 2015/12/30 12:54:34 gustafn Exp $
 
 } {
     { type "Public" }
@@ -42,17 +42,17 @@ foreach proc [nsv_array names api_proc_doc] {
 	lappend matches [list $proc $doc_elements(script)] 
     } elseif {$type eq "Deprecated" && $doc_elements(deprecated_p)} {
 	lappend matches [list $proc $doc_elements(script)] 
-    } elseif {$type eq "Private" && $doc_elements(private_p) } {
+    } elseif {$type eq "Private" && $doc_elements(protection) eq "private" } {
 	lappend matches [list $proc $doc_elements(script)] 
-    } elseif {$type eq "Public" && $doc_elements(public_p) } {
+    } elseif {$type eq "Public" && $doc_elements(protection) eq "public" } {
 	lappend matches [list $proc $doc_elements(script)] 
     } 
 }
 
 if {$sort_by eq "file"} {
-    set matches [lsort -command ad_sort_by_second_string_proc $matches]    
+    set matches [lsort -command ::apidoc::ad_sort_by_second_string_proc $matches]    
 } else {
-    set matches [lsort -command ad_sort_by_first_string_proc $matches]
+    set matches [lsort -command ::apidoc::ad_sort_by_first_string_proc $matches]
 }
 
 multirow create proc_list file proc url
@@ -64,3 +64,9 @@ foreach sublist $matches {
     multirow append proc_list $file $proc $url
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

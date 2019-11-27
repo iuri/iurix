@@ -6,13 +6,13 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Mon Dec 11 10:52:35 2000
-    @cvs-id $Id: new.tcl,v 1.5 2005/07/22 02:33:22 skaufman Exp $
+    @cvs-id $Id: new.tcl,v 1.5.14.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
     { role:trim "" }
     { pretty_name "" }
     { pretty_plural "" }
-    { return_url "" }
+    { return_url:localurl "" }
 } -properties {
     context:onevalue
     
@@ -57,3 +57,9 @@ if { [template::form is_valid role_form] } {
     ad_returnredirect $return_url
     ad_script_abort
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

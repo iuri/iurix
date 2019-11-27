@@ -4,7 +4,7 @@
 
 <!-- @author Dave Bauer (dave@thedesignexperience.org) -->
 <!-- @creation-date 2004-05-09 -->
-<!-- @cvs-id $Id: copy-oracle.xql,v 1.6 2008/10/23 13:59:02 victorg Exp $ -->
+<!-- @cvs-id $Id: copy-oracle.xql,v 1.6.6.2 2017/05/09 12:01:01 antoniop Exp $ -->
 
 <queryset>
   
@@ -15,7 +15,7 @@
   
   <fullquery name="get_copy_objects">
     <querytext>
-      select fs.object_id, fs.name, fs.parent_id,
+      select fs.object_id, fs.name, fs.title, fs.parent_id,
       acs_permission.permission_p(fs.object_id, :user_id, 'read') as copy_p, fs.type
       from fs_objects fs
       where fs.object_id in ([template::util::tcl_to_sql_list $object_id])
@@ -30,7 +30,9 @@
            :object_id,
            :folder_id,
 	   :user_id,
-           :peer_addr);
+           :peer_addr,
+	   :name,
+	   :title);
 	end;
     </querytext>
   </fullquery>
@@ -42,7 +44,9 @@
            :object_id,
            :folder_id,
 	   :user_id,
-           :peer_addr );
+           :peer_addr,
+	   :name,
+	   :title);
         end;
     </querytext>
   </fullquery>

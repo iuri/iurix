@@ -7,7 +7,7 @@ ad_library {
     @author Malte Sussdorff (sussdorff@sussdorff.de)
     @creation-date 2005-06-15
     @arch-tag: d9aec4df-102d-4b0d-8d0e-3dc470dbe783
-    @cvs-id $Id: acs-mail-lite-callback-procs.tcl,v 1.22 2009/03/18 22:41:15 emmar Exp $
+    @cvs-id $Id: acs-mail-lite-callback-procs.tcl,v 1.23.2.3 2017/04/21 16:11:28 gustafn Exp $
 }
 
 ad_proc -public -callback acs_mail_lite::send {
@@ -21,33 +21,28 @@ ad_proc -public -callback acs_mail_lite::send {
     {-cc_addr}
     {-bcc_addr}
     {-file_ids}
+    {-filesystem_files}
+    {-delete_filesystem_files_p}
     {-object_id}
+    {-status ok}
+    {-errorMsg ""}
 } {
 
     Callback for executing code after an email has been send using the send mechanism.
     
 	@param package_id Package ID of the sending package
-	
 	@param message_id the generated message_id for this mail
-
 	@param from_addr email of the sender
-
 	@param to_addr list of emails to whom did we send this email
-
 	@param body Text body of the email
-
-    @param mime_type Mime type of the email body
-	
+        @param mime_type Mime type of the email body
 	@param subject of the email
-	
 	@param cc_addr list of emails to whom did we send this email in CC
-
 	@param bcc_addr list of emails to whom did we send this email in BCC
-
 	@param file_ids List of file ids sent as attachments.
-
-    @param object_id The ID of the object that is responsible for sending the mail in the first place
-
+        @param object_id The ID of the object that is responsible for sending the mail in the first place
+        @param status Status of the send operation ("ok" or "error")
+        @param errorMsg Error Details
 } -
 
 ad_proc -public -callback acs_mail_lite::incoming_email {
@@ -97,9 +92,9 @@ ad_proc -public -callback acs_mail_lite::incoming_email -impl acs-mail-lite {
     upvar $array email
 
     set to [acs_mail_lite::parse_email_address -email $email(to)]
-    ns_log Debug "acs_mail_lite::incoming_email -impl acs-mail-lite called. Recepient $to"
+    ns_log Debug "acs_mail_lite::incoming_email -impl acs-mail-lite called. Recipient $to"
 
-    util_unlist [acs_mail_lite::parse_bounce_address -bounce_address $to] user_id package_id signature
+    lassign [acs_mail_lite::parse_bounce_address -bounce_address $to] user_id package_id signature
     
     # If no user_id found or signature invalid, ignore message
     if {$user_id eq ""} {
@@ -110,3 +105,9 @@ ad_proc -public -callback acs_mail_lite::incoming_email -impl acs-mail-lite {
     }
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

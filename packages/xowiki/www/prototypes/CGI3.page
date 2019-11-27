@@ -1,5 +1,5 @@
 # -*- tcl-*-
-# $Id: CGI3.page,v 1.2 2007/04/17 10:48:05 gustafn Exp $
+# $Id: CGI3.page,v 1.4.4.1 2017/07/25 06:30:50 gustafn Exp $
 ::xowiki::Object new -title "CGI3" -text {
   #
   # The parameter declaration sets the context for the 
@@ -19,7 +19,7 @@
   # as long as no absolute class or object names are used (no leading colons)
   #
   
-  Class CGI
+  Class create CGI
   CGI instproc content {} {
     my get_parameters
 

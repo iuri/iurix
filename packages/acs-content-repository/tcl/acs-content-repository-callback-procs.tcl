@@ -7,7 +7,7 @@ ad_library {
     @author Malte Sussdorff (sussdorff@sussdorff.de)
     @creation-date 2005-06-15
     @arch-tag: d9aec4df-102d-4b0d-8d0e-3dc470dbe783
-    @cvs-id $Id: acs-content-repository-callback-procs.tcl,v 1.5 2007/08/30 10:21:57 maltes Exp $
+    @cvs-id $Id: acs-content-repository-callback-procs.tcl,v 1.6.2.1 2015/09/10 08:21:16 gustafn Exp $
 }
 
 
@@ -42,8 +42,8 @@ ad_proc -public -callback subsite::parameter_changed -impl acs-content-repositor
 	set file_location ""
 	
 	if {$relativepath_p} {
-	    # The file location is relative to acs_root_dir
-	    append file_location "[acs_root_dir]/"
+	    # The file location is relative to $::acs::rootdir
+	    append file_location "$::acs::rootdir/"
 	}
 	append file_location [parameter::get_from_package_key -package_key "acs-content-repository" -parameter "CRFileLocationRoot" -default "content-repository-content-files"]
 	
@@ -53,3 +53,9 @@ ad_proc -public -callback subsite::parameter_changed -impl acs-content-repositor
 	ns_log Debug "subsite::parameter_changed -impl acs-content-repository don't care about $parameter"
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

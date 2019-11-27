@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="ko_KR" charset="utf-8">
+<message_catalog package_key="survey" locale="ko_KR" charset="utf-8">
 
   <msg key="-__Created_by">- 가 생성한</msg>
   <msg key="_on_creation_date">, %creation_date%에</msg>
@@ -80,7 +80,7 @@
   <msg key="lt_Cancel_and_return_to__1">취소하고 설문 관리로 돌아 감</msg>
   <msg key="lt_Completely_delete">%user_name_var%'의 응답을 %response_date_var%에서 완전히 삭제? (주의: 삭제하면 복구할 수 없습니다.) </msg>
   <msg key="lt_Confirm_Survey_Detail">설문 상세내용 확인</msg>
-  <msg key="lt_Copying_a_survey_will">설문을 복사하면 모든 질문을 가진 새로운 설문이 생성된다.&lt;br /&gt;응답 자료는 복사되지 않는다. </msg>
+  <msg key="lt_Copying_a_survey_will">설문을 복사하면 모든 질문을 가진 새로운 설문이 생성된다.&lt;br&gt;응답 자료는 복사되지 않는다. </msg>
   <msg key="lt_Could_not_find_a_surv">설문의 질문을 찾을 수 없습니다</msg>
   <msg key="lt_Could_not_find_the_re">응답을 찾을 수 없습니다</msg>
   <msg key="lt_Couldnt_find_attachment">첨부를 찾을 수 없습니다. 주어진 response_id %response_id%, question_id %question_id%와 일치하는 첨부를 찾을 수 없습니다.</msg>
@@ -94,7 +94,7 @@
   <msg key="lt_Everyone_eligible_to_">모든 사람이 이 설문에 응해야 함 </msg>
   <msg key="lt_Everyone_who_has_alre">이 설문에 이미 응한 사람들</msg>
   <msg key="lt_Everyone_who_has_not_">이 설문에 아직 응하지 않은 사람들</msg>
-  <msg key="lt_For_Multiple_Choicebr">복수개의 답에 대하여&lt;br /&gt;타당한 응답의 목록 입력&lt;br /&gt; (라인 당 한개의 선택 입력) </msg>
+  <msg key="lt_For_Multiple_Choicebr">복수개의 답에 대하여&lt;br&gt;타당한 응답의 목록 입력&lt;br&gt; (라인 당 한개의 선택 입력) </msg>
   <msg key="lt_had_to_say_in_respons">%survey_name%에 응답하여 답을 하여야 한다:</msg>
   <msg key="lt_Here_is_how_your_surv">여기에 당신의 설문에 대한 설명이 보일 것이다:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;관리자 조사&quot;&gt;</msg>

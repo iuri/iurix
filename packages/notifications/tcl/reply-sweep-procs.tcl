@@ -6,7 +6,7 @@ ad_library {
 
     @creation-date 2002-06-02
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: reply-sweep-procs.tcl,v 1.7 2003/11/06 14:28:03 matk Exp $
+    @cvs-id $Id: reply-sweep-procs.tcl,v 1.7.24.1 2015/09/12 11:06:47 gustafn Exp $
 
 }
 
@@ -52,3 +52,9 @@ ad_proc -public notification::reply::sweep::process_all_replies {} {
         }
     }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

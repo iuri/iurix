@@ -1,17 +1,17 @@
 <master>
- <property name="title">@page_title;noquote@</property>
- <property name="context">@context;noquote@</property>
+ <property name="doc(title)">@page_title;literal@</property>
+ <property name="context">@context;literal@</property>
 
 <formtemplate id="search">
-Search <formwidget id="search_locale"> for <formwidget id="q"> <input type="submit" value="Search">
+<p>Search <formwidget id="search_locale"> for <formwidget id="q"> <input type="submit" value="Search">
 </formtemplate>
 
-<include src="/packages/acs-lang/lib/conflict-link" locale="@current_locale@" />
+<include src="/packages/acs-lang/lib/conflict-link" locale="@current_locale;literal@" >
 
 <if @locale_enabled_p@ and @site_wide_admin_p@>
   <ul class="action-links">
-    <li><a href="@import_all_url@" title="Imports all messages for this locale from the catalog files">Import all messages for this locale</a></li>
-    <li> <a href="@export_all_url@" title="Export all messages for this locale to the catalog files">Export all messages for this locale</a></li>
+    <li><a href="@import_all_url@" title="#acs-lang.Import_all_messages__title#">#acs-lang.Import_all_messages_for_this_locale#</a></li>
+    <li> <a href="@export_all_url@" title="#acs-lang.Export_all_messages__title#">#acs-lang.Export_all_messages_for_this_locale#</a></li>
   </ul>
 </if>
 
@@ -22,15 +22,15 @@ Search <formwidget id="search_locale"> for <formwidget id="q"> <input type="subm
       <table cellpadding="4" cellspacing="1" border="0">
         <tr valign="middle" style="background: #FFFFE4">
           <th></th>
-          <th>Package</th>
-          <th>Translated</th>
-          <th>Untranslated</th>
-          <th>Total</th>
+          <th>#acs-lang.Package#</th>
+          <th>#acs-lang.Translated#</th>
+          <th>#acs-lang.Untranslated#</th>
+          <th>#acs-lang.Total#</th>
         </tr>
         <multiple name="packages">
           <tr style="background: #EEEEEE">
             <td>
-              <a href="@packages.batch_edit_url@" title="Batch edit all messages in this @packages.package_key@"><img src="/shared/images/Edit16.gif" border="0" width="16" height="16"></a>
+              <a href="@packages.batch_edit_url@" title="Batch edit all messages in this @packages.package_key@"><img src="/shared/images/Edit16.gif" alt="edit" width="16" height="16"></a>
             </td>
             <td>
               <a href="@packages.view_messages_url@" title="View all messages in package">@packages.package_key@</a>

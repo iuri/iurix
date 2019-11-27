@@ -73,7 +73,7 @@ form create add_entry -elements {
     address -html { size 40 } -label "Address" -optional -datatype text
     city -html { size 30 } -label "City" -optional -datatype text
     state -html { size 3 maxlength 2 } -label "State" -optional -datatype keyword \
-	-validate { {expr [string length $value ] ==2 } {Entry for tate must be two characters in length } }
+	-validate { {expr [string length $value ] ==  2 } {Entry for tate must be two characters in length } }
     zip -html { size 10 } -label "Zip" -optional -datatype text
     country  -html { size 30 } -label "Country" -optional -datatype text
     email -html { size 30 } -label "Email" -optional -datatype text
@@ -108,7 +108,7 @@ if { [form is_valid add_entry] } {
       )"
 
     # can't seem to get orable to bind array variables birthday.day, birthday.month and birthday.year
-    # okay, turns out oracle doesn't support arrays, will have to do this in tcl first
+    # okay, turns out oracle doesn't support arrays, will have to do this in Tcl first
  
     template::forward form-sample.acs
 }
@@ -117,7 +117,7 @@ db_multirow address get_address ""
 
 set rowcount [set address:rowcount]
 
-if { $rowcount > [expr {$start_row + $num_rows}] } {
+if { $rowcount > $start_row + $num_rows } {
     set next_set [expr {$start_row + $num_rows}]
 } else {
     set next_set ""
@@ -133,7 +133,7 @@ if { $previous_set < 1} {
     set previous_set 1 
 }
 
-if {$rowcount > [expr {$next_set + $num_rows}]} {
+if {$rowcount > $next_set + $num_rows} {
     set last_set [expr {$rowcount - ($rowcount % $num_rows)}]
 } else {
     set last_set ""
@@ -143,3 +143,9 @@ if {$rowcount > [expr {$next_set + $num_rows}]} {
 
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -8,8 +8,9 @@
     <td valign="top">
         <if @msg@ not nil>
 	    <h1 style="color:red;">@msg;noquote@</h1>
-	</if>
-    	<formtemplate id="send-email"></formtemplate>
+	    </if>
+    	    <formtemplate id="send-email"></formtemplate>
     </td>
   </tr>
 </table>
+

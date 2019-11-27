@@ -70,7 +70,8 @@
       and    deleted_p = 'f'
       $user_filter_where_clause
       $sw_category_filter_where_clause
- order by entry_date desc, entry_id, com.category_id
+      order by entry_date desc, entry_id, com.category_id
+      LIMIT 10
         </querytext>
     </fullquery>
 

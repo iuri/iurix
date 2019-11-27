@@ -6,12 +6,12 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: view-comment.tcl,v 1.9 2010/12/20 00:15:22 donb Exp $
+    @cvs-id $Id: view-comment.tcl,v 1.10.2.2 2016/05/21 10:15:38 gustafn Exp $
 } { 
-    comment_id:notnull
-    { revision_id {} }
+    comment_id:naturalnum,notnull
+    { revision_id:naturalnum,optional {} }
     { object_name {} }
-    { return_url {} }
+    { return_url:localurl {} }
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -36,14 +36,14 @@ set user_id [ad_conn user_id]
 
 # check for permissions
 set package_id [ad_conn package_id]
-ad_require_permission $comment_id read
-set write_perm_p [ad_permission_p $comment_id write]
-set admin_p [ad_permission_p $package_id admin]
+permission::require_permission -object_id $comment_id -privilege read
+set write_perm_p [permission::permission_p -object_id $comment_id -privilege write]
+set admin_p [permission::permission_p -object_id $package_id -privilege admin]
 
 # if the user has write permissions then allow
 # viewing of selected revision
 if { $write_perm_p == 1 } {
-    if { [empty_string_p $revision_id] } {
+    if { $revision_id eq "" } {
 	# get the latest revision
 	set revision_id [db_string get_latest_revision {
             select content_item.get_latest_revision(:comment_id) from dual
@@ -93,8 +93,8 @@ db_multirow -extend {view_comment_url} revisions get_revisions {*SQL*} {
     set view_comment_url [export_vars -base "view-comment" {comment_id revision_id return_url}]
 }
 
-set allow_file_p [ad_parameter AllowFileAttachmentsP {general-comments} {t}]
-set allow_link_p [ad_parameter AllowLinkAttachmentsP {general-comments} {t}]
+set allow_file_p [parameter::get -parameter AllowFileAttachmentsP -default {t}]
+set allow_link_p [parameter::get -parameter AllowLinkAttachmentsP -default {t}]
 set allow_attach_p "t"
 if { $allow_file_p == "f" && $allow_link_p == "f" } {
     set allow_attach_p "f"
@@ -135,3 +135,9 @@ if { $live_revision ne $revision_id } {
 }
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

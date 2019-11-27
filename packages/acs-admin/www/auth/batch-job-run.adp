@@ -1,9 +1,9 @@
 <master>
-  <property name="context">@context;noquote@</property>
-  <property name="title">@page_title;noquote@</property>
+  <property name="context">@context;literal@</property>
+  <property name="doc(title)">@page_title;literal@</property>
 
 <p> Batch sync completed. </p>
 
 <p> 
-  <b>&raquo;</b> <a href="@job_url@">View job results</a>
+  <strong>&raquo;</strong> <a href="@job_url@">View job results</a>
 </p>

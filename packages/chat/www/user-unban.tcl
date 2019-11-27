@@ -5,13 +5,13 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 22, 2000
-    @cvs-id $Id: user-unban.tcl,v 1.3 2006/03/14 12:16:09 emmar Exp $
+    @cvs-id $Id: user-unban.tcl,v 1.3.12.1 2016/06/20 08:40:23 gustafn Exp $
 } {
-    room_id:integer,notnull
-    party_id:integer,notnull
+    room_id:naturalnum,notnull
+    party_id:naturalnum,notnull
 }
 
-ad_require_permission $room_id chat_user_unban
+permission::require_permission -object_id $room_id -privilege chat_user_unban
 
 set context_bar [list [list "room?room_id=$room_id" "[_ chat.Room_Information]"] "[_ chat.Unban_user]"]
 

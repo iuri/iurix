@@ -1,5 +1,5 @@
 ad_page_contract {
-  @cvs-id $Id: skin.tcl,v 1.2 2002/09/10 22:22:16 jeffd Exp $
+  @cvs-id $Id: skin.tcl,v 1.2.28.1 2015/09/10 08:22:12 gustafn Exp $
 } {
   skin
 } -properties {
@@ -27,3 +27,9 @@ switch $skin {
 
 ad_return_template $file
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

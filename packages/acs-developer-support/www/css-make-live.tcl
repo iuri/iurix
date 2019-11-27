@@ -6,9 +6,9 @@ ad_page_contract {
     
     @author Malte Sussdorff (malte.sussdorff@cognovis.de)
     @creation-date 2007-09-30
-    @cvs-id $Id: css-make-live.tcl,v 1.2 2010/12/05 13:45:21 jeffd Exp $
+    @cvs-id $Id: css-make-live.tcl,v 1.3.2.2 2017/03/28 06:46:51 gustafn Exp $
 } {
-    {revision_id:integer}
+    {revision_id:naturalnum,notnull}
     {file_location }
     {return_url_2 "/"}
 } -properties {
@@ -26,6 +26,12 @@ set target $file_location
 set source [content::revision::get_cr_file_path -revision_id $revision_id]
 
 #todo check if files are stored in db
-file copy -force $source $target
+file copy -force -- $source $target
 
 ad_returnredirect $return_url_2
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

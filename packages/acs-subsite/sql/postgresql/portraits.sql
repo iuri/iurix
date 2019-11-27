@@ -3,7 +3,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Hiro Iwashima (iwashima@mit.edu)
 
--- $Id: portraits.sql,v 1.4 2006/09/25 21:16:34 byronl Exp $
+-- $Id: portraits.sql,v 1.5.4.1 2016/08/31 18:57:41 gustafn Exp $
 
 create table user_portraits (
 	user_id		integer constraint user_portraits_user_id_fk
@@ -37,32 +37,33 @@ create table user_portraits (
 -- /
 -- show errors
 
-create function inline_0 ()
-returns integer as '
-begin
-  PERFORM acs_rel_type__create_role(''user'', ''User'', ''Users'');
-  PERFORM acs_rel_type__create_role(''portrait'', ''Portrait'', ''Portraits'');
+CREATE OR REPLACE FUNCTION inline_0 () RETURNS integer AS $$
+BEGIN
+  PERFORM acs_rel_type__create_role('user', 'User', 'Users');
+  PERFORM acs_rel_type__create_role('portrait', 'Portrait', 'Portraits');
 
   PERFORM acs_rel_type__create_type (
-      ''user_portrait_rel'',
-      ''#acs-subsite.User_Portrait#'',
-      ''#acs-subsite.User_Portraits#'',
-      ''relationship'',
-      ''user_portraits'',
-      ''user_id'',
-      ''user_portrait_rel'',
-      ''user'',
-      ''user'',
+      'user_portrait_rel',
+      '#acs-subsite.User_Portrait#',
+      '#acs-subsite.User_Portraits#',
+      'relationship',
+      'user_portraits',
+      'user_id',
+      'user_portrait_rel',
+      'user',
+      'user',
       1,
       1,
-      ''content_item'',
+      'content_item',
       null,
       0,
-      1
+      1,
+      'f'
   );
 
   return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0 ();
 

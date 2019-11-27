@@ -5,7 +5,7 @@ ad_library {
     @author arjun (arjun@openforce.net)
     @author yon (yon@openforce.net)
     @creation-date 2002-07-10
-    @cvs-id $Id: site-node-apm-integration-procs.tcl,v 1.12 2007/01/10 21:22:12 gustafn Exp $
+    @cvs-id $Id: site-node-apm-integration-procs.tcl,v 1.12.12.1 2015/09/10 08:21:59 gustafn Exp $
 
 }
 
@@ -72,3 +72,9 @@ namespace eval site_node_apm_integration {
     }
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

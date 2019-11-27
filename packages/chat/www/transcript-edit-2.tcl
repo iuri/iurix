@@ -4,12 +4,12 @@ ad_page_contract {
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 28, 2000
-    @cvs-id $Id: transcript-edit-2.tcl,v 1.7 2007/11/19 01:14:16 donb Exp $
+    @cvs-id $Id: transcript-edit-2.tcl,v 1.7.6.1 2016/06/20 08:40:23 gustafn Exp $
 } {
-    transcript_id:notnull,integer
+    transcript_id:notnull,naturalnum
     transcript_name:trim,notnull
     contents:html,notnull
-    room_id:notnull,integer
+    room_id:notnull,naturalnum
     {description:trim ""}
 }
 

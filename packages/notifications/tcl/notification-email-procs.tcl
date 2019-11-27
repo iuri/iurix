@@ -4,7 +4,7 @@ ad_library {
 
     @creation-date 2002-06-20
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: notification-email-procs.tcl,v 1.35 2009/04/02 15:57:03 emmar Exp $
+    @cvs-id $Id: notification-email-procs.tcl,v 1.38.2.6 2017/03/27 10:41:51 gustafn Exp $
 
 }
 
@@ -31,7 +31,7 @@ namespace eval notification::email {
         preferred, but if it doesn't exist, we build one using the system URL.
     } {
         set domain [get_parameter -name "EmailDomain"]
-        if { [empty_string_p $domain] } {
+        if { $domain eq "" } {
             # No domain set up, let's use the default from the system info
             # This may not find anything, but at least it's worth a try
             if { ![regexp {^(https?://)?(www\.)?([^/]*)} [ad_url] match ignore ignore domain] } {
@@ -77,7 +77,7 @@ namespace eval notification::email {
     } {
         Build an object/type-specific e-mail address that the user can reply to.
     } {
-        if {[empty_string_p $object_id] || [empty_string_p $type_id]} {
+        if {$object_id eq "" || $type_id eq ""} {
             return "\"[address_domain] mailer\" <[reply_address_prefix]@[address_domain]>"
         } else {
             return "\"[address_domain] mailer\" <[reply_address_prefix]-$object_id-$type_id@[address_domain]>"
@@ -116,7 +116,7 @@ namespace eval notification::email {
     } {
 
        # Get user data
-       set email [cc_email_from_party $to_user_id]
+       set email [party::email -party_id $to_user_id]
        set user_locale [lang::user::site_wide_locale -user_id $to_user_id]
        if { $user_locale eq "" } {
            set user_locale lang::system::site_wide_locale
@@ -125,15 +125,18 @@ namespace eval notification::email {
        # Variable used in the content
        set manage_notifications_url [manage_notifications_url]
 
-       if { [string length $content_html] == 0 } {
+       if { $content_html eq "" } {
            set mime_type "text/plain"
-           append content_text "\n#notifications.lt_Getting_too_much_emai#"
+           append content_text "\n#" "notifications.lt_Getting_too_much_emai#"
            set content $content_text
        } else {
            set mime_type "text/html"
-           append content_html "<p>#notifications.lt_Getting_too_much_emai#</p>"
+           append content_html "<p>#" "notifications.lt_Getting_too_much_emai#</p>"
            set content $content_html
        }
+
+       # convert relative URLs to fully qualified URLs
+       set content [ad_html_qualify_links $content]
 
        # Use this to build up extra mail headers        
        set extra_headers [list]
@@ -143,8 +146,8 @@ namespace eval notification::email {
         
        set reply_to [reply_address -object_id $reply_object_id -type_id $notification_type_id]
 
-       if { ![empty_string_p $from_user_id] && $from_user_id != 0 && [db_0or1row get_person {}]} {
-           set from_email [cc_email_from_party $from_user_id]
+       if { $from_user_id ne "" && $from_user_id != 0 && [db_0or1row get_person {}]} {
+           set from_email [party::email -party_id $from_user_id]
 	   
            # Set the Mail-Followup-To address to the
            # address of the notifications handler.
@@ -255,8 +258,8 @@ namespace eval notification::email {
 
             # walk through the headers and extract each one
             set is_auto_reply_p 0
-            while {![empty_string_p $line]} {
-                set next_line [lindex $file [expr $i + 1]]
+            while {$line ne ""} {
+                set next_line [lindex $file $i+1]
                 if {[regexp {^[ ]*$} $next_line match] && $i > 0} {
                     set end_of_headers_p 1
                 }
@@ -305,7 +308,7 @@ namespace eval notification::email {
             # the rest of the foreach as well
             if { $is_auto_reply_p } {
                 ns_log Debug "load_qmail_mail_queue: message $msg is from an auto-responder, skipping"
-                if {[catch {ns_unlink $msg} errmsg]} {
+                if {[catch {file delete -- $msg} errmsg]} {
                     ns_log Warning "load_qmail_mail_queue: couldn't remove message $msg:  $errmsg"
                 }
                 continue
@@ -331,10 +334,10 @@ namespace eval notification::email {
             set to [parse_email_address $to]
 
             # Find the from user
-            set from_user [cc_lookup_email_user $from]
+            set from_user [party::get_by_email -email $from]
 
             # We don't accept empty users for now
-            if {[empty_string_p $from_user]} {
+            if {$from_user eq ""} {
                 ns_log debug "load_qmail_mail_queue: no user for from address: $from, to: $to. bouncing message."
 		# bounce message with an informative error.
 		bounce_mail_message  -to_addr $email_headers(from) \
@@ -343,7 +346,7 @@ namespace eval notification::email {
 		    -message_headers $orig_headers \
 		    -reason "Invalid sender.  You must be a member of the site and\nyour From address must match your registered address."
 
-                if {[catch {ns_unlink $msg} errmsg]} {
+                if {[catch {file delete -- $msg} errmsg]} {
                     ns_log Warning "load_qmail_mail_queue: couldn't remove message $msg: $errmsg"
                 }
                 continue
@@ -351,7 +354,7 @@ namespace eval notification::email {
 
             set to_stuff [parse_reply_address -reply_address $to]
             # We don't accept a bad incoming email address
-            if {[empty_string_p $to_stuff]} {
+            if {$to_stuff eq ""} {
                 ns_log debug "load_qmail_mail_queue: bad to address $to from $from. bouncing message."
 
 		# bounce message here
@@ -361,7 +364,7 @@ namespace eval notification::email {
 		    -message_headers $orig_headers \
 		    -reason "Invalid To Address"
 
-                if {[catch {ns_unlink $msg} errmsg]} {
+                if {[catch {file delete -- $msg} errmsg]} {
                     ns_log Warning "load_qmail_mail_queue: couldn't remove message file $msg: $errmsg"
                 }
                 continue
@@ -381,7 +384,7 @@ namespace eval notification::email {
 	        set headers $orig_headers
                 db_dml holdinsert {} -clobs [list $to_addr $headers $body]
 
-                if {[catch {ns_unlink $msg} errmsg]} { 
+                if {[catch {file delete -- $msg} errmsg]} { 
 		    ns_log Error "load_qmail_mail_queue: unable to delete queued message $msg: $errmsg"
 		}
 
@@ -402,3 +405,9 @@ namespace eval notification::email {
     }
 
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

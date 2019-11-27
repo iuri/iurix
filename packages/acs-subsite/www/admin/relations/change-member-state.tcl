@@ -6,12 +6,12 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Dec 13 20:11:27 2000
-    @cvs-id $Id: change-member-state.tcl,v 1.2 2007/01/10 21:22:08 gustafn Exp $
+    @cvs-id $Id: change-member-state.tcl,v 1.3.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    rel_id:integer,notnull
+    rel_id:naturalnum,notnull
     member_state:notnull
-    {return_url ""}
+    {return_url:localurl ""}
 } -validate {
     permission_p -requires {rel_id:notnull} {
 	if { ![relation_permission_p -privilege admin $rel_id] } {
@@ -36,3 +36,8 @@ if {$return_url eq ""} {
     set return_url "one?rel_id=$rel_id"
 }
 ad_returnredirect $return_url
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -5,9 +5,9 @@ ad_page_contract {
 
     @author Jeff Davis (davis@xorch.net)
     @creation-date 7/1/2002
-    @cvs-id $Id: photos-edit.tcl,v 1.5 2003/12/12 23:03:01 rocaelh Exp $
+    @cvs-id $Id: photos-edit.tcl,v 1.9 2015/06/28 12:56:09 gustafn Exp $
 } {
-    album_id:integer,notnull
+    album_id:naturalnum,notnull
     {page:integer,notnull "1"}
 } -validate {
     valid_album -requires {album_id:integer} {
@@ -39,7 +39,7 @@ ns_set put [ns_conn outputheaders] "Cache-Control" "no-cache"
 set user_id [ad_conn user_id]
 
 # check for read permission on album
-ad_require_permission $album_id read
+permission::require_permission -object_id $album_id -privilege read
 
 set context_list [pa_context_bar_list -final "[_ photo-album.Edit_page] $page" $album_id]
 
@@ -62,11 +62,11 @@ where ci.live_revision = cr.revision_id
   and ci.item_id = :album_id
 }
 # to move an album need write on album and write on parent folder
-set move_p [expr $write_p  && $folder_write_p]
+set move_p [expr {$write_p  && $folder_write_p}]
 
 # to delete an album, album must be empty, need delete on album, and write on parent folder
-set has_children_p [expr [pa_count_photos_in_album $album_id] > 0]
-set delete_p [expr !($has_children_p) && $album_delete_p && $folder_write_p]
+set has_children_p [expr {[pa_count_photos_in_album $album_id] > 0}]
+set delete_p [expr {!($has_children_p) && $album_delete_p && $folder_write_p}]
 
 set photos_on_page [pa_all_photos_on_page $album_id $page]
 
@@ -146,8 +146,8 @@ if {$has_children_p && [llength $photos_on_page] > 0} {
         set val(viewer_path) $viewer_path
         set val(viewer_height) $viewer_height
         set val(viewer_width) $viewer_width
-        set val(window_height) [expr $viewer_height + 28]
-        set val(window_width) [expr $viewer_width + 24]
+        set val(window_height) [expr {$viewer_height + 28}]
+        set val(window_width) [expr {$viewer_width + 24}]
         set child($photo_id) [array get val]
     }
     
@@ -170,7 +170,7 @@ if {$has_children_p && [llength $photos_on_page] > 0} {
     for {set i 1} {$i <= $total_pages} {incr i} {
         lappend pages $i
     }
-    set page_nav [pa_pagination_bar $page $pages "photos-edit?[export_vars -url {album_id}]&page="]
+    set page_nav [pa_pagination_bar $page $pages "[export_vars -base photos-edit {album_id}]&page="]
 
 
 } else {

@@ -1,6 +1,9 @@
 <html>
-  <body>
-  <h1>Sample Users</h1>
+<head>
+<title>Demo: Users</title>
+</head>
+<body>
+<h1>Sample Users</h1>
 
   <if @users:rowcount@ eq 0>
     <p>Sorry, there are no users in the system at this time.</p>
@@ -9,7 +12,7 @@
   <table>
   <tr><th>First Name</th><th>Last Name</th><th>Full Name</th></tr>
   <multiple name=users>
-  <if @users.rownum@ odd><tr></if><else><tr bgcolor=#eeeeee></else>
+  <if @users.rownum@ odd><tr></if><else><tr bgcolor="#eeeeee"></else>
     <td>@users.first_name@</td><td>@users.last_name@</td>
     <td>@users.full_name@</td>
   </tr>

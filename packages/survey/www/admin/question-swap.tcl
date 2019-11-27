@@ -8,16 +8,16 @@ ad_page_contract {
 
   @author nstrug@arsdigita.com
 
-  @cvs-id $Id: question-swap.tcl,v 1.3 2003/03/12 01:05:52 daveb Exp $
+  @cvs-id $Id: question-swap.tcl,v 1.5 2014/10/27 16:41:58 victorg Exp $
 
 } {
-  survey_id:integer,notnull
-  section_id:integer,notnull
+  survey_id:naturalnum,notnull
+  section_id:naturalnum,notnull
   sort_order:integer,notnull
   direction:notnull
 }
 
-ad_require_permission $section_id survey_modify_survey
+permission::require_permission -object_id $section_id -privilege survey_modify_survey
 
 if { $direction=="up" } {
      set next_sort_order [expr { $sort_order - 1 }]

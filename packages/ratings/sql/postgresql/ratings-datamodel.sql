@@ -6,7 +6,7 @@
 -- @author Jeff Davis <davis@xarg.net>
 -- @creation-date 10/22/2003
 --
--- @cvs-id $Id: ratings-datamodel.sql,v 1.2 2004/05/21 22:53:02 lars Exp $
+-- @cvs-id $Id: ratings-datamodel.sql,v 1.2.2.1 2005/07/29 23:08:24 miguelm Exp $
 --
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -25,7 +25,8 @@ create table rating_dimensions (
         range_low       integer default 1,
         range_high      integer default 5,
         label_low       text default 'worst',
-        label_high      text default 'best'
+        label_high      text default 'best',
+	title		varchar(100)
 );
 
 comment on table rating_dimensions is '
@@ -34,27 +35,28 @@ comment on table rating_dimensions is '
 
 
 create table ratings (
-        rating_id       integer
-                        constraint ratings_rating_id_fk
-                        references acs_objects(object_id)
-                        constraint ratings_rating_id_pk
-                        primary key,
-        dimension_id    integer
-                        constraint ratings_dimension_id_fk
-                        references rating_dimensions(dimension_id) on delete cascade,
-        object_id       integer
-                        constraint ratings_object_id_fk
-                        references acs_objects(object_id) on delete cascade
-                        constraint ratings_object_id_nn
-                        not null,
-        rating          integer
-                        constraint ratings_rating_nn
-                        not null,
-        owner_id        integer
-                        constraint ratings_owner_id_fk
-                        references parties(party_id) on delete cascade
-                        constraint ratings_owner_id_nn
-                        not null
+        rating_id           integer
+                            constraint ratings_rating_id_fk
+                            references acs_objects(object_id)
+                            constraint ratings_rating_id_pk
+                            primary key,
+        dimension_id        integer
+                            constraint ratings_dimension_id_fk
+                            references rating_dimensions(dimension_id) on delete cascade,
+        object_id           integer
+                            constraint ratings_object_id_fk
+                            references acs_objects(object_id) on delete cascade
+                            constraint ratings_object_id_nn
+                            not null,
+        rating              integer
+                            constraint ratings_rating_nn
+                            not null,
+        owner_id            integer
+                            constraint ratings_owner_id_fk
+                            references parties(party_id) on delete cascade
+                            constraint ratings_owner_id_nn
+                            not null,
+	context_object_id   integer
 );
 
 comment on table ratings is '

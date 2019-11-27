@@ -8,10 +8,10 @@ ad_page_contract {
 
     @author Michael Yoon (michael@arsdigita.com)
     @creation-date 2000-03-05
-    @cvs-id $Id: plsql-subprogram-one.tcl,v 1.3 2002/09/06 21:49:54 jeffd Exp $
+    @cvs-id $Id: plsql-subprogram-one.tcl,v 1.6.2.2 2016/08/02 10:14:41 gustafn Exp $
 } {
-    name
-    type
+    name:token
+    type:token
 } -properties {
     title:onevalue
     context:onevalue
@@ -22,23 +22,21 @@ set context [list {"plsql-subprograms-all" "All PL/SQL Subprograms"} "One PL/SQL
 
 set source_text ""
 
-db_foreach source_text "select text
-from user_source
-where name = upper(:name)
-and type = upper(:type)
-order by line" {
-    append source_text $text
+db_foreach source_text {} {
+    append source_text $text \n\n\n
 }
 
 switch $type {
     "PACKAGE" {
 	set type "PACKAGE BODY"
-	set package_slider_list [list "package" "<a href=\"[ad_conn url]?[export_url_vars type name]\">package body</a>"]
+	set href [export_vars -base [ad_conn url] {type name}]
+	set package_slider_list [list "package" [subst {<a href="[ns_quotehtml $href]">package body</a>}]]
     }
 
     "PACKAGE BODY" {
 	set type "PACKAGE"
-	set package_slider_list [list "<a href=\"[ad_conn url]?[export_url_vars type name]\">package</a>" "package body"]
+	set href [export_vars -base [ad_conn url] {type name}]
+	set package_slider_list [list [subst {<a href="[ns_quotehtml $href]">package</a>}] "package body"]
     }
 
     default {
@@ -52,3 +50,9 @@ set name [string tolower $name]
 
 db_release_unused_handles
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

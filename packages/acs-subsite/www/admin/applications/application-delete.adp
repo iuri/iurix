@@ -1,9 +1,12 @@
 <master>
-  <property name="title">@page_title@</property>
-  <property name="context">@context@</property>
+  <property name="doc(title)">@page_title;literal@</property>
+  <property name="context">@context;literal@</property>
+
+<h2>@page_title@</h2>
+@listing;noquote@
 
 <p>
-  Are you sure you want to delete <if @num@ eq 1>this application</if><else>these @num@ applications</else>?
+  Are you sure you want to delete <if @num;literal@ true>this application</if><else>these @num@ applications</else>?
 </p>
 
 <p>

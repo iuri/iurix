@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: types-create.sql,v 1.6 2006/07/27 20:09:34 victorg Exp $
+-- $Id: types-create.sql,v 1.8 2011/07/07 10:46:02 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -376,6 +376,28 @@ begin;
    'text'
  );
 
+ select content_type__create_attribute (
+   'content_revision',
+   'item_id',
+   'integer',
+   'Item id',
+   'Item ids',
+   null,
+   null,
+   'integer'
+ );
+
+ select content_type__create_attribute (
+   'content_revision',
+   'content',
+   'text',
+   'Content',
+   'Content',
+   null,
+   null,
+   'text'
+ );
+
 end;
 
 -- Declare standard relationships with children and other items
@@ -542,26 +564,34 @@ end;
 
 -- prompt *** Refreshing content type attribute views...
 
-create function inline_0 () returns integer as '
-declare
+
+
+--
+-- procedure inline_0/0
+--
+CREATE OR REPLACE FUNCTION inline_0(
+
+) RETURNS integer AS $$
+DECLARE
         type_rec   record;       
-begin
+BEGIN
 
 -- select object_type from acs_object_types 
 --    connect by supertype = prior object_type 
---    start with object_type = ''content_revision'' 
+--    start with object_type = 'content_revision' 
 
   for type_rec in select o1.object_type
                   from acs_object_types o1, acs_object_types o2
                   where o1.tree_sortkey between o2.tree_sortkey and tree_right(o2.tree_sortkey)
-                    and o2.object_type = ''content_revision''
+                    and o2.object_type = 'content_revision'
                   
   LOOP
     PERFORM content_type__refresh_view(type_rec.object_type);
   end LOOP;
 
   return null;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0();
 

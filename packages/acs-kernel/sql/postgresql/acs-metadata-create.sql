@@ -1,7 +1,7 @@
 --
 -- acs-kernel/sql/acs-metadata-create.sql
 --
--- A generic metadata system that allows table inheritence. This is
+-- A generic metadata system that allows table inheritance. This is
 -- based in many ways on Problem Set 4 by Philip Greenspun
 -- (philg@mit.edu), and the user-groups data model by Tracy Adams
 -- (teadams@mit.edu).
@@ -12,7 +12,7 @@
 --
 -- @creation-date 2000-05-18
 --
--- @cvs-id $Id: acs-metadata-create.sql,v 1.30 2010/03/10 00:44:03 donb Exp $
+-- @cvs-id $Id: acs-metadata-create.sql,v 1.43.2.2 2017/04/21 15:59:20 gustafn Exp $
 
 -- ******************************************************************
 -- * KNOWLEDGE LEVEL
@@ -26,7 +26,7 @@
 create table acs_object_types (
 	object_type	varchar(1000) not null
 			constraint acs_object_types_pk primary key,
-	supertype	varchar(100) constraint acs_object_types_supertype_fk
+	supertype	varchar(1000) constraint acs_object_types_supertype_fk
 			references acs_object_types (object_type),
 	abstract_p	boolean default 'f' not null,
 	pretty_name	varchar(1000) not null
@@ -54,18 +54,35 @@ create index acs_obj_types_tree_skey_idx on acs_object_types (tree_sortkey);
 
 -- support for tree queries on acs_object_types
 
-create or replace function acs_object_type_get_tree_sortkey(varchar) returns varbit as '
-declare
-  p_object_type    alias for $1;
-begin
-  return tree_sortkey from acs_object_types where object_type = p_object_type;
-end;' language 'plpgsql';
 
-create function acs_object_type_insert_tr () returns trigger as '
-declare
+
+-- added
+select define_function_args('acs_object_type_get_tree_sortkey','object_type');
+
+--
+-- procedure acs_object_type_get_tree_sortkey/1
+--
+CREATE OR REPLACE FUNCTION acs_object_type_get_tree_sortkey(
+   p_object_type varchar
+) RETURNS varbit AS $$
+DECLARE
+BEGIN
+  return tree_sortkey from acs_object_types where object_type = p_object_type;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+--
+-- procedure acs_object_type_insert_tr/0
+--
+CREATE OR REPLACE FUNCTION acs_object_type_insert_tr(
+
+) RETURNS trigger AS $$
+DECLARE
         v_parent_sk     varbit default null;
         v_max_value     integer;
-begin
+BEGIN
         select max(tree_leaf_key_to_int(tree_sortkey)) into v_max_value 
           from acs_object_types 
          where supertype = new.supertype;
@@ -78,19 +95,27 @@ begin
 
         return new;
 
-end;' language 'plpgsql' stable strict;
+END;
+$$ LANGUAGE plpgsql stable strict;
 
 create trigger acs_object_type_insert_tr before insert 
 on acs_object_types for each row 
 execute procedure acs_object_type_insert_tr ();
 
-create function acs_object_type_update_tr () returns trigger as '
-declare
+
+
+--
+-- procedure acs_object_type_update_tr/0
+--
+CREATE OR REPLACE FUNCTION acs_object_type_update_tr(
+
+) RETURNS trigger AS $$
+DECLARE
         v_parent_sk     varbit default null;
         v_max_value     integer;
         v_rec           record;
-        clr_keys_p      boolean default ''t'';
-begin
+        clr_keys_p      boolean default 't';
+BEGIN
         if new.object_type = old.object_type and 
            ((new.supertype = old.supertype) or 
             (new.supertype is null and old.supertype is null)) then
@@ -107,7 +132,7 @@ begin
             if clr_keys_p then
                update acs_object_types set tree_sortkey = null
                where tree_sortkey between new.tree_sortkey and tree_right(new.tree_sortkey);
-               clr_keys_p := ''f'';
+               clr_keys_p := 'f';
             end if;
             
             select max(tree_leaf_key_to_int(tree_sortkey)) into v_max_value
@@ -126,7 +151,8 @@ begin
 
         return new;
 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 create trigger acs_object_type_update_tr after update 
 on acs_object_types
@@ -235,7 +261,7 @@ as select ot1.object_type, ot2.object_type as ancestor_type
       and ot1.tree_sortkey between ot2.tree_sortkey and tree_right(ot2.tree_sortkey);
 
 create table acs_object_type_tables (
-	object_type	varchar(100) not null 
+	object_type	varchar(1000) not null 
                         constraint acs_obj_type_tbls_obj_type_fk
 			references acs_object_types (object_type),
 	table_name	varchar(30) not null,
@@ -266,14 +292,22 @@ create table acs_datatypes (
 			constraint acs_datatypes_datatype_pk primary key,
 	max_n_values	integer default 1
 			constraint acs_datatypes_max_n_values_ck
-			check (max_n_values > 0)
+			check (max_n_values > 0),
+        database_type   text,
+        column_size     text,
+        column_check_expr text,
+        column_output_function text
 );
 
 comment on table acs_datatypes is '
- Defines the set of available datatypes for acs_attributes. These
- datatypes are abstract, not implementation-specific, i.e., they
- are not Oracle datatypes. The set of pre-defined datatypes is
- inspired by XForms (http://www.w3.org/TR/xforms-datamodel/).
+ Defines the set of available abstract datatypes for acs_attributes, along with
+ an optional default mapping to a database type, size, and constraint to use if the
+ attribute is created with create_attribute''s storage_type param set to "type_specific"
+ and the create_storage_p param is set to true.  These defaults can be overwritten by
+ the caller.
+
+ The set of pre-defined datatypes is inspired by XForms
+ (http://www.w3.org/TR/xforms-datamodel/).
 ';
 
 comment on column acs_datatypes.max_n_values is '
@@ -285,79 +319,124 @@ comment on column acs_datatypes.max_n_values is '
  optional, i.e., min_n_values would always be zero.
 ';
 
+comment on column acs_datatypes.database_type is '
+  The base database type corresponding to the abstract datatype.  For example "varchar" or
+  "integer".
+';
+
+comment on column acs_datatypes.column_size is '
+  Optional default column size specification to append to the base database type.  For
+  example "1000" for the "string" abstract datatype, or "10,2" for "number".
+';
+
+comment on column acs_datatypes.column_check_expr is '
+  Optional check constraint expression to declare for the type_specific database column.  In
+  Oracle, for instance, the abstract "boolean" type is declared "text", with a column
+  check expression to restrict the values to "f" and "t".
+';
+
+comment on column acs_datatypes.column_output_function is '
+  Function to call for this datatype when building a select view.  If not null, it will
+  be called with an attribute name and is expected to return an expression on that
+  attribute.  Example: date attributes will be transformed to calls to "to_char()".
+';
+
+
 -- Load pre-defined datatypes.
 --
-create function inline_0 ()
-returns integer as '
-begin
+begin;
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''string'', null);
+  ('string', null, 'varchar', '4000');
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''boolean'', 1);
+  ('boolean', 1, 'bool', null);
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''number'', null);
+  ('number', null, 'numeric', '10,2');
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''integer'', 1);
+  ('integer', 1, 'integer', null);
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''money'', null);
+  ('currency', null, 'money', null);
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_output_function)
  values
-  (''date'', null);
+  ('date', null, 'timestamp', 'acs_datatype__date_output_function');
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_output_function)
  values
-  (''timestamp'', null);
+  ('timestamp', null, 'timestamp', 'acs_datatype__timestamp_output_function');
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_output_function)
  values
-  (''time_of_day'', null);
+  ('time_of_day', null, 'timestamp', 'acs_datatype__timestamp_output_function');
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''enumeration'', null);
+  ('enumeration', null, 'varchar', '100');
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''url'', null);
+  ('url', null, 'varchar', '250');
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''email'', null);
+  ('email', null, 'varchar', '200');
 
  insert into acs_datatypes
-  (datatype, max_n_values)
+  (datatype, max_n_values, database_type, column_size)
  values
-  (''file'', 1);
+  ('file', 1, 'varchar', '100');
 
-  return 0;
-end;' language 'plpgsql';
+insert into acs_datatypes
+ (datatype, max_n_values, database_type, column_size)
+values
+ ('text', null, 'text', null);
 
-select inline_0 ();
+insert into acs_datatypes
+  (datatype, max_n_values, database_type)
+values
+  ('keyword', 1, 'text');
 
-drop function inline_0 ();
+insert into acs_datatypes
+ (datatype, max_n_values, database_type, column_size)
+values
+ ('richtext', null, 'text', null);
 
+insert into acs_datatypes
+ (datatype, max_n_values, database_type, column_size)
+values
+ ('filename', null, 'varchar', '100');
 
+insert into acs_datatypes
+ (datatype, max_n_values, database_type, column_size)
+values
+ ('float', null, 'float8', null);
+
+-- PG 8.x has no unsigned integer datatype
+insert into acs_datatypes
+ (datatype, max_n_values, database_type, column_size)
+values
+ ('naturalnum', null, 'integer', null);
+
+end;
 
 --create table acs_input_types (
 --);
@@ -370,7 +449,7 @@ create table acs_attributes (
 	attribute_id	integer not null
 			constraint acs_attributes_attribute_id_pk
 			primary key,
-	object_type	varchar(100) not null
+	object_type	varchar(1000) not null
 			constraint acs_attributes_object_type_fk
 			references acs_object_types (object_type),
 	table_name	varchar(30),
@@ -383,7 +462,7 @@ create table acs_attributes (
 	sort_order	integer not null,
 	datatype	varchar(50) not null
 			constraint acs_attributes_datatype_fk
-			references acs_datatypes (datatype),
+			references acs_datatypes (datatype) on update cascade,
 	default_value	text,
 	min_n_values	integer default 1 not null
 			constraint acs_attributes_min_n_values_ck
@@ -468,7 +547,7 @@ create table acs_enum_values (
 create index acs_enum_values_attr_id_idx on acs_enum_values (attribute_id);
 
 create table acs_attribute_descriptions (
-	object_type	varchar(100) not null constraint acs_attr_descs_obj_type_fk
+	object_type	varchar(1000) not null constraint acs_attr_descs_obj_type_fk
 			references acs_object_types (object_type),
 	attribute_name  varchar(100) not null,
 	constraint acs_attr_descs_ob_tp_at_na_fk
@@ -512,128 +591,269 @@ from acs_attributes attr,
         from acs_object_types t) all_types
 where attr.object_type = all_types.ancestor_type;
 
-
 -----------------------
 -- METADATA PACKAGES --
 -----------------------
-select define_function_args('acs_object_type__create_type','object_type,pretty_name,pretty_plural,supertype,table_name,id_column,package_name,abstract_p;f,type_extension_table,name_method');
--- DRB: null table_name change
-create function acs_object_type__create_type (varchar,varchar,varchar,varchar,varchar,varchar,varchar,boolean,varchar,varchar)
-returns integer as '
-declare
-  create_type__object_type            alias for $1;  
-  create_type__pretty_name            alias for $2;  
-  create_type__pretty_plural          alias for $3;  
-  create_type__supertype              alias for $4;  
-  create_type__table_name             alias for $5;  -- default null
-  create_type__id_column              alias for $6;  -- default null
-  create_type__package_name           alias for $7;  -- default null
-  create_type__abstract_p             alias for $8;  -- default ''f''
-  create_type__type_extension_table   alias for $9;  -- default null
-  create_type__name_method            alias for $10; -- default null
-  v_package_name acs_object_types.package_name%TYPE;
-  v_supertype						  acs_object_types.supertype%TYPE;
+
+
+select define_function_args('acs_object_type__create_type','object_type,pretty_name,pretty_plural,supertype,table_name;null,id_column;null,package_name;null,abstract_p;f,type_extension_table;null,name_method;null,create_table_p;f,dynamic_p;f');
+
+--
+-- procedure acs_object_type__create_type/12
+--
+CREATE OR REPLACE FUNCTION acs_object_type__create_type(
+   p_object_type varchar,
+   p_pretty_name varchar,
+   p_pretty_plural varchar,
+   p_supertype varchar,
+   p_table_name varchar,           -- default null
+   p_id_column varchar,            -- default null
+   p_package_name varchar,         -- default null
+   p_abstract_p boolean,           -- default 'f'
+   p_type_extension_table varchar, -- default null
+   p_name_method varchar,          -- default null
+   p_create_table_p boolean,       -- default 'f'
+   p_dynamic_p boolean             -- default 'f'
+
+) RETURNS integer AS $$
+DECLARE
+  v_package_name                      acs_object_types.package_name%TYPE;
+  v_supertype                         acs_object_types.supertype%TYPE;
   v_name_method                       varchar;
   v_idx                               integer;
-begin
-    v_idx := position(''.'' in create_type__name_method);
+  v_temp_p                            boolean;
+  v_supertype_table                   acs_object_types.table_name%TYPE;
+  v_id_column                         acs_object_types.id_column%TYPE;
+  v_table_name                        acs_object_types.table_name%TYPE;
+BEGIN
+    v_idx := position('.' in p_name_method);
     if v_idx <> 0 then
-         v_name_method := substr(create_type__name_method,1,v_idx - 1) || 
-                       ''__'' || substr(create_type__name_method, v_idx + 1);
+         v_name_method := substr(p_name_method,1,v_idx - 1) || 
+                       '__' || substr(p_name_method, v_idx + 1);
     else 
-         v_name_method := create_type__name_method;
+         v_name_method := p_name_method;
     end if;
 
-    if create_type__package_name is null or create_type__package_name = '''' then
-      v_package_name := create_type__object_type;
+    -- If we are asked to create the table, provide reasonable default values for the
+    -- table name and id column.  Traditionally OpenACS uses the plural form of the type
+    -- name.  This code appends "_t" (for "table") because the use of english plural rules
+    -- does not work well for all languages.
+
+    if p_create_table_p and (p_table_name is null or p_table_name = '') then
+      v_table_name := p_object_type || '_t';
     else
-      v_package_name := create_type__package_name;
+      v_table_name := p_table_name;
     end if;
 
-	if create_type__supertype is null or create_type__supertype = '''' then
-	  v_supertype := ''acs_object'';
-	else
-	  v_supertype := create_type__supertype;
-	end if;
+    if p_create_table_p and (p_id_column is null or p_id_column = '') then
+      v_id_column := p_object_type || '_id';
+    else
+      v_id_column := p_id_column;
+    end if;
+
+    if p_package_name is null or p_package_name = '' then
+      v_package_name := p_object_type;
+    else
+      v_package_name := p_package_name;
+    end if;
+
+    if p_object_type <> 'acs_object' then
+      if p_supertype is null or p_supertype = '' then
+        v_supertype := 'acs_object';
+      else
+        v_supertype := p_supertype;
+        if not acs_object_type__is_subtype_p('acs_object', p_supertype) then
+          raise exception '%s is not a valid type', p_supertype;
+        end if;
+      end if;
+    end if;
 
     insert into acs_object_types
       (object_type, pretty_name, pretty_plural, supertype, table_name,
        id_column, abstract_p, type_extension_table, package_name,
-       name_method)
+       name_method, dynamic_p)
     values
-      (create_type__object_type, create_type__pretty_name, 
-       create_type__pretty_plural, v_supertype, 
-       create_type__table_name, create_type__id_column, 
-       create_type__abstract_p, create_type__type_extension_table, 
-       v_package_name, v_name_method);
+      (p_object_type, p_pretty_name, 
+       p_pretty_plural, v_supertype, 
+       v_table_name, v_id_column, 
+       p_abstract_p, p_type_extension_table, 
+       v_package_name, v_name_method, p_dynamic_p);
+
+    if p_create_table_p then
+
+      if exists (select 1
+                 from pg_class
+                 where relname = lower(v_table_name)) then
+        raise exception 'Table "%" already exists', v_table_name;
+      end if;
+
+      loop
+        select table_name,object_type into v_supertype_table,v_supertype
+        from acs_object_types
+        where object_type = v_supertype;
+        exit when v_supertype_table is not null;
+      end loop;
+  
+      execute 'create table ' || v_table_name || ' (' ||
+        v_id_column || ' integer constraint ' || v_table_name ||
+        '_pk primary key ' || ' constraint ' || v_table_name ||
+        '_fk references ' || v_supertype_table || ' on delete cascade)';
+    end if;
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
+
+-- DRB: backwards compatibility version, don't allow for table creation.
 
 
-select define_function_args('acs_object_type__drop_type','object_type,cascade_p;f');
+
+--
+-- procedure acs_object_type__create_type/10
+--
+CREATE OR REPLACE FUNCTION acs_object_type__create_type(
+   p_object_type varchar,
+   p_pretty_name varchar,
+   p_pretty_plural varchar,
+   p_supertype varchar,
+   p_table_name varchar,           -- default null
+   p_id_column varchar,            -- default null
+   p_package_name varchar,         -- default null
+   p_abstract_p boolean,           -- default 'f'
+   p_type_extension_table varchar, -- default null
+   p_name_method varchar           -- default null
+
+) RETURNS integer AS $$
+--
+-- acs_object_type__create_type/10 maybe obsolete, when we define proper defaults for /12
+--
+DECLARE
+BEGIN
+    return acs_object_type__create_type(p_object_type, p_pretty_name,
+      p_pretty_plural, p_supertype, p_table_name,
+      p_id_column, p_package_name, p_abstract_p,
+      p_type_extension_table, p_name_method,'f','f');
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- old define_function_args('acs_object_type__drop_type','object_type,drop_table_p;f,drop_children_p;f')
+-- new
+select define_function_args('acs_object_type__drop_type','object_type,drop_children_p;f,drop_table_p;f');
+
+
 -- procedure drop_type
-create or replace function acs_object_type__drop_type (varchar,boolean)
-returns integer as '
-declare
-  drop_type__object_type            alias for $1;  
-  drop_type__cascade_p              alias for $2;  -- default ''f''
+
+
+--
+-- procedure acs_object_type__drop_type/3
+--
+CREATE OR REPLACE FUNCTION acs_object_type__drop_type(
+   p_object_type varchar,
+   p_drop_children_p boolean, -- default 'f'
+   p_drop_table_p boolean     -- default 'f'
+
+) RETURNS integer AS $$
+DECLARE
   row                               record;
   object_row                        record;
-begin
+  v_table_name                      acs_object_types.table_name%TYPE;
+BEGIN
 
-   if drop_type__cascade_p then
-     for object_row in select object_id
-                         from acs_objects
-                         where object_type = drop_type__object_type
-     loop
-       PERFORM acs_object__delete (object_row.object_id);
-     end loop;
-   end if;
-
-    -- drop all the attributes associated with this type
-    for row in select attribute_name 
-                 from acs_attributes 
-                where object_type = drop_type__object_type 
+  -- drop children recursively
+  if p_drop_children_p then
+    for row in select object_type
+               from acs_object_types
+               where supertype = p_object_type 
     loop
-       PERFORM acs_attribute__drop_attribute (drop_type__object_type, 
-                                              row.attribute_name);
+      perform acs_object_type__drop_type(row.object_type, 't', p_drop_table_p);
     end loop;
+  end if;
 
-    delete from acs_attributes
-    where object_type = drop_type__object_type;
+  -- drop all the attributes associated with this type
+  for row in select attribute_name 
+             from acs_attributes 
+             where object_type = p_object_type 
+  loop
+    perform acs_attribute__drop_attribute (p_object_type, row.attribute_name);
+  end loop;
 
-    delete from acs_object_types
-    where object_type = drop_type__object_type;
+  -- Remove the associated table if it exists and p_drop_table_p is true
 
-    return 0; 
-end;' language 'plpgsql';
+  if p_drop_table_p then
 
+    select table_name into v_table_name 
+    from acs_object_types 
+    where object_type = p_object_type;
+
+    if found then
+      if not exists (select 1
+                     from pg_class
+                     where relname = lower(v_table_name)) then
+        raise exception 'Table "%" does not exist', v_table_name;
+      end if;
+
+      execute 'drop table ' || v_table_name || ' cascade';
+    end if;
+
+  end if;
+
+  delete from acs_object_types
+  where object_type = p_object_type;
+
+  return 0; 
+END;
+$$ LANGUAGE plpgsql;
+
+-- Retained for backwards compatibility
+
+CREATE OR REPLACE FUNCTION acs_object_type__drop_type (varchar,boolean) RETURNS integer AS $$
+BEGIN
+  return acs_object_type__drop_type($1,$2,'f');
+END;
+$$ LANGUAGE plpgsql;
 
 -- function pretty_name
-create or replace function acs_object_type__pretty_name (varchar)
-returns varchar as '
-declare
-  pretty_name__object_type            alias for $1;  
+
+
+-- added
+select define_function_args('acs_object_type__pretty_name','object_type');
+
+--
+-- procedure acs_object_type__pretty_name/1
+--
+CREATE OR REPLACE FUNCTION acs_object_type__pretty_name(
+   pretty_name__object_type varchar
+) RETURNS varchar AS $$
+DECLARE
   v_pretty_name                       acs_object_types.pretty_name%TYPE;
-begin
+BEGIN
     select t.pretty_name into v_pretty_name
       from acs_object_types t
      where t.object_type = pretty_name__object_type;
 
     return v_pretty_name;
    
-end;' language 'plpgsql' stable strict;
+END;
+$$ LANGUAGE plpgsql stable strict;
 
 
 -- function is_subtype_p
-create or replace function acs_object_type__is_subtype_p (varchar,varchar)
-returns boolean as '
-declare
-  is_subtype_p__object_type_1          alias for $1;  
-  is_subtype_p__object_type_2          alias for $2;  
+
+
+-- added
+select define_function_args('acs_object_type__is_subtype_p','object_type_1,object_type_2');
+
+--
+-- procedure acs_object_type__is_subtype_p/2
+--
+CREATE OR REPLACE FUNCTION acs_object_type__is_subtype_p(
+   is_subtype_p__object_type_1 varchar,
+   is_subtype_p__object_type_2 varchar
+) RETURNS boolean AS $$
+DECLARE
   v_result                             integer;       
-begin
+BEGIN
     select count(*) into v_result
      where exists (select 1
                      from acs_object_types t, acs_object_types t2
@@ -642,107 +862,306 @@ begin
                       and t.tree_sortkey between t2.tree_sortkey and tree_right(t2.tree_sortkey));
 
     if v_result > 0 then
-       return ''t'';
+       return 't';
     end if;
 
-    return ''f'';
+    return 'f';
 
-end;' language 'plpgsql' stable;
-
-
-
--- show errors
+END;
+$$ LANGUAGE plpgsql stable;
 
 
-select define_function_args('acs_attribute__create_attribute','object_type,attribute_name,datatype,pretty_name,pretty_plural,table_name,column_name,default_value,min_n_values;1,max_n_values;1,sort_order,storage;type_specific,static_p;f');
+-- old define_function_args('acs_attribute__create_attribute','object_type,attribute_name,datatype,pretty_name,pretty_plural,table_name,column_name,default_value,min_n_values;1,max_n_values;1,sort_order,storage;type_specific,static_p;f,create_column_p;f,database_type,size,null_p;t,references,check_expr,column_spec')
+-- new
+select define_function_args('acs_attribute__create_attribute','object_type,attribute_name,datatype,pretty_name,pretty_plural;null,table_name;null,column_name;null,default_value;null,min_n_values;1,max_n_values;1,sort_order;null,storage;type_specific,static_p;f,create_column_p;f,database_type;null,size;null,null_p;t,references;null,check_expr;null,column_spec;null');
 
--- create or replace package body acs_attribute
--- function create_attribute
-create or replace function acs_attribute__create_attribute (varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,integer,integer,integer,varchar,boolean)
-returns integer as '
-declare
-  create_attribute__object_type            alias for $1;  
-  create_attribute__attribute_name         alias for $2;  
-  create_attribute__datatype               alias for $3;  
-  create_attribute__pretty_name            alias for $4;  
-  create_attribute__pretty_plural          alias for $5;  -- default null
-  create_attribute__table_name             alias for $6;  -- default null
-  create_attribute__column_name            alias for $7;  -- default null
-  create_attribute__default_value          alias for $8;  -- default null
-  create_attribute__min_n_values           alias for $9;  -- default 1
-  create_attribute__max_n_values           alias for $10; -- default 1
-  create_attribute__sort_order             alias for $11; -- default null
-  create_attribute__storage                alias for $12; -- default ''type_specific''
-  create_attribute__static_p               alias for $13; -- default ''f''
 
-  v_sort_order           acs_attributes.sort_order%TYPE;
-  v_attribute_id         acs_attributes.attribute_id%TYPE;
-begin
-    if create_attribute__sort_order is null then
-      select coalesce(max(sort_order), 1) into v_sort_order
-      from acs_attributes
-      where object_type = create_attribute__object_type
-      and attribute_name = create_attribute__attribute_name;
+
+
+--
+-- procedure acs_attribute__create_attribute/20
+--
+CREATE OR REPLACE FUNCTION acs_attribute__create_attribute(
+   p_object_type varchar,
+   p_attribute_name varchar,
+   p_datatype varchar,
+   p_pretty_name varchar,
+   p_pretty_plural varchar,   -- default null
+   p_table_name varchar,      -- default null
+   p_column_name varchar,     -- default null
+   p_default_value varchar,   -- default null
+   p_min_n_values integer,    -- default 1 -- default '1'
+   p_max_n_values integer,    -- default 1 -- default '1'
+   p_sort_order integer,      -- default null
+   p_storage varchar,         -- default 'type_specific'
+   p_static_p boolean,        -- default 'f'
+   p_create_column_p boolean, -- default 'f'
+   p_database_type varchar,   -- default null
+   p_size varchar,            -- default null
+   p_null_p boolean,          -- default 't'
+   p_references varchar,      -- default null
+   p_check_expr varchar,      -- default null
+   p_column_spec varchar      -- default null
+
+) RETURNS integer AS $$
+DECLARE
+
+  v_sort_order            acs_attributes.sort_order%TYPE;
+  v_attribute_id          acs_attributes.attribute_id%TYPE;
+  v_column_spec           text;
+  v_table_name            text;
+  v_constraint_stub       text;
+  v_column_name           text;
+  v_datatype              record;
+
+BEGIN
+
+  if not exists (select 1
+                 from acs_object_types
+                 where object_type = p_object_type) then
+    raise exception 'Object type % does not exist', p_object_type;
+  end if; 
+
+  if p_sort_order is null then
+    select coalesce(max(sort_order), 1) into v_sort_order
+    from acs_attributes
+    where object_type = p_object_type
+    and attribute_name = p_attribute_name;
+  else
+    v_sort_order := p_sort_order;
+  end if;
+
+  select nextval('t_acs_attribute_id_seq') into v_attribute_id;
+
+  insert into acs_attributes
+    (attribute_id, object_type, table_name, column_name, attribute_name,
+     pretty_name, pretty_plural, sort_order, datatype, default_value,
+     min_n_values, max_n_values, storage, static_p)
+  values
+    (v_attribute_id, p_object_type, 
+     p_table_name, p_column_name, 
+     p_attribute_name, p_pretty_name,
+     p_pretty_plural, v_sort_order, 
+     p_datatype, p_default_value,
+     p_min_n_values, p_max_n_values, 
+     p_storage, p_static_p);
+
+  if p_create_column_p then
+
+    select table_name into v_table_name from acs_object_types
+    where object_type = p_object_type;
+
+    if not exists (select 1
+                   from pg_class
+                   where relname = lower(v_table_name)) then
+      raise exception 'Table % for object type % does not exist', v_table_name, p_object_type;
+    end if;
+
+    -- Add the appropriate column to the table
+
+    -- We can only create the table column if
+    -- 1. the attribute is declared type_specific (generic storage uses an auxiliary table)
+    -- 2. the attribute is not declared static
+    -- 3. it does not already exist in the table
+
+    if p_storage <> 'type_specific' then
+      raise exception 'Attribute % for object type % must be declared with type_specific storage',
+        p_attribute_name, p_object_type;
+    end if;
+
+    if p_static_p then
+      raise exception 'Attribute % for object type % can not be declared static',
+        p_attribute_name, p_object_type;
+    end if;
+
+    if p_table_name is not null then
+      raise exception 'Attribute % for object type % can not specify a table for storage', p_attribute_name, p_object_type;
+    end if;
+
+    if exists (select 1
+               from pg_class c, pg_attribute a
+               where c.relname::varchar = v_table_name
+                 and c.oid = a.attrelid
+                 and a.attname = lower(p_attribute_name)) then
+      raise exception 'Column % for object type % already exists',
+        p_attribute_name, p_object_type;
+    end if;
+
+    -- all conditions for creating this column have been met, now let's see if the type
+    -- spec is OK
+
+    if p_column_spec is not null then
+      if p_database_type is not null
+        or p_size is not null
+        or p_null_p is not null
+        or p_references is not null
+        or p_check_expr is not null then
+      raise exception 'Attribute % for object type % is being created with an explicit column_spec, but not all of the type modification fields are null',
+        p_attribute_name, p_object_type;
+      end if;
+      v_column_spec := p_column_spec;
     else
-      v_sort_order := create_attribute__sort_order;
+      select coalesce(p_database_type, database_type) as database_type,
+        coalesce(p_size, column_size) as column_size,
+        coalesce(p_check_expr, column_check_expr) as check_expr
+      into v_datatype
+      from acs_datatypes
+      where datatype = p_datatype;
+  
+      v_column_spec := v_datatype.database_type;
+
+      if v_datatype.column_size is not null then
+        v_column_spec := v_column_spec || '(' || v_datatype.column_size || ')';
+      end if;
+
+      v_constraint_stub := ' constraint ' || p_object_type || '_' ||
+        p_attribute_name || '_';
+
+      if v_datatype.check_expr is not null then
+        v_column_spec := v_column_spec || v_constraint_stub || 'ck check(' ||
+          p_attribute_name || v_datatype.check_expr || ')';
+      end if;
+
+      if not p_null_p then
+        v_column_spec := v_column_spec || v_constraint_stub || 'nn not null';
+      end if;
+
+      if p_references is not null then
+        v_column_spec := v_column_spec || v_constraint_stub || 'fk references ' ||
+          p_references || ' on delete';
+        if p_null_p then
+          v_column_spec := v_column_spec || ' set null';
+        else
+          v_column_spec := v_column_spec || ' cascade';
+        end if;
+      end if;
+
     end if;
+        
+    execute 'alter table ' || v_table_name || ' add ' || p_attribute_name || ' ' ||
+            v_column_spec;
 
-    select nextval(''t_acs_attribute_id_seq'') into v_attribute_id;
+  end if;
 
-    insert into acs_attributes
-      (attribute_id, object_type, table_name, column_name, attribute_name,
-       pretty_name, pretty_plural, sort_order, datatype, default_value,
-       min_n_values, max_n_values, storage, static_p)
-    values
-      (v_attribute_id, create_attribute__object_type, 
-       create_attribute__table_name, create_attribute__column_name, 
-       create_attribute__attribute_name, create_attribute__pretty_name,
-       create_attribute__pretty_plural, v_sort_order, 
-       create_attribute__datatype, create_attribute__default_value,
-       create_attribute__min_n_values, create_attribute__max_n_values, 
-       create_attribute__storage, create_attribute__static_p);
+  return v_attribute_id;
 
-    return v_attribute_id;
-   
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
-create or replace function acs_attribute__create_attribute (varchar,varchar,varchar,varchar,varchar,varchar,varchar,integer,integer,integer,integer,varchar,boolean)
-returns integer as '
-begin
+
+
+--
+-- procedure acs_attribute__create_attribute/13
+--
+CREATE OR REPLACE FUNCTION acs_attribute__create_attribute(
+   p_object_type varchar,
+   p_attribute_name varchar,
+   p_datatype varchar,
+   p_pretty_name varchar,
+   p_pretty_plural varchar, -- default null
+   p_table_name varchar,    -- default null
+   p_column_name varchar,   -- default null
+   p_default_value varchar, -- default null
+   p_min_n_values integer,  -- default 1
+   p_max_n_values integer,  -- default 1
+   p_sort_order integer,    -- default null
+   p_storage varchar,       -- default 'type_specific'
+   p_static_p boolean       -- default 'f'
+
+) RETURNS integer AS $$
+--
+-- acs_attribute__create_attribute/13 maybe obsolete, when we define proper defaults for /20
+--
+DECLARE
+BEGIN
+  return acs_attribute__create_attribute(p_object_type,
+    p_attribute_name, p_datatype, p_pretty_name,
+    p_pretty_plural, p_table_name, p_column_name,
+    p_default_value, p_min_n_values,
+    p_max_n_values, p_sort_order, p_storage,
+    p_static_p, 'f', null, null, null, null, null, null);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION acs_attribute__create_attribute (varchar,varchar,varchar,varchar,varchar,varchar,varchar,integer,integer,integer,integer,varchar,boolean) RETURNS integer AS $$
+BEGIN
     return acs_attribute__create_attribute ($1, $2, $3, $4, $5, $6, $7, cast ($8 as varchar), $9, $10, $11, $12, $13);
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 -- procedure drop_attribute
-create function acs_attribute__drop_attribute (varchar,varchar)
-returns integer as '
-declare
-  drop_attribute__object_type            alias for $1;  
-  drop_attribute__attribute_name         alias for $2;  
-begin
-    -- first remove possible values for the enumeration
-    delete from acs_enum_values
-      where attribute_id in (select a.attribute_id 
-                               from acs_attributes a 
-                              where a.object_type = drop_attribute__object_type
-                                and a.attribute_name = drop_attribute__attribute_name);
+select define_function_args('acs_attribute__drop_attribute','object_type,attribute_name,drop_column_p;f');
 
-    delete from acs_attributes
-     where object_type = drop_attribute__object_type
-       and attribute_name = drop_attribute__attribute_name;
 
-    return 0; 
-end;' language 'plpgsql';
+
+--
+-- procedure acs_attribute__drop_attribute/3
+--
+CREATE OR REPLACE FUNCTION acs_attribute__drop_attribute(
+   p_object_type varchar,
+   p_attribute_name varchar,
+   p_drop_column_p boolean -- default 'f'
+
+) RETURNS integer AS $$
+DECLARE
+  v_table_name             acs_object_types.table_name%TYPE;
+BEGIN
+
+  -- Check that attribute exists and simultaneously grab the type's table name
+  select t.table_name into v_table_name
+  from acs_object_types t, acs_attributes a
+  where a.object_type = p_object_type
+    and a.attribute_name = p_attribute_name
+    and t.object_type = p_object_type;
+    
+  if not found then
+    raise exception 'Attribute %:% does not exist', p_object_type, p_attribute_name;
+  end if;
+
+  -- first remove possible values for the enumeration
+  delete from acs_enum_values
+  where attribute_id in (select a.attribute_id 
+                         from acs_attributes a 
+                         where a.object_type = p_object_type
+                         and a.attribute_name = p_attribute_name);
+
+  -- Drop the table if one were specified for the type and we're asked to
+  if p_drop_column_p and v_table_name is not null then
+      execute 'alter table ' || v_table_name || ' drop column ' ||
+        p_attribute_name || ' cascade';
+  end if;  
+
+  -- Finally, get rid of the attribute
+  delete from acs_attributes
+  where object_type = p_object_type
+  and attribute_name = p_attribute_name;
+
+  return 0; 
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION acs_attribute__drop_attribute (varchar,varchar) RETURNS integer AS $$
+BEGIN
+  return acs_attribute__drop_attribute($1, $2, 'f');
+END;
+$$ LANGUAGE plpgsql;
+
 
 select define_function_args('acs_attribute__add_description','object_type,attribute_name,description_key,description');
 -- procedure add_description
-create function acs_attribute__add_description (varchar,varchar,varchar,text)
-returns integer as '
-declare
-  add_description__object_type            alias for $1;  
-  add_description__attribute_name         alias for $2;  
-  add_description__description_key        alias for $3;  
-  add_description__description            alias for $4;  
-begin
+
+
+--
+-- procedure acs_attribute__add_description/4
+--
+CREATE OR REPLACE FUNCTION acs_attribute__add_description(
+   add_description__object_type varchar,
+   add_description__attribute_name varchar,
+   add_description__description_key varchar,
+   add_description__description text
+) RETURNS integer AS $$
+DECLARE
+BEGIN
     insert into acs_attribute_descriptions
      (object_type, attribute_name, description_key, description)
     values
@@ -750,25 +1169,64 @@ begin
       add_description__description_key, add_description__description);
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select define_function_args('acs_attribute__drop_description','object_type,attribute_name,description_key');
 -- procedure drop_description
-create function acs_attribute__drop_description (varchar,varchar,varchar)
-returns integer as '
-declare
-  drop_description__object_type            alias for $1;  
-  drop_description__attribute_name         alias for $2;  
-  drop_description__description_key        alias for $3;  
-begin
+
+
+--
+-- procedure acs_attribute__drop_description/3
+--
+CREATE OR REPLACE FUNCTION acs_attribute__drop_description(
+   drop_description__object_type varchar,
+   drop_description__attribute_name varchar,
+   drop_description__description_key varchar
+) RETURNS integer AS $$
+DECLARE
+BEGIN
     delete from acs_attribute_descriptions
     where object_type = drop_description__object_type
     and attribute_name = drop_description__attribute_name
     and description_key = drop_description__description_key;
 
     return 0; 
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 
+
+-- added
+select define_function_args('acs_datatype__date_output_function','attribute_name');
+
+--
+-- procedure acs_datatype__date_output_function/1
+--
+CREATE OR REPLACE FUNCTION acs_datatype__date_output_function(
+   p_attribute_name text
+) RETURNS text AS $$
+DECLARE
+BEGIN
+  return 'to_char(' || p_attribute_name || ', ''YYYY-MM-DD'')';
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+-- added
+select define_function_args('acs_datatype__timestamp_output_function','attribute_name');
+
+--
+-- procedure acs_datatype__timestamp_output_function/1
+--
+CREATE OR REPLACE FUNCTION acs_datatype__timestamp_output_function(
+   p_attribute_name text
+) RETURNS text AS $$
+DECLARE
+BEGIN
+  return 'to_char(' || p_attribute_name || ', ''YYYY-MM-DD HH24:MI:SS'')';
+END;
+$$ LANGUAGE plpgsql;
 
 -- show errors

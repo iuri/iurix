@@ -8,11 +8,11 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-edit.tcl,v 1.5 2002/11/07 08:32:49 peterm Exp $
+    @cvs-id $Id: comment-edit.tcl,v 1.6.2.2 2016/05/21 10:15:38 gustafn Exp $
 } { 
-    comment_id:integer,notnull
-    { revision_id {} }
-    { return_url {} }
+    comment_id:naturalnum,notnull
+    { revision_id:naturalnum {} }
+    { return_url:localurl {} }
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -26,11 +26,11 @@ ad_page_contract {
 }
 
 # check to see if the user can edit this comment
-ad_require_permission $comment_id write
+permission::require_permission -object_id $comment_id -privilege write
 
 # if revision_id is not passed in, assume that the user
 # wishes to edit the latest revision
-if { [empty_string_p $revision_id] } {
+if { $revision_id eq "" } {
     set revision_id [db_string get_latest_revision \
             "select content_item.get_latest_revision(:comment_id) from dual"]
 }
@@ -56,3 +56,9 @@ set target "comment-edit-2"
 ad_return_template "comment-ae"
 
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

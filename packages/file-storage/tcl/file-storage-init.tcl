@@ -4,7 +4,7 @@ ad_library {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 6 November 2000
-    @cvs-id $Id: file-storage-init.tcl,v 1.7 2005/05/26 08:28:45 maltes Exp $
+    @cvs-id $Id: file-storage-init.tcl,v 1.7.10.1 2015/09/12 11:06:17 gustafn Exp $
 }
 
 # unused after mount callback handles this now
@@ -32,3 +32,9 @@ ad_library {
 #     return [fs::new_root_folder -package_id $package_id]
 # }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

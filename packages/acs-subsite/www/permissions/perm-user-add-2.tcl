@@ -1,10 +1,10 @@
 ad_page_contract {} {
-    object_id
-    user_id:multiple,integer
-    return_url
+    object_id:naturalnum,notnull
+    user_id:multiple,naturalnum
+    return_url:localurl
 }
 
-ad_require_permission $object_id admin
+permission::require_permission -object_id $object_id -privilege admin
 
 db_transaction {
     foreach one_user_id $user_id {
@@ -15,3 +15,9 @@ db_transaction {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -5,7 +5,7 @@
 -- @author Pascal Scheffers (pascal@scheffers.net)
 -- @creation-date 2000-10-12
 --
--- @cvs-id $Id: general-comments-drop.sql,v 1.3 2001/06/14 19:52:22 pascals Exp $
+-- @cvs-id $Id: general-comments-drop.sql,v 1.4 2013/03/30 22:50:45 gustafn Exp $
 --
 
 -- revoke all 'general_comments_create' permissions
@@ -22,11 +22,16 @@ where
 -- /
 
 -- remove all comments from the system
-create function inline_0 ()
-returns integer as '
-declare 
+
+
+--
+-- procedure inline_0/0
+--
+CREATE OR REPLACE FUNCTION inline_0(
+) RETURNS integer AS $$
+DECLARE 
     comment_rec RECORD; 
-begin
+BEGIN
 
     FOR comment_rec IN select comment_id from general_comments LOOP
 
@@ -47,13 +52,11 @@ begin
     END LOOP;
 
     return 0;
-end;' language 'plpgsql';
+END;
+$$ LANGUAGE plpgsql;
 
 select inline_0 ();
 
 drop function inline_0 ();
-
--- /
-
 drop table general_comments;
 

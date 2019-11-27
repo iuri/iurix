@@ -32,9 +32,7 @@
       cr.description,
       i.height as height,
       i.width as width,
-      i.image_id as image_id,
-      pp.photographer,
-      pp.community_id
+      i.image_id as image_id
     from cr_items ci,
       cr_revisions cr,
       pa_photos pp,
@@ -61,19 +59,17 @@
 
 <fullquery name="insert_photo_attributes">      
       <querytext>
-
-	insert into pa_photos 
+	    insert into pa_photos 
         (pa_photo_id, story, caption, 
-	community_id, photographer, 
-        user_filename, camera_model, flash, 
-        aperture, metering, focal_length,exposure_time,
-        focus_distance, sha256)
+         user_filename,camera_model,date_taken,flash, 
+         aperture,metering,focal_length,exposure_time,
+         focus_distance,sha256,photographer)
         SELECT :revision_id, :new_story, :new_caption, 
-	:new_community_id, :new_photographer, user_filename,
-	camera_model,flash, aperture,metering,focal_length,exposure_time,
-        focus_distance,sha256
-        FROM pa_photos prev
-        WHERE prev.pa_photo_id = :previous_revision
+               user_filename,camera_model,date_taken,flash, 
+               aperture,metering,focal_length,exposure_time,
+               focus_distance,sha256,photographer
+          FROM pa_photos prev
+         WHERE prev.pa_photo_id = :previous_revision
         
       </querytext>
 </fullquery>

@@ -1,5 +1,6 @@
 <html>
-  <head>
+<head>
+<title>Demo: Grid</title>
   <style>
     h1 { font-family: Arial, Helvetica }
     th { font-family: Arial, Helvetica }
@@ -8,7 +9,7 @@
   </head>
   <body bgcolor="#FFFFCC">
   <h1>Sample Users</h1>
-  <table cellpadding=8 cellspacing=0 border=1 bgcolor=#CCFFCC>
+  <table cellpadding="8" cellspacing="0" border="1" bgcolor="#CCFFCC">
 
 <grid name="users" cols="3">
 

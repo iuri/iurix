@@ -13,7 +13,7 @@
         <revremark>First Draft</revremark>
       </revision>
     </revhistory>
-    <pubdate role="cvstag">($Id: package-documentation.xml,v 1.2 2003/04/28 04:02:44 joela Exp $)</pubdate>
+    <pubdate role="cvstag">($Id: package-documentation.xml,v 1.2.24.2 2017/04/21 15:07:52 gustafn Exp $)</pubdate>
     <authorgroup>
       <author>
 	<firstname>Joel</firstname>
@@ -84,7 +84,7 @@
             </listitem>
             <listitem>
               <para>An Author changes a note previously written.
-              Authors can't change other authors' notes.</para>
+              Authors can&#39;t change other authors' notes.</para>
             </listitem>
             <listitem>
               <para>An Author deletes a note that is no longer
@@ -304,7 +304,7 @@
           <listitem>
             <para>Use the template system to generate a form for
             editing/creating a note.  If an existing note id was
-            passed in, populate the form fields wih that note's
+            passed in, populate the form fields with that note&#39;s
             values.
 </para>
           </listitem>
@@ -320,7 +320,7 @@
   </chapter>
 
   <chapter id="admin-guide" xreflabel="Administrator Guide">
-    <title>Administrator's guide</title>
+    <title>Administrator&#39;s guide</title>
     <para>No administrative tasks are needed or possible</para>
   </chapter>
   

@@ -7,7 +7,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2005-01-20
     @arch-tag: 0f0b0270-4074-410a-a5f9-386d402adc46
-    @cvs-id $Id: news-apm-callback-procs.tcl,v 1.4 2006/08/08 21:27:04 donb Exp $
+    @cvs-id $Id: news-apm-callback-procs.tcl,v 1.4.12.2 2016/01/02 20:34:49 gustafn Exp $
 }
 
 namespace eval ::news::install {}
@@ -130,7 +130,7 @@ ad_proc -private news::install::before_uninstantiate {
     
     @error 
 } {
-    news_items_delete [db_list dead_news ""]
+    news_items_delete [db_list dead_news {}]
     rss_support::del_subscription -summary_context_id $package_id -owner news -impl_name news
 }
 
@@ -186,3 +186,9 @@ ad_proc -public enable_intervals_and_methods {type_id} {
 	-type_id $type_id \
 	-delivery_method_id [notification::delivery::get_id -short_name email]
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

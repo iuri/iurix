@@ -1,10 +1,10 @@
 <master>
-  <property name="title">@page_title@</property>
-  <property name="context">@context@</property>
-  <property name="focus">@focus;noquote@</property>
+  <property name="doc(title)">@page_title;literal@</property>
+  <property name="context">@context;literal@</property>
+  <property name="focus">@focus;literal@</property>
 
 <formtemplate id="application"></formtemplate>
 
 <ul class="action-links">
-  <li><a href="@multiple_add_url@">Add multiple applications</a></li>
+  <li><a href="@multiple_add_url@">#acs-subsite.Add_multiple_applications#</a></li>
 </ul>

@@ -3,6 +3,10 @@
 	color: #c30000;
 }
 
+strong.form-required-mark {
+    font-weight: inherit;
+}
+
 .form-label-error {
 	font-weight: bold;
 }
@@ -84,4 +88,8 @@ legend span {
 
 .margin-form-div h1 {
 	margin-left: 13.5em;
+}
+
+div.form-item-wrapper label {
+  display:inline;
 }

@@ -1,8 +1,0 @@
-ad_page_contract {}
-
-template::head::add_css -href "https://www.evex.co/themes/front/css/main.css"
-
-
-
-
-

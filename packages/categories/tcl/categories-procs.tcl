@@ -4,7 +4,7 @@ ad_library {
     @author Timo Hentschel (timo@timohentschel.de)
 
     @creation-date 16 April 2003
-    @cvs-id $Id: categories-procs.tcl,v 1.28 2010/01/13 17:07:00 ryang Exp $
+    @cvs-id $Id: categories-procs.tcl,v 1.29.2.2 2016/07/03 17:02:03 gustafn Exp $
 }
 
 
@@ -371,7 +371,11 @@ ad_proc -public category::count_children {
 } {
     counts all direct sub categories
 } {
-    return [db_string select {}]
+    return [db_string count_children {
+        select count(*)
+        from categories
+        where parent_id=:category_id
+    }]
 }
                                              
 ad_proc -public category::get_parent {
@@ -504,7 +508,7 @@ ad_proc -private category::context_bar { tree_id locale object_id {ctx_id ""}} {
     if {$object_id ne ""} {
 	set context_bar [list [category::get_object_context $object_id] [list [export_vars -no_empty -base object-map {locale object_id ctx_id}] [_ categories.cadmin]]]
     } else {
-	set context_bar [list [list ".?[export_vars -no_empty {locale ctx_id}]" [_ categories.cadmin]]]
+	set context_bar [list [list [export_vars -base . -no_empty {locale ctx_id}] [_ categories.cadmin]]]
     }
     lappend context_bar [list [export_vars -no_empty -base tree-view {tree_id locale object_id ctx_id}] [category_tree::get_name $tree_id $locale]]
 
@@ -547,3 +551,9 @@ ad_proc -private category::before_uninstall {} {
     acs_sc::impl::delete -contract_name AcsObject -impl_name category_idhandler
     acs_sc::impl::delete -contract_name AcsObject -impl_name category_tree_idhandler
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -6,11 +6,11 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Dec 12 11:23:12 2000
-    @cvs-id $Id: delete.tcl,v 1.3 2002/09/06 21:50:01 jeffd Exp $
+    @cvs-id $Id: delete.tcl,v 1.5.2.3 2016/05/20 20:02:44 gustafn Exp $
 
 } {
-    segment_id:integer,notnull
-    { return_url "" }
+    segment_id:naturalnum,notnull
+    { return_url:localurl "" }
 } -properties {
     export_vars:onevalue
     segment_name:onevalue
@@ -28,10 +28,16 @@ db_1row select_segment_info {
      where s.segment_id = :segment_id
 }
 
-set export_vars [export_form_vars segment_id]
+set export_vars [export_vars -form {segment_id}]
 set context [list \
      [list "[ad_conn package_url]admin/rel-segments/" "Relational segments"] \
-     [list one?[ad_export_vars segment_id] "One segment"] \
+     [list [export_vars -base one segment_id] "One segment"] \
      "Remove segment"]
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

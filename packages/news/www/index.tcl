@@ -6,12 +6,12 @@ ad_page_contract {
     
     @author Stefan Deusch (stefan@arsdigita.com)
     @creation-date 2000-12-20
-    @cvs-id $Id: index.tcl,v 1.16 2008/11/09 23:29:28 donb Exp $
+    @cvs-id $Id: index.tcl,v 1.20.2.2 2015/09/20 16:09:56 gustafn Exp $
 
 } {
 
    {view:trim "live"}
-   page:optional
+   page:naturalnum,optional
 
 } -properties {
 
@@ -25,7 +25,7 @@ ad_page_contract {
 
 
 set package_id [ad_conn package_id]
-ad_require_permission $package_id news_read
+permission::require_permission -object_id $package_id -privilege news_read
 
 
 set context {} 
@@ -33,7 +33,7 @@ set context {}
 set actions_list [list]
 
 # view switch in live | archived news
-if { [string equal "live" $view] } {
+if {"live" eq $view} {
 
     set title [apm_instance_name_from_id $package_id]
     set view_clause [db_map view_clause_live]
@@ -57,8 +57,8 @@ if { [string equal "live" $view] } {
 }
 
 # switches for privilege-enabled links: admin for news_admin, submit for registered users
-set news_admin_p [ad_permission_p $package_id news_admin]
-set news_create_p [ad_permission_p $package_id news_create]
+set news_admin_p [permission::permission_p -object_id $package_id -privilege news_admin]
+set news_create_p [permission::permission_p -object_id $package_id -privilege news_create]
 
 if { $news_admin_p } {
     lappend actions_list [_ news.Create_a_news_item] \
@@ -84,7 +84,7 @@ db_multirow -extend { publish_date news_item_url } news_items item_list {} {
 }
 
 # TODO: pagination
-set max_dspl [ad_parameter DisplayMax "news" 10]
+set max_dspl [parameter::get -parameter DisplayMax -default 10]
 template::list::create -name news -multirow news_items -actions $actions_list -no_data [_ news.lt_There_are_no_news_ite] -elements {
     publish_date {
         label "[_ news.Release_Date]"
@@ -105,11 +105,12 @@ set rss_exists [rss_support::subscription_exists \
                     -summary_context_id $package_id \
                     -impl_name news]
 set rss_url "[news_util_get_url $package_id]rss/rss.xml"
+set news_url [ad_return_url]
 
-set notification_chunk [notification::display::request_widget \
-                        -type one_news_item_notif \
-                        -object_id $package_id \
-                        -pretty_name "News" \
-                        -url [ad_return_url] \
-                        ]
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -3,7 +3,7 @@
 --
 -- @author oumi@arsdigita.com
 -- @creation-date 2000-02-02
--- @cvs-id $Id: user-profiles-create.sql,v 1.3 2004/01/26 15:39:46 jeffd Exp $
+-- @cvs-id $Id: user-profiles-create.sql,v 1.3.22.1 2016/08/31 18:57:41 gustafn Exp $
 --
 
 -------------------------------
@@ -35,7 +35,8 @@ begin
       object_type_two		=> 'user',
       role_two			=> 'user',
       min_n_rels_two		=> 0,
-      max_n_rels_two		=> null
+      max_n_rels_two		=> null,
+      composable_p          => 'f'
     );
 
 end;

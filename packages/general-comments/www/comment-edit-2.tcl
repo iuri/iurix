@@ -12,14 +12,14 @@ ad_page_contract {
     @author Phong Nguyen <phong@arsdigita.com>
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-edit-2.tcl,v 1.6 2002/11/07 08:32:49 peterm Exp $
+    @cvs-id $Id: comment-edit-2.tcl,v 1.7.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    comment_id:integer,notnull
-    object_id:integer,notnull
+    comment_id:naturalnum,notnull
+    object_id:naturalnum,notnull
     title:notnull
     content:notnull,html
     comment_mime_type
-    { return_url {} }
+    { return_url:localurl {} }
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -30,7 +30,7 @@ ad_page_contract {
 }
 
 # check to see if the user can edit this comment
-ad_require_permission $comment_id write
+permission::require_permission -object_id $comment_id -privilege write
 
 set page_title "[_ general-comments.Confirm_comment_on]: [acs_object_name $object_id]"
 set context "\"[_ general-comments.Confirm_comment]\""
@@ -41,3 +41,9 @@ set html_content [ad_html_text_convert -from $comment_mime_type -- $content]
 ad_return_template "comment-ae-2"
     
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

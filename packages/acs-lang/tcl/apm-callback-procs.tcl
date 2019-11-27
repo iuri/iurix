@@ -6,7 +6,7 @@ ad_library {
 
     @creation-date August 2009
     @author  Emmanuelle Raffenne (eraffenne@gmail.com)
-    @cvs-id $Id: apm-callback-procs.tcl,v 1.1.2.1 2010/05/14 13:15:45 emmar Exp $
+    @cvs-id $Id: apm-callback-procs.tcl,v 1.2.6.1 2015/09/10 08:21:25 gustafn Exp $
 
 }
 
@@ -31,3 +31,9 @@ ad_proc -private lang::apm::after_upgrade {
         -spec {
         }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

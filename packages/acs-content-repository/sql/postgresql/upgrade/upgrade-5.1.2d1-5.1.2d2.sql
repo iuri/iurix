@@ -4,7 +4,7 @@
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2004-07-18
 -- @arch-tag: e3c4c07f-a3cc-480f-a06f-7ffd30e5606f
--- @cvs-id $Id: upgrade-5.1.2d1-5.1.2d2.sql,v 1.2 2004/07/24 08:34:05 jeffd Exp $
+-- @cvs-id $Id: upgrade-5.1.2d1-5.1.2d2.sql,v 1.2.18.1 2017/04/21 14:53:07 gustafn Exp $
 --
 
 
@@ -40,7 +40,7 @@ begin
   PERFORM acs_attribute__drop_attribute(drop_attribute__content_type, 
                                         drop_attribute__attribute_name);
 
-  -- Drop the column if neccessary
+  -- Drop the column if necessary
   if drop_attribute__drop_column then
       execute ''alter table '' || v_table || '' drop column '' ||
 	drop_attribute__attribute_name || '' cascade'';

@@ -65,15 +65,15 @@ ad_proc -public ah::ext::ajax {
     @creation-date 2007-09-07
 
     @param url The url that the javascript will post to
-    @param params A tcl list of parameters to pass to the url
+    @param params A Tcl list of parameters to pass to the url
     @param success A javascript function to be executed when the url is successfully accessed
     @param failure A javascript function to execute if transaction failed.
 
 } {
     set script "Ext.Ajax.request({url:\"$url\""
-    if { [exists_and_not_null params] } { append script ",params:$params" }
-    if { [exists_and_not_null success] } { append script ",success:$success" }
-    if { [exists_and_not_null failure] } { append script ",failure:$failure" }
+    if { ([info exists params] && $params ne "") } { append script ",params:$params" }
+    if { ([info exists success] && $success ne "") } { append script ",success:$success" }
+    if { ([info exists failure] && $failure ne "") } { append script ",failure:$failure" }
     append script  "}); "
     return $script
 }
@@ -97,7 +97,7 @@ ad_proc -public ah::ext::msgbox {
     @author Hamilton Chua (ham@solutiongrove.com)
     @creation-date 2007-09-07
 
-    @param options A tcl list of options, see above for more info on how to structure and pass options to this proc.
+    @param options A Tcl list of options, see above for more info on how to structure and pass options to this proc.
 
 } {
 

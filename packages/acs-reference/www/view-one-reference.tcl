@@ -4,9 +4,9 @@ ad_page_contract {
     @param repository_id 
     @author Jon Griffin (jon@jongriffin.com)
     @creation-date 17 Sept 2001
-    @cvs-id $Id: view-one-reference.tcl,v 1.3 2005/03/01 00:01:22 jeffd Exp $
+    @cvs-id $Id: view-one-reference.tcl,v 1.4.2.2 2016/01/02 17:39:23 gustafn Exp $
 } {
-    repository_id:integer,notnull
+    repository_id:naturalnum,notnull
 } -properties {
     context_bar:onevalue
     package_id:onevalue
@@ -19,6 +19,12 @@ set title "View one Table"
 set context_bar [list [list "reference-list" "Reference List" ] "$title"]
 set user_id [ad_conn user_id]
 
-db_1row get_table { *SQL* } -column_array table_info
+db_1row get_table {} -column_array table_info
 
 ad_return_template
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -6,9 +6,9 @@ ad_page_contract {
 
     @author Tom Baginski (bags@arsdigita.com)
     @creation-date 12/10/2000
-    @cvs-id $Id: photo-add.tcl,v 1.6.6.1 2007/06/14 09:12:49 emmar Exp $
+    @cvs-id $Id: photo-add.tcl,v 1.9 2014/08/07 07:59:50 gustafn Exp $
 } {
-    album_id:integer,notnull
+    album_id:naturalnum,notnull
 } -validate {
     valid_album -requires {album_id:integer} {
 	if [string equal [pa_is_album_p $album_id] "f"] {
@@ -21,11 +21,11 @@ ad_page_contract {
 }
 
 # check for read permission on folder
-ad_require_permission $album_id pa_create_photo
+permission::require_permission -object_id $album_id -privilege pa_create_photo
 
 set context_list [pa_context_bar_list -final "[_ photo-album._Upload]" $album_id]
 
-set photo_id [db_string get_next_object_id "select acs_object_id_seq.nextval from dual"]
+set photo_id [db_nextval "acs_object_id_seq"]
 
 form create photo_upload -action photo-add-2 -html {enctype multipart/form-data}
 

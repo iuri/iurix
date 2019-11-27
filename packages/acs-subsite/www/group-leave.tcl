@@ -3,10 +3,10 @@ ad_page_contract {
     
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-08-07
-    @cvs-id $Id: group-leave.tcl,v 1.2 2004/01/30 15:17:31 lars Exp $
+    @cvs-id $Id: group-leave.tcl,v 1.3.2.3 2016/05/20 20:02:44 gustafn Exp $
 } {
-    {group_id:integer {[application_group::group_id_from_package_id]}}
-    return_url:optional
+    {group_id:naturalnum,notnull {[application_group::group_id_from_package_id]}}
+    return_url:localurl,optional
 }
 
 set user_id [auth::require_login]
@@ -30,8 +30,14 @@ if { $member_p } {
 
 }
 
-if { ![exists_and_not_null return_url] } {
+if { (![info exists return_url] || $return_url eq "") } {
     set return_url "../"
 }
 
 ad_returnredirect -message "You have left the group \"$group_info(group_name)\"." $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

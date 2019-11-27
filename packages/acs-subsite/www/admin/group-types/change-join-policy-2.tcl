@@ -6,11 +6,11 @@ ad_page_contract {
     @author Oumi Mehrotra (oumi@arsdigita.com)
 
     @creation-date 2001-02-23
-    @cvs-id $Id: change-join-policy-2.tcl,v 1.2 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: change-join-policy-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
 } {
     group_type:notnull
     default_join_policy:notnull
-    {return_url ""}
+    {return_url:localurl ""}
 }
 
 if { ![db_0or1row select_pretty_name {
@@ -24,7 +24,7 @@ if { ![db_0or1row select_pretty_name {
     return
 }
 
-if {$dynamic_p ne "t" } {
+if {$dynamic_p != "t" } {
     ad_return_error "Cannot administer group type" "Group type \"$group_type\" can only be administered by programmers"
 }
 
@@ -45,7 +45,13 @@ if {!$group_type_exists_p} {
 }
 
 if {$return_url eq ""} {
-    set return_url one?[ad_export_vars group_type]
+    set return_url [export_vars -base one group_type]
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

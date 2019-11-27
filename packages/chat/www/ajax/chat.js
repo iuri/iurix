@@ -57,18 +57,18 @@ function messagesReceiver(node,doc,div) {
         p.className = 'line';
         e = node.childNodes[i].getElementsByTagName('span');
         span = doc.createElement('span');
-        span.innerHTML = decodeURIComponent(e[0].firstChild.nodeValue);
+	span.innerHTML = e[0].innerHTML;
         span.className = 'timestamp';
         p.appendChild(span);
         
         span = doc.createElement('span');
         s = e[1].firstChild.nodeValue;
-        span.innerHTML = decodeURIComponent(e[1].firstChild.nodeValue.replace(/\+/g,' '));
+	span.innerHTML = e[1].innerHTML;
         span.className = 'user';
         p.appendChild(span);
         
         span = doc.createElement('span');
-        span.innerHTML = decodeURIComponent(e[2].firstChild.nodeValue.replace(/\+/g,' '));
+        span.innerHTML = e[2].innerHTML;
         span.className = 'message';
         p.appendChild(span);
         
@@ -102,14 +102,19 @@ function updateReceiver(content) {
                 var messagesNode = body[0].childNodes[i];
                 if (messagesNode.hasChildNodes()) {
                     var messagesDoc = frames['ichat'].document;
-                    var messagesDiv = frames['ichat'].document.getElementById('messages');
+                    var messagesDiv = messagesDoc.getElementById('messages');
+		    if (messagesDiv == null) {
+			messagesDiv = messagesDoc.createElement('div');
+			messagesDiv.id = 'messages';
+			messagesDoc.body.appendChild(messagesDiv);
+		    }
                     messagesReceiver(messagesNode,messagesDoc,messagesDiv);
                 }                
                 break;
             case "users":
                 var usersNode = body[0].childNodes[i].childNodes[0];
                 var usersDoc = frames['ichat-users'].document;
-                var usersTbody = frames['ichat-users'].document.getElementById('users').tBodies[0];
+                var usersTbody = usersDoc.getElementById('users').tBodies[0];
                 usersReceiver(usersNode,usersDoc,usersTbody);                
                 break;
         }
@@ -128,12 +133,24 @@ function usersReceiver(node,doc,tbody) {
         e = node.childNodes[i].getElementsByTagName('TD');
         
         td = doc.createElement('td');
-        td.innerHTML = decodeURIComponent(e[0].firstChild.nodeValue.replace(/\+/g,' '));
+	// 2017-04-06:	
+	// - td.innerHTML = e[0].innerHTML: Explorer 11 will show
+	//   undefined instead of username	
+	// - td.appendChild(e[0].firstChild): Chrome loses href and
+	//   style
+	// copying by hand is currently the only solution I have found
+	ea = e[0].firstChild;
+	a = doc.createElement('a');
+	a.setAttribute('target', ea.getAttribute('target'));
+	a.setAttribute('href', ea.getAttribute('href'));
+	a.setAttribute('style', ea.getAttribute('style'));
+	a.textContent = ea.textContent;
+	td.appendChild(a);
         td.className = 'user';
         tr.appendChild(td);
         
-        td = doc.createElement('td');
-        td.innerHTML = decodeURIComponent(e[1].firstChild.nodeValue.replace(/\+/g,' '));
+        td = doc.createElement('td');	
+	td.appendChild(e[1].firstChild);
         td.className = 'timestamp';
         tr.appendChild(td);   
         
@@ -171,7 +188,13 @@ DataConnection.prototype = {
                 obj.busy = false;
             } else {
                 clearInterval(updateInterval);
-                alert('Something wrong in HTTP request, status code = ' + obj.connection.status);
+		var errmsg = obj.connection.responseText.trim();		
+		if (!errmsg.match("^chat-errmsg: .*")) {
+		    errmsg = 'Something wrong in HTTP request, status code = ' + obj.connection.status;
+		} else {
+		    errmsg = errmsg.substr(13);
+		}
+		alert(errmsg);
             }
         }       
     }, 
@@ -189,11 +212,12 @@ DataConnection.prototype = {
             alert("chatSendMsg conflict! Maybe banned?");
         }
         var msgField = document.getElementById('chatMsg');
-        if (msgField.value == '') {
+	msg = encodeURIComponent(msgField.value);	
+        if (msg == '') {
             return;
         }
-        msgField.disabled = true;
-        this.httpSendCmd(send_url + escape(msgField.value));
+        msgField.disabled = true;	
+        this.httpSendCmd(send_url + msg);
         msgField.value = '#chat.sending_message#';
         // alert("Reseting inactivityTimeout");
         // inactivityTimeout = setTimeout(stopUpdates,300000);

@@ -4,7 +4,7 @@ ad_library {
 
     @creation-date July 19, 2005
     @author Enrique Catalan <quio@galileo.edu>
-    @cvs-id $Id: notification-callback-procs.tcl,v 1.4 2008/06/07 20:29:01 donb Exp $
+    @cvs-id $Id: notification-callback-procs.tcl,v 1.5.2.3 2016/09/12 11:02:28 gustafn Exp $
 }
 
 ad_proc -callback merge::MergeShowUserInfo -impl notifications {
@@ -13,7 +13,7 @@ ad_proc -callback merge::MergeShowUserInfo -impl notifications {
     Show the notifications of user_id
 } {
     set result [list "Notifications of $user_id"]
-    set user_notifications [db_list_of_lists user_notification { *SQL* }]
+    set user_notifications [db_list_of_lists user_notification {}]
     lappend result $user_notifications
     return $result
 }
@@ -29,8 +29,8 @@ ad_proc -callback merge::MergePackageUser -impl notifications {
     ns_log Notice $msg
     
     db_transaction {
-	db_dml upd_notifications { *SQL* }
-	db_dml upd_map { *SQL* }
+	db_dml upd_notifications {}
+	db_dml upd_map {}
 	lappend result "Notifications merge is done"
     } 
     return $result
@@ -73,17 +73,17 @@ ad_proc -public -callback acs_mail_lite::incoming_email -impl notifications {
     
     set to_stuff [notification::email::parse_reply_address -reply_address $to]
     # We don't accept a bad incoming email address
-    if {[empty_string_p $to_stuff]} {
+    if {$to_stuff eq ""} {
 	# This is not an e-mail notification can work with. Maybe bounce ?
 	return
     }
 
     # Find the user_id of the sender
     ns_log Notice "acs_mail_lite::incoming_email -impl notifications: from $from"
-    set user_id [cc_lookup_email_user $from]
+    set user_id [party::get_by_email -email $from]
     
     # We don't accept empty users for now
-    if {[empty_string_p $user_id]} {
+    if {$user_id eq ""} {
 	ns_log Notice "acs_mail_lite::incoming_email -impl notifications: Unknown sender with email $from. Bouncing message."
 	# bounce message with an informative error.
 	notification::email::bounce_mail_message \
@@ -135,3 +135,9 @@ ad_proc -public -callback notifications::incoming_email {
     -array:required
 } {
 } -
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -1,4 +1,4 @@
-# $Id: sessions-one-month.tcl,v 1.3 2002/09/18 14:54:47 jeffd Exp $
+# $Id: sessions-one-month.tcl,v 1.3.28.2 2016/01/02 21:14:10 gustafn Exp $
 set_the_usual_form_variables
 
 # pretty_month, pretty_year
@@ -23,15 +23,13 @@ append whole_page "[ad_admin_header "Sessions in $pretty_month, $pretty_year"]
 "
 
 
-set selection [ns_db select $db "select 
-  entry_date, 
-  to_char(entry_date,'fmDD') as day_number,
-  session_count, 
-  repeat_count
-from session_statistics
-where rtrim(to_char(entry_date,'Month')) = '$QQpretty_month'
-and to_char(entry_date,'YYYY') = '$QQpretty_year'
-order by entry_date"]
+set selection [ns_db select $db {
+    select entry_date, to_char(entry_date,'fmDD') as day_number, session_count, repeat_count
+    from session_statistics
+    where rtrim(to_char(entry_date,'Month')) = '$QQpretty_month'
+    and to_char(entry_date,'YYYY') = '$QQpretty_year'
+    order by entry_date
+}]
 
 while { [ns_db getrow $db $selection] } {
     set_variables_after_query
@@ -53,3 +51,9 @@ append whole_page "
 "
 db_release_unused_handles
 ns_return 200 text/html $whole_page
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

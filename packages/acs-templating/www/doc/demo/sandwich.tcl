@@ -1,27 +1,34 @@
 ad_page_contract {
-  @cvs-id $Id: sandwich.tcl,v 1.3 2007/01/10 21:22:13 gustafn Exp $
+  @cvs-id $Id: sandwich.tcl,v 1.4.2.3 2016/03/13 23:35:44 gustafn Exp $
 } {
-  {grid ""}
+  {grid:boolean ""}
 } -properties {}
 
+set title "Sandwich Demo"
 
-form create sandwich
-
-element create sandwich grid \
-  -label "grid" -optional \
-  -datatype text -widget hidden
-
-element create sandwich nickname -html { size 30 } \
-  -label "Sandwich Name" -datatype text
-
-element create sandwich protein \
- -label "Protein" -datatype text -widget radio \
- -options { {Bacon bacon} {Chicken chicken} {Beef beef} }
-
-element create sandwich vitamins \
- -label "Vitamins" -datatype text -widget checkbox -optional \
- -options { {Lettuce lettuce} {Tomato tomato} \
-            {Pickle pickle} {Sprouts sprouts} }
+form create sandwich -has_submit 1 \
+    -elements {
+        grid -label "grid" -optional -datatype text -widget hidden
+    
+        nickname -html { size 30 } -label "Sandwich Name" -datatype text
+    
+        protein -label "Protein" -datatype text -widget radio \
+            -options { \
+                           {Bacon bacon} \
+                           {Chicken chicken} \
+                           {Beef beef} \
+                       }
+    
+        vitamins -label "Vitamins" -datatype text -widget checkbox -optional \
+            -options { \
+                           {Lettuce lettuce} \
+                           {Tomato tomato} \
+                           {Pickle pickle} \
+                           {Sprouts sprouts} \
+                       }
+        
+        ok -widget submit -label Submit
+    }
 
 # Set defaults
 if { [form is_request sandwich] } {
@@ -31,6 +38,12 @@ if { [form is_request sandwich] } {
 }
 
 # Choose standard or gridded output
-if {[element get_value sandwich grid] eq "t"} {
-  ad_return_template sandwich-grid
+if {[element get_value sandwich grid] == "t"} {
+    ad_return_template sandwich-grid
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

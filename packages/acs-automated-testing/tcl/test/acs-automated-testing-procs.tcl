@@ -3,7 +3,7 @@ ad_library {
 
     @author Peter Marklund
     @creation-date 20 April 2004
-    @cvs-id $Id: acs-automated-testing-procs.tcl,v 1.3 2006/10/29 19:07:12 donb Exp $
+    @cvs-id $Id: acs-automated-testing-procs.tcl,v 1.3.16.1 2015/09/10 08:21:14 gustafn Exp $
 }
 
 aa_register_case -cats {web smoke} -libraries tclwebtest tclwebtest_example {
@@ -32,3 +32,9 @@ aa_register_case -cats {web smoke} -libraries tclwebtest tclwebtest_example {
             twt::user::delete -user_id $user_id
         }
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

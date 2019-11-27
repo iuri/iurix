@@ -4,18 +4,18 @@ ad_library {
 
     @author Eric Lorenzo (eric@openforce.net)
     @creation-date 22 March, 2002
-    @cvs-id $Id: acs-mail-lite-init.tcl,v 1.13 2010/03/16 12:10:27 emmar Exp $
+    @cvs-id $Id: acs-mail-lite-init.tcl,v 1.14.2.1 2015/09/10 08:21:31 gustafn Exp $
 
 }
 
 # Default interval is about one minute (reduce lock contention with other jobs scheduled at full minutes)
-#ad_schedule_proc -thread t 61 acs_mail_lite::sweeper
+ad_schedule_proc -thread t 61 acs_mail_lite::sweeper
 
 set queue_dir [parameter::get_from_package_key -parameter "BounceMailDir" -package_key "acs-mail-lite"]
 
 if {$queue_dir ne ""} {
     # if BounceMailDir is set then handle incoming mail
-    ad_schedule_proc -thread t 20 acs_mail_lite::load_mails -queue_dir $queue_dir
+    ad_schedule_proc -thread t 10 acs_mail_lite::load_mails -queue_dir $queue_dir
 }
 
 # check every few minutes for bounces
@@ -28,9 +28,12 @@ nsv_set acs_mail_lite check_bounce_p 0
 
 
 # Redefine ns_sendmail as a wrapper for acs_mail_lite::send
+#ns_log Notice "acs-mail-lite: renaming acs_mail_lite::sendmail to ns_sendmail"
+#rename ns_sendmail _old_ns_sendmail
+#rename acs_mail_lite::sendmail ns_sendmail
 
-
-ns_log Notice "acs-mail-lite: renaming acs_mail_lite::sendmail to ns_sendmail"
-
-rename ns_sendmail _old_ns_sendmail
-rename acs_mail_lite::sendmail ns_sendmail
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -8,11 +8,11 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: toggle-approval.tcl,v 1.2 2001/06/14 19:52:22 pascals Exp $
+    @cvs-id $Id: toggle-approval.tcl,v 1.3.2.2 2016/05/21 10:15:38 gustafn Exp $
 } {
-    comment_id:integer,notnull
-    {revision_id {}}
-    {return_url {}}
+    comment_id:naturalnum,notnull
+    {revision_id:naturalnum {}}
+    {return_url:localurl {}}
 }
 
 # get the live revision of the item for comparison
@@ -22,7 +22,7 @@ set live_revision [db_string get_live_revision \
 # if the user did not pass in a revision_id, then
 # assume that the user wishes to toggle the approval
 # state of the latest revision
-if { [empty_string_p $revision_id] } {
+if { $revision_id eq "" } {
     set revision_id [db_string get_latest_revision \
         "select content_item.get_latest_revision(:comment_id) from dual"]
 }
@@ -47,3 +47,9 @@ if { $live_revision != $revision_id } {
 }
 
 ad_returnredirect $return_url
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

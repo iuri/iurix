@@ -1,4 +1,4 @@
-# $Id: 00-serializer-procs.tcl,v 1.5 2008/01/26 01:17:10 gustafn Exp $
+# $Id: 00-serializer-procs.tcl,v 1.5.12.1 2015/09/10 08:10:44 gustafn Exp $
 if {![info exists ::xotcl::version]} {
   ns_log notice "**********************************************************"
   ns_log notice "OOPS, apparenty you have no XOTcl installed on your aolserver."
@@ -13,3 +13,9 @@ if {$::xotcl::version < 1.5} {
   ns_log notice "Please updgrade to a new version (see http://openacs.org/xowiki/xotcl-core)"
   ns_log notice "**********************************************************"
 }
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 2
+#    indent-tabs-mode: nil
+# End:

@@ -3,11 +3,11 @@
 
     @author David Dao (ddao@arsdigita.com)
     @creation-date November 17, 2000
-    @cvs-id $Id: transcript-entry.adp,v 1.9 2008/11/09 23:29:23 donb Exp $
+    @cvs-id $Id: transcript-entry.adp,v 1.9.4.2 2017/01/18 18:24:23 gustafn Exp $
 -->
 <master>
-<property name="context">@context;noquote@</property>
-<property name="title">@title;noquote@</property>
+<property name="context">@context;literal@</property>
+<property name="doc(title)">@title;literal@</property>
 
 <form action="@action@" method="post" class="margin-form">
     <div>
@@ -35,7 +35,7 @@
             #chat.delete_messages_after_transcript#
         </div>
       </div>
-      <if @active_p@ eq "t">
+      <if @active_p;literal@ true>
         <div class="form-item-wrapper">
           <div class="form-label">
             <label for="deactivate_room">#chat.Room_deactivate#</label>

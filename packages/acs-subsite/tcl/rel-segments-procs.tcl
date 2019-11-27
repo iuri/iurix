@@ -6,7 +6,7 @@ ad_library {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Dec 12 16:37:45 2000
-    @cvs-id $Id: rel-segments-procs.tcl,v 1.4 2007/01/10 21:22:06 gustafn Exp $
+    @cvs-id $Id: rel-segments-procs.tcl,v 1.5.2.3 2017/04/21 15:27:49 gustafn Exp $
     
 }
 
@@ -34,18 +34,7 @@ ad_proc -public rel_segments_new {
 	    set creation_ip [ad_conn peeraddr]
 	}
     }
-    return [db_exec_plsql create_rel_segment {
-      declare
-      begin 
-	:1 := rel_segment.new(segment_name => :segment_name,
-                                  group_id => :group_id,
-                                  context_id => :context_id,
-                                  rel_type => :rel_type,
-                                  creation_user => :creation_user,
-                                  creation_ip => :creation_ip
-                                 );
-      end;
-    }]
+    return [db_exec_plsql create_rel_segment {}]
 
 }
 
@@ -59,20 +48,16 @@ ad_proc -public rel_segments_delete {
     @creation-date 1/12/2001
 
 } {
-    # First delete dependant constraints.
-    db_foreach select_dependant_constraints {
+    # First delete dependent constraints.
+    db_foreach select_dependent_constraints {
 	select c.constraint_id
 	  from rel_constraints c
 	 where c.required_rel_segment = :segment_id
     } {
-	db_exec_plsql constraint_delete {
-	    begin rel_constraint.del(:constraint_id); end;
-	}
+	db_exec_plsql constraint_delete {}
     }
 
-    db_exec_plsql rel_segment_delete {
-	begin rel_segment.del(:segment_id); end;
-    }
+    db_exec_plsql rel_segment_delete {}
     
 }
 
@@ -89,6 +74,12 @@ ad_proc -public rel_segments_permission_p {
     @creation-date 12/2000
 
 } {
-    return [ad_permission_p -user_id $user_id $segment_id $privilege]
+    return [permission::permission_p -party_id $user_id -object_id $segment_id -privilege $privilege]
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

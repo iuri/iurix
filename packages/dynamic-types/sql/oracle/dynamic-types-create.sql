@@ -5,7 +5,7 @@
 -- Authors:      Michael Pih (pihman@arsdigita.com)
 --               Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: dynamic-types-create.sql,v 1.3 2005/05/26 10:27:57 maltes Exp $
+-- $Id: dynamic-types-create.sql,v 1.4 2018/04/05 14:44:09 hectorr Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -285,7 +285,7 @@ begin
   -- Drop the attribute
   acs_attribute.drop_attribute(content_type, attribute_name);
 
-  -- Drop the column if neccessary
+  -- Drop the column if necessary
   if drop_column = 't' then
     begin
       execute immediate 'alter table ' || v_table || ' drop column ' ||

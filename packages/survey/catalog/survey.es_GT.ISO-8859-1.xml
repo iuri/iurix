@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<message_catalog package_key="survey" package_version="5.0.1" locale="es_GT" charset="ISO-8859-1">
+<message_catalog package_key="survey" locale="es_GT" charset="ISO-8859-1">
 
   <msg key="-__Created_by">-Creado por</msg>
   <msg key="_on_creation_date">, en %creation_date%</msg>
@@ -85,7 +85,7 @@
   <msg key="lt_Cancel_and_return_to__1">Cancelar y regresar a administracion de encuestas</msg>
   <msg key="lt_Completely_delete">Borrar completamente las respuestas de %user_name_var% de %response_date_var%? (Nota: Esto no se puede deshacer.)</msg>
   <msg key="lt_Confirm_Survey_Detail">Confirmar detalles de Encuesta</msg>
-  <msg key="lt_Copying_a_survey_will">Copiar una encuesta va a crear una nueva encuesta con copias a todas la preguntas.&lt;br /&gt; Ninguna de las respuestas será duplicada.</msg>
+  <msg key="lt_Copying_a_survey_will">Copiar una encuesta va a crear una nueva encuesta con copias a todas la preguntas.&lt;br&gt; Ninguna de las respuestas será duplicada.</msg>
   <msg key="lt_Could_not_find_a_surv">No pudimos encontrar una pregunta</msg>
   <msg key="lt_Could_not_find_the_re">No pudimos encontrar la respuesta</msg>
   <msg key="lt_Couldnt_find_attachment">No pudimos encontrar el archivo adjunto. No pudimo sencontrar un attachment que corresponda al id_de_la_pregunta %response_id%, id_pregunta %question_id% dados.</msg>
@@ -99,7 +99,7 @@
   <msg key="lt_Everyone_eligible_to_">Todos los elegidos a tomar esta encuesta</msg>
   <msg key="lt_Everyone_who_has_alre">Todos los que ya han tomado esta encuesta</msg>
   <msg key="lt_Everyone_who_has_not_">Todos los que no han tomado esta encuesta</msg>
-  <msg key="lt_For_Multiple_Choicebr">Para Opción Múltiple&lt;br /&gt;Ingresar una lista de respuestas válidas&lt;br /&gt;(ingresar una opción por linea)</msg>
+  <msg key="lt_For_Multiple_Choicebr">Para Opción Múltiple&lt;br&gt;Ingresar una lista de respuestas válidas&lt;br&gt;(ingresar una opción por linea)</msg>
   <msg key="lt_had_to_say_in_respons">tiene que decir acerca de la encuesta %survey_name%:</msg>
   <msg key="lt_Here_is_how_your_surv">Esta es la descripción que va a aparecer:</msg>
   <msg key="lt_img_srcgraphicsadming">&lt;img src=&quot;graphics/admin.gif&quot; border=&quot;0&quot; alt=&quot;Administrar Encuestas&quot;&gt;</msg>

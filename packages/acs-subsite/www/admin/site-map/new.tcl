@@ -2,14 +2,14 @@ ad_page_contract {
 
     @author Rafael Schloming (rhs@mit.edu)
     @creation-date 2000-09-09
-    @cvs-id $Id: new.tcl,v 1.5 2005/03/01 00:01:23 jeffd Exp $
+    @cvs-id $Id: new.tcl,v 1.7.2.2 2015/09/18 07:27:48 gustafn Exp $
 
 } {
-    parent_id:integer,notnull
+    parent_id:naturalnum,notnull
     name:notnull
     node_type:notnull
     {expand:integer,multiple {}}
-    {root_id:integer {}}
+    {root_id:naturalnum,notnull {}}
 } -validate {
     name_root_ck -requires name:notnull {
         if {[string match "*/*" $name]} {
@@ -57,7 +57,7 @@ db_transaction {
         "Error Creating Site Node" \
         "The following error was generated when attempting to create the site node:
         <blockquote><pre>
-                [ad_quotehtml $errmsg]
+                [ns_quotehtml $errmsg]
         </pre></blockquote>"
 }
 
@@ -65,4 +65,10 @@ if {[lsearch $expand $parent_id] == -1} {
     lappend expand $parent_id
 }
 
-ad_returnredirect ".?[export_url_vars expand:multiple root_id]"
+ad_returnredirect [export_vars -base . {expand:multiple root_id}]
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

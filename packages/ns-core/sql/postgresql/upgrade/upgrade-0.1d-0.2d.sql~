@@ -1,0 +1,15 @@
+-- upgrade SQL script to rename column names
+
+CREATE TABLE ns_mail_weights(
+       id				integer
+					CONSTRAINT ns_mail_weights_pk
+					PRIMARY KEY,
+       mail_id				integer
+       					CONSTRAINT ns_mail_weights_fk
+       					REFERENCES iurix_mails ON DELETE CASCADE,
+       criteria				varchar(50)
+);
+
+DROP SEQUENCE ns_mail_weights_seq;
+CREATE SEQUENCE ns_mail_criteria_seq;
+

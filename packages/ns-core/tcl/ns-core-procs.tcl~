@@ -1,0 +1,322 @@
+ad_library {
+
+    ns-core package API
+
+    @author Iuri Sampaio (iuri.sampaio@iurix.com)
+    @creation-date 2018-12-25
+}
+
+
+namespace eval ns_core {}
+namespace eval ns_core::email {}
+namespace eval ns_core::user {}
+
+ad_proc -public ns_core::email::add_weights {
+    {-email_id:required}
+} {
+
+    It saves weights from emails
+
+    @param email_id
+} {
+
+    ns_log Notice "Running ns_core::email::add_weights | EMAILID $email_id"
+    
+    db_1row select_bodies {
+	select bodies from iurix_mails WHERE mail_id = :email_id
+    } 
+    
+    ns_log Notice "BODIES $bodies"
+    
+    set mime_type [lindex [lindex $bodies 0] 0]
+    set body [lindex [lindex $bodies 0] 1]
+    
+    # ns_log Notice "MIME $mime_type"
+    # ns_log Notice "$body"
+    
+    set lines [split $body \n]
+    
+    set tree_id [category_tree::get_id "Criteria" "en_US"]
+    set categories [category_tree::get_categories -tree_id $tree_id]
+    ns_log Notice "TREEID $tree_id | CATEGORIES $categories"
+    
+    # Critérios de distribuiçao:
+    # Quantidade - Complexidade - Competencia - Urgencia
+    # Pesos :
+    # 1 = 5 pontos; 2 = 15 pontos; 3 = 50 pontos; 4 = 100 pontos; 5 = 200 pontos
+    # maximo de pontos por dia: 100
+    
+    # Contradicao:  5 = 200 enquanto o max diario é 100
+    
+    # qual a referencia de decisao?
+    ##  Selecionar o usuario com menos pontos no dia e enviar o email?
+    ## Se todos ultrapassam 100 pontos no dia?
+    ### deve-se aguardar o proximo dia?
+
+    for {set i 0} {$i < 4} {incr i} {
+	
+	set weight [lindex $lines $i]
+	
+	if {! [ regexp {^([1-5])$} $weight] }  {
+
+	    ns_log Notice "ERROR: Wrong format within email's body. Weight is not within the interval 1-5!"
+	    return
+	}
+    }
+
+    
+    
+    set total 0
+    for {set i 0} {$i < 4} {incr i} {
+	
+	set weight [lindex $lines $i]
+	
+	set points [db_string get_desc {
+	    SELECT description FROM category_translations WHERE name = :weight AND locale = 'en_US'
+	} -default ""]    
+	
+	ns_log Notice "WEIGHT $weight | POINTS $points"
+	
+	append weights "${weight},"
+	
+	set total [expr $total + $points]
+	
+    }
+    
+    set weights [string trimright $weights ","]
+    
+    
+    
+    
+    
+    if {![db_0or1row exists_mail_p {
+	SELECT id FROM ns_mail_weights WHERE mail_id = :email_id
+    }] } {
+	
+	ns_log Notice "INSETRT MAIL WEIGHTS"
+	
+	set id [db_nextval ns_mail_weights_seq]
+	
+	ns_log Notice "ID $id | MAILID $email_id | WEIGHTS $weights | TOTAL $total"
+	
+	# To save mail weights for tracking purposes 
+	db_transaction {
+	    
+	    db_dml insert_weights {
+		INSERT INTO ns_mail_weights(id, mail_id, weights) VALUES (:id, :email_id, :weights)
+	    }   
+	}
+	
+    } else {
+	ns_log Notice "MAIL EXISTS"
+    }
+    
+    
+    
+    
+    
+}
+
+
+
+
+
+
+ad_proc -public ns_core::user::get_target_lawyer {} {
+
+    Returns user_id, which has minum score
+
+} {
+
+
+    set group_id [group::get_id -group_name "Lawyers"]
+    set lawyers [group::get_members -group_id $group_id]
+    
+    ns_log Notice "ID $group_id | MEMBERS $lawyers"
+        
+   
+    # Get the user with minimum score
+    set scored_lawyers [db_list select_user {
+	SELECT user_id
+	FROM ns_user_score
+	WHERE NOW() > creation_date::timestamptz
+	AND NOW() - creation_date::timestamptz <= interval '24 hours' 
+	
+    }]
+    
+    ns_log Notice "TODAY SCORED LAWYERS $scored_lawyers"
+    
+    # IF scored_lawyers == 0 THEN select random from members
+    # ELSE
+    ## IF scored_lawyers > 0 then
+    ### IF scored_lawyers == lawyers THEN select the lawyers with minimum score
+    ### ELSE get lawyers (not in scored) and select random (scored_lawyers never have more than lawyers) 
+    
+    
+    if {$scored_lawyers eq 0} {
+	#do nothing
+	set target_lawyer [lindex $lawyers 0]
+	
+    } else {
+
+	ns_log Notice "SCOREDLAWYERS $scored_lawyers | LAWYERS $lawyers"
+	if {[llength $scored_lawyers] eq [llength $lawyers]} {
+	    set lawyers [join $lawyers ", "]
+	    
+	    # what if there are 2 or more lawyers with the same score?
+	    # set target_lawyer [db_string select_min_score "
+	    #    SELECT user_id FROM ns_user_score WHERE score = (SELECT MIN(score) FROM ns_user_score WHERE user_id IN ($lawyers))
+	    # "]
+	    set target_lawyer [db_string select_min_score "
+	    SELECT user_id FROM ns_user_score ORDER BY score LIMIT 1
+	"]
+	    
+	} else {
+	    foreach elem $lawyers {
+		# if any lawyer is not in scored then add it to 
+		if {[lsearch -inline $scored_lawyers $elem] eq ""} {
+		    set target_lawyer $elem	
+		}
+	    }       
+	}
+    }
+
+    return $target_lawyer
+}
+
+
+
+
+
+
+
+
+
+
+
+ad_proc -public ns_core::email::scan_email {
+    {-mail_id}
+} {
+    
+    It scans email's body, searching, registering and distributing the email to the lawyers, based on defined criteria 
+    Specification
+
+    # Critérios de distribuiçao:
+    # Quantidade - Complexidade - Competencia - Urgencia
+    # Pesos :
+    # 1 = 5 pontos; 2 = 15 pontos; 3 = 50 pontos; 4 = 100 pontos; 5 = 200 pontos
+    # maximo de pontos por dia: 100
+    
+    # Contradicao:  5 = 200 enquanto o max diario é 100
+    
+    # qual a referencia de decisao?
+    ##  Selecionar o usuario com menos pontos no dia e enviar o email?
+    ## Se todos ultrapassam 100 pontos no dia?
+    ### deve-se aguardar o proximo dia?
+
+    # Melhor distribuir alternadamente e tambem adotar os criterior.
+    ## Ex.  1 email 1,2,3,1  e outro email 2,1,3,1 com pontuacao muito baixa nao deve ser enviados para o mesmo advogado (enviar alternadamente)
+
+    
+    
+} {
+
+    ns_log Notice "Running ns_core::scan_email $mail_id"
+
+
+    set email_id $mail_id
+    
+    ns_core::email::add_weights -email_id $email_id
+    
+    set target_lawyer [ns_core::user::get_target_lawyer ]
+    
+    set score 0
+    set weights [db_string select_weights {
+	SELECT weights FROM ns_mail_weights WHERE mail_id = :email_id
+    } -default ""]
+    
+    ns_log notice "WEIGHTS $weights"
+    
+    foreach weight [split $weights  ","] {
+	
+	set points [db_string get_desc {
+	    SELECT description FROM category_translations WHERE name = :weight AND locale = 'en_US'
+	} -default ""]    
+	
+	ns_log Notice "WEIGHT $weight | POINTS $points"
+	
+	append weights "${weight},"
+	
+	set score [expr $score + $points]
+	
+    }
+    
+    #    ns_log Notice "SCORE $score"
+    
+    
+    # if the final lawyer isn't scored already then it creates a new record
+
+    ns_log Notice "TARGET LAWYER $target_lawyer"
+    
+    if {[info exists target_lawyer]} {
+	if {[db_0or1row select_user {
+	SELECT user_id FROM ns_user_score
+	    WHERE user_id = :target_lawyer
+	    AND creation_date::date = now()::date
+	}] } {
+	    
+	 #   ns_log Notice "UPDATE USER $target_lawyer TO score table"
+	    
+	    db_transaction {
+		db_dml update_score {
+		    
+		    UPDATE ns_user_score SET score = score + :score
+		    WHERE user_id = :target_lawyer
+		    
+		}	
+	    }
+	    
+	} else {
+	#    ns_log Notice "ADD USER $target_lawyer TO score table"
+	    set id [db_nextval ns_user_score_seq]
+	    
+	    # get user_id
+	    db_transaction {
+		db_dml insert_user {
+		    INSERT INTO ns_user_score (id, user_id, score, creation_date)
+		    VALUES (:id, :target_lawyer, :score, now())
+		}
+	    }
+	}    
+	
+	
+	acs_user::get -user_id $target_lawyer -array user
+	
+	# ns_log Notice "[parray user]"
+	
+	ix_mail::get -mail_id $email_id -array email
+	
+	# ns_log Notice "[parray email]"
+
+	ns_log Notice "SENDING EMAIL to $user(email)"
+	
+	acs_mail_lite::send -send_immediately \
+	    -from_addr "nevessouza@iurix.com" \
+	    -to_addr $user(email) \
+	    -subject $email(subject) \
+	    -body $email(bodies) \
+	    -mime_type "text/html"
+	
+	
+    }
+    
+    
+    
+    
+    
+    
+    
+    return  
+}
+    
+    

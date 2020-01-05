@@ -1,0 +1,13 @@
+ad_page_contract {}
+
+
+ns_log Notice " SEND EMAIL to_addr iuri_sampaio@hotmail.com"
+acs_mail_lite::send -send_immediately \
+    -to_addr "iuri.sampaio@gmail.com" \
+    -from_addr "nevessouza@iurix.com" \
+    -subject "Email sample from oacs" \
+    -body "This is a test body. The persrverance is super" \
+    -mime_type "text/html"
+
+
+#ad_script_abort

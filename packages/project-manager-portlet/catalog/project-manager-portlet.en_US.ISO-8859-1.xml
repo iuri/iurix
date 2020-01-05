@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="project-manager-portlet" package_version="0.4d8" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="Administration">Administration</msg>
+  <msg key="clear">clear</msg>
+  <msg key="is_observer">Is Observer</msg>
+  <msg key="lt_Project_Manager_Admin">Project Manager Administration</msg>
+  <msg key="More">More</msg>
+  <msg key="my_projects">My Projects</msg>
+  <msg key="my_tasks">My Tasks</msg>
+  <msg key="pool_projects">Pool Projects</msg>
+  <msg key="pool_tasks">Pool Tasks</msg>
+  <msg key="Project_Manager">Project Manager</msg>
+  <msg key="Project_Manager_Calendar_Portlet">&lt;a href=&quot;project-manager/task-week-calendar&quot;&gt;Project Manager Calendar Portlet &lt;/a&gt;</msg>
+  <msg key="Project_Manager_Portlet">&lt;a href=&quot;project-manager&quot;&gt;Project Manager Portlet&lt;/a&gt;</msg>
+  <msg key="Project_Manager_Project_Calendar_Portlet">Project Manager Project Calendar Portlet</msg>
+  <msg key="Project_Manager_Projects_Portlet">Projects Portlet</msg>
+  <msg key="Project_Manager_Task_Portlet">&lt;a href=&quot;project-manager/tasks&quot;&gt;Project Manager Task Portlet&lt;/a&gt;</msg>
+</message_catalog>

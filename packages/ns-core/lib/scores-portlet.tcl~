@@ -1,0 +1,20 @@
+ad_page_contract {}
+
+multirow create users user_id
+multirow create scores score
+multirow create dates date
+
+
+db_multirow scores select_scores {
+    SELECT user_id, score, creation_date FROM ee_user_scores us ORDER BY creation_date
+} {
+
+    multirow append users $user_id
+    multirow append scores $score
+    multirow append dates $creation_date
+    
+}
+
+
+
+    

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="iurix-mail" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="Body">Body</msg>
+  <msg key="Click">Click</msg>
+  <msg key="Compose_email">Compose email</msg>
+  <msg key="Compose_mail">Compose Email</msg>
+  <msg key="Date">Date</msg>
+  <msg key="Delete_email">Delete email</msg>
+  <msg key="Delete_emails">Delete emails</msg>
+  <msg key="Deleted_emails">Deleted emails</msg>
+  <msg key="Forward_emails">Forward emails</msg>
+  <msg key="From">From</msg>
+  <msg key="Go_back">Go back</msg>
+  <msg key="No_data">No data</msg>
+  <msg key="Refresh_inbox">Refresh inbox</msg>
+  <msg key="Send">Send</msg>
+  <msg key="Sent_emails">Sent emails</msg>
+  <msg key="Subject">Subject</msg>
+  <msg key="To">To</msg>
+  <msg key="to_connect_lt">to connect</msg>
+</message_catalog>

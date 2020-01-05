@@ -1,0 +1,9 @@
+ad_page_contract {} {
+
+
+}
+
+
+
+ad_returnredirect [export_vars -base index {msg}] 
+ad_acript_abort

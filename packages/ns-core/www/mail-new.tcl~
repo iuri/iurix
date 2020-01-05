@@ -1,0 +1,81 @@
+ad_page_contract {}
+
+set mail_id 3733
+
+db_1row select_bodies {
+    select bodies from iurix_mails WHERE mail_id = :mail_id
+} 
+
+# ns_log Notice "BODIES $bodies"
+
+set mime_type [lindex [lindex $bodies 0] 0]
+set body [lindex [lindex $bodies 0] 1]
+
+# ns_log Notice "MIME $mime_type"
+# ns_log Notice "$body"
+
+set lines [split $body \n]
+
+# Critérios de distribuiçao:
+# Quantidade - Complexidade - Competencia - Urgencia
+# Pesos :
+# 1 = 5 pontos; 2 = 15 pontos; 3 = 50 pontos; 4 = 100 pontos; 5 = 200 pontos
+# maximo de pontos por dia: 100
+
+# Contradicao:  5 = 200 enquanto o max diario é 100
+
+# qual a referencia de decisao?
+##  Selecionar o usuario com menos pontos no dia e enviar o email?
+## Se todos ultrapassam 100 pontos no dia?
+### deve-se aguardar o proximo dia?
+
+set tree_id [category_tree::get_id "Criteria" "en_US"]
+set categories [category_tree::get_categories -tree_id $tree_id]
+ns_log Notice "TREEID $tree_id | CATEGORIES $categories"
+
+set total 0
+for {set i 0} {$i < 4} {incr i} {
+
+    set weight [lindex $lines $i]
+
+    set points [db_string get_desc {
+	SELECT description FROM category_translations WHERE name = :weight AND locale = 'en_US'
+    } -default ""]    
+
+    ns_log Notice "WEIGHT $weight | POINTS $points"
+    
+    append weights "${weight},"
+
+    set total [expr $total + $points]
+    
+}
+
+set weights [string trimright $weights ","]
+
+
+
+
+
+if {![db_0or1row exists_mail_p {
+    SELECT id FROM ns_mail_weights WHERE mail_id = :mail_id
+}] } {
+
+    ns_log Notice "INSETRT MAIL WEIGHTS"
+	
+    set id [db_nextval ns_mail_weights_seq]
+    
+    ns_log Notice "ID $id | MAILID $mail_id | WEIGHTS $weights | TOTAL $total"
+    
+    # To save mail weights for tracking purposes 
+    db_transaction {
+	
+	db_dml insert_weights {
+	    INSERT INTO ns_mail_weights(id, mail_id, weights) VALUES (:id, :mail_id, :weights)
+	}   
+    }
+    
+} else {
+    ns_log Notice "MAIL EXISTS"
+}
+
+

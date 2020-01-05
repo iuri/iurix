@@ -1,0 +1,93 @@
+ad_page_contract {}
+
+
+
+ad_proc -public compress {
+    {-str ""}
+} {
+    Compresses string
+} {
+    set i 1
+    set result ""
+    
+
+    set aux [lindex $str 0]
+    
+    ns_log Notice "INPUT $str | AUX $aux | COUNTER $i"
+
+    foreach c [split $str ""] {
+	ns_log Notice "$c | $i "
+	
+	if {$aux ne $c} {
+	    append result "$c$i"
+	    set i 0
+	    
+	}
+		
+	incr i
+	set aux $c
+
+    }
+
+    ns_log Notice "RESULT $result"
+    return $result
+}
+
+
+
+compress -str "aaaabbb"
+
+
+
+ad_proc -private compress_not_cached  {
+    {-str ""}
+} {
+    Compresses string
+} {
+
+    while $str ne "" {
+
+	 # Mem_cache ns_cache  NAVISERVER api
+
+
+    }
+
+
+    return $result
+}
+
+
+
+ad_proc -public  decompress {
+    {-str ""}
+} {
+    Decompresses string
+} {
+
+    while $str ne "" {
+	
+
+
+    }
+
+
+    return $result
+}
+
+
+ad_proc -public  decompress_not_cached {
+    {-str ""}
+} {
+    Decompresses string
+} {
+
+    while $str ne "" {
+	
+
+
+    }
+
+
+    return $result
+}
+

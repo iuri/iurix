@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OTA_VehAvailRateRQ xmlns="http://www.opentravel.org/OTA/2003/05">
+  <POS>
+    <Source>
+      <RequestorID Type="5" ID="3016177" MessagePassword="21awa77y4he98ddc8e1989q31840dj5v7d88fa38i1da18b5b9e1491f606e33f48701kc69pf426ld6f461c10835209f2f288d2" />
+      <CompanyName>CLIENTE TESTE</CompanyName>
+    </Source>
+  </POS>
+  <VehAvailRQCore>
+    <VehRentalCore PickUpDateTime="2019-08-29T12:20:00" ReturnDateTime="2019-08-30T20:00:00">
+      <PickUpLocation LocationCode="SSA" />
+      <ReturnLocation LocationCode="SSA" />
+    </VehRentalCore>
+    <VendorPrefs>
+      <VehPref Code="ECMM" CodeContext="ACRISS" />
+    </VendorPrefs>
+    <SpecialEquipPrefs>
+      <SpecialEquipPref EquipType="13" Quantity="1" />
+    </SpecialEquipPrefs>
+  </VehAvailRQCore>
+  <VehAvailRQInfo>
+    <Customer>
+      <CoveragePrefs>
+	<CoveragePref Code="BAS" />
+      </CoveragePrefs>
+      <Primary>
+	<Email Type="2">confirmacao@teste.com</Email>
+	<Telephone PhoneTechType="2" PhoneNumber="11 44444444" />
+	<PersonName>
+	  <NamePrefix>Sr.</NamePrefix>
+	  <GivenName>JOAO</GivenName>
+	  <Surname>TESTE</Surname>
+	</PersonName>
+	<PaymentForm>
+	  <Voucher ValueType="FPF" />
+	</PaymentForm>
+      </Primary>
+    </Customer>
+    <RateQualifier RateQualifier="" PromotionCode="" />
+    <ArrivalDetails TransportationCode="24" />
+  </VehAvailRQInfo>
+</OTA_VehAvailRateRQ>

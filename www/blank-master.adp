@@ -29,12 +29,12 @@
 <meta name="twitter:image" content="https://iurix.com/resources/images/iurixshare.png" />
 
 
+
 <!-- Added by iuri@iurix.com -->
 <!-- Favicon features https://www.favicon-generator.org/  -->
 <!-- creation-date: 2019-07-20 -->
 <link rel="icon" type="image/png" sizes="16x16" href="/resources/images/favicon-16x16.png">
 <link rel="shortcut icon" type="image/x-icon" href="/resources/images/favicon-16x16.png">
-
 <!-- END Favicon features -->
 
 
@@ -67,35 +67,7 @@ _editor_lang = "@::xinha_lang;literal@";
 <if @head@ not nil>@head;literal@</if>
 
 
-<!-- Added by iuri@iurix.com -->
-<!-- Google features -->
-<!-- creation-date: 2019-07-20 -->
-<!-- Google AdSense Snippet -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<script>
-  (adsbygoogle = window.adsbygoogle || []).push({
-      google_ad_client: "ca-pub-9443985379428796",
-      enable_page_level_ads: true
-  });
-</script>
-
-
-
-<!-- Global site tag (gtag.js) - Google Analytics Snippet -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-144184532-1"></script>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-144184532-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('set', {'user_id': '@user_id@'}); // Set the user ID using signed-in user_id.
-      ga('set', 'userId', '@user_id@'); // Set the user ID using signed-in user_id.
-
-  gtag('config', 'UA-144184532-1');
-</script>
-
-<!-- END Google features -->
+<script data-ad-client="ca-pub-9443985379428796" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
 </head>
 <body<if @body.class@ not nil> class="@body.class;literal@"</if><if @body.id@ not nil> id="@body.id;literal@"</if>>

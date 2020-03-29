@@ -6,8 +6,37 @@ ad_library {
 namespace eval ix_selic {}
 namespace eval ix_selic::rates {}
 
+ad_proc -public ix_selic::insert_result {
+    {-p}
+    {-mp}
+    {-jp}
+    {-jm}
+    {-subtotal}
+    {-total}
+    {-dl}
+    {-dc}
+    {-dvm}     
+} {
+    It return the rate based in the date and type of rate
+    
+} {
+	
 
 
+    db_transaction {
+	set id [db_nextval ix_selic_result_id_seq]
+	db_dml insert_result {
+	    INSERT INTO ix_selic_results (
+	      result_id, value, value_fee, value_tax, tax_fee, subtotal, total, ack_date, creation_date, expiration_date
+	    ) VALUES (
+	      :id, :p, :mp, :jp, :jm, :subtotal, :total, :dl, :dc, :dvm
+	    )
+	}
+    }
+    
+    
+    
+}
 
 ad_proc -public ix_selic::rates::get_acumulated_rate {
     {-date}

@@ -1,7 +1,11 @@
 
 
-<table width="100%"><tr><td width="6%"><a href="/ix-currency/" style="font-weight:bold; color:#000000;text-decoration:none;">USD $1</a></td><td><div class="marquee" id="mycrawler">@lcur;noquote@</div></td></tr></table>
-
+<if @lcur@ ne "">
+  <table width="100%"><tr>
+    <td width="6%"><a href="/ix-currency/" style="font-weight:bold; color:#000000;text-decoration:none;">USD $1</a></td>
+    <td><div class="marquee" id="mycrawler">@lcur;noquote@</div></td>
+  </tr></table>
+</if>
 <script type="text/javascript">
 marqueeInit({
 	uniqueid: 'mycrawler',

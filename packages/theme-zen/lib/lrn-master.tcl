@@ -280,6 +280,27 @@ if {$dotlrn_toolbar_p} {
     template::add_header -src "/packages/dotlrn/lib/toolbar"
 }
 
+
+
+
+
+template::head::add_meta -http_equiv "charset" -name "charset" -content "utf-8"
+template::head::add_meta -name "viewport" -content "width=device-width, initial-scale=1.0"
+template::head::add_meta -name "description" -content "IURIX - Register & Login page"
+template::head::add_meta -name "author" -content "Iuri Sampaio <iuri@iurix.com>"
+template::head::add_meta -name "keywords" -content "Tecnologia, Social corporativo, Arte e Cultura,)"
+
+
+template::head::add_script -async -src "https://www.googletagmanager.com/gtag/js?id=UA-144184532-1"
+template::head::add_javascript -script {
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments)};
+    gtag('js', new Date());
+    gtag('config', 'UA-144184532-1');
+} -order 1
+
+
+
 # Local variables:
 #    mode: tcl
 #    tcl-indent-level: 4

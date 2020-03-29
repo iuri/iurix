@@ -6,6 +6,28 @@ ad_library {
 namespace eval ix_currency {}
 namespace eval ix_currency::rates {}
 
+
+ad_proc -public ix_currency::rates::add_currency_history {currency rate date} {
+    Adds records of currency's rate
+} {
+    ns_log Notice "Running ix_currency::rates::add..."
+
+    ns_log Notice "$currency $rate $date"
+
+
+    set rate_id [db_exec_plsql insert_rate {
+	SELECT ix_currency_rate__new (
+			     :currency,
+			     :rate,
+			     :date
+	     )
+    }]
+
+    return $rate_id
+}
+
+
+
 ad_proc -public ix_currency::get_currency_rates {
     {interval ""}
 } {
@@ -31,21 +53,27 @@ ad_proc -public ix_currency::get_currency_rates {
 
 
 ad_proc -public ix_currency::rates::add {currency rate} {
-    Adds daily currencie's rate
+    Adds daily currency's rate
 } {
     ns_log Notice "Running ix_currency::rates::add..."
-
-#    ns_log Notice "$currency $rate"
-
-
-    set rate_id [db_exec_plsql insert_rate {
-	SELECT ix_currency_rate__new (
-			     :currency,
-			     :rate
-	     )
-    }]
-
-    return $rate_id
+    set cur_rate 0    
+    db_0or1row select_rate {
+	SELECT rate FROM ix_currency_rates
+	WHERE currency_code = :currency
+	AND creation_date > now () - interval '23 hour'
+	ORDER BY creation_date ;
+    }
+    
+    if {$rate ne $cur_rate } {	   
+	set rate_id [db_exec_plsql insert_rate {
+	    SELECT ix_currency_rate__new (
+					  :currency,
+					  :rate
+					  )
+	}]
+	return $rate_id
+    }	
+    return 
 }
 
 
@@ -60,48 +88,58 @@ ad_proc -public ix_currency::get_xml_ecb_currency_rates {} {
     @http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml
     
 } {
-
-set src "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
-
-set xml [ns_httpget $src]
-
-set doc [dom parse $xml]
-set root [$doc documentElement]
-
-
-proc explore {parent} {
-
-    set type [$parent nodeType]
-    set name [$parent nodeName]
+    ns_log Notice "Running ad_proc ix_currency::get_xml_ecb_currency_rates    "
+    set url "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
     
- #   ns_log Notice  "$parent is a $type node named $name"
+    set result [ns_http run $url]
+    #    ns_log Notice "$xml"
 
-    if {$type != "ELEMENT_NODE"} then return 
+    set status [dict get $result status]
+    ns_log Notice "STATUS $status"
+
     
-    #ns_log Notice "[llength [$parent attributes]]"
-    if {[llength [$parent attributes]]} {
-        # ns_log Notice "attributes: [join [$parent attributes] ", "]"
-	if { [llength [$parent attributes]] == 2 && $name == "Cube" } {
-	    set value1 [$parent getAttribute currency]
-	    set value2 [$parent getAttribute rate] 
-	    ix_currency::rates::add $value1 $value2
+    set xml [dict get $result body]
+    ns_log Notice "XML \n $xml"
+    
+    set doc [dom parse $xml]
 
-
-#	    ns_log Notice "$value1 $value2"
+    ns_log Notice "DOC \n $doc"
+    
+    set root [$doc documentElement]
+    
+    proc explore {parent} {
+	
+	set type [$parent nodeType]
+	set name [$parent nodeName]
+	
+	#   ns_log Notice  "$parent is a $type node named $name"
+	
+	if {$type != "ELEMENT_NODE"} then return 
+	
+	#ns_log Notice "[llength [$parent attributes]]"
+	if {[llength [$parent attributes]]} {
+	    # ns_log Notice "attributes: [join [$parent attributes] ", "]"
+	    if { [llength [$parent attributes]] == 2 && $name == "Cube" } {
+		set value1 [$parent getAttribute currency]
+		set value2 [$parent getAttribute rate] 
+		ix_currency::rates::add $value1 $value2
+		
+		
+		#	    ns_log Notice "$value1 $value2"
+	    }
+	}
+	
+	foreach child [$parent childNodes] {
+	    explore $child
 	}
     }
-
-    foreach child [$parent childNodes] {
-	explore $child
-    }
-}
-
-
-explore $root
-
-$doc delete 
-
-return 0
+    
+    
+    explore $root
+    
+    $doc delete 
+    
+    return 0
 }
 
 

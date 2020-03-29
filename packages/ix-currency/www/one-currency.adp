@@ -5,10 +5,7 @@
 
 <SCRIPT Language="JavaScript" src="/resources/diagram/diagram/diagram.js"></SCRIPT></property>
 
-
 <include src="/packages/ix-currency/lib/currencies-display">
-
-
 
 <h1>@code;noquote@ 
   <if @diff@ lt 0.0000><span style="color:red;">$@rate;noquote@ $@diff;noquote@ @percent;noquote@%</span> </if>
@@ -27,7 +24,6 @@
 
 
 
-<include src="chart-line"> 
-
-
-      <div data-href="http://iurix.com/ix-currency/" data-layout="button"></div>
+<include src="chart-line" &="rate" &="percent" &="diff" &="usd_rate" &="code" >
+<div data-href="http://iurix.com/ix-currency/" data-layout="button"></div>
+      		  

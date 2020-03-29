@@ -1,4 +1,6 @@
-<script type="text/javascript"
+
+
+<script type="text/javascript">
           src="https://www.google.com/jsapi?autoload={
             'modules':[{
               'name':'visualization',
@@ -31,14 +33,11 @@
     </script>
 
 
-
-
-
 <if @untrusted_user_id@ eq 0>
 <a href="@login_url@"><div id="curve_chart" style="width: 900px; height: 500px"></div></a>
 </if>
 <else>
-<div id="curve_chart" style="width: 900px; height: 500px"></div>
+<div id="curve_chart" style="width:900px; height: 500px"></div>
 </else>
 
 

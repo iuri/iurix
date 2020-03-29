@@ -34,9 +34,9 @@
         var data = google.visualization.arrayToDataTable([
 	['Year', 'BRL','USD','EUR'],
 	['Jan', 3.85, 1, 0.89],
-	['Feb', 3.75, 1, 0.99],
-	['Mar', 3.95, 1, 0.69],
-	['Apr', 3.25, 1, 0.29],
+	['Feb', 3.75, 1, 2.99],
+	['Mar', 5.35, 1, 0.49],
+	['Apr', 5.39, 1, 0.29],
         ]);
 
         var options = {

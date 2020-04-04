@@ -1,0 +1,537 @@
+text/html {<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <div class="moz-forward-container">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <!-- So that mobile webkit will display zoomed in -->
+      <meta name="viewport" content="initial-scale=1.0">
+      <!-- disable auto telephone linking in iOS -->
+      <meta name="format-detection" content="telephone=no">
+      <!-- Do not use webfonts on Outlook -->
+      <!--[if !mso]><!-- -->
+      <link
+        href="https://fonts.googleapis.com/css?family=Lato%3A400%2C700"
+        rel="stylesheet">
+      <!--<![endif]-->
+      <title>DataCamp Email</title>
+      <style type="text/css">
+
+  body {
+    -webkit-text-size-adjust: none;
+    -ms-text-size-adjust: none;
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', 'Open Sans', verdana, arial, helvetica, sans-serif;
+    font-weight: 200;
+  }
+
+  a[cta-primary]:hover {
+    border: 1px solid #1f697f !important;
+    color: #1f697f !important;
+  }
+
+  a[class="cta-primary"]:hover {
+    background-color: #FBE28D !important;
+  }
+
+  a[class="cta-secondary"]:hover {
+    background-color: #7ECCE2 !important;
+  }
+
+  a[class="cta-white"]:hover {
+    color: #000000 !important;
+  }
+
+  a[class="cta-purple"]:hover {
+    background-color: #A786F3 !important;
+  }
+
+  a:hover img[class="footer-logo-base"], a:active img[class="footer-logo-base"] {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    max-width: 0;
+    max-height: 0;
+  }
+
+  a:hover img[class="footer-logo-roll"], a:active img[class="footer-logo-roll"] {
+    width: 36px !important;
+    height: 39px !important;
+    display: inline !important;
+    max-width: 36px !important;
+    max-height: 39px !important;
+  }
+
+  a:hover img[class="social-base"], a:active img[class="social-base"] {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    max-width: 0;
+    max-height: 0;
+  }
+
+  a:hover img[class="social-roll"], a:active img[class="social-roll"] {
+    width: 33px !important;
+    height: 33px !important;
+    display: inline !important;
+    max-width: 33px !important;
+    max-height: 33px !important;
+  }
+
+  .blue-gradient {
+    background-image: linear-gradient(to right top, #3aaaca, #2388b0);
+  }
+
+  .gold-gradient {
+     background-image: linear-gradient(to right top, #fcde75, #ffc844);
+  }
+
+  .party-gradient {
+    background-image: linear-gradient(123deg, #33aacc, #9340c2);
+  }
+
+  /* GRAY BORDER - 4 SIDES */
+  .white-container-full {
+    border: solid 1px #e6eaeb;
+  }
+
+  /* GRAY BORDER - BOTTOM 3 SIDES */
+  .white-container {
+    border-color: #e6eaeb;
+    border-width: 1px;
+    border-style: none solid solid solid;
+  }
+
+  /* GRAY BORDER - 4 SIDES */
+  .white-container-full {
+    border: solid 1px #e6eaeb;
+  }
+
+  /* iOS BLUE LINKS */
+  a[x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+  }
+
+  /* CTA BOX ALIGNMENT FIX */
+  @media screen and (max-width: 600px){
+    img[class="mobile-hide"]{
+      display: none !important;
+    }
+
+    h2[class="cta_box_text"]{
+      text-align: center !important;
+    }
+  }
+
+</style>
+      <table bgcolor="#ffffff" width="100%" cellspacing="0"
+        cellpadding="0">
+        <tbody>
+          <tr>
+            <td align="left">
+              <table bgcolor="#ffffff" cellspacing="0" cellpadding="0">
+                <tbody>
+                  <tr>
+                    <td align="left">
+                      <table bgcolor="#ffffff" cellspacing="0"
+                        cellpadding="0">
+                        <tbody>
+                          <tr>
+                            <td height="20"><br>
+                            </td>
+                            <td height="20"><br>
+                            </td>
+                            <td height="20"><br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td width="24"><br>
+                            </td>
+                            <td style="font-family: 'Lato', 'Open Sans',
+                              sans-serif; font-size: 16px; font-weight:
+                              400; line-height: 22px; color: #3d4251;
+                              background-color: #ffffff; width:590px;"
+                              align="left" width="590">We have three new
+                              pieces of content for you to explore,
+                              starting with two new Python courses. Our
+                              Feature Engineering for NLP in Python
+                              course teaches techniques that will allow
+                              you to extract useful information from
+                              text and process it into a format suitable
+                              for applying machine learning models. <br>
+                              <br>
+                              Weâre also launching Regular Expressions
+                              in Python. Youâll learn how to split
+                              strings, join them back together,
+                              interpolate them, and more using regular
+                              expressions. Then, check out our new
+                              practice coding challenge, Introduction to
+                              R for Finance.<br>
+                              <br>
+                              Finally, check out five courses that are
+                              top-rated by other DataCamp users.<br>
+                              <br>
+                              <strong>Courses</strong><br>
+                              <table bgcolor="#ffffff" align="center"
+                                cellspacing="0" cellpadding="0">
+                                <tbody>
+                                  <tr>
+                                    <td align="center" width="580">
+                                      <table bgcolor="#ffffff"
+                                        align="left" cellspacing="0"
+                                        cellpadding="0">
+                                        <tbody>
+                                          <tr>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              width:25px;"
+                                              align="center" width="25"
+                                              valign="top"> â¢
+                                            </td>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              " align="left"> <a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vd3d3LmRhdGFjYW1wLmNvbS9jb3Vyc2VzL2ZlYXR1cmUtZW5naW5lZXJpbmctZm9yLW5scC1pbi1weXRob24_dXRtX21lZGl1bT1lbWFpbFx1MDAyNnV0bV9zb3VyY2U9Y3VzdG9tZXJpb1x1MDAyNnV0bV9jYW1wYWlnbj1jb3Vyc2VfMTY1NzAiLCJsaW5rX2lkIjozMjg1NDUwNDgsInBvc2l0aW9uIjowfQ/8bf5c88379ec3a199009d2a4aef1cd62d7f12b3d6b0bea171bbcbaadf84a0655"
+                                                style="color: #33aacc; "
+                                                moz-do-not-send="true">Feature
+                                                Engineering for NLP in
+                                                Python</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td height="7"><br>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              width:25px;"
+                                              align="center" width="25"
+                                              valign="top"> â¢
+                                            </td>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              " align="left"> <a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vd3d3LmRhdGFjYW1wLmNvbS9jb3Vyc2VzL3JlZ3VsYXItZXhwcmVzc2lvbnMtaW4tcHl0aG9uP3V0bV9tZWRpdW09ZW1haWxcdTAwMjZ1dG1fc291cmNlPWN1c3RvbWVyaW9cdTAwMjZ1dG1fY2FtcGFpZ249Y291cnNlXzE3MTE4IiwibGlua19pZCI6MzI4NTQ1MDQ5LCJwb3NpdGlvbiI6MX0/ad1944ac5621dd7ccf0f08734d62c03c9233dd0b9311dc09c3507fbc081ebe13"
+                                                style="color: #33aacc; "
+                                                moz-do-not-send="true">Regular
+                                                Expressions in Python</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td height="7"><br>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <br>
+                              <strong>Coding Challenges</strong><br>
+                              <table bgcolor="#ffffff" align="center"
+                                cellspacing="0" cellpadding="0">
+                                <tbody>
+                                  <tr>
+                                    <td align="center" width="580">
+                                      <table bgcolor="#ffffff"
+                                        align="left" cellspacing="0"
+                                        cellpadding="0">
+                                        <tbody>
+                                          <tr>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              width:25px;"
+                                              align="center" width="25"
+                                              valign="top"> â¢
+                                            </td>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              " align="left"> <a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vZGF0YWNhbXAuYXBwLmxpbmsvRGhNdkFKb25xUC8_Y291cnNlX2lkPTI2NTMiLCJsaW5rX2lkIjozMjg1NDUwNTAsInBvc2l0aW9uIjoyfQ/c621b2181df2a180f7be680679c7aa3bed35c07388e6b1dc3606f189e688c514"
+                                                style="color: #33aacc; "
+                                                moz-do-not-send="true">Introduction
+                                                to R for Finance</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td height="7"><br>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <br>
+                              <strong>5 Courses Recommended by DataCamp
+                                Users</strong><br>
+                              <table bgcolor="#ffffff" align="center"
+                                cellspacing="0" cellpadding="0">
+                                <tbody>
+                                  <tr>
+                                    <td align="center" width="580">
+                                      <table bgcolor="#ffffff"
+                                        align="left" cellspacing="0"
+                                        cellpadding="0">
+                                        <tbody>
+                                          <tr>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              width:25px;"
+                                              align="center" width="25"
+                                              valign="top"> â¢
+                                            </td>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              " align="left"> <a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vd3d3LmRhdGFjYW1wLmNvbS9jb3Vyc2VzL2FuYWx5emluZy1idXNpbmVzcy1kYXRhLWluLXNxbD91dG1fbWVkaXVtPWVtYWlsXHUwMDI2dXRtX3NvdXJjZT1jdXN0b21lcmlvXHUwMDI2dXRtX2NhbXBhaWduPWNvdXJzZV8xNTI2OCIsImxpbmtfaWQiOjMyODU0NDUzMywicG9zaXRpb24iOjN9/08a9182eafc55a1a84e506c5b497e7898369b63ae27dbc1e28f3c842122e246b"
+                                                style="color: #33aacc; "
+                                                moz-do-not-send="true">Analyzing
+                                                Business Data in SQL</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td height="7"><br>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              width:25px;"
+                                              align="center" width="25"
+                                              valign="top"> â¢
+                                            </td>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              " align="left"> <a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vd3d3LmRhdGFjYW1wLmNvbS9jb3Vyc2VzL3NxbC1mb3ItZXhwbG9yYXRvcnktZGF0YS1hbmFseXNpcz91dG1fc291cmNlPWN1c3RvbWVyaW9cdTAwMjZ1dG1fbWVkaXVtPWVtYWlsXHUwMDI2dXRtX2NhbXBhaWduPWNvdXJzZV8xMzI3NCIsImxpbmtfaWQiOjMyODU0MzgxOSwicG9zaXRpb24iOjR9/6f3629985ea00b4a3a22993d271a1d7d907d56308083e5b24272787d0506b9d1"
+                                                style="color: #33aacc; "
+                                                moz-do-not-send="true">SQL
+                                                for Exploratory Data
+                                                Analysis</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td height="7"><br>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              width:25px;"
+                                              align="center" width="25"
+                                              valign="top"> â¢
+                                            </td>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              " align="left"> <a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vd3d3LmRhdGFjYW1wLmNvbS9jb3Vyc2VzL2FuYWx5emluZy1tYXJrZXRpbmctY2FtcGFpZ25zLXdpdGgtcGFuZGFzP3V0bV9tZWRpdW09ZW1haWxcdTAwMjZ1dG1fc291cmNlPWN1c3RvbWVyaW9cdTAwMjZ1dG1fY2FtcGFpZ249Y291cnNlXzE0ODUzIiwibGlua19pZCI6MzI4NTQ0ODU2LCJwb3NpdGlvbiI6NX0/6a0457fae86a5d601a2ef2124b1f9ab8dc79cb478e91bc67e2ea85a8ff78c918"
+                                                style="color: #33aacc; "
+                                                moz-do-not-send="true">Analyzing
+                                                Marketing Campaigns with
+                                                pandas</a> (in Python)
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td height="7"><br>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              width:25px;"
+                                              align="center" width="25"
+                                              valign="top"> â¢
+                                            </td>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              " align="left"> <a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vd3d3LmRhdGFjYW1wLmNvbS9jb3Vyc2VzL29wdGltaXppbmctcHl0aG9uLWNvZGUtd2l0aC1wYW5kYXM_dXRtX21lZGl1bT1lbWFpbFx1MDAyNnV0bV9zb3VyY2U9Y3VzdG9tZXJpb1x1MDAyNnV0bV9jYW1wYWlnbj1jb3Vyc2VfMTQ2MzAiLCJsaW5rX2lkIjozMjg1NDQ3ODcsInBvc2l0aW9uIjo2fQ/c41056524e1d6630738905801685cc3e4938762855c96ce43349b62a6a5eab2f"
+                                                style="color: #33aacc; "
+                                                moz-do-not-send="true">Optimizing
+                                                Python Code with pandas</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td height="7"><br>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              width:25px;"
+                                              align="center" width="25"
+                                              valign="top"> â¢
+                                            </td>
+                                            <td style="font-family:
+                                              'Lato', 'Open Sans',
+                                              sans-serif; font-size:
+                                              16px; font-weight: normal;
+                                              color: #3d4251;
+                                              background-color: #ffffff;
+                                              " align="left"> <a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vd3d3LmRhdGFjYW1wLmNvbS9jb3Vyc2VzL3ByZWRpY3RpbmctY3VzdG9tZXItY2h1cm4taW4tcHl0aG9uP3V0bV9tZWRpdW09ZW1haWxcdTAwMjZ1dG1fc291cmNlPWN1c3RvbWVyaW9cdTAwMjZ1dG1fY2FtcGFpZ249Y291cnNlXzYzNDIiLCJsaW5rX2lkIjozMjg1NDQ3ODgsInBvc2l0aW9uIjo3fQ/0d7b49e503abb14c31aba8353ce4d048a0a7f527ca91b02c3449994cb076215c"
+                                                style="color: #33aacc; "
+                                                moz-do-not-send="true">Predicting
+                                                Customer Churn in Python</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td height="7"><br>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <br>
+                              Happy learning,<br>
+                              <br>
+                              The DataCamp Team
+                            </td>
+                            <td width="5"><br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td height="20"><br>
+                            </td>
+                            <td height="20"><br>
+                            </td>
+                            <td height="20"><br>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table bgcolor="#ffffff" cellspacing="0"
+                        cellpadding="0">
+                        <tbody>
+                          <tr>
+                            <td height="80"><br>
+                            </td>
+                            <td height="80"><br>
+                            </td>
+                            <td height="80"><br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td width="24"><br>
+                            </td>
+                            <td style="font-family: 'Lato', 'Open Sans',
+                              sans-serif; font-size: 13px; font-weight:
+                              400; line-height: 22px; color: #686f75;
+                              background-color: #ffffff; width:590px;"
+                              align="left" width="590"> <span
+                                style="display: inline-block;">DataCamp
+                                Inc.</span> | <span style="display:
+                                inline-block;">350 Fifth Avenue</span> |
+                              <span style="display: inline-block;">Suite
+                                7730</span> | <span style="display:
+                                inline-block;">New York, NY 10118</span>
+                              | <span style="display: inline-block;"><a
+href="https://links.datacamp.com/e/c/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09IiwiaHJlZiI6Imh0dHBzOi8vd3d3LmRhdGFjYW1wLmNvbS9tYWlsX3ByZWZlcmVuY2VzL2ZiNjA4M2IwLWViMDMtNDE4NS05M2ZkLTQwOWM4MDI5MGY0MiIsImxpbmtfaWQiOjk0NjIsInBvc2l0aW9uIjo4fQ/b92d7e2989251bc26ae6c7e52e7ee22f655b1d336bb90393c311e22934e18a33"
+                                  style="color: #686f75; "
+                                  moz-do-not-send="true">Unsubscribe</a></span>
+                            </td>
+                            <td width="5"><br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td height="20"><br>
+                            </td>
+                            <td height="20"><br>
+                            </td>
+                            <td height="20"><br>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <img
+src="https://links.datacamp.com/e/o/eyJlbWFpbF9pZCI6IlJOMkhCQU1BQVd2Yl82UDhoTjZXVkxseXAxVmZDQT09In0="
+        style="height: 1px !important; max-height: 1px !important;
+        max-width: 1px !important; width: 1px !important"
+        moz-do-not-send="true">
+    </div>
+  </body>
+</html>
+}

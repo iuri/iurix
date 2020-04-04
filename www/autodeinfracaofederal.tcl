@@ -11,7 +11,7 @@ ad_page_contract {} {
 
 ad_form -name form -html {enctype multipart/form-data} -form {    
     {inform:text(inform) {label ""}  {value "<h1>Auto de Infra&ccedil;&atilde;o Federal<h1/>"}}
-    {p:text {label "Valor principal do debito/tributo - P"} {html "size 10"} {help_text "Informação disponível no Lançamento de Ofício."}}
+    {p:text {label "Valor principal do debito/tributo - P"}  {html "size 10"} {help_text "Informação disponível no Lançamento de Ofício."}}
     {jp:text {label "Juros de mora sobre principal - JP"} {html "size 10"} {help_text "Informação disponível no Lançamento de Ofício."}}    
     {mp:text {label "Multa proporcional - MP"} {help_text "Informação disponível no Lançamento de Ofício."} {html {onChange "document.form.__refreshing_p.value='1';document.form.submit()"}}}
 }
@@ -20,12 +20,23 @@ ad_form -name form -html {enctype multipart/form-data} -form {
 set current_date [lc_time_fmt [db_string select_current_date {SELECT now() FROM dual} -default ""] "%q %X" "pt_BR"]
 set subtotal ""
 if {[exists_and_not_null p] && [exists_and_not_null jp] && [exists_and_not_null mp] } {
+    ns_log Notice "P $p | JP $jp | MP $mp | JM $jm | SUBTOTAL $subtotal "
 
-    set p [string map {"," ""} $p]
-    set jp [string map {"," ""} $jp]
-    set mp [string map {"," ""}  $mp]
-    set jm [string map {"," ""} $jm]
+    
+    set p [string map {"." ""} $p]
+    set jp [string map {"." ""} $jp]
+    set mp [string map {"." ""}  $mp]
+    set jm [string map {"." ""} $jm]
 
+    set p [string map {"," "."} $p]
+    set jp [string map {"," "."} $jp]
+    set mp [string map {"," "."}  $mp]
+    set jm [string map {"," "."} $jm]
+
+    ns_log Notice "P $p | JP $jp | MP $mp | JM $jm | SUBTOTAL $subtotal "
+    
+
+    
     set subtotal [format "%.2f" [expr $p + $jp + $mp]]
     
     if { [exists_and_not_null jm]} {	
@@ -60,9 +71,17 @@ ad_form -extend -name form -form {
         {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" id='form.date-button'> \[<b>DD-MM-AAAA</b>\]} }
     }
     {inform2:text(inform) {label ""}  {value "<a href=https://docs.google.com/document/d/16756by_GEZjjO4yai8IGnxAl5d5saNzT5DavytQ1zoU/edit?usp=sharing><b>Termos & Documenta&ccedil;&atilde;o</b> </a>"}}
+} -edit_request {
+
+
+} -new_request {
+
+
 } -on_submit {
     
     ns_log Notice "Imposto $p | Juros Proporc. $jp | Multa Prop. $mp | Data Ciencia $dc | Data Lavrarura$dl"
+
+    
     
     set dc [calendar::to_sql_datetime -date $dc -time "00:00:00" -time_p 0]
     
@@ -205,3 +224,6 @@ template::head::add_javascript -src "https://ajax.googleapis.com/ajax/libs/jquer
 template::head::add_javascript -src "https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" -order 2
     
     
+
+
+template::head::add_javascript -src "/resources/jquery.mask.min.js" -order 2

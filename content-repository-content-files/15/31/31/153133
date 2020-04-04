@@ -1,0 +1,108 @@
+text/html {<html><head><meta http-equiv="Content-Type" content="text/html; charset=us-ascii"></head><body style="word-wrap: break-word; -webkit-nbsp-mode: space; line-break: after-white-space;" class=""><a href="http://semi-legitimate.com/blog/item/how-to-rewrite-outgoing-address-in-postfix" class="">http://semi-legitimate.com/blog/item/how-to-rewrite-outgoing-address-in-postfix</a><br class=""><div><blockquote type="cite" class=""><div bgcolor="#FFFFFF" text="#000000" class="">
+    <header class="major" style="box-sizing: border-box; margin: 0px;
+      padding: 0px; border: 0px; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      font-variant-numeric: inherit; font-variant-east-asian: inherit;
+      font-weight: 300; font-stretch: inherit; font-size: 16px;
+      line-height: inherit; font-family: Lato, Helvetica, sans-serif;
+      vertical-align: baseline; display: block; text-align: center;
+      color: rgb(162, 162, 162); letter-spacing: normal; orphans: 2;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      background-color: rgb(31, 30, 33); text-decoration-style: initial;
+      text-decoration-color: initial;">
+      <h2 style="box-sizing: border-box; margin: 0px 0px 1em; padding:
+        0px; border: 0px; font-style: inherit; font-variant: inherit;
+        font-weight: 300; font-stretch: inherit; font-size: 1.75em;
+        line-height: 2em; font-family: inherit; vertical-align:
+        baseline; color: rgb(255, 255, 255); letter-spacing: 0.25em;
+        text-transform: uppercase;" class=""><span style="box-sizing: border-box;
+          margin: 0px; padding: 0px; border: 0px; font: inherit;
+          vertical-align: baseline; text-align: left;" class=""><a href="http://semi-legitimate.com/blog/index.html" style="box-sizing: border-box; margin: 0px; padding: 0px;
+            border: 0px; font: inherit; vertical-align: baseline;
+            transition: color 0.2s ease-in-out 0s, border-color 0.2s
+            ease-in-out 0s; color: inherit; text-decoration: none;" class=""><em style="box-sizing: border-box; margin: 0px; padding: 0px;
+              border: 0px; font-style: italic; font-variant: inherit;
+              font-weight: inherit; font-stretch: inherit; font-size:
+              inherit; line-height: inherit; font-family: inherit;
+              vertical-align: baseline;" class="">BLOG:<span class="">&nbsp;</span></em></a><span id="blog-title" style="box-sizing: border-box; margin: 0px;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">HOW TO REWRITE OUTGOING ADDRESS IN POSTFIX</span></span></h2>
+    </header>
+    <div class="pos-content" style="box-sizing: border-box; margin: 0px;
+      padding: 0px; border: 0px; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      font-variant-numeric: inherit; font-variant-east-asian: inherit;
+      font-weight: 300; font-stretch: inherit; font-size: 16px;
+      line-height: inherit; font-family: Lato, Helvetica, sans-serif;
+      vertical-align: baseline; color: rgb(162, 162, 162);
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      background-color: rgb(31, 30, 33); text-decoration-style: initial;
+      text-decoration-color: initial;">
+      <div class="element-textarea first element last" style="box-sizing: border-box; margin: 0px; padding: 0px;
+        border: 0px; font: inherit; vertical-align: baseline;">
+        <div style="box-sizing: border-box; margin: 0px; padding: 0px;
+          border: 0px; font: inherit; vertical-align: baseline;" class=""><p style="box-sizing: border-box; margin: 0px 0px 2em;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">Sometimes I find myself configuring an internal
+            Linux machine to be able to send emails for alerts or from a
+            particular application. Since this will not be a primary
+            mail server, I just want to rewrite the outgoing address to
+            be something that make sense with the proper domain for the
+            users. Here are the quick steps to accomplish this:</p>
+        </div>
+        <div style="box-sizing: border-box; margin: 0px; padding: 0px;
+          border: 0px; font: inherit; vertical-align: baseline;" class="">
+          <pre class="bash" style="box-sizing: border-box; margin: 0px 0px 2em; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 0.9em; line-height: inherit; font-family: monospace; vertical-align: baseline;">&nbsp;
+<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline; color: rgb(194, 12, 185);" class="">vi</span> <span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>etc<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>postfix<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>main.cf
+&nbsp;</pre><p style="box-sizing: border-box; margin: 0px 0px 2em;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">Modify the "mydomain" variable to your email
+            domain</p>
+          <pre class="bash" style="box-sizing: border-box; margin: 0px 0px 2em; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 0.9em; line-height: inherit; font-family: monospace; vertical-align: baseline;">&nbsp;
+mydomain = <a href="http://example.com" class="">example.com</a>
+&nbsp;</pre><p style="box-sizing: border-box; margin: 0px 0px 2em;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">Make sure to uncomment the proper network
+            interface. I'm usually lazy and just do all.</p>
+          <pre class="bash" style="box-sizing: border-box; margin: 0px 0px 2em; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 0.9em; line-height: inherit; font-family: monospace; vertical-align: baseline;">&nbsp;
+inet_interfaces = all
+&nbsp;</pre><p style="box-sizing: border-box; margin: 0px 0px 2em;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">Now at the bottom of this file you need to
+            specify the generic map file for rewriting the address.</p>
+          <pre class="bash" style="box-sizing: border-box; margin: 0px 0px 2em; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 0.9em; line-height: inherit; font-family: monospace; vertical-align: baseline;">&nbsp;
+smtp_generic_maps = hash:<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>etc<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>postfix<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>generic
+&nbsp;</pre><p style="box-sizing: border-box; margin: 0px 0px 2em;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">Save and exit main.cf. Now we need to edit
+            /etc/postfix/generic</p>
+          <pre class="bash" style="box-sizing: border-box; margin: 0px 0px 2em; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 0.9em; line-height: inherit; font-family: monospace; vertical-align: baseline;">&nbsp;
+<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline; color: rgb(194, 12, 185);" class="">vi</span> <span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>etc<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>postfix<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>generic
+&nbsp;</pre><p style="box-sizing: border-box; margin: 0px 0px 2em;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">You need to specify the mapping of the original
+            address to the one you want. Since in this case I just want
+            to rewrite everything I usually add the following two lines
+            and it seems to catch everything.</p>
+          <pre class="bash" style="box-sizing: border-box; margin: 0px 0px 2em; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 0.9em; line-height: inherit; font-family: monospace; vertical-align: baseline;">&nbsp;
+ root<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">@</span><a href="http://example.com" class="">example.com</a>   no-reply<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">@</span><a href="http://example.com" class="">example.com</a>
+ <span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">@</span><a href="http://example.com" class="">example.com</a>       no-reply<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">@</span><a href="http://example.com" class="">example.com</a>
+&nbsp;</pre><p style="box-sizing: border-box; margin: 0px 0px 2em;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">Save and exit the file. Now we need to create the
+            postfix db.</p>
+          <pre class="bash" style="box-sizing: border-box; margin: 0px 0px 2em; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 0.9em; line-height: inherit; font-family: monospace; vertical-align: baseline;">&nbsp;
+postmap <span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>etc<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>postfix<span style="box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-position: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-alternates: inherit; font-variant-east-asian: inherit; font-weight: bold; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; vertical-align: baseline;" class="">/</span>generic
+&nbsp;</pre><p style="box-sizing: border-box; margin: 0px 0px 2em;
+            padding: 0px; border: 0px; font: inherit; vertical-align:
+            baseline;" class="">This will create the /etc/postfix/generic.db hash
+            file.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</blockquote></div><br class=""></body></html>}

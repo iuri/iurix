@@ -1,0 +1,2353 @@
+text/html {<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+    <br>
+    <div class="moz-forward-container">
+      <script type="application/ld+json">
+[{
+  "@context": "http://schema.org/",
+  "@type": "Organization",
+
+  // WARNING: Before sending email, either point the logo
+  // at your own image or delete the logo annotation.
+  //
+  // If showing a logo, we recommend using an https URL.
+  // It's not a requirement today, but may be in the future.
+  "logo": "https://images.meredith.com/crossbrand/favicons/48p/travel-leisure-favicon.png"
+},{
+  "@context": "http://schema.org/",
+  "@type": "EmailMessage",
+
+  // Use this optional alternative subject line to avoid duplicate text
+  // between the subject, deal badge, and discount code.
+  "subjectLine": "Don't Do These Things on Your Next Flight"
+},{
+  "@context": "http://schema.org/",
+  "@type": "DiscountOffer",
+
+  // Describe your discount, this will be shown as a badge (eg "25% off" or "free shipping")
+  "description": "",
+
+  "discountCode": "",
+  "availabilityStarts": "",
+  "availabilityEnds": ""
+},{
+  // Promotion card with single image.
+  // We recommend using an https URL.  It's not a requirement today, but may be in the future.
+  // Any image size will work and will just be cropped automatically.
+  // GIF & WEBP images are not supported and will be filtered out.
+  // Sample image is 538x138, 3.9 aspect ratio
+  "@context": "http://schema.org/",
+  "@type": "PromotionCard",
+  "image": ""
+}]
+    </script>
+      <!--[if gte mso 9]><xml>
+<o:OfficeDocumentSettings>
+<o:AllowPNG/>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml><![endif]-->
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <!--[if !mso]><!-->
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <!--<![endif]-->
+      <meta name="viewport" content="width=device-width,
+        initial-scale=1.0">
+      <meta name="x-apple-disable-message-reformatting">
+      <title></title>
+      <!-- Outlook Web Font Fix - Normalise space between bullets and text with <li> | Update font stacks to web-safe backups for Outlook -->
+      <!--[if gte mso 9]>
+<style type="text/css">
+h1,.hl-1,h2,.hl-2{font-family:Georgia, serif !important;}
+li {text-indent: -1em;}
+h3,.hl-3,p,.text,.footer-text,.bold,.bullet,.button_structure,.button_structure-2,.button_style{font-family:Arial, sans-serif !important;}
+li {text-indent: -1em;}
+</style>
+<![endif]-->
+      <!-- Webfont @import URL goes in a separate style block -->
+      <style type="text/css">
+                /* Webfont @import URL */
+                @import url('https://fonts.googleapis.com/css?family=Playfair+Display|Roboto:400,700|Roboto+Condensed:700&display=swap');
+            </style>
+      <style type="text/css">
+                /* Style CSS */
+                
+                /* Link Color */
+                a {
+                    color: #666666;
+                }
+                
+                /* Font Styling */
+                h1, .hl-1, h2, .hl-2 {
+                    font-family: 'Playfair Display', Georgia, serif;
+                }
+h3, .hl-3, p, .text, .footer-text, .bold, .bullet {
+                    font-family: 'Roboto', Arial, serif;
+                }
+.button_structure, .button_style {
+                    font-family: 'Roboto Condensed', Arial, sans-serif;
+                }
+                h1, .hl-1 {
+                    font-size: 28px;
+                    line-height: 35px;
+                    font-weight: 400;
+                    text-align: left;
+                    color: #000000;
+                }
+                h2, .hl-2 {
+                    font-size: 24px;
+                    line-height: 30px;
+                    font-weight: 400;
+                    text-align: left;
+                    color: #000000;
+                }
+                h3, .hl-3 {
+                    font-size: 16px;
+                    line-height: 20px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    color: #000000;
+                }
+                p, .text {
+                    font-size: 15px;
+                    line-height: 20px;
+                    font-weight: 400;
+                    text-align: left;
+                    color: #000000;
+                }
+                .footer-text {
+                    font-size: 12px;
+                    line-height: 15px;
+                    text-align: center;
+                    color: #999999;
+                }
+                
+                /* Visual Elements */
+                .border {
+                    border: 1px solid #dddddd;
+                }
+                .bullet {
+                    color: #333333;
+                }
+                .button_structure {
+                    -webkit-border-radius: 0px;
+                    -moz-border-radius: 0px;
+                    border-radius: 0px;
+                    height: 45px;
+                    background-color: #000000;
+                    text-align: center;
+                    mso-line-height-rule: exactly !important;
+                }
+                .button_style {
+                    font-size: 14px;
+                    line-height: 14px;
+                    font-weight: 400;
+                    letter-spacing: 0px;
+                    mso-line-height-rule: exactly !important;
+                    color: #ffffff !important;
+                    text-decoration: none;
+                    -webkit-border-radius: 0px;
+                    -moz-border-radius: 0px;
+                    border-radius: 0px;
+                    padding: 10px 0px;
+                    display: inline-block;
+                    width: 100%;
+                }
+                .circle {
+                -webkit-border-radius: 50%;
+                    -moz-border-radius: 50%;
+                    border-radius: 50%;
+                }
+            </style>
+      <style type="text/css">
+                
+                /* Structural CSS */
+                html {
+                    Margin: 0 auto;
+                    padding: 0;
+                }
+                body {
+                    width: 100%;
+                    min-width: 100%;
+                    Margin: 0 auto !important;
+                    padding: 0 !important;
+                    border-collapse: collapse !important;
+                    table-layout: fixed !important;
+                }
+                table td {
+                    border-collapse: collapse !important;
+                }
+                img {
+                    display: block;
+                    border: none;
+                    text-align: center;
+                }
+                .p-tblr-20 {
+                    padding-top: 20px;
+                    padding-bottom: 20px;
+                    padding-left: 20px;
+                    padding-right: 20px;
+                }
+                .p-t-20-b-25 {
+                    padding-top: 20px;
+                    padding-bottom: 25px;
+                }
+                
+                /* Client-specific CSS */
+                #outlook a {
+                    padding: 0 !important;
+                }
+                .ExternalClass * {
+                    line-height: 100%;
+                }
+                * {
+                    -webkit-text-size-adjust: none;
+                }
+                
+                /* Mobile-Specific CSS */
+                @media screen and (max-width: 480px) {
+                u + .body .full-wrap {
+                    width: 100% !important;
+                    width: 100vw !important;
+                }
+                    .mobile-only {
+                        display: block!important;
+                        width: auto!important;
+                        max-height: inherit!important;
+                        overflow: visible!important;
+                        float: none!important;
+                    }
+                    .wrap {
+                        width: 100%!important;
+                        max-width: 100%!important;
+                        height: auto!important;
+                    }
+                    .empty {
+                        width: 0 !important;
+                        height: 0 !important;
+                        display: none !important;
+                    }
+                    .responsive-image {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        height: auto !important;
+                    }
+                    .padding-none {
+                        padding: 0px !important;
+                    }
+                    .mp-b-20 {
+                        padding-bottom: 20px !important;
+                    }
+                    .mp-tblr-20 {
+                        padding-top: 20px !important;
+                        padding-bottom: 20px !important;
+                        padding-left: 20px !important;
+                        padding-right: 20px !important;
+                    }
+                    .mp-lr-20 {
+                        padding-left: 20px !important;
+                        padding-right: 20px !important;
+                    }
+                    .mp-lr-5 {
+                        padding-left: 5px !important;
+                        padding-right: 5px !important;
+                    }
+                    .m-align {
+                        vertical-align: middle !important;
+                    }
+                    .margin-none {
+                    margin: 0 !important;
+                    }
+                    .break {
+                        display: block !important;
+                    }
+                    .text-center {
+                        text-align: center !important;
+                    }
+                    .lh-25 {
+                    line-height: 25px !important;
+                    }
+                }
+            </style> <img
+src="http://l.mail.travelandleisure.com/rts/open.aspx?tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG"
+        style="display:none" moz-do-not-send="true" width="1" height="1">
+      <!--start wrapper table-->
+      <table role="presentation" class="wrap full-wrap margin-none"
+        style="background-color:#f9f2e8; margin-top:10px;" width="100%"
+        cellspacing="0" cellpadding="0" border="0" bgcolor="#f9f2e8"
+        align="center">
+        <tbody>
+          <tr>
+            <td align="center">
+              <table role="presentation" class="wrap"
+                style="background-color:#FFFFFF;" width="700"
+                cellspacing="0" cellpadding="0" border="0"
+                bgcolor="#FFFFFF" align="center">
+                <tbody>
+                  <tr>
+                    <td align="center">
+                      <!--start message content-->
+                      <table class="wrap empty"
+                        style="background:#f9f2e8;" width="700"
+                        cellspacing="0" cellpadding="0" border="0"
+                        bgcolor="#f9f2e8" align="center">
+                        <tbody>
+                          <tr>
+                            <td style="padding:5px 0px; border-bottom:
+                              1px solid #d7d7d9;" align="center">
+                              <table class="wrap" width="660"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <tbody>
+                                  <tr>
+                                    <td class="text empty"
+                                      style="font-size: 12px;"
+                                      width="295"><a
+                                        data-link-name="Drinking Beer Is
+                                        Actually Good for Gut Health"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675808&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        style="color:#333333;
+                                        text-decoration: none;"
+                                        moz-do-not-send="true">Drinking
+                                        Beer Is Actually Good for Gut
+                                        Health</a></td>
+                                    <td align="center"><a
+                                        data-link-name="T+L Logo"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675809&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true"><img
+src="https://images.meredith.com/tl/newsletters/2019/06/TL-logo-200-2.png"
+                                          alt="Travel + Leisure"
+                                          class="responsive-image"
+                                          style="max-width:90px
+                                          !important;"
+                                          moz-do-not-send="true"
+                                          width="90"></a></td>
+                                    <td class="text empty"
+                                      style="text-align:right;
+                                      font-size: 12px;" width="295"><a
+                                        data-link-name="View in Browser"
+                                        style="color: #333333;
+                                        text-decoration: none;"
+                                        class="preheader-link"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675810&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=1e1e6a3708b918c731ffd14809cc9292ff4d6faa27cbe28a54165bbefa29a54e%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">View in
+                                        Browser</a></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <!--[if !mso]><!-- -->
+                      <div class="mobile-only" style="font-size: 0;
+                        max-height: 0; overflow: hidden; display: none">
+                        <!--MOBILE nav-->
+                        <table class="wrap" style="background:#f9f2e8;"
+                          width="700" cellspacing="0" cellpadding="0"
+                          border="0" bgcolor="#f9f2e8" align="center">
+                          <tbody>
+                            <tr>
+                              <td style="padding:5px 0px; border-bottom:
+                                1px solid #d7d7d9;" align="center">
+                                <table class="wrap" width="660"
+                                  cellspacing="0" cellpadding="0"
+                                  border="0" align="center">
+                                  <tbody>
+                                    <tr>
+                                      <td class="text" style="font-size:
+                                        12px;" width="125"><a
+                                          data-link-name="Drinking Beer
+                                          Is Actually Good for Gut
+                                          Health"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675808&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                          style="color:#333333;
+                                          text-decoration: none;"
+                                          moz-do-not-send="true">Drinking
+                                          Beer Is Actually Good for Gut
+                                          Health</a></td>
+                                      <td align="center"><a
+                                          data-link-name="T+L Logo"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675809&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                          moz-do-not-send="true"><img
+src="https://images.meredith.com/tl/newsletters/2019/06/TL-logo-200-2.png"
+                                            alt=""
+                                            class="responsive-image"
+                                            style="max-width:90px
+                                            !important;"
+                                            moz-do-not-send="true"
+                                            width="90"></a></td>
+                                      <td class="text"
+                                        style="text-align:right;
+                                        font-size: 12px; padding-right:
+                                        20px;" width="105"><a
+                                          data-link-name="View in
+                                          Browser" style="color:
+                                          #333333; text-decoration:
+                                          none;" class="preheader-link"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675810&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=1e1e6a3708b918c731ffd14809cc9292ff4d6faa27cbe28a54165bbefa29a54e%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                          moz-do-not-send="true">View in
+                                          Browser</a></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <!--end of MOBILE nav-->
+                      </div>
+                      <!--<![endif]-->
+                      <!--start Reuben_head4 content-->
+                      <table role="presentation" class="wrap"
+                        style="background:#ffffff;" width="700"
+                        cellspacing="0" cellpadding="0" border="0"
+                        bgcolor="#ffffff" align="center">
+                        <tbody>
+                          <tr>
+                            <td class="p-tblr-20" align="center">
+                              <table width="140" cellspacing="0"
+                                cellpadding="0" border="0">
+                                <tbody>
+                                  <tr>
+                                    <td><img
+src="https://images.meredith.com/tl/newsletters/2019/06/Just-In-logo.png"
+                                        alt="Just In - The Latest from
+                                        T+L" class="responsive-image"
+                                        style="max-width:140px
+                                        !important;"
+                                        moz-do-not-send="true"
+                                        width="140"></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <!--end Reuben_head4 content-->
+                      <!--start Reuben_feature3 content-->
+                      <table role="presentation" class="wrap"
+                        width="566" cellspacing="0" cellpadding="0"
+                        border="0" align="center">
+                        <tbody>
+                          <tr>
+                            <td>
+                              <!--Reuben_contentTbl_full-->
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image A"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675811&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1576175623/airplane-seat-recline-PLANEBEHAVE1219.jpg?itok=C60RLkCm"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675812&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="This Survey
+                                        Explains What Not to Do on an
+                                        Airplane"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">This
+                                        Survey Explains What Not to Do
+                                        on an Airplane</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy--><!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 1"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675813&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image B"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675814&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/566x319/public/1493300803/summer-blueberries-produce-fruit-LOWCAL0417.jpg?itok=DtxO_E1y"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675815&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="14 Foods You Can
+                                        Eat As Much of As You Want"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">14 Foods
+                                        You Can Eat As Much of As You
+                                        Want</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 2"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675816&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image C"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675817&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1571868903/gifts-women-travel-GGWMNTRVL1019.jpg?itok=UjstxJCP"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675818&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="Gifts for Women
+                                        Who Love to Travel"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">Gifts for
+                                        Women Who Love to Travel</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 3"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675819&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image D"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675820&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1574720103/disneyland-matter-horn-mountain-BBALLCOURT1119.jpg?itok=0_YIh4hP"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675821&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="There's a Secret
+                                        Basketball Court Hidden Inside
+                                        One of Your Favorite Disney
+                                        Rides â and You Can Finally See
+                                        It" style="text-decoration:
+                                        none; color: #000000;"
+                                        moz-do-not-send="true">There's a
+                                        Secret Basketball Court Hidden
+                                        Inside One of Your Favorite
+                                        Disney Rides â and You Can
+                                        Finally See It</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 4"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675822&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <!--end Feature 4-->
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image E"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675823&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1575388344/strong-beer-BEERHEALTH1219.jpg?itok=vcUnn-Pk"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675824&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="Drinking âStrong
+                                        Beerâ Is Just As Good for Your
+                                        Gut As Taking Probiotics, Study
+                                        Finds
+                                        " style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">Drinking
+                                        'Strong Beer' Is Just As Good
+                                        for Your Gut As Taking
+                                        Probiotics, Study Finds
+                                      </a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 5"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675825&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <!--MARQUEE AD #1-->
+                              <table class="wrap" cellspacing="0"
+                                cellpadding="0" border="0"
+                                align="center">
+                                <tbody>
+                                  <tr>
+                                    <td colspan="2"><a
+                                        data-link-name="Marquee Ad"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675826&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        rel="nofollow"
+                                        moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674575&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                          style="display: block; width:
+                                          100%; max-width: 620px
+                                          !important; height:auto;"
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="620" border="0"></a></td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding-bottom: 40px;"
+                                      align="left"><a style="display:
+                                        block; max-width: 116px;
+                                        max-height: 15px;"
+                                        data-link-name="Marquee Ad"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675827&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        rel="nofollow"
+                                        moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674576&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                          moz-do-not-send="true"
+                                          border="0"></a></td>
+                                    <td style="padding-bottom: 40px;"
+                                      align="right"><a style="display:
+                                        block; max-width: 19px;
+                                        max-height: 15px;"
+                                        data-link-name="Marquee Ad"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675828&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        rel="nofollow"
+                                        moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674578&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                          moz-do-not-send="true"
+                                          border="0"></a></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image F"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675829&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="http://i.specialoffers.meredith.com/wpm/588/ContentUploads/Images/12.16_LeatherCardCase.JPG"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675830&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="This Leather
+                                        Card Case Is the Best Stocking
+                                        Stuffer for Everyone on Your
+                                        List â Including Yourself"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">This
+                                        Leather Card Case Is the Best
+                                        Stocking Stuffer for Everyone on
+                                        Your List â Including Yourself</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Shop Now 6"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675831&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">SHOP NOW Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image G"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675832&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1576257964/hand-sanitizer-HANDY1219.jpg?itok=GkzD-iQ2"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675833&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="Is Hand
+                                        Sanitizer Actually Bad for You?"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">Is Hand
+                                        Sanitizer Actually Bad for You?</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 7"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675834&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image H"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675835&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1576258433/security-christmas-tree-lithuanian-airports-04-LITHTREE1219.jpg?itok=Y4-YE3ai"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675836&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="This Airport
+                                        Created a Christmas Tree Made
+                                        Entirely of Things Confiscated
+                                        by Security"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">This
+                                        Airport Created a Christmas Tree
+                                        Made Entirely of Things
+                                        Confiscated by Security</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 8"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675837&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image I"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675838&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1576168317/rothys-ribbon-stripe-model-lead-ROTHYSRS1219.jpg?itok=wESmpMyN"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675839&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="These Christmas
+                                        Sweater-Inspired Flats Are the
+                                        Most Festive Shoes You Can Wear
+                                        This Holiday Season"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">These
+                                        Christmas Sweater-Inspired Flats
+                                        Are the Most Festive Shoes You
+                                        Can Wear This Holiday Season</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 9"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675840&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image J"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675841&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1497040146/woman-with-coffee-PROTECTHAIR0617.jpg?itok=Uw-I5-5l"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675842&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="The Surprising
+                                        Habit That's Destroying Your
+                                        Hair" style="text-decoration:
+                                        none; color: #000000;"
+                                        moz-do-not-send="true">The
+                                        Surprising Habit That's
+                                        Destroying Your Hair</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 10"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675843&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <!-- 300x250 AD -->
+                              <table class="wrap" cellspacing="0"
+                                cellpadding="0" border="0"
+                                align="center">
+                                <tbody>
+                                  <tr>
+                                    <td colspan="2"><a
+                                        data-link-name="300x250 Ad"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675844&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        rel="nofollow"
+                                        moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674583&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                          style="width: 100%; max-width:
+                                          620px !important;"
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="620" border="0"></a></td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding-bottom: 40px;"
+                                      align="left"><a style="display:
+                                        block; max-width: 116px;
+                                        max-height: 15px;"
+                                        data-link-name="300x250 Ad"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675845&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        rel="nofollow"
+                                        moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674584&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                          moz-do-not-send="true"
+                                          border="0"></a></td>
+                                    <td style="padding-bottom: 40px; "
+                                      align="right"><a style="display:
+                                        block; max-width: 19px;
+                                        max-height: 15px;"
+                                        data-link-name="300x250 Ad"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675846&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        rel="nofollow"
+                                        moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674586&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                          moz-do-not-send="true"
+                                          border="0"></a></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image K"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675847&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1532975227/sacred-valley-peru-weaving-ALECPERU0718.jpg?itok=W-8AIAdN"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675848&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="T+L A-List
+                                        Spotlight: Travel Advisor Erin
+                                        Correia's 16-Day Peru and
+                                        Ecuador Itinerary"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">T+L
+                                        A-List Spotlight: Travel Advisor
+                                        Erin Correia's 16-Day Peru and
+                                        Ecuador Itinerary</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 11"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675849&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image L"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675850&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1574093829/nike-air-zoom-pulse-2-lead.jpg?itok=jaYzV52h"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675851&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="Nike Just
+                                        Released Super Comfortable
+                                        Nurse-Approved Sneakers"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">Nike Just
+                                        Released Super Comfortable
+                                        Nurse-Approved Sneakers</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 12"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675852&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image N"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675853&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1576502198/boeing-renton-interior-BOEING1219.jpg?itok=aXca-zjB"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675854&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="Boeing Likely to
+                                        Halt 737 Production As Grounding
+                                        Extends Into 2020"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">Boeing
+                                        Likely to Halt 737 Production As
+                                        Grounding Extends Into 2020</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 14"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675855&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <!--Image--> <tbody>
+                                  <tr>
+                                    <td style="padding-bottom: 20px;"
+                                      align="center">
+                                      <a data-link-name="Image N"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675856&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+src="https://cdn-image.travelandleisure.com/sites/default/files/styles/1600x1000/public/1576177923/everlasting-comfort-travel-pillow-tout-AMZN-TRAVEL1219.jpg?itok=PQMX7RE-"
+                                          alt=""
+                                          class="responsive-image"
+                                          moz-do-not-send="true"
+                                          width="566">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                  <!--end Image-->
+                                  <!--Headline-->
+                                  <tr>
+                                    <td class="hl-1" style="text-align:
+                                      center; padding-bottom:20px;
+                                      padding-right:20px;
+                                      padding-left:20px"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675857&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        data-link-name="Over 2,000
+                                        Shoppers Have Given This
+                                        Under-$20 Travel Set a
+                                        Near-Perfect Rating on Amazon"
+                                        style="text-decoration: none;
+                                        color: #000000;"
+                                        moz-do-not-send="true">Over
+                                        2,000 Shoppers Have Given This
+                                        Under-$20 Travel Set a
+                                        Near-Perfect Rating on Amazon</a></td>
+                                  </tr>
+                                  <!--end Headline-->
+                                  <!--Body Copy-->
+                                  <!--end Body Copy-->
+                                  <!--List of Links-->
+                                  <!--Button-->
+                                  <tr>
+                                    <td style="padding-bottom: 40px;">
+                                      <table role="presentation"
+                                        class="wrap" width="160"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td align="center">
+                                              <table role="presentation"
+                                                class="wrap"
+                                                style="max-width:160px
+                                                !important;"
+                                                width="100%"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td
+                                                      class="button_structure"><a
+data-link-name="Read More 14"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675858&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                        target="_blank"
+class="button_style" moz-do-not-send="true">READ MORE Â»</a> </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <!--end Button-->
+                                  <!--end List of Links-->
+                                </tbody>
+                              </table>
+                              <!--end Reuben_contentTbl_full--> </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <!--start Reuben_lower2 content--><!--end Reuben_lower2 content-->
+                      <!--end Reuben_feature3 content-->
+                      <!--start Reuben_lower2 content-->
+                      <table class="wrap" width="700" cellspacing="0"
+                        cellpadding="0" border="0" align="center">
+                        <tbody>
+                          <tr>
+                            <td style="padding:0px 30px;" align="center">
+                              <table class="wrap" width="640"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <tbody>
+                                  <tr>
+                                    <td align="center">
+                                      <table class="wrap" width="223"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="left">
+                                        <tbody>
+                                          <tr>
+                                            <td
+                                              style="padding-right:30px;"
+                                              class="padding-none"
+                                              valign="top"
+                                              align="center">
+                                              <table role="presentation"
+                                                class="wrap" width="193"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td align="center">
+                                                      <table
+                                                        role="presentation"
+                                                        class="wrap"
+                                                        style="max-width:
+                                                        250px
+                                                        !important;"
+                                                        cellspacing="0"
+                                                        cellpadding="0"
+                                                        border="0"
+                                                        align="center">
+                                                        <!--Headline-->
+                                                        <!--end Headline-->
+                                                        <!--Image--> <tbody>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-bottom:
+                                                          20px;"
+                                                          align="center">
+                                                          <a
+                                                          data-link-name="Image
+                                                          N"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675859&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+moz-do-not-send="true">
+                                                          <img
+src="http://i.specialoffers.meredith.com/wpm/588/ContentUploads/Images/TravelLeisure/121619_Dev1.jpg"
+                                                          alt=""
+                                                          class="responsive-image"
+moz-do-not-send="true" width="193">
+                                                          </a>
+                                                          </td>
+                                                          </tr>
+                                                          <!--end Image-->
+                                                          <!--Bullet List-->
+                                                          <tr>
+                                                          <td
+                                                          class="hl-2"
+                                                          style="padding-bottom:15px;
+                                                          text-align:
+                                                          center"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675860&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+data-link-name="7 Small Towns You Must Visit in America"
+                                                          style="text-decoration:
+                                                          none; color:
+                                                          #000000;"
+                                                          moz-do-not-send="true">7
+                                                          Small Towns
+                                                          You Must Visit
+                                                          in America</a></td>
+                                                          </tr>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-bottom:
+                                                          40px;">
+                                                          <table
+                                                          role="presentation"
+                                                          class="wrap"
+                                                          width="175"
+                                                          cellspacing="0"
+cellpadding="0" border="0" align="center">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          align="center">
+                                                          <table
+                                                          role="presentation"
+                                                          class="wrap"
+                                                          style="max-width:175px
+                                                          !important;"
+                                                          width="100%"
+                                                          cellspacing="0"
+cellpadding="0" border="0" align="center">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          class="button_structure"><a
+data-link-name="Read More 14"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675861&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+target="_blank" class="button_style" moz-do-not-send="true">READ MORE Â»</a>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          <!--end Bullet List-->
+                                                        </tbody>
+                                                      </table>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                      <!--[if mso]></td><td><![endif]-->
+                                      <table class="wrap" width="223"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="left">
+                                        <tbody>
+                                          <tr>
+                                            <td
+                                              style="padding-right:30px;"
+                                              class="padding-none"
+                                              valign="top"
+                                              align="center">
+                                              <table role="presentation"
+                                                class="wrap" width="193"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td align="center">
+                                                      <table
+                                                        role="presentation"
+                                                        class="wrap"
+                                                        style="max-width:
+                                                        250px
+                                                        !important;"
+                                                        cellspacing="0"
+                                                        cellpadding="0"
+                                                        border="0"
+                                                        align="center">
+                                                        <!--Headline-->
+                                                        <!--end Headline-->
+                                                        <!--Image--> <tbody>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-bottom:
+                                                          20px;"
+                                                          align="center">
+                                                          <a
+                                                          data-link-name="Image
+                                                          O"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675862&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+moz-do-not-send="true">
+                                                          <img
+src="http://i.specialoffers.meredith.com/wpm/588/ContentUploads/Images/TravelLeisure/121619_Dev2.jpg"
+                                                          alt=""
+                                                          class="responsive-image"
+moz-do-not-send="true" width="193">
+                                                          </a>
+                                                          </td>
+                                                          </tr>
+                                                          <!--end Image-->
+                                                          <!--Bullet List-->
+                                                          <tr>
+                                                          <td
+                                                          class="hl-2"
+                                                          style="padding-bottom:15px;
+                                                          text-align:
+                                                          center"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675863&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+data-link-name="Where to Find the Best Tacos in the U.S."
+                                                          style="text-decoration:
+                                                          none; color:
+                                                          #000000;"
+                                                          moz-do-not-send="true">Where
+                                                          to Find the
+                                                          Best Tacos in
+                                                          the U.S.</a></td>
+                                                          </tr>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-bottom:
+                                                          40px;">
+                                                          <table
+                                                          role="presentation"
+                                                          class="wrap"
+                                                          width="175"
+                                                          cellspacing="0"
+cellpadding="0" border="0" align="center">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          align="center">
+                                                          <table
+                                                          role="presentation"
+                                                          class="wrap"
+                                                          style="max-width:175px
+                                                          !important;"
+                                                          width="100%"
+                                                          cellspacing="0"
+cellpadding="0" border="0" align="center">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          class="button_structure"><a
+data-link-name="Read More 15"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675864&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+target="_blank" class="button_style" moz-do-not-send="true">READ MORE Â»</a>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          <!--end Bullet List-->
+                                                        </tbody>
+                                                      </table>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                      <!--[if mso]></td><td><![endif]-->
+                                      <table class="wrap" width="193"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="left">
+                                        <tbody>
+                                          <tr>
+                                            <td valign="top"
+                                              align="center">
+                                              <table role="presentation"
+                                                class="wrap" width="193"
+                                                cellspacing="0"
+                                                cellpadding="0"
+                                                border="0"
+                                                align="center">
+                                                <tbody>
+                                                  <tr>
+                                                    <td align="center">
+                                                      <table
+                                                        role="presentation"
+                                                        class="wrap"
+                                                        style="max-width:
+                                                        250px
+                                                        !important;"
+                                                        cellspacing="0"
+                                                        cellpadding="0"
+                                                        border="0"
+                                                        align="center">
+                                                        <!--Headline-->
+                                                        <!--end Headline-->
+                                                        <!--Image--> <tbody>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-bottom:
+                                                          20px;"
+                                                          align="center">
+                                                          <a
+                                                          data-link-name="Image
+                                                          P"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675865&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+moz-do-not-send="true">
+                                                          <img
+src="http://i.specialoffers.meredith.com/wpm/588/ContentUploads/Images/TravelLeisure/121619_Dev3.jpg"
+                                                          alt=""
+                                                          class="responsive-image"
+moz-do-not-send="true" width="193">
+                                                          </a>
+                                                          </td>
+                                                          </tr>
+                                                          <!--end Image-->
+                                                          <!--Bullet List-->
+                                                          <tr>
+                                                          <td
+                                                          class="hl-2"
+                                                          style="padding-bottom:15px;
+                                                          text-align:
+                                                          center"><a
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675866&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+data-link-name="The Biggest Perks of Flying First Class"
+                                                          style="text-decoration:
+                                                          none; color:
+                                                          #000000;"
+                                                          moz-do-not-send="true">The
+                                                          Biggest Perks
+                                                          of Flying
+                                                          First Class</a></td>
+                                                          </tr>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-bottom:
+                                                          40px;">
+                                                          <table
+                                                          role="presentation"
+                                                          class="wrap"
+                                                          width="175"
+                                                          cellspacing="0"
+cellpadding="0" border="0" align="center">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          align="center">
+                                                          <table
+                                                          role="presentation"
+                                                          class="wrap"
+                                                          style="max-width:175px
+                                                          !important;"
+                                                          width="100%"
+                                                          cellspacing="0"
+cellpadding="0" border="0" align="center">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          class="button_structure"><a
+data-link-name="Read More 16"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675867&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+target="_blank" class="button_style" moz-do-not-send="true">READ MORE Â»</a>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          <!--end Bullet List-->
+                                                        </tbody>
+                                                      </table>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <!--MARQUEE AD #2-->
+                      <table class="wrap" cellspacing="0"
+                        cellpadding="0" border="0" align="center">
+                        <tbody>
+                          <tr>
+                            <td colspan="2"><a data-link-name="Marquee
+                                Ad 2"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675868&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                rel="nofollow" moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674579&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                  style="display: block; width: 100%;
+                                  max-width: 620px !important;
+                                  height:auto;" class="responsive-image"
+                                  moz-do-not-send="true" width="620"
+                                  border="0"></a></td>
+                          </tr>
+                          <tr>
+                            <td style="padding-bottom: 40px;"
+                              align="left"><a style="display: block;
+                                max-width: 116px; max-height: 15px;"
+                                data-link-name="Marquee Ad 2"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675869&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                rel="nofollow" moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674580&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                  moz-do-not-send="true" border="0"></a></td>
+                            <td style="padding-bottom: 40px;"
+                              align="right"><a style="display: block;
+                                max-width: 19px; max-height: 15px;"
+                                data-link-name="Marquee Ad 2"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675870&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=iuri@iurix.com%7c2019-12-17%7c237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                rel="nofollow" moz-do-not-send="true"><img
+src="http://li.travelandleisure.com/imp?s=674582&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                                  moz-do-not-send="true" border="0"></a></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <!--start Reuben_socnav2 content-->
+                      <table role="presentation" class="wrap"
+                        style="border-top: 1px solid #dddddd;
+                        border-bottom: 1px solid #dddddd" width="700"
+                        cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                          <tr>
+                            <td style="padding-bottom:25px;
+                              padding-top:25px" class="mp-lr-20">
+                              <table role="presentation"
+                                style="max-width: 280px !important;"
+                                class="wrap" width="180" cellspacing="0"
+                                cellpadding="0" border="0"
+                                align="center">
+                                <tbody>
+                                  <tr>
+                                    <td style="padding-right:20px;"
+                                      align="center">
+                                      <a data-link-name="Facebook
+                                        Footer"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675871&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img name=""
+                                          src="http://images.meredith.com/crossbrand/Social-Icons/facebook.png"
+                                          alt="Facebook"
+                                          class="responsive-image"
+                                          style="max-width: 30px
+                                          !important"
+                                          moz-do-not-send="true"
+                                          width="30">
+                                      </a>
+                                    </td>
+                                    <td style="padding-right:20px;"
+                                      align="center">
+                                      <a data-link-name="Pinterest
+                                        Footer"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675872&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img name=""
+                                          src="http://images.meredith.com/crossbrand/Social-Icons/pinterest.png"
+                                          alt="Pinterest"
+                                          class="responsive-image"
+                                          style="max-width: 30px
+                                          !important"
+                                          moz-do-not-send="true"
+                                          width="30">
+                                      </a>
+                                    </td>
+                                    <td style="padding-right:20px;"
+                                      align="center">
+                                      <a data-link-name="Twitter Footer"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675873&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img
+                                          src="http://images.meredith.com/crossbrand/Social-Icons/twitter.png"
+                                          alt="Twitter" name=""
+                                          class="responsive-image"
+                                          style="max-width: 30px
+                                          !important"
+                                          moz-do-not-send="true"
+                                          width="30" border="0">
+                                      </a>
+                                    </td>
+                                    <td align="center">
+                                      <a data-link-name="Instagram
+                                        Footer"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675874&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        moz-do-not-send="true">
+                                        <img name=""
+                                          src="http://images.meredith.com/crossbrand/Social-Icons/instagram.png"
+                                          alt="Instagram"
+                                          class="responsive-image"
+                                          style="max-width: 30px
+                                          !important"
+                                          moz-do-not-send="true"
+                                          width="30">
+                                      </a>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <!--end Reuben_socnav2 content-->
+                      <!--start Reuben_foot2 content-->
+                      <table role="presentation" class="wrap"
+                        width="700" cellspacing="0" cellpadding="0"
+                        border="0" align="center">
+                        <tbody>
+                          <tr>
+                            <td class="p-tblr-20">
+                              <table role="presentation" class="wrap"
+                                cellspacing="0" cellpadding="0"
+                                border="0" align="center">
+                                <tbody>
+                                  <tr>
+                                    <td align="center">
+                                      <table role="presentation"
+                                        cellspacing="0" cellpadding="0"
+                                        border="0" align="center">
+                                        <tbody>
+                                          <tr>
+                                            <td class="text"
+                                              style="padding-right:15px;
+                                              border-right:1px solid
+                                              #e5e5e5; font-size:16px;
+                                              font-weight:700;
+                                              text-align:center;"><a
+                                                data-link-name="Unsubscribe"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675803&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                style="color:#000000;"
+                                                moz-do-not-send="true">Unsubscribe</a>
+                                            </td>
+                                            <td class="text"
+                                              style="padding-left:15px;
+                                              font-size:16px;
+                                              font-weight:700;
+                                              text-align:center;"><a
+                                                data-link-name="Update
+                                                User Profile"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675875&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                                style="color:#000000;"
+                                                moz-do-not-send="true">Update
+                                                User Profile</a>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="footer-text"
+                                      style="padding:20px 0px;">This
+                                      email was sent to <a class="moz-txt-link-abbreviated" href="mailto:iuri@iurix.com">iuri@iurix.com</a><span
+                                        class="empty">Â Â |Â Â </span><span
+                                        class="break">Was this email
+                                        forwarded to you? <a
+                                          data-link-name="Subscribe"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675876&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                          style="color:#000000;"
+                                          moz-do-not-send="true">Subscribe
+                                          here</a></span> </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="footer-text"><span
+                                        class="break">Meredith
+                                        Corporation</span><span
+                                        class="empty">, </span>1716
+                                      Locust Street, Des Moines, IA
+                                      50309 <span class="break">Â©2019.
+                                        All Rights Reserved.</span>
+                                      <br>
+                                      <a data-link-name="Privacy Policy"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675804&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        style="color:#000000;"
+                                        moz-do-not-send="true">Privacy
+                                        Policy</a>Â Â |Â Â <a
+                                        data-link-name="California
+                                        Privacy Rights"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675805&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        style="color:#000000;"
+                                        moz-do-not-send="true">California
+                                        Privacy Rights</a>Â Â |Â Â <a
+                                        data-link-name="Terms of
+                                        Service"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675806&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        style="color:#000000;"
+                                        moz-do-not-send="true">Terms of
+                                        Service</a>Â Â |Â Â <a
+                                        data-link-name="Help Center"
+href="http://l.mail.travelandleisure.com/rts/go2.aspx?h=9675877&amp;tp=i-H43-9U-1yPU-UAYh5m-Hv-8pdmo-1c-UAUlvA-c2xSG&amp;x=237ddc72c0b36ca87c4712e37380af1d5643801a%7c470548%7c20191216%7c121619%7c470548%7c27640017122"
+                                        style="color:#000000;"
+                                        moz-do-not-send="true">Help
+                                        Center</a></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <!--end Reuben_foot2 content-->
+                      <!--end Reuben_lower2 content-->
+                      <!--end message content-->
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- end wrapper table -->
+      <!--Yahoo-Specific CSS (Copy CSS from above and place here [use minifier.org to compress])-->
+      <style type="text/css">@import url(https://fonts.googleapis.com/css?family=Playfair+Display|Roboto:400,700|Roboto+Condensed:700&display=swap);</style>
+      <style type="text/css">a{color:#666}h1,.hl-1,h2,.hl-2{font-family:'Playfair Display',Georgia,serif}h3,.hl-3,p,.text,.footer-text,.bold,.bullet{font-family:'Roboto',Arial,serif}.button_structure,.button_style{font-family:'Roboto Condensed',Arial,sans-serif}h1,.hl-1{font-size:28px;line-height:35px;font-weight:400;text-align:left;color:#000}h2,.hl-2{font-size:24px;line-height:30px;font-weight:400;text-align:left;color:#000}h3,.hl-3{font-size:16px;line-height:20px;font-weight:700;text-transform:uppercase;color:#000}p,.text{font-size:15px;line-height:20px;font-weight:400;text-align:left;color:#000}.footer-text{font-size:12px;line-height:15px;text-align:center;color:#999}.border{border:1px solid #ddd}.bullet{color:#333}.button_structure{-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;height:45px;background-color:#000;text-align:center;mso-line-height-rule:exactly!important}.button_style{font-size:14px;line-height:14px;font-weight:400;letter-spacing:0;mso-line-height-rule:exactly!important;color:#ffffff!important;text-decoration:none;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;padding:10px 0;display:inline-block;width:100%}.circle{-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%}</style>
+      <style type="text/css">html{Margin:0 auto;padding:0}body{width:100%;min-width:100%;Margin:0 auto!important;padding:0!important;border-collapse:collapse!important;table-layout:fixed!important}table td{border-collapse:collapse!important}img{display:block;border:none;text-align:center}.p-tblr-20{padding-top:20px;padding-bottom:20px;padding-left:20px;padding-right:20px}.p-t-20-b-25{padding-top:20px;padding-bottom:25px}#outlook a{padding:0!important}.ExternalClass *{line-height:100%}*{-webkit-text-size-adjust:none}@media screen and (max-width:480px){u + .body .full-wrap{width:100%!important;width:100vw!important}.mobile-only{display:block!important;width:auto!important;max-height:inherit!important;overflow:visible!important;float:none!important}.wrap{width:100%!important;max-width:100%!important;height:auto!important}.empty{width:0!important;height:0!important;display:none!important}.responsive-image{width:100%!important;max-width:100%!important;height:auto!important}.padding-none{padding:0px!important}.mp-b-20{padding-bottom:20px!important}.mp-tblr-20{padding-top:20px!important;padding-bottom:20px!important;padding-left:20px!important;padding-right:20px!important}.mp-lr-20{padding-left:20px!important;padding-right:20px!important}.mp-lr-5{padding-left:5px!important;padding-right:5px!important}.m-align{vertical-align:middle!important}.margin-none{margin:0!important}.break{display:block!important}.text-center{text-align:center!important}.lh-25{line-height:25px!important}}</style>
+      <!--Safe RTB Code-->
+      <table width="40" height="6" cellspacing="0" cellpadding="0"
+        border="0">
+        <tbody>
+          <tr>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494400&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494401&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494402&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494403&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494404&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494405&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494406&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494407&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494408&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494409&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494410&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494411&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494412&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494413&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494414&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494415&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494416&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494417&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494418&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+            <td><img
+src="http://li.travelandleisure.com/imp?s=125494419&amp;li=TAL_JustIn&amp;e=iuri@iurix.com&amp;p=2019-12-17"
+                moz-do-not-send="true" width="2" height="6" border="0"></td>
+          </tr>
+        </tbody>
+      </table>
+      <img
+src="https://session.timecommerce.net/v1/sp?ids=hid=237ddc72c0b36ca87c4712e37380af1d5643801a&amp;did=470548-20191217"
+        moz-do-not-send="true" width="0" height="1">
+    </div>
+  </body>
+</html>
+}

@@ -40,3 +40,14 @@
   </div>
   <div class="col-sm-2"></div>
 </div>
+
+
+
+<script>
+$("#p").mask("$.$$0,00", {reverse :true});
+$("#jp").mask("$.$$0,00", {reverse :true});
+$("#jm").mask("$.$$0,00", {reverse :true});
+$("#mp").mask("$.$$0,00", {reverse :true});
+$("#subtotal").mask("$.$$0,00", {reverse :true});
+
+</script>

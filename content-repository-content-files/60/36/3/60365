@@ -1,0 +1,833 @@
+text/html {<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <br>
+    <div class="moz-forward-container"><!-- start coded_template: id:9783722120 path:Coded files/Custom/email/Engineering_Blog_Emails/New_Article_v4.html -->
+      <meta name="viewport" content="width=device-width,
+        initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title></title>
+      <style type="text/css">
+      p {
+        margin: 15px 0;
+      }
+    </style>
+      <meta name="generator" content="HubSpot">
+      <meta property="og:url"
+content="http://toptal-2799924.hs-sites.com/-temporary-slug-21697490-b3ab-4a36-8966-e7411ebc992f">
+      <meta name="x-apple-disable-message-reformatting">
+      <meta name="robots" content="noindex,follow">
+      <div id="preview_text" style="display: none; font-size: 1px;
+        color: #f2f2f2; line-height: 1px; max-height: 0px; max-width:
+        0px; opacity: 0; overflow: hidden;">Seva evaluates XML as a data
+        interchange format and discusses the future of JSON.</div>
+      <div style="width: 640px; margin: 0 auto; min-width: 640px;
+        max-width: 640px;">
+        <div style="letter-spacing: 636px; line-height: 0; mso-hide:
+          all">Â </div>
+        <table style="width: 100%;" border="0" cellspacing="0"
+          cellpadding="0">
+          <tbody>
+            <tr>
+              <td><br>
+              </td>
+              <td width="640">
+                <table style="width: 100%; border-spacing: 0;
+                  border-collapse: collapse;">
+                  <tbody>
+                    <tr>
+                      <td style="padding: 0;">
+                        <div style="display: block; width: 100%;
+                          background: #204ECF;">
+                          <table style="width: 100%; background:
+                            #204ECF;" border="0" cellspacing="0"
+                            cellpadding="0">
+                            <tbody>
+                              <tr>
+                                <td colspan="4" style="padding: 0;"
+                                  height="22"><br>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="padding: 0;" width="20"><br>
+                                </td>
+                                <td style="vertical-align: middle;"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*W5M6k2X6_QYCyW40R9ch4bRjX-0/5/f18dQhb0Sjvc8YXN32N7rRy-jHyjJqN8q5L1xRJm4PW3hHh8X2P7_nXVcnTGj992gLmW4t0sSr1n3kJCW7nwMJH1xbWNZW26nPn92yH5cmW26p8qv61SSZmW7mG7sD51vX4yW6Gmspn1dqWs6W6nfQxS4s2K_hW5CRkYj5NWmFkV-zk2J47YlYyW4bfcHb47Xx4zW3C811X4-TPrsW2KQ2YY6lD20dW49WVtr3VVg3wW3y7v1R6G2lbzN7NMdQN4cNXyW75WRHJ7r2tqhW5rfP1F88MT0jN7VsjX6KMzbWW8N102Z4G-h9vW78vFcf1MFzbwW8mC8R853mbHYW2QsJB96CN4WQW83FqPB6xsYNbW2M7j9-6B0p1TW2QQ47f7Dmlr5W66rs2T5VqNrXN2Qn0Xgsgb2xW5gSHY56H5W1CW37P0d415hnZlW2Z_zlj5D8ns9VxKbDf1ymH-qN3xxDzQJhllSW3zjt6Y373JcXW3Dvwgk8NjF9fW1MwNhn5j24_MN8J6ll6mRw0WDdXyXb2r_-f3QPswT03"
+                                    data-hs-link-id="0" target="_blank"
+                                    moz-do-not-send="true"><img
+src="https://uploads.toptal.io/blog/image/126936/toptal-blog-image-1534853015367-19063c5267213474b04a827f089ad0c2.png"
+                                      alt="" style="float: left;"
+                                      moz-do-not-send="true" height="29"></a>
+                                </td>
+                                <td style="vertical-align: middle;
+                                  text-align: right;" align="right">
+                                  <table border="0" align="right"
+                                    cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                      <tr>
+                                        <td> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*W9hPmVz7-_Q0TW8lrTyL4sZtHs0/5/f18dQhb0Sjvb8YXMVzN7rRy-jHyjJqN8q5L1xRJm4PN3hHhbrVMsQMVnQ9Qq8Z_pJ9W2MyX6Q8YztwfW8Z_tb32K85XMW31mwRD2MznrNN5nbq6BGXpVfW3ZD1X32qVftPW3ppM5y8W51BJW1TxP_c2cHyfvW4fhyL7560qrCW5ZpycS57-ZBTW83C5JP37RhtbW7NrMZs3ndfYDW5DFWr25mKjF6W3m2lpt2x-ccwW7d094f6G7FblW4DFfS36R8gysW41mgC15kzDtRW5krMjD7YsvtZW2JMtQZ5d7t41W7ZbG8f41NCXGW9jKMh72nqhCpVPDmZQ41T3qNW8rdWLV8qBQQBW8RH8YY4VctvfW5khg7w16rQqqW6ZvGS-4TY1QhW87c84J3Sn0_0W4KP5BH1VtdWZN14ytl-VR6H2W4q1tJT93KrcyW1RVr3Z4msb1TW1CksCf7gYszfW4brRL44j9fpGW5SfN2s3D4fWZW5xGZCL35-zJBW8GljtD4f28vsMVs7V_VmpDcf23HQfL02"
+                                            data-hs-link-id="0"
+                                            target="_blank"
+                                            moz-do-not-send="true"><img
+src="https://uploads.toptal.io/blog/image/125668/toptal-blog-image-1521005292111-0582221c638699855c9370718a6dc648.png"
+                                              alt=""
+                                              style="vertical-align:
+                                              top;"
+                                              moz-do-not-send="true"
+                                              width="32"></a> </td>
+                                        <td width="20">Â </td>
+                                        <td> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*W8p2V8h61M-zTW3Xr_X-3fzYjB0/5/f18dQhb0SbTX8Y9ZP0W5vB61F1m4DtzW7t5B9G1DpMbNW6Dk5R21SrC8dVLDpF18CSvhfW8DrTT23KzZKHW8rCJJ_8tBFq3N8m1tVXRJWYmW8l2nK08r4b46W63lffJ5_MPY7W81gM8-7d-tJnVQJ99n8tsM52W62cMPM3ppM5yW8W51BJ1TxP_cW2cHyfv4fhHg6W8hTJV48lwVXYW8hS2967bj20MW3c_zs67J39qHW2m8DqK2HT8mrW6lNxNt8DNj1dW8QKpyr4sj3hVW2BcyM91mGWlYW4VgDS72pn5lgW7bV1p-2nJBSnW2Bmn7x4sqGsYW3N1p7j7c0VkxW8KlRd174hVtQVPXS3Q4WxtcZW5XlGjf5tqP2kW2xHQJx1qYJpnW7ZHPxt86QnnXW9687gz8Q_JspW73ZRqS42bhkrW5wXVpT6SSJNcMw97znVzQv-VVn7DD1Ff1gFN2N2X6_W2lQbW4Jz7-R2nRylcW5rNKps7Z0jFvW6YSqnL2_yQmKW4-cjBQ5zRT1-N8hLFqZpRF6TW1NwBMn1MVsRjTxgLY6SN26d103"
+                                            data-hs-link-id="0"
+                                            target="_blank"
+                                            moz-do-not-send="true"><img
+src="https://uploads.toptal.io/blog/image/125667/toptal-blog-image-1521005283540-4d933a4bb042a18e5843222a037d0201.png"
+                                              alt=""
+                                              style="vertical-align:
+                                              top;"
+                                              moz-do-not-send="true"
+                                              width="32"></a> </td>
+                                        <td width="20">Â </td>
+                                        <td> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*V6wVsQ8bBx2HW5hcw3k8t1WGk0/5/f18dQhb0SbTR8YXNq0N7rRy-jHyjJqN8q5L1xRJm4PW3hHhdt2P7_nXVcnTGj992gLmW4txBlX6b16HkW7Z5GVw6PZb6JVb8m6N1xbWNZW26nPn92yH4W5W1nrCGB51LTg5W5DHNj21f1W6KVqmbPC3ppM5yW8W51BJ1TxP_cW2cHyfv4fhHf-W8hTJV48lwVXYW8hS2967bj1_4VFLkzn5rC5Q6W80MMfG5DFWr2W5mKjF63m2gsrW53X_Zp52YlfxW3_8mpl9fgwMTW4fd6Q382Ky5jW1j1n8_1fQvQ0W6wQxtn5pvZDWW159tMg6yhrwSW83xQmJ9dm49JW4PQ6Dd1BdkxLW83JKh97wmYCmW7x2KKz8ggk-WVrhDwy1hsGvmW2bWFYN4yVsRyVnMbFr6XjSNCN7KK8WS6qVQ7W3MYtL8294YPHW1NFfl48P4pWxW8RhZrM3JLpG4W8KVZFt3jzyPPW5bN28m8nVd-yW8ClvQj2kq3NTW7b9yS51MbBMwW6fXgk_7ZzM3SW8x2Tv41MWhN-W1MKdc285D0lz111"
+                                            data-hs-link-id="0"
+                                            target="_blank"
+                                            moz-do-not-send="true"><img
+src="https://uploads.toptal.io/blog/image/125666/toptal-blog-image-1521005268330-d7ae3975c766ab789a8da965bd772e6a.png"
+                                              alt=""
+                                              style="vertical-align:
+                                              top;"
+                                              moz-do-not-send="true"
+                                              width="32"></a> </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                                <td style="padding: 0;" width="20"><br>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" style="padding: 0;"
+                                  height="22"><br>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 0;">
+                        <div style="display: block; width: 100%;
+                          overflow: hidden; background: #FFFFFF;
+                          background: linear-gradient(180deg, #11286C
+                          334px, #FFFFFF 334px);">
+                          <div style="display: block; width: 640px;
+                            margin: 0 auto; padding: 0 0 8px;
+                            background:
+url(https://hs-2799924.f.hubspotemail.net/hub/2799924/hubfs/0724-JSON-VS-XML-part3-Luke_Newsletter.png)
+                            0% 0% / 640px 334px no-repeat;
+                            background-image:
+url(https://hs-2799924.f.hubspotemail.net/hub/2799924/hubfs/0724-JSON-VS-XML-part3-Luke_Newsletter.png);
+                            background-size: 640px 334px;
+                            background-repeat: no-repeat;"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*VvqYc-5H_k9PN17VzTpj6Sr40/5/f18dQhb0SbTT8Y9_DzW5vB61F1m4DtzW7t5B9G1DpMbNW6Dk5TP5Cgxh0VnQ9Qq8--HBkW8Z_2Kr2K85-MW5mZ50N7r9JBgW6zfF1y4gs4WJN1BL6W4pSLjKW4f-s8c2MTPSyVKng6q1Wg4bjW2tHSDw58j9SkW7HMmhx32ShdrW7JlxgG5LMjltW5hDPvW7JCxGlW81bhDK7N_KqMW12CJpd3VKVtLW6mGWN224ZF-xW1ZY618835kBnW4YFc4457-WqMW3H_Pty2DzCtRW1yB_6Y21YsC0W7k9Ctn54Rg4jW5KFcw_7CJ0SKW3ZFNh58TkvhsVLVWnL1PHLhvW8ccbV08c1Z0hVkbRMW3--w4KW3ppJkW5YzB5tW9kG4vM8hsSswW1SN9lH21fTtYW5ScVfg2LT1qVW7pZjc19kFbqXN6Pc2NW433c6MwKJnC3qXS-W3nv6Gw2ykpF4W6hRCjj7334cKW1ny5pj8RprFdW6H0qbP9gqLk6W45Mlsw92wZldW6SDCt38_drDGW4Zg3V21WPqF4VpV_-f2lYd-N111"
+                              style="display: block; width: 100%;
+                              height: 296px; text-decoration: none;"
+                              data-hs-link-id="0" target="_blank"
+                              moz-do-not-send="true">Â </a>
+                            <table style="width: 100%;" border="0"
+                              cellspacing="0" cellpadding="0">
+                              <tbody>
+                                <tr>
+                                  <td style="padding: 0;" width="16"><br>
+                                  </td>
+                                  <td>
+                                    <table style="width: 100%;
+                                      background: #fff;" border="0"
+                                      cellspacing="0" cellpadding="0">
+                                      <tbody>
+                                        <tr>
+                                          <td colspan="3"
+                                            style="padding: 0;"
+                                            height="30"><br>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td style="padding: 0;"
+                                            width="30"><br>
+                                          </td>
+                                          <td> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*W70WCX68vMssvW7jwzXl3_lBK70/5/f18dQhb0SbTT8Y9_DzW5vB61F1m4DtzW7t5B9G1DpMbNW6Dk5TP5Cgxh0VnQ9Qq8--HBkW8Z_2Kr2K85-MW5mZ50N7r9JBgW6zfF1y4gs4WJN1BL6W4pSLjKW4f-s8c2MTPSyVKng6q1Wg4bjW2tHSDw58j9SkW7HMmhx32ShdrW7JlxgG5LMjltW5hDPvW7JCxGlW81bhDK7N_KqMW12CJpd3VKVtLW6mGWN224ZF-xW1ZY618835kBnW4YFc4457-WqMW3H_Pty2DzCtRW1yB_6Y21YsC0W7k9Ctn54Rg4jW5KFcw_7CJ0SKW3ZFNh58TkvhsVLVWnL1PHLhvW8ccbV08c1Z0hVkbRMW3--w4KW3ppJkW5YzB5tW9kG4vM8hsSswW1SN9lH21fTtYW5ScVfg2LT1qVW7pZjc19kFbqXN6Pc2NW433c6MwKJnC3qXS-W3nv6Gw2ykpF4W6hRCjj7334cKW1ny5pj8RprFdW6H0qbP9gqLk6W45Mlsw92wZldW6SDCt38_drDGW4Zg3V21WPqKRVpV__L3SBqPp111"
+                                              style="text-decoration:
+                                              none;" data-hs-link-id="1"
+                                              target="_blank"
+                                              moz-do-not-send="true">
+                                              <h1 style="margin: 0;
+                                                font-family: 'Helvetica
+                                                Neue', Helvetica, 'Segoe
+                                                UI', Arial, sans-serif;
+                                                font-weight: 400;
+                                                font-size: 30px; color:
+                                                #204ECF;">A Deep Look at
+                                                JSON vs. XML, Part 3:
+                                                XML and the Future of
+                                                JSON</h1>
+                                            </a>
+                                            <table border="0"
+                                              cellspacing="0"
+                                              cellpadding="0">
+                                              <tbody>
+                                                <tr>
+                                                  <td style="padding:
+                                                    0;" height="18"><br>
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                  <td style="padding: 0;
+                                                    font-family:
+                                                    'Helvetica Neue',
+                                                    Helvetica, 'Segoe
+                                                    UI', Arial,
+                                                    sans-serif;
+                                                    font-size: 16px;
+                                                    line-height:
+                                                    1.4375;">
+                                                    <p
+                                                      style="margin-bottom:
+                                                      1em; ">In Part 1
+                                                      and 2, we took a
+                                                      closer look at the
+                                                      evolution of the
+                                                      web, how XML and
+                                                      JSON arose, and
+                                                      the differences
+                                                      between the two
+                                                      standards.</p>
+                                                    <p
+                                                      style="margin-bottom:
+                                                      1em; ">In this
+                                                      final part of our
+                                                      series on JSON vs.
+                                                      XML, Toptal
+                                                      Freelance
+                                                      Full-stack
+                                                      Developer Seva
+                                                      Safris looks at
+                                                      XML as a data
+                                                      interchange
+                                                      format, and how
+                                                      well it supports
+                                                      complex
+                                                      requirements. We
+                                                      end this series
+                                                      with a discussion
+                                                      about the future
+                                                      of JSON, and
+                                                      explore solutions
+                                                      that bring the
+                                                      strengths of XML
+                                                      to JSON.</p>
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                  <td style="padding:
+                                                    0;" height="32"><br>
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                  <td style="padding:
+                                                    0;"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*W1l8kkK7GP5-zW9g623k6BpXDb0/5/f18dQhb0SbTT8Y9_DzW5vB61F1m4DtzW7t5B9G1DpMbNW6Dk5TP5Cgxh0VnQ9Qq8--HBkW8Z_2Kr2K85-MW5mZ50N7r9JBgW6zfF1y4gs4WJN1BL6W4pSLjKW4f-s8c2MTPSyVKng6q1Wg4bjW2tHSDw58j9SkW7HMmhx32ShdrW7JlxgG5LMjltW5hDPvW7JCxGlW81bhDK7N_KqMW12CJpd3VKVtLW6mGWN224ZF-xW1ZY618835kBnW4YFc4457-WqMW3H_Pty2DzCtRW1yB_6Y21YsC0W7k9Ctn54Rg4jW5KFcw_7CJ0SKW3ZFNh58TkvhsVLVWnL1PHLhvW8ccbV08c1Z0hVkbRMW3--w4KW3ppJkW5YzB5tW9kG4vM8hsSswW1SN9lH21fTtYW5ScVfg2LT1qVW7pZjc19kFbqXN6Pc2NW433c6MwKJnC3qXS-W3nv6Gw2ykpF4W6hRCjj7334cKW1ny5pj8RprFdW6H0qbP9gqLk6W45Mlsw92wZldW6SDCt38_drDGW4Zg3V21XNJnHMpV_YtKFh9h111"
+                                                      style="display:
+                                                      inline-block;
+                                                      border-width: 14px
+                                                      48px 14px 48px;
+                                                      border-style:
+                                                      solid;
+                                                      border-color:
+                                                      #00CC83;
+                                                      border-radius:
+                                                      4px; background:
+                                                      #00CC83; color:
+                                                      #FFFFFF;
+                                                      font-family:
+                                                      'Helvetica Neue',
+                                                      Helvetica, 'Segoe
+                                                      UI', Arial,
+                                                      sans-serif;
+                                                      font-size: 15px;
+                                                      font-weight: 700;
+                                                      text-decoration:
+                                                      none; text-align:
+                                                      center;"
+                                                      data-hs-link-id="2"
+                                                      target="_blank"
+                                                      moz-do-not-send="true">Continue
+                                                      Reading</a> </td>
+                                                </tr>
+                                                <tr>
+                                                  <td style="padding:
+                                                    0;" height="10"><br>
+                                                  </td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                          </td>
+                                          <td style="padding: 0;"
+                                            width="30"><br>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td colspan="3"
+                                            style="padding: 0;"
+                                            height="30"><br>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                  <td style="padding: 0;" width="16"><br>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 0;">
+                        <table style="width: 100%; background: #F3F3F3;"
+                          border="0" cellspacing="0" cellpadding="0">
+                          <tbody>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="40"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 0;" width="46"><br>
+                              </td>
+                              <td style="padding: 0;">
+                                <table style="width: 100%; background:
+                                  #F3F3F3;" border="0" cellspacing="0"
+                                  cellpadding="0">
+                                  <tbody>
+                                    <tr>
+                                      <td>
+                                        <h2 style="margin: 0; padding:
+                                          0; font-family: 'Helvetica
+                                          Neue', Helvetica, 'Segoe UI',
+                                          Arial, sans-serif;
+                                          font-weight: 400; font-size:
+                                          24px;">About the Author</h2>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td style="padding: 0;"
+                                        height="20"><br>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td>
+                                        <table style="width: 100%;"
+                                          border="0" cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td style="padding: 0;
+                                                max-width: 228px;
+                                                background: #fff;"
+                                                width="228" valign="top">
+                                                <a href=""
+                                                  data-hs-link-id="0"
+                                                  target="_blank"
+                                                  moz-do-not-send="true">
+                                                  <img
+src="https://uploads.toptal.io/user/photo/24849/large_aa765a3e7243db7e5ac85bedc951c38e.png"
+                                                    alt=""
+                                                    moz-do-not-send="true"
+                                                    width="228"> </a>
+                                                <table style="width:
+                                                  100%;" border="0"
+                                                  cellspacing="0"
+                                                  cellpadding="0">
+                                                  <tbody>
+                                                    <tr>
+                                                      <td colspan="3"
+                                                        style="padding:
+                                                        0;" height="24"><br>
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        style="padding:
+                                                        0;" width="22"><br>
+                                                      </td>
+                                                      <td>
+                                                        <h3
+                                                          style="margin:
+                                                          0;
+                                                          font-family:
+                                                          'Helvetica
+                                                          Neue',
+                                                          Helvetica,
+                                                          'Segoe UI',
+                                                          Arial,
+                                                          sans-serif;
+                                                          font-weight:
+                                                          400;
+                                                          font-size:
+                                                          18px;">Seva
+                                                          Safris</h3>
+                                                      </td>
+                                                      <td
+                                                        style="padding:
+                                                        0;" width="22"><br>
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td colspan="3"
+                                                        style="padding:
+                                                        0;" height="6"><br>
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        style="padding:
+                                                        0;" width="22"><br>
+                                                      </td>
+                                                      <td>
+                                                        <p
+                                                          style="margin-bottom:
+                                                          1em; margin:
+                                                          0;
+                                                          font-family:
+                                                          'Helvetica
+                                                          Neue',
+                                                          Helvetica,
+                                                          'Segoe UI',
+                                                          Arial,
+                                                          sans-serif;
+                                                          font-weight:
+                                                          700;
+                                                          font-size:
+                                                          13px; color:
+                                                          #455065;">Full-stack
+                                                          Developer</p>
+                                                        <p
+                                                          style="margin-bottom:
+                                                          1em;
+                                                          line-height:
+                                                          22px;
+                                                          font-family:
+                                                          'Helvetica
+                                                          Neue',
+                                                          Helvetica,
+                                                          'Segoe UI',
+                                                          Arial,
+                                                          sans-serif;
+                                                          font-size:
+                                                          14px; color:
+                                                          #455065;">Seva
+                                                          is a veteran
+                                                          of both
+                                                          enterprise and
+                                                          startups with
+                                                          20 years of
+                                                          industry
+                                                          experience,
+                                                          and a UC
+                                                          Berkeley
+                                                          graduate in
+                                                          EECS and MSE.
+                                                          His
+                                                          impressive,
+                                                          fast-track
+                                                          leadership
+                                                          career is
+                                                          marked by his
+                                                          proven ability
+                                                          to lead
+                                                          peak-performing
+                                                          teams,
+                                                          achieving
+                                                          remarkable
+                                                          results.</p>
+                                                      </td>
+                                                      <td
+                                                        style="padding:
+                                                        0;" width="22"><br>
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td colspan="3"
+                                                        style="padding:
+                                                        0;" height="32"><br>
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        style="padding:
+                                                        0;" width="22"><br>
+                                                      </td>
+                                                      <td
+                                                        style="text-align:
+                                                        center;"> <a
+                                                          href=""
+                                                          style="display:
+                                                          block;
+                                                          padding: 14px
+                                                          0; border: 1px
+                                                          solid #C4C6CA;
+                                                          border-radius:
+                                                          4px;
+                                                          background:
+                                                          #FFFFFF;
+                                                          color:
+                                                          #00CC83;
+                                                          font-family:
+                                                          'Helvetica
+                                                          Neue',
+                                                          Helvetica,
+                                                          'Segoe UI',
+                                                          Arial,
+                                                          sans-serif;
+                                                          font-size:
+                                                          15px;
+                                                          font-weight:
+                                                          700;
+                                                          text-decoration:
+                                                          none;
+                                                          text-align:
+                                                          center;"
+                                                          data-hs-link-id="1"
+target="_blank" moz-do-not-send="true">Hire the Author</a> </td>
+                                                      <td
+                                                        style="padding:
+                                                        0;" width="22"><br>
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td colspan="3"
+                                                        style="padding:
+                                                        0;" height="24"><br>
+                                                      </td>
+                                                    </tr>
+                                                  </tbody>
+                                                </table>
+                                              </td>
+                                              <td style="padding: 0;"
+                                                width="28"><br>
+                                              </td>
+                                              <td style="padding: 0;"
+                                                valign="top">
+                                                <table style="width:
+                                                  100%;" border="0"
+                                                  cellspacing="0"
+                                                  cellpadding="0">
+                                                  <tbody>
+                                                    <tr>
+                                                      <td
+                                                        style="padding:
+                                                        0;">
+                                                        <h3
+                                                          style="margin-bottom:
+                                                          32px; margin:
+                                                          0;
+                                                          font-family:
+                                                          'Helvetica
+                                                          Neue',
+                                                          Helvetica,
+                                                          'Segoe UI',
+                                                          Arial,
+                                                          sans-serif;
+                                                          font-weight:
+                                                          400;
+                                                          font-size:
+                                                          18px; color:
+                                                          #455065;">Other
+                                                          recommended
+                                                          articles:</h3>
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td
+                                                        style="padding:
+                                                        0;" height="32"><br>
+                                                      </td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td>
+                                                        <ul
+                                                          style="padding:
+                                                          0 0 0 20px;">
+                                                          <li
+                                                          style="margin:
+                                                          0 0 32px;"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*VL6YL857QGhzW17ffyP6KwnpB0/5/f18dQhb0SbTT8Y9_DzW5vB61F1m4DtzW7t5B9G1DpMbNW6Dk5TP5Cgxh0VnQ9Qq8--HBkW8Z_2Kr2K85-MW5mZ50N7r9JBgW6zfF1y4gs4WJN1BL6W4pSLjKW4d_9pD2MTPSyVKng6q1Wg4bjW2tHSDw58j9SkW7HMmhx32ShdrW7JlxgG5LMjltW5hDPvW7JCxGlW81bhDK7N_KqMW12CJpd3VKVtLW6mGWN224ZF-xW1ZY618835kBnW4YFc4457-WqMW3H_Pty2DzCtRW1yB_6Y21YsC0W7k9Ctn54Rg4jW5KFcw_7CJ0SKW3ZFNh58TkvhsVLVWnL1PHLhvW8ccbV08c1Z0hVkbRMW3--w4KW3ppJkW5YzB5tW9kG4vM8hsSswW1SN9lH21fTtYW5ScVfg2LT1qVW7pZjc19kFbqXN6Pc2NW433c6MwKJnC3qXS-W3nv6Gw2ykpF4W6hRCjj7334cKW1ny5pj8RprFdW6H0qbP9gqLk6W45Mlsw92wZldW6SDCt38_drDGW4Zg3V21WPqF4VpV_Yd44fj5w111"
+style="font-family: 'Helvetica Neue', Helvetica, 'Segoe UI', Arial,
+                                                          sans-serif;
+                                                          font-size:
+                                                          14px;
+                                                          text-decoration:
+                                                          none; color:
+                                                          #204ECF;"
+                                                          data-hs-link-id="0"
+target="_blank" moz-do-not-send="true">A Deep Look at JSON vs. XML, Part
+                                                          1: The History
+                                                          of Each
+                                                          Standard</a> </li>
+                                                          <li
+                                                          style="margin:
+                                                          0 0 32px;"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*W9d9Vgq8HzJM7W84nGwr1g8vl20/5/f18dQhb0SbTT8Y9_DzW5vB61F1m4DtzW7t5B9G1DpMbNW6Dk5TP5Cgxh0VnQ9Qq8--HBkW8Z_2Kr2K85-MW5mZ50N7r9JBgW6zfF1y4gs4WJN1BL6W4pSLjKW4f-s3t2MTPSyVKng6q1Wg4bjW2tHSDw58j9SkW7HMmhx32ShdrW7JlxgG5LMjltW5hDPvW7JCxGlW81bhDK7N_KqMW12CJpd3VKVtLW6mGWN224ZF-xW1ZY618835kBnW4YFc4457-WqMW3H_Pty2DzCtRW1yB_6Y21YsC0W7k9Ctn54Rg4jW5KFcw_7CJ0SKW3ZFNh58TkvhsVLVWnL1PHLhvW8ccbV08c1Z0hVkbRMW3--w4KW3ppJkW5YzB5tW9kG4vM8hsSswW1SN9lH21fTtYW5ScVfg2LT1qVW7pZjc19kFbqXN6Pc2NW433c6MwKJnC3qXS-W3nv6Gw2ykpF4W6hRCjj7334cKW1ny5pj8RprFdW6H0qbP9gqLk6W45Mlsw92wZldW6SDCt38_drDGW4Zg3V21WPqF4VpW00w7Mt7yh111"
+style="font-family: 'Helvetica Neue', Helvetica, 'Segoe UI', Arial,
+                                                          sans-serif;
+                                                          font-size:
+                                                          14px;
+                                                          text-decoration:
+                                                          none; color:
+                                                          #204ECF;"
+                                                          data-hs-link-id="0"
+target="_blank" moz-do-not-send="true">A Deep Look At JSON vs. XML, Part
+                                                          2: The
+                                                          Strengths and
+                                                          Weaknesses of
+                                                          Both</a> </li>
+                                                          <li
+                                                          style="margin:
+                                                          0 0 32px;"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*W8lK59810WpzzW7MrHKV2xbHbh0/5/f18dQhb0S8349ctxVzN7rRy-jHyjJqN8q5L1xRJm4PW3hHh9_5zh-NRVnQ9Qq8--HBkW8Z_2Kr2K85-MW5mZ50N7r9JBgW5pXSLy1VgCqhN52XGKSK3KNdW31H36Y5nblDHW8Xl4XJ1Vc8JTW6zfgT_2g_5MPW8xW5yp67h08GW1qMTQx37-lBnW8m7cbK8rD0BlVQJGTy8pQNVfW4H_yDl7lcvHTW1L4LKy2VXYzJN7t5r0htGVjmW3VXWyn5y8wvBW5FyShG5x2JJLW8pChcS4KHSs3W5x5KNk7-XB_5W67h1CP8qQfVdW32p-C34cMfxqW57ykDL96dt2WW4-24TP99TJLMW5RlSdT5xNCj8W8mGgzn313G0_N8wxL7dLGKqLW3ZdsWP5r8cVxVMGpdt5yNwX5W38WXVP5LyH3QW16-ndH11t4PyMFfQ_rX502FW5FJN8V5CKh4YW33Wpzk8gGb2vW3pKKDw3rgzxvW8NlJ6x8Mc8RHW3pkvNm38TX69W8w-cNW1BgLjvW6sZc3n73QsnmW1d5pgb4NzZCLW6Btl9c5k01NcW1t2x9F61lPZvW25bs1285sHmZN6hmZsHbtxvrW95hyV_4s8ltqW6-5NHL8PGls2W4Pxhj53DlwBbW26631t5QLhx40"
+style="font-family: 'Helvetica Neue', Helvetica, 'Segoe UI', Arial,
+                                                          sans-serif;
+                                                          font-size:
+                                                          14px;
+                                                          text-decoration:
+                                                          none; color:
+                                                          #204ECF;"
+                                                          data-hs-link-id="0"
+target="_blank" moz-do-not-send="true">JSON Web Token Tutorial: An
+                                                          Example in
+                                                          Laravel and
+                                                          AngularJS</a>
+                                                          </li>
+                                                          <li
+                                                          style="margin:
+                                                          0 0 32px;"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*W6l3YQB4X4MrmW4x7zFh1ygGBJ0/5/f18dQhb0Sq5y8Y9WDlW5vB61F1m4DtzW7t5B9G1DpMbNW6Dk5QM1Qt2G2VLDpF18CSvhfW8CRP2G5qjcTMW1nPLDM3NwXC9MQKhFyRy_JSW3KzrqK61TcpbW8rBTMK8tY9QjN1l21dNYwlK6W5CRfQZ7dDt3sW61SSZm7mG7sDW51vX4y6GmkM7W34RChY8X4fzwW30rzWl8X4nlWW66KBg-1ZJc7nW9dSlS635rgClW94-4T07sLptqW41TlcR3TwTqCW4KbKt-2kGjZwW6qQkKC7wxfkwW94q7cq6VKJl2W1hC_8g5lppH7W2qGfs85VdNV1W3CrwJ_5TWx4cW5_cJ1f6VNP9NW6B2Jx78g3W63W91LlC48cJV9CW540SYd76R952W7Dd_nC7ph2MFN5YW70hLsDshW8GpkGz8LZDHxW4y4PY34q02-0W8byzWx6KFlQFW2NZcsx3qY36qN4P7JQ8rPpMvMrJh2DR6wHJW6256fC57z9jKW2lxN1619rc8kW7qqT8c8G2Vx7W3tqXr91tPD-FW78GBJd7tZqY5W8Sq1pN4Vt2cZMVMPVbVrLq8W13jlLl4dVPV60"
+style="font-family: 'Helvetica Neue', Helvetica, 'Segoe UI', Arial,
+                                                          sans-serif;
+                                                          font-size:
+                                                          14px;
+                                                          text-decoration:
+                                                          none; color:
+                                                          #204ECF;"
+                                                          data-hs-link-id="0"
+target="_blank" moz-do-not-send="true">Bidirectional Relationship
+                                                          Support in
+                                                          JSON</a> </li>
+                                                          <li
+                                                          style="margin:
+                                                          0 0 32px;"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*N5HzKlGWfJ2FW2s2MkT8z-G_G0/5/f18dQhb0SbTZ8YXNdxN7rRy-jHyjJqN8q5L1xRJm4PW3hHh9D5Cgxh0VnQ9Qq8--HBkW8Z_2Kr2K85-MW5mZ50N8XkDwnW6zfF9532WGb3W30JL2l54SlNfVq50z78Wm7skW1FFnNJ4bJ02hW4b_rKw7MbC3kW3c-XzR58j9SkW7HMmhx32ShdrW7JlxgG5LMjltW2zKx3C9dSlS6W35rgCl94-4T0W7sLfyr520N2HW7v70tS2Hyb60W9dH8_66V4mf7W95y9fP8gjY6LW8WBKbV56sy_8N2NhXFJrqlNHW4MNdJL54CLl_W4QmjKk56MbNTW8WRWsf7x2mP_W54WSMs83BNtXW4QvjFz1yV6FqVtY1yj2rCWcXW1BLJh_53mbRJW2ST-pV6xh8HmW6YtSPv8X8Z8XW8gVx1p4MSdt5W84nzLC1FNlwVN4lBZ6Fnpm3lW1Q68w61MMh8vW3gtF8p5v7gSxN1P4JCn1XPzxW2nRylc5rNKpsW7Z0jFv6YSqnLW2_yQmK4-cjBQW5zRT1-8hLFqZVpRF6T1NwBMnN1MVsRj17_dBf6LL_rv03"
+style="font-family: 'Helvetica Neue', Helvetica, 'Segoe UI', Arial,
+                                                          sans-serif;
+                                                          font-size:
+                                                          14px;
+                                                          text-decoration:
+                                                          none; color:
+                                                          #204ECF;"
+                                                          data-hs-link-id="0"
+target="_blank" moz-do-not-send="true">Creating a Secure REST API in
+                                                          Node.js</a> </li>
+                                                        </ul>
+                                                      </td>
+                                                    </tr>
+                                                  </tbody>
+                                                </table>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                              <td style="padding: 0;" width="46"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="40"><br>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 0;">
+                        <table style="width: 100%; background: #fff;"
+                          border="0" cellspacing="0" cellpadding="0">
+                          <tbody>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="40"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 0;"><br>
+                              </td>
+                              <td style="padding: 0;" width="528">
+                                <h2 style="margin: 0; font-family:
+                                  'Helvetica Neue', Helvetica, 'Segoe
+                                  UI', Arial, sans-serif; font-weight:
+                                  400; font-size: 24px;">Hiring
+                                  Full-stack Developers?</h2>
+                              </td>
+                              <td style="padding: 0;"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="20"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 0;" width="46"><br>
+                              </td>
+                              <td style="padding: 0;" width="528">
+                                <p style="margin-bottom: 1em;
+                                  font-family: 'Helvetica Neue',
+                                  Helvetica, 'Segoe UI', Arial,
+                                  sans-serif; font-size: 14px;
+                                  line-height: 20px;">Looking for an
+                                  elite full-stack developer to join
+                                  your team? Get started with a Toptal
+                                  account to hire experts like <a
+                                    href="" style="text-decoration:
+                                    none; color: #204ECF;"
+                                    data-hs-link-id="2" target="_blank"
+                                    moz-do-not-send="true">Seva Safris</a>.</p>
+                              </td>
+                              <td style="padding: 0;"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="32"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 0;"><br>
+                              </td>
+                              <td style="padding: 0;" width="528"> <a
+href="https://i1.t.hubspotemail.net/e2t/c/*W7cG5jK37382DW7Kntlg3bRSX30/*VLgN9H6cZW2FW92knSs2bZXl20/5/f18dQhb0Sjvc8YXN32N7rRy-jHyjJqN8q5L1xRJm4PW3hHh8X2P7_nXVcnTGj992gLmW4t0sSr1n3kJCW7nwMJH2l_vBgW5y6kC85RpDVPW32Bb_x5lhgkKVhZ1mT7BQDltW7PkS8t1Sxgm1W7C06FN1Hl_t1VhHQ6l8V6nHWW1YXXdV2N33B5W3_t0gL32Gf2QW4cBzLv49z-4PN2MV0XLbG0m9W8W1JLS2KSp23W2gvtCX3NnV4FW1nJpwv26pdfjW35y0Pl6RqVYdW2xJdXs3l4kqzW8nC_mF4TKHJtW3JM7SX5sPkgTW66Y14S4-hszQMfTVld8zz54W2By55w3MsDdbN8r007QPZD6bN93wkkmSYhgPW5xV46b6TVWv1W99ptnD3bCtQHW36_JtK97kKHnW7q7-Qc6jhn4lN45Ly2MkwRPgW8cKNT-1HlSMdW3J0MlJ8TSVVJW5qdN3F7jcdLDW81N02K8-nNjBW71W6jL88LB4pW8MdBVz7VC7Z9W16QYgx7D7HxjN1Dy_KC7gbsmf2NZYLK04"
+                                  style="display: inline-block; padding:
+                                  14px 48px; border: 1px solid #C4C6CA;
+                                  border-radius: 4px; background:
+                                  #FFFFFF; color: #00CC83; font-family:
+                                  'Helvetica Neue', Helvetica, 'Segoe
+                                  UI', Arial, sans-serif; font-size:
+                                  15px; font-weight: 700;
+                                  text-decoration: none; text-align:
+                                  center;" data-hs-link-id="0"
+                                  target="_blank" moz-do-not-send="true">Start
+                                  Hiring</a> </td>
+                              <td style="padding: 0;" width="46"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="40"><br>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 0;">
+                        <table style="width: 100%; background: #262D3D;
+                          color: #C4C6CA;" border="0" cellspacing="0"
+                          cellpadding="0">
+                          <tbody>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="30"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 0;" width="46"><br>
+                              </td>
+                              <td style="padding: 0;" width="548">
+                                <p style="margin-bottom: 1em; margin: 0;
+                                  font-family: 'Helvetica Neue',
+                                  Helvetica, 'Segoe UI', Arial,
+                                  sans-serif; font-size: 13px;
+                                  line-height: 22px;"> Â© 2010-2019
+                                  Toptal, LLC. All rights reserved.
+                                  Toptal, LLC, 2810 N. Church Street,
+                                  Wilmington, Delaware 94104. </p>
+                              </td>
+                              <td style="padding: 0;"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="20"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 0;"><br>
+                              </td>
+                              <td style="padding: 0;" width="548">
+                                <p style="margin-bottom: 1em; margin: 0;
+                                  font-family: 'Helvetica Neue',
+                                  Helvetica, 'Segoe UI', Arial,
+                                  sans-serif; font-size: 13px;"><a
+href="https://hs-2799924.s.hubspotemail.net/hs/manage-preferences/unsubscribe?d=Vn9bT08TP-CYVxrybv3SH9vJW49M9N-3Fbt5qW8MDL6b15gBJzW8y4Qvg6nFbXkW5NMNvs5QvmnTN8v-T-8XfqrZN5X8P4FXk_7QVbw6rB1SFmT3W4dGpBx6fTGBvw1p30_6nWw2&amp;v=3&amp;utm_campaign=Toptal%20Engineering%20Blog&amp;utm_source=hs_email&amp;utm_medium=email&amp;utm_content=74968595&amp;_hsenc=p2ANqtz-9qFFdRYYMs8YERlk42UbKnkAO6wk1sdFJGVOcSSRxxSxi1XFfUk7mym7vrr_94Oq6ksYiKvHUoFMB_LqRSyKiFyfh9OQ&amp;_hsmi=74968595"
+                                    style="text-decoration: none; color:
+                                    #FFFFFF;" data-hs-link-id="0"
+                                    target="_blank"
+                                    moz-do-not-send="true">Update your
+                                    subscription preferences</a></p>
+                              </td>
+                              <td style="padding: 0;" width="46"><br>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colspan="3" style="padding: 0;"
+                                height="30"><br>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+              <td><br>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- end coded_template: id:9783722120 path:Coded files/Custom/email/Engineering_Blog_Emails/New_Article_v4.html -->
+      <img
+src="https://i1.t.hubspotemail.net/e2t/o/*N86-dbm5WdMcW9jjMZl709pmY0/*W62qk1W6N3dKqW3-hzLG2Vz-LK0/5/f18dQhb0Sdd21dtGktW1yqjqz1m6dncW2MncZJ2MDC5WW9k7t1S1h5JfdMgl_781KsXyW1Kdyk85Yd8flW2_3ww65ShxNTW1fnj8J7qqT8cW8G2Vx73tqXr9W1tPD-F78GBJdW7tZqY58Sq1pNN4Vt2cZVmwxdf57l8fF02"
+        alt=""
+style="display:none!important;min-height:1px!important;width:1px!important;border-width:0!important;margin-top:0!important;margin-bottom:0!important;margin-right:0!important;margin-left:0!important;padding-top:0!important;padding-bottom:0!important;padding-right:0!important;padding-left:0!important"
+        moz-do-not-send="true" border="0" width="1" height="1">
+    </div>
+  </body>
+</html>
+}

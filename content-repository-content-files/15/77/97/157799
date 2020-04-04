@@ -1,0 +1,790 @@
+text/html {<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <br>
+    <div class="moz-forward-container">
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <!--[if gte mso 9]><xml>
+<o:OfficeDocumentSettings>
+<o:AllowPNG/>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml><![endif]-->
+      <!--Variables-->
+      <title>NGINX | High Performance Load Balancer, Web Server, &amp;
+        Reverse Proxy</title>
+      <style>
+      /* CLIENT-SPECIFIC STYLES */
+      img{-ms-interpolation-mode: bicubic;} 
+      /* Force IE to smoothly render resized images. */
+      #outlook a{padding:0;} 
+      /* Force Outlook 2007 and up to provide a "view in browser" message. */
+      table{mso-table-lspace:0pt;mso-table-rspace:0pt;} 
+      /* Remove spacing between tables in Outlook 2007 and up. */
+      .ReadMsgBody{width:100%;} 
+      .ExternalClass{width:100%;} 
+      /* Force Outlook.com to display emails at full width. */
+      p, a, li, td, blockquote{mso-line-height-rule:exactly;} 
+      /* Force Outlook to render line heights as they're originally set. */
+      a[href^="tel"], a[href^="sms"]{color:inherit;cursor:default; text-decoration:none;} 
+      /* Force mobile devices to inherit declared link styles. */
+      p, a, li, td, body, table, blockquote{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;} 
+      /* Prevent Windows- and Webkit-based mobile platforms from changing declared text sizes. */
+      .ExternalClass, .ExternalClass p, .ExternalClass td, .ExternalClass div, .ExternalClass span, .ExternalClass font{line-height:100%;}
+      /* Force Outlook.com to display line heights normally. */
+
+      a {
+        color:#269d4f;
+      }
+      @media only screen and (max-width:650px){
+        table#bodyTable{
+          width:100%;
+        }
+        img{
+          max-width:100%;
+          height:auto;
+        }
+        .stack{
+          padding-top:25px !important;
+          padding-right:5% !important;
+          padding-bottom:20px !important;
+          padding-left:5% !important;
+        }
+        .tableStack{
+          width:100% !important;
+        }
+        .desktopPad{
+          display: none !important;
+        }
+        .centerImage img{
+          margin-left:auto !important;
+          margin-right:auto !important;
+          display:block !important;
+        }
+        .mobileTopPad{
+          padding-top:20px !important;
+        }
+        #mobileTopPad{
+          padding-top:20px !important;
+        }
+        .centerContent{
+          text-align:center !important;
+        }
+        .centerContent img{
+
+          margin-left:auto !important;
+          margin-right:auto !important;
+        }
+        .centerContent2{
+          padding-top:20px !important;
+          text-align:center !important;
+        }
+        #noBorder{
+          border-left:none !important;
+          border-right:none !important;
+          padding-top:20px !important;
+        }
+        .tableGrow{
+          width:70% !important;
+        }
+        .mobileBottomPad{
+          padding-bottom:20px !important;
+        }
+        .tableShrink{
+          width:70% !important;
+        }
+
+      }
+    </style>
+      <!--[if gte mso 9]>
+<style type="text/css">
+table#outlookPadColumn{
+width:35% !important;
+padding-right:2% !important;
+}
+td{
+font-family:Arial, Helvetica, sans-serif !important;
+}
+</style>
+<![endif]-->
+      <table border="0" width="100%" cellspacing="0" cellpadding="0">
+        <tbody>
+          <tr>
+            <td>
+              <div>
+                <table style="mso-padding-alt: 0px 0px 0px 0px;"
+                  border="0" width="100%" cellspacing="0"
+                  cellpadding="0">
+                  <tbody>
+                    <tr>
+                      <td>
+                        <table border="0" width="100%" height="100%"
+                          cellspacing="0" cellpadding="0">
+                          <tbody>
+                            <tr>
+                              <td
+background="https://pages.nginx.com/rs/990-FXF-735/images/bkgdSmallSlice.jpg"
+                                align="left" valign="top">
+                                <!--Body Table-->
+                                <table id="bodyTable"
+                                  style="margin-left:auto;margin-right:auto;"
+                                  border="0" align="center" width="650"
+                                  cellspacing="0" cellpadding="0">
+                                  <tbody>
+                                    <tr>
+                                      <td id="container"
+                                        class="mktoContainer">
+                                        <table class="mktoModule"
+                                          id="spacerModule"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="desktopPad"
+                                                style="background-color:transparent;
+                                                line-height:15px;
+                                                font-size:0px;padding-top:15px;">Â 
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="logo"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="stack"
+                                                style="background-color:transparent;
+                                                padding-left:35px;
+                                                padding-right:35px;"
+                                                align="center">
+                                                <div class="mktoSnippet"
+                                                  id="logoSnippet"> <img
+src="http://pages.nginx.com/rs/990-FXF-735/images/logoHeader.png" alt=""
+style="display:block; margin-left:auto; margin-right:auto;"
+                                                    moz-do-not-send="true"
+                                                    border="0"
+                                                    width="200"
+                                                    height="49"> </div>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="spacerModule86208a94-ff9f-4578-bdf1-6700dc7a6717"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="desktopPad"
+                                                style="background-color:transparent;
+                                                line-height:20px;
+                                                font-size:0px;padding-top:20px;">Â 
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="spacerModulea0a7fa21-3da7-417b-9f04-0bedc7e6b787"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="desktopPad"
+                                                style="background-color:#ffffff;
+                                                line-height:20px;
+                                                font-size:0px;padding-top:20px;">Â 
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="headerImagePad0ecb414e-15bb-4858-a9b8-cadb55d39bcb"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="stack"
+                                                style="background-color:#ffffff;
+                                                padding-left:35px;
+                                                padding-right:35px;"
+                                                align="center">
+                                                <div class="mktoText"
+                                                  id="bannerImageWithPad0ecb414e-15bb-4858-a9b8-cadb55d39bcb">
+                                                  <a
+href="https://email.nginx.com/dc/PX-d3BUIYY13OoIgLxhSk6YABPCJ7KZuBETdV4KL7aRwTVE8lJr1LZAPZmhmjLZSlOtCeBVP7zpP3EzwlcAwFUbHGKFsUM-yGi9uQc9nIVYPsAafm5t1k3S4SYESxkq1/I0s1NF30BD1EJ94f0E0XF00"
+                                                    target="_blank"
+                                                    moz-do-not-send="true"><img
+src="https://pages.nginx.com/rs/990-FXF-735/images/Email Header - WB -
+                                                      Achieving
+                                                      Comprehensive API
+                                                      Security
+                                                      580x306.jpg"
+                                                      alt=""
+                                                      style="display:
+                                                      block;
+                                                      margin-left: auto;
+                                                      margin-right:
+                                                      auto;"
+                                                      moz-do-not-send="true"
+                                                      border="0"
+                                                      width="580"
+                                                      height="306"></a>
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="fullWidthTextb9107413-6491-4258-85b2-9d3c375e9a04"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="stack"
+                                                style="background-color:#ffffff;
+                                                padding-left:35px;
+                                                padding-right:35px;
+                                                font-family: Arial,
+                                                Helvetica, sans-serif;
+                                                font-size:16px;
+                                                line-height:20px;
+                                                color:#333333;
+                                                text-align:center;">
+                                                <div class="mktoText"
+                                                  id="bodyCopyb9107413-6491-4258-85b2-9d3c375e9a04">
+                                                  <p style="text-align:
+                                                    left;">Securing your
+                                                    API environment
+                                                    involves every API
+                                                    touchpoint â
+                                                    authenticating and
+                                                    authorizing API
+                                                    clients, rate
+                                                    limiting API calls
+                                                    to mitigate DDoS
+                                                    attacks, and
+                                                    protecting the
+                                                    backend applications
+                                                    that process the API
+                                                    calls. Attend this
+                                                    upcoming webinar to
+                                                    learn how to secure
+                                                    every API touchpoint
+                                                    using the NGINX
+                                                    Controller API
+                                                    Management Module
+                                                    and Okta API Access
+                                                    Management.</p>
+                                                  <div
+                                                    style="text-align:
+                                                    left;"> <span
+                                                      style="color:
+                                                      #333333;
+                                                      font-family:
+                                                      Arial, Helvetica,
+                                                      sans-serif;
+                                                      font-size: 18px;
+                                                      font-style:
+                                                      normal;
+                                                      font-variant-ligatures:
+                                                      normal;
+                                                      font-variant-caps:
+                                                      normal;
+                                                      font-weight:
+                                                      normal;
+                                                      letter-spacing:
+                                                      normal; orphans:
+                                                      2; text-align:
+                                                      left; text-indent:
+                                                      0px;
+                                                      text-transform:
+                                                      none; white-space:
+                                                      normal; widows: 2;
+                                                      word-spacing: 0px;
+-webkit-text-stroke-width: 0px; background-color: #ffffff; display:
+                                                      inline !important;
+                                                      float: none;">Join
+                                                      us in this webinar
+                                                      to learn:</span> <br>
+                                                  </div>
+                                                  <ul>
+                                                    <li
+                                                      style="text-align:
+                                                      left;">About key
+                                                      API management
+                                                      capabilities
+                                                      offered by NGINX
+                                                      Controller </li>
+                                                    <li
+                                                      style="text-align:
+                                                      left;">How to
+                                                      authenticate and
+                                                      authorize API
+                                                      clients using Okta</li>
+                                                    <li
+                                                      style="text-align:
+                                                      left;">About rate
+                                                      limiting API calls
+                                                      using NGINX
+                                                      Controller</li>
+                                                    <li>
+                                                      <div
+                                                        style="text-align:
+                                                        left;"> How to
+                                                        use Okta and the
+                                                        API Management
+                                                        Module together
+                                                        effectively, in
+                                                        a live demo </div>
+                                                    </li>
+                                                  </ul>
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="fullWidthText"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="stack"
+                                                style="background-color:#ffffff;
+                                                padding-left:35px;
+                                                padding-right:35px;
+                                                font-family: Arial,
+                                                Helvetica, sans-serif;
+                                                font-size:16px;
+                                                line-height:20px;
+                                                color:#333333;
+                                                text-align:left;">
+                                                <div class="mktoText"
+                                                  id="bodyCopy">
+                                                  <div
+                                                    style="text-align:
+                                                    center;"> <strong><span
+style="font-size: 16px;">Wednesday, August 21 â¢ 10:00AM PDT | 1:00PM EDT</span></strong>
+                                                  </div>
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="spacerModuleSmallafe589a7-17c5-4ab6-af02-559fea138948"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="desktopPad"
+                                                style="background-color:#ffffff;
+                                                line-height:10px;
+                                                font-size:0px;padding-top:10px;">Â 
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="buttonModule211675686-b5bb-4d1c-963f-df113521c0e1"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="stack"
+                                                style="background-color:#ffffff;
+                                                padding-left:35px;
+                                                padding-right:35px;">
+                                                <!--Button-->
+                                                <table
+                                                  style="border-top-right-radius:5px;
+border-bottom-right-radius:5px; border-bottom-left-radius:5px;
+                                                  border-top-left-radius:5px;
+                                                  border:1px solid
+                                                  #f6a704" border="0"
+                                                  bgcolor="#f6a704"
+                                                  align="center"
+                                                  cellspacing="0"
+                                                  cellpadding="0">
+                                                  <tbody>
+                                                    <tr>
+                                                      <td
+                                                        style="padding-top:10px;
+padding-right:22px; padding-bottom:10px; padding-left:22px;
+                                                        font-family:Arial,
+                                                        Helvetica,
+                                                        sans-serif;
+                                                        font-size:14px;
+                                                        color:#ffffff;">
+                                                        <div
+                                                          class="mktoText"
+id="buttonLink211675686-b5bb-4d1c-963f-df113521c0e1"> <a
+href="https://email.nginx.com/dc/PX-d3BUIYY13OoIgLxhSk6YABPCJ7KZuBETdV4KL7aRwTVE8lJr1LZAPZmhmjLZSlOtCeBVP7zpP3EzwlcAwFUbHGKFsUM-yGi9uQc9nIVYPsAafm5t1k3S4SYESxkq1/I0s1NF30BD1EJ94f0E0XF00"
+                                                          title=""
+                                                          style="text-decoration:
+                                                          none; color:
+                                                          #ffffff;"
+                                                          moz-do-not-send="true">REGISTER
+                                                          NOW</a> </div>
+                                                      </td>
+                                                    </tr>
+                                                  </tbody>
+                                                </table>
+                                                <!--/Button--> </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="spacerModuleSmalld2f4117e-6855-4c13-a605-258e238c5f5e"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="desktopPad"
+                                                style="background-color:#ffffff;
+                                                line-height:10px;
+                                                font-size:0px;padding-top:10px;">Â 
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="fullWidthTextb985fccb-d854-4a18-bc74-f86b1e9e4183"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="stack"
+                                                style="background-color:#ffffff;
+                                                padding-left:35px;
+                                                padding-right:35px;
+                                                font-family: Arial,
+                                                Helvetica, sans-serif;
+                                                font-size:16px;
+                                                line-height:20px;
+                                                color:#333333;
+                                                text-align:left;">
+                                                <div class="mktoText"
+                                                  id="bodyCopyb985fccb-d854-4a18-bc74-f86b1e9e4183">
+                                                  We hope you can <a
+href="https://email.nginx.com/dc/PX-d3BUIYY13OoIgLxhSk6YABPCJ7KZuBETdV4KL7aRwTVE8lJr1LZAPZmhmjLZSlOtCeBVP7zpP3EzwlcAwFUbHGKFsUM-yGi9uQc9nIVYPsAafm5t1k3S4SYESxkq1/I0s1NF30BD1EJ94f0E0XF00"
+                                                    target="_blank"
+                                                    moz-do-not-send="true">join
+                                                    us</a>! <br>
+                                                  <br>
+                                                  Best, <br>
+                                                  <br>
+                                                  Emily Turner <br>
+                                                  NGINX, Inc. </div>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="spacerModulef3f3fbb5-6195-4113-ac67-480576010b31"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="desktopPad"
+                                                style="background-color:#ffffff;
+                                                line-height:20px;
+                                                font-size:0px;padding-top:20px;">Â 
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                        <table class="mktoModule"
+                                          id="footerModule"
+                                          style="min-width:100%;"
+                                          border="0" width="100%"
+                                          cellspacing="0"
+                                          cellpadding="0">
+                                          <tbody>
+                                            <tr>
+                                              <td class="stack"
+                                                style="padding-left:35px;
+                                                padding-right:35px;
+                                                padding-top:20px;
+                                                padding-bottom:20px;
+                                                background-color:transparent;">
+                                                <div class="mktoSnippet"
+                                                  id="footerSnippet">
+                                                  <table border="0"
+                                                    width="100%"
+                                                    cellspacing="0"
+                                                    cellpadding="0">
+                                                    <tbody>
+                                                      <tr>
+                                                        <td><!--Table 1-->
+                                                          <table
+                                                          class="tableStack"
+id="outlookPadColumn" style="margin-right: 3%;" border="0" align="left"
+                                                          width="31%"
+                                                          cellspacing="0"
+cellpadding="0">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-top:
+                                                          25px;">
+                                                          <table
+                                                          class="tableGrow"
+                                                          border="0"
+                                                          align="center"
+                                                          width="180"
+                                                          cellspacing="0"
+cellpadding="0">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          class="centerImage"><a
+href="https://email.nginx.com/z0f349B001DXJQEsF1H0F00" target="_blank"
+                                                          moz-do-not-send="true"><img
+src="http://pages.nginx.com/rs/990-FXF-735/images/twitterIcon.png"
+                                                          alt=""
+                                                          style="display:
+                                                          block;
+                                                          margin-left:
+                                                          auto;
+                                                          margin-right:
+                                                          auto;"
+                                                          moz-do-not-send="true"
+                                                          border="0"
+                                                          width="28"
+                                                          height="29"></a></td>
+                                                          <td><a
+                                                          href="https://email.nginx.com/f00E90B03R01sX4fFJFI10D"
+target="_blank" moz-do-not-send="true"><img
+                                                          src="http://pages.nginx.com/rs/990-FXF-735/images/youtubeIcon.png"
+                                                          alt=""
+                                                          style="display:
+                                                          block;
+                                                          margin-left:
+                                                          auto;
+                                                          margin-right:
+                                                          auto;"
+                                                          moz-do-not-send="true"
+                                                          border="0"
+                                                          width="28"
+                                                          height="23"></a></td>
+                                                          <td><a
+                                                          href="https://email.nginx.com/V3XJ1009Es0F400FBDf1SJ0"
+target="_blank" moz-do-not-send="true"><img
+                                                          src="http://pages.nginx.com/rs/990-FXF-735/images/linkedinIcon.png"
+                                                          alt=""
+                                                          style="display:
+                                                          block;
+                                                          margin-left:
+                                                          auto;
+                                                          margin-right:
+                                                          auto;"
+                                                          moz-do-not-send="true"
+                                                          border="0"
+                                                          width="28"
+                                                          height="28"></a></td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          <!--/Table 1-->
+                                                          <!--Table 2-->
+                                                          <table
+                                                          class="tableStack"
+                                                          border="0"
+                                                          align="left"
+                                                          width="31%"
+                                                          cellspacing="0"
+cellpadding="0">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          class="mobileTopPad"
+                                                          id="noBorder"
+style="border-left: 2px solid #a19e9d; border-right: 2px solid #a19e9d;">
+                                                          <table
+                                                          border="0"
+                                                          width="100%"
+                                                          cellspacing="0"
+cellpadding="0">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          class="centerImage"
+                                                          align="center"><a
+href="https://email.nginx.com/DFTD00K0FX300E1sBJ4109f" target="_blank"
+                                                          moz-do-not-send="true"><img
+src="http://pages.nginx.com/rs/990-FXF-735/images/footerLogo.png" alt=""
+style="display: block; margin-left: auto; margin-right: auto;"
+                                                          moz-do-not-send="true"
+                                                          border="0"
+                                                          width="70"
+                                                          height="88"></a></td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          <!--/Table 2-->
+                                                          <!--Table 3-->
+                                                          <table
+                                                          class="tableStack"
+                                                          border="0"
+                                                          align="right"
+                                                          width="31%"
+                                                          cellspacing="0"
+cellpadding="0">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          class="mobileTopPad">
+                                                          <table
+                                                          border="0"
+                                                          width="100%"
+                                                          cellspacing="0"
+cellpadding="0">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-top:
+                                                          15px;
+                                                          font-family:
+                                                          Arial,
+                                                          Helvetica,
+                                                          sans-serif;
+                                                          font-size:
+                                                          14px;
+                                                          line-height:
+                                                          22px; color:
+                                                          #bfbfbf;
+                                                          text-align:
+                                                          center;
+                                                          font-weight:
+                                                          400;">Contact
+                                                          us<br>
+                                                          <a
+                                                          href="https://email.nginx.com/ZXJD10sL90001f03U40BFFE"
+moz-do-not-send="true">nginx-inquiries@nginx.com</a><br>
+                                                          1-800-915-9122</td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          </td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                          <!--/Table 3--></td>
+                                                      </tr>
+                                                      <tr>
+                                                        <td
+                                                          class="stack"
+style="padding-left: ${leftPadding}; padding-right: ${rightPadding};
+                                                          padding-bottom:
+                                                          20px;">
+                                                          <table
+                                                          border="0"
+                                                          width="100%"
+                                                          cellspacing="0"
+cellpadding="0">
+                                                          <tbody>
+                                                          <tr>
+                                                          <td
+                                                          style="padding-top:
+                                                          15px;
+                                                          font-family:
+                                                          Arial,
+                                                          Helvetica,
+                                                          sans-serif;
+                                                          font-size:
+                                                          14px;
+                                                          line-height:
+                                                          22px; color:
+                                                          #bfbfbf;
+                                                          text-align:
+                                                          center;">Â©
+                                                          2019 NGINX,
+                                                          Inc. âÂ 795
+                                                          Folsom Street,
+                                                          San Francisco,
+                                                          CA 94107<br>
+                                                          <a
+                                                          href="https://email.nginx.com/NX00VFf9001s1EF0MJD034B"
+style="text-decoration: none; color: #009639;" moz-do-not-send="true">Manage
+                                                          your
+                                                          subscription
+                                                          preferences</a>
+                                                          or <a
+href="https://pages.nginx.com/UnsubscribePage.html?mkt_unsubscribe=1&amp;mkt_tok=eyJpIjoiT1RFeU1XSTFNMlF6WldZNSIsInQiOiI2akNqSXpkbW55QmpEZGplNmFGUTdrMEcyUVV4dWZqNXZSWHNJeUloTktkM1lKTCtLWW8xOVJmYkQ2VlNXR0hDMVM4ejBmNkl5NTZ6dkkvOTE1RmgrWkozbVpKZEJzaHZPR0pNRXZ6dklWeVZJMU9nZ1k5elFoZ1I4UFZnUkd1KyJ9"
+style="text-decoration: none; color: #009639;" moz-do-not-send="true">unsubscribe</a>.</td>
+                                                          </tr>
+                                                          </tbody>
+                                                          </table>
+                                                        </td>
+                                                      </tr>
+                                                    </tbody>
+                                                  </table>
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                                <!--End Body Table--> </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <img
+src="http://email.nginx.com/trk?t=1&amp;mid=OTkwLUZYRi03MzU6MTU2NTU6MTM4MjM6NTE1OTY6MDoxMzI3Mzo5Ojk3OTA0OjI0MTI4OTc1LTU6aXVyaUBpdXJpeC5jb20%3D"
+        style="display:none !important;" alt="" moz-do-not-send="true"
+        width="1" height="1">
+    </div>
+  </body>
+</html>
+}

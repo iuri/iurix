@@ -16,10 +16,9 @@ set page_url "[ad_url][ad_conn url]"
 set title "Currency Rate"
 set context [list $title]
 
-db_1row select_usd_rate {
-    SELECT rate AS usd_rate FROM ix_currency_rates
-    WHERE currency_code = 'USD'
-    ORDER BY creation_date DESC LIMIT 1
+set pretty_code $code
+if {$code eq "EUR"} {
+    set code "USD"
 }
 
 db_1row select_currency {
@@ -41,7 +40,22 @@ db_1row select_currency {
 }
 
 
+db_1row select_usd_rate {
+    SELECT rate AS usd_rate FROM ix_currency_rates
+    WHERE currency_code = 'USD'
+    ORDER BY creation_date DESC LIMIT 1
+}
 
 
-set rate [format "%.4f" [expr $rate / [expr $usd_rate]]]
-set diff [format "%.4f" [expr $diff / [expr $usd_rate]]]
+
+if {$pretty_code ne "EUR"} {
+    set rate [format "%.4f" [expr $rate / [expr $usd_rate]]]
+    set diff [format "%.4f" [expr $diff / [expr $usd_rate]]]
+    set percent [format "%.4f" [expr $percent / [expr $usd_rate]]]
+
+} else {
+    
+    set rate [format "%.4f" $rate]
+    set diff [format "%.4f" $diff]
+    set percent [format "%.4f" $percent]
+}

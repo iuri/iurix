@@ -1,0 +1,512 @@
+text/html {<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <br>
+    <div class="moz-forward-container">
+      <table class="body-wrap" style=" margin: 0; font-family:
+        &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica,
+        Arial, sans-serif; font-size: 14px; ;box-sizing: border-box;
+        ;background-color: #EEEFF3; width: 100%;">
+        <tbody>
+          <tr style=" margin: 0; font-family: &quot;Open Sans&quot;,
+            &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;
+            font-size: 14px; ;box-sizing: border-box;">
+            <td style=" margin: 0; font-family: &quot;Open Sans&quot;,
+              &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;
+              font-size: 14px; ;box-sizing: border-box; ;vertical-align:
+              top;"><br>
+            </td>
+            <td class="container" style=" margin: 0; font-family:
+              &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;,
+              Helvetica, Arial, sans-serif; font-size: 14px;
+              ;box-sizing: border-box; ;vertical-align: top; ;display:
+              block !important; max-width: 580px !important; width:
+              580px; margin: 0 auto !important; Margin: 0 auto
+              !important; padding: 0 !important; /* makes it centered */
+              clear: both !important;" width="580">
+              <div class="content" style=" margin: 0; font-family:
+                &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;,
+                Helvetica, Arial, sans-serif; font-size: 14px;
+                ;box-sizing: border-box; ;max-width: 580px; margin: 0
+                auto; display: block; padding: 20px;">
+                <table class="main" style=" margin: 0; font-family:
+                  &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;,
+                  Helvetica, Arial, sans-serif; font-size: 14px;
+                  ;box-sizing: border-box; ;background-color: #fff;
+                  /*border: 1px solid #e2e2e2;*/ border-radius: 3px;"
+                  width="100%" cellspacing="0" cellpadding="0">
+                  <tbody>
+                    <tr style=" margin: 0; font-family: &quot;Open
+                      Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica,
+                      Arial, sans-serif; font-size: 14px; ;box-sizing:
+                      border-box;">
+                      <td class="content-wrap" style=" margin: 0;
+                        font-family: &quot;Open Sans&quot;,
+                        &quot;Helvetica Neue&quot;, Helvetica, Arial,
+                        sans-serif; font-size: 14px; ;box-sizing:
+                        border-box; ;vertical-align: top; ;padding:
+                        20px;">
+                        <table style=" margin: 0; font-family:
+                          &quot;Open Sans&quot;, &quot;Helvetica
+                          Neue&quot;, Helvetica, Arial, sans-serif;
+                          font-size: 14px; ;box-sizing: border-box;"
+                          width="100%" cellspacing="0" cellpadding="0">
+                          <tbody>
+                            <tr style=" margin: 0; font-family:
+                              &quot;Open Sans&quot;, &quot;Helvetica
+                              Neue&quot;, Helvetica, Arial, sans-serif;
+                              font-size: 14px; ;box-sizing: border-box;">
+                              <td class="w50" style=" margin: 0;
+                                font-family: &quot;Open Sans&quot;,
+                                &quot;Helvetica Neue&quot;, Helvetica,
+                                Arial, sans-serif; font-size: 14px;
+                                ;box-sizing: border-box;
+                                ;vertical-align: top; ;width: 50%
+                                !important;"> <img
+                                  src="https://www.infoq.com/styles/i/logo.png"
+                                  alt="InfoQ" style=" max-width: 100%;
+                                  float: left; clear: both; display:
+                                  block; margin: 0; "
+                                  moz-do-not-send="true" width="110"
+                                  height="33"> </td>
+                              <td class="w50" style=" margin: 0;
+                                font-family: &quot;Open Sans&quot;,
+                                &quot;Helvetica Neue&quot;, Helvetica,
+                                Arial, sans-serif; font-size: 14px;
+                                ;box-sizing: border-box;
+                                ;vertical-align: top; ;width: 50%
+                                !important; ;text-align: right;">
+                                <p class="alignright text-faded" style="
+                                  margin: 0; font-family: &quot;Open
+                                  Sans&quot;, &quot;Helvetica
+                                  Neue&quot;, Helvetica, Arial,
+                                  sans-serif; font-size: 14px;
+                                  ;margin-bottom: 10px; font-weight:
+                                  normal; ;color: #777777; ;text-align:
+                                  right; ;padding-top: 5px;"><small
+                                    style=" font-size: 11px; "><strong
+                                      style=" font-weight: 600;
+                                      ;font-size: 11px;">Aug 13</strong></small></p>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr style=" margin: 0; font-family: &quot;Open
+                      Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica,
+                      Arial, sans-serif; font-size: 14px; ;box-sizing:
+                      border-box;">
+                      <td class="hero" style=" margin: 0; font-family:
+                        &quot;Open Sans&quot;, &quot;Helvetica
+                        Neue&quot;, Helvetica, Arial, sans-serif;
+                        font-size: 14px; ;box-sizing: border-box;
+                        ;vertical-align: top; ;background-image:
+                        url(images/header-bg.jpg); background-position:
+                        center center; background-repeat: none;
+                        background-color: #2B6BAD; height: 160px; color:
+                        #fff; vertical-align: middle; text-align:
+                        center;">
+                        <h1 class="aligncenter" style=" margin: 0;
+                          font-family: &quot;Open Sans&quot;,
+                          &quot;Helvetica Neue&quot;, Helvetica, Arial,
+                          sans-serif; font-size: 14px; ;font-family:
+                          &quot;Open Sans&quot;, &quot;Helvetica
+                          Neue&quot;, Helvetica, Arial, sans-serif;
+                          color: #212121; margin: 10px 0; line-height:
+                          1.2em; ;font-size: 26px; font-weight: 600;
+                          /*line-height: 31px;*/ ;text-align: center;
+                          ;margin: 0; color: #fff;"><strong style="
+                            font-weight: 600; ;font-size: 26px;
+                            font-weight: bold; /*line-height: 31px;*/">Olá!</strong><br>
+                          Resumo diário das atualizações no InfoQ Brasil</h1>
+                      </td>
+                    </tr>
+                    <tr style=" margin: 0; font-family: &quot;Open
+                      Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica,
+                      Arial, sans-serif; font-size: 14px; ;box-sizing:
+                      border-box;">
+                      <td style=" margin: 0; font-family: &quot;Open
+                        Sans&quot;, &quot;Helvetica Neue&quot;,
+                        Helvetica, Arial, sans-serif; font-size: 14px;
+                        ;box-sizing: border-box; ;vertical-align: top;"
+                        bgcolor="#EEEFF3">
+                        <hr style=" color: #EEEFF3; background-color:
+                          #EEEFF3; height: 25px; margin: 0; border:
+                          none; " size="25"> </td>
+                    </tr>
+                    <tr style=" margin: 0; font-family: &quot;Open
+                      Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica,
+                      Arial, sans-serif; font-size: 14px; ;box-sizing:
+                      border-box;">
+                      <td class="content-wrap" style=" margin: 0;
+                        font-family: &quot;Open Sans&quot;,
+                        &quot;Helvetica Neue&quot;, Helvetica, Arial,
+                        sans-serif; font-size: 14px; ;box-sizing:
+                        border-box; ;vertical-align: top; ;padding:
+                        20px;">
+                        <table style=" margin: 0; font-family:
+                          &quot;Open Sans&quot;, &quot;Helvetica
+                          Neue&quot;, Helvetica, Arial, sans-serif;
+                          font-size: 14px; ;box-sizing: border-box;"
+                          width="100%" cellspacing="0" cellpadding="0">
+                          <tbody>
+                            <tr style=" margin: 0; font-family:
+                              &quot;Open Sans&quot;, &quot;Helvetica
+                              Neue&quot;, Helvetica, Arial, sans-serif;
+                              font-size: 14px; ;box-sizing: border-box;">
+                              <td colspan="2" class="content-block"
+                                style=" margin: 0; font-family:
+                                &quot;Open Sans&quot;, &quot;Helvetica
+                                Neue&quot;, Helvetica, Arial,
+                                sans-serif; font-size: 14px;
+                                ;box-sizing: border-box;
+                                ;vertical-align: top; ;padding: 0 0
+                                20px; color: #3A3A3A;">
+                                <h3 class="aligncenter" style=" margin:
+                                  0; font-family: &quot;Open Sans&quot;,
+                                  &quot;Helvetica Neue&quot;, Helvetica,
+                                  Arial, sans-serif; font-size: 14px;
+                                  ;font-family: &quot;Open Sans&quot;,
+                                  &quot;Helvetica Neue&quot;, Helvetica,
+                                  Arial, sans-serif; color: #212121;
+                                  margin: 10px 0; line-height: 1.2em;
+                                  ;font-size: 20px; font-weight: 600;
+                                  /*line-height: 24px;*/ ;text-align:
+                                  center;">Atividades nos tópicos que
+                                  você segue</h3>
+                              </td>
+                            </tr>
+                            <tr style=" margin: 0; font-family:
+                              &quot;Open Sans&quot;, &quot;Helvetica
+                              Neue&quot;, Helvetica, Arial, sans-serif;
+                              font-size: 14px; ;box-sizing: border-box;">
+                              <td style=" margin: 0; font-family:
+                                &quot;Open Sans&quot;, &quot;Helvetica
+                                Neue&quot;, Helvetica, Arial,
+                                sans-serif; font-size: 14px;
+                                ;box-sizing: border-box;
+                                ;vertical-align: top;">
+                                <table class="topic-items" style="
+                                  margin: 0; font-family: &quot;Open
+                                  Sans&quot;, &quot;Helvetica
+                                  Neue&quot;, Helvetica, Arial,
+                                  sans-serif; font-size: 14px;
+                                  ;box-sizing: border-box;" width="100%"
+                                  cellspacing="0" cellpadding="0">
+                                  <tbody>
+                                    <tr style=" margin: 0; font-family:
+                                      &quot;Open Sans&quot;,
+                                      &quot;Helvetica Neue&quot;,
+                                      Helvetica, Arial, sans-serif;
+                                      font-size: 14px; ;box-sizing:
+                                      border-box;">
+                                      <td colspan="2" class="topic-title
+                                        has-border" style=" margin: 0;
+                                        font-family: &quot;Open
+                                        Sans&quot;, &quot;Helvetica
+                                        Neue&quot;, Helvetica, Arial,
+                                        sans-serif; font-size: 14px;
+                                        ;box-sizing: border-box;
+                                        ;vertical-align: top;
+                                        ;border-top: #D5DDE3 1px solid;
+                                        padding: 15px 0 0 0;">
+                                        <h3 style=" margin: 0;
+                                          font-family: &quot;Open
+                                          Sans&quot;, &quot;Helvetica
+                                          Neue&quot;, Helvetica, Arial,
+                                          sans-serif; font-size: 14px;
+                                          ;font-family: &quot;Open
+                                          Sans&quot;, &quot;Helvetica
+                                          Neue&quot;, Helvetica, Arial,
+                                          sans-serif; color: #212121;
+                                          margin: 10px 0; line-height:
+                                          1.2em; ;font-size: 20px;
+                                          font-weight: 600;
+                                          /*line-height: 24px;*/
+                                          ;font-size: 16px; font-weight:
+                                          600; margin: 0; ;color:
+                                          #3EB96F; font-weight: bold;">DevOps</h3>
+                                      </td>
+                                    </tr>
+                                    <tr style=" margin: 0; font-family:
+                                      &quot;Open Sans&quot;,
+                                      &quot;Helvetica Neue&quot;,
+                                      Helvetica, Arial, sans-serif;
+                                      font-size: 14px; ;box-sizing:
+                                      border-box;">
+                                      <td class="topic-info" style="
+                                        margin: 0; font-family:
+                                        &quot;Open Sans&quot;,
+                                        &quot;Helvetica Neue&quot;,
+                                        Helvetica, Arial, sans-serif;
+                                        font-size: 14px; ;box-sizing:
+                                        border-box; ;vertical-align:
+                                        top; ;width: 93%; ;padding: 15px
+                                        0;">
+                                        <p style=" margin: 0;
+                                          font-family: &quot;Open
+                                          Sans&quot;, &quot;Helvetica
+                                          Neue&quot;, Helvetica, Arial,
+                                          sans-serif; font-size: 14px;
+                                          ;margin-bottom: 10px;
+                                          font-weight: normal;
+                                          ;margin-bottom: 0;"> <strong
+                                            style=" font-weight: 600;
+                                            ;color: #3a3a3a;">Amazon
+                                            Releases AWS Lake Formation
+                                            to General Availability</strong>
+                                          por <strong style="
+                                            font-weight: 600; ;color:
+                                            #3a3a3a;"><strong style="
+                                              font-weight: 600; ">Steef-Jan
+                                              Wiggers</strong></strong>
+                                          <br>
+                                          <a
+href="https://links.infoq.com/wf/click?upn=ahwnhY5vVjzVSWFrVA5cbtYUpurF5FO6TH-2F5dzFP19f7AwXoM-2F4axV8LgaeZtg9TfSSgobMu9w9QVYo6FkE2pxH6ctxpu2KVKnhFP-2FsMEEJQjyCgtmCj5HLuMaPP5wErQON6Uc-2BpodxGKYHvygKjxGBauM81ND1PVmakkJNyMWxU5mS7enliSIHZRi4vi-2Bbm0D8RCqfcXv2HeHJNgwmV1LNfUDpBZ1dEkDatH2H6VrsaHcPeFgDJXITwkNLBd6ckk32VdFRiOGeTEPdGa-2FR6qDNAER0JC7fzAZVZHUyPoqYkEvwBIKbJ2n1pOipvnS-2BXzTOTnCKMIYY17C3EoWRiNQZg0rTqIFvNhD0EKl3rUhn7k2u4ihvLarOOweRmIJ3PYIMiFiGbgBtOgYcJBbgXiw-3D-3D_HcUcouT0zBEMPn1RNPiLOrN91P1C25YBEUJoVY6-2BPT2STRMeEXveGRMmYjTWQSkMPYjMWU5GbDfYxYayhLdprJ7k3XP8Jux-2FPl9laaO8Hg-2BEX3HDjsq7v3gz2sfqnrdaduiQtS5h-2FnLLCEsRPYRZE8CBoT8MVWEFs5aE8w-2Bx9yjy0518eYq4z7rXUJhqE3z83oKdZcmyuuUL6Pdr1eMb0nxsL0U-2BJyRj-2FD-2F-2BSbb8oFWiuXZd0dgsQOQDVPi7wff8dl0otKRz9d73psxd3Dd1prsuHSYSNHqOlVYMrnmUak4-3D"
+                                            style=" color: #2B6BAD;
+                                            text-decoration: underline;
+                                            " moz-do-not-send="true"><strong
+                                              style=" font-weight: 600;
+                                              ">Leia agora</strong></a>
+                                        </p>
+                                      </td>
+                                      <td class="topic-icon alignright"
+                                        style=" margin: 0; font-family:
+                                        &quot;Open Sans&quot;,
+                                        &quot;Helvetica Neue&quot;,
+                                        Helvetica, Arial, sans-serif;
+                                        font-size: 14px; ;box-sizing:
+                                        border-box; ;vertical-align:
+                                        top; ;text-align: right;
+                                        ;padding: 15px 0;"> <img
+                                          class="alignright" style="
+                                          max-width: 100%; float: left;
+                                          clear: both; display: block;
+                                          margin: 0; ;text-align: right;
+                                          ;float: right;"
+                                          src="https://www.infoq.com/images/icon-news.jpg"
+                                          alt="News" title="news"
+                                          moz-do-not-send="true"
+                                          width="20" height="20"> </td>
+                                    </tr>
+                                    <tr style=" margin: 0; font-family:
+                                      &quot;Open Sans&quot;,
+                                      &quot;Helvetica Neue&quot;,
+                                      Helvetica, Arial, sans-serif;
+                                      font-size: 14px; ;box-sizing:
+                                      border-box;">
+                                      <td colspan="2" class="topic-title
+                                        has-border" style=" margin: 0;
+                                        font-family: &quot;Open
+                                        Sans&quot;, &quot;Helvetica
+                                        Neue&quot;, Helvetica, Arial,
+                                        sans-serif; font-size: 14px;
+                                        ;box-sizing: border-box;
+                                        ;vertical-align: top;
+                                        ;border-top: #D5DDE3 1px solid;
+                                        padding: 15px 0 0 0;">
+                                        <h3 style=" margin: 0;
+                                          font-family: &quot;Open
+                                          Sans&quot;, &quot;Helvetica
+                                          Neue&quot;, Helvetica, Arial,
+                                          sans-serif; font-size: 14px;
+                                          ;font-family: &quot;Open
+                                          Sans&quot;, &quot;Helvetica
+                                          Neue&quot;, Helvetica, Arial,
+                                          sans-serif; color: #212121;
+                                          margin: 10px 0; line-height:
+                                          1.2em; ;font-size: 20px;
+                                          font-weight: 600;
+                                          /*line-height: 24px;*/
+                                          ;font-size: 16px; font-weight:
+                                          600; margin: 0; ;color:
+                                          #3EB96F; font-weight: bold;">DevOps</h3>
+                                      </td>
+                                    </tr>
+                                    <tr style=" margin: 0; font-family:
+                                      &quot;Open Sans&quot;,
+                                      &quot;Helvetica Neue&quot;,
+                                      Helvetica, Arial, sans-serif;
+                                      font-size: 14px; ;box-sizing:
+                                      border-box;">
+                                      <td class="topic-info" style="
+                                        margin: 0; font-family:
+                                        &quot;Open Sans&quot;,
+                                        &quot;Helvetica Neue&quot;,
+                                        Helvetica, Arial, sans-serif;
+                                        font-size: 14px; ;box-sizing:
+                                        border-box; ;vertical-align:
+                                        top; ;width: 93%; ;padding: 15px
+                                        0;">
+                                        <p style=" margin: 0;
+                                          font-family: &quot;Open
+                                          Sans&quot;, &quot;Helvetica
+                                          Neue&quot;, Helvetica, Arial,
+                                          sans-serif; font-size: 14px;
+                                          ;margin-bottom: 10px;
+                                          font-weight: normal;
+                                          ;margin-bottom: 0;"> <strong
+                                            style=" font-weight: 600;
+                                            ;color: #3a3a3a;">Google
+                                            Announces General
+                                            Availability of Cloud
+                                            Security Scanner for GKE and
+                                            Compute Engine</strong> por
+                                          <strong style=" font-weight:
+                                            600; ;color: #3a3a3a;"><strong
+                                              style=" font-weight: 600;
+                                              ">Eldert Grootenboer</strong></strong>
+                                          <br>
+                                          <a
+href="https://links.infoq.com/wf/click?upn=ahwnhY5vVjzVSWFrVA5cbtYUpurF5FO6TH-2F5dzFP19f7AwXoM-2F4axV8LgaeZtg9T8ZJcMGKhYm1dsbJ0g43-2BxI6lIkCURIezKVH4W9cDB9t705dK75IMuBnVrCrOxIKf3nWSnlyG7Memc282vZ5UcjPyb5fAdbS5Z0ecyTC-2BC1RUPU1blMEMPmxO6TM4oRySJK4nAIIEYFE3F-2B8XXJKCYGSwoaOG3uwhtLSCdWcpIkYLNDenQKROIveXXNdX8MEbCHYIaZkxP4QRQLqCYiC35AzEx0TZV-2B4l0qFmnAhOKTubG1lQdJ0jdBjQzj8Mak-2FDHmKa-2B9fsGg-2BfNpkgS8EzyriZYsPHWQw9MxqCBvL89oGOwZlyK-2B0Jh5l7a3LevFiXHpvo4jf-2FI8RdayOzS-2FX-2B2CsqtrmO-2BtNHNVDV-2FDHvCUw-3D_HcUcouT0zBEMPn1RNPiLOrN91P1C25YBEUJoVY6-2BPT2STRMeEXveGRMmYjTWQSkMIY86hDK2pOmZC6oT-2FL4yKkBLf7mu2eGHWAbDg-2BFh1nDdX2-2FXOXdtwHKVX9MxgvTM4MKZbQK900BAhK50WDpVahfbCXk05vvXV5XHykrqj0Dpq7voqg3gsk176aUjYUcstvteazvCU0rVYJ1XQAJ6PMxmROegCqYeUhSeBuAX28jvbxG6WLK-2BxlWFRVV9pEB85dZTJBRihI8UgT6HI1Ty8mcbi8BfQs0jG6MOlxlgsbc-3D"
+                                            style=" color: #2B6BAD;
+                                            text-decoration: underline;
+                                            " moz-do-not-send="true"><strong
+                                              style=" font-weight: 600;
+                                              ">Leia agora</strong></a>
+                                        </p>
+                                      </td>
+                                      <td class="topic-icon alignright"
+                                        style=" margin: 0; font-family:
+                                        &quot;Open Sans&quot;,
+                                        &quot;Helvetica Neue&quot;,
+                                        Helvetica, Arial, sans-serif;
+                                        font-size: 14px; ;box-sizing:
+                                        border-box; ;vertical-align:
+                                        top; ;text-align: right;
+                                        ;padding: 15px 0;"> <img
+                                          class="alignright" style="
+                                          max-width: 100%; float: left;
+                                          clear: both; display: block;
+                                          margin: 0; ;text-align: right;
+                                          ;float: right;"
+                                          src="https://www.infoq.com/images/icon-news.jpg"
+                                          alt="News" title="news"
+                                          moz-do-not-send="true"
+                                          width="20" height="20"> </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr style=" margin: 0; font-family:
+                              &quot;Open Sans&quot;, &quot;Helvetica
+                              Neue&quot;, Helvetica, Arial, sans-serif;
+                              font-size: 14px; ;box-sizing: border-box;">
+                              <td colspan="2" class="aligncenter
+                                all-notifications" style=" margin: 0;
+                                font-family: &quot;Open Sans&quot;,
+                                &quot;Helvetica Neue&quot;, Helvetica,
+                                Arial, sans-serif; font-size: 14px;
+                                ;box-sizing: border-box;
+                                ;vertical-align: top; ;text-align:
+                                center; ;padding: 30px 0 10px 0;
+                                border-top: #D5DDE3 1px solid;
+                                font-weight: bold;"> <a
+href="https://links.infoq.com/wf/click?upn=ahwnhY5vVjzVSWFrVA5cblY-2BTVHgfR0oHRBq1gP7zeQcge91UoqBOT2LmDgsXRpDf90nA5Dvv-2FAqP2ZQIeYbQkcQFQRX-2BaRqivjD4U7no-2FZMU3lZG8jsHtodnwMVF4xnsppTRIXuwlthRPyOppWF2lehC5Yzto72-2FJAeWlzQOaIFh8UYWTYM4tw40BAxjM-2F9ua-2F1oIZ68kfiahB-2BYVMFfFg2pFwELI-2B-2FcgAZafH8wGE-3D_HcUcouT0zBEMPn1RNPiLOrN91P1C25YBEUJoVY6-2BPT2STRMeEXveGRMmYjTWQSkMtjm84iTAe5F58-2FVPEw8ORwP5ufhMluRongXj0ja4TdC60kzrvCRPSqPih753qSDYU4k9dYBFG54lKsMxt-2B-2FNlEqTKeGzOxGkH5DHeeFexCKKYZWyMEdXSAVCk4KdBsMfhKeQAxzXgphNH3JcZmZwhjIua70hkv7v3ZiIsXEkHSjwlu0AucaDPsIayDYIc9nWndLVKQjba46Ii9rbJC9qw-2FUWRW28DVMbUQm4-2FeDFzqM-3D"
+                                  class="aligncenter" style=" color:
+                                  #2B6BAD; text-decoration: underline;
+                                  ;text-align: center;"
+                                  moz-do-not-send="true">Todas as
+                                  Notificações</a> </td>
+                            </tr>
+                            <tr style=" margin: 0; font-family:
+                              &quot;Open Sans&quot;, &quot;Helvetica
+                              Neue&quot;, Helvetica, Arial, sans-serif;
+                              font-size: 14px; ;box-sizing: border-box;">
+                              <td colspan="2" class="aligncenter
+                                all-notifications-noBorder" style="
+                                margin: 0; font-family: &quot;Open
+                                Sans&quot;, &quot;Helvetica Neue&quot;,
+                                Helvetica, Arial, sans-serif; font-size:
+                                14px; ;box-sizing: border-box;
+                                ;vertical-align: top; ;text-align:
+                                center; ;padding: 30px 0 10px 0;
+                                font-weight: bold;"> <a
+href="https://links.infoq.com/wf/click?upn=ahwnhY5vVjzVSWFrVA5cblY-2BTVHgfR0oHRBq1gP7zeRNdvaSQ7Hnvyrz4EaqYRYvOx6605ZzhBiail9PofvLDp8QxsT-2BRHQAPmPDYtnp-2BzYMA1JMxaiBUe67BbeygCJ-2F3JamffXwZ0cQ6pDM51TG9MsaCbrnxCrXetonBIOJ0f9BegtGW0qMYj6NGBk-2BHoHFR-2FpxPuoMsHfMU40AuM-2BVYuuya7a91qeHycqnCTZUrszy7SfO5VFPR2KOAiPm4ZDx_HcUcouT0zBEMPn1RNPiLOrN91P1C25YBEUJoVY6-2BPT2STRMeEXveGRMmYjTWQSkMIOrxC45af8dMoH5a3JEM9CNxOAeKTOr03KzVFlVNYovigqNe-2B-2Bz6sOuStdsDJm-2B54yuK818qeQmCYbmagYsEBwQ6MKXuitFfPAaYj5TbFV2Cqa9YZUB1AnYQZUOOm2kDWf9I-2FY2mHB9pjvpgHYSzBds-2FDo-2FBSfP0xaTuSDCa-2BWZrLeIlQEgo2Q8gYHgtLu2fsIZZUjdqYxEap-2F5go5fCbNbPqUXvPcd37mtZz5gcfrE-3D"
+                                  style=" color: #2B6BAD;
+                                  text-decoration: underline; "
+                                  moz-do-not-send="true">Configurações
+                                  das Notificações</a> </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="footer" style=" margin: 0; font-family:
+                  &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;,
+                  Helvetica, Arial, sans-serif; font-size: 14px;
+                  ;box-sizing: border-box; ;width: 100%; clear: both;
+                  color: #999; padding: 20px 0;">
+                  <table style=" margin: 0; font-family: &quot;Open
+                    Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica,
+                    Arial, sans-serif; font-size: 14px; ;box-sizing:
+                    border-box;" width="100%">
+                    <tbody>
+                      <tr style=" margin: 0; font-family: &quot;Open
+                        Sans&quot;, &quot;Helvetica Neue&quot;,
+                        Helvetica, Arial, sans-serif; font-size: 14px;
+                        ;box-sizing: border-box;">
+                        <td class="aligncenter" style=" margin: 0;
+                          font-family: &quot;Open Sans&quot;,
+                          &quot;Helvetica Neue&quot;, Helvetica, Arial,
+                          sans-serif; font-size: 14px; ;box-sizing:
+                          border-box; ;vertical-align: top; ;color:
+                          #999; font-size: 12px; ;text-align: center;">
+                          <p class="center" style=" margin: 0;
+                            font-family: &quot;Open Sans&quot;,
+                            &quot;Helvetica Neue&quot;, Helvetica,
+                            Arial, sans-serif; font-size: 14px; ;color:
+                            #999; font-size: 12px; ;margin-bottom: 10px;
+                            font-weight: normal; ;color: #777;
+                            line-height: 24px"> Você não gostaria de
+                            receber esse tipo de email? <a
+href="https://links.infoq.com/wf/click?upn=ahwnhY5vVjzVSWFrVA5cblY-2BTVHgfR0oHRBq1gP7zeRNdvaSQ7Hnvyrz4EaqYRYvBEBCoDnyuaocHkVpouCSGXovm7lAoTNhFD5QRJ7Qhkr5UfQ7ZpOMqcgceG0nHZjaRQSO5SbDYT4Dq9B8Iewfit0zj8AsqraUrYn1GSFdFEK4uXs1LibrnPL5Pz6X-2Fi43zv7zvcSZv-2Fg54dVl52dpetlG0-2F6bZy2ICxEc7TIu-2BOoQLLym-2BBMuT1wrE06oLMP-2F_HcUcouT0zBEMPn1RNPiLOrN91P1C25YBEUJoVY6-2BPT2STRMeEXveGRMmYjTWQSkMUBxbE7fhb0JOS8eag4W3Xv0ko5wllxOMQbxPTqYe7JeYfOAiCxF2CH8DKEwy0OqJbOPCeJhoWxbMcU0y-2BHYbUH6sXPEdZH7wcnFyBGxp9hdYjcrUQxppiL9BauIQmr5JC2HqK98HXcsEWp9nYDxl8synM5FQs-2BalhHUWnyz9eWVwDdl0oJI5nOcc7-2FCS5ZocSF3H7S533Wg-2BM053drwr4b5BaGbOT7gbIzBlkQjjdzU-3D"
+                              style=" color: #999; font-size: 12px;
+                              ;color: #2B6BAD; text-decoration:
+                              underline;" moz-do-not-send="true">Cancelar
+                              assinatura</a> <br>
+                            <br>
+                            - - - <br>
+                            <br>
+                            <strong style=" font-weight: 600; ;color:
+                              #3a3a3a;">C4Media Inc. (InfoQ.com),</strong>
+                            <br>
+                            2275 Lake Shore Boulevard West, <br>
+                            Suite #325, <br>
+                            Toronto, Ontario, Canada, <br>
+                            M8V 3Y3 </p>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </td>
+            <td style=" margin: 0; font-family: &quot;Open Sans&quot;,
+              &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;
+              font-size: 14px; ;box-sizing: border-box; ;vertical-align:
+              top;"><br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <img
+src="https://links.infoq.com/wf/open?upn=HcUcouT0zBEMPn1RNPiLOrN91P1C25YBEUJoVY6-2BPT2STRMeEXveGRMmYjTWQSkM-2FEk28ewErpF75-2BfxssyzcC6j-2BGWHYnmjL8OdOB-2BmEPXZURIu-2BrqmzScRw1l8qwG2hB882jHWicSvnbTz053cARG0fpR0bjcPMPo2-2Bnd59qumEFbacQ95ASq6JMB5tsN-2FPQj-2BfuPpcOvuNZgPQGO4LKW-2BETg0gClzwKs17vhV7CCrzrOcPLSbLugJvlwJYqAuR5ZPjUllIe0SrGB28H62MA2pMA73-2Br4xGMLo9Mc8Iqs-3D"
+        alt="" style="height:1px !important;width:1px
+        !important;border-width:0 !important;margin-top:0
+        !important;margin-bottom:0 !important;margin-right:0
+        !important;margin-left:0 !important;padding-top:0
+        !important;padding-bottom:0 !important;padding-right:0
+        !important;padding-left:0 !important;" moz-do-not-send="true"
+        border="0" width="1" height="1">
+    </div>
+  </body>
+</html>
+}

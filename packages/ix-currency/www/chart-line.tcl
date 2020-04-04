@@ -14,9 +14,6 @@ ad_page_contract {
     rates:multirow
 }
 
-
-ns_log Notice "CODE CURRENCY $code"
-
 if {![db_table_exists ix_currency_rates]} {
     set header [ad_header "IX Currency Rates"]
     ad_return_template currency-rates-no-exist
@@ -26,10 +23,11 @@ if {![db_table_exists ix_currency_rates]} {
 db_multirow rates select_currency_rates "
     SELECT CR.creation_date AS timestamp, CR.rate AS price FROM ix_currency_rates CR 
     WHERE CR.currency_code = :code 
-    AND CR.creation_date > now() - INTERVAL '30 days' 
+--    AND CR.creation_date > now() - INTERVAL '30 days' 
     ORDER BY CR.creation_date ASC" {
 	
 	set price [format "%.4f" [expr [expr $price] / [expr $usd_rate] ]]
+	set timestamp [lc_time_fmt $timestamp "%D" "pt_BR"]
 #	ns_log Notice "$price"
 }
 
@@ -42,6 +40,19 @@ if { $untrusted_user_id == 0 } {
 } else {
     set login_url ""
 }
+
+
+
+
+
+
+
+
+
+template::head::add_javascript -src "https://www.gstatic.com/charts/loader.js" -order 1
+
+
+
 
 
 ad_return_template

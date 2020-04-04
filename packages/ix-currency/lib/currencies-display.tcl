@@ -74,7 +74,7 @@ if {[llength $currencies] > 0} {
 	set usd_percent [lindex [lindex $currencies $usd_pos] 3]
 
 	set eur_rate [expr 1 / [expr $usd_rate]]
-	set eur_diff [expr 1 / [expr $usd_diff]]
+	set eur_diff [expr 1 / [expr $usd_rate]]
 	set eur_percent [expr 1 / [expr $usd_percent]]
     	
     }
@@ -96,7 +96,7 @@ if {[llength $currencies] > 0} {
     foreach currency $currencies {
 	set code [lindex $currency 0]
 	set rate [format "%.4f" [expr [expr [lindex $currency 1]] / [expr $usd_rate]]]
-	set diff [format "%.4f" [expr [expr [lindex $currency 2]] / [expr $usd_diff]]]
+	set diff [format "%.4f" [expr [expr [lindex $currency 2]] / [expr $usd_rate]]]
 	set percent [format "%.4f" [lindex $currency 3]]
 	set one_currency_url [export_vars -base "/currencies/one-currency" {code}]
 	

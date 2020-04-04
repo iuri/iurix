@@ -1,35 +1,28 @@
 
 
-<script type="text/javascript">
-          src="https://www.google.com/jsapi?autoload={
-            'modules':[{
-              'name':'visualization',
-              'version':'1',
-              'packages':['corechart']
-            }]
-          }"></script>
 
     <script type="text/javascript">
-      google.setOnLoadCallback(drawChart);
-
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-	['Year', '@code@'],
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+    
+    function drawChart() {
+	var data = google.visualization.arrayToDataTable([
+	['Price', '@pretty_code@'],
 	<multiple name="rates">
 	  ['@rates.timestamp@', @rates.price@],
 	</multiple>
-        ]);
+							 ]);
+	
+	var options = {
+	    title: ' T x $',
+	    curveType: 'function',
+	    legend: { position: 'bottom' }
+	};
+	
+	var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+	chart.draw(data, options);
+    }
 
-        var options = {
-          title: 'Currency Performance',
-          curveType: 'function',
-          legend: { position: 'bottom' }
-        };
-
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
-        chart.draw(data, options);
-      }
     </script>
 
 

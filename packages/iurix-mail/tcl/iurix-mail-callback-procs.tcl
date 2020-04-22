@@ -32,9 +32,9 @@ ad_proc -public -callback acs_mail_lite::incoming_email -impl iurix-mail {
     set user_id [party::get_by_email -email $email(from)]
     set package_id [iurix_mail::get_package_id]
 
-    ns_log Notice "$email(from)"
-    ns_log Notice "USER ID: $user_id"
-    ns_log Notice "$email(to)"
+#    ns_log Notice "$email(from)"
+#    ns_log Notice "USER ID: $user_id"
+#    ns_log Notice "$email(to)"
     
     if {[string equal $user_id ""]} {
 	ns_log Error "#### Error: user_id is empty!"

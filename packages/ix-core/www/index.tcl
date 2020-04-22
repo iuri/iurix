@@ -3,10 +3,6 @@ ad_page_contract {}
 set user_id [ad_conn user_id]
 
 
-template::head::add_meta -name "viewport" -content "width=device-width, initial-scale=1, shrink-to-fit=no"
-template::head::add_meta -name "description" -content "IURIX Website"
-template::head::add_meta -name "author" -content "Iuri de Araujo Sampaio (iuri@iurix.com)"
-
 
 #    <!-- Bootstrap core CSS -->
 
@@ -22,6 +18,21 @@ template::head::add_css -href "vendor/magnific-popup/magnific-popup.css"
 #    <!-- Custom styles for this template -->
 
 template::head::add_css -href "css/creative.min.css"
+
+template::head::add_meta -http_equiv "charset" -name "charset" -content "utf-8"
+template::head::add_meta -name "description" -content "IURIX Website"
+template::head::add_meta -name "author" -content "Iuri de Araujo Sampaio (iuri@iurix.com)"
+template::head::add_meta -name "viewport" -content "width=device-width, initial-scale=1.0"
+template::head::add_meta -name "keywords" -content "Tecnologia, Social corporativo, Arte e Cultura,)"
+
+
+template::head::add_script -async -src "https://www.googletagmanager.com/gtag/js?id=UA-144184532-1"
+template::head::add_javascript -script {
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments)};
+    gtag('js', new Date());
+    gtag('config', 'UA-144184532-1');
+} -order 1
 
 
 

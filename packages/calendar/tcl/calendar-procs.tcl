@@ -469,10 +469,7 @@ ad_proc -private calendar::compare_day_items_by_current_hour {a b} {
 ad_proc -public calendar::do_notifications {
     {-mode:required}
     {-cal_item_id:required}
-    {-url ""}
-    {-package_id ""}
 } {
-    ns_log Notice "Running calendar:do_notifications"
     # Select all the important information
     calendar::item::get -cal_item_id $cal_item_id -array cal_item
 
@@ -490,10 +487,8 @@ ad_proc -public calendar::do_notifications {
     set calendar_id $cal_item(calendar_id)
     set time_p $cal_item(time_p)
 
-    if {$url eq ""} {
-        set url "[ad_url][ad_conn package_url]"
-    }
-    
+    set url "[ad_url][ad_conn package_url]"
+
     set new_content ""
     append new_content "[_ calendar.Calendar]:  <a href=\"[ns_quotehtml $url]\">[ad_conn instance_name]</a><br>\n"
     append new_content "[_ calendar.Calendar_Item]: <a href=\"[ns_quotehtml ${url}cal-item-view?cal_item_id=$cal_item_id]\">$cal_item(name)</a><br>\n"
@@ -513,15 +508,11 @@ ad_proc -public calendar::do_notifications {
     # send text for now.
     set new_content [ad_html_to_text -- $new_content]
 
-    if {$package_id eq ""} {
-        set package_id [ad_conn package_id] 
-    }
-    
     # Do the notification for the forum
     notification::new \
         -type_id [notification::type::get_type_id \
         -short_name calendar_notif] \
-        -object_id $package_id \
+        -object_id [ad_conn package_id] \
         -response_id $cal_item(cal_item_id) \
         -notif_subject "$mode [_ calendar.Calendar_Item]: $cal_item(name)" \
         -notif_text $new_content

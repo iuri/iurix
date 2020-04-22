@@ -57,7 +57,10 @@ ad_proc -public ix_selic::rates::get_acumulated_rate {
 	WHERE type = :type
 	AND date BETWEEN :date::timestamp AND now()
     } -default 0]
-    
+
+    if {![exists_and_not_null next] } {
+	set next 0
+    }
     ns_log Notice "RATE ACUMU $curr | $next"
     
     return [expr $curr + $next]

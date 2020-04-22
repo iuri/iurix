@@ -37,20 +37,13 @@ ad_proc -public calendar::item::new {
     {-description:required}
     {-calendar_id ""}
     {-item_type_id ""}
-    {-creation_user ""}
-    {-package_id ""}
 } {
     if {[dates_valid_p -start_date $start_date -end_date $end_date]} {
-        # set creation_ip [ad_conn peeraddr]
-        set creation_ip "127.0.0.1"
-        
-        if {$creation_user eq ""} {
-            set creation_user [ad_conn user_id]
-        }
-        
-        set activity_id [db_exec_plsql insert_activity {} ]
+        set creation_ip [ad_conn peeraddr]
+        set creation_user [ad_conn user_id]
 
-        ns_log Notice "Running ad_proc calendar::item::new ..."
+        set activity_id [db_exec_plsql insert_activity {} ]
+        
         # Convert from user timezone to system timezone
         if { $start_date ne $end_date } {
 
@@ -62,8 +55,6 @@ ad_proc -public calendar::item::new {
         }
 
         set timespan_id [db_exec_plsql insert_timespan {}]
-
-        ns_log Notice "TIMESPAN."
         
         # create the cal_item
         # we are leaving the name and description fields in acs_event
@@ -73,21 +64,20 @@ ad_proc -public calendar::item::new {
         # by default, the cal_item permissions 
         # are going to be inherited from the calendar permissions
         set cal_item_id [db_exec_plsql cal_item_add {}]
-
-        ns_log Notice "AFTER cal_item_add plsql"
+	
 	db_dml set_item_type_id "update cal_items set item_type_id=:item_type_id where cal_item_id=:cal_item_id"
 
         # removing inherited permissions
-        if { $calendar_id ne "" && [calendar::personal_p -calendar_id $calendar_id -user_id $creation_user] } {
+        if { $calendar_id ne "" && [calendar::personal_p -calendar_id $calendar_id] } {
             permission::set_not_inherit -object_id $cal_item_id
         }
-        assign_permission $cal_item_id $creation_user read
-        assign_permission $cal_item_id $creation_user write
-        assign_permission $cal_item_id $creation_user delete
-        assign_permission $cal_item_id $creation_user admin
-        ns_log Notice "BEFORE NOTIFCATIONS "
 
-#        calendar::do_notifications -mode New -cal_item_id $cal_item_id -url "[export_vars -base "http://iurix.com/nevessouza/agenda/cal-item-add" {$cal_item_id}]" -package_id $package_id
+        assign_permission  $cal_item_id  $creation_user read
+        assign_permission  $cal_item_id  $creation_user write
+        assign_permission  $cal_item_id  $creation_user delete
+        assign_permission  $cal_item_id  $creation_user admin
+
+        calendar::do_notifications -mode New -cal_item_id $cal_item_id
         return $cal_item_id
 
     } else {

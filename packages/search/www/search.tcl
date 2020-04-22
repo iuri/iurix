@@ -52,12 +52,17 @@ set debug_p 0
 
 set user_id [ad_conn user_id]
 set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
+
+ns_log Notice "DRIVER $driver"
+
 if {[callback::impl_exists -impl $driver -callback search::driver_info]} {
     array set info [lindex [callback -impl $driver search::driver_info] 0]
 #    array set info [list package_key intermedia-driver version 1 automatic_and_queries_p 1  stopwords_p 1]
 } else {
     array set info [acs_sc::invoke -contract FtsEngineDriver -operation info -call_args [list] -impl $driver]
 }
+
+ns_log Notice "[parray info]"
 
 if { [array get info] eq "" } {
     ns_return 200 text/html [_ search.lt_FtsEngineDriver_not_a]

@@ -10,15 +10,18 @@ ad_page_contract {
 
       Round diff and percent to 4 decimals
       @http://www.postgresql.org/docs/8.3/static/typeconv-func.html
-
-
 }
+
+
+
+set admin_p [permission::permission_p -object_id [ad_conn package_id] -privilege admin]
 
 # set currencies [ix_currency::get_currency_rates "today"]
 # Query to return interval
 #     SELECT cr1.currency_code AS currency, cast(cr1.rate as numeric) AS today, cast(cr1.rate as numeric)-cast(t1.rate as numeric) AS diff, 100-(cast(t1.rate as numeric)*100/cast(cr1.rate as numeric)) AS percent from ix_currency_rates cr1 RIGHT OUTER JOIN ( select * from ix_currency_rates cr1 WHERE cr1.creation_date > now() - interval '48 hour' AND creation_date < now() - interval '24 hours') as t1 ON (t1.currency_code = cr1.currency_code) WHERE cr1.creation_date > now() - interval '24 hour' ;
 
 
+set current_date [lc_time_fmt [db_string select_current_date {SELECT now() - INTERVAL '3 hour' FROM dual} -default ""] "%q %X" "pt_BR"]
 
 
 set currencies [db_list_of_lists select_rates {
@@ -63,10 +66,10 @@ if {![exists_and_not_null currencies] } {
 
 set lcur ""
 
-ns_log Notice "\n CURRENCIES $currencies \n"
+# ns_log Notice "\n CURRENCIES $currencies \n"
 if {[llength $currencies] > 0} {
     set usd_pos [lsearch -glob $currencies USD*]
-    ns_log Notice "USD POS $usd_pos"
+  #  ns_log Notice "USD POS $usd_pos"
     # If USD rate exists then convert all rates from EUR to USD
     if {$usd_pos ne -1}  {
 	set usd_rate [lindex [lindex $currencies $usd_pos] 1]

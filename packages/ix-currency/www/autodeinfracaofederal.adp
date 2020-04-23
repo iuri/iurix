@@ -9,8 +9,10 @@
 
     <formtemplate id="form"></formtemplate>
 
+
     <if @jm@ ne "">
       <div id="result" style="text-align:right">
+      <h1>Resultado</h1>
       Data de Ciencia: @dc@ <br>
       Data de Lavratura: @dl@ <br>
       Data de Vencimento: @dvm@ <br><br>

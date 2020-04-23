@@ -4,7 +4,7 @@
   <if @admin_p@ eq 1>
     <a href="admin/">Admin</a> |
   </if>
-  <a href="/blog/">Blog</a> | <a href="/currencies/">C&acirc;mbio</a> @current_date;noquote@
+  <a href="autodeinfracaofederal">Auto de Infra&ccedil;&atilde;o</a> | <a href="/blog/">Blog</a> | <a href="/currencies/">C&acirc;mbio</a> @current_date;noquote@
 </p></h1>
 <if @lcur@ ne "">
   <table width="100%"><tr>

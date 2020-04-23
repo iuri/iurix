@@ -26,3 +26,4 @@ DROP SEQUENCE ix_currency_rate_id_seq;
 DROP TABLE ix_currency_rates CASCADE;
 
 
+\i drop-selic.sql

@@ -81,7 +81,16 @@ ad_form -extend -name form -form {
     
     ns_log Notice "Imposto $p | Juros Proporc. $jp | Multa Prop. $mp | Data Ciencia $dc | Data Lavrarura$dl"
 
-    
+    set p [string map {"." ""} $p]
+    set jp [string map {"." ""} $jp]
+    set mp [string map {"." ""}  $mp]
+    set jm [string map {"." ""} $jm]
+
+    set p [string map {"," "."} $p]
+    set jp [string map {"," "."} $jp]
+    set mp [string map {"," "."}  $mp]
+    set jm [string map {"," "."} $jm]
+   
     
     set dc [calendar::to_sql_datetime -date $dc -time "00:00:00" -time_p 0]
     
@@ -141,16 +150,12 @@ ad_form -extend -name form -form {
     # Buscar índice do mês do vencimento na tabela “Taxa de Juros Selic Acumulada Mensalmente”
     # http://receita.economia.gov.br/orientacao/tributaria/pagamentos-e-parcelamentos/taxa-de-juros-selic#Selicmensalmente
     #  Ex set i "1.29"
-    set p [string map {"," ""} $p]
-    set jp [string map {"," ""} $jp]
-    set mp [string map {"," ""}  $mp]
-    set jm [string map {"," ""} $jm]
-
 
     
     set i [ix_selic::rates::get_rate -date $dvm -type 1]
     ns_log Notice "RATE SIMPLES $i ******"
     ns_log Notice "\n MATH $mp * $i \n"
+    
     set jm [expr [expr $mp * $i] / 100]
     ns_log Notice "JM = $mp * $i / 100 = $jm"
     

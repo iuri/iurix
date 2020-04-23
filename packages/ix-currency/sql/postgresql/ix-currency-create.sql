@@ -114,3 +114,6 @@ CREATE OR REPLACE FUNCTION ix_currency_rate__delete (
 
 	RETURN 0;
   END;' language 'plpgsql';
+
+
+\i create-selic.sql

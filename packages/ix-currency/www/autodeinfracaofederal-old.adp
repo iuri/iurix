@@ -1,40 +1,18 @@
 <master>
-  <property name="doc(title)">SELIC</property>
-  <property name="context">SELIC</property>
 
 <include src="/packages/ix-currency/lib/currencies-display">
 
-<div class="row" style="padding:15px;">
+<div class="row">
+  <div class="col-sm-4"></div>
   <div class="col-sm-4">
-    <div class="row">
-      <div class="col"><h2>SELIC</h2></div>
-    </div>
-    <div class="row" style="border:solid #000 1px">
-      <div class="col-sm-3"><h2>M&Ecirc;S</h2></div>
-      <div class="col-sm-3"><h2>% MENSAL</h2></div>
-      <div class="col-sm-3"><h2>ACUMULADO</h2></div>
-      <div class="col-sm-3"><h2>TAXA A UTILIZAR</h2></div>
-    </div>
-    <multiple name="rates">
-    <div class="row" style="border:solid #000 1px">
-      <div class="col-sm-3">@rates.abrev_date@</div>
-      <div class="col-sm-3" style="background:#99E599;">@rates.rate@</div>
-      <div class="col-sm-3">@rates.acm_rate@</div>
-      <div class="col-sm-3" style="background:#E599CF">@rates.applied_rate@</div>
-    </div>
-
-    </multiple>
-
-  </div>
-  <div class="col-sm-8">
 
 
     <formtemplate id="form"></formtemplate>
 
 
-    <if @jm_p@ eq true>
+    <if @jm@ ne "">
       <div id="result" style="text-align:right">
-      <h1>Demonstração</h1>
+      <h1>Resultado</h1>
       Data de Ciencia: @dc@ <br>
       Data de Lavratura: @dl@ <br>
       Data de Vencimento: @dvm@ <br><br>
@@ -49,6 +27,7 @@
       </div>
     </if>
   </div>
+  <div class="col-sm-4"></div>
 </div>
 <div class="row">
   <div class="col-sm-2"></div>

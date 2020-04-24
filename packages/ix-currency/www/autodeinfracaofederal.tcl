@@ -8,12 +8,58 @@ ad_page_contract {} {
     {dvm ""}
 } 
 
+set acm_rate 0
+template::multirow create rates abrev_date rate acm_rate applied_rate
+db_foreach select_rates {
+    SELECT rate_id, rate, date, EXTRACT(MONTH FROM date) AS month, EXTRACT(YEAR FROM date) AS year
+    FROM ix_selic_rates
+    WHERE type = '0'
+    ORDER BY date ASC
+} { 
 
-ad_form -name form -html {enctype multipart/form-data} -form {    
+    set abrev_date "$month-$year"
+
+    set acm_rate [format "%.2f" [expr $acm_rate + $rate]]
+    set applied_rate [db_string select_acm_rate {
+	SELECT rate FROM ix_selic_rates WHERE type = '1' AND date = :date
+    } -default ""]
+
+    template::multirow append rates $abrev_date $rate $acm_rate $applied_rate  
+
+
+    
+}
+
+
+
+
+ad_form -name form -html {enctype multipart/form-data} -form {
+
     {inform:text(inform) {label ""}  {value "<h1>Auto de Infra&ccedil;&atilde;o Federal<h1/>"}}
-    {p:text {label "Valor principal do debito/tributo - P"} {html "size 10"} {help_text "Informação disponível no Lançamento de Ofício."}}
-    {jp:text {label "Juros de mora sobre principal - JP"} {html "size 10"} {help_text "Informação disponível no Lançamento de Ofício."}}    
-    {mp:text {label "Multa proporcional - MP"} {help_text "Informação disponível no Lançamento de Ofício."} {html {onChange "document.form.__refreshing_p.value='1';document.form.submit()"}}}
+    {dl:date
+	{label "Data da Lavratura - DL"}
+        {format "DD MM YYYY"}
+        {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" id='form.date-button'> \[<b>DD-MM-AAAA</b>\]} }
+    }
+    {dc:date
+	{label "Data da ciência - DC"}
+        {format "DD MM YYYY"}
+        {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" id='form.date-button'> \[<b>DD-MM-AAAA</b>\]} }
+    }
+
+
+
+}
+
+
+ad_form -extend -name form -form {    
+    {p:text {label "Principal (P)"} {html "size 10"} {help_text "Valor principal do d&eacute;bito"}}
+    {j:text {label "Juros (J)"} {html "size 10"} {help_text ""}}
+    {m:text {label "Multa (M)"} {html "size 10"} {help_text ""}}
+
+    
+    {jp:text {label "Juros de mora sobre principal (JP)"} {html "size 10"} {help_text ""}}    
+    {jp:text {label "Juros de mora sobre multa (JM)"} {help_text ""} {html {onChange "document.form.__refreshing_p.value='1';document.form.submit()"}}}
 }
 
 
@@ -60,16 +106,6 @@ ad_form -extend -name form -form {
 
 
 ad_form -extend -name form -form {    
-    {dl:date
-	{label "Data da Lavratura - DL"}
-        {format "DD MM YYYY"}
-        {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" id='form.date-button'> \[<b>DD-MM-AAAA</b>\]} }
-    }
-    {dc:date
-	{label "Data da ciência - DC"}
-        {format "DD MM YYYY"}
-        {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" id='form.date-button'> \[<b>DD-MM-AAAA</b>\]} }
-    }
     {inform2:text(inform) {label ""}  {value "<a href=https://docs.google.com/document/d/16756by_GEZjjO4yai8IGnxAl5d5saNzT5DavytQ1zoU/edit?usp=sharing><b>Termos & Documenta&ccedil;&atilde;o</b> </a>"}}
 } -edit_request {
 

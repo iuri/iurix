@@ -1,4 +1,7 @@
-ad_page_contract {} {} 
+ad_page_contract {} {
+    form_id:integer,optional
+    {__refreshing_p "0"}
+} 
 
 set myform [ns_getform]
 if {[string equal "" $myform]} {
@@ -53,6 +56,7 @@ db_foreach select_rates {
 ad_form -name form -html {enctype multipart/form-data} -form {
     {form_id:key}
     {inform:text(inform) {label ""}  {value "<h1>Auto de Infra&ccedil;&atilde;o Federal<h1/>"}}
+    {inform2:text(inform) {label ""}  {value "<h2>Datas</h2>"}}
     {dl:date
 	{label "Data da Lavratura (DL)"}
         {format "DD MM YYYY"}
@@ -64,85 +68,84 @@ ad_form -name form -html {enctype multipart/form-data} -form {
         {after_html {<input type="button" style="height:23px; width:23px; background: url('/resources/acs-templating/calendar.gif');" id="form.date-button2" onBlur="document.form.__refreshing_p.value='1';document.form.submit()"> \[<b>DD-MM-AAAA</b>\]} }
        
     }
-    {dv:text(inform)
-	{label "Data de Vencimento (DV)"} }
-}
-
-
-ad_form -extend -name form -form {    
-    {p:text {label "Principal (P)"} {html "size 10"} {help_text "Valor principal do d&eacute;bito"}}
-    {j:text {label "Juros (J)"} {html "size 10"} {help_text ""}}
-    {m:text {label "Multa (M)"} {html "size 10"} {help_text ""}}
-
-    
-    {jp:text {label "Juros de mora sobre principal (JP)"} {html "size 10"} {help_text ""}}    
-    {jm:text {label "Juros de mora sobre multa (JM)"} {help_text ""} {html {onChange "document.form.__refreshing_p.value='1';document.form.submit()"}}}
-}
-
-
-set current_date [lc_time_fmt [db_string select_current_date {SELECT now() FROM dual} -default ""] "%q %X" "pt_BR"]
-set subtotal ""
-
-set jm_p false
-if {[exists_and_not_null p] && [exists_and_not_null jp] && [exists_and_not_null mp] } {
-    ns_log Notice "P $p | JP $jp | MP $mp | JM $jm | SUBTOTAL $subtotal "
-
-    set jm_p true
-    set p [string map {"." ""} $p]
-    set jp [string map {"." ""} $jp]
-    set mp [string map {"." ""}  $mp]
-    set jm [string map {"." ""} $jm]
-
-    set p [string map {"," "."} $p]
-    set jp [string map {"," "."} $jp]
-    set mp [string map {"," "."}  $mp]
-    set jm [string map {"," "."} $jm]
-
-    ns_log Notice "P $p | JP $jp | MP $mp | JM $jm | SUBTOTAL $subtotal "
-    
-
-    
-    set subtotal [format "%.2f" [expr $p + $jp + $mp]]
-    
-    if { [exists_and_not_null jm]} {	
-	set total [format "%.2f" [expr $p + $jp + $mp + $jm]]
-	set jm [format "%.2f" $jm]	
-	set dc [lc_time_fmt $dc "%q %X" "pt_BR"]
-	set dl [lc_time_fmt $dl "%q %X" "pt_BR"]
-	set dv [lc_time_fmt $dv "%q %X" "pt_BR"]       
+    {dv:date
+	{label "Data de Vencimento (DV)"}
+	{mode display}
+        {format "DD MM YYYY"}
     }
 
-    set p [format "%.2f" $p]
-    set jp [format "%.2f" $jp]
-    set mp [format "%.2f" $mp]   
 }
 
 
 ad_form -extend -name form -form {    
-    {subtotal:text,optional {label "Total"} {value $subtotal }    }
+    {inform3:text(inform) {label ""}  {value "<h2>C&aacute;lculo</h2>"}}
+    {p:text {label "Principal (P)"} {html "size 10"} {help_text "Valor principal do d&eacute;bito"}}
+    {j:text {label "Juros (J)"} {html "size 10"} {help_text ""}}
+    {m:text {label "Multa (M)"} {html {onChange "document.form.__refreshing_p.value='1';document.form.submit()"}} {help_text ""}}
 }
 
 
 
+ad_form -extend -name form -form {
+    {jp:text {label "Juros de mora sobre principal (JP)"} {html "size 10"} {help_text ""}}    
+    {jm:text {label "Juros de mora sobre multa (JM)"} {html "size 10"} {help_text ""}}
+    {total:text {label "Total"} {html "size 10"} {help_text ""}}
+}
+
+
+
+
 ad_form -extend -name form -form {    
-    {inform2:text(inform) {label ""}  {value "<a href=https://docs.google.com/document/d/16756by_GEZjjO4yai8IGnxAl5d5saNzT5DavytQ1zoU/edit?usp=sharing><b>Termos & Documenta&ccedil;&atilde;o</b> </a>"}}
+    {inform4:text(inform) {label ""}  {value "<a href=https://docs.google.com/document/d/16756by_GEZjjO4yai8IGnxAl5d5saNzT5DavytQ1zoU/edit?usp=sharing><b>Termos & Documenta&ccedil;&atilde;o</b> </a>"}}
 
 
 } -on_submit {
     
-    ns_log Notice "Imposto $p | Juros Proporc. $jp | Multa Prop. $mp | Data Ciencia $dc | Data Lavrarura$dl"
+    ns_log Notice "Imposto $p | Juros $j | Multa $m | Juros sobre Principal $jp | Juros sobre Multa $jm | Data Ciencia $dc | Data Lavrarura $dl | Data Vencimento $dv | "
 
-
-
-    set dc [calendar::to_sql_datetime -date $dc -time "00:00:00" -time_p 0]
+    if {$p ne "" && $m ne ""} {
+ 	set p [string map {"." ""} $p]
+	set m [string map {"." ""}  $m]
+	set j [string map {"." ""} $j]
+	set jp [string map {"." ""} $jp]
+	set jm [string map {"." ""} $jm]
 	
-    set dl [calendar::to_sql_datetime -date $dl -time "00:00:00" -time_p 0]
+	set p [string map {"," "."} $p]
+	set m [string map {"," "."} $m]
+	set j [string map {"," "."} $j]
+	set jp [string map {"," "."} $jp]
+	set jm [string map {"," "."} $jm]
+	
+	
+	set dv [calendar::to_sql_datetime -date $dv -time "00:00:00" -time_p 0]
+	set i [ix_selic::rates::get_rate -date $dv -type 1]
+	ns_log Notice "RATE SIMPLES $i ******"
+	ns_log Notice "\n MATH $jp * $i \n"
+	
+	set result [expr [expr $jp * $i] / 100]
+	ns_log Notice "RESULT = $jp * $i / 100  = $result"
+	
+	
+	
+    }
+
+     
+} -after_submit {
     
+    ad_returnredirect [export_vars -base autodeinfracaofederal {value p jp mp jm dv dc dl}]
+    ad_script_abort
+
+} -on_refresh {
+    ns_log Notice "Imposto $p | Juros $j | Multa $m | Data Ciencia $dc | Data Lavrarura $dl"
+    
+    set dc [calendar::to_sql_datetime -date $dc -time "00:00:00" -time_p 0]
+    set dl [calendar::to_sql_datetime -date $dl -time "00:00:00" -time_p 0]
+
     ns_log Notice "DATA CIENCIA $dc"
     ns_log Notice "DATA LAVRATURA $dl"
     
     
-	set dc_day_of_week [db_string select_dat_of_week { SELECT extract(dow from timestamp :dc) FROM dual  } -default ""]    	
+    set dc_day_of_week [db_string select_dat_of_week { SELECT extract(dow from timestamp :dc) FROM dual  } -default ""]    	
     ns_log Notice "DAY OF WEEK $dc_day_of_week"
     # Case dc_day_of_week is sat or sun then add 2 or 1 day to dc 
     switch $dc_day_of_week {
@@ -164,8 +167,8 @@ ad_form -extend -name form -form {
     
     # 1. Juros de mora sobre a multa - JM
     set dv [db_string select_date { SELECT DATE :dc + interval '32 days' FROM dual } -default ""]
-    ns_log Notice "DVM $dv "
-    
+    ns_log Notice "DVM $dv"
+
     set dv_day_of_week [db_string select_dat_of_week { SELECT extract(dow from timestamp :dv) FROM dual  } -default ""]
     
     ns_log Notice "DVM Day OF WEEK $dv_day_of_week"
@@ -187,95 +190,47 @@ ad_form -extend -name form -form {
     }
     ns_log Notice "NEW DVM $dv"
 
+    set dv [calendar::from_sql_datetime -sql_date $dv  -format "YYY-MM-DD"]
+    ns_log Notice "DV2 $dv"
 
+    template::element set_value form dv $dv
 
-
-
-
-    
-    
-    set p [string map {"." ""} $p]
-    set jp [string map {"." ""} $jp]
-    set mp [string map {"." ""}  $mp]
-    set jm [string map {"." ""} $jm]
-
-    set p [string map {"," "."} $p]
-    set jp [string map {"," "."} $jp]
-    set mp [string map {"," "."}  $mp]
-    set jm [string map {"," "."} $jm]
-   
-    
-
-    # gets index of mora from auxiliar table 1 - Taxa SEclic Acumulada
-    # juros mora index
-    # Buscar índice do mês do vencimento na tabela “Taxa de Juros Selic Acumulada Mensalmente”
-    # http://receita.economia.gov.br/orientacao/tributaria/pagamentos-e-parcelamentos/taxa-de-juros-selic#Selicmensalmente
-    #  Ex set i "1.29"
-
-    
-    set i [ix_selic::rates::get_rate -date $dv -type 1]
-    ns_log Notice "RATE SIMPLES $i ******"
-    ns_log Notice "\n MATH $mp * $i \n"
-    
-    set jm [expr [expr $mp * $i] / 100]
-    ns_log Notice "JM = $mp * $i / 100 = $jm"
-    
-
-
-
-
-    
-    # 2. Juros de mora sobre principal - Complemento - JP-C
-    # Determinar mês da lavratura - ML do Lançamento de Ofício, a partir da DL (Campo D). Exemplo: Se DL é 04.dez.2019, o mês da lavratura é “dezembro/2019”.
-
-    #set pivot_month_lavratura [db_string select_month_lavr { SELECT extract(month FROM timestamp :dl) FROM dual  } -default ""]
-    #set pivot_year_lavratura [db_string select_year_lavr { SELECT extract(year FROM timestamp :dl) FROM dual  } -default ""]
-    #ns_log Notice "PIVOT MONTH LAVRATURA $pivot_month_lavratura"
-    #set date_lavr "$month_names($pivot_month_lavratura)-$pivot_year_lavratura"
-    #ns_log Notice "DATE LAVR $date_lavr"
-
-    # Buscar no site da RFB abaixo a tabela “Taxa de Juros Selic”
-    # http://receita.economia.gov.br/orientacao/tributaria/pagamentos-e-parcelamentos/taxa-de-juros-selic#Selic 
-    
-    
-    # index_mora_compl
-    set j [ix_selic::rates::get_acumulated_rate -date $dl -type 0]
-    #set j [expr 0.37 + 0.38 + 0.29]
-    ns_log Notice "INDEX ACUMULADO ***** $j"
-    set jp [expr $jp + [expr [expr $p * $j] / 100] ]
-    ns_log Notice "JP = $p * $j / 100 = $jp"
-
-    ix_selic::insert_result \
-	-p $p \
-	-mp $mp \
-	-jp $jp \
-	-jm $jm \
-	-subtotal [format "%.2f" [expr $p + $jp + $mp + $jm]] \
-	-total [format "%.2f" [expr $p + $jp + $mp + $jm]] \
-	-dl $dl \
-	-dc $dc \
-	-dvm $dv 
+    set monthly_rate [db_string select_monthly_rate {
+	SELECT rate FROM ix_selic_rates
+	WHERE EXTRACT(month FROM date) = EXTRACT(month FROM :dl::timestamp)	
+	AND EXTRACT(year FROM date) = EXTRACT(year FROM :dl::timestamp)
+	AND type = '0' 
 	
-    if {[catch { acs_mail_lite::send -send_immediately \
-		     -to_addr iuri.sampaio@gmail.com \
-		     -from_addr postmaster@iurix.com -subject "IURIX - NOVO CALCULO SELIC!" -body "Alguem fez um novo calculo \n [ad_conn peeraddr] \n -p $p \
-	-mp $mp \n
-	-jp $jp \n
-	-jm $jm \n
-	-subtotal [format \"%.2f\" [expr $p + $jp + $mp + $jm]] \n
-	-total [format \"%.2f\" [expr $p + $jp + $mp + $jm]] \n
-	-dl $dl \n
-	-dc $dc \n
-	-dvm $dv \n
-	" -mime_type "text/html" } errmsg] } {
-	ns_log Notice "ERROR SENDING EMAIL $errmsg"
+    } -default ""]
+    
+    set applied_rate [db_string select_applied_rate {
+	SELECT rate FROM ix_selic_rates
+        WHERE EXTRACT(month FROM date) = EXTRACT(month FROM :dl::timestamp)	
+	AND EXTRACT(year FROM date) = EXTRACT(year FROM :dl::timestamp)
+	AND type = '1' 
+    } -default ""]
+
+    ns_log notice "RATES $monthly_rate | $applied_rate"
+
+    if {$p ne "" && $m ne ""} {
+	set p [string map {"." ""} $p]
+	set m [string map {"." ""}  $m]
+	set j [string map {"." ""} $j]
+	
+	set p [string map {"," "."} $p]
+	set m [string map {"," "."} $m]
+	set j [string map {"," "."} $j]
+	
+	set jp [format "%.2f" [expr [expr [expr $applied_rate + $monthly_rate - 1] * $p] / 100]]
+	set jm [format "%.2f" [expr [expr $applied_rate * $m] / 100]]
+	ns_log Notice "Juros princ $jp | Juros multa $jm"     
+
+	set total [format "%.2f" [expr $p + $j + $m + $jp + $jm]]
+	template::element set_value form jp $jp
+	template::element set_value form jm $jm
+	template::element set_value form total $total
     }
-    
-} -after_submit {
-    
-    ad_returnredirect [export_vars -base autodeinfracaofederal {value p jp mp jm dv dc dl}]
-    ad_script_abort
-    
+
 }
 
 
@@ -289,7 +244,4 @@ template::head::add_javascript -src "https://ajax.googleapis.com/ajax/libs/jquer
 # <!-- Latest compiled JavaScript -->
 template::head::add_javascript -src "https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" -order 2
     
-    
-
-
 template::head::add_javascript -src "/resources/jquery.mask.min.js" -order 2

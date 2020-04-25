@@ -31,23 +31,6 @@
 
     <formtemplate id="form"></formtemplate>
 
-
-    <if @jm_p@ eq true>
-      <div id="result" style="text-align:right">
-      <h1>Demonstração</h1>
-      Data de Ciencia: @dc@ <br>
-      Data de Lavratura: @dl@ <br>
-      Data de Vencimento: @dvm@ <br><br>
-    
-
-      <b>Data Atual: @current_date@</b> <br>  
-      Tributo (Principal): @p@  <br>
-      <b>Juros de mora sobre o Principal: @jp@</b> <br>
-      Multa proporcional: @mp@ <br>
-      <b>Juros de mora sobre a Multa: @jm@</b> <br>
-      Total: @total@ <br>
-      </div>
-    </if>
   </div>
 </div>
 <div class="row">

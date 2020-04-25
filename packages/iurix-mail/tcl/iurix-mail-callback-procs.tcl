@@ -22,9 +22,7 @@ ad_proc -public -callback acs_mail_lite::incoming_email -impl iurix-mail {
     @author Iuri Sampaio (iuri@iurix.com)
     @creation_date 2011-09-30
 } {
-    
-    ns_log Notice "Running ad_proc iurix_mail::incoming_email"
-    
+        
     upvar $array email
 
     # ns_log Notice "[parray email]"

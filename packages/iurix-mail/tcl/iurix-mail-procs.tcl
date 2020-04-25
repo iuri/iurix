@@ -147,7 +147,6 @@ ad_proc -public ix_mail::account::new {
     It adds an user's email account 
 
 } {
-    ns_log Notice "Running ad_proc iurix_mail::account::new"
    
     set account_id [random]
     
@@ -261,7 +260,7 @@ ad_proc -public ix_mail::email::new {
     
     Create a new message
 } {
-    ns_log Notice "Running ad_proc iurixmail::new_"
+#    ns_log Notice "Running ad_proc iurixmail::new_"
 
     foreach arg $largs {
 	#ns_log Notice "ARG $arg"

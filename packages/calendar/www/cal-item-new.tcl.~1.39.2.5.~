@@ -27,7 +27,6 @@ if {![info exists item_type_id]} {
 }
 
 set date [calendar::adjust_date -date $date -julian_date $julian_date]
-ns_log Notice "DATE ORG $date"
 set ansi_date $date
 set calendar_list [calendar::calendar_list]
 set calendar_options [calendar::calendar_list -privilege create]
@@ -248,11 +247,7 @@ ad_form -extend -name cal_item -validate {
     # To support green calendar
     # set date [template::util::date::from_ansi $ansi_start_date]
     # set date [lindex $ansi_start_date 0]
-    ns_log Notice "ANSI DATE $ansi_start_date"
-    
     set date [calendar::from_sql_datetime -sql_date $ansi_start_date  -format "YYY-MM-DD"]
-
-    ns_log Notice "DATE $date"
     set start_time [template::util::date::from_ansi $ansi_start_date [lc_get formbuilder_time_format]]
     set end_time [template::util::date::from_ansi $ansi_end_date [lc_get formbuilder_time_format]]
 } -new_data {

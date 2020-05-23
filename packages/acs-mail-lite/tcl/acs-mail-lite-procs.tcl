@@ -137,7 +137,7 @@ namespace eval acs_mail_lite {
         set smtppassword [parameter::get -parameter "SMTPPassword" \
                               -package_id $mail_package_id]
 
-        ns_log Notice "ORIGINATOR $originator"
+        # ns_log Notice "ORIGINATOR $originator"
         set cmd [list smtp::sendmessage $multi_token -originator "nevessouza@iurix.com"]
         
         foreach header $headers {

@@ -67,7 +67,8 @@ _editor_lang = "@::xinha_lang;literal@";
 <if @head@ not nil>@head;literal@</if>
 
 
-<script data-ad-client="ca-pub-9443985379428796" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<script data-ad-client="ca-pub-1131295276959624" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
 </head>
 <body<if @body.class@ not nil> class="@body.class;literal@"</if><if @body.id@ not nil> id="@body.id;literal@"</if>>

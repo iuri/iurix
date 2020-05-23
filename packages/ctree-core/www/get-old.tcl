@@ -2,7 +2,7 @@ ad_page_contract {} {
     {type:optional}
     {post:optional}
     {description:optional}
-    {tree:optional}
+    {tree}
     {token}
 }
 
@@ -90,36 +90,33 @@ if {[string equal $token $access_token]} {
 	}
 	
     } else {
-	set json "\"trees\": \["
 	
-	db_foreach select_trees {
-	    SELECT item_id, name FROM cr_items WHERE content_type = 'c_tree'
-	} {
-	    
-	    append json "\{\"name\":\"$name\"\},"
-	}
-	set json [string trimright $json ","]
-	append json "\]"
 	
 	set result "{
                   \"data\": {
-                    \"status\": true,          
-                    $json
+                               \"status\":false
                   },
-                  \"errors\":{},
+                  \"errors\":{
+                               \"id\": \"401 Unauthorized\",
+                               \"status\": \"HTTP/1.1 401 Access Denied\",
+                               \"title\": \"Item not found!\",
+                               \"detail\": \"The item does not relate to any data in the system. Please register!\",
+                               \"source\": \"filename: /packages/ctree/www/get.tcl \"
+                  },
                   \"meta\": {
                          \"copyright\": \"Copyright 2019 Collaboration Tree http://www.innovativefuture.org/collaboration-tree/ \",
                          \"application\": \"CTree Rest API\",
-                         \"version\": \"0.1d\",
-                         \"id\": \"HTTP/1.1 200 Authorized\",
-                         \"status\": \"true\",
-                         \"message\": \"Successfull request. Access allowed\"
-                  }
-            }"
-	    
-	    doc_return 200 "application/json" $result
-	    ad_script_abort
-	    
+                               \"version\": \"0.1d\",
+                               \"id\": \"HTTP/1.1 401 Unauthorized\",
+                               \"status\": \"false\",
+                               \"message\": \"login failed. Access denied.\"
+                  }                                                                                                 
+        }"
+
+
+	doc_return 401 "application/json" $result
+	ad_return_complaint 1 "Item URL Invalid"
+	ad_script_abort
     }
 } else {
 

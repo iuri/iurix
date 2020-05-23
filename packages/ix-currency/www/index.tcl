@@ -21,6 +21,10 @@ ns_log Notice " $varname - $varvalue"
     }
 }
 
+set admin_p [permission::permission_p -object_id [ad_conn package_id] -privilege admin]
+
+set current_date [lc_time_fmt [db_string select_current_date {SELECT now() - INTERVAL '3 hour' FROM dual} -default ""] "%q %X" "pt_BR"]
+
 
 set lcurrencies [db_list_of_lists select_rates {
     SELECT cr1.currency_code AS currency, cast(cr1.rate as numeric) AS today, cast(cr1.rate as numeric)-cast(t1.rate as numeric) AS diff, 100-(cast(t1.rate as numeric)*100/cast(cr1.rate as numeric)) AS percent from ix_currency_rates cr1 RIGHT OUTER JOIN ( select * from ix_currency_rates cr1 WHERE cr1.creation_date > now() - interval '48 hour' AND creation_date < now() - interval '24 hours') as t1 ON (t1.currency_code = cr1.currency_code) WHERE cr1.creation_date > now() - interval '24 hour' ;

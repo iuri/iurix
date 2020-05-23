@@ -93,7 +93,7 @@ select content_folder__register_content_type(-100,'c_segmentvariation','t');
 
 
 
--- "elements" : {
+-- "post" : {
 --"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
 --"childCount" : 1,
 --"createdDate" : 123456789,
@@ -107,22 +107,22 @@ select content_folder__register_content_type(-100,'c_segmentvariation','t');
 
 
 select content_type__create_type (
-       'c_element',     -- content_type
+       'c_post',     -- content_type
        'c_tree',    	 -- supertype. We search revision content 
                         -- first, before item metadata
-       'C-Tree Element',    -- pretty_name
-       'C-Tree Elements',   -- pretty_plural
+       'C-Tree Post',    -- pretty_name
+       'C-Tree Posts',   -- pretty_plural
        NULL,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
        NULL,	         -- id_column
-       'c_element__get_title' -- name_method
+       'c_post__get_title' -- name_method
 );
 
 
 -- necessary to work around limitation of content repository:
-select content_folder__register_content_type(-100,'c_element','t');
+select content_folder__register_content_type(-100,'c_post','t');
 
 
 -- descriptions

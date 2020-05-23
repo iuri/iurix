@@ -1,10 +1,10 @@
 <master src="/www/blank-master">
-
+<div><include src="/packages/ix-currency/lib/currencies-display"></div>
   <body id="page-top">
-
+  
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-      <div class="container">
+      <div class="container" style="margin-top:30px;">
         <a class="navbar-brand js-scroll-trigger" href="#page-top">IURIX</a>
         <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -41,7 +41,7 @@
         <div class="row">
           <div class="col-lg-10 mx-auto">
             <h1 class="text-uppercase">
-              <strong>I.T. catalizes your business </strong>
+              <strong>I.T. catalyzes your business </strong>
             </h1>
             <hr>
           </div>

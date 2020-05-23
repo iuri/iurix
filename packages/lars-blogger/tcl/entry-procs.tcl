@@ -36,7 +36,8 @@ ad_proc -public lars_blogger::entry::new {
         set entry_id [db_exec_plsql entry_add {}]
         lars_blog_flush_cache $package_id
     }
-
+    
+    ns_log Notice "BEFORE publish blog entry"
     # If publish directly, fire off notifications and ping weblogs.com
     if { ![template::util::is_true $draft_p] } {
         lars_blogger::entry::publish \
@@ -263,7 +264,7 @@ ad_proc -public lars_blogger::entry::do_notifications {
 ad_proc lars_blogger::entry::trackback { -entry_id } {
     sends trackback ping (if enabled)
 } {
-
+    ns_log Notice "ENTRY TRACKBACK PING ..."
     if {[parameter::get -parameter EnableAutoDiscoveryAndPing -default "1"]} {
 
 	lars_blogger::entry::get -entry_id $entry_id -array entry

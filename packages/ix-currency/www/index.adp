@@ -1,7 +1,12 @@
 <master>
 
 <include src="/packages/ix-currency/lib/currencies-display">
-
+<h1><p align="right">
+  <if @admin_p@ eq 1>
+    <a href="admin/">Admin</a> |
+  </if>
+  <a href="autodeinfracaofederal">Auto de Infra&ccedil;&atilde;o</a> | <a href="/blog/">Blog</a> | <a href="/currencies/">C&acirc;mbio</a> @current_date;noquote@
+</p></h1>
 <h1>#ix-currency.Convert_Currency#</h1>
 <form name="currency_converter">
 

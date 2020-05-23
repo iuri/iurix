@@ -30,7 +30,7 @@ ad_proc import_json {
     array set arr $t
     #   ns_log Notice "RL_JSON \n $arr(ctrees)"
     array set arr2 $arr(ctrees)
-    #ns_log notice "ARRAY2 \n [parray arr2] \n\n"
+    ns_log notice "ARRAY2 \n [parray arr2] \n\n"
     
     # https://www.tcl.tk/man/tcl8.4/TclCmd/array.htm
     # https://wiki.tcl-lang.org/page/RL_JSON+Extensions
@@ -42,7 +42,7 @@ ad_proc import_json {
 	    SELECT count(*) FROM cr_items WHERE name = :name AND parent_id = :parent_id
 	}]} {	    
 	    
-	# ns_log Notice "TREE: $name \n ATTRIBS $arr2($name) \n LENGTH [llength $arr2($name)]"
+	    ns_log Notice "TREE: $name \n ATTRIBS $arr2($name) \n LENGTH [llength $arr2($name)]"
 	    ctree::tree::new -name $name -parent_id [ad_conn package_id] -content_type c_tree -attributes "$arr2($name)" -add_p t
 	} else {
 	    ns_log Notice "TREE EXISTS"

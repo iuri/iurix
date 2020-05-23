@@ -260,7 +260,7 @@ ad_proc -public ix_mail::email::new {
     
     Create a new message
 } {
-#    ns_log Notice "Running ad_proc iurixmail::new_"
+    ns_log Notice "Running ad_proc iurixmail::new_"
 
     foreach arg $largs {
 	#ns_log Notice "ARG $arg"

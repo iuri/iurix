@@ -95,7 +95,7 @@ ad_proc ctree::tree::new {
 		    set content_type "c_feedback"		
 		}	    
 		"elements" {	
-		    set content_type "c_element"		
+		    set content_type "c_post"		
 		}	    
 		"segmentVariations" {	
 		    set content_type "c_segmentvariation"		

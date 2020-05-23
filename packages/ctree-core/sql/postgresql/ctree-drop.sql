@@ -11,6 +11,6 @@ select content_folder__unregister_content_type(-100,'c_segmentvariation','t');
 select content_type__drop_type('c_segmentvariation', 't', 't');
 
 
-select content_folder__unregister_content_type(-100,'c_element','t');
-select content_type__drop_type('c_element', 't', 't');
+select content_folder__unregister_content_type(-100,'c_post','t');
+select content_type__drop_type('c_post', 't', 't');
 

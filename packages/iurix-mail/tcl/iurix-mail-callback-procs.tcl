@@ -25,7 +25,7 @@ ad_proc -public -callback acs_mail_lite::incoming_email -impl iurix-mail {
         
     upvar $array email
 
-    # ns_log Notice "[parray email]"
+#    ns_log Notice "[parray email]"
      
     set user_id [party::get_by_email -email $email(from)]
     set package_id [iurix_mail::get_package_id]

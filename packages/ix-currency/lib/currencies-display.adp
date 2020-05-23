@@ -1,11 +1,5 @@
 
 
-<h1><p align="right">
-  <if @admin_p@ eq 1>
-    <a href="admin/">Admin</a> |
-  </if>
-  <a href="autodeinfracaofederal">Auto de Infra&ccedil;&atilde;o</a> | <a href="/blog/">Blog</a> | <a href="/currencies/">C&acirc;mbio</a> @current_date;noquote@
-</p></h1>
 <if @lcur@ ne "">
   <table width="100%"><tr>
     <td width="6%"><a href="/ix-currency/" style="font-weight:bold; color:#000000;text-decoration:none;">USD $1</a></td>

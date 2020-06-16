@@ -2,7 +2,9 @@ ad_page_contract {} {
     {type:optional}
     {post:optional}
     {description:optional}
-    {tree:optional}
+    {cTreeKey:optional}
+    {pageSize ""}
+    {pageOffset ""}	
     {token}
 }
 
@@ -11,19 +13,23 @@ set access_token "GHERFEIFGEG765434567NEIGrghreuighe"
 
 if {[string equal $token $access_token]} {
     
-    if {[info exists tree]} {
+    if {[info exists cTreeKey]} {
 	#Tree's in the argument
+	ns_log  Notice "cTreeKey $cTreeKey"
+	
 	set parent_id [ad_conn package_id]
+	ns_log Notice "PARENT $parent_id"
 	if {[db_0or1row item_exists {
-	    SELECT item_id FROM cr_items WHERE name = :tree AND parent_id = :parent_id
+	    SELECT item_id FROM cr_items WHERE name = :cTreeKey AND parent_id = :parent_id
 	}]} {
-	    # If a c_post is required, then return post's data 
+	    ns_log Notice "ITEMID $item_id"
+	    
+	    # If a ctree_post is required, then return post's data 
 	    if {[info exists post]} {
 		set parent_id $item_id
 		if {[db_0or1row item_exists {
 		    SELECT item_id FROM cr_items WHERE name = :post AND parent_id = :parent_id
-		}]} {
-		    
+		}]} {		    
 		    ns_log Notice "ITEMID $item_id"		
 		}
 		
@@ -31,17 +37,16 @@ if {[string equal $token $access_token]} {
 		    set item_id [db_string select_desc { SELECT ci.item_id
 			FROM cr_items ci,cr_revisions cr
 			WHERE cr.revision_id = ci.latest_revision
-			AND ci.content_type = 'c_description'
+			AND ci.content_type = 'ctree_description'
 		    } -default ""]
 		    ns_log Notice "ITEMID $item_id"
 		    # set item_id [ctree::get_description -description $description -post $post -tree $tree]
 		}		
-	    }
-		
+	    }	    
 	}
 	
 	
-	# If a c_type is required, then return post's data 
+	# If a ctree_type is required, then return post's data 
 	if {[info exists type]} {
 	    ns_log Notice "GET TYPE $type"
 	    set parent_id $item_id
@@ -60,11 +65,15 @@ if {[string equal $token $access_token]} {
 	    set j [lsearch $item(description) [lindex $item(description) [expr $i +1]]]
 	    set nm [lindex $item(description) $i] 
 	    set desc [lindex [lindex $item(description) $j] [expr $i + 1]]
-	    set json "\"$nm\":\"[list $desc]\""		    
+	    set json "\"$nm\":\"[list $desc]\""
+	    set json "\"$item(content_type)\":\{$json\}"
+
 	} else {
-	    set json "\"$item(name)\":\"[list $item(description)]\""
+	    #  set json "\"$item(name)\":\"[list $item(description)]\""
+	    set json "\"$item(content_type)\":\"$item(title)\""
+
 	}
-	set json "\"$item(content_type)\":\{$json\}"
+	#set item(content_type) [lindex [split $item(content_type) "_"] 1]
 	
 	if {[array exists item]} {
 	    set result "{
@@ -90,22 +99,20 @@ if {[string equal $token $access_token]} {
 	}
 	
     } else {
-	set json "\"trees\": \["
+	#	set json "\"cTrees\": \["
 	
-	db_foreach select_trees {
-	    SELECT item_id, name FROM cr_items WHERE content_type = 'c_tree'
-	} {
-	    
-	    append json "\{\"name\":\"$name\"\},"
-	}
-	set json [string trimright $json ","]
-	append json "\]"
+	#db_foreach select_trees {
+	#    SELECT item_id, name FROM cr_items WHERE content_type = 'ctree'
+	#} {
+	#    set title [content::item::get_title -item_id $item_id]
+	#    
+	#    append json "\{\"name\":\"$title\"\},"
+	#}
+	#set json [string trimright $json ","]
+	#append json "\]"
 	
 	set result "{
-                  \"data\": {
-                    \"status\": true,          
-                    $json
-                  },
+                  \"data\": null,
                   \"errors\":{},
                   \"meta\": {
                          \"copyright\": \"Copyright 2019 Collaboration Tree http://www.innovativefuture.org/collaboration-tree/ \",
@@ -113,7 +120,7 @@ if {[string equal $token $access_token]} {
                          \"version\": \"0.1d\",
                          \"id\": \"HTTP/1.1 200 Authorized\",
                          \"status\": \"true\",
-                         \"message\": \"Successfull request. Access allowed\"
+                         \"message\": \"Successfull request. No data!\"
                   }
             }"
 	    

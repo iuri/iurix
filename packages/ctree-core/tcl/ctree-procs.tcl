@@ -41,13 +41,24 @@ ad_proc ctree::tree::new {
     if {$parent_id eq "" } {
 	set parent_id $package_id
     }
+    ns_log Notice "ADDP $add_p"
     
-    if {$add_p} {	
+    if {$add_p} {
+	if {[info exists arr(name)]} {
+	    set pretty_name $arr(name)
+	} else {
+	    set pretty_name $name
+	}
+	
+	ns_log Notice "NAME $name | pretty name $pretty_name"
+	
 	set name [util_text_to_url [string map {á a à a â a ã a ç c é e è e ê e í i ó o õ o ô o ú u "´" "" "'" "" " " - "," -} [string tolower $name]]]
-	db_transaction {
-	    if {![db_string item_exists {
-		SELECT count(*) FROM cr_items WHERE name = :name AND parent_id = :parent_id
-	    }]} {	    
+	
+	if {![db_0or1row item_exists {
+	    SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :parent_id
+	}]} {	    
+	    
+	    db_transaction {
 		set item_id [content::item::new \
 				 -item_id $item_id \
 				 -parent_id $parent_id \
@@ -55,6 +66,7 @@ ad_proc ctree::tree::new {
 				 -creation_ip $creation_ip \
 				 -package_id $package_id \
 				 -name "$name" \
+				 -title "$pretty_name" \
 				 -description $attributes \
 				 -storage_type "$storage_type" \
 				 -content_type $content_type \
@@ -66,57 +78,73 @@ ad_proc ctree::tree::new {
 	    #lappend attributes [list url $name]	    
 	    set revision_id [content::revision::new \
 				 -item_id $item_id \
-				 -title $name \
+				 -title $pretty_name \
 				 -description $attributes \
 				 -attributes $item_attributes]	   	    
-	} 
-    }
-    
-    foreach attrib [array names arr] {
+	} else {
+	    ns_log Notice "TREE EXISTS"
+	    db_1row item_exists {
+		SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :parent_id
+	    }
+	}
+
+
+
+
+	
+	foreach attrib [array names arr] {
 	# ns_log Notice "$attrib [llength $arr($attrib)]"
-	for {set i 0} {$i < [llength $arr($attrib)]} {incr i} {
-	    # ns_log Notice "***** [lindex \"$arr($attrib)\" $i]"
-	    set flag true
-	    switch $attrib {
-		"descriptions" {
-		    set content_type "c_description"
-		    set n [lindex [lindex "$arr($attrib)" [expr $i + 1]] [expr 1 +1]]
-		    ns_log Notice "NAME $n"
-		    #ctree::tree::new -name $n -content_type $content_type -attributes [lindex "$arr($attrib)" [expr $i + 1]] -parent_id $item_id -add_p $flag
-
-		}	    
-		"types" {
-		    set content_type "c_type"
-		}	    
-		"segmentTypes" {	
-		    set content_type "c_segmenttype"		
+	    for {set i 0} {$i < [llength $arr($attrib)]} {incr i} {
+		# ns_log Notice "***** [lindex \"$arr($attrib)\" $i]"
+		set flag true
+		switch $attrib {
+		    "descriptions" {
+			set content_type "ctree_description"
+			set n [lindex [lindex "$arr($attrib)" [expr $i + 1]] [expr 1 +1]]
+			ns_log Notice "NAME $n"
+			#ctree::tree::new -name $n -content_type $content_type -attributes [lindex "$arr($attrib)" [expr $i + 1]] -parent_id $item_id -add_p $flag
+			
+		    }	    
+		    "types" {
+			set content_type "ctree_type"
+		    }	    
+		    "segmentTypes" {	
+			set content_type "ctree_segmenttype"		
+		    }
+		    "feedback" {
+			set content_type "ctree_feedback"		
+		    }	    
+		    "elements" {	
+			set content_type "ctree_post"		
+		    }	    
+		    "segmentVariations" {	
+			set content_type "ctree_segmentvariation"		
+		    }
+		    default {
+			set flag false
+		    }
 		}
-		"feedback" {
-		    set content_type "c_feedback"		
-		}	    
-		"elements" {	
-		    set content_type "c_post"		
-		}	    
-		"segmentVariations" {	
-		    set content_type "c_segmentvariation"		
+		if {$flag} {
+		    ns_log Notice "FLAG $flag *******"
+		    ns_log Notice "ADD ITEM \n
+			-name [lindex \"$arr($attrib)\" $i] \n
+			-content_type $content_type \n
+			-attributes [lindex \"$arr($attrib)\" [expr $i + 1]] \n
+			-parent_id $item_id \n
+			-add_p $flag
+		    "
+		    
+		    ctree::tree::new -name [lindex "$arr($attrib)" $i] -content_type $content_type -attributes [lindex "$arr($attrib)" [expr $i + 1]] -parent_id $item_id -add_p $flag
+		    incr i
 		}
-		default {
-		    set flag false
-		}
-	    }
-	    if {$flag} {
-		ns_log Notice "FLAG $flag *******"
-		ctree::tree::new -name [lindex "$arr($attrib)" $i] -content_type $content_type -attributes [lindex "$arr($attrib)" [expr $i + 1]] -parent_id $item_id -add_p $flag
-		incr i
-	    }
-	}	
-    } 
-}
+	    }	
+	} 	
+    }
+}    
 
 
 
-
-
+    
 
 
 

@@ -3,41 +3,41 @@
 
 
 select content_type__create_type (
-       'c_tree',    -- content_type
+       'ctree',    -- content_type
        'content_revision',       -- supertype. We search revision content 
                                  -- first, before item metadata
-       'C-Tree Object',    -- pretty_name
-       'C-Tree Objects',   -- pretty_plural
+       'CTree Object',    -- pretty_name
+       'CTree Objects',   -- pretty_plural
        NULL,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
        NULL,	         -- id_column
-       'c_tree__get_title' -- name_method
+       'ctree__get_title' -- name_method
 );
 
 -- necessary to work around limitation of content repository:
-select content_folder__register_content_type(-100,'c_tree','t');
+select content_folder__register_content_type(-100,'ctree','t');
 
 
 select content_type__create_type (
-       'c_type',    -- content_type
-       'c_tree',       -- supertype. We search revision content 
+       'ctree_type',    -- content_type
+       'ctree',       -- supertype. We search revision content 
                                  -- first, before item metadata
-       'C-Tree Type',    -- pretty_name
-       'C-Tree Types',   -- pretty_plural
+       'CTree Type',    -- pretty_name
+       'CTree Types',   -- pretty_plural
        NULL,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
        NULL,	         -- id_column
-       'c_type__get_title' -- name_method
+       'ctree_type__get_title' -- name_method
 );
 
 
 
 -- necessary to work around limitation of content repository:
-select content_folder__register_content_type(-100,'c_type','t');
+select content_folder__register_content_type(-100,'ctree_type','t');
 
 -- "e19ce806-319b-cec9-dba2-16d7dcebd700" : {
 -- "color" : "#16ad16",
@@ -52,21 +52,21 @@ select content_folder__register_content_type(-100,'c_type','t');
 
 
 select content_type__create_type (
-       'c_segmenttype',    -- content_type
-       'c_tree',       -- supertype. We search revision content 
+       'ctree_segmenttype',    -- content_type
+       'ctree',       -- supertype. We search revision content 
                                  -- first, before item metadata
-       'C-Tree Segment Type',    -- pretty_name
-       'C-Tree Segment Types',   -- pretty_plural
+       'CTree Segment Type',    -- pretty_name
+       'CTree Segment Types',   -- pretty_plural
        NULL,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
        NULL,	         -- id_column
-       'c_segmenttype__get_title' -- name_method
+       'ctree_segmenttype__get_title' -- name_method
 );
 
 -- necessary to work around limitation of content repository:
-select content_folder__register_content_type(-100,'c_segmenttype','t');
+select content_folder__register_content_type(-100,'ctree_segmenttype','t');
 
 
 -- segmentVariations
@@ -75,21 +75,21 @@ select content_folder__register_content_type(-100,'c_segmenttype','t');
 
 
 select content_type__create_type (
-       'c_segmentvariation',     -- content_type
-       'c_tree',       	 -- supertype. We search revision content 
+       'ctree_segmentvariation',     -- content_type
+       'ctree',       	 -- supertype. We search revision content 
                                  -- first, before item metadata
-       'C-Tree Segment Variation',    -- pretty_name
-       'C-Tree Segment Variations',   -- pretty_plural
+       'CTree Segment Variation',    -- pretty_name
+       'CTree Segment Variations',   -- pretty_plural
        NULL,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
        NULL,	         -- id_column
-       'c_segmentvariation__get_title' -- name_method
+       'ctree_segmentvariation__get_title' -- name_method
 );
 
 -- necessary to work around limitation of content repository:
-select content_folder__register_content_type(-100,'c_segmentvariation','t');
+select content_folder__register_content_type(-100,'ctree_segmentvariation','t');
 
 
 
@@ -107,22 +107,22 @@ select content_folder__register_content_type(-100,'c_segmentvariation','t');
 
 
 select content_type__create_type (
-       'c_post',     -- content_type
-       'c_tree',    	 -- supertype. We search revision content 
+       'ctree_post',     -- content_type
+       'ctree',    	 -- supertype. We search revision content 
                         -- first, before item metadata
-       'C-Tree Post',    -- pretty_name
-       'C-Tree Posts',   -- pretty_plural
+       'CTree Post',    -- pretty_name
+       'CTree Posts',   -- pretty_plural
        NULL,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
        NULL,	         -- id_column
-       'c_post__get_title' -- name_method
+       'ctree_post__get_title' -- name_method
 );
 
 
 -- necessary to work around limitation of content repository:
-select content_folder__register_content_type(-100,'c_post','t');
+select content_folder__register_content_type(-100,'ctree_post','t');
 
 
 -- descriptions
@@ -130,21 +130,21 @@ select content_folder__register_content_type(-100,'c_post','t');
  
 
 select content_type__create_type (
-       'c_description',     -- content_type
-       'c_tree',    	 -- supertype. We search revision content 
+       'ctree_description',     -- content_type
+       'ctree',    	 -- supertype. We search revision content 
                         -- first, before item metadata
-       'C-Tree Description',    -- pretty_name
-       'C-Tree Descriptions',   -- pretty_plural
+       'CTree Description',    -- pretty_name
+       'CTree Descriptions',   -- pretty_plural
        NULL,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
        NULL,	         -- id_column
-       'c_description__get_title' -- name_method
+       'ctree_description__get_title' -- name_method
 );
 
 -- necessary to work around limitation of content repository:
-select content_folder__register_content_type(-100,'c_description','t');
+select content_folder__register_content_type(-100,'ctree_description','t');
 
 
 
@@ -152,18 +152,18 @@ select content_folder__register_content_type(-100,'c_description','t');
 -- forDescription {246113fd-067a-f126-f406-3fea6605049f {18986a2d-7a73-8c4f-b4f1-110fe91bc45f {rating 0 text {test comment}}}}
 
 select content_type__create_type (
-       'c_feedback',     -- content_type
-       'c_tree',    	 -- supertype. We search revision content 
+       'ctree_feedback',     -- content_type
+       'ctree',    	 -- supertype. We search revision content 
                         -- first, before item metadata
-       'C-Tree Feedback',    -- pretty_name
-       'C-Tree Feedbacks',   -- pretty_plural
+       'CTree Feedback',    -- pretty_name
+       'CTree Feedbacks',   -- pretty_plural
        NULL,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
        NULL,	         -- id_column
-       'c_feedback__get_title' -- name_method
+       'ctree_feedback__get_title' -- name_method
 );
 
 -- necessary to work around limitation of content repository:
-select content_folder__register_content_type(-100,'c_feedback','t');
+select content_folder__register_content_type(-100,'ctree_feedback','t');

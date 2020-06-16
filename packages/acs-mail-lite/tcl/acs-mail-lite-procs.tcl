@@ -138,7 +138,7 @@ namespace eval acs_mail_lite {
                               -package_id $mail_package_id]
 
         # ns_log Notice "ORIGINATOR $originator"
-        set cmd [list smtp::sendmessage $multi_token -originator "nevessouza@iurix.com"]
+        set cmd [list smtp::sendmessage $multi_token -originator $originator]
         
         foreach header $headers {
             lappend cmd -header $header

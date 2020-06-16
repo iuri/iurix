@@ -1,3 +1,0 @@
-ad_page_contract {}
-
-set http [util::http::get https://homologacao.movida.com.br/movida/ws3/]

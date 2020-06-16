@@ -5,7 +5,7 @@
 <link>https://iurix.com/blog/</link>
 <description>Lars Blogger</description>
 <generator>OpenACS 5.0</generator>
-<lastBuildDate>Fri, 22 May 2020 18:42:31 GMT</lastBuildDate>
+<lastBuildDate>Mon, 15 Jun 2020 12:56:14 GMT</lastBuildDate>
 <image>
 <title>Lars Blogger</title>
 <url>https://iurix.com/rss-support/images/openacs_logo_rss.gif</url>
@@ -14,76 +14,82 @@
 <height>48</height>
 </image>
 <item>
-<title>{This Week: Italy-China Relations, Reopening China&#39;s Economy, and More}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2844</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2844</guid>
-<description>View in browserMay 22, 2020Playing with fire: Italy, China, and Europe&amp;nbsp;Italy&#39;s decision to endorse China&#39;s Belt and Road Initiative in 2019 has created controversy in Europe. Now, the devastating economic impact of the COVID-19 pandemic risks pushing Italy further into Chinaâs arms, argues Giovanna De Maio.&amp;nbsp;Read moreIraq and the US still need each other&amp;nbsp;Iraq&#39;s new prime minister, Mustafa Kadhimi, will have to make progress on two policy fronts, write Michael O&#39;Hanlon and Sara ...</description>
-<pubDate>Fri, 22 May 2020 18:42:31 GMT</pubDate>
+<title>{O que vem agora?}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4067</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4067</guid>
+<description>
+
+
+
+
+
+Faaaala dev!As Ãºltimas semanas foram insanas, com a entrega da primeira ediÃ§Ã£o da Next Level Week e mais duas turmas iniciando nos nossos bootcamps. E depois de passar por uma experiÃªncia tÃ£o intensa como o NLW, sempre fica aquele sentimento de &#34;o que vem agora?&#34;Mas a resposta Ã© bem simples: - 10 desafios pra vocÃª escolher- mais um trabalho incrÃ­vel para o seu portfÃ³lio- muita prÃ¡tica pra vocÃª continuar evoluindo- aprendizado, networking, destaque no MegaRank- 35k em prÃªmiosR...</description>
+<pubDate>Mon, 15 Jun 2020 12:56:14 GMT</pubDate>
 </item>
 <item>
-<title>{Your Postman Monthly Newsletter, May 2020}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2840</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2840</guid>
-<description>To view this email as a web page,&amp;nbsp;click here&amp;nbsp;May 2020 Newsletter&amp;nbsp;Mark your calendar for June 24, 2020, 8:00 a.m. (PDT)In the &#34;Build Better APIs with Postman API Builder&#34; webinar, weâll be walking through a technical demonstration of how you can use Postmanâs new API Builder to build higher-quality APIs, speed up API development, and increase API adoption.Topics include:Organizing your API elements around your API schemaMaking API elements shareable and collaborativeCreating,...</description>
-<pubDate>Fri, 22 May 2020 18:25:21 GMT</pubDate>
+<title>{About face}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4037</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4037</guid>
+<description>Your round-up of the latest, greatest data storiesHello iuri,Microsoft is the latest in a line of tech giants to&amp;nbsp;ban the sale of facial recognition software to police&amp;nbsp;until new laws are in place to govern its use. The news comes just days after&amp;nbsp;IBM stated it will no longer support the development or research of facial recognition technology&amp;nbsp;and Amazon announced that&amp;nbsp;police will be banned from using its facial recognition software for a year. Amazon said in a statement ...</description>
+<pubDate>Sun, 14 Jun 2020 14:15:24 GMT</pubDate>
 </item>
 <item>
-<title>{First contact with the &#39;randonauts&#39;}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2836</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2836</guid>
-<description>Your round-up of the latest, greatest data storiesHello,As Apple and Google&amp;nbsp;release their Covid-19 contact tracing technology, the UKâs own contact tracing app has been&amp;nbsp;dogged by privacy concerns&amp;nbsp;after a pilot on the Isle of Wight. The data collected by the UKâs app could, according to researchers, be used to re-identify users and potentially allow authorities to monitor peopleâs social interactions. The UKâs National Cyber Security Centre has said itâs âaware of mos...</description>
-<pubDate>Fri, 22 May 2020 13:19:31 GMT</pubDate>
+<title>{How to Build a Node.js Error-handling System}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4041</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4041</guid>
+<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;How to Build a Node.js Error-handling SystemNode.js developers often find themselves working with chaotic code thatâs anything but clean. This can obviously cause productivity issues and outright errors.In this article, Toptal Full-stack Developer Jay Huang will introduce you to error-handling in Node.js and demonstrate how you can build a robust error-handling system yourself.Continue Reading&amp;nbsp;Save to PocketAbout the AuthorJay HuangFull-stack DeveloperJay is a full-sta...</description>
+<pubDate>Sun, 14 Jun 2020 14:15:24 GMT</pubDate>
 </item>
 <item>
-<title>{Get an offer or book a demo!}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2830</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2830</guid>
-<description>THANK YOU FOR BEING PART OF THE&amp;nbsp;BIGGEST BCI MEETING EVER!g.tec medical engineering GmbH&amp;nbsp;Austria.&amp;nbsp;&amp;nbsp;About&amp;nbsp;|&amp;nbsp;Products&amp;nbsp;|&amp;nbsp;Webinars&amp;nbsp;|&amp;nbsp;Contact</description>
-<pubDate>Fri, 22 May 2020 11:40:31 GMT</pubDate>
+<title>{=?utf-8?Q?Pepsi=E2=80=99s_=2432_Billion_Typo_Caused_Deadly_Riots_?=
+ =?utf-8?Q?=7C_Sean_Kernan_in_Better_Marketing?=}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4033</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4033</guid>
+<description>Stories for Iuri SampaioTodayâs highlightsPepsiâs $32 Billion Typo Caused Deadly RiotsHow they accidentally made a promise they couldnât keepSean Kernan&amp;nbsp;in&amp;nbsp;Better Marketing4 min readHow to run a React Native app on iOSI recently started to develop a React-Native app on iOS. This was my first foray into native app developmentâ¦Soujanya PS&amp;nbsp;in&amp;nbsp;freeCodeCamp.org4 min readThat Time I Fell in Love With a Married WomanThat Did Not End Like I Expected it ToJoe Duncan&amp;nbsp;in&amp;...</description>
+<pubDate>Sun, 14 Jun 2020 14:14:24 GMT</pubDate>
 </item>
 <item>
-<title>{The evolution of the most popular repos since 2012}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2826</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2826</guid>
-<description>&amp;nbsp;DEVELOPER TIDBITS&amp;nbsp;&amp;lt;/&amp;gt;&amp;nbsp;ðª ð¥ï¸Hi!Were you a developer in 2012?If the answer is &#39;yes&#39;, then I would like to invite you to a big dose of nostalgia (and if your answer is &#39;no&#39;, then there is no doubt you need to see this).But I&#39;m jumping ahead too much. Let&#39;s start at the beginning: since we love data at CodersRank, we created a dynamic video about contributed repositories by using public data from GitHub. More specifically, we wanted to see how the popularity of differe...</description>
-<pubDate>Fri, 22 May 2020 11:39:21 GMT</pubDate>
+<title>{cron.weekly issue #138: PHP, Nginx, Rust, ARM, choose &amp; more}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4029</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4029</guid>
+<description>Read this issue online Â»CRON.WEEKLYPHP, Nginx, Rust, ARM, choose &amp;amp; moreissue #138 for Sunday, June 14, 2020Hi everyone! ðWelcome to cron.weekly issue #138.So many good content this week, plenty to keep you occupied I believe! Lots of variety.Grab a âï¸, find a ð¥ to eat &amp;amp; enjoy this issue.On master/slave terminologyI&#39;ll keep this brief since it&#39;s a loaded topic. Many open-soure projects have (re-)opened discussions about the use of master/slave terminology in their code base.O...</description>
+<pubDate>Sun, 14 Jun 2020 13:26:34 GMT</pubDate>
 </item>
 <item>
-<title>{&#34;This is how I turned my old laptop into a server.&#34; + 6 more
- must-reads!}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2818</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2818</guid>
-<description>Hey hey!We&#39;ve had all sorts of exciting stuff happening at DEV lately, so I wanted to share the two I&#39;m most excited about: 1) Yours truly is a co-host of&amp;nbsp;DEV&#39;s first official podcast, DevDiscuss, and 2) Coil is offering all Grant For The Web Hackathon participants&amp;nbsp;a free, 3-month trial.If you check out our podcast, please consider writing a review. ðð Top 7 Posts From Last Week ð1.&amp;nbsp;In defense of the modern web: a look at the current state of the web and areas of improv...</description>
-<pubDate>Fri, 22 May 2020 11:38:21 GMT</pubDate>
+<title>{Present Moment Reminder}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4025</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4025</guid>
+<description>Unsubscribe&amp;nbsp; |&amp;nbsp;&amp;nbsp;Privacy PolicyThis email was sent to&amp;nbsp;iuri@iurix.com&amp;nbsp;by&amp;nbsp;Eckhart Teachings.P.O.&amp;nbsp;Box 8010&amp;nbsp; |&amp;nbsp; Boulder&amp;nbsp; |&amp;nbsp; CO&amp;nbsp; |&amp;nbsp; 80306</description>
+<pubDate>Sun, 14 Jun 2020 13:14:04 GMT</pubDate>
 </item>
 <item>
-<title>{Reduce Your Breach Risk with a Password Manager}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2822</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2822</guid>
-<description>PCI DSS compliance news updates.&amp;nbsp;View in browserReduce Your Breach Risk with a Password ManagerPublished by Admin â¢ May 21, 2020Guest post by&amp;nbsp;ConsumersAdvocate.org&amp;nbsp;Itâs the Little Things that Sting Password proliferation is a common cause for complaint in the business world. One recent study found that the average business user has 191 passwords to keep track of. And that figure primarily reflects the âciviliansâ ...&amp;nbsp;Read moreThe post&amp;nbsp;Reduce Your Breach Risk wi...</description>
-<pubDate>Fri, 22 May 2020 11:38:21 GMT</pubDate>
+<title>{Divagate - plus, The Words of the Week - 6/12/20}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4021</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4021</guid>
+<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYJune 14, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;divagate&amp;nbsp;&amp;nbsp;verb&amp;nbsp;|&amp;nbsp;DYE-vuh-gayt&amp;nbsp;Definition&amp;nbsp;:to wander or stray from a course or subject&amp;nbsp;:&amp;nbsp;diverge,&amp;nbsp;digress&amp;nbsp;Scroll down for more about&amp;nbsp;divagate&amp;nbsp;&amp;nbsp;TRENDING NOW:defundj&#39;accuseno quarterper capitaSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border: 0px; outline: 0px; margin: 0px; padding: 0px; font-size: 10px; color: rgb(174, 0, 21); line-height: 10px; ...</description>
+<pubDate>Sun, 14 Jun 2020 13:13:54 GMT</pubDate>
 </item>
 <item>
-<title>{Modern Web Scraping with Python and Selenium}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2806</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2806</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;Modern Web Scraping with Python and SeleniumWeb scraping has been around since the early days of the World Wide Web, but scraping modern sites that heavily rely on new technologies is anything but straightforward.In this article, Toptal Software Developer Neal Barnett demonstrates how you can use Python and Selenium to scrape sites that employ a lot of JavaScript, iframes, and certificates.Continue Reading&amp;nbsp;Save to PocketAbout the AuthorNeal BarnettSoftware DeveloperNeal ...</description>
-<pubDate>Thu, 21 May 2020 23:26:51 GMT</pubDate>
+<title>{Things you should do as React-Native Developer | Shreyak Upadhyay in
+ The Startup}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4013</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4013</guid>
+<description>Stories for Iuri SampaioTodayâs highlightsThings you should do as React-Native DeveloperReact Native(RN) community has evolved a lot since 2015 from version 0.1.0 to 0.62.2. They do a lot ofâ¦Shreyak Upadhyay&amp;nbsp;in&amp;nbsp;The Startup10 min readInsights and My Experience From My Interview at FacebookThis post is to encourage people who have dreamed of something and doubted its possibilityKriti Joshi&amp;nbsp;in&amp;nbsp;Better Programming8 min readIf You Ever Use This Phrase Your Marriage is Probabl...</description>
+<pubDate>Sun, 14 Jun 2020 13:13:44 GMT</pubDate>
 </item>
 <item>
-<title>=?utf-8?Q?The_Internet=E2=80=99s_more_secure_because_of_you?=</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2802</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2802</guid>
-<description>This is a friendly message from the Electronic Frontier Foundation.&amp;nbsp;Dear Supporter of Digital Freedom,Certbot is part of a growing number of EFF technology projects designed to protect your online freedom. EFF helped develop Letâs Encrypt, the free SSL certificate authority expanding the availability of encryption and taking the web by storm. We created HTTPS Everywhere to help ensure that users connect to websites securely. We also maintain Privacy Badger, a free browser tool that help...</description>
-<pubDate>Thu, 21 May 2020 23:25:41 GMT</pubDate>
+<title>=?utf-8?Q?Pela_vida_dos_ind=C3=ADgenas!?=</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4017</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4017</guid>
+<description>Assine esse abaixo-assinado pela vida dos povos indÃ­genas nessa pandemia!Pela proteÃ§Ã£o dos povos indÃ­genas: queremos testes da Covid-19 nas aldeias!40.521 pessoas assinaram&amp;nbsp;a petiÃ§Ã£o de Soilo Urupe Chue e Kaianaku KamaiurÃ¡, com Cristian Wariu. Ajude a chegar em 50.000!Assine agora com um Ãºnico cliqueA histÃ³ria nos mostra que epidemias jÃ¡ dizimaram comunidades inteiras. Agora, vivemos sob o risco de uma ameaÃ§a que tem alertado o mundo todo: a pandemia da Covid-19, inimigo invisÃ...</description>
+<pubDate>Sun, 14 Jun 2020 13:13:44 GMT</pubDate>
 </item>
 <item>
-<title>{=?utf-8?Q?Knomi=C2=AE_Combines_Face_and_Voice_for_the_Most_Secure?=
- =?utf-8?Q?_Mobile_Biometric_Authentication_Solution_Available?=}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=2798</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=2798</guid>
-<description>View in browser&amp;nbsp;&amp;nbsp;&amp;nbsp;KnomiÂ®&amp;nbsp;Combines Face and Voice for the Most Secure Mobile Biometric Authentication Solution Available&amp;nbsp;The best performing device-independent authentication solution just got better. KnomiÂ®âAware&#39;s field-proven mobile biometric authentication frameworkânow offers a new voice biometric capability called speaker recognition, which when combined with it&#39;s already high-performing facial recognition, presents an ideal choice for a well-integrated, sec...</description>
-<pubDate>Thu, 21 May 2020 23:24:31 GMT</pubDate>
+<title>{Definitive List of the World&#39;s Best Pointbreaks + Welcome to Sweden!}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=4009</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=4009</guid>
+<description>Definitive list of the world&#39;s best pointbreaks, the real first session at Teahupoo, welcome to Sweden and how to get good at True Surf.&amp;nbsp;Visit&amp;nbsp;magicseaweedDefinitive List of the World&#39;s Best PointbreaksOr, where you should travel to once it&#39;s safe to do so.&amp;nbsp;&amp;nbsp;FEATURES AND VIDEOSMSW Highlights&amp;nbsp;YES, This is Sweden!Lifting the lid on Europe&#39;s best kept secret with Freddie Meadows.Read more&amp;nbsp;The First Session at TeahupooBefore Laird, there was the queen of Chopes. And t...</description>
+<pubDate>Sun, 14 Jun 2020 13:13:34 GMT</pubDate>
 </item>
 </channel>
 </rss>

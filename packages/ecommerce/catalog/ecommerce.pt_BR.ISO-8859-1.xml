@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="ecommerce" locale="pt_BR" charset="ISO-8859-1">
+
+  <msg key="1_Star">1</msg>
+  <msg key="2_Stars">2</msg>
+  <msg key="3_Stars">3</msg>
+  <msg key="4_Stars">4</msg>
+  <msg key="5_Stars">5</msg>
+  <msg key="Action">Ação</msg>
+  <msg key="Add_products">Adicionar produtos</msg>
+  <msg key="Add_Review">Avalie o serviço %product_name%</msg>
+  <msg key="Cancel">Cancelar</msg>
+  <msg key="click_here">clique aqui!</msg>
+  <msg key="confirmed">confirmado</msg>
+  <msg key="Continue_Shopping">Continue Comprando</msg>
+  <msg key="Create_event">Criar evento</msg>
+  <msg key="Description">Descrição</msg>
+  <msg key="Enter_your_review_below">Insira a sua avaliação: (máximo 1,000 palavras)</msg>
+  <msg key="Events_hall">Salão de Eventos</msg>
+  <msg key="If_you_are_not">Se não for</msg>
+  <msg key="In_progress">Em andamento</msg>
+  <msg key="My_events">Meus eventos</msg>
+  <msg key="My_Order_History">Meu Histórico de pedidos</msg>
+  <msg key="My_orders">Meus pedidos</msg>
+  <msg key="My_shopping_cart">Meu pedido</msg>
+  <msg key="Options">Opções</msg>
+  <msg key="Order">Pedido</msg>
+  <msg key="Please_enter_a_headline_lt">Insira o Título da sua Avaliação</msg>
+  <msg key="Price_Item">Preço/Item</msg>
+  <msg key="Quantity">Quantidade</msg>
+  <msg key="Request_proposal">Solicitar proposta</msg>
+  <msg key="Request_proposals">Solicitar propostas</msg>
+  <msg key="Save">Salvar</msg>
+  <msg key="Select_partners">Selecione parceiros</msg>
+  <msg key="Select_products">Selecionar produtos</msg>
+  <msg key="Subtotal">SubTotal</msg>
+  <msg key="Theres_no_orders">Não há pedidos</msg>
+  <msg key="Update">Atualizar</msg>
+  <msg key="What_is_your_rating_lt">Quantas estrelas daria ao serviço?</msg>
+  <msg key="You_need_to_select_lt">Muito bom! Agora associe o seu pedido ao seu evento.</msg>
+  <msg key="Your_Shopping_Cart_is_empty">Sua cesta de eventos está vazia!</msg>
+</message_catalog>

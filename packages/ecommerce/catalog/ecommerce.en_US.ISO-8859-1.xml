@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="ecommerce" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="1_Star">1 Star</msg>
+  <msg key="2_Stars">2 Stars</msg>
+  <msg key="3_Stars">3 Stars</msg>
+  <msg key="4_Stars">4 Stars</msg>
+  <msg key="5_Stars">5 Stars</msg>
+  <msg key="Action">Action</msg>
+  <msg key="Add_products">Add products</msg>
+  <msg key="Add_Review">Add Review %product_name%</msg>
+  <msg key="Cancel">Cancel</msg>
+  <msg key="click_here">click here!</msg>
+  <msg key="confirmed">confirmed</msg>
+  <msg key="Continue_Shopping">Continue Shopping</msg>
+  <msg key="Continue_shopping">Continue shopping</msg>
+  <msg key="Create_event">Create event</msg>
+  <msg key="Description">Description</msg>
+  <msg key="Enter_your_review_below">Enter your review below: (maximum of 1,000 words)</msg>
+  <msg key="Events_hall">Events Hall</msg>
+  <msg key="If_you_are_not">If you&#39;re not</msg>
+  <msg key="In_progress">In progress</msg>
+  <msg key="My_events">My events</msg>
+  <msg key="My_Order_History">My Order History</msg>
+  <msg key="My_orders">My orders</msg>
+  <msg key="My_shopping_cart">My shopping cart</msg>
+  <msg key="Options">Options</msg>
+  <msg key="Order">Order</msg>
+  <msg key="Please_enter_a_headline_lt">Please enter a headline for your review:</msg>
+  <msg key="Price_Item">Price/Item</msg>
+  <msg key="Proceed_to_Checkout">Proceed to Checkout</msg>
+  <msg key="Quantity">Quantity</msg>
+  <msg key="Request_proposal">Request proposal</msg>
+  <msg key="Request_proposals">Request proposals</msg>
+  <msg key="Reviews">Reviews</msg>
+  <msg key="Save">Save</msg>
+  <msg key="Save_cart">Salvar cesta</msg>
+  <msg key="Select_partners">Select partners</msg>
+  <msg key="Select_products">Select Products</msg>
+  <msg key="Subtotal">Subtotal</msg>
+  <msg key="Theres_no_orders">There is no order</msg>
+  <msg key="Update">Update</msg>
+  <msg key="What_is_your_rating_lt">What is your rating of this product?</msg>
+  <msg key="You_need_to_select_lt">You need an event to make an order!</msg>
+  <msg key="Your_Shopping_Cart_is_empty">Your Shopping Cart is empty!</msg>
+</message_catalog>

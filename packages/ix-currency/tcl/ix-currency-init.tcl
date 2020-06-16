@@ -8,5 +8,5 @@ ad_library {
     Ref.: http://openacs.org/api-doc/proc-view?proc=ad_schedule_proc
 }
 
-ad_schedule_proc -thread t 43200 ix_currency::get_xml_ecb_currency_rates
+#ad_schedule_proc -thread t 43200 ix_currency::get_xml_ecb_currency_rates
 

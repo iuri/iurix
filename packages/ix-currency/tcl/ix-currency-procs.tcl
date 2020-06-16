@@ -11,19 +11,31 @@ ad_proc -public ix_currency::rates::add_currency_history {currency rate date} {
     Adds records of currency's rate
 } {
     ns_log Notice "Running ix_currency::rates::add..."
-
+    
     ns_log Notice "$currency $rate $date"
-
-
-    set rate_id [db_exec_plsql insert_rate {
-	SELECT ix_currency_rate__new (
+	return [db_exec_plsql insert_rate {
+	    SELECT ix_currency_rate__new (
 			     :currency,
 			     :rate,
 			     :date
 	     )
-    }]
-
-    return $rate_id
+	}]
+    
+#    if {[db_0or1row select_currency {
+#	SELECT rate_id FROM ix_currency_rates
+#	WHERE currency_code = :currency
+#	AND rate = :rate
+    #	AND creation_date = :date
+#}]} {
+#	return [db_exec_plsql insert_rate {
+#	    SELECT ix_currency_rate__new (
+#:currency,
+#			     :rate,
+#   :date
+#	     )
+#	}]
+ #   }
+  #  return
 }
 
 

@@ -40,9 +40,12 @@ foreach currency_code $codes {
 		    set rate [$parent getAttribute OBS_VALUE]
 		    set date [db_string select_date { SELECT :date::timestamptz FROM dual } -default ""]
 		    ns_log Notice "INSERT $currency $rate $date "
-		    ix_currency::rates::add_currency_history $currency $rate $date
-		    
-		    
+		    set rate_id [ix_currency::rates::add_currency_history $currency $rate $date]
+		    if {$rate_id ne ""} {
+			ns_log Notice "INSERTED"
+		    } else {
+			ns_log Notice "NOT INSERTED "
+		    }
 		    #	    ns_log Notice "$value1 $value2"
 		}
 	    }
@@ -61,3 +64,5 @@ foreach currency_code $codes {
 }
 
 
+ad_returnredirect index
+ad_script_abort

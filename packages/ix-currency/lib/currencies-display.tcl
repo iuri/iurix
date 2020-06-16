@@ -37,9 +37,8 @@ set currencies [db_list_of_lists select_rates {
 }]
 
 
+ns_log Notice "CURRENCIES $currencies"
 
-
-# ns_log Notice "CURRENCIES $currencies"
 if {![exists_and_not_null currencies] } {
     set currencies [db_list_of_lists select_rates {
 	SELECT 
@@ -51,6 +50,7 @@ if {![exists_and_not_null currencies] } {
 	ORDER BY cr1.creation_date DESC LIMIT 32
     }]
 }
+
 # TCL Function References
 # https://www.tcl.tk/man/tcl8.4/TclCmd/expr.htm
 # http://www.astro.princeton.edu/~rhl/Tcl-Tk_docs/tcl/expr.n.html

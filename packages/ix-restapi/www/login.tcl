@@ -46,14 +46,15 @@ if {[ns_conn method] eq "POST"} {
 		ns_log Notice "HEADER $header"
 		
 		# set payload "\{\"iss\": \"26973410000102\", \"aud\": \"iurix.com/REST\", \"sub\": \"$user(user_id)\", \"name\": \"$user(name)\", \"iat\": [ns_time], \"exp\": [ns_time incr [ns_time] 6000]\}"
+		# set payload "{'iss': '26973410000102', 'aud': 'iurix.com/REST', 'sub': '$user(user_id)', 'iat': [ns_time]}"
 		set payload "{'sub': '$user(user_id)', 'iat': [ns_time]}"
 		ns_log Notice "Payload $payload"
 		set enc_payload [ns_base64encode $payload]
 
-		set secret [ns_crypto::hmac string -digest sha256 "Abracadabra" ""]
-		ns_log Notice "CRYPTO $secret"
+		set hmac_secret [ns_crypto::hmac string -digest sha256 "Abracadabra" "What is the magic word?"]
+		ns_log Notice "CRYPTO $hmac_secret"
 
-		set token "${enc_header}.${enc_payload}.${secret}"
+		set token "${enc_header}.${enc_payload}.${hmac_secret}"
 		ns_log Notice "TOIKEN $token"	
 
 		## Finish ADproc from ix-jwt
@@ -71,6 +72,9 @@ if {[ns_conn method] eq "POST"} {
 			\"lastName\": \"$user(last_name)\",
 			\"email\": \"$user(email)\",
                         \"password\": \"$token\", 
+                        \"phonenumber\": \"76543234567\", 
+                        \"country\": \"Brasil\", 
+                        \"city\": \"Salvador\",
 			\"createdAt\": \"$user(creation_date)\",
 			\"updatedAt\": \"$user(last_visit)\",
 			\"__v\": 0

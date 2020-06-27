@@ -3,7 +3,6 @@ ns_log Notice "Running TCL script user/login"
 if {[ns_conn method] eq "POST"} {
     package req json
 
-
     set header [ns_conn header]
     ns_log Notice "HEADER \n $header"
     set h [ns_set size $header]

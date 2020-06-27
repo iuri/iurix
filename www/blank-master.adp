@@ -11,7 +11,11 @@
 <!-- Added by iuri@iurix.com -->
 <!-- Favicon features -->
 <!-- creation-date: 2019-07-20 -->
+<!-- Ensures optimal rendering on mobile devices. -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Optimal Internet Explorer compatibility -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
 <meta name="msapplication-TileColor" content="#ffffff">
 <meta name="msapplication-TileImage" content="/resources/images/ms-icon-144x144.png">
 <meta name="theme-color" content="#ffffff">

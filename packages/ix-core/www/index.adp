@@ -15,16 +15,22 @@
               <a class="nav-link js-scroll-trigger" href="#about">About</a>
             </li>
             <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#services">Services</a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link js-scroll-trigger" href="/currencies/">Currencies</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger" href="#services">Services</a>
+              <a class="nav-link js-scroll-trigger" href="/ecommerce">Ecommerce</a>
             </li>
             <li class="nav-item">
               <a class="nav-link js-scroll-trigger" href="#portfolio">Portfolio</a>
             </li>
             <li class="nav-item">
               <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#donate">Donate</a>
             </li>
             <li class="nav-item">
 	      <include src="/packages/search/lib/search">
@@ -233,6 +239,37 @@
       </div>
     </section>
 
+
+
+    <section id="donate">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12 text-center">
+            <h2 class="section-heading">We have a purpose to help others!</h2>
+	    <h3> Scan the QR Code or click to Donate</h3>
+<!--	    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+	    <input type="hidden" name="cmd" value="_s-xclick" />
+	    <input type="hidden" name="hosted_button_id" value="THTHY7L9FU5EQ" />
+	    <input type="image" src="https://www.paypalobjects.com/pt_BR/BR/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Faça doações com o botão do PayPal" />
+	    <img alt="" border="0" src="https://www.paypal.com/pt_BR/i/scr/pixel.gif" width="1" height="1" />
+	    </form>
+-->
+
+	    <img src="/qrcode-donate.png"><br><br>
+	    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+	      <input type="hidden" name="cmd" value="_s-xclick" />
+	      <input type="hidden" name="hosted_button_id" value="THTHY7L9FU5EQ" />
+	      <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+	      <img alt="" border="0" src="https://www.paypal.com/en_BR/i/scr/pixel.gif" width="1" height="1" />
+	    </form><br><br>
+	    <h2 class="section-heading">SHARE this link!</h2>
+	    <p> https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=THTHY7L9FU5EQ&source=url </p>
+
+		<hr class="my-4">
+          </div>
+        </div>
+      </div>
+    </section>
     <!-- Bootstrap core JavaScript -->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

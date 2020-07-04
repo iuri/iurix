@@ -1,0 +1,1537 @@
+{
+    "ctrees" : {
+	"<default>" : {
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"enciv" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539436", "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "EnCiv Example cTree",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "f07cd2c4-46d3-7516-ec91-f618ef539436" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65342" : {
+			    "data" : "http://enciv.org/wp-content/uploads/2019/01/enciv-logo-black.png",
+			    "rating" : 0,
+			    "type" : "501f7439-ac3e-9562-2bf4-3a32b89ca6cf"
+			}
+		    },
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "This is the subject for this example cTree. By default, this is the post all other posts lead back to.  It usually describes the high level problem, question, or goal the cTree is focused on.",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"hfla" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539436", "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "Hack for LA Example cTree",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "f07cd2c4-46d3-7516-ec91-f618ef539436" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65342" : {
+			    "data" : "https://pbs.twimg.com/profile_images/1005201967021371392/pF1VTXHs_400x400.jpg",
+			    "rating" : 0,
+			    "type" : "501f7439-ac3e-9562-2bf4-3a32b89ca6cf"
+			}
+		    },
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "This is the subject for this example cTree. By default, this is the post all other posts lead back to.  It usually describes the high level problem, question, or goal the cTree is focused on.",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"la-corgi-day" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "Los Angeles Corgi Day",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "So Cal Corgi Nation hosts a fun Beach Day event every year in Huntington Beach.  We want to host one in LA for all Angelinos to enjoy.",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"la-cosplay" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "Los Angeles Cosplay Spaces",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "Cosplay or costume art is growing in LA – what are ways we can create safe and fun spaces for people to show off their creativity?",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"la-homeless" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "Los Angeles Homelessness",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "Los Angeles has a growing homelessness problem.  What can be done to help more get off the street.",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"la-metro-purple" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "LA Metro Purple Line",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "The new Metro Purple Line subway will run under Beverly Hills. What issues might this cause?",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"sola-target" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "South LA Target Lot",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "There was a Target that was supposed to be built in South LA. That was 12 years and millions of dollars ago. What should we build there instead if the project is not going to continue?",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"test" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    },
+		    "866596bf-4bec-bc23-075b-a30aae30e4c1" : {
+			"8111684a-7e39-757b-0a6a-907495decb4e" : {
+			    "rating" : 0,
+			    "segments" : [ "e82cbae4-7d36-0507-e43a-780fef7ae421" ]
+			}
+		    },
+		    "bcd09662-a73f-93ce-56e5-930a6af3ef1a" : {
+			"b7aa416a-b185-2c05-709c-710b140440b0" : {
+			    "rating" : 0,
+			    "segments" : [ "6a2f5405-4004-973b-0b83-2b4807b22016" ]
+			}
+		    },
+		    "c3ec3aaf-d62b-a729-2a4e-a0e28dc3a35b" : {
+			"db5c257c-1e19-8539-754a-92cb1c698b8d" : {
+			    "rating" : 0,
+			    "segments" : [ "55e0448b-ff0e-5faf-1e6a-56b39c6f5d61" ]
+			}
+		    },
+		    "dd37ac21-4777-ec3f-85ab-ac38838b58c7" : {
+			"9e3b456f-0df0-747d-d761-c46ac0ceec0f" : {
+			    "rating" : 0,
+			    "segments" : [ "11826a05-f522-ce6c-62ec-b87d4c29fbe1" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "test1",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		},
+		"bcd09662-a73f-93ce-56e5-930a6af3ef1a" : {
+		    "childCount" : 0,
+		    "createdDate" : 12345679,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345689,
+		    "parents" : {
+			"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 1,
+		    "title" : "test2",
+		    "type" : "725d347c-7990-8cc7-f63f-7fb92009b853"
+		},
+		"dd37ac21-4777-ec3f-85ab-ac38838b58c7" : {
+		    "childCount" : 0,
+		    "createdDate" : 1556678497689,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1556678497689,
+		    "parents" : {
+			"bcd09662-a73f-93ce-56e5-930a6af3ef1a" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "I have a question",
+		    "type" : "890a8cf3-4a9d-3a59-212f-63c903b918fa"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "Test",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "11826a05-f522-ce6c-62ec-b87d4c29fbe1" : {
+			"be3710c9-6c3d-6128-64af-870e2f051250" : {
+			    "data" : "Here's the question",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "55e0448b-ff0e-5faf-1e6a-56b39c6f5d61" : {
+			"7b48b0e4-ecdd-15b9-fb01-180d3b0a56fe" : {
+			    "data" : "an odoo/educat instance on my server at home",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "6a2f5405-4004-973b-0b83-2b4807b22016" : {
+			"bc8dbc57-a087-99a4-9faa-51efd858e377" : {
+			    "data" : "test description 2",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "e82cbae4-7d36-0507-e43a-780fef7ae421" : {
+			"82409f2d-a5c5-e188-9a4d-ca5409632279" : {
+			    "data" : "Making a test run",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "test description 1",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"weho-park" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "West Hollywood Park Rec Center",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "What kinds of services should be offered at the new West Hollywood Park recreation center when it opens?  See weho.org/whparkproject",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"weho-run" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "17b80f1b-7984-cec0-d262-ed46de397dc4" : {
+			"e0d36fc9-170f-d554-9ab7-f443d28e2503" : {
+			    "rating" : 0,
+			    "segments" : [ "8c65c7fc-642b-d6c4-ec99-1992e86f414d" ]
+			}
+		    },
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    },
+		    "aba76a62-71d0-bd52-f6e8-285711d5c9e0" : {
+			"10611623-74b2-4e6a-88e3-3920cc8485f1" : {
+			    "rating" : 0,
+			    "segments" : [ "6683ec38-6c29-0c36-c3ed-4b877ad1161a" ]
+			}
+		    },
+		    "ca3c6533-b1c8-00ae-29dc-e68715fe9129" : {
+			"35ee2f93-14d1-038c-3b7b-ad5abc224c51" : {
+			    "rating" : 0,
+			    "segments" : [ "e98191c5-8d15-c605-2441-ff9b893f57e1" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"17b80f1b-7984-cec0-d262-ed46de397dc4" : {
+		    "childCount" : 0,
+		    "createdDate" : 1576644618372,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1576644618372,
+		    "parents" : {
+			"ca3c6533-b1c8-00ae-29dc-e68715fe9129" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Too much waste is thrown on our streets during marathons",
+		    "type" : "5a7c59ba-add8-e251-9eb2-5801058c9e80"
+		},
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 0,
+		    "title" : "Subject",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		},
+		"aba76a62-71d0-bd52-f6e8-285711d5c9e0" : {
+		    "childCount" : 0,
+		    "createdDate" : 1576646552536,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1576646552536,
+		    "parents" : {
+			"17b80f1b-7984-cec0-d262-ed46de397dc4" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Clean Solution= trash cans",
+		    "type" : "8e4d0986-7fc1-fdde-a167-bcb905702193"
+		},
+		"ca3c6533-b1c8-00ae-29dc-e68715fe9129" : {
+		    "childCount" : 0,
+		    "createdDate" : 1576644530891,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1576644530891,
+		    "parents" : {
+			"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Bring Back Our Runners",
+		    "type" : "725d347c-7990-8cc7-f63f-7fb92009b853"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		}
+	    },
+	    "name" : "West Hollywood Runs",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "6683ec38-6c29-0c36-c3ed-4b877ad1161a" : {
+			"fcfd6cca-17c4-4fe8-e983-ceabe9c8ffb7" : {
+			    "data" : "we need more of these on our streets",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "8c65c7fc-642b-d6c4-ec99-1992e86f414d" : {
+			"55cf2270-04f3-5ac7-3dc3-2ddf146ee40a" : {
+			    "data" : "We need to clean up our streets better and throw away trash in portable bins",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "e98191c5-8d15-c605-2441-ff9b893f57e1" : {
+			"c7e228d4-8ef5-526c-a8d3-49e7c3a6f1bc" : {
+			    "data" : "Let's make this work people and bring back our marathons!!",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "How do we bring back the 5k and 10k running events to West Hollywood?",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	}
+    }
+}

@@ -13,7 +13,59 @@ namespace eval ctree {}
 
 namespace eval ctree::tree {}
 
-ad_proc ctree::tree::new {
+ad_proc -public ctree::import_json {
+    -jsonText
+} {
+    Gets full JSON, converts JSON's response to TCL array, then converts the array into a TCL list, suing rl_json library, isolates page into @data and gets @item_id directly, accessing data with list poperties
+} {
+    package require json
+    package require rl_json
+    namespace path {::rl_json}
+    
+    ns_log Notice "Runnin gad_proc ctree::import_json"
+    ns_log Notice "JSON \n $jsonText"
+
+    # TCLlib JSON
+    set l_data [json::json2dict $jsonText]
+    ns_log Notice "TCLLIB \n $l_data"
+
+    if {[lindex $l_data 0] eq "ctrees"} {
+	#import_trees -data [lindex $l_data 1]
+    }
+    
+    # RL_JSON
+    set t [json get $jsonText]
+    #    ns_log Notice "T \n $t"
+    array set arr $t
+    ns_log Notice "RL_JSON \n $arr(ctrees)"
+    array set arr2 $arr(ctrees)
+    ns_log notice "ARRAY2 \n [parray arr2] \n\n"
+    
+    # https://www.tcl.tk/man/tcl8.4/TclCmd/array.htm
+    # https://wiki.tcl-lang.org/page/RL_JSON+Extensions
+    set parent_id [ad_conn package_id]
+
+    foreach name [array names arr2] {
+	
+	#set name [util_text_to_url [string map {á a à a â a ã a ç c é e è e ê e í i ó o õ o ô o ú u "´" "" "'" "" " " - "," - } [string tolower $name]]]
+
+	ns_log Notice "ADD TREE: $name \n ATTRIBS $arr2($name) \n LENGTH [llength $arr2($name)]"
+
+	ctree::tree::new -name $name -parent_id [ad_conn package_id] -content_type ctree -attributes "$arr2($name)" -add_p t
+    }   
+}
+
+
+
+
+
+
+
+
+
+
+
+ad_proc -public  ctree::tree::new {
     {-name}
     {-parent_id ""}
     {-content_type}

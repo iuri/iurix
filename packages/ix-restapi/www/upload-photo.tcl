@@ -5,30 +5,31 @@ ad_page_contract {} {
 }
 
 ns_log Notice "Running REST upload-photo"
-set myform [ns_getform]
-if {[string equal "" $myform]} {
-    ns_log Notice "No Form was submited"
-} else {
-    ns_log Notice "FORM"
-    ns_set print $myform
-    for {set i 0} {$i < [ns_set size $myform]} {incr i} {
-	set varname [ns_set key $myform $i]
-	set varvalue [ns_set value $myform $i]
-	ns_log Notice " $varname - $varvalue"
-    }
+
+if {[ix_rest::jwt::validation_p] eq 0} {
+    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
+    ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
+    ad_script_abort
 }
 
 
 
-
 if {[ns_conn method] eq "POST"} {
+
+    set myform [ns_getform]
+    if {[string equal "" $myform]} {
+	ns_log Notice "No Form was submited"
+    } else {
+	ns_log Notice "FORM"
+	ns_set print $myform
+	for {set i 0} {$i < [ns_set size $myform]} {incr i} {
+	    set varname [ns_set key $myform $i]
+	    set varvalue [ns_set value $myform $i]
+	    ns_log Notice " $varname - $varvalue"
+	}
+    }
     
-    set header [ns_conn header]
-    ns_log Notice "HEADER \n $header"
-    set h [ns_set size $header]
-    ns_log Notice "HEADERS $h"
-    set req [ns_set array $header]
-    ns_log Notice "$req"
+
     
     #    ns_log Notice "BODY \n  [ns_getcontent -as_file false]"
     package req json
@@ -45,9 +46,17 @@ if {[ns_conn method] eq "POST"} {
 	ns_log Notice "[lindex $arr(person_name) 1]"
 	ns_log Notice ""
 	
+	set user_id $arr(user_id)
+	if {![exists_and_not_null user_id]} {
+	    set user_id [ad_conn user_id]
+	}
+
+	set album_id [ix_rest::album::get_id -user_id $user_id]
+
+	# Retrieves album_id 
+	#set album_id 4648
+		
 	#check permission
-	set album_id 4648
-	set user_id 704
 	permission::require_permission -party_id $user_id -object_id $album_id -privilege "pa_create_photo"
 	set new_photo_ids [pa_load_images \
 			       -remove 1 \

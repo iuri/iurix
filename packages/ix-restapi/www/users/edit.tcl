@@ -1,40 +1,13 @@
-ad_page_contract {
-}
+ad_page_contract {}
 
 ns_log Notice "Running TCL script users/edit"
 
-
-ns_log Notice " METHOD [ns_conn method]"
-set header [ns_conn header]
-ns_log Notice "HEADER \n $header"
-set h [ns_set size $header]
-ns_log Notice "HEADERS $h"
-set req [ns_set array $header]
-ns_log Notice "$req"
-set token [lindex [ns_set get $header authorization] 1]
-ns_log Notice "TOKEN $token"
-
-set token [split $token "."]
-set header1 [ns_base64decode [lindex $token 0]]
-set payload [ns_base64decode [lindex $token 1]]
-set hmac_secret [lindex $token 2]
-ns_log Notice "TOKEN $token \n
-HEADER $header1 \n
-PAYLOAD $payload \n
-SECRET $hmac_secret \n"
-
-#
-# VErifying HMAC, one needs the key and data as well
-#
-set hmac_verified_p 0
-
-set hmac_vrf [ns_crypto::hmac string -digest sha256 "Abracadabra" "What is the magic word?"]
-ns_log Notice "VRF $hmac_vrf"
-if {$hmac_secret eq $hmac_vrf} {
-    set hmac_verified_p 1
+if {[ix_rest::jwt::validation_p] eq 0} {
+    
+    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
+    ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
 }
 
-ns_log Notice "VERYF $hmac_verified_p"
 set dict [json::json2dict [ns_getcontent -as_file false]]
 #
 # Do something with the dict

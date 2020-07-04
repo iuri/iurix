@@ -1,0 +1,577 @@
+{
+    "ctrees" : {
+	"<default>" : {
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	},
+	"test" : {
+	    "descriptions" : {
+		"forElement" : {
+		    "056f12cd-94d7-4b96-44c0-334f107832fa" : {
+			"787a321f-1ea4-e399-9057-7b6f0e114208" : {
+			    "rating" : 0,
+			    "segments" : [ "67f20f19-9e1d-71f3-8bd1-a5087ebe5450" ]
+			}
+		    },
+		    "099214cc-02cc-2fcb-4f41-bd9025ba34f2" : {
+			"dc15aa5d-835a-bb12-fb3d-6734a84e37dc" : {
+			    "rating" : 0,
+			    "segments" : [ "93a82a1f-c506-9a95-b44a-bbd446611563" ]
+			}
+		    },
+		    "2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			"246113fd-067a-f126-f406-3fea6605049f" : {
+			    "rating" : 0,
+			    "segments" : [ "f07cd2c4-46d3-7516-ec91-f618ef539437" ]
+			}
+		    },
+		    "530b6e96-8e6d-5849-cdcb-fc5846d3b5b6" : {
+			"9a3edb57-9180-dc0a-f7e4-a445351f57f8" : {
+			    "rating" : 0,
+			    "segments" : [ "60736267-dcfd-d4ed-d956-e8e297cab3a4" ]
+			}
+		    },
+		    "644428e5-c5b3-f057-96a3-95155fe7c202" : {
+			"7d94f8fc-3b4e-60e2-1679-e499dd240481" : {
+			    "rating" : 0,
+			    "segments" : [ "8ca5ccfc-bb7b-30f8-3c12-3e2fbe658a1a" ]
+			}
+		    },
+		    "64f1d2b5-d8ce-b50f-150d-bc9542392e6d" : {
+			"dd7612e9-89f9-697c-ceae-51646924f6d5" : {
+			    "rating" : 0,
+			    "segments" : [ "f65969df-c83e-bc84-6897-869a2aa5133f" ]
+			}
+		    },
+		    "7a6bb24e-ef1a-f8cf-69b3-f8248cd2b0d0" : {
+			"ce9504be-1fc9-dd88-baa5-cfc0db51dba8" : {
+			    "rating" : 0,
+			    "segments" : [ "ba29639e-c3f0-f95d-9d04-385f20b80d3d" ]
+			}
+		    },
+		    "847d0f5e-8d14-0030-9577-c516a0a0a2f4" : {
+			"78956451-5995-5adb-ad7f-4f2daf711356" : {
+			    "rating" : 0,
+			    "segments" : [ "b2272f4f-56de-e6de-723a-aed68c7464d7" ]
+			}
+		    },
+		    "b5fe2e6b-3853-1ca5-e130-c995ca6800bc" : {
+			"c2651dd5-70f6-e2b2-4e53-b2fc523c3a6a" : {
+			    "rating" : 0,
+			    "segments" : [ "135c85df-3d1f-65c2-a1a8-19a0696ae2e5" ]
+			}
+		    },
+		    "bcd09662-a73f-93ce-56e5-930a6af3ef1a" : {
+			"b7aa416a-b185-2c05-709c-710b140440b0" : {
+			    "rating" : 0,
+			    "segments" : [ "6a2f5405-4004-973b-0b83-2b4807b22016" ]
+			}
+		    },
+		    "c159d764-e8a4-a88e-d8ec-8f396ffeb7b3" : {
+			"f57c4345-de9a-44e2-eb72-16672973efa9" : {
+			    "rating" : 0,
+			    "segments" : [ "49b7f969-4b69-7cba-e75a-e70b3cf9d7e4" ]
+			}
+		    },
+		    "dc3f22a5-f959-116c-4b36-cdca705acf81" : {
+			"21d34b4e-05ce-b13e-34ae-9093202a060d" : {
+			    "rating" : 0,
+			    "segments" : [ "9d888473-9b51-91bd-a51f-16c97c44d670" ]
+			}
+		    }
+		}
+	    },
+	    "elements" : {
+		"056f12cd-94d7-4b96-44c0-334f107832fa" : {
+		    "childCount" : 2,
+		    "createdDate" : 1554709434095,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 1,
+		    "lastInteractionDate" : 1588482069420,
+		    "parents" : {
+			"bcd09662-a73f-93ce-56e5-930a6af3ef1a" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "I have a question",
+		    "type" : "890a8cf3-4a9d-3a59-212f-63c903b918fa"
+		},
+		"099214cc-02cc-2fcb-4f41-bd9025ba34f2" : {
+		    "childCount" : 0,
+		    "createdDate" : 1588481119006,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1588481119006,
+		    "parents" : {
+			"056f12cd-94d7-4b96-44c0-334f107832fa" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Here's a better answer",
+		    "type" : "77ffc744-2142-c4cc-8366-35d4c3a6f23b"
+		},
+		"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+		    "childCount" : 1,
+		    "createdDate" : 123456789,
+		    "feedbackCount" : 1,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345789,
+		    "rating" : 1,
+		    "title" : "test1",
+		    "type" : "21ec137f-d241-1062-535d-348db8190275"
+		},
+		"530b6e96-8e6d-5849-cdcb-fc5846d3b5b6" : {
+		    "childCount" : 0,
+		    "createdDate" : 1554709474774,
+		    "feedbackCount" : 8,
+		    "interactionCount" : 17,
+		    "lastInteractionDate" : 1588414640321,
+		    "parents" : {
+			"64f1d2b5-d8ce-b50f-150d-bc9542392e6d" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Here's a problem",
+		    "type" : "5a7c59ba-add8-e251-9eb2-5801058c9e80"
+		},
+		"644428e5-c5b3-f057-96a3-95155fe7c202" : {
+		    "childCount" : 0,
+		    "createdDate" : 1588480586751,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1588480586751,
+		    "parents" : {
+			"056f12cd-94d7-4b96-44c0-334f107832fa" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Here's another answer",
+		    "type" : "77ffc744-2142-c4cc-8366-35d4c3a6f23b"
+		},
+		"64f1d2b5-d8ce-b50f-150d-bc9542392e6d" : {
+		    "childCount" : 1,
+		    "createdDate" : 1554709453729,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 1,
+		    "lastInteractionDate" : 1590037361507,
+		    "parents" : {
+			"056f12cd-94d7-4b96-44c0-334f107832fa" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Here's the answer",
+		    "type" : "77ffc744-2142-c4cc-8366-35d4c3a6f23b"
+		},
+		"7a6bb24e-ef1a-f8cf-69b3-f8248cd2b0d0" : {
+		    "childCount" : 0,
+		    "createdDate" : 1588481970752,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1588481970752,
+		    "parents" : {
+			"056f12cd-94d7-4b96-44c0-334f107832fa" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Here's the best answer",
+		    "type" : "77ffc744-2142-c4cc-8366-35d4c3a6f23b"
+		},
+		"847d0f5e-8d14-0030-9577-c516a0a0a2f4" : {
+		    "childCount" : 0,
+		    "createdDate" : 1588482069347,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1588482069347,
+		    "parents" : {
+			"056f12cd-94d7-4b96-44c0-334f107832fa" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Here's the final answer",
+		    "type" : "77ffc744-2142-c4cc-8366-35d4c3a6f23b"
+		},
+		"b5fe2e6b-3853-1ca5-e130-c995ca6800bc" : {
+		    "childCount" : 0,
+		    "createdDate" : 1554709511016,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1554709511016,
+		    "parents" : {
+			"c159d764-e8a4-a88e-d8ec-8f396ffeb7b3" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Here's an implementation",
+		    "type" : "e19ce806-319b-cec9-dba2-16d7dcebd700"
+		},
+		"bcd09662-a73f-93ce-56e5-930a6af3ef1a" : {
+		    "childCount" : 0,
+		    "createdDate" : 12345679,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 12345689,
+		    "parents" : {
+			"2433fa24-3570-3e30-e032-03b81dd8ddcb" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 1,
+		    "title" : "test2",
+		    "type" : "725d347c-7990-8cc7-f63f-7fb92009b853"
+		},
+		"c159d764-e8a4-a88e-d8ec-8f396ffeb7b3" : {
+		    "childCount" : 0,
+		    "createdDate" : 1554709485364,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1554709485364,
+		    "parents" : {
+			"530b6e96-8e6d-5849-cdcb-fc5846d3b5b6" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Here's a solution",
+		    "type" : "8e4d0986-7fc1-fdde-a167-bcb905702193"
+		},
+		"dc3f22a5-f959-116c-4b36-cdca705acf81" : {
+		    "childCount" : 0,
+		    "createdDate" : 1590037361429,
+		    "feedbackCount" : 0,
+		    "interactionCount" : 0,
+		    "lastInteractionDate" : 1590037361429,
+		    "parents" : {
+			"64f1d2b5-d8ce-b50f-150d-bc9542392e6d" : {
+			    "rating" : 1
+			}
+		    },
+		    "rating" : 0,
+		    "title" : "Answer Question",
+		    "type" : "890a8cf3-4a9d-3a59-212f-63c903b918fa"
+		}
+	    },
+	    "feedback" : {
+		"forDescription" : {
+		    "246113fd-067a-f126-f406-3fea6605049f" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45f" : {
+			    "rating" : 0,
+			    "text" : "test comment"
+			}
+		    }
+		},
+		"forElement" : {
+		    "530b6e96-8e6d-5849-cdcb-fc5846d3b5b6" : {
+			"1931dfd5-a3af-aa65-5a42-ef039c3e49d1" : {
+			    "text" : "test 4"
+			},
+			"3fd1f45f-6c43-bf8b-118a-7698b9b1339d" : {
+			    "text" : "another test"
+			},
+			"ad286b27-637b-3b41-ac78-262b5d622439" : {
+			    "feedbackCount" : 0,
+			    "interactionCount" : 0,
+			    "lastInteractionDate" : 1588240467212,
+			    "rating" : 0,
+			    "reviewer" : "",
+			    "text" : "test 6"
+			},
+			"cccf6efc-5ebc-2aba-bc47-8ef9f4300877" : {
+			    "text" : "test 5"
+			},
+			"ccfa9d88-3f97-6d38-20c5-0a4a928f6e53" : {
+			    "feedbackCount" : 0,
+			    "interactionCount" : 0,
+			    "lastInteractionDate" : 1588242705576,
+			    "rating" : 0,
+			    "reviewer" : "",
+			    "text" : "test 8"
+			},
+			"d0fc4fff-b238-0094-befa-dca84cc58d82" : {
+			    "text" : "test 3"
+			},
+			"e86178c4-ed73-119e-98a9-e79098dd4e99" : {
+			    "feedbackCount" : 0,
+			    "interactionCount" : 0,
+			    "lastInteractionDate" : 1588240594176,
+			    "rating" : 0,
+			    "reviewer" : "",
+			    "text" : "test 7"
+			},
+			"e8a902e0-b4d8-62fc-cbae-f0aec8b3f8dc" : {
+			    "text" : "test"
+			}
+		    },
+		    "bcd09662-a73f-93ce-56e5-930a6af3ef1a" : {
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45d" : {
+			    "createdDate" : 12345679,
+			    "rating" : 0,
+			    "text" : "test comment 2"
+			},
+			"18986a2d-7a73-8c4f-b4f1-110fe91bc45e" : {
+			    "createdDate" : 12345678,
+			    "rating" : 0,
+			    "text" : "test comment 1"
+			}
+		    }
+		}
+	    },
+	    "name" : "Test",
+	    "segmentTypes" : {
+		"501f7439-ac3e-9562-2bf4-3a32b89ca6cf" : {
+		    "canBeThumbnail" : true,
+		    "componentName" : "ctree-segment-image"
+		},
+		"9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a" : {
+		    "canBeThumbnail" : false,
+		    "componentName" : "ctree-segment-text"
+		}
+	    },
+	    "segmentVariations" : {
+		"forSegment" : {
+		    "135c85df-3d1f-65c2-a1a8-19a0696ae2e5" : {
+			"51f685d3-9fe4-d4be-2022-af0f40b727b8" : {
+			    "data" : "Add a fix",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "49b7f969-4b69-7cba-e75a-e70b3cf9d7e4" : {
+			"216cfa42-15cf-3512-9417-1438516a7a01" : {
+			    "data" : "Keep testing",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "60736267-dcfd-d4ed-d956-e8e297cab3a4" : {
+			"9703f94d-dfde-3534-a75a-d423168c9ad7" : {
+			    "data" : "We can't see all items",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "67f20f19-9e1d-71f3-8bd1-a5087ebe5450" : {
+			"9c939b64-15a5-7c61-36e6-c762711bcb5a" : {
+			    "data" : "What should I ask?",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "6a2f5405-4004-973b-0b83-2b4807b22016" : {
+			"bc8dbc57-a087-99a4-9faa-51efd858e377" : {
+			    "data" : "test description 2",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "8ca5ccfc-bb7b-30f8-3c12-3e2fbe658a1a" : {
+			"7f2e91c8-68b8-eedb-642b-b560c27f21fe" : {
+			    "data" : "This is a test answer",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "93a82a1f-c506-9a95-b44a-bbd446611563" : {
+			"0cd06406-8b17-c50a-9b87-13fe429ae69d" : {
+			    "data" : "Yet another test answer",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "9d888473-9b51-91bd-a51f-16c97c44d670" : {
+			"96fd9a4a-68a4-c292-5c20-48e999acb6e6" : {
+			    "data" : "I question this answer",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "b2272f4f-56de-e6de-723a-aed68c7464d7" : {
+			"7a25bf4d-e844-0367-47e8-514a002b8ba8" : {
+			    "data" : "Final test answer",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "ba29639e-c3f0-f95d-9d04-385f20b80d3d" : {
+			"cc5366d2-e9ce-dbad-7307-020ec1554934" : {
+			    "data" : "Test answer",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "f07cd2c4-46d3-7516-ec91-f618ef539437" : {
+			"42e4fc57-d485-6faf-d2ed-e5b4a4f65343" : {
+			    "data" : "test description 1",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    },
+		    "f65969df-c83e-bc84-6897-869a2aa5133f" : {
+			"d2743e78-14c6-0574-c48a-dce1583a3e6d" : {
+			    "data" : "You already did",
+			    "rating" : 0,
+			    "type" : "9df0e7c6-89f9-ccd0-84ff-7d26dd589c8a"
+			}
+		    }
+		}
+	    },
+	    "types" : {
+		"21ec137f-d241-1062-535d-348db8190275" : {
+		    "color" : "#8a5b15",
+		    "description" : "What this cTree is about",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Subject",
+		    "parentsMax" : 0,
+		    "parentsRequired" : false,
+		    "prompt" : "Create cTree"
+		},
+		"5a7c59ba-add8-e251-9eb2-5801058c9e80" : {
+		    "color" : "#e12323",
+		    "description" : "Issue which needs to be solved",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Problem",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Identify problem"
+		},
+		"725d347c-7990-8cc7-f63f-7fb92009b853" : {
+		    "color" : "#d58c20",
+		    "description" : "Areas which need to be addresed",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Goals",
+		    "parentTypes" : [ null, "21ec137f-d241-1062-535d-348db8190275", "725d347c-7990-8cc7-f63f-7fb92009b853" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Add goal"
+		},
+		"77ffc744-2142-c4cc-8366-35d4c3a6f23b" : {
+		    "color" : "#2c2ce2",
+		    "description" : "Possible answer to question",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Answer",
+		    "parentTypes" : [ null, "890a8cf3-4a9d-3a59-212f-63c903b918fa" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Answer question"
+		},
+		"890a8cf3-4a9d-3a59-212f-63c903b918fa" : {
+		    "color" : "#d1d100",
+		    "description" : "Something which needs to be answered",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Question",
+		    "parentTypes" : [ null, "725d347c-7990-8cc7-f63f-7fb92009b853", "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Ask question"
+		},
+		"8e4d0986-7fc1-fdde-a167-bcb905702193" : {
+		    "color" : "#00aeae",
+		    "description" : "Potential way to address problem",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Solution",
+		    "parentTypes" : [ null, "5a7c59ba-add8-e251-9eb2-5801058c9e80" ],
+		    "parentsMax" : -1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest solution"
+		},
+		"e19ce806-319b-cec9-dba2-16d7dcebd700" : {
+		    "color" : "#16ad16",
+		    "description" : "How to structure or accomplish suggestion",
+		    "iconUrl" : "/images/app-icon-32.png",
+		    "name" : "Implementation",
+		    "parentTypes" : [ null, "e19ce806-319b-cec9-dba2-16d7dcebd700", "77ffc744-2142-c4cc-8366-35d4c3a6f23b", "8e4d0986-7fc1-fdde-a167-bcb905702193" ],
+		    "parentsMax" : 1,
+		    "parentsRequired" : true,
+		    "prompt" : "Suggest implementation"
+		}
+	    }
+	}
+    }
+}

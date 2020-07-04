@@ -49,103 +49,85 @@ if {[ns_conn method] eq "GET"} {
 	}]} {
 	    ns_log Notice "ITEMID $item_id"
 
-	    append json_request "\"cTree\": \"$cTree\","
-	    
 	    content::item::get -item_id $item_id -revision latest -array_name item
-	    append json_data "\"$item(name)\": \{"
 	    
 	    if {[info exists cTreeName]} {
-		append json_request "\"cTreeName\": true,"
-		append json_data "\"cTreeName\": \"$item(title)\""
+		set cTreeName $item(title)
 	    }
-	    
+	    	   	    
 	    # If a ctree_post is required, then return post's data 
 	    if {[info exists postType]} {
-		ns_log Notice "postType TRUE"
-		append json_request "\"postType\": \"id\","
-		append json_data "\",postType\": \["
-
-		# Gets all postTypes
-		db_foreach select_posts {
-		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description
-		    FROM cr_items ci, cr_revisions cr
-		    WHERE ci.item_id = cr.item_id
-		    AND ci.latest_revision = cr.revision_id
-		    AND ci.content_type = 'ctree_post'
-		    AND ci.parent_id = :item_id
-		} {
-		    ns_log Notice "POSTID $id"
-		    append json_data "\{
-			\"id\": \"$name\",
-			\"name\": \"$title\",
-			\"parentsRequired\": false,
-			\"parentsMax\": 0,
-			\"iconUrl\": \"/images/post_type_icon.png\",
-			\"color\": \"#FF7700\", 
-			\"description\": \"$description\",
-			\"prompt\": \"Button label to add post with type\"
-		    \},"		    
+		set parent_id $item_id
+		if {[db_0or1row item_exists {
+		    SELECT item_id FROM cr_items WHERE name = :post AND parent_id = :parent_id
+		}]} {		    
+		    ns_log Notice "ITEMID $item_id"		
 		}
 		
-		set json_data [string trimright $json_data ","]
-		append json_data "\]"
+		if {[info exists description]} {
+		    set item_id [db_string select_desc { SELECT ci.item_id
+			FROM cr_items ci,cr_revisions cr
+			WHERE cr.revision_id = ci.latest_revision
+			AND ci.content_type = 'ctree_description'
+		    } -default ""]
+		    ns_log Notice "ITEMID $item_id"
+		    # set item_id [ctree::get_description -description $description -post $post -tree $tree]
+		}		
 	    }	    
-
-
-	    if {[info exists segmentType]} {
-		ns_log notice "segmentType TRUE"
-		append json_request "\"segmentType\": \"id\","
-
-
-		append json_data ",\"segmentType\": \["
-
-		# Gets all postTypes
-		db_foreach select_segment_type {
-		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description
-		    FROM cr_items ci, cr_revisions cr
-		    WHERE ci.item_id = cr.item_id
-		    AND ci.latest_revision = cr.revision_id
-		    AND ci.content_type = 'ctree_segmenttype'
-		    AND ci.parent_id = :item_id
-		} {
-		    ns_log Notice "SEgmentType $id"
-		    append json_data "\{
-			\"id\": \"$name\",
-			\"componentName\": \"example-type-component\",
-			\"canBeThumbnail\": true
-		    \},"		    
-		}
-		
-		set json_data [string trimright $json_data ","]
-		append json_data "\]"
-
-
-
-		
-	    }	    
-
-	    set json_request [string trimright $json_request ","]
-	    set json_data [string trimright $json_data ","]
 	    
-	    set result "\{
-		\"request\": \{$json_request\},
-		\"cTrees\": \{
-		    $json_data
-		\},
-		\"errors\":\{\},
-		\"meta\": \{
-		    \"copyright\": \"Copyright 2019 Collaboration Tree http://www.innovativefuture.org/collaboration-tree/ \",
-		    \"application\": \"CTree Rest API\",
-		    \"version\": \"0.1d\",
-		    \"id\": \"HTTP/1.1 200 Authorized\",
-		    \"status\": \"true\",
-		    \"message\": \"Successfull request. Access allowed\"
-		\}
-	    \}"
+	    # If a ctree_type is required, then return post's data 
+	    if {[info exists type]} {
+		ns_log Notice "GET TYPE $type"
+		set parent_id $item_id
+		if {[db_0or1row item_exists {
+		    SELECT item_id FROM cr_items WHERE name = :type AND parent_id = :parent_id
+		}]} {
+		    ns_log Notice "ITEMID $item_id"		
+		}
+	    }
+	    
+	    content::item::get -item_id $item_id -array_name item -revision latest
+	    #ns_log Notice "[parray item]"
+	    
+	    if {[info exists post] && [info exists description]} {	    
+		set i [lsearch $item(description) $post]
+		set j [lsearch $item(description) [lindex $item(description) [expr $i +1]]]
+		set nm [lindex $item(description) $i] 
+		set desc [lindex [lindex $item(description) $j] [expr $i + 1]]
+		set json "\"$nm\":\"[list $desc]\""
+		set json "\"$item(content_type)\":\{$json\}"
+		
+	    } else {
+		#  set json "\"$item(name)\":\"[list $item(description)]\""
+		set json "\"$item(content_type)\":\"$item(title)\""
+		
+	    }
+	    #set item(content_type) [lindex [split $item(content_type) "_"] 1]
+	    
+	    if {[array exists item]} {
+		set result "\{
+		    \"request\": \{
+			\"cTree\": \"$cTree\"	    
+		    \},		    
+		    \"data\": \{
+			\"status\": true,          
+			$json
+		    \},
+		    \"errors\":\{\},
+		    \"meta\": \{
+			\"copyright\": \"Copyright 2019 Collaboration Tree http://www.innovativefuture.org/collaboration-tree/ \",
+			\"application\": \"CTree Rest API\",
+			\"version\": \"0.1d\",
+			\"id\": \"HTTP/1.1 200 Authorized\",
+			\"status\": \"true\",
+			\"message\": \"Successfull request. Access allowed\"
+		    \}
+		\}"
 		
 		doc_return 200 "application/json" $result
 		ad_script_abort
 		
+	    }
 	}
     }
     #	set json "\"cTrees\": \["

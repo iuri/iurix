@@ -1,6 +1,6 @@
 <master>
 
-<a href="import-sample">Import Data</a> |
+<a href="upload-json">Import Data</a> |
 <a href="purge-data">Purge Data</a> |
 
 

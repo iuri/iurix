@@ -1,31 +1,36 @@
-ns_log Notice "Running TCL script user/login"
+ad_page_contract {
+    Login webservice API method, form-data format
+} {
+    {email}
+    {password}
+}
+
+ns_log Notice "Running TCL script signIn.tcl"
+
+set myform [ns_getform]
+if {[string equal "" $myform]} {
+    ns_log Notice "No Form was submited"
+} else {
+    ns_log Notice "FORM"
+    ns_set print $myform
+    for {set i 0} {$i < [ns_set size $myform]} {incr i} {
+	set varname [ns_set key $myform $i]
+	set varvalue [ns_set value $myform $i]
+	
+	ns_log Notice " $varname - $varvalue"
+    }
+}
 
 if {[ns_conn method] eq "POST"} {
-    package req json
-
-    set header [ns_conn header]
-    ns_log Notice "HEADER \n $header"
-    set h [ns_set size $header]
-    ns_log Notice "HEADERS $h"
-    set req [ns_set array $header]
-    ns_log Notice "$req"
-    
-    set dict [json::json2dict [ns_getcontent -as_file false]]
-    #
-    # Do something with the dict
-    #
-    ns_log Notice "DICT $dict"
-
-    array set arr $dict
-    if {[array exists arr] && [array size arr] > 0} {
-	ns_log Notice "EMAIL $arr(email) \n PWD  $arr(password) \n"
+    if {[exists_and_not_null email] && [exists_and_not_null password]} {
+	ns_log Notice "EMAIL $email \n PWD  $password \n"
 
 	set authority_options [auth::authority::get_authority_options]
 	set authority_id [lindex $authority_options 0 1]
 	array set auth_info [auth::authenticate \
 				 -authority_id $authority_id \
-				 -email [string trim $arr(email)] \
-				 -password $arr(password)]
+				 -email [string trim $email] \
+				 -password $password]
 
 
 	# Handle authentication problems

@@ -1,21 +1,38 @@
+ad_page_contract {
+    Login webservice API method, form-data format
+} {
+    {email}
+    {password}
+    {firstNames:optional}
+    {lastName:optional}    
+}
+
+ns_log Notice "Running TCL script signUp.tcl"
+
+set myform [ns_getform]
+if {[string equal "" $myform]} {
+    ns_log Notice "No Form was submited"
+} else {
+    ns_log Notice "FORM"
+    ns_set print $myform
+    for {set i 0} {$i < [ns_set size $myform]} {incr i} {
+	set varname [ns_set key $myform $i]
+	set varvalue [ns_set value $myform $i]
+	
+	ns_log Notice " $varname - $varvalue"
+    }
+}
 
 if {[ns_conn method] eq "POST"} {
-    # set header [ns_conn header]
-    # set header_size [ns_set size $header]
-    # set req [ns_set array $header]
-    # set content [ns_conn content]
-    # set content2 [ns_getcontent -as_file false]
-    package req json
-    set dict [json::json2dict [ns_getcontent -as_file false]]
-    
-    array set arr $dict 
-    if {[array exists arr] && [array size arr] > 0} {
-	
-	# Register User
-	ns_log Notice "USER \n [parray arr]"
-	
+    if {[exists_and_not_null email] && [exists_and_not_null password]} {
+	if {![exists_and_not_null firstNames]} {
+	    set firstNames [ad_generate_random_string]
+	}
+	if {![exists_and_not_null lastName]} {
+	    set lastName [ad_generate_random_string]
+	}
 	# Add user
-	set user_id [party::get_by_email -email $arr(email)]
+	set user_id [party::get_by_email -email $email]
 	
 	if {![exists_and_not_null user_id]  } {
 	    db_transaction {
@@ -23,12 +40,12 @@ if {[ns_conn method] eq "POST"} {
 		array set creation_info [auth::create_user \
 					     -user_id $user_id \
 					     -verify_password_confirm \
-					     -username $arr(email) \
-					     -email $arr(email) \
-					     -first_names $arr(firstNames) \
-					     -last_name $arr(lastName) \
-					     -password $arr(password) \
-					     -password_confirm $arr(password)]
+					     -username $email \
+					     -email $email \
+					     -first_names $firstNames \
+					     -last_name $lastName \
+					     -password $password \
+					     -password_confirm $password]
 		
 		if { $creation_info(creation_status) eq "ok" && [exists_and_not_null rel_group_id] } {
 		    group::add_member \

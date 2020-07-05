@@ -10,8 +10,48 @@ ad_library {
 }
 
 namespace eval ctree {}
-
 namespace eval ctree::tree {}
+namespace eval ctree::jwt {}
+
+ad_proc -public ctree::jwt::validation_p {} {
+    Validates jwt sent from client side. HMAC validation
+    References: https://jwt.io/
+} {
+
+    set header [ns_conn header]
+    ns_log Notice "HEADER \n $header"
+    set h [ns_set size $header]
+    ns_log Notice "HEADERS $h"
+    set req [ns_set array $header]
+    ns_log Notice "$req"
+    
+    
+    set token [lindex [ns_set get $header Authorization] 1]
+    ns_log Notice "TOKEN $token"
+    
+    set token [split $token "."]
+    set header1 [ns_base64decode [lindex $token 0]]
+    set payload [ns_base64decode [lindex $token 1]]
+    set hmac_secret [lindex $token 2]
+    ns_log Notice "TOKEN $token \n
+HEADER $header1 \n
+PAYLOAD $payload \n
+SECRET $hmac_secret \n"
+    
+    #
+    # VErifying HMAC, one needs the key and data as well
+    #
+    set hmac_verified_p 0
+    
+    set hmac_vrf [ns_crypto::hmac string -digest sha256 "Abracadabra" "What is the magic word?"]
+    ns_log Notice "VRF $hmac_vrf"
+    if {$hmac_secret eq $hmac_vrf} {
+	return  1
+    }
+    return 0
+}
+
+
 
 ad_proc -public ctree::import_json {
     -jsonText

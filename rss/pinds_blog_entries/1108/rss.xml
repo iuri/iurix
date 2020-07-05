@@ -5,7 +5,7 @@
 <link>https://iurix.com/blog/</link>
 <description>Lars Blogger</description>
 <generator>OpenACS 5.0</generator>
-<lastBuildDate>Sat, 04 Jul 2020 15:03:26 GMT</lastBuildDate>
+<lastBuildDate>Sun, 05 Jul 2020 13:45:58 GMT</lastBuildDate>
 <image>
 <title>Lars Blogger</title>
 <url>https://iurix.com/rss-support/images/openacs_logo_rss.gif</url>
@@ -13,6 +13,96 @@
 <width>126</width>
 <height>48</height>
 </image>
+<item>
+<title>{=?utf-8?Q?O_retorno_da_Segment_ao_mon=C3=B3lito_=F0=9F=94=99_e_as?=
+ =?utf-8?Q?_falhas_do_MondoDB_reportadas_pela_Jepsen_=F0=9F=8D=82?=}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6047</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6047</guid>
+<description>+ Evitando falhas em cascata em sistemas distribuÃ­dos, IBM encerra produtos com reconhecimento facial e como a Volkswagen vem se tornando uma empresa orientada a software.&amp;nbsp;Arquitetura e DesignDecompor um monÃ³lito nÃ£o requer microservices - Sam Newman no QCon Londres&amp;nbsp;Sam Newman diz que o objetivo de decompor um monÃ³lito deve ser uma capacidade de deploy independente e que os desenvolvedores precisam se concentrar no resultado, nÃ£o na tecnologia. Segundo Sam Newman, durante sua ap...</description>
+<pubDate>Sun, 05 Jul 2020 13:45:58 GMT</pubDate>
+</item>
+<item>
+<title>{=?utf-8?Q?=5B=F0=9F=90=8DPyTricks=5D=3A_Merging_two_dicts_in_Pyth?=
+ =?utf-8?Q?on_3=2E5+_with_a_single_expression?=}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6043</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6043</guid>
+<description># How to merge two dictionaries
+# in Python 3.5+
+
+&amp;gt;&amp;gt;&amp;gt; x = {&#39;a&#39;: 1, &#39;b&#39;: 2}
+&amp;gt;&amp;gt;&amp;gt; y = {&#39;b&#39;: 3, &#39;c&#39;: 4}
+
+&amp;gt;&amp;gt;&amp;gt; z = {**x, **y}
+
+&amp;gt;&amp;gt;&amp;gt; z
+{&#39;c&#39;: 4, &#39;a&#39;: 1, &#39;b&#39;: 3}
+
+# In Python 2.x you could
+# use this:
+&amp;gt;&amp;gt;&amp;gt; z = dict(x, **y)
+&amp;gt;&amp;gt;&amp;gt; z
+{&#39;a&#39;: 1, &#39;c&#39;: 4, &#39;b&#39;: 3}
+
+# In these examples, Python merges dictionary keys
+# in the order listed in the expression, overwriting 
+# duplicates from left to right.
+#
+# See: https://www.youtube.com/watch?v=Duexw08KaC8
+This emai...</description>
+<pubDate>Sun, 05 Jul 2020 13:39:48 GMT</pubDate>
+</item>
+<item>
+<title>{cron.weekly issue #141: Zettlr, Redis, gg, pipes, sysctl &amp; more}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6039</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6039</guid>
+<description>Read this issue online Â»CRON.WEEKLYZettlr, Redis, gg, pipes, sysctl &amp;amp; moreissue #141 for Sunday, July 5, 2020Hi everyone! ðWelcome to cron.weekly issue #141.Lots of variety in this issue again, these are the most fun ones to write. ðOh, and there&#39;s a job section at the bottom for those on the lookout for something new.Grab a âï¸ &amp;amp; enjoy!News &amp;amp; general ðBtrfs at FacebookFacebook is one of the world&#39;s biggest Btrfs users. Lots of interesting details in this write-up of a...</description>
+<pubDate>Sun, 05 Jul 2020 13:37:48 GMT</pubDate>
+</item>
+<item>
+<title>{Deracinate - plus, The Words of the Week - 7/3/20}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6035</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6035</guid>
+<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYJuly 5, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;deracinate&amp;nbsp;&amp;nbsp;verb&amp;nbsp;|&amp;nbsp;dee-RASS-uh-nayt&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:uproot&amp;nbsp;&amp;nbsp;2&amp;nbsp;:to remove or separate from a native environment or culture;&amp;nbsp;especially&amp;nbsp;:to remove the racial or ethnic characteristics or influences from&amp;nbsp;Scroll down for more about&amp;nbsp;deracinate&amp;nbsp;&amp;nbsp;TRENDING NOW:proteancapriciousdefundj&#39;accuseSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border:...</description>
+<pubDate>Sun, 05 Jul 2020 13:36:48 GMT</pubDate>
+</item>
+<item>
+<title>{Elon Musk Tweeted:}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6031</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6031</guid>
+<description>&amp;nbsp;&amp;nbsp;Your Highlights&amp;nbsp;Elon Musk&amp;nbsp;@elonmusk&amp;nbsp;10K&amp;nbsp;87K&amp;nbsp;400KEngineering&amp;nbsp;@engineeringvidsFloating bridge&amp;nbsp;&amp;nbsp;480&amp;nbsp;15K&amp;nbsp;100KFernando Haddad&amp;nbsp;@Haddad_FernandoColuna: Se o movimento antifascista quiser ser mais do que a pregaÃ§Ã£o da tolerÃ¢ncia em meio Ã  desconstruÃ§Ã£o do nosso incipiente Estado de bem-estar, ele deve promover a superaÃ§Ã£o das condiÃ§Ãµes âobjetivasâ que garantem a reproduÃ§Ã£o das nossas iniquidades.&amp;nbsp;A necessidade de u...</description>
+<pubDate>Sun, 05 Jul 2020 13:35:38 GMT</pubDate>
+</item>
+<item>
+<title>{=?utf-8?Q?_=5B=F0=9F=90=8DPyTricks=5D=3A_Different_ways_to_test_m?=
+ =?utf-8?Q?ultiple_flags_at_once_in_Python?=}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6027</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6027</guid>
+<description># Different ways to test multiple
+# flags at once in Python
+x, y, z = 0, 1, 0
+
+if x == 1 or y == 1 or z == 1:
+    print(&#39;passed&#39;)
+
+if 1 in (x, y, z):
+    print(&#39;passed&#39;)
+
+# These only test for truthiness:
+if x or y or z:
+    print(&#39;passed&#39;)
+
+if any((x, y, z)):
+    print(&#39;passed&#39;)
+</description>
+<pubDate>Sun, 05 Jul 2020 13:34:38 GMT</pubDate>
+</item>
+<item>
+<title>{Present Moment Reminder}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6023</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6023</guid>
+<description>Unsubscribe&amp;nbsp; |&amp;nbsp;&amp;nbsp;Privacy PolicyThis email was sent to&amp;nbsp;iuri@iurix.com&amp;nbsp;by&amp;nbsp;Eckhart Teachings.P.O.&amp;nbsp;Box 8010&amp;nbsp; |&amp;nbsp; Boulder&amp;nbsp; |&amp;nbsp; CO&amp;nbsp; |&amp;nbsp; 80306</description>
+<pubDate>Sun, 05 Jul 2020 13:33:38 GMT</pubDate>
+</item>
 <item>
 <title>{Automate your React Native App with Fastlane | Nicolas
  Dommanget-Muller in Level Up Coding}</title>
@@ -35,60 +125,6 @@
 <guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6001</guid>
 <description>&amp;nbsp;&amp;nbsp;&amp;nbsp;Kubernetes: AKS vs. EKS vs. GKEKubernetes already won the battle of container orchestration tools. Now AWS, Azure, and Google Cloud each have their own managed Kubernetes version. How do they stack up?In this detailed comparison, Toptal Freelance DevOps Engineer Guillaume Dury shares his experiences with EKS, AKS, and GKE.Continue Reading&amp;nbsp;Save to PocketAbout the AuthorGuillaume DuryDevOps Engineer and DeveloperWorking as a DevOps engineer in Asia, Guillaume set up the in...</description>
 <pubDate>Sat, 04 Jul 2020 15:02:16 GMT</pubDate>
-</item>
-<item>
-<title>{Optimizing Retailer Revenue with Sales Forecasting AI}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6005</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6005</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;Optimizing Retailer Revenue with Sales Forecasting AIRetailers often face supply and demand issues that cause them to miss out on potential sales or tie up a lot of money in overstocked products.In this article, Toptal Data Scientist Ahmed Khaled explains how retailers can boost revenues and cut costs with sales forecasts backed by artificial intelligence.Continue Reading&amp;nbsp;Save to PocketAbout the AuthorAhmed KhaledData ScientistAhmed is a senior data scientist who loves t...</description>
-<pubDate>Sat, 04 Jul 2020 15:02:16 GMT</pubDate>
-</item>
-<item>
-<title>{=?utf-8?Q?Steve_Jobs=E2=80=99s_Advice_Turned_This_Programmer_Into?=
- =?utf-8?Q?_a_Billionaire_=7C_Alan_Trapulionis_in_Entrepreneur=27s_Handboo?=
- =?utf-8?Q?k?=}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=5993</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=5993</guid>
-<description>Stories for Iuri SampaioTodayâs highlightsSteve Jobsâs Advice Turned This Programmer Into a BillionaireAll Marc Benioff did was listen to the words of a dreamerAlan Trapulionis&amp;nbsp;in&amp;nbsp;Entrepreneur&#39;s Handbook4 min readReact vs. Angular: The 2020 EditionSome things changed, others have evolved. Whatâs the latest?Michael Krasnov&amp;nbsp;in&amp;nbsp;Better Programming4 min readWrite a native module to enable full-screen mode in React Native (Android)There are times where some screens needs to...</description>
-<pubDate>Sat, 04 Jul 2020 15:01:16 GMT</pubDate>
-</item>
-<item>
-<title>=?utf-8?Q?Build_apps_in_a_few_hours_with_Forge_=F0=9F=91=8C?=</title>
-<link>https://iurix.com/blog/one-entry?entry_id=5199</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=5199</guid>
-<description>The deadline for the&amp;nbsp;Atlassian Codegeist&amp;nbsp;hackathon is in 11 days. Submissions are due July 13th before 5pm EDT. Don&#39;t worry, you still have time to build and win big.In as little as a few hours, you can build scalable apps using Atlassian&#39;s new cloud app development platform, Forge. Although Forge is still in beta, you can request access using the referral &#34;Codegeist&#34; and start building. There are prizes for Connect apps, Forge apps, and bonus prizes for Trello Power-Ups. Don&#39;t miss ...</description>
-<pubDate>Thu, 02 Jul 2020 22:34:06 GMT</pubDate>
-</item>
-<item>
-<title>{Obtain - plus, 14 Words Inspired by Dogs}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=5191</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=5191</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYJuly 2, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;obtain&amp;nbsp;&amp;nbsp;verb&amp;nbsp;|&amp;nbsp;ub-TAYN&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:to gain or attain usually by planned action or effort&amp;nbsp;&amp;nbsp;2&amp;nbsp;:to be generally recognized or established&amp;nbsp;:&amp;nbsp;prevail&amp;nbsp;Scroll down for more about&amp;nbsp;obtain&amp;nbsp;&amp;nbsp;TRENDING NOW:proteancapriciousdefundj&#39;accuseSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border: 0px; outline: 0px; margin: 0px; padding: 0px; font-size...</description>
-<pubDate>Thu, 02 Jul 2020 12:03:26 GMT</pubDate>
-</item>
-<item>
-<title>{&#34;Keys for You to Become a Better Frontend Web Developer&#34; + 7
- Must-Reads!}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=5174</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=5174</guid>
-<description>Hey hey!This week, I want to give a special shoutout to the&amp;nbsp;Grant For the Web x DEV Community hackathon winners&amp;nbsp;and participants. Those were some&amp;nbsp;veryinspiring projects to review and really got me (and all the judges) thinking about how we can build a better internet for creators with Web Monetization. Thanks to all who participated, commented â and won!&amp;nbsp;Now, on to this week&#39;s roundup!ðCongrats to...ðVitor&amp;nbsp;for sticking with their writing habit&amp;nbsp;ð§ Emilie&amp;n...</description>
-<pubDate>Wed, 01 Jul 2020 13:39:35 GMT</pubDate>
-</item>
-<item>
-<title>{=?utf-8?Q?Voc=C3=AA_est=C3=A1_passando_por_um_novo_tr=C3=A2nsito_?=
- =?utf-8?Q?astrol=C3=B3gico?=}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=5178</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=5178</guid>
-<description>Descubra as tendÃªncias da Astrologia para o seu momento.Veja este e-mail em seu navegadorPALAVRA CHAVE:Mudar a palavra|Entenda melhorSEU HORÃSCOPONOVO TRANSITO ASTROLÃGICOAtenÃ§Ã£o:&amp;nbsp;Devido Ã  pandemia do COVID-19, interprete os seus trÃ¢nsitos considerando as normas de saÃºde e o isolamento social necessÃ¡rios nesse perÃ­odo.&amp;nbsp;Entenda melhor aquiDISPOSIÃÃO SOCIAL, AINDA QUE VIRTUAL&amp;nbsp;DE:&amp;nbsp;01/07 (Hoje) |&amp;nbsp;ATÃ:&amp;nbsp;17/07&amp;nbsp;CICLO:&amp;nbsp;TrÃ¢nsito&amp;nbsp;ocorrido&amp;nbsp;em...</description>
-<pubDate>Wed, 01 Jul 2020 13:39:35 GMT</pubDate>
-</item>
-<item>
-<title>{Creating YouTube mobile app UI (dark mode) using React Native | C K
- in The Startup}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=5166</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=5166</guid>
-<description>Stories for Iuri SampaioTodayâs highlightsCreating YouTube mobile app UI (dark mode) using React Nativeexpo init react-native-youtube-uiC K&amp;nbsp;in&amp;nbsp;The Startup7 min read10 Tips and Tricks That Will Make You a Better ReactJS DevThis will help you becoming better React devs, write better code or excel at coding interviewsSimon Holdorf&amp;nbsp;in&amp;nbsp;Better Programming8 min readThe Friend Zone is ToxicA lesson in dealing with rejectionThom Gallet&amp;nbsp;in&amp;nbsp;Mind Cafe3 min readHow to Pull Y...</description>
-<pubDate>Wed, 01 Jul 2020 13:38:14 GMT</pubDate>
 </item>
 </channel>
 </rss>

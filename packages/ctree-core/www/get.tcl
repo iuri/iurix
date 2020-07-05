@@ -8,7 +8,7 @@ ad_page_contract {
     {cTree:optional}
     {cTreeName:boolean,optional}
     {description:optional}
-    {feeback:optional}
+    {feedback:optional}
     {post:optional}
     {postType:optional}
     {query:optional}
@@ -46,6 +46,7 @@ if {[ns_conn method] eq "GET"} {
     ns_log Notice "BODY \n  [ns_getcontent -as_file false]"
     
     if {[info exists cTree]} {
+	
 	#Tree's in the argument
 	ns_log  Notice "cTree $cTree"
 	
@@ -79,23 +80,24 @@ if {[ns_conn method] eq "GET"} {
 
 		# Gets all postTypes
 		db_foreach select_posts {
-		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description
+		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description AS desc
 		    FROM cr_items ci, cr_revisions cr
 		    WHERE ci.item_id = cr.item_id
 		    AND ci.latest_revision = cr.revision_id
-		    AND ci.content_type = 'ctree_post'
+		    AND ci.content_type = 'ctree_type'
 		    AND ci.parent_id = :item_id
 		} {
-		    ns_log Notice "POSTID $id"
+		    ns_log Notice "POSTID $id"	    
+		    
 		    append json_data "\{
 			\"id\": \"$name\",
 			\"name\": \"$title\",
-			\"parentsRequired\": false,
-			\"parentsMax\": 0,
-			\"iconUrl\": \"/images/post_type_icon.png\",
-			\"color\": \"#FF7700\", 
-			\"description\": \"Sample of description\",
-			\"prompt\": \"Button label to add post with type\"
+			\"color\": \"[lindex $desc 1]\", 
+			\"description\": \"[lindex $desc 3]\",
+			\"iconUrl\": \"[lindex $desc 5]\",
+			\"parentsMax\": [lindex $desc 11],
+			\"parentsRequired\": [lindex $desc 13],
+			\"prompt\": \"[lindex $desc 15]\"
 		    \},"		    
 		}
 		
@@ -103,6 +105,53 @@ if {[ns_conn method] eq "GET"} {
 		append json_data "\]"
 	    }	    
 
+
+
+
+	    ##
+	    ##### post  (same as element)
+	    ##
+	    if {[info exists post]} {
+		append json_request "\"post\": \"id\","
+		append json_data ",\"post\": \["
+
+		# Gets all postTypes
+		db_foreach select_posts {
+		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description AS desc
+		    FROM cr_items ci, cr_revisions cr
+		    WHERE ci.item_id = cr.item_id
+		    AND ci.latest_revision = cr.revision_id
+		    AND ci.content_type = 'ctree_post'
+		    AND ci.parent_id = :item_id
+		} {
+		    ns_log Notice "POSTID $id"
+		    array set arr $desc
+		    append json_data "\{
+			\"id\": \"$name\",
+			\"name\": \"$arr(title)\",
+			\"rating\": $arr(rating),
+			\"childCount\": $arr(childCount),
+			\"description\": \"$desc\"
+		    \},"		    
+		}
+		
+		set json_data [string trimright $json_data ","]
+		append json_data "\]"
+	    }	    
+
+
+
+
+
+
+
+
+
+
+
+
+
+	    
 	    ##
 	    ##### segmentType
 	    ##
@@ -110,9 +159,9 @@ if {[ns_conn method] eq "GET"} {
 		append json_request "\"segmentType\": \"id\","
 		append json_data ",\"segmentType\": \["
 
-		# Gets all postTypes
+		# Gets all segmentType Types
 		db_foreach select_segment_type {
-		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description
+		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description AS desc
 		    FROM cr_items ci, cr_revisions cr
 		    WHERE ci.item_id = cr.item_id
 		    AND ci.latest_revision = cr.revision_id
@@ -122,8 +171,8 @@ if {[ns_conn method] eq "GET"} {
 		    ns_log Notice "SEgmentType $id"
 		    append json_data "\{
 			\"id\": \"$name\",
-			\"componentName\": \"example-type-component\",
-			\"canBeThumbnail\": true
+			\"componentName\": \"[lindex $desc 3]\",
+			\"canBeThumbnail\": [lindex $desc 1]
 		    \},"		    
 		}
 		
@@ -133,26 +182,84 @@ if {[ns_conn method] eq "GET"} {
 
 
 	    ##
-	    ##### segmentType
+	    ##### segmentVariation
 	    ##
-	    if {[info exists segmentType]} {
-		append json_request "\"segmentType\": \"id\","
-		append json_data ",\"segmentType\": \["
+	    if {[info exists segmentVariation]} {
+		append json_request "\"segmentVariation\": \"id\","
+		append json_data ",\"segmentVariation\": \["
 
-		# Gets all postTypes
-		db_foreach select_segment_type {
+		# Gets all segmentVariation Types
+		db_foreach select_segment_variation {
+		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description AS desc
+		    FROM cr_items ci, cr_revisions cr
+		    WHERE ci.item_id = cr.item_id
+		    AND ci.latest_revision = cr.revision_id
+		    AND ci.content_type = 'ctree_segmentvariation'
+		    AND ci.parent_id = :item_id
+		} {
+		    ns_log Notice "SegmentVaiation $id"
+		    append json_data "\{
+			\"id\": \"$name\",
+			\"description\": \"$desc\"
+		    \},"		    
+		}
+		
+		set json_data [string trimright $json_data ","]
+		append json_data "\]"	       
+	    }
+
+
+
+
+	    ##
+	    ##### feedback
+	    ##
+	    if {[info exists feedback]} {
+		append json_request "\"feedback\": \"id\","
+		append json_data ",\"feedback\": \["
+
+		# Gets all feedback types
+		db_foreach select_feedback {
+		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description AS desc
+		    FROM cr_items ci, cr_revisions cr
+		    WHERE ci.item_id = cr.item_id
+		    AND ci.latest_revision = cr.revision_id
+		    AND ci.content_type = 'ctree_feedback'
+		    AND ci.parent_id = :item_id
+		} {
+		    ns_log Notice "Feedback $id"
+		    append json_data "\{
+			\"id\": \"$name\",
+			\"description\": \"$desc\"
+		    \},"		    
+		}
+		
+		set json_data [string trimright $json_data ","]
+		append json_data "\]"	       
+	    }
+
+
+
+	    ##
+	    ##### description
+	    ##
+	    if {[info exists description]} {
+		append json_request "\"description\": \"id\","
+		append json_data ",\"description\": \["
+
+		# Gets all Descriptions types
+		db_foreach select_description {
 		    SELECT ci.item_id AS id, ci.name, cr.title, cr.description
 		    FROM cr_items ci, cr_revisions cr
 		    WHERE ci.item_id = cr.item_id
 		    AND ci.latest_revision = cr.revision_id
-		    AND ci.content_type = 'ctree_segmenttype'
+		    AND ci.content_type = 'ctree_description'
 		    AND ci.parent_id = :item_id
 		} {
-		    ns_log Notice "SEgmentType $id"
+		    ns_log Notice "Description $id"
 		    append json_data "\{
 			\"id\": \"$name\",
-			\"componentName\": \"example-type-component\",
-			\"canBeThumbnail\": true
+			\"description\": \"$description\"
 		    \},"		    
 		}
 		

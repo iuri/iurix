@@ -5,7 +5,7 @@
 <link>https://iurix.com/blog/</link>
 <description>Lars Blogger</description>
 <generator>OpenACS 5.0</generator>
-<lastBuildDate>Sun, 05 Jul 2020 13:45:58 GMT</lastBuildDate>
+<lastBuildDate>Sat, 11 Jul 2020 18:50:52 GMT</lastBuildDate>
 <image>
 <title>Lars Blogger</title>
 <url>https://iurix.com/rss-support/images/openacs_logo_rss.gif</url>
@@ -14,117 +14,113 @@
 <height>48</height>
 </image>
 <item>
-<title>{=?utf-8?Q?O_retorno_da_Segment_ao_mon=C3=B3lito_=F0=9F=94=99_e_as?=
- =?utf-8?Q?_falhas_do_MondoDB_reportadas_pela_Jepsen_=F0=9F=8D=82?=}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6047</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6047</guid>
-<description>+ Evitando falhas em cascata em sistemas distribuÃ­dos, IBM encerra produtos com reconhecimento facial e como a Volkswagen vem se tornando uma empresa orientada a software.&amp;nbsp;Arquitetura e DesignDecompor um monÃ³lito nÃ£o requer microservices - Sam Newman no QCon Londres&amp;nbsp;Sam Newman diz que o objetivo de decompor um monÃ³lito deve ser uma capacidade de deploy independente e que os desenvolvedores precisam se concentrar no resultado, nÃ£o na tecnologia. Segundo Sam Newman, durante sua ap...</description>
-<pubDate>Sun, 05 Jul 2020 13:45:58 GMT</pubDate>
+<title>{RN Push Notifications: a complete guide (Front + Back) | Arnaud
+ Ambroselli in The Startup}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6255</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6255</guid>
+<description>Stories for Iuri SampaioTodayâs highlightsRN Push Notifications: a complete guide (Front + Back)If you arrive here, I think you&#39;ll know that it&#39;s not that easy to find a good tutorial to handle Pushâ¦Arnaud Ambroselli&amp;nbsp;in&amp;nbsp;The Startup12 min readReact Native: MongoDB Aggregation with Stack NavigationHow to aggregate a targeted sample of records and browse them in React NativeRoss Bulat11 min readWomen Settle for Jerks for One Simple ReasonIt shouldnât shock anyone.Jessica Wildfire&amp;...</description>
+<pubDate>Sat, 11 Jul 2020 18:50:52 GMT</pubDate>
 </item>
 <item>
-<title>{=?utf-8?Q?=5B=F0=9F=90=8DPyTricks=5D=3A_Merging_two_dicts_in_Pyth?=
- =?utf-8?Q?on_3=2E5+_with_a_single_expression?=}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6043</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6043</guid>
-<description># How to merge two dictionaries
-# in Python 3.5+
-
-&amp;gt;&amp;gt;&amp;gt; x = {&#39;a&#39;: 1, &#39;b&#39;: 2}
-&amp;gt;&amp;gt;&amp;gt; y = {&#39;b&#39;: 3, &#39;c&#39;: 4}
-
-&amp;gt;&amp;gt;&amp;gt; z = {**x, **y}
-
-&amp;gt;&amp;gt;&amp;gt; z
-{&#39;c&#39;: 4, &#39;a&#39;: 1, &#39;b&#39;: 3}
-
-# In Python 2.x you could
-# use this:
-&amp;gt;&amp;gt;&amp;gt; z = dict(x, **y)
-&amp;gt;&amp;gt;&amp;gt; z
-{&#39;a&#39;: 1, &#39;c&#39;: 4, &#39;b&#39;: 3}
-
-# In these examples, Python merges dictionary keys
-# in the order listed in the expression, overwriting 
-# duplicates from left to right.
-#
-# See: https://www.youtube.com/watch?v=Duexw08KaC8
-This emai...</description>
-<pubDate>Sun, 05 Jul 2020 13:39:48 GMT</pubDate>
+<title>{Fwd: New Python tutorials on Real Python}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6251</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6251</guid>
+<description>Hey there,Thereâs always something going on over at&amp;nbsp;realpython.com&amp;nbsp;as far as Python tutorials go.Hereâs what you may have missed this past week:Object-Oriented Programming (OOP) in Python 3In this tutorial, you&#39;ll learn all about object-oriented programming (OOP) in Python. You&#39;ll learn the basics of the OOP paradigm and cover concepts like classes and inheritance. You&#39;ll also see to how instantiate an object from a class:â&amp;nbsp;realpython.com/python3-object-oriented-programmin...</description>
+<pubDate>Sat, 11 Jul 2020 18:50:42 GMT</pubDate>
 </item>
 <item>
-<title>{cron.weekly issue #141: Zettlr, Redis, gg, pipes, sysctl &amp; more}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6039</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6039</guid>
-<description>Read this issue online Â»CRON.WEEKLYZettlr, Redis, gg, pipes, sysctl &amp;amp; moreissue #141 for Sunday, July 5, 2020Hi everyone! ðWelcome to cron.weekly issue #141.Lots of variety in this issue again, these are the most fun ones to write. ðOh, and there&#39;s a job section at the bottom for those on the lookout for something new.Grab a âï¸ &amp;amp; enjoy!News &amp;amp; general ðBtrfs at FacebookFacebook is one of the world&#39;s biggest Btrfs users. Lots of interesting details in this write-up of a...</description>
-<pubDate>Sun, 05 Jul 2020 13:37:48 GMT</pubDate>
+<title>{I&#39;ll be emailing you weekly}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6243</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6243</guid>
+<description>Hey, everyone.This is a new weekly email I&#39;ll be sending out on Friday to complement our early-week newsletter from Jess.I want to keep folks in the loop about the most recent changes to DEV and Forem. I&#39;ll keep these emails short, and often actionable. As an community-driven open source organization, we have no shortage of new things going on to and ways to get involved.
+We merged about 100 pull requests this past week, a couple that stand out to me personally are:Improved tag index design. T...</description>
+<pubDate>Sat, 11 Jul 2020 18:50:32 GMT</pubDate>
 </item>
 <item>
-<title>{Deracinate - plus, The Words of the Week - 7/3/20}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6035</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6035</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYJuly 5, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;deracinate&amp;nbsp;&amp;nbsp;verb&amp;nbsp;|&amp;nbsp;dee-RASS-uh-nayt&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:uproot&amp;nbsp;&amp;nbsp;2&amp;nbsp;:to remove or separate from a native environment or culture;&amp;nbsp;especially&amp;nbsp;:to remove the racial or ethnic characteristics or influences from&amp;nbsp;Scroll down for more about&amp;nbsp;deracinate&amp;nbsp;&amp;nbsp;TRENDING NOW:proteancapriciousdefundj&#39;accuseSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border:...</description>
-<pubDate>Sun, 05 Jul 2020 13:36:48 GMT</pubDate>
+<title>{Histrionic - plus, Back Words}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6247</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6247</guid>
+<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYJuly 10, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;histrionic&amp;nbsp;&amp;nbsp;adjective&amp;nbsp;|&amp;nbsp;his-tree-AH-nik&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:deliberately affected&amp;nbsp;:&amp;nbsp;overly dramatic or emotional&amp;nbsp;:&amp;nbsp;theatrical&amp;nbsp;&amp;nbsp;2&amp;nbsp;:of or relating to actors, acting, or the theater&amp;nbsp;Scroll down for more about&amp;nbsp;histrionic&amp;nbsp;&amp;nbsp;TRENDING NOW:proteancapriciousdefundj&#39;accuseSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border: 0px; outline: ...</description>
+<pubDate>Sat, 11 Jul 2020 18:50:32 GMT</pubDate>
 </item>
 <item>
-<title>{Elon Musk Tweeted:}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6031</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6031</guid>
-<description>&amp;nbsp;&amp;nbsp;Your Highlights&amp;nbsp;Elon Musk&amp;nbsp;@elonmusk&amp;nbsp;10K&amp;nbsp;87K&amp;nbsp;400KEngineering&amp;nbsp;@engineeringvidsFloating bridge&amp;nbsp;&amp;nbsp;480&amp;nbsp;15K&amp;nbsp;100KFernando Haddad&amp;nbsp;@Haddad_FernandoColuna: Se o movimento antifascista quiser ser mais do que a pregaÃ§Ã£o da tolerÃ¢ncia em meio Ã  desconstruÃ§Ã£o do nosso incipiente Estado de bem-estar, ele deve promover a superaÃ§Ã£o das condiÃ§Ãµes âobjetivasâ que garantem a reproduÃ§Ã£o das nossas iniquidades.&amp;nbsp;A necessidade de u...</description>
-<pubDate>Sun, 05 Jul 2020 13:35:38 GMT</pubDate>
+<title>=?utf-8?Q?In_love=2C_war=2C_and_open-source=E2=80=94never_give_up?=</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6239</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6239</guid>
+<description>Hey there,Iâll never forget launching my first open-source project and sharing it on Redditâ¦I had spent a couple of days at my parentsâ place over Christmas that year and decided to use some of my spare time to work on a Python library I christened&amp;nbsp;Schedule.The idea behind Schedule was very simple and had a narrow focus (I find that that thatâs always a good idea for libraries by the way):Developers would use it like a timer to periodically call a function inside their Python prog...</description>
+<pubDate>Sat, 11 Jul 2020 18:50:21 GMT</pubDate>
 </item>
 <item>
-<title>{=?utf-8?Q?_=5B=F0=9F=90=8DPyTricks=5D=3A_Different_ways_to_test_m?=
- =?utf-8?Q?ultiple_flags_at_once_in_Python?=}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6027</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6027</guid>
-<description># Different ways to test multiple
-# flags at once in Python
-x, y, z = 0, 1, 0
+<title>{Confabulate - plus, Back Words}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6235</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6235</guid>
+<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYJuly 11, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;confabulate&amp;nbsp;&amp;nbsp;verb&amp;nbsp;|&amp;nbsp;kun-FAB-yuh-layt&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:to talk informally&amp;nbsp;:&amp;nbsp;chat&amp;nbsp;&amp;nbsp;2&amp;nbsp;:to hold a discussion&amp;nbsp;:&amp;nbsp;confer&amp;nbsp;&amp;nbsp;3&amp;nbsp;:to fill in gaps in memory by&amp;nbsp;fabrication&amp;nbsp;Scroll down for more about&amp;nbsp;confabulate&amp;nbsp;&amp;nbsp;TRENDING NOW:commuteproteancapriciousdefundSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border: 0px; outlin...</description>
+<pubDate>Sat, 11 Jul 2020 18:50:11 GMT</pubDate>
+</item>
+<item>
+<title>{=?utf-8?Q?=5B=F0=9F=90=8DPyTricks=5D=3A_Python=27s_namedtuples_ca?=
+ =?utf-8?Q?n_be_a_great_alternative_to_defining_a_class_manually?=}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6227</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6227</guid>
+<description># Why Python is Great: Namedtuples
+# Using namedtuple is way shorter than
+# defining a class manually:
+&amp;gt;&amp;gt;&amp;gt; from collections import namedtuple
+&amp;gt;&amp;gt;&amp;gt; Car = namedtuple(&#39;Car&#39;, &#39;color mileage&#39;)
 
-if x == 1 or y == 1 or z == 1:
-    print(&#39;passed&#39;)
+# Our new &#34;Car&#34; class works as expected:
+&amp;gt;&amp;gt;&amp;gt; my_car = Car(&#39;red&#39;, 3812.4)
+&amp;gt;&amp;gt;&amp;gt; my_car.color
+&#39;red&#39;
+&amp;gt;&amp;gt;&amp;gt; my_car.mileage
+3812.4
 
-if 1 in (x, y, z):
-    print(&#39;passed&#39;)
+# We get a nice string repr for free:
+&amp;gt;&amp;gt;&amp;gt; my_car
+Car(color=&#39;red&#39; , mileage=3812.4)
 
-# These only test for truthiness:
-if x or y or z:
-    print(&#39;passed&#39;)
+# Like tuples, namedtuples are immutable:
+&amp;gt;&amp;gt...</description>
+<pubDate>Fri, 10 Jul 2020 13:22:15 GMT</pubDate>
+</item>
+<item>
+<title>=?utf-8?B?cC1wLXAtcGljayB1cCBhIHBlbmd1aW7CoPCfkKc=?=</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6231</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6231</guid>
+<description>Your round-up of the latest, greatest data storiesHello iuri,Zoom and Microsoft are the latest big tech companies to&amp;nbsp;put a pause on their compliance with a new Hong Kong data security law. They join other tech giants such as Facebook, Twitter and Google in taking more time to review the impacts of the new law, which critics say âeffectively curtails protest and freedom of speechâ.While England is yet to produce a working contact-tracing app (or was that&amp;nbsp;contract-tasting?) Ireland...</description>
+<pubDate>Fri, 10 Jul 2020 13:22:15 GMT</pubDate>
+</item>
+<item>
+<title>{=?utf-8?Q?=5B=F0=9F=90=8DPyTricks=5D=3A_The_get=28=29_method_on_P?=
+ =?utf-8?Q?ython_dicts_and_its_=22default=22_arg?=}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6222</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6222</guid>
+<description># The get() method on dicts
+# and its &#34;default&#34; argument
 
-if any((x, y, z)):
-    print(&#39;passed&#39;)
-</description>
-<pubDate>Sun, 05 Jul 2020 13:34:38 GMT</pubDate>
+name_for_userid = {
+    382: &#34;Alice&#34;,
+    590: &#34;Bob&#34;,
+    951: &#34;Dilbert&#34;,
+}
+
+def greeting(userid):
+    return &#34;Hi %s!&#34; % name_for_userid.get(userid, &#34;there&#34;)
+
+&amp;gt;&amp;gt;&amp;gt; greeting(382)
+&#34;Hi Alice!&#34;
+
+&amp;gt;&amp;gt;&amp;gt; greeting(333333)
+&#34;Hi there!&#34;
+When &#34;get()&#34; is called it checks if the given key exists in the dict.If it&amp;nbsp;does exist, the value for that key is returned.If it does&amp;nbsp;not&amp;nbsp;exist then the value of the default argument is...</description>
+<pubDate>Thu, 09 Jul 2020 15:56:59 GMT</pubDate>
 </item>
 <item>
-<title>{Present Moment Reminder}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6023</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6023</guid>
-<description>Unsubscribe&amp;nbsp; |&amp;nbsp;&amp;nbsp;Privacy PolicyThis email was sent to&amp;nbsp;iuri@iurix.com&amp;nbsp;by&amp;nbsp;Eckhart Teachings.P.O.&amp;nbsp;Box 8010&amp;nbsp; |&amp;nbsp; Boulder&amp;nbsp; |&amp;nbsp; CO&amp;nbsp; |&amp;nbsp; 80306</description>
-<pubDate>Sun, 05 Jul 2020 13:33:38 GMT</pubDate>
-</item>
-<item>
-<title>{Automate your React Native App with Fastlane | Nicolas
- Dommanget-Muller in Level Up Coding}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6009</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6009</guid>
-<description>Stories for Iuri SampaioTodayâs highlightsAutomate your React Native App with FastlaneSimplify Screenshots, beta deployment, app store deployment and signing in your React Native App ðNicolas Dommanget-Muller&amp;nbsp;in&amp;nbsp;Level Up Coding7 min readReact Native Screens: Using StateOn my last article, I gave you some relationships between React and React Native. One of the things I didnâtâ¦Jacques Plante&amp;nbsp;in&amp;nbsp;The Startup5 min readCheating Is Nothing But a FantasyAnd itâs not so ...</description>
-<pubDate>Sat, 04 Jul 2020 15:03:26 GMT</pubDate>
-</item>
-<item>
-<title>{[Webinar] Automate Your NGINX Environment with the Ansible Collection
- for NGINX Controller}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=5997</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=5997</guid>
-<description>View in Browser&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Did you know that 28% of enterprises have adopted a weekly app release cycle and 27% are releasing app updates every day? Achieving this kind of speed while maintaining the quality your customers expect is possible only with automation. Attend this webinar to learn how to automate your NGINX Plus environment using NGINX Controller and our Ansible collection.Watch&amp;nbsp;this webinar to learn:What is a âcollectionâ and why are certified collections valua...</description>
-<pubDate>Sat, 04 Jul 2020 15:02:16 GMT</pubDate>
-</item>
-<item>
-<title>{[Kubernetes] AWS vs. GCP vs. Azure}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=6001</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6001</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;Kubernetes: AKS vs. EKS vs. GKEKubernetes already won the battle of container orchestration tools. Now AWS, Azure, and Google Cloud each have their own managed Kubernetes version. How do they stack up?In this detailed comparison, Toptal Freelance DevOps Engineer Guillaume Dury shares his experiences with EKS, AKS, and GKE.Continue Reading&amp;nbsp;Save to PocketAbout the AuthorGuillaume DuryDevOps Engineer and DeveloperWorking as a DevOps engineer in Asia, Guillaume set up the in...</description>
-<pubDate>Sat, 04 Jul 2020 15:02:16 GMT</pubDate>
+<title>{Bromide - plus, A Trick for Dealing with Summer Heat: Estivate}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=6218</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=6218</guid>
+<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYJuly 9, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;bromide&amp;nbsp;&amp;nbsp;noun&amp;nbsp;|&amp;nbsp;BROH-myde&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:a binary compound of&amp;nbsp;bromine&amp;nbsp;with another element or a&amp;nbsp;radical&amp;nbsp;including some (such as&amp;nbsp;potassium bromide) used as sedatives&amp;nbsp;&amp;nbsp;2a&amp;nbsp;:a commonplace or tiresome person&amp;nbsp;:&amp;nbsp;bore&amp;nbsp;&amp;nbsp;b&amp;nbsp;:a commonplace or hackneyed statement or notion&amp;nbsp;Scroll down for more about&amp;nbsp;bromide&amp;nbsp;&amp;nbsp;TRENDING NOW:...</description>
+<pubDate>Thu, 09 Jul 2020 15:47:19 GMT</pubDate>
 </item>
 </channel>
 </rss>

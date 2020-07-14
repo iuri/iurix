@@ -1,8 +1,0 @@
-#/packages/ctree-core/www/put.tcl
-ad_page_contract {
-    Add/update stored data based on provided JSON, treated as a single transaction (i.e. no partial updates).
-
-    @author Iuri de Araujo (iuri@iurix.com)
-    @creation_date 4 Jul 2020
-
-}

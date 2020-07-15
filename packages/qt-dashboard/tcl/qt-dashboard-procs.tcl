@@ -24,7 +24,6 @@ ad_proc qt::websocket::listen {} {
     namespace path {::rl_json}
     
     
-    ws::client::close conn11
     set WebSocketUri [parameter::get_global_value -parameter "WebSocketUri" -package_key "qt-dashboard" -default ""]
     
     # set url "ws://192.199.241.130:5008/api/subscribe?auth_token=9fb6e731-b342-4952-b0c1-aa1d0b52757b&event_type=extract"
@@ -82,9 +81,25 @@ ad_proc qt::dashboard::import_json {
 	    
 	    set name [lindex [lindex $attributes 0] 3]
 	    ns_log Notice "NAME $name"
+
+	    
 	    if {![db_0or1row item_exists {
 		SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :parent_id
 	    }]} {	    
+
+
+		ns_log Notice "-item_id $item_id \
+				     -parent_id $parent_id \
+				     -creation_user $creation_user \
+				     -creation_ip $creation_ip \
+				     -package_id $package_id \
+				     -name $name \
+				     -title $name \
+				     -description $l_json \
+				     -storage_type $storage_type \
+				     -content_type $content_type \
+				     -mime_type text/plain"
+
 		
 		db_transaction {
 		    set item_id [content::item::new \
@@ -95,7 +110,7 @@ ad_proc qt::dashboard::import_json {
 				     -package_id $package_id \
 				     -name $name \
 				     -title $name \
-				     -description $l \
+				     -description $l_json \
 				     -storage_type "$storage_type" \
 				     -content_type $content_type \
 				     -mime_type "text/plain"
@@ -104,7 +119,7 @@ ad_proc qt::dashboard::import_json {
 		set revision_id [content::revision::new \
 				     -item_id $item_id \
 				     -title $name \
-				     -description $l]	   	    
+				     -description $l_json]	   	    
 	    } else {
 		ns_log Notice "Face EXISTS"
 		db_1row item_exists {

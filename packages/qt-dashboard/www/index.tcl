@@ -7,31 +7,71 @@ ns_log Notice "Running TCL script index.tcl"
 set url "https://dashboard.qonteo.com/api/totalgender"
 
 
+set l_qty [list]
+set body [list {"task": "yesterday"}]
+set result [qt::dashboard::persons::get -body $body -url $url]
+
+set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
+foreach {gender qty} $l_data {
+    lappend l_qty [lindex [split $qty ":"] 1]   
+}
+
+array set yesterday [list female [lindex $l_qty 0] \
+			 male [lindex $l_qty 1] \
+			 total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
+ns_log Notice "YESTERDAY [parray yesterday]"
+
+
+
+
+set l_qty [list]
 set body [list {"task": "today"}]
+set result [qt::dashboard::persons::get -body $body -url $url]
+
+set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
+foreach {gender qty} $l_data {
+    lappend l_qty [lindex [split $qty ":"] 1]   
+}
+
+array set today [list \
+		     female [lindex $l_qty 0] \
+		     female_diff [expr 100 - \
+				      [expr \
+					   [expr [lindex $l_qty 0] * 100] / $yesterday(female)]] \
+		     male [lindex $l_qty 1] \
+		     male_diff [expr 100 - \
+				    [expr \
+					 [expr [lindex $l_qty 1] * 100] / $yesterday(male)]]\
+		     total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
+		 
+ns_log Notice "TODAY [parray today]"
 
 
-ns_log Notice "BODY $body"
 
-#######################
-# submit POST request
-#######################
-set requestHeaders [ns_set create]
-set replyHeaders [ns_set create]
-ns_set update $requestHeaders "Content-type" "application/json"
 
-set h [ns_http queue -method POST \
-	   -headers $requestHeaders \
-	   -timeout 60.0 \
-	   -body [list {"task": "today"}] \
-	   $url]
-set result [ns_http wait $h]
 
-#######################
-# output results
-#######################
-# ns_log notice "status [dict get $result status]"
 
-ns_log Notice "RESLUT $result"
+set l_qty [list]
+set body [list {"task": "lastweek"}]
+set result [qt::dashboard::persons::get -body $body -url $url]
+
+set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
+foreach {gender qty} $l_data {
+    lappend l_qty [lindex [split $qty ":"] 1]   
+}
+
+array set lastweek [list \
+			female [lindex $l_qty 0] \
+			male [lindex $l_qty 1] \
+			total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
+ns_log Notice "LASTWEEK [parray lastweek]"
+
+
+
+
+
+
+
 
 
 template::head::add_javascript -src "https://www.gstatic.com/charts/loader.js" -order 1
@@ -88,6 +128,7 @@ template::head::add_javascript -script {
 
 
 
+template::head::add_css -href "/resources/qt-dashboard/styles/dashboard.css"
 # <!-- Latest compiled and minified CSS -->
 template::head::add_css -href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
 

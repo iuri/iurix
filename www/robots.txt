@@ -3,6 +3,7 @@ Disallow: /doc/
 Disallow: /api-doc/
 Disallow: /register
 Disallow: /register/
+Disallow: /calendar/
 Disallow: /comments/
 Disallow: /notifications/
 Disallow: /test/
@@ -11,6 +12,10 @@ Disallow: /acs-service-contract/
 Disallow: /acs-lang/
 Disallow: /acs-admin/
 Disallow: /RPC2/
+
+# SemrushBot
+User-agent: SemrushBot
+Disallow: /
 
 # googlebot knows wildcards so block all register
 User-agent: googlebot

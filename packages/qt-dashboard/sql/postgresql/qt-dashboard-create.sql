@@ -24,3 +24,24 @@ select content_type__create_type (
 
 -- necessary to work around limitation of content repository:
 select content_folder__register_content_type(-100,'qt_face','t');
+
+
+--
+-- Vehicles
+--
+select content_type__create_type (
+       'qt_vehicle',    -- content_type
+       'content_revision',       -- supertype. We search revision content 
+                                 -- first, before item metadata
+       'Qonteo Vehicle',    -- pretty_name
+       'Qonteo Vehicles',   -- pretty_plural
+       NULL,        -- table_name
+       -- IURI: acs_object_types supports a null table name so we do that
+       -- instead of passing a false value so we can actually use the
+       -- content repository instead of duplicating all the code in file-storage
+       NULL,	         -- id_column
+       'qt_vehicle__get_title' -- name_method
+);
+
+-- necessary to work around limitation of content repository:
+select content_folder__register_content_type(-100,'qt_vehicle','t');

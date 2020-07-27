@@ -1,0 +1,142 @@
+<master>
+
+
+<div class="container" width="100%">
+
+  <div class="row">
+     <div class="col-sm-2">
+     	  <img src="/resources/qt-dashboard/images/ds-logo.png" width="200px">
+     </div>
+     <div class="col-sm-8">
+     	  <div style="font-size: 4.0rem;letter-spacing: 5.5px;color: #0B18F1;text-align: center;font-weight: 400;margin: 1rem 0;line-height: 1.3;" >
+	  	       E.D.S. EL POLO<br>CO.PMXCO.BOG.AO1
+          </div>
+
+     </div>
+     <div class="col-sm-2" style="float:right;">
+     	  <div style="font-size: 3.0rem; text-align: left; margin-left: 5.0rem; color: #0B18F1;font-weight:800;">
+	  DATA<br>
+	  STREET<br>
+	  PERFORMANCE<br>
+	  </div>
+     </div>
+  </div>
+
+
+  <div class="row">
+     <div class="col-sm-12 block_title">
+     	  #qt-dashboard.Persons#
+     </div>
+  </div>
+
+  <div class="row">
+     <div class="col-sm-4 blue_box">
+     	  <div class="block1_left_box_first_text">#qt-dashboard.Today#</div>
+	  <div class="block1_left_box_second_text">@today.total@</div>
+	  <div class="block1_left_box_third_text">#qt-dashboard.Daily_Summary#</div>
+	  <div class="block1_left_box_fourth_text">&nbsp;</div>
+     </div>
+     <div class="col-sm-2"></div>
+     <div class="col-sm-6 double_blue_box">
+       <div class="row">
+         <div class="col-sm-12 block1_right_box_first_text">#qt-dashboard.Daily_Summary#</div>
+       </div>
+       <div class="row">
+         <div class="col-sm-6">
+	   <div class="block1_right_box_second_text"> @today.female@</div>
+	   <div class="block1_right_box_third_text">#qt-dashboard.Women#</div>
+	   <div class="block1_right_box_fourth_text">@today.female_diff@% </div>
+	 </div>
+	 <div class="col-sm-6">
+	   <div class="block1_right_box_second_text">@today.male@</div>
+	   <div class="block1_right_box_third_text">#qt-dashboard.Men#</div>
+	   <div class="block1_right_box_fourth_text">@today.male_diff@%</div>
+	 </div>
+       </div>
+     </div>
+  </div>
+
+  <div class="row">
+     <div class="col-sm-12 block_title">#qt-dashboard.Daily_Hours_Summary# </div>
+     <div id="daily_chart_div" style="width: 100%; height: 500px;"></div>
+  </div>
+
+
+
+  <div class="row">
+     <div class="col-sm-12 block2_gray_box">
+       <div class="block2_first_text">#qt-dashboard.Yesterday#</div>
+       <div class="block2_second_text">@yesterday.total@</div>
+       <div class="block2_third_text">#qt-dashboard.Daily_Summary#</div>
+     </div>
+  </div>
+  <br>
+  
+  <div class="row block3_gray_box">
+     <div class="col-sm-12">
+       <div class="block3_first_text">#qt-dashboard.Daily_Summary#</div>
+     </div>
+     <div class="row" style="width:100%">
+         <div class="col-sm-6">
+	   <div class="block3_second_text">@yesterday.female@</div>
+	   <div class="block3_third_text">#qt-dashboard.Women#</div>
+	 </div>
+	 <div class="col-sm-6">
+	   <div class="block3_second_text">@yesterday.male@</div>
+	   <div class="block3_third_text">#qt-dashboard.Men#</div>
+	 </div>
+     </div>
+  </div>
+  <br>
+
+  <div class="row">
+     <div class="col-sm-12 block2_gray_box">
+       <div class="block4_first_text">#qt-dashboard.This_Week#</div>
+       <div class="block4_second_text">@lastweek.total@</div>
+       <div class="block4_third_text">#qt-dashboard.Daily_Summary#</div>
+     </div>
+  </div>
+  <br>
+  <div class="row block3_gray_box">
+     <div class="col-sm-12">
+       <div class="block5_first_text">#qt-dashboard.Daily_Summary#</div>
+     </div>
+     <div class="row" style="width:100%">
+       <div class="col-sm-6">
+	   <div class="block5_second_text">@lastweek.female@</div>
+	   <div class="block5_third_text">#qt-dashboard.Women#</div>
+       </div>
+       <div class="col-sm-6">
+	   <div class="block5_second_text">@lastweek.male@</div>
+	   <div class="block5_third_text">#qt-dashboard.Men#</div>
+       </div>
+     </div>
+  </div>
+
+
+
+  <div class="row">
+     <div class="col-sm-12" style="background-color: #E5E5E5;display: flex; justify-content: center; align-items: center; flex-direction: column; line-height: 4.8rem; padding: 4.5rem 0;
+    box-sizing: inherit;">
+    
+     </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="row">
+     <div class="col-sm-12 block_title"> #qt-dashboard.Weekly_Summary# </div>
+     <div id="weekly_chart_div" style="width: 100%; height: 500px;"></div>     
+  </div>
+</div>
+
+
+

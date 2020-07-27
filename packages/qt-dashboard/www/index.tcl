@@ -3,126 +3,102 @@ ad_page_contract {}
 
 ns_log Notice "Running TCL script index.tcl"
 
+# Retrieves Yesterday's vehicles
+db_0or1row select_vehicles_total {
+    SELECT COUNT(ci.item_id) AS total
+    FROM cr_items ci, cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
+    AND content_type = 'qt_vehicle'
+    AND creation_date BETWEEN now() - INTERVAL '48 hours' AND now() - INTERVAL '24 hours'    
+} -column_array yesterday
 
-set url "https://dashboard.qonteo.com/api/totalgender"
+# Retrieves weekly's vehicles
+db_0or1row select_vehicles_total {
+    SELECT COUNT(ci.item_id) AS total
+    FROM cr_items ci, cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
+    AND content_type = 'qt_vehicle'
+    AND creation_date BETWEEN now() - INTERVAL '1 week' AND now()
+} -column_array week
+
+# Retrieves monthly vehicles 
+db_0or1row select_vehicles_total {
+    SELECT COUNT(ci.item_id) AS total
+    FROM cr_items ci, cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
+    AND content_type = 'qt_vehicle'
+    AND creation_date BETWEEN now() - INTERVAL '1 month' AND now()
+    
+} -column_array month
 
 
-set l_qty [list]
-set body [list {"task": "yesterday"}]
-set result [qt::dashboard::persons::get -body $body -url $url]
 
-set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
-foreach {gender qty} $l_data {
-    lappend l_qty [lindex [split $qty ":"] 1]   
-}
-
-array set yesterday [list female [lindex $l_qty 0] \
-			 male [lindex $l_qty 1] \
-			 total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
-ns_log Notice "YESTERDAY [parray yesterday]"
-
-
-
-
-set l_qty [list]
-set body [list {"task": "today"}]
-set result [qt::dashboard::persons::get -body $body -url $url]
-
-set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
-foreach {gender qty} $l_data {
-    lappend l_qty [lindex [split $qty ":"] 1]   
-}
+set total [db_string select_vehicles_total {
+    SELECT COUNT(*)
+    FROM cr_items ci, cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
+    AND content_type = 'qt_vehicle'
+    AND creation_date BETWEEN now() - INTERVAL '24 hours' AND now()
+    
+} -default 0]
 
 array set today [list \
-		     female [lindex $l_qty 0] \
-		     female_diff [expr 100 - \
-				      [expr \
-					   [expr [lindex $l_qty 0] * 100] / $yesterday(female)]] \
-		     male [lindex $l_qty 1] \
-		     male_diff [expr 100 - \
-				    [expr \
-					 [expr [lindex $l_qty 1] * 100] / $yesterday(male)]]\
-		     total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
-		 
-ns_log Notice "TODAY [parray today]"
+		     total $total \
+		     date [clock format [clock seconds] -format "%Y %h - %d"] \
+		     diff [expr 100 - \
+			       [expr [expr $total * 100] / $yesterday(total)]] \
+		]
 
 
 
 
 
+# Retrieves vehicles grouped by hour
+# Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
+set data [db_list_of_lists select_vehicles_grouped_hourly {
+    select date_trunc('hour', cr.creation_date) AS hour, COUNT(1)
+    FROM cr_items ci, cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
+    AND ci.content_type = 'qt_vehicle'
+    AND cr.creation_date BETWEEN now() - INTERVAL '22 hours' AND now()
+    GROUP BY 1 ORDER BY hour;
+}]
 
-set l_qty [list]
-set body [list {"task": "lastweek"}]
-set result [qt::dashboard::persons::get -body $body -url $url]
 
-set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
-foreach {gender qty} $l_data {
-    lappend l_qty [lindex [split $qty ":"] 1]   
+foreach elem $data {
+    ns_log Notice "ELEM $elem"
+    set hour [lindex $elem 0]
+    set total [lindex $elem 1]
+    
+    set hour [clock scan [lindex [split $hour "+"] 0]]
+    # Extract the hour only. Colombia timezone GMT-5
+    set hour [clock format $hour -format %H]
+    switch $hour {
+	"00" {
+	    set hour 24
+	}
+	"08" {
+	    set hour 8
+	}
+	"09" {
+	    set hour 9
+	}
+    }
+    set hour [expr abs([expr $hour - 5])]
+    
+    append data_html "\[\'${hour}h\', $total, \'#292D95\'\],"
 }
 
-array set lastweek [list \
-			female [lindex $l_qty 0] \
-			male [lindex $l_qty 1] \
-			total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
-ns_log Notice "LASTWEEK [parray lastweek]"
 
-
-
-
-
-
-
-
+ns_log Notice "DTA HTML $data_html" 
 
 template::head::add_javascript -src "https://www.gstatic.com/charts/loader.js" -order 1
 template::head::add_javascript -script {
-    google.charts.load('current', {'packages':['corechart']});
-    google.charts.setOnLoadCallback(drawDailyChart);
-    google.charts.setOnLoadCallback(drawWeeklyChart);
-    
-    function drawDailyChart() {
-	var data = google.visualization.arrayToDataTable([
-							  ['Hours', 'Hombres', 'Mujeres', 'Peronas'],
-							  ['6AM',  1000,      400, 1400],
-							  ['7AM',  1170,      460, 1630],
-							  ['8AM',  660,       1120, 1780],
-							  ['9AM',  1030,      540, 1570]
-							 ]);
-	
-	var options = {
-	    title: 'Personas',
-	    hAxis: {title: 'Tiempo (Horas)',  titleTextStyle: {color: '#333'}},
-	    vAxis: {minValue: 0}
-	};
-	
-	var chart = new google.visualization.AreaChart(document.getElementById('daily_chart_div'));
-	chart.draw(data, options);
-    }
-
-
-
-
-
-    function drawWeeklyChart() {
-	var data = google.visualization.arrayToDataTable([
-							  ['Days', 'Hombres', 'Mujeres', 'Peronas'],
-							  ['Lunes',  1000,      400, 1400],
-							  ['7AM',  1170,      460, 1630],
-							  ['8AM',  660,       1120, 1780],
-							  ['9AM',  1030,      540, 1570]
-							 ]);
-	
-	var options = {
-	    title: 'Personas',
-	    hAxis: {title: 'Tiempo (Horas)',  titleTextStyle: {color: '#333'}},
-	    vAxis: {minValue: 0}
-	};
-	
-	var chart = new google.visualization.AreaChart(document.getElementById('weekly_chart_div'));
-	chart.draw(data, options);
-    }
-
-
     
 } -order 2
 

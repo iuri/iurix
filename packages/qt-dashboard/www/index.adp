@@ -25,118 +25,93 @@
 
   <div class="row">
      <div class="col-sm-12 block_title">
-     	  #qt-dashboard.Persons#
+     	  #qt-dashboard.Vehicles#
      </div>
   </div>
 
   <div class="row">
-     <div class="col-sm-4 blue_box">
-     	  <div class="block1_left_box_first_text">#qt-dashboard.Today#</div>
-	  <div class="block1_left_box_second_text">@today.total@</div>
-	  <div class="block1_left_box_third_text">#qt-dashboard.Daily_Summary#</div>
-	  <div class="block1_left_box_fourth_text">&nbsp;</div>
-     </div>
-     <div class="col-sm-2"></div>
-     <div class="col-sm-6 double_blue_box">
-       <div class="row">
-         <div class="col-sm-12 block1_right_box_first_text">#qt-dashboard.Daily_Summary#</div>
-       </div>
-       <div class="row">
-         <div class="col-sm-6">
-	   <div class="block1_right_box_second_text"> @today.female@</div>
-	   <div class="block1_right_box_third_text">#qt-dashboard.Women#</div>
-	   <div class="block1_right_box_fourth_text">@today.female_diff@% </div>
-	 </div>
-	 <div class="col-sm-6">
-	   <div class="block1_right_box_second_text">@today.male@</div>
-	   <div class="block1_right_box_third_text">#qt-dashboard.Men#</div>
-	   <div class="block1_right_box_fourth_text">@today.male_diff@%</div>
-	 </div>
-       </div>
-     </div>
-  </div>
-
-  <div class="row">
-     <div class="col-sm-12 block_title">#qt-dashboard.Daily_Hours_Summary# </div>
-     <div id="daily_chart_div" style="width: 100%; height: 500px;"></div>
-  </div>
-
-
-
-  <div class="row">
-     <div class="col-sm-12 block2_gray_box">
-       <div class="block2_first_text">#qt-dashboard.Yesterday#</div>
-       <div class="block2_second_text">@yesterday.total@</div>
-       <div class="block2_third_text">#qt-dashboard.Daily_Summary#</div>
-     </div>
-  </div>
-  <br>
-  
-  <div class="row block3_gray_box">
-     <div class="col-sm-12">
-       <div class="block3_first_text">#qt-dashboard.Daily_Summary#</div>
-     </div>
-     <div class="row" style="width:100%">
-         <div class="col-sm-6">
-	   <div class="block3_second_text">@yesterday.female@</div>
-	   <div class="block3_third_text">#qt-dashboard.Women#</div>
-	 </div>
-	 <div class="col-sm-6">
-	   <div class="block3_second_text">@yesterday.male@</div>
-	   <div class="block3_third_text">#qt-dashboard.Men#</div>
-	 </div>
-     </div>
+    <div class="col-sm-12 block1_green_box" style="background-image: linear-gradient(to bottom,#05c105,#2e8704); text-align: center;">
+      <div class="block1_first_text" style="color: #ffffff; 
+font-size: 2.8rem;
+    text-transform: uppercase;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    display: block;
+    margin: 1rem 0;
+    line-height: 1.3;">#qt-dashboard.Today#</div>
+      <div class="block1_second_text" style="color: #ffffff;
+    text-transform: uppercase;
+    margin: 1rem 0;
+    line-height: 1.3;
+    display: block;
+    font-size: 6.5rem;
+    font-weight: bold;
+">@today.total@</div>
+      <div class="block1_third_text" style="color: #00ff00; font-size: 2.5rem">@today.date@</div>
+      <div class="block1_fourth_text" style="display: block;
+    margin: 0;
+    color: #FFFFFF !important;
+    font-size: 2rem;
+    text-transform: uppercase;
+    font-weight: 600;">@today.diff@%</div>
+    </div>
   </div>
   <br>
 
+<script>
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawDailyChart);
+
+    function drawDailyChart() {
+	var data = google.visualization.arrayToDataTable([
+							  ['Element', 'Density', { role: 'style' }],
+							  @data_html;noquote@
+							  ]);
+
+	var view = new google.visualization.DataView(data);
+	view.setColumns([0, 1,
+			 { calc: 'stringify',
+			     sourceColumn: 1,
+			     type: 'string',
+			     role: 'annotation' },
+			 2]);
+
+	var options = {
+	    title: 'Cantidad de vehiculos/hora',
+	    width: '100%',
+	    height: 400,
+	    bar: {groupWidth: '95%'},
+	    legend: { position: 'none' },
+	};
+	var chart = new google.visualization.ColumnChart(document.getElementById('columnchart_values'));
+	chart.draw(view, options);
+    }
+ 
+</script>
+
   <div class="row">
-     <div class="col-sm-12 block2_gray_box">
-       <div class="block4_first_text">#qt-dashboard.This_Week#</div>
-       <div class="block4_second_text">@lastweek.total@</div>
-       <div class="block4_third_text">#qt-dashboard.Daily_Summary#</div>
-     </div>
+    <div class="col-sm-12">
+      <div id="columnchart_values" style="width: 100%; height: 300px;"></div>
+    </div>
   </div>
+
+
   <br>
-  <div class="row block3_gray_box">
-     <div class="col-sm-12">
-       <div class="block5_first_text">#qt-dashboard.Daily_Summary#</div>
-     </div>
-     <div class="row" style="width:100%">
-       <div class="col-sm-6">
-	   <div class="block5_second_text">@lastweek.female@</div>
-	   <div class="block5_third_text">#qt-dashboard.Women#</div>
-       </div>
-       <div class="col-sm-6">
-	   <div class="block5_second_text">@lastweek.male@</div>
-	   <div class="block5_third_text">#qt-dashboard.Men#</div>
-       </div>
-     </div>
+  <div class="row block2_gray_box" style="margin-top:100px;">
+    <div class="col-sm-4">
+      <div class="block2_first_text">#qt-dashboard.Yesterday#</div>
+      <div class="block2_second_text">@yesterday.total@</div>
+    </div>
+    <div class="col-sm-4" >
+      <div class="block2_first_text">#qt-dashboard.This_Week#</div>
+      <div class="block2_second_text">@week.total@</div>
+    </div>
+    <div class="col-sm-4">
+      <div class="block2_first_text">#qt-dashboard.This_Month#</div>
+      <div class="block2_second_text">@month.total@</div>
+    </div>
   </div>
-
-
-
-  <div class="row">
-     <div class="col-sm-12" style="background-color: #E5E5E5;display: flex; justify-content: center; align-items: center; flex-direction: column; line-height: 4.8rem; padding: 4.5rem 0;
-    box-sizing: inherit;">
-    
-     </div>
-  </div>
-
-
-
-
-
-
-
-
-
-
-
-  <div class="row">
-     <div class="col-sm-12 block_title"> #qt-dashboard.Weekly_Summary# </div>
-     <div id="weekly_chart_div" style="width: 100%; height: 500px;"></div>     
-  </div>
-</div>
-
-
 

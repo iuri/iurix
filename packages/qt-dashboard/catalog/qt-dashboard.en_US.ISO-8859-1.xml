@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="qt-dashboard" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="Daily_Hours_Summary">Daily Hours Summary</msg>
+  <msg key="Daily_Summary">Daily Summary</msg>
+  <msg key="Female">Female</msg>
+  <msg key="Men">Men</msg>
+  <msg key="Persons">Persons</msg>
+  <msg key="This_Month">This Month</msg>
+  <msg key="This_Week">This Week</msg>
+  <msg key="Today">Today</msg>
+  <msg key="Vehicles">Vehicles</msg>
+  <msg key="Weekly_Summary">Weekly Summary</msg>
+  <msg key="Women">Women</msg>
+  <msg key="Yesterday">Yesterday</msg>
+</message_catalog>

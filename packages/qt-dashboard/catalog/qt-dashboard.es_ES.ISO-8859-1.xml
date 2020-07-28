@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="qt-dashboard" locale="es_ES" charset="ISO-8859-1">
+
+  <msg key="Daily_Hours_Summary">HOY ACUMULADO - HORAS</msg>
+  <msg key="Daily_Summary">RESUMEN DEL DÍA</msg>
+  <msg key="Men">HOMBRES</msg>
+  <msg key="Persons">PERSONAS</msg>
+  <msg key="This_Month">Este Mes</msg>
+  <msg key="This_Week">ESTA SEMANA</msg>
+  <msg key="Today">HOY</msg>
+  <msg key="Vehicles">Vehículos</msg>
+  <msg key="Weekly_Summary">ACUMULADO POR DÍA DE SEMANA</msg>
+  <msg key="Women">MUJERES</msg>
+  <msg key="Yesterday">AYER</msg>
+</message_catalog>

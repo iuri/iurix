@@ -1,0 +1,93 @@
+<property name="focus">@focus;literal@</property>
+
+<formtemplate id="login"></formtemplate>
+
+<div class="foto-fondo">
+<div class="container">
+<div class="registro row">
+<div class="col-md-4 col-md-offset-4">
+<div class="panel panel-login">
+<div class="panel-heading">
+<div class="row">
+</div>
+<hr>
+</div>
+<div class="panel-body">
+<div class="row">
+<div class="col-lg-12">
+<form id="login-form" class="login" action="" method="post" role="form" style="display: block;">
+<div class="form-group">
+<input type="text" name="username"  id="email-input" tabindex="1" class="form-control" placeholder="Username" value="">
+</div>
+<div class="form-group">
+<input type="password" name="password" id="password-input" tabindex="2" class="form-control" placeholder="Password">
+</div>
+<!--									<div class="form-group text-center">
+<input type="checkbox" tabindex="3" class="" name="remember" id="remember">
+<label for="remember"> Remember Me</label>
+</div> -->
+<div class="form-group">
+<div class="row">
+<div class="col-sm-6 col-sm-offset-3">
+<input type="submit" name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-login" value="Login">
+<!-- <button type="submit" id="savebutt" class="btn btn-primary">Grabar</button> -->
+</div>
+</div>
+</div>
+<div class="form-group">
+<div class="row">
+<div class="col-lg-12">
+<div class="text-center">
+<a href="/signup" tabindex="5" class="forgot-password">Sign up</a>
+</div>
+</div>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+
+  <script type="text/javascript" src="js/login.js"></script>
+
+
+
+
+<div id="register-login">
+
+<if @forgotten_pwd_url@ not nil>
+  <if @email_forgotten_password_p;literal@ true>
+  <a href="@forgotten_pwd_url;literal@" true>#acs-subsite.Forgot_your_password#</a>
+  <br>
+  </if>
+</if>
+
+<if @self_registration;literal@ true>
+
+<if @register_url@ not nil>
+  <a href="@register_url@">#acs-subsite.Register#</a>
+</if>
+
+</if>
+</div>
+
+
+
+
+$(document).ready(function() {
+  $.post("/api/login", {
+    email: "rzevallos@hexas.biz",
+    password: "52283681"
+  }).then(function(data) {
+   // window.location.replace(data);
+    // If there's an error, log the error
+  }).catch(function(err) {
+    console.log(err);
+  });
+});

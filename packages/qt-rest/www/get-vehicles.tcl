@@ -7,9 +7,19 @@ ad_page_contract {
     {date_to ""}
     {where_clauses ""}
     {order "DESC"}
+    {count:boolean true}
 }
-    
 
+
+ns_log Notice "Running TCL script get-vehicles.tcl"
+
+ns_log Notice "$limit \n
+    $offset \n
+    $date_from \n
+    $date_to \n
+    $where_clauses \n
+    $order \n
+"
 
 if {[exists_and_not_null date_from] } {
     if {[catch { set timestamp [clock scan $date_from] } errmsg]} {   
@@ -33,21 +43,36 @@ if {[exists_and_not_null date_to]} {
 
 set result "\{\"vehicles\": \["
 
-db_foreach select_vehicles "
-    SELECT ci.name, cr.description, o.creation_date
-    FROM cr_items ci, cr_revisions cr, acs_objects o
-    WHERE ci.item_id = cr.item_id
-    AND ci.item_id = o.object_id
-    AND ci.latest_revision = cr.revision_id
-    AND ci.content_type = 'qt_vehicle'
-    $where_clauses
-    ORDER BY o.creation_date $order
-    LIMIT $limit OFFSET $offset
+if {$count eq true} {
+    db_0or1row select_vehicles "
+	SELECT COUNT(*) AS total
+	FROM cr_items ci, acs_objects o
+	WHERE ci.item_id = o.object_id
+	AND ci.content_type = 'qt_vehicle'
+	$where_clauses
+    "
     
-" {
+    append result "\{\"total\": $total\},"
+
+} else {
+    db_foreach select_vehicles "
+	SELECT ci.name, cr.description, o.creation_date
+	FROM cr_items ci, cr_revisions cr, acs_objects o
+	WHERE ci.item_id = cr.item_id
+	AND ci.item_id = o.object_id
+	AND ci.latest_revision = cr.revision_id
+	AND ci.content_type = 'qt_vehicle'
+	$where_clauses
+	ORDER BY o.creation_date $order
+	LIMIT $limit OFFSET $offset
+	
+    " {
 
 
-    append result "\{\"name\": \"$name\", \"creation_date\": \"$creation_date\", \"description\": \"$description\"\},"
+	append result "\{\"name\": \"$name\", \"creation_date\": \"$creation_date\", \"description\": \"$description\"\},"
+    }
+
+
 }
 
 

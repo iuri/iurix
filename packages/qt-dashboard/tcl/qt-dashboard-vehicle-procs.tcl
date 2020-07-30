@@ -47,7 +47,7 @@ ad_proc qt::dashboard::vehicle::import {} {
 	    set data [json get $arr(page)]
 	    array set arr2 [lindex $data 1]  	    
 	    set item_id [db_nextval "acs_object_id_seq"]	    
-	    set creation_user 7058 
+	    set creation_user 726
 	    set content_type qt_vehicle
 	    set storage_type "text"
 	    set package_id [apm_package_id_from_key qt-dashboard]

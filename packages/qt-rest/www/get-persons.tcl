@@ -11,7 +11,7 @@ ad_page_contract {
 }
 
 
-ns_log Notice "Running TCL script get-vehicles.tcl"
+ns_log Notice "Running TCL script get-persons.tcl"
 
 ns_log Notice "$limit \n
     $offset \n
@@ -41,7 +41,7 @@ if {[exists_and_not_null date_to]} {
     }
 }
 
-set result "\{\"vehicles\": \["
+set result "\{\"persons\": \["
 
 if {$count eq true} {
     db_0or1row select_vehicles "

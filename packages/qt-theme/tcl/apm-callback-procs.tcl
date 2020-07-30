@@ -1,7 +1,7 @@
-namespace eval openacs_default_theme {}
-namespace eval openacs_default_theme::install {}
+namespace eval qonteo_theme {}
+namespace eval qonteo_theme::install {}
 
-ad_proc openacs_default_theme::install::after_install {} {
+ad_proc qonteo_theme::install::after_install {} {
     Package after installation callback proc.  Add our themes, and set the acs-subsite's
     default master template parameter's default value to our "plain" theme.
 } {
@@ -11,12 +11,12 @@ ad_proc openacs_default_theme::install::after_install {} {
 
         subsite::new_subsite_theme \
             -key default_plain \
-            -name #openacs-default-theme.plain# \
-            -template /packages/openacs-default-theme/lib/plain-master \
+            -name #qt-theme.plain# \
+            -template /packages/qt-theme/lib/plain-master \
             -css {
-		{-href /resources/openacs-default-theme/styles/default-master.css -media all}
-		{-href /resources/acs-templating/forms.css -media all}
-		{-href /resources/acs-templating/lists.css -media all}
+		{-href /resources/qt-theme/styles/default-master.css -media all}
+		{-href /resources/qt-theme/forms.css -media all}
+		{-href /resources/qt-theme/lists.css -media all}
 	    } \
             -form_template /packages/acs-templating/resources/forms/standard \
             -list_template /packages/acs-templating/resources/lists/table \
@@ -25,12 +25,12 @@ ad_proc openacs_default_theme::install::after_install {} {
 
         subsite::new_subsite_theme \
             -key default_tabbed \
-            -name #openacs-default-theme.tabbed# \
-            -template /packages/openacs-default-theme/lib/tabbed-master \
+            -name #qt-theme.tabbed# \
+            -template /packages/qt-theme/lib/tabbed-master \
             -css {
-		{-href /resources/openacs-default-theme/styles/default-master.css -media all}
-		{-href /resources/acs-templating/forms.css -media all}
-		{-href /resources/acs-templating/lists.css -media all}
+		{-href /resources/qt-theme/styles/default-master.css -media all}
+		{-href /resources/qt-theme/forms.css -media all}
+		{-href /resources/qt-theme/lists.css -media all}
 	    } \
             -form_template /packages/acs-templating/resources/forms/standard \
             -list_template /packages/acs-templating/resources/lists/table \
@@ -51,13 +51,13 @@ ad_proc openacs_default_theme::install::after_install {} {
     # those values set for acs-templating during install.
 
     parameter::set_default -package_key acs-subsite -parameter DefaultMaster \
-        -value /packages/openacs-default-theme/lib/plain-master
+        -value /packages/qt-theme/lib/plain-master
 
     parameter::set_default -package_key acs-subsite -parameter ThemeCSS \
 	-value {
-	    {-href /resources/openacs-default-theme/styles/default-master.css -media all}
-	    {-href /resources/acs-templating/forms.css -media all}
-	    {-href /resources/acs-templating/lists.css -media all}
+	    {-href /resources/qt-theme/styles/default-master.css -media all}
+	    {-href /resources/qt-theme/forms.css -media all}
+	    {-href /resources/qt-theme/lists.css -media all}
 	}
 
     parameter::set_default -package_key acs-subsite -parameter ThemeKey -value default_plain

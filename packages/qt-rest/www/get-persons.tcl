@@ -44,16 +44,32 @@ if {[exists_and_not_null date_to]} {
 set result "\{\"persons\": \["
 
 if {$count eq true} {
-    db_0or1row select_vehicles "
-	SELECT COUNT(*) AS total
-	FROM cr_items ci, acs_objects o
+    set total 0
+    set w 0
+    set m 0
+    
+    db_foreach select_count_persons "
+	SELECT ci.item_id, cr.description
+	FROM cr_items ci, cr_revisions cr, acs_objects o
 	WHERE ci.item_id = o.object_id
+        AND ci.item_id = cr.item_id
+	AND ci.latest_revision = cr.revision_id
 	AND ci.content_type = 'qt_face'
 	$where_clauses
-    "
+    " {
+	incr total
+	ns_log Notice "DESC $description"
+	set gender [dict get [lindex [lindex [lindex $description 1] 0] 1] gender]
+	if {$gender eq 0} {
+	    incr w	
+	} elseif {$gender eq 1} {
+	    incr m
+	}
+    }
     
-    append result "\{\"total\": $total\},"
-
+    
+    append result "\{\"total\": $total\, \"women\": $w, \"men\": $m\},"
+    
 } else {
     db_foreach select_vehicles "
 	SELECT ci.name, cr.description, o.creation_date
@@ -67,12 +83,12 @@ if {$count eq true} {
 	LIMIT $limit OFFSET $offset
 	
     " {
-
-
+	
+	
 	append result "\{\"name\": \"$name\", \"creation_date\": \"$creation_date\", \"description\": \"$description\"\},"
     }
-
-
+    
+    
 }
 
 

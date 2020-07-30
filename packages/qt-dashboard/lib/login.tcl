@@ -329,7 +329,7 @@ ad_form -extend -name login -form {
 
 
 template::head::add_css -href "//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" -order 1
-template::head::add_css -href "https://app.qonteo.com/css/login2.css" -order 2
+template::head::add_css -href "/resources/qt-dashboard/styles/login.css" -order 2
 template::head::add_javascript -src "//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js" -order 1
 template::head::add_javascript -src "//code.jquery.com/jquery-1.11.1.min.js" -order 2
 

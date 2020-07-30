@@ -1,9 +1,8 @@
 <property name="focus">@focus;literal@</property>
 
 
-<div class="foto-fondo">
 <div class="container">
-<div class="registro row">
+<div class="row">
 <div class="col-md-4 col-md-offset-4">
 <div class="panel panel-login">
 <div class="panel-heading">
@@ -36,7 +35,6 @@
 </if>
 
 </if>
-</div>
 </div>
 </div>
 </div>

@@ -1,4 +1,3 @@
-<master>
 
 
 <div class="container" width="100%">
@@ -60,7 +59,16 @@ font-size: 2.8rem;
     </div>
   </div>
   <br>
-  <div class="row block2_gray_box">
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div id="daily_chart_values" style="width: 100%; height: 300px;"></div>
+    </div>
+  </div>
+
+
+
+  <div class="row block2_gray_box" style="margin-top:15%;">
     <div class="col-sm-4">
       <div class="block2_first_text">#qt-dashboard.Yesterday#</div>
       <div class="block2_second_text">@yesterday.total@</div>
@@ -77,15 +85,35 @@ font-size: 2.8rem;
 
   <br>
 
+
+
+  <div class="row"  style="margin-top:15%;">
+    <div class="col-sm-12">
+      <div id="weekly_chart_values" style="width: 100%; height: 300px;"></div>
+    </div>
+  </div>
+
+
+  <div class="row" style="margin-top:15%;">
+    <div class="col-sm-12">
+      <div id="monthly_chart_values" style="width: 100%; height: 300px;"></div>
+    </div>
+  </div>
+
+
+
+
+
 <script>
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawDailyChart);
     google.charts.setOnLoadCallback(drawWeeklyChart);
+    google.charts.setOnLoadCallback(drawMonthlyChart);
 
     function drawDailyChart() {
 	var data = google.visualization.arrayToDataTable([
 							  ['Element', 'Density', { role: 'style' }],
-							  @data_html;noquote@
+							  @daily_data_html;noquote@
 							  ]);
 
 	var view = new google.visualization.DataView(data);
@@ -122,7 +150,7 @@ font-size: 2.8rem;
 			 2]);
 
 	var options = {
-	    title: 'Cantidad de vehiculos/dia',
+	    title: 'Cantidad de vehiculos/semana',
 	    width: '100%',
 	    height: 400,
 	    bar: {groupWidth: '95%'},
@@ -132,18 +160,33 @@ font-size: 2.8rem;
 	chart.draw(view, options);
     }
 
+
+
+
+    function drawMonthlyChart() {
+	var data = google.visualization.arrayToDataTable([
+							  ['Element', 'Density', { role: 'style' }],
+							  @monthly_data_html;noquote@
+							  ]);
+
+	var view = new google.visualization.DataView(data);
+	view.setColumns([0, 1,
+			 { calc: 'stringify',
+			     sourceColumn: 1,
+			     type: 'string',
+			     role: 'annotation' },
+			 2]);
+
+	var options = {
+	    title: 'Cantidad de vehiculos/mes',
+	    width: '100%',
+	    height: 400,
+	    bar: {groupWidth: '95%'},
+	    legend: { position: 'none' },
+	};
+	var chart = new google.visualization.ColumnChart(document.getElementById('monthly_chart_values'));
+	chart.draw(view, options);
+    }
+
 </script>
-
-  <div class="row">
-    <div class="col-sm-12">
-      <div id="daily_chart_values" style="width: 100%; height: 300px;"></div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-sm-12">
-      <div id="weekly_chart_values" style="width: 100%; height: 300px;"></div>
-    </div>
-  </div>
-
 

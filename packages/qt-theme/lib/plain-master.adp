@@ -6,6 +6,7 @@
 <property name="skip_link">@skip_link;literal@</property>
 
 <div id="wrapper">
+  <if @sw_admin_p@>
     <div id="system-name">
       <if @system_url@ not nil><a href="@system_url@">@system_name@</a></if>
       <else>@system_name@</else>
@@ -50,7 +51,7 @@
       </else>
     </div>
   </div> <!-- /header -->
-            
+  </if>
   <if @navigation:rowcount@ not nil>
     <list name="navigation_groups">
       <div id="@navigation_groups:item@-navigation">

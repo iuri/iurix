@@ -9,8 +9,9 @@ ns_log Notice "HEADERS $h"
 set req [ns_set array $header]
 ns_log Notice "$req"
 
-ns_log Notice "BODY \n  [ns_getcontent -as_file false]"
+set tmp_file [ns_getcontent -as_file true]
 
+ns_log Notice "FILE \n $tmp_file"
 
 if {[ns_conn method] eq "POST"} {
 

@@ -37,7 +37,7 @@ if {[ns_conn method] eq "GET"} {
 	    SELECT TIMESTAMP WITH TIME ZONE 'epoch' + :epoch * INTERVAL '1 second';
 
 	}]
-	ns_log Notice "CREATE DATE $creation_date"
+	ns_log Notice "CREATION DATE $creation_date"
 	set creation_timestamp [clock scan [lindex [split $creation_date "."] 0]]
 
 	set cur_date [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
@@ -46,12 +46,11 @@ if {[ns_conn method] eq "GET"} {
 	
 	set date1 [clock scan [lindex [split $creation_timestamp "."] 0]]
 	set date2 [clock scan $cur_timestamp]
-	
+	ns_log Notice "DATES $date1 $date2"
 	set diff [expr $date2 - $date1]
-
 	set t [formatTimeInterval $diff]
        
-	
+	set t [qt::util::interval_ymdhs $date2 $date1]
 	ns_log Notice "$item_id $name \n $title \n $description \n timestamp $t"
 	
 	append data ""

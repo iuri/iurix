@@ -6,26 +6,30 @@ ad_page_contract {
     {date_from ""}
     {date_to ""}
     {where_clauses ""}
+    {order "DESC"}
 }
     
 
 
-if {$date_from ne "" && [catch { set timestamp [clock scan $date_from] } errmsg]} {   
-    ns_respond -status 400 -type "text/plain" -string $errmsg
-    ad_script_abort   
-} else {
+if {[exists_and_not_null date_from] } {
+    if {[catch { set timestamp [clock scan $date_from] } errmsg]} {   
+	ns_respond -status 400 -type "text/plain" -string $errmsg
+	ad_script_abort   
+    } else {
         #        AND cr.creation_date > now() - INTERVAL '2 day'
-    append where_clauses "AND o.creation_date >= '${date_from}'"
+	append where_clauses " AND o.creation_date >= '${date_from}' "
+    }
 }
 
-if {$date_to ne "" && [catch { set timestamp [clock scan $date_to] } errmsg]} {   
-    ns_respond -status 400 -type "text/plain" -string $errmsg
-    ad_script_abort    
-} else {
-    #    AND cr.creation_date < now() - INTERVAL '1 day'
-    append where_clauses "AND o.creation_date <= '${date_to}'"
+if {[exists_and_not_null date_to]} {
+    if {[catch { set timestamp [clock scan $date_to] } errmsg]} {   
+	ns_respond -status 400 -type "text/plain" -string $errmsg
+	ad_script_abort    
+    } else {
+	#    AND cr.creation_date < now() - INTERVAL '1 day'
+	append where_clauses " AND o.creation_date <= '${date_to}' "
+    }
 }
-
 
 set result "\{\"vehicles\": \["
 
@@ -37,7 +41,7 @@ db_foreach select_vehicles "
     AND ci.latest_revision = cr.revision_id
     AND ci.content_type = 'qt_vehicle'
     $where_clauses
-    ORDER BY o.creation_date ASC
+    ORDER BY o.creation_date $order
     LIMIT $limit OFFSET $offset
     
 " {

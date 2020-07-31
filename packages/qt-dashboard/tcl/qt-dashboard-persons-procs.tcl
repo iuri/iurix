@@ -40,7 +40,12 @@ ad_proc qt::dashboard::person::import {
 	    # Inserting Face
 	    set creation_user 726
 	    set creation_ip "192.199.241.130"
-	    set creation_date [clock format $arr(timestamp)]
+	    set epoch $arr(timestamp)
+	    set creation_date [db_string select_timestamp {
+		SELECT TIMESTAMP WITH TIME ZONE 'epoch' + :epoch * INTERVAL '1 second' - INTERVAL '5 hour';
+	    }]
+	    set creation_date [lindex [split $creation_date  "."] 0] 	    
+	    # set creation_date [clock format $arr(timestamp)]
 	    set package_id [apm_package_id_from_key qt-dashboard]
 	    set content_type qt_face
 	    set storage_type "text"

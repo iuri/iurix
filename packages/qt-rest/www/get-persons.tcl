@@ -5,6 +5,7 @@ ad_page_contract {
     {offset:integer 0}
     {date_from ""}
     {date_to ""}
+    {gender ""}
     {where_clauses ""}
     {order "DESC"}
     {count:boolean true}
@@ -43,34 +44,35 @@ if {[exists_and_not_null date_to]} {
 
 set result "\{\"persons\": \["
 
-if {$count eq true} {
-    set total 0
-    set w 0
-    set m 0
-    
-    db_foreach select_count_persons "
-	SELECT ci.item_id, cr.description
+if {$count eq true} {   
+    db_0or1row select_count_persons "
+	SELECT COUNT(ci.item_id) total,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS women,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS men
 	FROM cr_items ci, cr_revisions cr, acs_objects o
 	WHERE ci.item_id = o.object_id
         AND ci.item_id = cr.item_id
 	AND ci.latest_revision = cr.revision_id
 	AND ci.content_type = 'qt_face'
 	$where_clauses
-    " {
-	incr total
-	ns_log Notice "DESC $description"
-	set gender [dict get [lindex [lindex [lindex $description 1] 0] 1] gender]
-	if {$gender eq 0} {
-	    incr w	
-	} elseif {$gender eq 1} {
-	    incr m
-	}
+    "   
+
+    if {$gender eq "female"} {
+	append result "\{\"women\": $women\},"
+    } elseif {$gender eq "male"} {
+	append result "\{\"men\": $men\},"
+    } else {
+	append result "\{\"total\": $total\, \"women\": $women, \"men\": $men\},"
+    }
+} else {
+
+
+    if {$gender eq "female"} {
+	append where_clauses " AND SPLIT_PART(cr.description, ' ', 8) = '0' "
+    } elseif { $gender eq "male" } {
+	append where_clauses " AND SPLIT_PART(cr.description, ' ', 8) = '1' "
     }
     
-    
-    append result "\{\"total\": $total\, \"women\": $w, \"men\": $m\},"
-    
-} else {
     db_foreach select_vehicles "
 	SELECT ci.name, cr.description, o.creation_date
 	FROM cr_items ci, cr_revisions cr, acs_objects o

@@ -3,128 +3,58 @@ ad_page_contract {}
 
 ns_log Notice "Running TCL script index.tcl"
 
+#content::item::delete -item_id 337277
+# https://dba.stackexchange.com/questions/112796/postgres-count-with-different-condition-on-the-same-query
+# https://www.postgresqltutorial.com/postgresql-split_part/
 
-set url "https://dashboard.qonteo.com/api/totalgender"
+db_0or1row select_persons_yesterday {
+    SELECT COUNT(ci.item_id) total,
+    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
+    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
+    FROM cr_items ci, cr_revisions cr, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
+    AND ci.content_type = 'qt_face'
+    AND o.creation_date >= TIMESTAMP 'YESTERDAY' - INTERVAL '25 hour'
+    AND o.creation_date < TIMESTAMP 'TODAY' - INTERVAL '25 hour'
+    --  AND o.creation_date >= TIMESTAMP '2020-07-29'
+    --  AND o.creation_date < TIMESTAMP '2020-07-30'
+} -column_array yesterday
 
 
-set l_qty [list]
-set body [list {"task": "yesterday"}]
-set result [qt::dashboard::persons::get -body $body -url $url]
 
-set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
-foreach {gender qty} $l_data {
-    lappend l_qty [lindex [split $qty ":"] 1]   
+
+db_0or1row select_persons_today {
+    SELECT COUNT(ci.item_id) total,
+    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
+    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
+    FROM cr_items ci, cr_revisions cr, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
+    AND ci.content_type = 'qt_face'
+    AND o.creation_date >= TIMESTAMP 'TODAY' - INTERVAL '25 hours' 
 }
-
-array set yesterday [list female [lindex $l_qty 0] \
-			 male [lindex $l_qty 1] \
-			 total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
-ns_log Notice "YESTERDAY [parray yesterday]"
-
-
-
-
-set l_qty [list]
-set body [list {"task": "today"}]
-set result [qt::dashboard::persons::get -body $body -url $url]
-
-set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
-foreach {gender qty} $l_data {
-    lappend l_qty [lindex [split $qty ":"] 1]   
-}
-
+ns_log Notice "TOTAL TODAY $total"
 array set today [list \
-		     female [lindex $l_qty 0] \
-		     female_diff [expr 100 - \
-				      [expr \
-					   [expr [lindex $l_qty 0] * 100] / $yesterday(female)]] \
-		     male [lindex $l_qty 1] \
-		     male_diff [expr 100 - \
-				    [expr \
-					 [expr [lindex $l_qty 1] * 100] / $yesterday(male)]]\
-		     total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
-		 
-ns_log Notice "TODAY [parray today]"
+		     total $total \
+		     female $female \
+		     female_diff [expr 100 - [expr [expr $female * 100] / $yesterday(female)]] \
+		     male $male \
+		     male_diff [expr 100 - [expr [expr $male * 100] / $yesterday(male)]]]
 
 
 
 
-
-
-set l_qty [list]
-set body [list {"task": "lastweek"}]
-set result [qt::dashboard::persons::get -body $body -url $url]
-
-set l_data [split [string map {"[" "" "]" "" "{" "" "}" ""} [dict get $result body]] ","]
-foreach {gender qty} $l_data {
-    lappend l_qty [lindex [split $qty ":"] 1]   
+array set lastweek {
+    total 0
+    female 0
+    male 0
 }
 
-array set lastweek [list \
-			female [lindex $l_qty 0] \
-			male [lindex $l_qty 1] \
-			total [expr [lindex $l_qty 0] + [lindex $l_qty 1]]]
-ns_log Notice "LASTWEEK [parray lastweek]"
 
 
-
-
-
-
-
-
-
-template::head::add_javascript -src "https://www.gstatic.com/charts/loader.js" -order 1
-template::head::add_javascript -script {
-    google.charts.load('current', {'packages':['corechart']});
-    google.charts.setOnLoadCallback(drawDailyChart);
-    google.charts.setOnLoadCallback(drawWeeklyChart);
-    
-    function drawDailyChart() {
-	var data = google.visualization.arrayToDataTable([
-							  ['Hours', 'Hombres', 'Mujeres', 'Peronas'],
-							  ['6AM',  1000,      400, 1400],
-							  ['7AM',  1170,      460, 1630],
-							  ['8AM',  660,       1120, 1780],
-							  ['9AM',  1030,      540, 1570]
-							 ]);
-	
-	var options = {
-	    title: 'Personas',
-	    hAxis: {title: 'Tiempo (Horas)',  titleTextStyle: {color: '#333'}},
-	    vAxis: {minValue: 0}
-	};
-	
-	var chart = new google.visualization.AreaChart(document.getElementById('daily_chart_div'));
-	chart.draw(data, options);
-    }
-
-
-
-
-
-    function drawWeeklyChart() {
-	var data = google.visualization.arrayToDataTable([
-							  ['Days', 'Hombres', 'Mujeres', 'Peronas'],
-							  ['Lunes',  1000,      400, 1400],
-							  ['7AM',  1170,      460, 1630],
-							  ['8AM',  660,       1120, 1780],
-							  ['9AM',  1030,      540, 1570]
-							 ]);
-	
-	var options = {
-	    title: 'Personas',
-	    hAxis: {title: 'Tiempo (Horas)',  titleTextStyle: {color: '#333'}},
-	    vAxis: {minValue: 0}
-	};
-	
-	var chart = new google.visualization.AreaChart(document.getElementById('weekly_chart_div'));
-	chart.draw(data, options);
-    }
-
-
-    
-} -order 2
 
 
 

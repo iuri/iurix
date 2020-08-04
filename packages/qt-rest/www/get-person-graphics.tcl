@@ -133,18 +133,18 @@ if {[info exists heatmap] && $heatmap eq true} {
 	AND ci.item_id = cr.item_id
 	AND ci.latest_revision = cr.revision_id
 	AND ci.content_type = :content_type
-	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
+	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
+	-- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
 	GROUP BY 1 ORDER BY hour ASC    
     } {
 	set hour [clock scan [lindex [split $hour "+"] 0]]
 	set h [clock format $hour -format %H]
 	set d [clock format $hour -format "%d/%m"]
 	
-	append result "\{\"hora\": \"${h}h $d\", \"total\": $total, \"female\": $female, \"male\": $male\},"
+	append result "\{\"date\": \"$d\", \"time\": \"${h}h\", \"total\": $total, \"female\": $female, \"male\": $male\},"
     }
     set result [string trimright $result ","]
-    append result "\]\},"
-    
+    append result "\]\},"    
 }
 
 
@@ -195,7 +195,8 @@ if {[info exists age] && $age eq true} {
 	AND ci.item_id = cr.item_id
 	AND ci.latest_revision = cr.revision_id
 	AND ci.content_type = :content_type
-	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
+	-- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
+	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
 	GROUP BY 1
 	ORDER BY day ASC;
 	
@@ -203,13 +204,13 @@ if {[info exists age] && $age eq true} {
 	set day [clock scan [lindex [split $day "+"] 0]]
 	set day [clock format $day -format "%d/%m"]
 	
-	append result "\{\"day\": \"$day\", \"ageRange\": \["
-	append result "\{\"18minus\": $age18minus, \"female\": $female18minus, \"male\": $male18minus\},"
-	append result "\{\"18-25\": $age1825, \"female\": $female1825, \"male\": $male1825\},"
-	append result "\{\"25-35\": $age2535, \"female\": $female2535, \"male\": $male2535\},"
-	append result "\{\"35-45\": $age3545, \"female\": $female3545, \"male\": $male3545\},"
-	append result "\{\"45-55\": $age4555, \"female\": $female4555, \"male\": $male4555\},"
-	append result "\{\"55plus\": $age55plus, \"female\": $female55plus, \"male\": $male55plus\}"
+	append result "\{\"day\": \"$day\", \"ranges\": \["
+	append result "\{\"rangoEdad\": \"-18\", \"mujeres\": \"$female18minus\", \"hombres\": \"$male18minus\"\},"
+	append result "\{\"rangoEdad\": \"18-25\", \"mujeres\": \"$female1825\", \"hombres\": \"$male1825\"\},"
+	append result "\{\"rangoEdad\": \"25-35\", \"mujeres\": \"$female2535\", \"hombres\": \"$male2535\"\},"
+	append result "\{\"rangoEdad\": \"35-45\", \"mujeres\": \"$female3545\", \"hombres\": \"$male3545\"\},"
+	append result "\{\"rangoEdad\": \"45-55\", \"mujeres\": \"$female4555\", \"hombres\": \"$male4555\"\},"
+	append result "\{\"rangoEdad\": \"+55\", \"mujeres\": \"$female55plus\", \"hombres\": \"$male55plus\"\}"
 	append result "\]\},"
     }
 

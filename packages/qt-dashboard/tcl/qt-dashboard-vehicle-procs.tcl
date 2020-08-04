@@ -54,7 +54,8 @@ ad_proc qt::dashboard::vehicle::import {} {
 	    set creation_ip "178.62.211.78"
 	    set creation_date $arr2(first_seen)
 	    set name $arr2(id)
-  
+	    #set plate $arr(plate_number)
+	    
 	    if {![db_0or1row item_exists {
 		SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
 	    }]} {	    		
@@ -74,15 +75,7 @@ ad_proc qt::dashboard::vehicle::import {} {
 				     -mime_type "text/plain"
 				]
 		}	    	    
-		set revision_id [content::revision::new \
-				     -item_id $item_id \
-				     -title $name \
-				     -creation_user $creation_user \
-				     -package_id $package_id \
-				     -creation_ip $creation_ip \
-				     -creation_date $creation_date \
-				     -description [lindex $data 1]]
-
+	
 		ns_log Notice "New Vehicle Inserted $name"
 	    } else {
 		db_1row item_exists {

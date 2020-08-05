@@ -38,7 +38,7 @@ foreach elem $daily_data {
 
     set total [lindex $elem 1]
 
-    append result "\{\"hour\": \"${hour}h\", \"total\": $total\},"
+    append result "\{\"hour\": \"${hour}h\", \"time\": \"${hour}:00\", \"total\": $total\},"
 }
 set result [string trimright $result ","]
 append result "\]\},"
@@ -64,17 +64,17 @@ foreach elem $weekly_data {
     set day [lc_time_fmt $day %d/%b]
 
     switch $dow {
-	"0" { set dow "DOM $day" }
-	"1" { set dow "LUN $day" }
-	"2" { set dow "MAR $day" }
-	"3" { set dow "MIE $day" }
-	"4" { set dow "JUE $day" }
-	"5" { set dow "VIE $day" }
-	"6" { set dow "SAB $day" }
+	"0" { set dow "DOM" }
+	"1" { set dow "LUN" }
+	"2" { set dow "MAR" }
+	"3" { set dow "MIE" }
+	"4" { set dow "JUE" }
+	"5" { set dow "VIE" }
+	"6" { set dow "SAB" }
     }
     set total [lindex $elem 1]
 
-    append result "\{\"day\": \"$day\", \"total\": $total\},"
+    append result "\{\"day\": \"$day\",\"dow\": \"$dow\", \"total\": $total\},"
     
 }
 set result [string trimright $result ","]

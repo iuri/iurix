@@ -52,8 +52,34 @@ db_foreach select_person_grouped_hourly {
 } {
     set hour [clock scan [lindex [split $hour "+"] 0]]
     set hour [clock format $hour -format %H]
+
+    
     append result "\{\"hora\": \"${hour}h\", \"total\": $total, \"female\": $female, \"male\": $male\},"
 }
+
+
+db_0or1row select_total {
+    select date_trunc('hour', o.creation_date) AS hour,
+    COUNT(1) AS total
+    FROM cr_items ci, acs_objects o, cr_revisions cr
+    WHERE ci.item_id = o.object_id
+    AND ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
+    AND ci.content_type = :content_type
+    AND o.creation_date::date = :creation_date::date
+    GROUP BY 1 ORDER BY hour ASC    
+}
+
+if {![exists_and_not_null total]} {
+    for {set i 0} {$i < 24} {incr i} {
+	set total [ expr 3 * $i]
+	append result "\{\"hour\": \"${i}h\", \"time\": \"${i}:00\", \"total\": \"$total\", \"female\": \"[expr int($total * 0.3)]\", \"male\": \"[expr int($total * 0.7)]\"\},"
+	
+    } 
+}
+
+
+
 set result [string trimright $result ","]
 append result "\]\},"
 

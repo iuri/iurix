@@ -97,7 +97,7 @@ ad_proc -private search::indexer {} {
     @author Neophytos Demetriou
     @author Jeff Davis (davis@xarg.net)
 } {
-
+    ns_log Notice "Running ad_proc search::indexer"
     set driver [parameter::get -package_id [apm_package_id_from_key search] -parameter FtsEngineDriver]
 
     if { $driver eq ""
@@ -108,7 +108,7 @@ ad_proc -private search::indexer {} {
     }
     # JCD: pull out the rows all at once so we release the handle
     foreach row [db_list_of_lists search_observer_queue_entry {}] {
-
+        ns_log Notice "ROW $row"
         # DRB: only do Oracle shit for oracle (doh)
         if { [ns_config "ns/db/drivers" oracle] ne "" } {
             nsv_incr search_static_variables item_counter

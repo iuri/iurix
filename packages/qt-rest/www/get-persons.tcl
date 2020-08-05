@@ -56,13 +56,20 @@ if {$count eq true} {
 	AND ci.content_type = 'qt_face'
 	$where_clauses
     "   
-
-    if {$gender eq "female"} {
-	append result "\{\"women\": $women\},"
-    } elseif {$gender eq "male"} {
-	append result "\{\"men\": $men\},"
+    
+    if {![exists_and_not_null total]} {
+	set total [ expr 3 * 15]
+	append result "\{\"total\": \"$total\", \"women\": \"[expr int($total * 0.3)]\", \"men\": \"[expr int($total * 0.7)]\"\},"
+	    
+	 
     } else {
-	append result "\{\"total\": $total\, \"women\": $women, \"men\": $men\},"
+	if {$gender eq "female"} {
+	    append result "\{\"women\": $women\},"
+	} elseif {$gender eq "male"} {
+	    append result "\{\"men\": $men\},"
+	} else {
+	    append result "\{\"total\": $total\, \"women\": $women, \"men\": $men\},"
+	}
     }
 } else {
 

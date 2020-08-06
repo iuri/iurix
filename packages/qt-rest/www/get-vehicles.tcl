@@ -13,6 +13,7 @@ ad_page_contract {
 
 ns_log Notice "Running TCL script get-vehicles.tcl"
 
+
 ns_log Notice "$limit \n
     $offset \n
     $date_from \n

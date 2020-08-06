@@ -14,6 +14,7 @@ ad_page_contract {
 
 ns_log Notice "Running TCL script get-persons.tcl"
 
+
 ns_log Notice "$limit \n
     $offset \n
     $date_from \n
@@ -60,17 +61,19 @@ if {$count eq true} {
     if {![exists_and_not_null total]} {
 	set total [ expr 3 * 15]
 	append result "\{\"total\": \"$total\", \"women\": \"[expr int($total * 0.3)]\", \"men\": \"[expr int($total * 0.7)]\"\},"
-	    
-	 
-    } else {
-	if {$gender eq "female"} {
-	    append result "\{\"women\": $women\},"
-	} elseif {$gender eq "male"} {
-	    append result "\{\"men\": $men\},"
-	} else {
-	    append result "\{\"total\": $total\, \"women\": $women, \"men\": $men\},"
-	}
     }
+    
+    
+    
+    
+    if {$gender eq "female"} {
+	append result "\{\"women\": $women\},"
+    } elseif {$gender eq "male"} {
+	append result "\{\"men\": $men\},"
+    } else {
+	append result "\{\"total\": $total\, \"women\": $women, \"men\": $men\},"
+    }
+
 } else {
 
 

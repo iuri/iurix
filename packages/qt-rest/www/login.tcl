@@ -62,7 +62,6 @@ if {[ns_conn method] eq "POST"} {
 		set status 200
 		set header [ns_set new]
 		ns_set put $header "Authorization" "Bearer $token"
-		ns_set put $header "Access-Control-Allow-Origin" "*"
 		set result "\{
 		    \"token\": \"$token\",
 		    \"user\": \{

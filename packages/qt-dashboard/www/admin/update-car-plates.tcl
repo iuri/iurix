@@ -9,7 +9,6 @@ set plate [db_string select_plate {
     AND ci.content_type = 'qt_vehicle'
     LIMIT 1
 } -default ""]
-ns_log Notice "PLATE $plate"
 
 
 

@@ -53,16 +53,12 @@ set debug_p 0
 set user_id [ad_conn user_id]
 set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
 
-ns_log Notice "DRIVER $driver"
-
 if {[callback::impl_exists -impl $driver -callback search::driver_info]} {
     array set info [lindex [callback -impl $driver search::driver_info] 0]
 #    array set info [list package_key intermedia-driver version 1 automatic_and_queries_p 1  stopwords_p 1]
 } else {
     array set info [acs_sc::invoke -contract FtsEngineDriver -operation info -call_args [list] -impl $driver]
 }
-
-ns_log Notice "[parray info]"
 
 if { [array get info] eq "" } {
     ns_return 200 text/html [_ search.lt_FtsEngineDriver_not_a]
@@ -120,7 +116,6 @@ if {"this" ne $scope } {
     }
 }
 
-ns_log Notice "$driver"
 if {[callback::impl_exists -impl $driver -callback search::search]} {
     # DAVEB TODO Add subsite to the callback def?
     # FIXME do this in the intermedia driver!
@@ -133,9 +128,6 @@ if {[callback::impl_exists -impl $driver -callback search::search]} {
     array set result [acs_sc::invoke -contract FtsEngineDriver -operation search \
 			  -call_args $params -impl $driver]
 }
-
-ns_log Notice "FLAG 2"
-ns_log Notice "ARRAY \n [parray result]"
 
 set tend [clock clicks -milliseconds]
 
@@ -183,30 +175,21 @@ set nstopwords [llength $result(stopwords)]
 template::multirow create searchresult title_summary txt_summary url_one object_id
 
 
-ns_log Notice "RESULT(IDS) $result(ids)"
-
 foreach object_id $result(ids) {
-    ns_log Notice "OBJECTID $object_id"
     if {[catch {
         set object_type [acs_object_type $object_id]
-        ns_log Notice "OBJECT TYPE $object_type"
         if {[callback::impl_exists -impl $object_type -callback search::datasource]} {
-            ns_log Notice "FLAG 1"
             array set datasource [lindex [callback -impl $object_type search::datasource -object_id $object_id] 0]
             set url_one [lindex [callback -impl $object_type search::url -object_id $object_id] 0]
         } else {
             #ns_log warning "SEARCH search/www/search.tcl callback::datasource::$object_type not found"
-            ns_log Notice "FLAG 2"
             array set datasource [acs_sc::invoke -contract FtsContentProvider -operation datasource \
 				      -call_args [list $object_id] -impl $object_type]
 
-            ns_log Notice "FLAG 3 $object_id $object_type"
             set url_one [acs_sc::invoke -contract FtsContentProvider -operation url \
 			     -call_args [list $object_id] -impl $object_type]
-            ns_log Notice "FLAG 4"
         }
 
-        ns_log Notice ""
         search::content_get txt $datasource(content) $datasource(mime) $datasource(storage_type) $object_id
         if {[callback::impl_exists -impl $driver -callback search::summary]} {
             set title_summary [lindex [callback -impl $driver search::summary -query $q -text $datasource(title)] 0]

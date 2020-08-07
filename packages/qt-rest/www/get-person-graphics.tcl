@@ -56,6 +56,7 @@ db_0or1row select_total {
     AND ci.content_type = :content_type
     AND o.creation_date::date = :creation_date::date
     GROUP BY 1 ORDER BY hour ASC
+    LIMIT 1
 }
 
 if {![exists_and_not_null total]} {

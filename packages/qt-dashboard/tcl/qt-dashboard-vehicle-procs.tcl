@@ -54,7 +54,8 @@ ad_proc qt::dashboard::vehicle::import {} {
 	    set creation_ip "178.62.211.78"
 	    set creation_date $arr2(first_seen)
 	    set name $arr2(id)
-	    #set plate $arr(plate_number)
+	    set description [lindex $data 1]
+	    set plate [lindex $description 3]
 	    
 	    if {![db_0or1row item_exists {
 		SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
@@ -68,10 +69,12 @@ ad_proc qt::dashboard::vehicle::import {} {
 				     -creation_ip $creation_ip \
 				     -creation_date $creation_date \
 				     -name $name \
-				     -title $name \
-				     -description [lindex $data 1] \
+				     -title $plate \
+				     -description $description \
 				     -storage_type "$storage_type" \
 				     -content_type $content_type \
+				     -text $description \
+				     -data $description \
 				     -mime_type "text/plain"
 				]
 		}	    	    

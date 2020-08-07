@@ -120,6 +120,7 @@ if {"this" ne $scope } {
     }
 }
 
+ns_log Notice "$driver"
 if {[callback::impl_exists -impl $driver -callback search::search]} {
     # DAVEB TODO Add subsite to the callback def?
     # FIXME do this in the intermedia driver!
@@ -132,6 +133,10 @@ if {[callback::impl_exists -impl $driver -callback search::search]} {
     array set result [acs_sc::invoke -contract FtsEngineDriver -operation search \
 			  -call_args $params -impl $driver]
 }
+
+ns_log Notice "FLAG 2"
+ns_log Notice "ARRAY \n [parray result]"
+
 set tend [clock clicks -milliseconds]
 
 if { $t eq [_ search.Feeling_Lucky] && $result(count) > 0} {
@@ -177,19 +182,31 @@ set nstopwords [llength $result(stopwords)]
 
 template::multirow create searchresult title_summary txt_summary url_one object_id
 
+
+ns_log Notice "RESULT(IDS) $result(ids)"
+
 foreach object_id $result(ids) {
+    ns_log Notice "OBJECTID $object_id"
     if {[catch {
         set object_type [acs_object_type $object_id]
+        ns_log Notice "OBJECT TYPE $object_type"
         if {[callback::impl_exists -impl $object_type -callback search::datasource]} {
+            ns_log Notice "FLAG 1"
             array set datasource [lindex [callback -impl $object_type search::datasource -object_id $object_id] 0]
             set url_one [lindex [callback -impl $object_type search::url -object_id $object_id] 0]
         } else {
             #ns_log warning "SEARCH search/www/search.tcl callback::datasource::$object_type not found"
+            ns_log Notice "FLAG 2"
             array set datasource [acs_sc::invoke -contract FtsContentProvider -operation datasource \
 				      -call_args [list $object_id] -impl $object_type]
+
+            ns_log Notice "FLAG 3 $object_id $object_type"
             set url_one [acs_sc::invoke -contract FtsContentProvider -operation url \
 			     -call_args [list $object_id] -impl $object_type]
+            ns_log Notice "FLAG 4"
         }
+
+        ns_log Notice ""
         search::content_get txt $datasource(content) $datasource(mime) $datasource(storage_type) $object_id
         if {[callback::impl_exists -impl $driver -callback search::summary]} {
             set title_summary [lindex [callback -impl $driver search::summary -query $q -text $datasource(title)] 0]

@@ -38,7 +38,7 @@ foreach elem $daily_data {
 
     set total [lindex $elem 1]
 
-    append result "\{\"hour\": \"${hour}h\", \"time\": \"${hour}:00\", \"total\": $total\},"
+    append result "\{\"time\": \"${hour}:00h\", \"hour\": \"${hour}h\", \"total\": $total\},"
 }
 set result [string trimright $result ","]
 append result "\]\},"

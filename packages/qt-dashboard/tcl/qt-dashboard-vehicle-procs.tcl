@@ -79,11 +79,31 @@ ad_proc qt::dashboard::vehicle::import {} {
 				]
 		}	    	    
 	
-		ns_log Notice "New Vehicle Inserted $name"
+		ns_log Notice "New ITEM Vehicle Inserted $name"
 	    } else {
+
 		db_1row item_exists {
 		    SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
 		}
+		
+		set revision_id [content::revision::new \
+				     -item_id $item_id \
+				     -title $name \
+				     -creation_user $creation_user \
+				     -package_id $package_id \
+				     -creation_ip $creation_ip \
+				     -creation_date $creation_date \
+				     -title $plate \
+				     -description $description \
+				     -content $description \
+				     -mime_type "text/plain" \
+				     -publish_date $creation_date \
+				     -is_live "t" \
+				     -storage_type "$storage_type" \
+				     -content_type $content_type]
+		
+		ns_log Notice "New REVISION Vehicle Inserted $name"
+
 	    }	    
 	    return $item_id	    
 	}

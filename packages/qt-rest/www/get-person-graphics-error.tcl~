@@ -167,16 +167,16 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
 
 if {[info exists age_range_p] && $age_range_p eq true} {
     append result "\{\"ageRanges\":\["
-    set l_age_ranges [db_list_of_lists seelct_ranges {
-	SELECT ROUND(SPLIT_PART(cr.description, ' ', 4)::numeric) AS range,
+    set l_age_ranges [db_list_of_lists select_age_ranges {
+	SELECT
+	ROUND(SPLIT_PART(cr.description, ' ', 4)::numeric) AS range,
 	COUNT(1) AS total,
 	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS total_female,
 	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS total_male
 	FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id
 	AND ci.item_id = cr.item_id
 	AND ci.latest_revision = cr.revision_id AND ci.content_type = :content_type
-	AND EXTRACT(MONTH FROM o.creation_date) = EXTRACT(MONTH FROM :creation_date::date)
-	GROUP BY range;	
+	AND EXTRACT(MONTH FROM o.creation_date) = EXTRACT(MONTH FROM :creation_date::date) GROUP BY range;	
     }]
     
     set male10 0
@@ -185,70 +185,69 @@ if {[info exists age_range_p] && $age_range_p eq true} {
     set female60 0
     
 
-#    set l_age_range [list {6 15 5 10} {11 22 7 15} {15 1 0 1} {16 11 2 9} {17 1 1 0} {19 1 0 1} {20 6 0 6} {21 10 1 9} {22 12 4 8} {23 25 7 18} {24 57 16 41} {25 91 17 74} {26 138 21 117} {27 202 22 180} {28 251 28 223} {29 370 34 336} {30 408 49 359} {31 456 42 414} {32 437 47 390} {33 495 45 450} {34 425 47 378} {35 432 55 377} {36 385 38 347} {37 362 52 310} {38 300 40 260} {39 265 28 237} {40 251 34 217} {41 199 28 171} {42 198 43 155} {43 160 30 130} {44 146 26 120} {45 127 31 96} {46 94 20 74} {47 85 21 64} {48 90 18 72} {49 56 13 43} {50 59 13 46} {51 45 8 37} {52 33 6 27} {53 28 3 25} {54 21 0 21} {55 18 4 14} {56 7 1 6} {57 15 4 11} {58 4 0 4} {59 9 1 8} {60 5 1 4} {61 7 0 7} {62 1 0 1} {63 6 0 6} {65 1 0 1} {66 1 0 1} {67 1 0 1}]
+    # set l_age_range [list {6 15 5 10} {11 22 7 15} {15 1 0 1} {16 11 2 9} {17 1 1 0} {19 1 0 1} {20 6 0 6} {21 10 1 9} {22 12 4 8} {23 25 7 18} {24 57 16 41} {25 91 17 74} {26 138 21 117} {27 202 22 180} {28 251 28 223} {29 370 34 336} {30 408 49 359} {31 456 42 414} {32 437 47 390} {33 495 45 450} {34 425 47 378} {35 432 55 377} {36 385 38 347} {37 362 52 310} {38 300 40 260} {39 265 28 237} {40 251 34 217} {41 199 28 171} {42 198 43 155} {43 160 30 130} {44 146 26 120} {45 127 31 96} {46 94 20 74} {47 85 21 64} {48 90 18 72} {49 56 13 43} {50 59 13 46} {51 45 8 37} {52 33 6 27} {53 28 3 25} {54 21 0 21} {55 18 4 14} {56 7 1 6} {57 15 4 11} {58 4 0 4} {59 9 1 8} {60 5 1 4} {61 7 0 7} {62 1 0 1} {63 6 0 6} {65 1 0 1} {66 1 0 1} {67 1 0 1}]
 
-    if {[llength $l_age_ranges] > 0} {
-	set range_f ""
-	foreach range $l_age_ranges {
-	    if {[lindex $range 0] <= 10} {
-		set female10 [expr [lindex $range 2] + $female10]			    
-		set male10 [expr [lindex $range 3] + $male10]
-		set total10 [expr $female10 + $male10]
-	    } elseif {[lindex $range 0] >= 60} {
-		set female60 [expr [lindex $range 2] + $female60]			    
-		set male60 [expr [lindex $range 3] + $male60]
-		set total60 [expr $female60 + $male60]
-	    } else {
-		lappend range_f $range
-	    }
+    set range_f ""
+    foreach range $l_age_ranges {
+	if {[lindex $range 0] <= 10} {
+	    set female10 [expr [lindex $range 2] + $female10]			    
+	    set male10 [expr [lindex $range 3] + $male10]
+	    set total10 [expr $female10 + $male10]
+	} elseif {[lindex $range 0] >= 60} {
+	    set female60 [expr [lindex $range 2] + $female60]			    
+	    set male60 [expr [lindex $range 3] + $male60]
+	    set total60 [expr $female60 + $male60]
+	} else {
+	    lappend range_f $range
 	}
-	
-	if {[exists_and_not_null total10]} {	
-	    append result "\{
+    }
+
+    if {[exists_and_not_null total10]} {	
+	append result "\{
 	    \"range\": \"-10\",
 	    \"total_female\": \"$female10\",
 	    \"total_male\": \"$male10\",
 	    \"total\": \"$total10\"	    
 	\},"
-	}
-	
+    }
+
    
-	foreach range $range_f {
-	    if {[expr [lindex $range 0] % 2] > 0 } {
-		set aux $range
-	    } else {
-		set female [expr [lindex $range 2] + [lindex $aux 2]]
-		set male [expr [lindex $range 3] + [lindex $aux 3]]
-		set total [expr [lindex $range 1] + [lindex $aux 1]]
-		append result "\{
+    foreach range $range_f {
+	if {[expr [lindex $range 0] % 2] > 0 } {
+	    set aux $range
+	} else {
+	    set female [expr [lindex $range 2] + [lindex $aux 2]]
+	    set male [expr [lindex $range 3] + [lindex $aux 3]]
+	    set total [expr [lindex $range 1] + [lindex $aux 1]]
+    	    append result "\{
 		\"range\": \"[lindex $range 0]\",
 		\"total_female\": \"$female\",
 		\"total_male\": \"$male\",
 		\"total\": \"$total\"	    
 	    \},"	   
-		set aux "0 0 0 0"
-	    }	
-	    
-	    
-	    
-	}
+	    set aux "0 0 0 0"
+	}	
+
+
 	
-	if {[exists_and_not_null total60]} {
-	    append result "\{
+    }
+    
+    if {[exists_and_not_null total60]} {
+	append result "\{
 	    \"range\": \"60+\",
 	    \"total_female\": \"$female60\",
 	    \"total_male\": \"$male60\",
 	    \"total\": \"$total60\"	    
 	\},"
-	} 
-	
-	
-	set result [string trimright $result ","]
-	append result "\]\},"
-	
-    }
+    } 
+     
+
+    set result [string trimright $result ","]
+    append result "\]\},"
     
 }
+    
+    
 set result [string trimright $result ","]
 append result "\]\}"
 

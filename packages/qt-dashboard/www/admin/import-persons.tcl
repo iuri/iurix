@@ -36,4 +36,13 @@ while {![eof $fp]} {
     }    
 }
 
+
+set item [db_list select_item {
+    SELECT cr.item_id, SPLIT_PART(cr.description, ' ', 4) as desc FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id AND ci.item_id = cr.item_id AND ci.latest_revision = cr.revision_id AND ci.content_type = 'qt_face' AND EXTRACT(MONTH FROM o.creation_date) = EXTRACT(MONTH FROM '2020-08-08'::date) LIMIT 1 ;
+}]
+
+if {[lindex $item 1] eq "N"} {
+    content::item::delete -item_d [lindex $item 0]
+}
+
 close $fp

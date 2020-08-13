@@ -8,6 +8,7 @@ ad_page_contract {
     {where_clauses ""}
     {order "DESC"}
     {count:boolean true}
+    {content_type "qt_vehicle"}
 }
 
 
@@ -52,8 +53,33 @@ if {$count eq true} {
 	AND ci.content_type = 'qt_vehicle'
 	$where_clauses
     "
+
+    db_0or1row select_vehicles_today_total {
+	select COUNT(1) AS today_total
+	FROM cr_items ci, acs_objects o
+	WHERE ci.item_id = o.object_id
+	AND ci.content_type = :content_type
+	AND o.creation_date::date = (now() - INTERVAL '5 hour')::date
+    }
+
+    db_0or1row select_vehicles_yesterday_total {
+	select COUNT(1) AS yesterday_total
+	FROM cr_items ci, acs_objects o
+	WHERE ci.item_id = o.object_id
+	AND ci.content_type = :content_type
+	AND o.creation_date::date >= (now() - INTERVAL '5 hour')::date - INTERVAL '48 hour'
+	AND o.creation_date::date < (now() - INTERVAL '5 hour')::date - INTERVAL '24 hour'
+    }
+
+    db_0or1row select_vehicles_week_total {
+	select COUNT(1) AS week_total
+	FROM cr_items ci, acs_objects o
+	WHERE ci.item_id = o.object_id
+	AND ci.content_type = :content_type
+	AND o.creation_date BETWEEN (now() - INTERVAL '5 hour')::date - INTERVAL '6 day' AND (now() - INTERVAL '5 hour')::date + INTERVAL '1 day'
+    }
     
-    append result "\{\"total\": $total\},"
+    append result "\{\"total\": $total\}, \{\"today\": $today_total\}, \{\"yesterday\": $yesterday_total\}, \{\"week\": $week_total\}"
 
 } else {
     db_foreach select_vehicles "

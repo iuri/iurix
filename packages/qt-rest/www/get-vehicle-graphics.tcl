@@ -41,7 +41,7 @@ foreach elem $daily_data {
     append result "\{\"time\": \"${hour}:00h\", \"hour\": \"${hour}h\", \"total\": $total\},"
 }
 set result [string trimright $result ","]
-append result "\]\},"
+append result "\],\"percent\": 12\},"
 
 
 # Retrieves vehicles grouped by hour
@@ -78,7 +78,7 @@ foreach elem $weekly_data {
     
 }
 set result [string trimright $result ","]
-append result "\]\},"
+append result "\],\"percent_week\": 23\},"
 
 
 
@@ -101,7 +101,7 @@ foreach elem $monthly_data {
     append result "\{\"day\": \"$day\", \"total\": $total\},"
 }
 set result [string trimright $result ","]
-append result "\]\}"
+append result "\],\"percent_month\": 28\}"
 
 append result "\]\}"
 

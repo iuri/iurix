@@ -83,7 +83,7 @@ if {$count eq true} {
 	append where_clauses " AND SPLIT_PART(cr.description, ' ', 8) = '1' "
     }
     
-    db_foreach select_vehicles "
+    db_foreach select_persons_data "
 	SELECT ci.name, cr.description, o.creation_date
 	FROM cr_items ci, cr_revisions cr, acs_objects o
 	WHERE ci.item_id = cr.item_id

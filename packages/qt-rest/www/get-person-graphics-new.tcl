@@ -35,10 +35,12 @@ set week_hourly_datasource [db_list_of_lists select_person_of_month_grouped_hour
 	GROUP BY 1 ORDER BY hour ASC    
 }]
 
-ns_log Notice "WEEKDS $week_hourly_datasource"
+ns_log Notice "WEEKHOURLYDS $week_hourly_datasource"
+
 set i [expr [llength $week_hourly_datasource] - 1]
 set elem [lindex $week_hourly_datasource $i]
 
+set today_datasource [list]
 while {[lindex [split [lindex $elem 0] " "] 0] eq $creation_date && $i > -1} {
     lappend today_datasource $elem
     set i [expr $i - 1]
@@ -47,7 +49,6 @@ while {[lindex [split [lindex $elem 0] " "] 0] eq $creation_date && $i > -1} {
 }
 
 append result "\{\"$creation_date\":\["
-ns_log Notice "TODAYDS $today_datasource"
 
 foreach elem $today_datasource {
     set datetime [lindex [split [lindex $elem 0] "+"] 0]
@@ -83,6 +84,7 @@ set i 1
 set j [expr [llength $month_data] - 1]
 # list to accumulate data
 set total_weeks [list]
+set week_data [list]
 while {$i < 3} {
     set elem [lindex $month_data $j]
     lappend week_data $elem
@@ -112,6 +114,7 @@ set percent_today 0
 if {[llength $week_data] > 2} {
     set today [lindex $week_data 0]
     set yesterday [lindex $week_data 1]
+    ns_log Notice "TODAY $today YESTERDAY $yesterday"
     set percent_today [expr [expr [expr [lindex $today 1] * 100] / [lindex $yesterday 1]] - 100]
 }
 
@@ -224,26 +227,18 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 	}
 	set l_age_ranges [linsert $l_age_ranges 0 [list 18 [expr $female18 + $male18] $female18 $male18]]
 	set l_age_ranges [linsert $l_age_ranges [llength $l_age_ranges] [list 60 [expr $female60 + $male60] $female60 $male60]]
-	
+
+	ns_log Notice "AGERANGES $l_age_ranges"
 	set default_ranges [list 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60]
-	foreach range $default_ranges {
+	foreach range $default_ranges {	   	    
 	    if {[lsearch -index 0 $l_age_ranges $range] eq -1} {
-		set i [expr [llength $l_age_ranges] / 2]
-		while {true} {
-		    #ns_log Notice "FLAG 4 I $i | J $j  | R1 [lindex [lindex $l_age_ranges 0] $i] | R $range"
-		    set j $i
-		    if {[lindex [lindex $l_age_ranges 0] $i] < $range} {
-			set i [expr [expr $i / 2] + 1]
-		    } elseif {[lindex [lindex $l_age_ranges 0] $i] > $range} {
-			set i [expr [expr $i / 2] - 1]
-		    }		    
-		    if {$i<0 || $i>[llength $l_age_ranges] || [lindex [lindex $l_age_ranges 0] $i] eq 0} {
-			break
-		    }
-		}
-		set l_age_ranges [linsert $l_age_ranges $j [list $range 0 0 0]]
+		ns_log Notice "NOT FOUND"
+		ns_log Notice "INSERT RANGE $range pos $j"
+		set l_age_ranges [linsert $l_age_ranges end [list $range 0 0 0]]
 	    }
 	}
+	set l_age_ranges [lsort -integer -index 0 $l_age_ranges]
+	ns_log Notice "AGERANGES $l_age_ranges"
 	
 	set aux [list 0 0 0 0]
 	foreach elem $l_age_ranges {

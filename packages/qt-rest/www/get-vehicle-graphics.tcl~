@@ -18,82 +18,129 @@ if {[info exists date]} {
 	ad_script_abort    
     }
 }
-ns_log Notice "CREATION DATE $creation_date"
-
 
 set result "\{\"vehicles\": \["
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
+
+
 set daily_data [db_list_of_lists select_vehicles_grouped_hourly {
+    
     select date_trunc('hour', o.creation_date) AS hour, COUNT(1)
     FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
     AND ci.content_type = :content_type
-    AND o.creation_date::date = :creation_date::date
-    GROUP BY 1 ORDER BY hour ASC
+    AND o.creation_date::date <= :creation_date::date
+    GROUP BY hour ORDER BY hour ASC
 }]
+
+#ns_log Notice "DAYly DATA $daily_data"
+
+set total00 0
+set total01 0
+set total02 0
+set total03 0
+set total04 0
+set total05 0
+set total06 0
+set total07 0
+set total08 0
+set total09 0
+set total10 0
+set total11 0
+set total12 0
+set total13 0
+set total14 0
+set total15 0
+set total16 0
+set total17 0
+set total18 0
+set total19 0
+set total20 0
+set total21 0
+set total22 0
+set total23 0
+set total24 0
+
+foreach elem $daily_data {
+#    ns_log Notice "ELEM $elem"
+    set hour [lindex $elem 0]
+    set hour [clock scan [lindex [split $hour "+"] 0]]
+    set hour [clock format $hour -format %H]
+    #   ns_log Notice "HOUR $hour"
+    # ns_log Notice "$hour | [lindex $elem 1]"
+    switch $hour {
+	"00" { set total00 [expr $total00 + [lindex $elem 1]] }
+	"01" { set total01 [expr $total01 + [lindex $elem 1]] }
+	"02" { set total02 [expr $total02 + [lindex $elem 1]] }
+	"03" { set total03 [expr $total03 + [lindex $elem 1]]}
+	"04" { set total04 [expr $total04 + [lindex $elem 1]]}
+	"05" { set total05 [expr $total05 + [lindex $elem 1]]}
+	"06" { set total06 [expr $total06 + [lindex $elem 1]]}
+	"07" { set total07 [expr $total07 + [lindex $elem 1]]}
+	"08" { set total08 [expr $total08 + [lindex $elem 1]]}
+	"09" { set total09 [expr $total09 + [lindex $elem 1]]}
+	"10" { set total10 [expr $total10 + [lindex $elem 1]]}
+	"11" { set total11 [expr $total11 + [lindex $elem 1]]}
+	"12" { set total12 [expr $total12 + [lindex $elem 1]]}
+	"13" { set total13 [expr $total13 + [lindex $elem 1]]}
+	"14" { set total14 [expr $total14 + [lindex $elem 1]]}
+	"15" { set total15 [expr $total15 + [lindex $elem 1]]}
+	"16" { set total16 [expr $total16 + [lindex $elem 1]]}
+	"17" { set total17 [expr $total17 + [lindex $elem 1]]}
+	"18" { set total18 [expr $total18 + [lindex $elem 1]]}
+	"19" { set total19 [expr $total19 + [lindex $elem 1]]}
+	"20" { set total20 [expr $total20 + [lindex $elem 1]]}
+	"21" { set total21 [expr $total21 + [lindex $elem 1]]}
+	"22" { set total22 [expr $total22 + [lindex $elem 1]]}
+	"23" { set total23 [expr $total23 + [lindex $elem 1]]}
+    }
+}
+
+
+set daily_data [list \
+		    [list 00 $total00] \
+		    [list 01 $total01] \
+		    [list 02 $total02] \
+		    [list 03 $total03] \
+		    [list 04 $total04] \
+		    [list 05 $total05] \
+		    [list 06 $total06] \
+		    [list 07 $total07] \
+		    [list 08 $total08] \
+		    [list 09 $total09] \
+		    [list 10 $total10] \
+		    [list 11 $total11] \
+		    [list 12 $total12] \
+		    [list 13 $total13] \
+		    [list 14 $total14] \
+		    [list 15 $total15] \
+		    [list 16 $total16] \
+		    [list 17 $total17] \
+		    [list 18 $total18] \
+		    [list 19 $total19] \
+		    [list 20 $total20] \
+    		    [list 21 $total21] \
+		    [list 22 $total22] \
+		    [list 23 $total23] \
+		   ]
+
+# ns_log Notice "DAILY DATA $daily_data"
 
 append result "\{\"$creation_date\":\["
 foreach elem $daily_data {
+#    ns_log Notice "ELEM $elem"
     set hour [lindex $elem 0]   
-    set hour [clock scan [lindex [split $hour "+"] 0]]
-    set hour [clock format $hour -format %H]
-
+    #set hour [clock scan [lindex [split $hour "+"] 0]]
+    #set hour [clock format $hour -format %H]
     set total [lindex $elem 1]
 
-    append result "\{\"${hour}h\", $total\},"
+    append result "\{\"time\": \"${hour}:00h\", \"hour\": \"${hour}h\", \"total\": $total\},"
 }
 set result [string trimright $result ","]
-append result "\]\},"
+append result "\],\"percent\": 12\},"
 
 
-# Retrieves vehicles grouped by hour
-# Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set weekly_data [db_list_of_lists select_vehicles_grouped_hourly {
-    select date_trunc('day', o.creation_date) AS day, COUNT(1)
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
-    AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
-    GROUP BY 1 ORDER BY day;
-}]
 
-append result "\{\"week\":\["
-foreach elem $weekly_data {
-    set day [lindex $elem 0]
-    set day [db_string select_dow {
-	SELECT EXTRACT(dow from date :day); 
-    } -default ""]
-
-    switch $day {
-	"0" {
-	    set day "DOM [lc_time_fmt [lindex $elem 0] %d/%b]"
-	}
-	"1" {
-	    set day "LUN [lc_time_fmt [lindex $elem 0] %d/%b]"
-	}
-	"2" {
-	    set day "MAR [lc_time_fmt [lindex $elem 0] %d/%b]"
-	}
-	"3" {
-	    set day "MIE [lc_time_fmt [lindex $elem 0] %d/%b]"
-	}
-	"4" {
-	    set day "JUE [lc_time_fmt [lindex $elem 0] %d/%b]"
-	}
-	"5" {
-	    set day "VIE [lc_time_fmt [lindex $elem 0] %d/%b]"
-	}
-	"6" {
-	    set day "SAB [lc_time_fmt [lindex $elem 0] %d/%b]"
-	}
-    }
-    set total [lindex $elem 1]
-
-    append result "\{\"$day\", $total\},"
-    
-}
-set result [string trimright $result ","]
-append result "\]\},"
 
 
 
@@ -104,19 +151,62 @@ set monthly_data [db_list_of_lists select_vehicles_grouped_hourly {
     FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
     AND ci.content_type = :content_type
-    AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
+   -- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
     GROUP BY 1 ORDER BY day;
 }]
+
+# ns_log Notice "MONTH DATA $monthly_data"
+
+
+# Retrieves vehicles grouped by hour
+# Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
+set weekly_data [db_list_of_lists select_vehicles_grouped_hourly {
+    select date_trunc('day', o.creation_date) AS day, COUNT(1)
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.content_type = :content_type
+    AND o.creation_date::date <= :creation_date::date
+    AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
+    GROUP BY 1 ORDER BY day;
+}]
+
+append result "\{\"week\":\["
+foreach elem $weekly_data {
+    set day [lindex $elem 0]
+    set dow [db_string select_dow {
+	SELECT EXTRACT(dow from date :day); 
+    } -default ""]
+    set day [lc_time_fmt $day %d/%b]
+
+    switch $dow {
+	"0" { set dow "DOM" }
+	"1" { set dow "LUN" }
+	"2" { set dow "MAR" }
+	"3" { set dow "MIE" }
+	"4" { set dow "JUE" }
+	"5" { set dow "VIE" }
+	"6" { set dow "SAB" }
+    }
+    set total [lindex $elem 1]
+
+    append result "\{\"day\": \"$day\",\"dow\": \"$dow\", \"total\": $total\},"
+    
+}
+set result [string trimright $result ","]
+append result "\],\"percent_week\": 23\},"
+
+
+
 
 append result "\{\"month\":\["
 foreach elem $monthly_data {
     set day [lc_time_fmt [lindex $elem 0] "%d/%b"]     
     set total [lindex $elem 1]
 
-    append result "\{\"$day\", $total\},"
+    append result "\{\"day\": \"$day\", \"total\": $total\},"
 }
 set result [string trimright $result ","]
-append result "\]\}"
+append result "\],\"percent_month\": 28\}"
 
 append result "\]\}"
 

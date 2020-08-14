@@ -2,36 +2,50 @@
 ad_page_contract {
     API REST method to return cr_items qt_vehicle
 } {
-    {date:optional}
+    {date_from:optional}
+    {date_to:optional}
     {content_type "qt_vehicle"}
 }
 ns_log Notice "Running TCL script get-vehicle-graphics.tcl"
 
-
-# set creation_date [clock format [clock scan [db_string select_now { SELECT now() - INTERVAL '5 hour' FROM dual}]] -format %Y-%m-%d]
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
-if {[info exists date]} {
-    if {![catch {set t [clock scan $date]} errmsg]} {
-	set creation_date $date
+set where_clauses ""
+
+if {[info exists date_from]} {
+    if {![catch {set t [clock scan $date_from]} errmsg]} {
+	append where_clauses " AND o.creation_date::date >= :date_from::date "
+	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
     }
 }
 
+
+if {[info exists date_to]} {
+    if {![catch {set t [clock scan $date_to]} errmsg]} {
+	append where_clauses " AND o.creation_date::date <= :date_to::date"
+    } else {
+	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	ad_script_abort    
+    }
+}
+
+
+
+
 set result "\{\"vehicles\": \["
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 
 
-set daily_data [db_list_of_lists select_vehicles_grouped_hourly {
-    
-    select date_trunc('hour', o.creation_date) AS hour, COUNT(1)
+set daily_data [db_list_of_lists select_vehicles_grouped_hourly "
+    SELECT date_trunc('hour', o.creation_date) AS hour, COUNT(1)
     FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
     AND ci.content_type = :content_type
-    AND o.creation_date::date <= :creation_date::date
+    $where_clauses
     GROUP BY hour ORDER BY hour ASC
-}]
+"]
 
 #ns_log Notice "DAYly DATA $daily_data"
 
@@ -129,21 +143,20 @@ set daily_data [list \
 
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set monthly_data [db_list_of_lists select_vehicles_grouped_hourly {
+set monthly_data [db_list_of_lists select_vehicles_grouped_hourly "
     select date_trunc('day', o.creation_date) AS day, COUNT(1)
     FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
     AND ci.content_type = :content_type
-   -- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
+    AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
     GROUP BY 1 ORDER BY day;
-}]
+"]
 
-ns_log Notice "MONTH DATA $monthly_data"
-
+#ns_log Notice "MONTH DATA $monthly_data"
 
 set today [lindex [lindex $monthly_data [expr [llength $monthly_data] -1]] 1]
 set yesterday [lindex [lindex $monthly_data [expr [llength $monthly_data] -2]] 1]
-ns_log Notice "TODAY $today YESTERDAY $yesterday"
+#ns_log Notice "TODAY $today YESTERDAY $yesterday"
 
 
 
@@ -174,15 +187,14 @@ append result "\],\"percent\": 12\},"
 
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set weekly_data [db_list_of_lists select_vehicles_grouped_hourly {
+set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
     select date_trunc('day', o.creation_date) AS day, COUNT(1)
     FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
     AND ci.content_type = :content_type
-    AND o.creation_date::date <= :creation_date::date
-    -- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
+    $where_clauses
     GROUP BY 1 ORDER BY day;
-}]
+"]
 
 
 
@@ -190,7 +202,7 @@ set weekly_data [db_list_of_lists select_vehicles_grouped_hourly {
 
 
 
-ns_log Notice "WEEKLY DATA $weekly_data"
+#ns_log Notice "WEEKLY DATA $weekly_data"
 set total0 0
 set total1 0
 set total2 0
@@ -256,7 +268,13 @@ foreach elem $weekly_data {
 set result [string trimright $result ","]
 append result "\],\"percent_week\": 23\},"
 
+#ns_log Notice "MONTHLY DATA $monthly_data"
 
+set aux [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ] 0] 0]
+for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
+    set aux [clock format [clock scan {+1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
+    lappend monthly_data [list $aux 0]
+}
 
 
 append result "\{\"month\":\["
@@ -266,9 +284,9 @@ foreach elem $monthly_data {
 
     append result "\{\"day\": \"$day\", \"total\": $total\},"
 }
-set result [string trimright $result ","]
-append result "\],\"percent_month\": 28\}"
 
+set result [string trimright $result ","]
+append result "\]\}"
 append result "\]\}"
 
 

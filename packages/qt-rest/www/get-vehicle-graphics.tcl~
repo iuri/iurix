@@ -126,7 +126,33 @@ set daily_data [list \
 
 # ns_log Notice "DAILY DATA $daily_data"
 
-append result "\{\"$creation_date\":\["
+
+# Retrieves vehicles grouped by hour
+# Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
+set monthly_data [db_list_of_lists select_vehicles_grouped_hourly {
+    select date_trunc('day', o.creation_date) AS day, COUNT(1)
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.content_type = :content_type
+    AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
+   -- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
+    GROUP BY 1 ORDER BY day;
+}]
+
+#ns_log Notice "MONTH DATA $monthly_data"
+
+set today [lindex [lindex $monthly_data [expr [llength $monthly_data] -1]] 1]
+set yesterday [lindex [lindex $monthly_data [expr [llength $monthly_data] -2]] 1]
+#ns_log Notice "TODAY $today YESTERDAY $yesterday"
+
+
+
+
+
+
+append result "\{\"today\": $today, \"yesterday\": $yesterday, \"week\": 23056, \"month\": 210556,"
+append result "\"day_hours\":\["
+
 foreach elem $daily_data {
 #    ns_log Notice "ELEM $elem"
     set hour [lindex $elem 0]   
@@ -144,18 +170,6 @@ append result "\],\"percent\": 12\},"
 
 
 
-# Retrieves vehicles grouped by hour
-# Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set monthly_data [db_list_of_lists select_vehicles_grouped_hourly {
-    select date_trunc('day', o.creation_date) AS day, COUNT(1)
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
-   -- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
-    GROUP BY 1 ORDER BY day;
-}]
-
-# ns_log Notice "MONTH DATA $monthly_data"
 
 
 # Retrieves vehicles grouped by hour
@@ -166,9 +180,24 @@ set weekly_data [db_list_of_lists select_vehicles_grouped_hourly {
     WHERE ci.item_id = o.object_id
     AND ci.content_type = :content_type
     AND o.creation_date::date <= :creation_date::date
-    AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
+    -- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
     GROUP BY 1 ORDER BY day;
 }]
+
+
+
+
+
+
+
+#ns_log Notice "WEEKLY DATA $weekly_data"
+set total0 0
+set total1 0
+set total2 0
+set total3 0
+set total4 0
+set total5 0
+set total6 0
 
 append result "\{\"week\":\["
 foreach elem $weekly_data {
@@ -179,23 +208,61 @@ foreach elem $weekly_data {
     set day [lc_time_fmt $day %d/%b]
 
     switch $dow {
-	"0" { set dow "DOM" }
-	"1" { set dow "LUN" }
-	"2" { set dow "MAR" }
-	"3" { set dow "MIE" }
-	"4" { set dow "JUE" }
-	"5" { set dow "VIE" }
-	"6" { set dow "SAB" }
+	"0" {
+	    set dow "DOM"
+	    set total0 [expr $total0 + [lindex $elem 1]]
+	}
+	"1" { set dow "LUN"
+	    set total1 [expr $total1 + [lindex $elem 1]]
+	}
+	"2" { set dow "MAR"
+	    set total2 [expr $total2 + [lindex $elem 1]]
+	}
+	"3" { set dow "MIE"
+	    set total3 [expr $total3 + [lindex $elem 1]]
+	}
+	"4" { set dow "JUE"
+	    set total4 [expr $total4 + [lindex $elem 1]]
+	}
+	"5" { set dow "VIE"
+	    set total5 [expr $total5 + [lindex $elem 1]]
+	}
+	"6" { set dow "SAB"
+	    set total6 [expr $total6 + [lindex $elem 1]]
+	}
     }
     set total [lindex $elem 1]
+    # append result "\{\"day\": \"$day\", \"dow\": \"$dow\", \"total\": [lindex $elem 1]\},"
+}
 
-    append result "\{\"day\": \"$day\",\"dow\": \"$dow\", \"total\": $total\},"
+
+
+
+set weekly_data [list \
+		     [list "LUN" $total1] \
+		     [list "MAR" $total2] \
+		     [list "MIE" $total3] \
+		     [list "JUE" $total4] \
+		     [list "VIE" $total5] \
+		     [list "SAB" $total6] \
+		     [list "DOM" $total0] \
+		     ]
+foreach elem $weekly_data {
+
+    append result "\{\"dow\": \"[lindex $elem 0]\", \"total\": [lindex $elem 1]\},"
     
 }
+
 set result [string trimright $result ","]
 append result "\],\"percent_week\": 23\},"
 
+#ns_log Notice "MONTHLY DATA $monthly_data"
 
+set aux [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ] 0] 0]
+for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
+    set aux [clock format [clock scan {+1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
+    lappend monthly_data [list $aux 0]
+}
 
 
 append result "\{\"month\":\["
@@ -205,9 +272,9 @@ foreach elem $monthly_data {
 
     append result "\{\"day\": \"$day\", \"total\": $total\},"
 }
-set result [string trimright $result ","]
-append result "\],\"percent_month\": 28\}"
 
+set result [string trimright $result ","]
+append result "\]\}"
 append result "\]\}"
 
 

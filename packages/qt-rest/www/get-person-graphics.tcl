@@ -346,7 +346,7 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 		set total [expr $female + $male]
 		switch [lindex $elem 0] {
 		    "18" { set range "-18" }
-		    "60" { set range "60+" }
+		    "60" { set range "+60" }
 		    default { set range [lindex $elem 0] }
 		}
 		append result "\{

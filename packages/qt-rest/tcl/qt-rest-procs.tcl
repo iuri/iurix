@@ -13,35 +13,32 @@ ad_library {
     @creation-date Sat May 23 17:16:42 2020 
 }
 
-namespace eval ix_rest {}
-namespace eval ix_rest::jwt {}
+namespace eval qt_rest {}
+namespace eval qt_rest::jwt {}
 namespace eval ix_rest::user {}
 namespace eval ix_rest::album {}
 
-ad_proc -public ix_rest::jwt::validation_p {} {
+ad_proc -public qt_rest::jwt::validation_p {} {
     Validates jwt sent from client side. HMAC validation
     References: https://jwt.io/
 } {
 
     set header [ns_conn header]
-    ns_log Notice "HEADER \n $header"
+    #    ns_log Notice "HEADER \n $header"
     set h [ns_set size $header]
-    ns_log Notice "HEADERS $h"
+    #    ns_log Notice "HEADERS $h"
     set req [ns_set array $header]
-    ns_log Notice "$req"
+    #    ns_log Notice "$req"
     
     
-    set token [lindex [ns_set get $header authorization] 1]
-    ns_log Notice "TOKEN $token"
+    set token [lindex [ns_set get $header Authorization] 1]
+    #    ns_log Notice "TOKEN $token"
     
     set token [split $token "."]
     set header1 [ns_base64decode [lindex $token 0]]
     set payload [ns_base64decode [lindex $token 1]]
     set hmac_secret [lindex $token 2]
-    ns_log Notice "TOKEN $token \n
-HEADER $header1 \n
-PAYLOAD $payload \n
-SECRET $hmac_secret \n"
+    #    ns_log Notice "TOKEN $token \n HEADER $header1 \n PAYLOAD $payload \n SECRET $hmac_secret \n"
     
     #
     # VErifying HMAC, one needs the key and data as well
@@ -49,7 +46,7 @@ SECRET $hmac_secret \n"
     set hmac_verified_p 0
     
     set hmac_vrf [ns_crypto::hmac string -digest sha256 "Abracadabra" "What is the magic word?"]
-    ns_log Notice "VRF $hmac_vrf"
+    #    ns_log Notice "VRF $hmac_vrf"
     if {$hmac_secret eq $hmac_vrf} {
 	return  1
     }
@@ -62,7 +59,7 @@ SECRET $hmac_secret \n"
 
 
 
-ad_proc -public ix_rest::album::get_id {
+ad_proc -public qt_rest::album::get_id {
     {-user_id:required}
 } {
     Returns album_id.
@@ -74,13 +71,13 @@ ad_proc -public ix_rest::album::get_id {
     }
     
     if {![exists_and_not_null item_id]} {
-	set item_id [ix_rest::album::new -user_id $user_id]
+	set item_id [qt_rest::album::new -user_id $user_id]
     }
     
     return $item_id  
 }
 
-ad_proc ix_rest::album::new {
+ad_proc qt_rest::album::new {
     {-user_id:required}
 } {
     Creates a new album and returns its album_id
@@ -93,7 +90,7 @@ ad_proc ix_rest::album::new {
 	set peeraddr [ad_conn  peeraddr]
 	acs_user::get -user_id $user_id -array user
 
-	ns_log Notice "[parray user]"
+	# ns_log Notice "[parray user]"
 	
 	regsub -all { +} [string tolower "$user_id $user(name) Album"] {_} name
 	regsub -all {/+} $name {-} name
@@ -166,14 +163,14 @@ ad_proc ix_rest::album::new {
 
 
 
-ad_proc ix_rest::user::edit {} {
+ad_proc qt_rest::user::edit {} {
     Updates user data
 
     @return
     @author Iuri de Araujo
 } {
     
-    ns_log Notice "Running ad_proc ix_rest::user::edit"
+    ns_log Notice "Running ad_proc qt_rest::user::edit"
 
     if {[ns_conn method] eq "PUT"} {
 	
@@ -263,7 +260,7 @@ ad_proc ix_rest::user::edit {} {
 
 
 
-ad_proc ix_rest::user::edit_form {} {
+ad_proc qt_rest::user::edit_form {} {
     Updates user data
 
     Body format JSON
@@ -271,7 +268,7 @@ ad_proc ix_rest::user::edit_form {} {
     @author Iuri de Araujo
 } {
     
-    ns_log Notice "Running ad_proc ix_rest::user::edit"
+    ns_log Notice "Running ad_proc qt_rest::user::edit"
 
     if {[ns_conn method] eq "PUT"} {
 	package req json

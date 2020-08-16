@@ -8,12 +8,19 @@ ad_page_contract {
 }
 ns_log Notice "Running TCL script get-vehicle-graphics.tcl"
 
+if {[qt_rest::jwt::validation_p] eq 0} {
+    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
+    ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
+    ad_script_abort
+}
+
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
 set where_clauses ""
 
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
-       append where_clauses " AND o.creation_date >= :date_from::date "
+	append where_clauses " AND o.creation_date::date >= :date_from::date "
+	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -23,7 +30,7 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
-	append where_clauses " AND o.creation_date <= :date_to::date "
+	append where_clauses " AND o.creation_date::date <= :date_to::date"
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -33,10 +40,7 @@ if {[info exists date_to]} {
 
 
 
-set result "\{\"vehicles\": \["
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-
-
 set daily_data [db_list_of_lists select_vehicles_grouped_hourly "
     SELECT date_trunc('hour', o.creation_date) AS hour, COUNT(1)
     FROM cr_items ci, acs_objects o
@@ -142,15 +146,14 @@ set daily_data [list \
 
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set monthly_data [db_list_of_lists select_vehicles_grouped_hourly {
+set monthly_data [db_list_of_lists select_vehicles_grouped_hourly "
     select date_trunc('day', o.creation_date) AS day, COUNT(1)
     FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
     AND ci.content_type = :content_type
     AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
-   -- AND o.creation_date BETWEEN :creation_date::date - INTERVAL '1 month' AND :creation_date::date + INTERVAL '1 day'
     GROUP BY 1 ORDER BY day;
-}]
+"]
 
 #ns_log Notice "MONTH DATA $monthly_data"
 
@@ -163,7 +166,7 @@ set yesterday [lindex [lindex $monthly_data [expr [llength $monthly_data] -2]] 1
 
 
 
-append result "\{\"today\": $today, \"yesterday\": $yesterday, \"week\": 23056, \"month\": 210556,"
+append result "\{\"today_total\": $today, \"today_percent\": 11, \"yesterday_total\": $yesterday, \"week_total\": 23056, \"week_percent\": 24, \"month_total\": 210556,"
 append result "\"day_hours\":\["
 
 foreach elem $daily_data {
@@ -176,7 +179,7 @@ foreach elem $daily_data {
     append result "\{\"time\": \"${hour}:00h\", \"hour\": \"${hour}h\", \"total\": $total\},"
 }
 set result [string trimright $result ","]
-append result "\],\"percent\": 12\},"
+append result "\],"
 
 
 
@@ -211,7 +214,7 @@ set total4 0
 set total5 0
 set total6 0
 
-append result "\{\"week\":\["
+append result "\"week\":\["
 foreach elem $weekly_data {
     set day [lindex $elem 0]
     set dow [db_string select_dow {
@@ -266,7 +269,7 @@ foreach elem $weekly_data {
 }
 
 set result [string trimright $result ","]
-append result "\],\"percent_week\": 23\},"
+append result "\],"
 
 #ns_log Notice "MONTHLY DATA $monthly_data"
 
@@ -277,7 +280,7 @@ for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
 }
 
 
-append result "\{\"month\":\["
+append result "\"month\":\["
 foreach elem $monthly_data {
     set day [lc_time_fmt [lindex $elem 0] "%d/%b"]     
     set total [lindex $elem 1]
@@ -286,8 +289,8 @@ foreach elem $monthly_data {
 }
 
 set result [string trimright $result ","]
-append result "\]\}"
-append result "\]\}"
+append result "\]"
+append result "\}"
 
 
 

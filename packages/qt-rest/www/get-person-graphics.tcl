@@ -275,14 +275,10 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
     set r [expr $max / 6]
     append result "\"heatmap_range\":\["
     append result "\{\"range\": \"1-$r\", \"color\": \"#5bcdfa\"\},"
-    set i [expr 2 * $r]
-    append result "\{\"range\": \"$i-[expr 3 * $r]\", \"color\": \"#5eaffe\"\},"
-    set i [expr 3 * $r]
-    append result "\{\"range\": \"$i-[expr 4 * $r]\", \"color\": \"#4782f5\"\},"
-    set i [expr 4 * $r]
-    append result "\{\"range\": \"$i-[expr 5 * $r]\", \"color\": \"#3450ef\"\},"
-    set i [expr 5 * $r]
-    append result "\{\"range\": \"$i-$max\", \"color\": \"#0502d3\"\}"
+    append result "\{\"range\": \"[expr $r + 1]-[expr $r * 3]\", \"color\": \"#5eaffe\"\},"
+    append result "\{\"range\": \"[expr 3 * $r + 1]-[expr $r * 4]\", \"color\": \"#4782f5\"\},"
+    append result "\{\"range\": \"[expr 4 * $r + 1]-[expr $r * 5]\", \"color\": \"#3450ef\"\},"
+    append result "\{\"range\": \"[expr 5 * $r + 1]-$max\", \"color\": \"#0502d3\"\}"
     append result "\],"
 
 

@@ -73,7 +73,7 @@ set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
     GROUP BY dow ORDER BY dow;
 "]
 set weekly_data [lreplace [lappend weekly_data [lindex $weekly_data 0]] 0 0]
-set week_total 0
+
 append result "\"week\":\["
 foreach elem $weekly_data {
     set dow [lindex $elem 0]    
@@ -86,7 +86,6 @@ foreach elem $weekly_data {
 	5 { set dow "VIE" }
 	6 { set dow "SAB" }
     }
-    set week_total [expr $week_total + [lindex $elem 1]]
     append result "\{\"dow\": \"$dow\", \"total\": [lindex $elem 1]\},"
 }
 set result [string trimright $result ","]
@@ -111,8 +110,32 @@ set today_percent [expr [expr [expr $today_total * 100] / $yesterday_total] - 10
 set aux [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ] 0] 0]
 ns_log Notice "AUX $aux"
 
-set last_week_total 108000
+
+
+set last_week_total 0
+set week_total 0
+
+# To get the week total, we must get the last day stored (i.e. today's date), find out which day of the week it is, then to drecrease days untill 0 (i.e. last sunday where the week starts)
+# set current_day [lindex [lindex $monthly_data [expr [llength $monthly_data] -1] ] 0]
+set dow [db_string select_dow { SELECT EXTRACT(dow FROM date :creation_date) } -default 6]
+set i $dow
+while {$i>-1} {
+    set elem [lindex $monthly_data [expr [llength $monthly_data] - $i -1]]
+    set week_total [expr $week_total + [lindex $elem 1]]
+    set i [expr $i - 1] 
+}
+
+set i [expr $dow + 7]
+while {$i>$dow} {
+    set elem [lindex $monthly_data [expr [llength $monthly_data] - $i -1]]
+    set last_week_total [expr $last_week_total + [lindex $elem 1]]
+    set i [expr $i - 1]
+}
+ns_log Notice "$last_week_total"
 set week_percent [expr [expr [expr $week_total * 100] / $last_week_total] - 100]
+		  
+
+
 
 
 

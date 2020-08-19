@@ -240,7 +240,7 @@ append result "\],"
 
 if {[info exists heatmap_p] && $heatmap_p eq true} {
     append result "\"heatmap\":\["
-    # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
+# Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
     set week_hourly_datasource [db_list_of_lists select_person_of_month_grouped_hourly {
 	select date_trunc('hour', o.creation_date) AS hour,
 	COUNT(1) AS total,
@@ -254,18 +254,37 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
 	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
 	GROUP BY 1 ORDER BY hour ASC    
     }]
-    
+    set max 0
     foreach elem $week_hourly_datasource {
+	
 	set hour [clock scan [lindex [split [lindex $elem 0] "+"] 0]]
 	set h [clock format $hour -format %H]
 	set d [clock format $hour -format "%d/%m"]
 	set total [lindex $elem 1]
+
+	if {$max < $total} {
+	    set max $total
+	}
 	set female [lindex $elem 2]
 	set male [lindex $elem 3]
 	append result "\{\"date\": \"$d\", \"time\": \"${h}h\", \"total\": $total, \"female\": $female, \"male\": $male\},"
     }
     set result [string trimright $result ","]
-    append result "\],"    
+    append result "\],"
+
+    set r [expr $max / 6]
+    append result "\"heatmap_range\":\["
+    append result "\{\"range\": \"1-$r\", \"color\": \"#5bcdfa\"\},"
+    append result "\{\"range\": \"[expr $r + 1]-[expr $r * 3]\", \"color\": \"#5eaffe\"\},"
+    append result "\{\"range\": \"[expr 3 * $r + 1]-[expr $r * 4]\", \"color\": \"#4782f5\"\},"
+    append result "\{\"range\": \"[expr 4 * $r + 1]-[expr $r * 5]\", \"color\": \"#3450ef\"\},"
+    append result "\{\"range\": \"[expr 5 * $r + 1]-$max\", \"color\": \"#0502d3\"\}"
+    append result "\],"
+
+
+
+
+    
 }
 
 

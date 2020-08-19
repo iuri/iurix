@@ -3,7 +3,7 @@ ad_page_contract {
     @creation-date September 01, 2001
     @cvs-id $Id: search.tcl,v 1.40.2.7 2017/02/05 11:40:32 gustafn Exp $
 } {
-    q:trim
+    {q:trim ""}
     {t:trim ""}
     {offset:naturalnum,notnull 0}
     {num:range(0|200) 0}
@@ -13,11 +13,6 @@ ad_page_contract {
     {scope ""}
     {object_type:token ""}
 } -validate {
-    keywords_p {
-        if {![info exists q] || $q eq ""} {
-            ad_complain "#search.lt_You_must_specify_some#"
-        }
-    }
     valid_dfs -requires dfs {
         if {![array exists symbol2interval]} {
             array set symbol2interval [parameter::get -package_id [ad_conn package_id] -parameter Symbol2Interval]
@@ -54,7 +49,7 @@ set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
 
 if {[callback::impl_exists -impl $driver -callback search::driver_info]} {
     array set info [lindex [callback -impl $driver search::driver_info] 0]
-#    array set info [list package_key intermedia-driver version 1 automatic_and_queries_p 1  stopwords_p 1]
+    #    array set info [list package_key intermedia-driver version 1 automatic_and_queries_p 1  stopwords_p 1]
 } else {
     array set info [acs_sc::invoke -contract FtsEngineDriver -operation info -call_args [list] -impl $driver]
 }
@@ -99,7 +94,7 @@ if {$search_package_id eq "" && [parameter::get -package_id $package_id -paramet
     lappend params $subsite_packages
     set search_package_id $subsite_packages
 } elseif {$search_package_id ne ""} { 
-  lappend params $search_package_id
+    lappend params $search_package_id
 }
 
 set t0 [clock clicks -milliseconds]
@@ -107,7 +102,7 @@ set t0 [clock clicks -milliseconds]
 # TODO calculate subsite or dotlrn package_ids
 if {"this" ne $scope } {
     # don't send package_id if its not searching this package
-  # set search_package_id "" ;# don't overwrite this, when you are restricting search to package_id
+    # set search_package_id "" ;# don't overwrite this, when you are restricting search to package_id
 } else {
     set search_node_id [site_node::get_node_id_from_object_id -object_id $search_package_id]
     if {"dotlrn" eq [site_node::get_element -node_id $search_node_id -element package_key]} {
@@ -120,14 +115,14 @@ if {[callback::impl_exists -impl $driver -callback search::search]} {
     # FIXME do this in the intermedia driver!
     #    set final_query_string [db_string final_query_select "select site_wide_search.im_convert(:q) from dual"]
 
-    array set result [lindex [callback -impl $driver search::search -query $q -offset $offset -limit $limit \
+    array set result [lindex [callback -impl $driver search::search \
+                                  -query $q -offset $offset -limit $limit \
 				  -user_id $user_id -df $df \
 				  -extra_args [list package_ids $search_package_id object_type $object_type]] 0]
 } else {
     array set result [acs_sc::invoke -contract FtsEngineDriver -operation search \
 			  -call_args $params -impl $driver]
 }
-
 
 set tend [clock clicks -milliseconds]
 
@@ -185,27 +180,83 @@ foreach object_id $result(ids) {
             #ns_log warning "SEARCH search/www/search.tcl callback::datasource::$object_type not found"
             array set datasource [acs_sc::invoke -contract FtsContentProvider -operation datasource \
 				      -call_args [list $object_id] -impl $object_type]
-
+            
             set url_one [acs_sc::invoke -contract FtsContentProvider -operation url \
 			     -call_args [list $object_id] -impl $object_type]
         }
-
+        
         search::content_get txt $datasource(content) $datasource(mime) $datasource(storage_type) $object_id
         if {[callback::impl_exists -impl $driver -callback search::summary]} {
             set title_summary [lindex [callback -impl $driver search::summary -query $q -text $datasource(title)] 0]
             set txt_summary [lindex [callback -impl $driver search::summary -query $q -text $txt] 0]
+        
         } else {
             set title_summary [acs_sc::invoke -contract FtsEngineDriver -operation summary \
 				   -call_args [list $q $datasource(title)] -impl $driver]
             set txt_summary [acs_sc::invoke -contract FtsEngineDriver -operation summary \
 				 -call_args [list $q $txt] -impl $driver]
+        
         }
     } errmsg]} {
         ns_log error "search.tcl object_id $object_id object_type $object_type error $errmsg"
     } else {
         set title_summary [string map {"<b>" "" "</b>" ""} $title_summary]
-        set creation_date [lc_time_fmt [db_string select_creation_date { SELECT creation_date FROM acs_objects WHERE object_id = :object_id } -default ""] "%q %X" "es_EX"]
-        append json "\{\"plate\": \"$title_summary\", \"creation_date\": \"$creation_date\"\},"
+        # set creation_date [lc_time_fmt [db_string select_creation_date { SELECT creation_date FROM acs_objects WHERE object_id = :object_id } -default ""] "%q %X" "es_ES"]
+        db_0or1row select_object {
+            SELECT o.creation_date, cr.description
+            FROM cr_revisions cr, acs_objects o
+            WHERE o.object_id = cr.revision_id
+            AND cr.revision_id = :object_id 
+        }
+        
+        set occurency [db_string select_revision_count { SELECT COUNT(revision_id) FROM cr_revisions WHERE item_id = (SELECT item_id FROM cr_revisions WHERE revision_id = :object_id) } -default 0]
+        
+        append json "\{
+            \"plate\": \"$title_summary\",
+            \"date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
+            \"time\": \"[lc_time_fmt $creation_date %H:%M]\",
+            \"location\": \"[lindex $description 5]\",
+            \"occurency\": \"$occurency\",
+            \"client_p\": true,
+            \"membership_p\": false
+        \},"
+    }
+}
+
+
+
+
+if { $result(count) eq 0 } {
+    
+    db_foreach select_vehicles {
+        SELECT cr.title,
+        MAX(cr.creation_date) AS creation_date,
+        COUNT(*) AS occurency
+        FROM cr_items ci,
+        cr_revisionsx cr
+        WHERE ci.item_id = cr.item_id
+        AND ci.content_type = 'qt_vehicle'
+        AND cr.title <> 'UNKNOWN'
+        GROUP BY cr.title
+        HAVING COUNT(*) > 1
+        ORDER BY COUNT(*) DESC
+        LIMIT 10
+    } {
+        set description [db_string select_description {
+            SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = :title AND cr.creation_date = :creation_date
+        } -default ""]
+        append json "\{
+            \"plate\": \"$title\",
+            \"date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
+            \"time\": \"[lc_time_fmt $creation_date %H:%M]\",
+            \"location\": \"[lindex $description 5]\",
+            \"occurency\": \"$occurency\",
+            \"client_p\": true,
+            \"membership_p\": false
+        \},"
+
+
+    
     }
 }
 

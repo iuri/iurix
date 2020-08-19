@@ -41,20 +41,21 @@ if {[info exists date_to]} {
 
 
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set daily_data [db_list_of_lists select_grouped_hour "
-    SELECT EXTRACT('hour' FROM o.creation_date) AS hour, COUNT(1) AS total
+append result "\{\"day_hours\":\["
+set max_hour [list]
+db_foreach select_grouped_hour "
+    SELECT EXTRACT('hour' FROM o.creation_date) AS hour, 
+    COUNT(1) AS total
     FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
     AND ci.content_type = :content_type
     $where_clauses
     GROUP BY hour ORDER BY hour ASC
-"]
-
-# ns_log Notice "DAYly DATA $daily_data"
-
-append result "\{\"day_hours\":\["
-foreach elem $daily_data {
-    append result "\{\"time\": \"[lindex $elem 0]:00h\", \"hour\": \"[lindex $elem 0]h\", \"total\":  [lindex $elem 1]\},"
+" {
+    if {[lindex $max_hour 1]<$total} {
+	set max_hour [list "\"${hour}h\"" $total]
+    }
+    append result "\{\"time\": \"${hour}:00h\", \"hour\": \"${hour}h\", \"total\": $total\},"
 }
 set result [string trimright $result ","]
 append result "\],"
@@ -73,8 +74,9 @@ set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
     GROUP BY dow ORDER BY dow;
 "]
 set weekly_data [lreplace [lappend weekly_data [lindex $weekly_data 0]] 0 0]
-set week_total 0
+
 append result "\"week\":\["
+set max_week_day [list]
 foreach elem $weekly_data {
     set dow [lindex $elem 0]    
     switch $dow {
@@ -86,7 +88,10 @@ foreach elem $weekly_data {
 	5 { set dow "VIE" }
 	6 { set dow "SAB" }
     }
-    set week_total [expr $week_total + [lindex $elem 1]]
+    if {[lindex $max_week_day 1]<[lindex $elem 1]} {
+	set max_week_day [list "\"$dow\"" [lindex $elem 1]]
+    }
+
     append result "\{\"dow\": \"$dow\", \"total\": [lindex $elem 1]\},"
 }
 set result [string trimright $result ","]
@@ -108,17 +113,36 @@ set today_total [lindex [lindex $monthly_data [expr [llength $monthly_data] -1]]
 set yesterday_total [lindex [lindex $monthly_data [expr [llength $monthly_data] -2]] 1]
 set today_percent [expr [expr [expr $today_total * 100] / $yesterday_total] - 100]
 
-set aux [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ] 0] 0]
-ns_log Notice "AUX $aux"
 
-set last_week_total 108000
+
+
+set last_week_total 0
+set week_total 0
+
+# To get the week total, we must get the last day stored (i.e. today's date), find out which day of the week it is, then to drecrease days untill 0 (i.e. last sunday where the week starts)
+# set current_day [lindex [lindex $monthly_data [expr [llength $monthly_data] -1] ] 0]
+set dow [db_string select_dow { SELECT EXTRACT(dow FROM date :creation_date) } -default 6]
+set i $dow
+while {$i>-1} {
+    set elem [lindex $monthly_data [expr [llength $monthly_data] - $i -1]]
+    set week_total [expr $week_total + [lindex $elem 1]]
+    set i [expr $i - 1] 
+}
+
+set i [expr $dow + 7]
+while {$i>$dow} {
+    set elem [lindex $monthly_data [expr [llength $monthly_data] - $i -1]]
+    set last_week_total [expr $last_week_total + [lindex $elem 1]]
+    set i [expr $i - 1]
+}
 set week_percent [expr [expr [expr $week_total * 100] / $last_week_total] - 100]
+		  
 
 
 
 
 
-
+set aux [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ] 0] 0]
 for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
     set aux [clock format [clock scan {+1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
     lappend monthly_data [list $aux 0]
@@ -126,8 +150,12 @@ for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
 
 append result "\"month\":\["
 set month_total 0
+set max_month_day [list]
 foreach elem $monthly_data {       
     set month_total [expr [lindex $elem 1] + $month_total]
+    if {[lindex $max_month_day 1]<[lindex $elem 1]} {
+	set max_month_day [list "[lc_time_fmt [lindex $elem 0] %d/%b]" [lindex $elem 1]]
+    }
     append result "\{\"day\": \"[lc_time_fmt [lindex $elem 0] "%d/%b"]\", \"total\": [lindex $elem 1]\},"
 }
 
@@ -137,7 +165,16 @@ append result "\],"
 
 # ns_log Notice "MONTH DATA $monthly_data"
 
-append result "\"today_total\": $today_total, \"today_percent\": $today_percent, \"yesterday_total\": $yesterday_total, \"week_total\": $week_total, \"week_percent\": 24, \"month_total\": $month_total\}"
+append result "\"today_total\": $today_total,
+    \"today_percent\": $today_percent,
+    \"yesterday_total\": $yesterday_total,
+    \"week_total\": $week_total,
+    \"week_percent\": $week_percent,
+    \"month_total\": $month_total,
+    \"max_hour\": \{\"hour\": [lindex $max_hour 0], \"total\": [lindex $max_hour 1]\},
+    \"max_week_day\": \{\"day\": [lindex $max_week_day 0], \"total\": [lindex $max_week_day 1]\},
+    \"max_month_day\": \{\"day\": \"[lindex $max_month_day 0]\", \"total\": [lindex $max_month_day 1]\}
+\}"
 
 ns_respond -status 200 -type "application/json" -string $result
 ad_script_abort

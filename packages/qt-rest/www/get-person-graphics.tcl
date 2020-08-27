@@ -8,6 +8,9 @@ ad_page_contract {
     {heatmap_p:boolean,optional}
 }
 
+# Validate and Authenticate JWT
+qt::rest::jwt::validation_p
+
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
 set content_type qt_face
 set where_clauses ""
@@ -25,6 +28,7 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
+	set creation_date $date_to
 	append where_clauses " AND o.creation_date::date <= :date_to::date "
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
@@ -35,8 +39,10 @@ if {[info exists date_to]} {
 
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set max_hour [list]
-append result "\{\"day_hours\":\["
-db_foreach select_grouped_per_hour "
+set max_hour_female [list]
+set max_hour_male [list]
+append result "\{\"hours\":\["
+set hourly_data [db_list_of_lists select_grouped_per_hour "
     SELECT EXTRACT('hour' FROM o.creation_date) AS hour,
     COUNT(1) AS total,
     COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
@@ -48,18 +54,32 @@ db_foreach select_grouped_per_hour "
     AND ci.content_type = :content_type
     $where_clauses
     GROUP BY 1 ORDER BY hour ASC    
-" {
-    if {[lindex $max_hour 1]<$total} {
-	set max_hour [list "\"${hour}h\"" $total]
+"]
+
+for {set i 0} {$i<24} {incr i} {
+    if {[lsearch -index 0 $hourly_data $i] eq -1} {
+	set hourly_data [linsert $hourly_data $i [list $i 0 0 0]]				     
     }
-    append result "\{\"time\": \"${hour}:00h\", \"hour\": \"${hour}h\", \"total\": $total, \"female\": $female, \"male\": $male\},"
 }
+
+ns_log Notice "HOUR $hourly_data"
+foreach elem $hourly_data {
+    if {[lindex $max_hour 1]<[lindex $elem 1]} {
+	set max_hour [list "\"[lindex $elem 0]h\"" [lindex $elem 1]]
+    }
+    if {[lindex $max_hour_female 1]<[lindex $elem 2]} {
+	set max_hour_female [list  "[lindex $elem 0]h" [lindex $elem 2]]
+    }
+    if {[lindex $max_hour_male 1]<[lindex $elem 3]} {
+	set max_hour_male [list "[lindex $elem 0]h" [lindex $elem 3]]
+    }
+    
+    append result "\{\"time\": \"[lindex $elem 0]:00h\", \"hour\": \"[lindex $elem 0]h\", \"total\": [lindex $elem 1]\, \"female\": [lindex $elem 2], \"male\": [lindex $elem 3]\},"
+}
+
+
 set result [string trimright $result ","]
 append result "\],"
-
-
-
-
 
 
 # Retrieves vehicles grouped by hour
@@ -77,9 +97,22 @@ set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
     $where_clauses
     GROUP BY 1 ORDER BY dow;
 "]
-set weekly_data [lreplace [lappend weekly_data [lindex $weekly_data 0]] 0 0]
+
+
 append result "\"week\":\["
 set max_week_day [list]
+set max_week_day_female [list]
+set max_week_day_male [list]
+
+for {set i 0} {$i<7} {incr i} {
+    if {[lsearch -index 0 $weekly_data $i] eq -1} {
+	#lappend weekly_data [list $i 0 0 0]
+	set weekly_data [linsert $weekly_data $i [list $i 0 0 0]]
+    }
+}
+#set weekly_data [lsort -index 0 $weekly_data]
+set weekly_data [lreplace [lappend weekly_data [lindex $weekly_data 0]] 0 0]
+
 foreach elem $weekly_data {
     set dow [lindex $elem 0]
     switch $dow {
@@ -95,7 +128,13 @@ foreach elem $weekly_data {
     if {[lindex $max_week_day 1]<[lindex $elem 1]} {
 	set max_week_day [list "\"$dow\"" [lindex $elem 1]]
     }
-
+    if {[lindex $max_week_day_female 1]<[lindex $elem 2]} {
+	set max_week_day_female [list "$dow" [lindex $elem 1]]
+    }
+    if {[lindex $max_week_day_male 1]<[lindex $elem 3]} {
+	set max_week_day_male [list "$dow" [lindex $elem 1]]
+    }
+    
     append result "\{\"dow\": \"$dow\", \"total\": [lindex $elem 1], \"female\": [lindex $elem 2], \"male\": [lindex $elem 3]\},"    
 }
 set result [string trimright $result ","]
@@ -119,9 +158,10 @@ append result "\],"
 
 
 
+
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set monthly_data [db_list_of_lists select_month_per_day {
+set monthly_data [db_list_of_lists select_month_per_day "
     SELECT date_trunc('day', o.creation_date) AS day,
     COUNT(1) AS total,
     COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
@@ -133,7 +173,7 @@ set monthly_data [db_list_of_lists select_month_per_day {
     AND ci.content_type = :content_type
     AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
     GROUP BY 1 ORDER BY day;
-}]
+"]
 
 # ns_log Notice "MONTH DATA $monthly_data"
 
@@ -145,12 +185,22 @@ set yesterday_female [lindex [lindex $monthly_data [expr [llength $monthly_data]
 set yesterday_male [lindex [lindex $monthly_data [expr [llength $monthly_data] -2] ] 3]
 set yesterday_total [expr $yesterday_female + $yesterday_male]
 
-set today_percent_female [expr [expr [expr $today_female * 100] / $yesterday_female] - 100]
-set today_percent_male [expr [expr [expr $today_male * 100] / $yesterday_male] - 100]
-set today_percent [expr $today_percent_female + $today_percent_male]
+set today_percent_female 0
+if {$today_female ne 0 && $yesterday_female ne 0} {
+    set today_percent_female [expr [expr [expr $today_female * 100] / $yesterday_female] - 100]
+}
+set today_percent_male 0
+if {$today_male ne 0 && $yesterday_male ne 0} {
+    set today_percent_male [expr [expr [expr $today_male * 100] / $yesterday_male] - 100]
+}
+set today_percent 0
+if {$today_female ne 0 && $today_male ne 0} {
+    set today_percent [expr $today_percent_female + $today_percent_male]
+}
 
 set week_female 0
 set week_male 0
+set week_total 0
 set last_week_total 0
 
 # To get the week total, we must get the last day stored (i.e. today's date), find out which day of the week it is, then to drecrease days untill 0 (i.e. last sunday where the week starts)
@@ -159,6 +209,7 @@ set dow [db_string select_dow { SELECT EXTRACT(dow FROM date :creation_date) } -
 set i $dow
 while {$i>-1} {
     set elem [lindex $monthly_data [expr [llength $monthly_data] - $i -1]]
+    set week_total [expr $week_total + [lindex $elem 1]]
     set week_female [expr $week_female + [lindex $elem 2]]
     set week_male [expr $week_male + [lindex $elem 3]]
     set i [expr $i - 1] 
@@ -170,15 +221,20 @@ while {$i>$dow} {
     set last_week_total [expr $last_week_total + [lindex $elem 1]]
     set i [expr $i - 1]
 }
-set week_total [expr $week_female + $week_male]
-set week_percent [expr [expr [expr $week_total * 100] / $last_week_total] - 100]
-		  
+
+
+set week_percent 0
+if {$week_total ne 0 && $last_week_total ne 0} {
+    set week_percent [expr [expr [expr $week_total * 100] / $last_week_total] - 100]
+}
 		  
 
 
 set month_female 0
 set month_male 0
 set max_month_day [list]
+set max_month_day_female [list]
+set max_month_day_male [list]
 
 
 foreach elem $monthly_data {
@@ -186,10 +242,29 @@ foreach elem $monthly_data {
     set month_male [expr $month_male + [lindex $elem 3]]
 
     if {[lindex $max_month_day 1]<[lindex $elem 1]} {
-	set max_month_day [list "[lc_time_fmt [lindex $elem 0] %d/%b]" [lindex $elem 1]]
+	set max_month_day [list "[lc_time_fmt [lindex $elem 0] %d/%b es_ES]" [lindex $elem 1]]
+    }
+    if {[lindex $max_month_day_female 1]<[lindex $elem 2]} {
+	set max_month_day_female [list "[lc_time_fmt [lindex $elem 0] %d/%b es_ES]" [lindex $elem 1]]
+    }
+    if {[lindex $max_month_day_male 1]<[lindex $elem 3]} {
+	set max_month_day_male [list "[lc_time_fmt [lindex $elem 0] %d/%b es_ES]" [lindex $elem 1]]
     }
 }
 set month_total [expr $month_female + $month_male]
+
+
+
+set aux [lindex [lindex [lindex $monthly_data 0] 0] 0]
+for {set i [expr [lindex [split $aux "-"] 2] - 1]} {$i>0} {set i [expr $i - 1]} {
+    set aux [clock format [clock scan {-1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
+    lappend monthly_data [list $aux 0 0 0] 
+}
+set monthly_data [lsort -index 0 $monthly_data]
+
+
+
+
 
 set aux [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ] 0] 0]
 for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
@@ -200,15 +275,11 @@ for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
 append result "\"month\":\["
 foreach elem $monthly_data {
     #set day [lc_time_fmt [lindex $elem 0] "%d/%b"]
-    append result "\{\"day\": \"[lc_time_fmt [lindex $elem 0] %d/%b]\", \"total\": [lindex $elem 1]\, \"female\": [lindex $elem 2]\,\"male\": [lindex $elem 3]\},"
+    append result "\{\"day\": \"[lc_time_fmt [lindex $elem 0] %d/%b es_ES]\", \"total\": [lindex $elem 1], \"female\": [lindex $elem 2], \"male\": [lindex $elem 3]\},"
 }
 
 set result [string trimright $result ","]
 append result "\],"
-
-
-
-
 
 
 
@@ -263,7 +334,7 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
 
 if {[info exists age_range_p] && $age_range_p eq true} {
     append result "\"ageRanges\":\["
-    set l_age_ranges [db_list_of_lists select_ranges {
+    set l_age_ranges [db_list_of_lists select_ranges "
 	SELECT ROUND(SPLIT_PART(cr.description, ' ', 4)::numeric) AS range,
 	COUNT(1) AS total,
 	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS total_female,
@@ -271,10 +342,9 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 	FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id
 	AND ci.item_id = cr.item_id
 	AND ci.latest_revision = cr.revision_id AND ci.content_type = :content_type
-	AND EXTRACT(MONTH FROM o.creation_date) = EXTRACT(MONTH FROM :creation_date::date)
+       	AND o.creation_date::date = :creation_date::date
 	GROUP BY range;	
-    }]
-   
+    "]
    
     if {[llength $l_age_ranges] > 0} {
 	set male18 0
@@ -304,6 +374,8 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 	    }
 	}
 	set l_age_ranges [lsort -integer -index 0 $l_age_ranges]
+
+	ns_log Notice "AGERANGES $l_age_ranges"
 	
 	set aux [list 0 0 0 0]
 	foreach elem $l_age_ranges {
@@ -320,8 +392,8 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 		}
 		append result "\{
 		    \"range\": \"$range\",
-		    \"total_female\": \"$female\",
-		    \"total_male\": \"$male\",
+		    \"female\": \"$female\",
+		    \"male\": \"$male\",
 		    \"total\": \"$total\"	    
 		\},"	   
 	    }
@@ -345,8 +417,14 @@ append result "\"today_total\": $today_total,
     \"yesterday_female\": $yesterday_female,
     \"yesterday_male\": $yesterday_male,
     \"max_hour\": \{\"hour\": [lindex $max_hour 0], \"total\": [lindex $max_hour 1]\},
+    \"max_hour_female\": \{\"hour\": \"[lindex $max_hour_female 0]\", \"total\": [lindex $max_hour_female 1]\},
+    \"max_hour_male\": \{\"hour\": \"[lindex $max_hour_male 0]\", \"total\": [lindex $max_hour_male 1]\},
     \"max_week_day\": \{\"day\": [lindex $max_week_day 0], \"total\": [lindex $max_week_day 1]\},
+    \"max_week_day_female\": \{\"day\": \"[lindex $max_week_day_female 0]\", \"total\": [lindex $max_week_day_female 1]\},
+    \"max_week_day_male\": \{\"day\": \"[lindex $max_week_day_male 0]\", \"total\": [lindex $max_week_day_male 1]\},
     \"max_month_day\": \{\"day\": \"[lindex $max_month_day 0]\", \"total\": [lindex $max_month_day 1]\},
+    \"max_month_day_female\": \{\"day\": \"[lindex $max_month_day_female 0]\", \"total\": [lindex $max_month_day_female 1]\},
+    \"max_month_day_male\": \{\"day\": \"[lindex $max_month_day_male 0]\", \"total\": [lindex $max_month_day_male 1]\},
     \"week_total\": $week_total,
     \"week_female\": $week_female,
     \"week_male\": $week_male,

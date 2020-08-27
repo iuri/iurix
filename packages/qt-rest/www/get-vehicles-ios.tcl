@@ -14,15 +14,6 @@ ad_page_contract {
 
 ns_log Notice "Running TCL script get-vehicles.tcl"
 
-
-ns_log Notice "$limit \n
-    $offset \n
-    $date_from \n
-    $date_to \n
-    $where_clauses \n
-    $order \n
-"
-
 if {[exists_and_not_null date_from] } {
     if {[catch { set timestamp [clock scan $date_from] } errmsg]} {   
 	ns_respond -status 400 -type "text/plain" -string $errmsg
@@ -43,7 +34,6 @@ if {[exists_and_not_null date_to]} {
     }
 }
 
-set result "\{\"vehicles\": \["
 
 if {$count eq true} {
     db_0or1row select_count_vehicles "
@@ -79,9 +69,11 @@ if {$count eq true} {
 	AND o.creation_date BETWEEN (now() - INTERVAL '5 hour')::date - INTERVAL '6 day' AND (now() - INTERVAL '5 hour')::date + INTERVAL '1 day'
     }
     
-    append result "\{\"total\": $total\}, \{\"today\": $today_total\}, \{\"yesterday\": $yesterday_total\}, \{\"week\": $week_total\}"
+    append result "\{\"total\": $total, \"today\": $today_total, \"yesterday\": $yesterday_total, \"week\": $week_total\}"
 
 } else {
+    set result "\{\"vehicles\": \["
+
     db_foreach select_vehicles "
 	SELECT ci.name, cr.description, o.creation_date
 	FROM cr_items ci, cr_revisions cr, acs_objects o
@@ -99,12 +91,12 @@ if {$count eq true} {
 	append result "\{\"name\": \"$name\", \"creation_date\": \"$creation_date\", \"description\": \"$description\"\},"
     }
 
-
+    set result [string trimright $result ","]
+    append result "\]\}"
+    
 }
 
 
-set result [string trimright $result ","]
-append result "\]\}"
 
 ns_respond -status 200 -type "application/json" -string $result
 ad_script_abort

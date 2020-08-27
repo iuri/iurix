@@ -13,12 +13,11 @@ ad_library {
     @creation-date Sat May 23 17:16:42 2020 
 }
 
-namespace eval qt_rest {}
-namespace eval qt_rest::jwt {}
-namespace eval ix_rest::user {}
-namespace eval ix_rest::album {}
+namespace eval qt::rest {}
+namespace eval qt::rest::jwt {}
+namespace eval qt::rest::user {}
 
-ad_proc -public qt_rest::jwt::validation_p {} {
+ad_proc -public qt::rest::jwt::validation_p {} {
     Validates jwt sent from client side. HMAC validation
     References: https://jwt.io/
 } {
@@ -48,9 +47,16 @@ ad_proc -public qt_rest::jwt::validation_p {} {
     set hmac_vrf [ns_crypto::hmac string -digest sha256 "Abracadabra" "What is the magic word?"]
     #    ns_log Notice "VRF $hmac_vrf"
     if {$hmac_secret eq $hmac_vrf} {
-	return  1
+	return  
     }
-    return 0
+
+
+    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
+    ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
+    ad_script_abort
+    
+      
+    return 1
 }
 
 
@@ -59,7 +65,7 @@ ad_proc -public qt_rest::jwt::validation_p {} {
 
 
 
-ad_proc -public qt_rest::album::get_id {
+ad_proc -public qt::rest::album::get_id {
     {-user_id:required}
 } {
     Returns album_id.
@@ -71,13 +77,13 @@ ad_proc -public qt_rest::album::get_id {
     }
     
     if {![exists_and_not_null item_id]} {
-	set item_id [qt_rest::album::new -user_id $user_id]
+	set item_id [qt::rest::album::new -user_id $user_id]
     }
     
     return $item_id  
 }
 
-ad_proc qt_rest::album::new {
+ad_proc qt::rest::album::new {
     {-user_id:required}
 } {
     Creates a new album and returns its album_id
@@ -163,14 +169,14 @@ ad_proc qt_rest::album::new {
 
 
 
-ad_proc qt_rest::user::edit {} {
+ad_proc qt::rest::user::edit {} {
     Updates user data
 
     @return
     @author Iuri de Araujo
 } {
     
-    ns_log Notice "Running ad_proc qt_rest::user::edit"
+    ns_log Notice "Running ad_proc qt::rest::user::edit"
 
     if {[ns_conn method] eq "PUT"} {
 	
@@ -260,7 +266,7 @@ ad_proc qt_rest::user::edit {} {
 
 
 
-ad_proc qt_rest::user::edit_form {} {
+ad_proc qt::rest::user::edit_form {} {
     Updates user data
 
     Body format JSON
@@ -268,7 +274,7 @@ ad_proc qt_rest::user::edit_form {} {
     @author Iuri de Araujo
 } {
     
-    ns_log Notice "Running ad_proc qt_rest::user::edit"
+    ns_log Notice "Running ad_proc qt::rest::user::edit"
 
     if {[ns_conn method] eq "PUT"} {
 	package req json

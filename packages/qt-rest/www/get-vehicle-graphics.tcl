@@ -8,11 +8,9 @@ ad_page_contract {
 }
 ns_log Notice "Running TCL script get-vehicle-graphics.tcl"
 
-if {[qt_rest::jwt::validation_p] eq 0} {
-    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
-    ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
-    ad_script_abort
-}
+
+# Validate and Authenticate JWT
+qt::rest::jwt::validation_p
 
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
 set where_clauses ""
@@ -20,6 +18,7 @@ set where_clauses ""
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
 	append where_clauses " AND o.creation_date::date >= :date_from::date "
+	set creation_date $date_from
 	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
@@ -31,6 +30,7 @@ if {[info exists date_from]} {
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
 	append where_clauses " AND o.creation_date::date <= :date_to::date"
+	set creation_date $date_to
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -41,9 +41,13 @@ if {[info exists date_to]} {
 
 
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-append result "\{\"day_hours\":\["
+append result "\{\"hours\":\["
 set max_hour [list]
-db_foreach select_grouped_hour "
+
+
+
+
+set hourly_data [db_list_of_lists select_grouped_hour "
     SELECT EXTRACT('hour' FROM o.creation_date) AS hour, 
     COUNT(1) AS total
     FROM cr_items ci, acs_objects o
@@ -51,11 +55,19 @@ db_foreach select_grouped_hour "
     AND ci.content_type = :content_type
     $where_clauses
     GROUP BY hour ORDER BY hour ASC
-" {
-    if {[lindex $max_hour 1]<$total} {
-	set max_hour [list "\"${hour}h\"" $total]
+"]
+
+for {set i 0} {$i<24} {incr i} {
+    if {[lsearch -index 0 $hourly_data $i] eq -1} {
+	set hourly_data [linsert $hourly_data $i [list $i 0]]				    
     }
-    append result "\{\"time\": \"${hour}:00h\", \"hour\": \"${hour}h\", \"total\": $total\},"
+}
+
+foreach elem $hourly_data {
+    if {[lindex $max_hour 1]<[lindex $elem 1]} {
+	set max_hour [list "\"[lindex $elem 0]h\"" [lindex $elem 1]]
+    }
+    append result "\{\"time\": \"[lindex $elem 0]:00h\", \"hour\": \"[lindex $elem 0]h\", \"total\": [lindex $elem 1]\},"
 }
 set result [string trimright $result ","]
 append result "\],"
@@ -73,10 +85,18 @@ set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
     $where_clauses
     GROUP BY dow ORDER BY dow;
 "]
-set weekly_data [lreplace [lappend weekly_data [lindex $weekly_data 0]] 0 0]
 
 append result "\"week\":\["
 set max_week_day [list]
+for {set i 0} {$i<7} {incr i} {
+    if {[lsearch -index 0 $weekly_data $i] eq -1} {
+	lappend weekly_data [list $i 0]
+    }
+}
+set weekly_data [lsort -index 0 $weekly_data]
+ set weekly_data [lreplace [lappend weekly_data [lindex $weekly_data 0]] 0 0]
+
+
 foreach elem $weekly_data {
     set dow [lindex $elem 0]    
     switch $dow {
@@ -132,17 +152,22 @@ while {$i>-1} {
 set i [expr $dow + 7]
 while {$i>$dow} {
     set elem [lindex $monthly_data [expr [llength $monthly_data] - $i -1]]
-    set last_week_total [expr $last_week_total + [lindex $elem 1]]
+    if { [llength $elem] > 0} {
+	set last_week_total [expr $last_week_total + [lindex $elem 1]]
+    }
     set i [expr $i - 1]
 }
 set week_percent [expr [expr [expr $week_total * 100] / $last_week_total] - 100]
 		  
+set aux [lindex [lindex [lindex $monthly_data 0] 0] 0]
+for {set i [expr [lindex [split $aux "-"] 2] - 1]} {$i>0} {set i [expr $i - 1]} {
+    set aux [clock format [clock scan {-1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
+    lappend monthly_data [list $aux 0] 
+}
+set monthly_data [lsort -index 0 $monthly_data]
 
 
-
-
-
-set aux [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ] 0] 0]
+set aux [lindex [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ]] 0] 0]
 for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
     set aux [clock format [clock scan {+1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
     lappend monthly_data [list $aux 0]
@@ -154,9 +179,9 @@ set max_month_day [list]
 foreach elem $monthly_data {       
     set month_total [expr [lindex $elem 1] + $month_total]
     if {[lindex $max_month_day 1]<[lindex $elem 1]} {
-	set max_month_day [list "[lc_time_fmt [lindex $elem 0] %d/%b]" [lindex $elem 1]]
+	set max_month_day [list "[lc_time_fmt [lindex $elem 0] %d/%b es_ES]" [lindex $elem 1]]
     }
-    append result "\{\"day\": \"[lc_time_fmt [lindex $elem 0] "%d/%b"]\", \"total\": [lindex $elem 1]\},"
+    append result "\{\"day\": \"[lc_time_fmt [lindex $elem 0] "%d/%b" "es_ES"]\", \"total\": [lindex $elem 1]\},"
 }
 
 set result [string trimright $result ","]

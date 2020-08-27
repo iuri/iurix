@@ -17,7 +17,7 @@ if {[ns_conn method] eq "GET"} {
     
     set err_msg ""
     set status 200
-    set album_id [ix_rest::album::get_id -user_id $user_id]
+    set album_id [qt::rest::album::get_id -user_id $user_id]
 
     set url [ad_url]
     # Gets user's Album

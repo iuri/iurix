@@ -3,10 +3,8 @@ ad_page_contract {
 } {
     {limit:integer 20}
     {offset:integer 0}
-    {date_from ""}
-    {date_to ""}
-    {gender ""}
-    {where_clauses ""}
+    {date_from:optional}
+    {date_to:optional}
     {order "DESC"}
     {count:boolean true}
 }
@@ -14,75 +12,85 @@ ad_page_contract {
 
 ns_log Notice "Running TCL script get-persons.tcl"
 
+set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
+set content_type qt_face
+set where_clauses ""
 
-ns_log Notice "$limit \n
-    $offset \n
-    $date_from \n
-    $date_to \n
-    $where_clauses \n
-    $order \n
-"
-
-if {[exists_and_not_null date_from] } {
-    if {[catch { set timestamp [clock scan $date_from] } errmsg]} {   
-	ns_respond -status 400 -type "text/plain" -string $errmsg
-	ad_script_abort   
+if {[info exists date_from]} {
+    if {![catch {set t [clock scan $date_from]} errmsg]} {
+	append where_clauses " AND o.creation_date::date >= :date_from::date "
+	
     } else {
-        #        AND cr.creation_date > now() - INTERVAL '2 day'
-	append where_clauses " AND o.creation_date >= '${date_from}' "
-    }
-}
-
-if {[exists_and_not_null date_to]} {
-    if {[catch { set timestamp [clock scan $date_to] } errmsg]} {   
-	ns_respond -status 400 -type "text/plain" -string $errmsg
+	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
-    } else {
-	#    AND cr.creation_date < now() - INTERVAL '1 day'
-	append where_clauses " AND o.creation_date <= '${date_to}' "
     }
 }
 
-set result "\{\"persons\": \["
+
+if {[info exists date_to]} {
+    if {![catch {set t [clock scan $date_to]} errmsg]} {
+	append where_clauses " AND o.creation_date::date <= :date_to::date"
+    } else {
+	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	ad_script_abort    
+    }
+} else {
+    	append where_clauses " AND o.creation_date::date <= :creation_date::date "
+}
+
 
 if {$count eq true} {   
-    db_0or1row select_count_persons "
-	SELECT COUNT(ci.item_id) total,
-	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS women,
-	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS men
+
+    db_0or1row select_today_total {
+	select COUNT(1) AS total,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
 	FROM cr_items ci, cr_revisions cr, acs_objects o
 	WHERE ci.item_id = o.object_id
         AND ci.item_id = cr.item_id
 	AND ci.latest_revision = cr.revision_id
-	AND ci.content_type = 'qt_face'
-	$where_clauses
-    "   
-    
-    if {![exists_and_not_null total]} {
-	set total [ expr 3 * 15]
-	append result "\{\"total\": \"$total\", \"women\": \"[expr int($total * 0.3)]\", \"men\": \"[expr int($total * 0.7)]\"\},"
-    }
-    
-    
-    
-    
-    if {$gender eq "female"} {
-	append result "\{\"women\": $women\},"
-    } elseif {$gender eq "male"} {
-	append result "\{\"men\": $men\},"
-    } else {
-	append result "\{\"total\": $total\, \"women\": $women, \"men\": $men\},"
-    }
+	AND ci.content_type = :content_type
+	AND o.creation_date::date = (now() - INTERVAL '5 hour')::date
+    } -column_array today
 
+    db_0or1row select_yesterday_total {
+	select COUNT(1) AS total,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
+	FROM cr_items ci, cr_revisions cr, acs_objects o
+	WHERE ci.item_id = o.object_id
+        AND ci.item_id = cr.item_id
+	AND ci.latest_revision = cr.revision_id
+	AND ci.content_type = :content_type
+	AND o.creation_date::date >= (now() - INTERVAL '5 hour')::date - INTERVAL '48 hour'
+	AND o.creation_date::date < (now() - INTERVAL '5 hour')::date - INTERVAL '24 hour'
+    } -column_array yesterday
+
+    db_0or1row select_week_total {
+	select COUNT(1) AS total,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
+	FROM cr_items ci, cr_revisions cr, acs_objects o
+	WHERE ci.item_id = o.object_id
+        AND ci.item_id = cr.item_id
+	AND ci.latest_revision = cr.revision_id
+	AND ci.content_type = :content_type
+	AND o.creation_date BETWEEN (now() - INTERVAL '5 hour')::date - INTERVAL '6 day' AND (now() - INTERVAL '5 hour')::date + INTERVAL '1 day'
+    } -column_array week
+
+
+    append result "\{
+	\"today\": \{\"total\": $today(total), \"female\": $today(female), \"male\": $today(male)\},
+	\"yesterday\": \{\"total\": $yesterday(total), \"female\": $yesterday(female), \"male\": $yesterday(male)\},
+	\"week\": \{\"total\": $week(total), \"female\": $week(female), \"male\": $week(male)\}
+    \}"
+     
+  
 } else {
-
-
-    if {$gender eq "female"} {
-	append where_clauses " AND SPLIT_PART(cr.description, ' ', 8) = '0' "
-    } elseif { $gender eq "male" } {
-	append where_clauses " AND SPLIT_PART(cr.description, ' ', 8) = '1' "
-    }
     
+
+    set result "\{\"persons\": \["
+
     db_foreach select_persons_data "
 	SELECT ci.name, cr.description, o.creation_date
 	FROM cr_items ci, cr_revisions cr, acs_objects o
@@ -92,20 +100,19 @@ if {$count eq true} {
 	AND ci.content_type = 'qt_face'
 	$where_clauses
 	ORDER BY o.creation_date $order
-	LIMIT $limit OFFSET $offset
-	
+	LIMIT $limit OFFSET $offset	
     " {
 	
 	
 	append result "\{\"name\": \"$name\", \"creation_date\": \"$creation_date\", \"description\": \"$description\"\},"
-    }
-    
-    
+    }       
+
+
+    set result [string trimright $result ","]
+    append result "\]\}"
 }
 
 
-set result [string trimright $result ","]
-append result "\]\}"
 
 ns_respond -status 200 -type "application/json" -string $result
 ad_script_abort

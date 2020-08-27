@@ -9,6 +9,7 @@ db_foreach select_revisions {
     AND ci.content_type = 'qt_vehicle';
 
 } {
+    ns_log Notice "REVID $revision_id"
     content::item::set_live_revision -revision_id $revision_id -publish_status live
     incr i
 }

@@ -5,12 +5,15 @@ ad_page_contract {
 } {
     {q:trim ""}
     {t:trim ""}
+    {date_from:optional}
+    {date_to:optional}
     {offset:naturalnum,notnull 0}
     {num:range(0|200) 0}
     {dfs:word,trim,notnull ""}
     {dts:word,trim,notnull ""}
     {search_package_id:naturalnum ""}
     {scope ""}
+    {page 0}
     {object_type:token ""}
 } -validate {
     valid_dfs -requires dfs {
@@ -32,6 +35,34 @@ ad_page_contract {
     
 }
 
+# Validate and Authenticate JWT
+qt::rest::jwt::validation_p
+
+set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
+set where_clauses ""
+
+if {[info exists date_from]} {
+    if {![catch {set t [clock scan $date_from]} errmsg]} {
+	append where_clauses " AND cr.creation_date::date >= :date_from::date "
+	
+    } else {
+	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	ad_script_abort    
+    }
+}
+
+
+if {[info exists date_to]} {
+    if {![catch {set t [clock scan $date_to]} errmsg]} {
+	append where_clauses " AND cr.creation_date::date <= :date_to::date"
+    } else {
+	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	ad_script_abort    
+    }
+}
+
+
+
 set page_title "Search Results"
 
 set package_id [apm_package_id_from_key search]
@@ -46,6 +77,76 @@ set debug_p 0
 
 set user_id [ad_conn user_id]
 set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
+
+db_0or1row select_top_plate "
+    SELECT cr.title,
+    MAX(cr.creation_date) AS creation_date,
+    COUNT(*) AS occurency
+    FROM cr_items ci,
+    cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.content_type = 'qt_vehicle'
+    AND cr.title <> 'UNKNOWN'
+    AND cr.title <> '111111'
+    AND cr.title <> '333333'
+    AND cr.title <> 'FBF724'
+    GROUP BY cr.title
+    HAVING COUNT(*) > 1
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+" -column_array top_plate
+
+db_0or1row select_top_plate_month "
+    SELECT cr.title,
+    MAX(cr.creation_date) AS creation_date,
+    COUNT(*) AS occurency
+    FROM cr_items ci,
+    cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.content_type = 'qt_vehicle'
+    AND cr.title <> 'UNKNOWN'
+    AND cr.title <> '111111'
+    AND cr.title <> '333333'
+    AND cr.title <> 'FBF724'
+    $where_clauses
+    GROUP BY cr.title
+    HAVING COUNT(*) > 1
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+" -column_array top_plate_month
+
+
+set top_plate(description) [db_string select_description "
+    SELECT cr.description FROM cr_revisionsx cr
+    WHERE cr.title = '$top_plate(title)'
+    AND cr.creation_date = '$top_plate(creation_date)'
+" -default ""]
+
+set top_plate_month(description) [db_string select_description "
+    SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = '$top_plate_month(title)' AND cr.creation_date = '$top_plate_month(creation_date)'
+" -default ""]
+
+
+append json "\{
+    \"top_plate\": \{
+        \"plate\": \"$top_plate(title)\",
+        \"date\": \"[lc_time_fmt $top_plate(creation_date) %Y-%m-%d]\",
+        \"time\": \"[lc_time_fmt $top_plate(creation_date) %H:%M]\",
+        \"location\": \"4.60971, -74.08175\",
+        \"occurency\": \"$top_plate(occurency)\",
+        \"client_p\": true,
+        \"membership_p\": false
+    \},
+    \"top_plate_month\": \{
+        \"plate\": \"$top_plate_month(title)\",
+        \"date\": \"[lc_time_fmt $top_plate_month(creation_date) %Y-%m-%d]\",
+        \"time\": \"[lc_time_fmt $top_plate_month(creation_date) %H:%M]\",
+        \"location\": \"4.60971, -74.08175\",
+        \"occurency\": \"$top_plate_month(occurency)\",
+        \"client_p\": true,
+        \"membership_p\": false
+    \},"
+
 
 if {[callback::impl_exists -impl $driver -callback search::driver_info]} {
     array set info [lindex [callback -impl $driver search::driver_info] 0]
@@ -167,8 +268,36 @@ set nquery [llength [split $q]]
 set stopwords $result(stopwords)
 set nstopwords [llength $result(stopwords)] 
 
+ns_log Notice "    SELECT COUNT(cr.title)
+    FROM cr_items ci,
+    cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.content_type = 'qt_vehicle'
+    AND cr.title <> 'UNKNOWN'
+    AND cr.title <> '111111'
+    AND cr.title <> '333333'
+    AND cr.title <> 'FBF724'
+    $where_clauses
+    GROUP BY cr.title
+    HAVING COUNT(*) >= 1"
 
-append json "\{\"plates\": \["
+set total_records [db_list select_total_pages "
+    SELECT COUNT(cr.title)
+    FROM cr_items ci,
+    cr_revisionsx cr
+    WHERE ci.item_id = cr.item_id
+    AND ci.content_type = 'qt_vehicle'
+    AND cr.title <> 'UNKNOWN'
+    AND cr.title <> '111111'
+    AND cr.title <> '333333'
+    AND cr.title <> 'FBF724'
+    $where_clauses
+    GROUP BY cr.title
+    HAVING COUNT(*) >= 1
+"]
+append json "\"pages\": [expr [llength $total_records] /10],"
+
+append json "\"plates\": \["
 set aux ""
 foreach object_id $result(ids) {
     if {[catch {
@@ -215,7 +344,7 @@ foreach object_id $result(ids) {
             \"plate\": \"$title_summary\",
             \"date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
             \"time\": \"[lc_time_fmt $creation_date %H:%M]\",
-            \"location\": \"[lindex $description 5]\",
+            \"location\": \"4.60971, -74.08175\",
             \"occurency\": \"$occurency\",
             \"client_p\": true,
             \"membership_p\": false
@@ -224,11 +353,12 @@ foreach object_id $result(ids) {
 }
 
 
-
+# order by date DESC, pagination
 
 if { $result(count) eq 0 } {
+    set offset [expr $page * 10]
     
-    db_foreach select_vehicles {
+    db_foreach select_vehicles "
         SELECT cr.title,
         MAX(cr.creation_date) AS creation_date,
         COUNT(*) AS occurency
@@ -237,21 +367,26 @@ if { $result(count) eq 0 } {
         WHERE ci.item_id = cr.item_id
         AND ci.content_type = 'qt_vehicle'
         AND cr.title <> 'UNKNOWN'
+        AND cr.title <> '111111'
+        AND cr.title <> '333333'
+        AND cr.title <> 'FBF724'
+        $where_clauses 
         GROUP BY cr.title
         HAVING COUNT(*) > 1
-        ORDER BY COUNT(*) DESC
-        LIMIT 10
-    } {
+        ORDER BY MAX(cr.creation_date) DESC 
+        LIMIT 10 OFFSET $offset;
+        
+    " {
         set description [db_string select_description {
             SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = :title AND cr.creation_date = :creation_date
         } -default ""]
         append json "\{
             \"plate\": \"$title\",
             \"date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
-            \"time\": \"[lc_time_fmt $creation_date %H:%M]\",
-            \"location\": \"[lindex $description 5]\",
+            \"time\": \"[lc_time_fmt $creation_date %H:%M:%S]\",
+            \"location\": \"4.60971, -74.08175\",
             \"occurency\": \"$occurency\",
-            \"client_p\": true,
+            \"client_p\": false,
             \"membership_p\": false
         \},"
 

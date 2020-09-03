@@ -54,7 +54,6 @@ if {[ns_conn method] eq "POST"} {
 			\"firstName\": \"$user(first_names)\",
 			\"lastName\": \"$user(last_name)\",
 			\"email\": \"$user(email)\",
-                        \"password\": \"$token\", 
                         \"phonenumber\": \"76543234567\", 
                         \"country\": \"Brasil\", 
                         \"city\": \"Salvador\",

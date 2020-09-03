@@ -31,7 +31,7 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
     if {$date_from ne ""} {
 	if {![catch {set t [clock scan $date_from]} errmsg]} {
 	    set creation_date $date_from
-	    append where_clauses " AND o.creation_date::timestamp >= :date_from::timestamp "	
+	    append where_clauses " AND o.creation_date::date >= :date_from::date "	
 	} else {
 	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	    ad_script_abort    
@@ -40,7 +40,7 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
     
     if {$date_to ne ""} {
 	if {![catch {set t [clock scan $date_to]} errmsg]} {
-	    append where_clauses " AND o.creation_date::timestamp <= :date_to::timestamp "
+	    append where_clauses " AND o.creation_date::date <= :date_to::date "
 	} else {
 	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	    ad_script_abort    
@@ -69,11 +69,11 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 	}
 	"month" {
 	    set textlabel [_ qt-dashboard.Vehicles_total_daily_per_month]
-	    set sql "SELECT date_trunc('day', o.creation_date::date) AS datetime, COUNT(1) AS total
+	    set sql "SELECT date_trunc('day', o.creation_date)::date AS datetime, COUNT(1) AS total
 		FROM cr_items ci, acs_objects o
 		WHERE ci.item_id = o.object_id
 		AND ci.content_type = :content_type
-		AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
+                $where_clauses
 		GROUP BY 1 ORDER BY datetime;"
 	}
     }
@@ -83,11 +83,21 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
     set max [list]
     foreach elem $datasource {
 	if {[lindex $max 1]<[lindex $elem 1]} {
-	    set max [list [lindex $elem 0] [lindex $elem 1]]
+	    set dow [lindex $elem 0]
+	    switch $dow   {
+		0 { set dow "DOM" }
+		1 { set dow "LUN" }
+		2 { set dow "MAR" }
+		3 { set dow "MIE" }
+		4 { set dow "JUE" }
+		5 { set dow "VIE" }
+		6 { set dow "SAB" }
+	    }
+	    set max [list $dow [lindex $elem 1]]
+	    
 	}
     }
-    
-    
+  
     template::list::create \
 	-name vehicles \
 	-multirow vehicles \
@@ -125,31 +135,31 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 		set creation_date [db_string select_now { SELECT now() - INTERVAL '5 hour' FROM dual}]
 		set textinfo  "[_ qt-dashboard.Report_created_at] [lindex [split $creation_date "."] 0]"	    
 	    }
-	    3 {
+	    2 {
 		switch $interval {
 		    "hour" {
 			set textinfo  "[_ qt-dashboard.Busiest_hour] [lindex $max 0] [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.vehicles]"
 		    }
 		    "week" {
-			set textinfo  "[_ qt-dashboard.Busiest_day] $datetime [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.vehicles]"
+			set textinfo  "[_ qt-dashboard.Busiest_day] [lindex $max 0] [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.vehicles]"
 		    }
 		    "month" {
-			set textinfo  "[_ qt-dashboard.Busiest_day] $datetime [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.vehicles]"
+			set textinfo  "[_ qt-dashboard.Busiest_day] [lindex $max 0] [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.vehicles]"
 		    }
 		}
 	    }
-	    5 {
+	    4 {
 		if {$date_from ne ""} {
 		    set textinfo [_ qt-dashboard.Date_Range]
 		}
 	    }
-	    6 {
+	    5 {
 		if {$date_from ne ""} {
 		    set textinfo $date_from
 		}
 	    }
-	    7 {
-		if {[info exists date_to] } {
+	    6 {
+		if {$date_to ne ""} {
 		    set textinfo $date_to
 		}
 	    }

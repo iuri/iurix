@@ -11,11 +11,11 @@ if {[ns_conn method] eq "POST"} {
     array set arr $dict
         
     if { [array exists arr] && [info exists arr(type)] && [info exists arr(format)]  } {
-	lang::user::set_locale "es_ES"
+#	lang::user::set_locale "es_ES"
 
 	switch $arr(format) {
 	    "csv" {
-		if {[info exists arr(interval)] } {
+		if {[info exists arr(interval)] && $arr(interval) ne "heatmap" } {
 		    switch $arr(type) {
 			"v" {
 			    if {[info exists arr(date_from)] && [info exists arr(date_to)] } {
@@ -29,6 +29,7 @@ if {[ns_conn method] eq "POST"} {
 				}			    
 			}					    
 			"p" {
+			    
 			    if {[info exists arr(date_from)] && [info exists arr(date_to)] } {
 				qt::dashboard::person::export_csv \
 				    -interval $arr(interval) \
@@ -39,6 +40,16 @@ if {[ns_conn method] eq "POST"} {
 				    -interval $arr(interval) 
 			    }			
 			}
+		    }
+		} else {
+		    if {[info exists arr(date_from)] && [info exists arr(date_to)] } {
+			qt::dashboard::person::export_heatmap_csv \
+			    -interval $arr(interval) \
+			    -date_from $arr(date_from) \
+			    -date_to $arr(date_to)
+		    } else {
+			qt::dashboard::person::export_heatmap_csv \
+			    -interval $arr(interval) 
 		    }
 		}
 	    }	    

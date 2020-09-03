@@ -25,7 +25,7 @@ ad_proc -public qt::dashboard::person::export_heatmap_csv {
 } {
     ns_log Notice "Running HEATMAP"
     set content_type qt_face
-    set creation_date [db_string select_now { SELECT (now() - INTERVAL '5 hour')::date FROM dual}]
+    set creation_date [db_string select_now { SELECT now() - INTERVAL '5 hour' FROM dual}]
     set where_clauses ""
 
     if {$date_from ne ""} {
@@ -48,33 +48,6 @@ ad_proc -public qt::dashboard::person::export_heatmap_csv {
     }
 
     
-    set elements {
-	textinfo {label "TOTAL SEMANA ACUMULADO PERSONAS POR HORA DEL DIA"}
-	hour {label "HORA"}
-    }
-
-    ns_log Notice "DATES $creation_date"
-    set from [clock format [clock scan {-7 day} -base [clock scan $creation_date]] -format "%Y-%m-%d"]
-    ns_log Notice "FROM $from"
-    
-    for {set i 0} {$i<7} {incr i} {
-	set from [clock format [clock scan {+1 day} -base [clock scan $from]] -format "%Y%m%d"]
-	lappend elements $from {label ""} 
-	append columns "$from "
-    }
-
-    ns_log Notice "ELEMENTS $elements"
-    ns_log notice "COLUMNS $columns"
-    
-    template::list::create \
-	-name persons \
-	-multirow persons \
-	-key item_id \
-	-elements $elements
-       
-    
-
-        
     set sql "
     	select date_trunc('hour', o.creation_date) AS hour,
 	COUNT(1) AS total
@@ -85,32 +58,58 @@ ad_proc -public qt::dashboard::person::export_heatmap_csv {
 	AND ci.content_type = :content_type
 	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
 	GROUP BY 1 ORDER BY hour ASC    "
+
+
+    set datasource [db_list_of_lists select_grouped_hour $sql]
+
+#	textinfo {label "TOTAL SEMANA-ACUMULADO PERSONAS POR HORA DEL DIA"}
+    set columns [list textinfo hour]
+
     
-    
-    set aux 0
-
-    set datasource [db_list_of_lists select_persons_count $sql]
-    db_multirow -extend { textinfo $columns} persons select_p $sql   {
-
-	ns_log Notice "ELEM $i"
-
-	set textinfo ""
-	
-	
-	ns_log Notice "Hour $hour | TOTAL $total "
-	set date [lindex [split [lindex $hour 0] " "] 0]
-	set date [string map {"-" ""} $date]
+    foreach elem $datasource {
+	set date [lindex [split [lindex $elem 0] " "] 0]
+	set date [string map {- _} $date]
 	ns_log Notice "DATE $date"
-	
-	set hour [lindex [split [lindex $hour 0] " "] 1]	
-	ns_log Notice "HOUR $hour"
-	
-	set $date $total
-	ns_log Notice ""
-	incr i
+	if {[lsearch -index 0 $columns $date] eq -1 } {
+	    lappend columns $date
+	}
     }
     
-#    qt::list::write_csv -name persons
+    ns_log Notice "$columns"
+
+
+    template::multirow create persons $columns
+
+    for {set i 0} {$i<[llength $columns]} {{incr i} {
+	ns_log Notice "DS [lindex $datasource $i] [lindex $datasource [expr $i + [llength $columns]]"
+    }
+
+
+
+    
+    template::list::create \
+	-name persons \
+	-multirow persons \
+	-key item_id \
+	-elements $elements    
+    
+    set i 0
+    db_multirow -extend { label textinfo $e1 } persons select_persons $sql {	
+	set textinfo ""
+
+	set date [lindex [split [lindex $hour 0] " "] 0]
+	set date [string map {- _} $date]
+	set $date $total
+	set hour [lindex [split [lindex $hour 1] "+"] 0]
+	set hour "${hour}:00h"
+	incr i
+	
+    }
+
+
+
+
+    qt::list::write_csv -name persons
     return
 
 

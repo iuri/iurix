@@ -67,17 +67,18 @@ ad_proc -public qt::rest::jwt::validation_p {} {
 
 ad_proc -public qt::rest::album::get_id {
     {-user_id:required}
+    {-name ""}
 } {
     Returns album_id.
     If it doesn't exist, then it creates a new album
 } {
     
     db_0or1row select_creation_user {
-	SELECT item_id FROM pa_albumsx WHERE creation_user = :user_id
+	SELECT item_id FROM pa_albumsx WHERE creation_user = :user_id AND object_title = :name
     }
     
     if {![exists_and_not_null item_id]} {
-	set item_id [qt::rest::album::new -user_id $user_id]
+	set item_id [qt::rest::album::new -user_id $user_id -name $name]
     }
     
     return $item_id  
@@ -85,23 +86,24 @@ ad_proc -public qt::rest::album::get_id {
 
 ad_proc qt::rest::album::new {
     {-user_id:required}
+    {-name ""}
 } {
     Creates a new album and returns its album_id
 } {
     
+    set title "$name $user(name) Album"
+    regsub -all { +} [string tolower "$user_id $name"] {_} name
+    regsub -all {/+} $name {-} name
     
     if {![db_0or1row select_creation_user {
-	SELECT item_id FROM pa_albumsx WHERE creation_user = :user_id
+	SELECT item_id FROM pa_albumsx WHERE creation_user = :user_id AND object_title = :name
     }]} {
 	set peeraddr [ad_conn  peeraddr]
 	acs_user::get -user_id $user_id -array user
 
 	# ns_log Notice "[parray user]"
 	
-	regsub -all { +} [string tolower "$user_id $user(name) Album"] {_} name
-	regsub -all {/+} $name {-} name
 	set story ""
-	set title "$user(name) Album"
 	set description ""
 	set photographer ""
 	
@@ -152,6 +154,7 @@ ad_proc qt::rest::album::new {
 		
 		# Set permission to creator user_id
 		pa_grant_privilege_to_creator $album_id $user_id
+		permission::grant -party_id -1 -object_id $album_id -privilege read
 		
 	    }
 	}	

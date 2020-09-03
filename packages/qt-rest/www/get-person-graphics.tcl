@@ -62,7 +62,6 @@ for {set i 0} {$i<24} {incr i} {
     }
 }
 
-ns_log Notice "HOUR $hourly_data"
 foreach elem $hourly_data {
     if {[lindex $max_hour 1]<[lindex $elem 1]} {
 	set max_hour [list "\"[lindex $elem 0]h\"" [lindex $elem 1]]
@@ -175,15 +174,32 @@ set monthly_data [db_list_of_lists select_month_per_day "
     GROUP BY 1 ORDER BY day;
 "]
 
-# ns_log Notice "MONTH DATA $monthly_data"
-
+set today_total [lindex [lindex $monthly_data [expr [llength $monthly_data] -1]] 1]
 set today_female [lindex [lindex $monthly_data [expr [llength $monthly_data] -1] ] 2]
 set today_male [lindex [lindex $monthly_data [expr [llength $monthly_data] -1] ] 3]
-set today_total [expr $today_female + $today_male]
 
-set yesterday_female [lindex [lindex $monthly_data [expr [llength $monthly_data] -2] ] 2]
-set yesterday_male [lindex [lindex $monthly_data [expr [llength $monthly_data] -2] ] 3]
-set yesterday_total [expr $yesterday_female + $yesterday_male]
+
+
+if {[llength $monthly_data] eq 1} {
+
+    db_0or1row select_yesterday_data {
+	SELECT COUNT(1) AS yesterday_total,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS yesterday_female,
+	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS yesterday_male
+	FROM cr_items ci, acs_objects o, cr_revisions cr
+	WHERE ci.item_id = o.object_id
+	AND ci.item_id = cr.item_id
+	AND ci.latest_revision = cr.revision_id
+	AND ci.content_type = :content_type
+	AND o.creation_date::date = :creation_date::date - INTERVAL '1 day';
+    }
+    
+} else {
+    set yesterday_total [lindex [lindex $monthly_data [expr [llength $monthly_data] -2] ] 1]
+    set yesterday_female [lindex [lindex $monthly_data [expr [llength $monthly_data] -2] ] 2]
+    set yesterday_male [lindex [lindex $monthly_data [expr [llength $monthly_data] -2] ] 3]
+}
+
 
 set today_percent_female 0
 if {$today_female ne 0 && $yesterday_female ne 0} {
@@ -209,16 +225,20 @@ set dow [db_string select_dow { SELECT EXTRACT(dow FROM date :creation_date) } -
 set i $dow
 while {$i>-1} {
     set elem [lindex $monthly_data [expr [llength $monthly_data] - $i -1]]
-    set week_total [expr $week_total + [lindex $elem 1]]
-    set week_female [expr $week_female + [lindex $elem 2]]
-    set week_male [expr $week_male + [lindex $elem 3]]
+    if {[lindex $elem 1] ne "" } {
+	set week_total [expr $week_total + [lindex $elem 1]]
+	set week_female [expr $week_female + [lindex $elem 2]]
+	set week_male [expr $week_male + [lindex $elem 3]]
+    }
     set i [expr $i - 1] 
 }
 
 set i [expr $dow + 7]
 while {$i>$dow} {
     set elem [lindex $monthly_data [expr [llength $monthly_data] - $i -1]]
-    set last_week_total [expr $last_week_total + [lindex $elem 1]]
+    if {[lindex $elem 1] ne "" } {
+	set last_week_total [expr $last_week_total + [lindex $elem 1]]
+    }
     set i [expr $i - 1]
 }
 
@@ -374,8 +394,6 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 	    }
 	}
 	set l_age_ranges [lsort -integer -index 0 $l_age_ranges]
-
-	ns_log Notice "AGERANGES $l_age_ranges"
 	
 	set aux [list 0 0 0 0]
 	foreach elem $l_age_ranges {

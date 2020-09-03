@@ -16,7 +16,7 @@ set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour')
 set where_clauses ""
 
 if {[info exists date_from]} {
-    if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
+    if {![catch {set t [clock scan $date_from]} errmsg]} {
 	append where_clauses " AND o.creation_date::date >= :date_from::date "
 	set creation_date $date_from
 	
@@ -27,8 +27,8 @@ if {[info exists date_from]} {
 }
 
 
-if {[info exists date_to]} {   
-    if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
+if {[info exists date_to]} {
+    if {![catch {set t [clock scan $date_to]} errmsg]} {
 	append where_clauses " AND o.creation_date::date <= :date_to::date"
 	set creation_date $date_to
     } else {
@@ -44,15 +44,15 @@ if {[info exists date_to]} {
 append result "\{\"hours\":\["
 set max_hour [list]
 
+
+
+
 set hourly_data [db_list_of_lists select_grouped_hour "
     SELECT EXTRACT('hour' FROM o.creation_date) AS hour, 
     COUNT(1) AS total
-    FROM cr_items ci, acs_objects o, cr_revisions cr
+    FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
-    AND ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
     AND ci.content_type = :content_type
-    AND cr.title <> 'UNKNOWN'
     $where_clauses
     GROUP BY hour ORDER BY hour ASC
 "]
@@ -129,8 +129,10 @@ set monthly_data [db_list_of_lists select_vehicles_grouped_hourly "
     GROUP BY 1 ORDER BY day;
 "]
 
+
 set today_total [lindex [lindex $monthly_data [expr [llength $monthly_data] -1]] 1]
 set yesterday_total [lindex [lindex $monthly_data [expr [llength $monthly_data] -2]] 1]
+
 if {$yesterday_total eq ""} {
     set yesterday_total [db_string select_yesterday {
 	SELECT COUNT(1) AS total
@@ -141,11 +143,8 @@ if {$yesterday_total eq ""} {
 
     } -default 1]
 }
+set today_percent [expr [expr [expr $today_total * 100] / $yesterday_total] - 100]
 
-set today_percent 0
-if {$today_total ne 0 && $yesterday_total ne 0} {
-    set today_percent [expr [expr [expr $today_total * 100] / $yesterday_total] - 100]
-}
 
 
 

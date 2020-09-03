@@ -90,6 +90,7 @@ db_0or1row select_top_plate "
     AND cr.title <> '111111'
     AND cr.title <> '333333'
     AND cr.title <> 'FBF724'
+    AND cr.title <> 'FBF124'
     GROUP BY cr.title
     HAVING COUNT(*) > 1
     ORDER BY COUNT(*) DESC
@@ -108,6 +109,7 @@ db_0or1row select_top_plate_month "
     AND cr.title <> '111111'
     AND cr.title <> '333333'
     AND cr.title <> 'FBF724'
+    AND cr.title <> 'FBF124'
     $where_clauses
     GROUP BY cr.title
     HAVING COUNT(*) > 1
@@ -291,6 +293,7 @@ set total_records [db_list select_total_pages "
     AND cr.title <> '111111'
     AND cr.title <> '333333'
     AND cr.title <> 'FBF724'
+    AND cr.title <> 'FBF124'
     $where_clauses
     GROUP BY cr.title
     HAVING COUNT(*) >= 1
@@ -370,6 +373,7 @@ if { $result(count) eq 0 } {
         AND cr.title <> '111111'
         AND cr.title <> '333333'
         AND cr.title <> 'FBF724'
+        AND cr.title <> 'FBF124'
         $where_clauses 
         GROUP BY cr.title
         HAVING COUNT(*) > 1

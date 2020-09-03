@@ -53,7 +53,6 @@ set hourly_data [db_list_of_lists select_grouped_per_hour "
     GROUP BY 1 ORDER BY hour ASC    
 "]
 
-ns_log Notice "HOULY DATA $hourly_data"
 for {set i 0} {$i<24} {incr i} {
     ns_log Notice "$i "
    ns_log Notice "[lsearch -index 0 $hourly_data $i] [lsearch -index 0 -all -inline $hourly_data $i]"
@@ -62,7 +61,6 @@ for {set i 0} {$i<24} {incr i} {
 	set hourly_data [linsert $hourly_data $i [list $i 0 0 0]]				     
     }
 }
-ns_log Notice "HOULY DATA $hourly_data"
 
 
 foreach elem $hourly_data {

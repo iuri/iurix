@@ -75,8 +75,9 @@ ad_proc -public qt::dashboard::person::export_heatmap_csv {
     
 
         
-    set sql "
-    	select date_trunc('hour', o.creation_date) AS hour,
+    set sql "SELECT
+	EXTRACT(hour FROM o.creation_date) AS hour,
+	EXTRACT(DAY FROM o.creation_date) AS day,
 	COUNT(1) AS total
 	FROM cr_items ci, acs_objects o, cr_revisions cr
 	WHERE ci.item_id = o.object_id
@@ -84,12 +85,13 @@ ad_proc -public qt::dashboard::person::export_heatmap_csv {
 	AND ci.latest_revision = cr.revision_id
 	AND ci.content_type = :content_type
 	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
-	GROUP BY 1 ORDER BY hour ASC    "
+	GROUP BY hour, day ORDER BY hour ASC "
     
     
     set aux 0
 
     set datasource [db_list_of_lists select_persons_count $sql]
+    ns_log Notice "DATASOURCE $datasource"
     db_multirow -extend { textinfo $columns} persons select_p $sql   {
 
 	ns_log Notice "ELEM $i"

@@ -52,8 +52,10 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 	    set textlabel [_ qt-dashboard.Vehicles_total_hourly_per_day]
 	    set sql "SELECT EXTRACT('hour' FROM o.creation_date) AS datetime, 
 		COUNT(1) AS total
-		FROM cr_items ci, acs_objects o
+		FROM cr_items ci, acs_objects o, cr_revisions cr
 		WHERE ci.item_id = o.object_id
+		AND ci.item_id = cr.item_id
+		AND ci.latest_revision = cr.revision_id
 		AND ci.content_type = :content_type
 		$where_clauses
 		GROUP BY datetime ORDER BY datetime ASC"
@@ -104,8 +106,8 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 	-key item_id \
 	-elements {
 	    textinfo { label "$textlabel" }
-	    datetime { label "Tiempo" }
-	    total { label "Total" }	
+	    datetime { label "$textlabel_datetime" }
+	    total { label "Total Vehiculos" }	
 	}
     
     

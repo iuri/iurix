@@ -17,7 +17,6 @@ set where_clauses ""
 
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
-	set creation_date $date_from
 	append where_clauses " AND o.creation_date::date >= :date_from::date"
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
@@ -28,7 +27,6 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
-	set creation_date $date_to
 	append where_clauses " AND o.creation_date::date <= :date_to::date "
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
@@ -161,7 +159,7 @@ append result "\],"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set monthly_data [db_list_of_lists select_month_per_day "
-    SELECT date_trunc('day', o.creation_date) AS day,
+    SELECT EXTRACT('day' FROM o.creation_date) AS day,
     COUNT(1) AS total,
     COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
     COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
@@ -170,7 +168,7 @@ set monthly_data [db_list_of_lists select_month_per_day "
     AND ci.item_id = cr.item_id
     AND ci.latest_revision = cr.revision_id
     AND ci.content_type = :content_type
-    AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
+    $where_clauses
     GROUP BY 1 ORDER BY day;
 "]
 
@@ -262,40 +260,28 @@ foreach elem $monthly_data {
     set month_male [expr $month_male + [lindex $elem 3]]
 
     if {[lindex $max_month_day 1]<[lindex $elem 1]} {
-	set max_month_day [list "[lc_time_fmt [lindex $elem 0] %d/%b es_ES]" [lindex $elem 1]]
+	set max_month_day [list [lindex $elem 0] [lindex $elem 1]]
     }
     if {[lindex $max_month_day_female 1]<[lindex $elem 2]} {
-	set max_month_day_female [list "[lc_time_fmt [lindex $elem 0] %d/%b es_ES]" [lindex $elem 1]]
+	set max_month_day_female [list [lindex $elem 0] [lindex $elem 1]]
     }
     if {[lindex $max_month_day_male 1]<[lindex $elem 3]} {
-	set max_month_day_male [list "[lc_time_fmt [lindex $elem 0] %d/%b es_ES]" [lindex $elem 1]]
+	set max_month_day_male [list [lindex $elem 0] [lindex $elem 1]]
     }
 }
 set month_total [expr $month_female + $month_male]
-
-
-
-set aux [lindex [lindex [lindex $monthly_data 0] 0] 0]
-for {set i [expr [lindex [split $aux "-"] 2] - 1]} {$i>0} {set i [expr $i - 1]} {
-    set aux [clock format [clock scan {-1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
-    lappend monthly_data [list $aux 0 0 0] 
+    
+for {set i 1} {$i<32} {incr i} {    
+    if {[lsearch -index 0 $monthly_data $i] eq -1} {
+	set monthly_data [linsert $monthly_data [expr $i - 1] [list $i 0 0 0]]
+    }
 }
-set monthly_data [lsort -index 0 $monthly_data]
-
-
-
-
-
-set aux [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ] 0] 0]
-for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
-    set aux [clock format [clock scan {+1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
-    lappend monthly_data [list $aux 0 0 0]
-}
+    
 
 append result "\"month\":\["
 foreach elem $monthly_data {
     #set day [lc_time_fmt [lindex $elem 0] "%d/%b"]
-    append result "\{\"day\": \"[lc_time_fmt [lindex $elem 0] %d/%b es_ES]\", \"total\": [lindex $elem 1], \"female\": [lindex $elem 2], \"male\": [lindex $elem 3]\},"
+    append result "\{\"day\": [lindex $elem 0], \"total\": [lindex $elem 1], \"female\": [lindex $elem 2], \"male\": [lindex $elem 3]\},"
 }
 
 set result [string trimright $result ","]
@@ -355,15 +341,18 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
 if {[info exists age_range_p] && $age_range_p eq true} {
     append result "\"ageRanges\":\["
     set l_age_ranges [db_list_of_lists select_ranges "
-	SELECT ROUND(SPLIT_PART(cr.description, ' ', 4)::numeric) AS range,
+	SELECT
+	CASE WHEN SPLIT_PART(cr.description, ' ', 4) <> 'undefined' THEN ROUND(SPLIT_PART(cr.description, ' ', 4)::numeric) END AS range,
 	COUNT(1) AS total,
 	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS total_female,
 	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS total_male
-	FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id
+	FROM cr_items ci, acs_objects o, cr_revisions cr
+	WHERE ci.item_id = o.object_id
 	AND ci.item_id = cr.item_id
-	AND ci.latest_revision = cr.revision_id AND ci.content_type = :content_type
-       	AND o.creation_date::date = :creation_date::date
-	GROUP BY range;	
+	AND ci.latest_revision = cr.revision_id
+	AND ci.content_type = 'qt_face'
+	GROUP BY range;
+	
     "]
    
     if {[llength $l_age_ranges] > 0} {

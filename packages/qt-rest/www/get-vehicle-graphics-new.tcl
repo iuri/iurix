@@ -16,10 +16,8 @@ set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour')
 set where_clauses ""
 
 if {[info exists date_from]} {
-    if {![catch {set t [clock scan $date_from]} errmsg]} {
-	append where_clauses " AND o.creation_date::date >= :date_from::date "
-	set creation_date $date_from
-	
+    if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
+	append where_clauses " AND o.creation_date::date >= :date_from::date "	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -27,10 +25,9 @@ if {[info exists date_from]} {
 }
 
 
-if {[info exists date_to]} {
-    if {![catch {set t [clock scan $date_to]} errmsg]} {
+if {[info exists date_to]} {   
+    if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
 	append where_clauses " AND o.creation_date::date <= :date_to::date"
-	set creation_date $date_to
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -44,15 +41,15 @@ if {[info exists date_to]} {
 append result "\{\"hours\":\["
 set max_hour [list]
 
-
-
-
 set hourly_data [db_list_of_lists select_grouped_hour "
     SELECT EXTRACT('hour' FROM o.creation_date) AS hour, 
     COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
+    FROM cr_items ci, acs_objects o, cr_revisions cr
     WHERE ci.item_id = o.object_id
+    AND ci.item_id = cr.item_id
+    AND ci.latest_revision = cr.revision_id
     AND ci.content_type = :content_type
+    AND cr.title <> 'UNKNOWN'
     $where_clauses
     GROUP BY hour ORDER BY hour ASC
 "]
@@ -120,18 +117,26 @@ append result "\],"
 
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set monthly_data [db_list_of_lists select_vehicles_grouped_hourly "
-    SELECT date_trunc('day', o.creation_date) AS day, COUNT(1) AS total
+set monthly_data [db_list_of_lists select_vehicles_grouped_daily "
+    SELECT
+    EXTRACT('day' FROM o.creation_date) AS day,
+    COUNT(1) AS total
     FROM cr_items ci, acs_objects o
     WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
-    AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
+    AND ci.content_type = '$content_type'
+    $where_clauses
     GROUP BY 1 ORDER BY day;
 "]
 
 
+ns_log Notice "MONTHLY DATA $monthly_data"
+
 set today_total [lindex [lindex $monthly_data [expr [llength $monthly_data] -1]] 1]
+ns_log Notice "Today Total $today_total"
+
 set yesterday_total [lindex [lindex $monthly_data [expr [llength $monthly_data] -2]] 1]
+ns_log Notice "Today Total $yesterday_total"
+
 
 if {$yesterday_total eq ""} {
     set yesterday_total [db_string select_yesterday {
@@ -143,8 +148,11 @@ if {$yesterday_total eq ""} {
 
     } -default 1]
 }
-set today_percent [expr [expr [expr $today_total * 100] / $yesterday_total] - 100]
 
+set today_percent 0
+if {$today_total ne 0 && $yesterday_total ne 0} {
+    set today_percent [expr [expr [expr $today_total * 100] / $yesterday_total] - 100]
+}
 
 
 
@@ -180,18 +188,10 @@ if {$last_week_total eq ""} {
     
 set week_percent [expr [expr [expr $week_total * 100] / $last_week_total] - 100]
 
-set aux [lindex [lindex [lindex $monthly_data 0] 0] 0]
-for {set i [expr [lindex [split $aux "-"] 2] - 1]} {$i>0} {set i [expr $i - 1]} {
-    set aux [clock format [clock scan {-1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
-    lappend monthly_data [list $aux 0] 
-}
-set monthly_data [lsort -index 0 $monthly_data]
-
-
-set aux [lindex [lindex [lindex $monthly_data [expr [llength $monthly_data] - 1 ]] 0] 0]
-for {set i [expr [lindex [split $aux "-"] 2] +1]} {$i <= 31} {incr i} {
-    set aux [clock format [clock scan {+1 day} -base [clock scan $aux]] -format "%Y-%m-%d %T" ]
-    lappend monthly_data [list $aux 0]
+for {set i 1} {$i<32} {incr i} {    
+    if {[lsearch -index 0 $monthly_data $i] eq -1} {
+	set monthly_data [linsert $monthly_data [expr $i - 1] [list $i 0]]
+    }
 }
 
 append result "\"month\":\["
@@ -200,9 +200,9 @@ set max_month_day [list]
 foreach elem $monthly_data {       
     set month_total [expr [lindex $elem 1] + $month_total]
     if {[lindex $max_month_day 1]<[lindex $elem 1]} {
-	set max_month_day [list "[lc_time_fmt [lindex $elem 0] %d/%b es_ES]" [lindex $elem 1]]
+	set max_month_day [list [lindex $elem 0] [lindex $elem 1]]
     }
-    append result "\{\"day\": \"[lc_time_fmt [lindex $elem 0] "%d/%b" "es_ES"]\", \"total\": [lindex $elem 1]\},"
+    append result "\{\"day\": \"[lindex $elem 0]\", \"total\": [lindex $elem 1]\},"
 }
 
 set result [string trimright $result ","]

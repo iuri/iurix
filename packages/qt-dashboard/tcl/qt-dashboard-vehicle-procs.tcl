@@ -1,5 +1,4 @@
 # /packages/qt-dashboard/tcl/qt-dashboard-procs.tcl
-
 ad_library {
 
     Utility functions for Qonteo Dashboard package
@@ -49,7 +48,8 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
     
     switch $interval {
 	"hour" {
-	    set textlabel [_ qt-dashboard.Vehicles_total_hourly_per_day]
+	    set textlabel "[_ qt-dashboard.Vehicles_total_hourly_per_day]"
+	    set textlabel_datetime "[_ qt-dashboard.Hour]"
 	    set sql "SELECT EXTRACT('hour' FROM o.creation_date) AS datetime, 
 		COUNT(1) AS total
 		FROM cr_items ci, acs_objects o, cr_revisions cr
@@ -57,11 +57,13 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 		AND ci.item_id = cr.item_id
 		AND ci.latest_revision = cr.revision_id
 		AND ci.content_type = :content_type
+		AND cr.title <> 'UNKNOWN'
 		$where_clauses
 		GROUP BY datetime ORDER BY datetime ASC"
 	}
 	"week" {
-	    set textlabel [_ qt-dashboard.Vehicles_total_daily_per_week]
+	    set textlabel "[_ qt-dashboard.Vehicles_total_daily_per_week]"
+	    set textlabel_datetime "[_ qt-dashboard.Day]"
 	    set sql "SELECT EXTRACT('dow' FROM o.creation_date) AS datetime, COUNT(1) AS total
 		FROM cr_items ci, acs_objects o
 		WHERE ci.item_id = o.object_id
@@ -70,7 +72,8 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 		GROUP BY datetime ORDER BY datetime;"
 	}
 	"month" {
-	    set textlabel [_ qt-dashboard.Vehicles_total_daily_per_month]
+	    set textlabel "[_ qt-dashboard.Vehicles_total_daily_per_month]"
+	    set textlabel_datetime "[_ qt-dashboard.Day]"
 	    set sql "SELECT date_trunc('day', o.creation_date)::date AS datetime, COUNT(1) AS total
 		FROM cr_items ci, acs_objects o
 		WHERE ci.item_id = o.object_id
@@ -105,9 +108,9 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 	-multirow vehicles \
 	-key item_id \
 	-elements {
-	    textinfo { label "$textlabel" }
-	    datetime { label "$textlabel_datetime" }
-	    total { label "Total Vehiculos" }	
+	    textinfo { label $textlabel }
+	    datetime { label $textlabel_datetime }
+	    total { label "[_ qt-dashboard.Total_Vehicles]" }	
 	}
     
     
@@ -140,7 +143,7 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 	    2 {
 		switch $interval {
 		    "hour" {
-			set textinfo  "[_ qt-dashboard.Busiest_hour] [lindex $max 0] [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.vehicles]"
+			set textinfo  "[_ qt-dashboard.Busiest_hour] [lindex $max 0]h [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.vehicles]"
 		    }
 		    "week" {
 			set textinfo  "[_ qt-dashboard.Busiest_day] [lindex $max 0] [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.vehicles]"
@@ -190,13 +193,14 @@ ad_proc qt::dashboard::vehicle::import {} {
     
     
 } {
-
+    ns_log Notice "Running vehicle::import ..."
     package require json
     package require rl_json
     namespace path {::rl_json}
     
-    
-    set url "http://178.62.211.78/io/lpr/trigger_with_response.php?camera_id=4&timeout=3&fast_answer=1&output_type=JSON"
+    set last_req [util_text_to_url [lindex [split [db_string select_last_record { select MAX(creation_date) FROM cr_items ci, acs_objects o WHERE ci.item_id = o.object_id AND ci.content_type = 'qt_vehicle';} -default [clock scan seconds] ] "+"] 0] ]
+    ns_log Notice "LASTREQ $last_req"
+    set url "http://178.62.211.78/io/lpr/trigger_with_response_qonteo.php?camera_id=16&last_req=$last_req&timeout=3&fast_answer=1&output_type=JSON"
     
     
     # Gets full JSON
@@ -208,68 +212,72 @@ ad_proc qt::dashboard::vehicle::import {} {
 	if {$arr(page) ne "Warning: empty answer!"} {
 	    # Isolates page data
 	    set data [json get $arr(page)]
-	    array set arr2 [lindex $data 1]  	    
-	    set item_id [db_nextval "acs_object_id_seq"]	    
-	    set creation_user 726
-	    set content_type qt_vehicle
-	    set storage_type "text"
-	    set package_id [apm_package_id_from_key qt-dashboard]
-	    set creation_ip "178.62.211.78"
-	    set creation_date $arr2(first_seen)
-	    set name $arr2(id)
-	    set description [lindex $data 1]
-	    set plate [lindex $description 3]
+	    #ns_log Notice "DATA $data"
 	    
-	    if {![db_0or1row item_exists {
-		SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
-	    }]} {	    		
-		db_transaction {
-		    set item_id [content::item::new \
-				     -item_id $item_id \
-				     -parent_id $package_id \
-				     -creation_user $creation_user \
-				     -package_id $package_id \
-				     -creation_ip $creation_ip \
-				     -creation_date $creation_date \
-				     -name $name \
-				     -title $plate \
-				     -description $description \
-				     -storage_type "$storage_type" \
-				     -content_type $content_type \
-				     -text $description \
-				     -data $description \
-				     -is_live "t" \
-				     -mime_type "text/plain"
-				]
-		}	    	    
-	
-		ns_log Notice "New ITEM Vehicle Inserted $name"
-	    } else {
-
-		db_1row item_exists {
+	    foreach {i elem} $data {
+		ns_log Notice "ELEM $elem"		
+		array set arr2 $elem
+		
+		set item_id [db_nextval "acs_object_id_seq"]	    
+		set creation_user 726
+		set content_type qt_vehicle
+		set storage_type "text"
+		set package_id [apm_package_id_from_key qt-dashboard]
+		set creation_ip "178.62.211.78"
+		set creation_date $arr2(first_seen)
+		set name $arr2(id)
+		set description $elem
+		set plate [lindex $description 3]
+		
+		if {![db_0or1row item_exists {
 		    SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
-		}
-		
-		set revision_id [content::revision::new \
-				     -item_id $item_id \
-				     -title $name \
-				     -creation_user $creation_user \
-				     -package_id $package_id \
-				     -creation_ip $creation_ip \
-				     -creation_date $creation_date \
-				     -title $plate \
-				     -description $description \
-				     -content $description \
-				     -mime_type "text/plain" \
-				     -publish_date $creation_date \
-				     -is_live "t" \
-				     -storage_type "$storage_type" \
-				     -content_type $content_type]
-		
-		ns_log Notice "New REVISION Vehicle Inserted $name"
-
-	    }	    
-	    return $item_id	    
+		}]} {	    		
+		    db_transaction {
+			set item_id [content::item::new \
+					 -item_id $item_id \
+					 -parent_id $package_id \
+					 -creation_user $creation_user \
+					 -package_id $package_id \
+					 -creation_ip $creation_ip \
+					 -creation_date $creation_date \
+					 -name $name \
+					 -title $plate \
+					 -description $description \
+					 -storage_type "$storage_type" \
+					 -content_type $content_type \
+					 -text $description \
+					 -data $description \
+					 -is_live "t" \
+					 -mime_type "text/plain"
+				    ]
+		    }	    	    
+		    
+		    ns_log Notice "New ITEM Vehicle Inserted $name"
+		} else {
+		    
+		    db_1row item_exists {
+			SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
+		    }
+		    
+		    set revision_id [content::revision::new \
+					 -item_id $item_id \
+					 -creation_user $creation_user \
+					 -package_id $package_id \
+					 -creation_ip $creation_ip \
+					 -creation_date $creation_date \
+					 -title $plate \
+					 -description $description \
+					 -content $description \
+					 -mime_type "text/plain" \
+					 -publish_date $creation_date \
+					 -is_live "t" \
+					 -storage_type "$storage_type" \
+					 -content_type $content_type]
+		    
+		    ns_log Notice "New REVISION Vehicle Inserted $name"
+		    
+		}	    		
+	    }
 	}
     }
     return 

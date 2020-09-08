@@ -35,11 +35,11 @@ select content_type__create_type (
                                  -- first, before item metadata
        'Qonteo Vehicle',    -- pretty_name
        'Qonteo Vehicles',   -- pretty_plural
-       NULL,        -- table_name
+       qt_vehicles,        -- table_name
        -- IURI: acs_object_types supports a null table name so we do that
        -- instead of passing a false value so we can actually use the
        -- content repository instead of duplicating all the code in file-storage
-       NULL,	         -- id_column
+       qt_vehicle_id,	         -- id_column
        'qt_vehicle__get_title' -- name_method
 );
 
@@ -47,53 +47,118 @@ select content_type__create_type (
 select content_folder__register_content_type(-100,'qt_vehicle','t');
 
 
+-- id 323659 plate_number IWR425 country_name Colombia country_symbol CO first_seen {2020-09-06 12:46:57} last_seen {2020-09-06 12:46:58} probability 1 location_name Test camera_name {LPR 3} direction COMING car_class Car plate_image http://178.62.211.78/plate_image_fa.php?id=323659 car_image http://178.62.211.78/car_image_fa.php?id=323659
+-- id 138232 plate_number UNKNOWN country_name Unknown country_symbol ?? first_seen {2020-08-01 17:58:53} last_seen {2020-08-01 17:58:53} probability 0.2 location_name Test camera_name LPR3 direction UNKNOWN class UNKNOWN plate_image http://178.62.211.78/plate_image_fa.php?id=138232 car_image http://178.62.211.78/car_image_fa.php?id=138232
+-- id 323666 plate_number WPP533 country_name Colombia country_symbol CO first_seen {2020-09-06 12:48:36} last_seen {2020-09-06 12:48:36} probability 0.4 location_name Test camera_name {LPR 3} direction COMING car_class Car plate_image http://178.62.211.78/plate_image_fa.php?id=323666 car_image http://178.62.211.78/car_image_fa.php?id=323666
 
 
-CREATE FUNCTION dynamic_pivot(central_query text, headers_query text)
- RETURNS refcursor AS
- $$
- DECLARE
-   left_column text;
-     header_column text;
-       value_column text;
-         h_value text;
-	   headers_clause text;
-	     query text;
-	       j json;
-	         r record;
-		   curs refcursor;
-		     i int:=1;
-		     BEGIN
-		       -- find the column names of the source query
-		         EXECUTE 'select row_to_json(_r.*) from (' ||  central_query || ') AS _r' into j;
-			   FOR r in SELECT * FROM json_each_text(j)
-			     LOOP
-			         IF (i=1) THEN left_column := r.key;
-				       ELSEIF (i=2) THEN header_column := r.key;
-				             ELSEIF (i=3) THEN value_column := r.key;
-					         END IF;
-						     i := i+1;
-						       END LOOP;
+-- SELECT cr.description FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id AND ci.item_id = cr.item_id AND ci.latest_revision = cr.revision_id AND ci.content_type = 'qt_vehicle' AND split_part(cr.description, ' ', 24) = 'car_class';
 
-  --  build the dynamic transposition query (based on the canonical model)
-    FOR h_value in EXECUTE headers_query
-      LOOP
-          headers_clause := concat(headers_clause,
-	       format(chr(10)||',min(case when %I=%L then %I::text end) as %I',
-	                  header_column,
-				   h_value,
-					   value_column,
-						   h_value ));
-						     END LOOP;
+-- SELECT cr.description FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id AND ci.item_id = cr.item_id AND ci.latest_revision = cr.revision_id AND ci.content_type = 'qt_vehicle' AND split_part(cr.description, ' ', 23) = 'class';
 
-  query := format('SELECT %I %s FROM (select *,row_number() over() as rn from (%s) AS _c) as _d GROUP BY %I order by min(rn)',
-             left_column,
-		   headers_clause,
-			   central_query,
-				   left_column);
+---------
+-- qt_vehicles
+---------
+create table ee_items (
+    qt_vehicle_id	        integer
+    				constraint qt_vehicle_id_fk
+    				references cr_revisions on delete cascade
+    				constraint qt_vehicle_id_pk primary key,
+    metrici_id	      		integer,
+    plate			varchar(10),
+    car_image_url	      	varchar,
+    plate_image_url         	varchar,
+    country_iso			char(2),
+    first_seen			timestamptz,
+    last_seen			timestamptz,
+    probability			numeric,
+    category_id			integer
+    				constraint category_id_fk
+    				references categories
+);
 
-  -- open the cursor so the caller can FETCH right away
-    OPEN curs FOR execute query;
-    RETURN curs;
-  END
-$$ LANGUAGE plpgsql;
+-- create content type attributes
+select content_type__create_attribute (
+  'qt_vehicle',			     -- content_type
+  'metrici_id',		     	     -- attribute_name
+  'integer',		    	     -- datatype
+  'Metrici ID',		     	     -- pretty_name
+  'Metrici IDs',	    	     -- pretty_plural
+  null,			   	     -- sort_order
+  null,			   	     -- default_value
+  'integer'		    	     -- column_spec
+);
+
+-- create content type attributes
+select content_type__create_attribute (
+  'qt_vehicle',			     -- content_type
+  'plate',		     	     -- attribute_name
+  'text',		    	     -- datatype
+  'Plate',		     	     -- pretty_name
+  'Plates',	    	     	     -- pretty_plural
+  null,			   	     -- sort_order
+  null,			   	     -- default_value
+  'text'		    	     -- column_spec
+);
+
+
+-- create content type attributes
+select content_type__create_attribute (
+  'qt_vehicle',			     -- content_type
+  'car_image_url',		     -- attribute_name
+  'text',		    	     -- datatype
+  'Car Image URL',     	     	     -- pretty_name
+  'Car Image URLs',    	     	     -- pretty_plural
+  null,			   	     -- sort_order
+  null,			   	     -- default_value
+  'text'		    	     -- column_spec
+);
+
+-- create content type attributes
+select content_type__create_attribute (
+  'qt_vehicle',			     -- content_type
+  'plate_image_url',	     	     -- attribute_name
+  'text',		    	     -- datatype
+  'Plate Image URL',	     	     -- pretty_name
+  'Plate Image URLs',    	     -- pretty_plural
+  null,			   	     -- sort_order
+  null,			   	     -- default_value
+  'text'		    	     -- column_spec
+);
+
+-- create content type attributes
+select content_type__create_attribute (
+  'qt_vehicle',			     -- content_type
+  'country_iso',	     	     -- attribute_name
+  'text',		    	     -- datatype
+  'Country ISO',	     	     -- pretty_name
+  'Country ISOs',    	     	     -- pretty_plural
+  null,			   	     -- sort_order
+  null,			   	     -- default_value
+  'text'		    	     -- column_spec
+);
+
+-- create content type attributes
+select content_type__create_attribute (
+  'qt_vehicle',			     -- content_type
+  'first_seen',		     	     -- attribute_name
+  'timestamptz',	    	     -- datatype
+  'First Seen',		     	     -- pretty_name
+  'First Seen',	    	     	     -- pretty_plural
+  null,			   	     -- sort_order
+  null,			   	     -- default_value
+  'timestamptz'		    	     -- column_spec
+);
+
+
+-- create content type attributes
+select content_type__create_attribute (
+  'qt_vehicle',			     -- content_type
+  'last_seen',		     	     -- attribute_name
+  'timestamptz',	    	     -- datatype
+  'Last Seen',		     	     -- pretty_name
+  'Last Seen',	    	     	     -- pretty_plural
+  null,			   	     -- sort_order
+  null,			   	     -- default_value
+  'timestamptz'		    	     -- column_spec
+);

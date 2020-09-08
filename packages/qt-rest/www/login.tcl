@@ -41,7 +41,10 @@ if {[ns_conn method] eq "POST"} {
 		set token "${enc_header}.${enc_payload}.${hmac_secret}"
 
 		## Finish ADproc from ix-jwt
-		
+		set admin_p false 
+		if {[acs_user::site_wide_admin_p -user_id $user(user_id)] eq 1} {
+		    set admin_p true
+		}
 		set err_msg ""
 		set status 200
 		set header [ns_set new]
@@ -50,6 +53,7 @@ if {[ns_conn method] eq "POST"} {
 		    \"token\": \"$token\",
 		    \"user\": \{
 		        \"isVerified\": \"$user(email_verified_p)\",
+		        \"isAdmin\": $admin_p,
 		        \"_id\": $user(user_id),
 			\"firstName\": \"$user(first_names)\",
 			\"lastName\": \"$user(last_name)\",

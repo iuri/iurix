@@ -44,16 +44,10 @@ if {[ns_conn method] eq "POST"} {
 	set fd [open $filename w]
 	fconfigure $fd -translation binary
 	package require base64
-	puts $fd [base64::decode $data]
-	#puts $fd [ns_base64decode -binary $data]
+	#puts $fd [base64::decode $data]
+	puts $fd [ns_base64decode -binary $data]
 	close $fd
-
-
 	
-	
-	#ns_returnfile 200 $mime_type $filename
-
-
 	set user_id $arr(user_id)
 	set album_id [qt::rest::album::get_id -user_id $user_id -name "SharedImages"]
 

@@ -52,65 +52,11 @@ ad_proc -public qt::dashboard::person::export_heatmap_csv {
 	textinfo {label "TOTAL SEMANA ACUMULADO PERSONAS POR HORA DEL DIA"}
 	hour {label "HORA"}
     }
-
-    ns_log Notice "DATES $creation_date"
-    set from [clock format [clock scan {-7 day} -base [clock scan $creation_date]] -format "%Y-%m-%d"]
-    ns_log Notice "FROM $from"
-    
-    for {set i 0} {$i<7} {incr i} {
-	set from [clock format [clock scan {+1 day} -base [clock scan $from]] -format "%Y%m%d"]
-	lappend elements $from {label ""} 
-	append columns "$from "
-    }
-
-    ns_log Notice "ELEMENTS $elements"
-    ns_log notice "COLUMNS $columns"
-    
-    template::list::create \
-	-name persons \
-	-multirow persons \
-	-key item_id \
-	-elements $elements
-       
-    
-
-        
-    set sql "SELECT
-	EXTRACT(hour FROM o.creation_date) AS hour,
-	EXTRACT(DAY FROM o.creation_date) AS day,
-	COUNT(1) AS total
-	FROM cr_items ci, acs_objects o, cr_revisions cr
-	WHERE ci.item_id = o.object_id
-	AND ci.item_id = cr.item_id
-	AND ci.latest_revision = cr.revision_id
-	AND ci.content_type = :content_type
-	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
-	GROUP BY hour, day ORDER BY hour ASC "
+     
     
     
-    set aux 0
+    
 
-    set datasource [db_list_of_lists select_persons_count $sql]
-    ns_log Notice "DATASOURCE $datasource"
-    db_multirow -extend { textinfo $columns} persons select_p $sql   {
-
-	ns_log Notice "ELEM $i"
-
-	set textinfo ""
-	
-	
-	ns_log Notice "Hour $hour | TOTAL $total "
-	set date [lindex [split [lindex $hour 0] " "] 0]
-	set date [string map {"-" ""} $date]
-	ns_log Notice "DATE $date"
-	
-	set hour [lindex [split [lindex $hour 0] " "] 1]	
-	ns_log Notice "HOUR $hour"
-	
-	set $date $total
-	ns_log Notice ""
-	incr i
-    }
     
 #    qt::list::write_csv -name persons
     return
@@ -123,6 +69,7 @@ ad_proc -public qt::dashboard::person::export_csv {
     {-interval}
     {-date_from ""}
     {-date_to ""}
+    {-gender ""}
 } {
 
     Export data from list::template  to CSV file
@@ -154,7 +101,8 @@ ad_proc -public qt::dashboard::person::export_csv {
     
     switch $interval {
 	"hour" {
-	    set textlabel [_ qt-dashboard.Persons_total_hourly_per_day]
+	    set textlabel "[_ qt-dashboard.Persons_total_hourly_per_day]"
+	    set textlabel_datetime "[_ qt-dashboard.Hour]"
 	    set sql "SELECT EXTRACT('hour' FROM o.creation_date) AS datetime,
 		COUNT(1) AS total,
 		COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
@@ -170,7 +118,9 @@ ad_proc -public qt::dashboard::person::export_csv {
 	    	    
 	}
 	"week" {
-	    set textlabel [_ qt-dashboard.Persons_total_daily_per_week]
+	    set textlabel "[_ qt-dashboard.Persons_total_daily_per_week]"
+	    set textlabel_datetime "[_ qt-dashboard.Day]"
+
 	    set sql "SELECT EXTRACT('dow' FROM o.creation_date) AS datetime,
 		COUNT(1) AS total,
 		COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
@@ -185,8 +135,9 @@ ad_proc -public qt::dashboard::person::export_csv {
 	    
 	}
 	"month" {
-	    set textlabel [_ qt-dashboard.Persons_total_daily_per_month]
-	    set sql "SELECT date_trunc('day', o.creation_date)::date AS datetime,
+	    set textlabel "[_ qt-dashboard.Persons_total_daily_per_month]"
+	    set textlabel_datetime "[_ qt-dashboard.Day]"
+	    set sql "SELECT EXTRACT('day' FROM o.creation_date) AS datetime,
 		COUNT(1) AS total,
 		COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
 		COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
@@ -195,18 +146,30 @@ ad_proc -public qt::dashboard::person::export_csv {
 		AND ci.item_id = cr.item_id
 		AND ci.latest_revision = cr.revision_id
 		AND ci.content_type = :content_type
-		AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
+		$where_clauses
 		GROUP BY 1 ORDER BY datetime;"
 	}
     }
-  
+
+
     set elements [list \
-		      textinfo [list label "$textlabel"] \
-		      datetime [list label "Tiempo"] \
-		      total [list label "Total"] \
-		      female [list label "Mujeres"] \
-		      male [list label "Hombres"]]
-    
+		      textinfo [list label $textlabel] \
+		      datetime [list label $textlabel_datetime]]
+    switch $gender {
+	"w" {	    
+	    lappend elements female [list label "Mujeres"]
+	}
+	"m" {
+	    lappend elements male [list label "Hombres"]
+	    
+	}
+	default {
+	    lappend elements total [list label "Total"] \
+		female [list label "Mujeres"] \
+		male [list label "Hombres"]
+	}
+    }
+
     set datasource [db_list_of_lists select_grouped_hour $sql]
     set max [list]
     foreach elem $datasource {
@@ -258,10 +221,10 @@ ad_proc -public qt::dashboard::person::export_csv {
 		set creation_date [db_string select_now { SELECT now() - INTERVAL '5 hour' FROM dual}]
 		set textinfo  "[_ qt-dashboard.Report_created_at] [lindex [split $creation_date "."] 0]"	    
 	    }
-	    3 {
+	    2 {
 		switch $interval {
 		    "hour" {
-			set datetime "${datetime}:00h"
+			set datetime "${datetime}"
 			set textinfo  "[_ qt-dashboard.Busiest_hour] [lindex $max 0] [_ qt-dashboard.with] [lindex $max 1] [_ qt-dashboard.persons], [lindex $max 2] [_ qt-dashboard.Women] y [lindex $max 3] [_ qt-dashboard.Men]"
 		    }
 		    "week" {
@@ -272,17 +235,17 @@ ad_proc -public qt::dashboard::person::export_csv {
 		    }
 		}
 	    }
-	    5 {
+	    4 {
 		if {$date_from ne ""} {
 		    set textinfo [_ qt-dashboard.Date_Range]
 		}
 	    }
-	    6 {
+	    5 {
 		if {$date_from ne ""} {
 		    set textinfo $date_from
 		}
 	    }
-	    7 {
+	    6 {
 		if {[info exists date_to] } {
 		    set textinfo $date_to
 		}

@@ -8,12 +8,12 @@ ad_page_contract {
     {date_from:optional}
     {date_to:optional}
     {offset:naturalnum,notnull 0}
+    {limit "50"}
     {num:range(0|200) 0}
     {dfs:word,trim,notnull ""}
     {dts:word,trim,notnull ""}
     {search_package_id:naturalnum ""}
     {scope ""}
-    {page 0}
     {object_type:token ""}
 } -validate {
     valid_dfs -requires dfs {
@@ -270,35 +270,15 @@ set nquery [llength [split $q]]
 set stopwords $result(stopwords)
 set nstopwords [llength $result(stopwords)] 
 
-ns_log Notice "    SELECT COUNT(cr.title)
+db_0or1row select_total_records "
+    SELECT COUNT(ci.item_id) total
     FROM cr_items ci,
     cr_revisionsx cr
     WHERE ci.item_id = cr.item_id
     AND ci.content_type = 'qt_vehicle'
-    AND cr.title <> 'UNKNOWN'
-    AND cr.title <> '111111'
-    AND cr.title <> '333333'
-    AND cr.title <> 'FBF724'
-    $where_clauses
-    GROUP BY cr.title
-    HAVING COUNT(*) >= 1"
+    $where_clauses"
 
-set total_records [db_list select_total_pages "
-    SELECT COUNT(cr.title)
-    FROM cr_items ci,
-    cr_revisionsx cr
-    WHERE ci.item_id = cr.item_id
-    AND ci.content_type = 'qt_vehicle'
-    AND cr.title <> 'UNKNOWN'
-    AND cr.title <> '111111'
-    AND cr.title <> '333333'
-    AND cr.title <> 'FBF724'
-    AND cr.title <> 'FBF124'
-    $where_clauses
-    GROUP BY cr.title
-    HAVING COUNT(*) >= 1
-"]
-append json "\"pages\": [expr [llength $total_records] /10],"
+append json "\"total\": $total,"
 
 append json "\"plates\": \["
 set aux ""
@@ -345,11 +325,12 @@ foreach object_id $result(ids) {
         
         append json "\{
             \"plate\": \"$title_summary\",
+            \"type\": \"[lindex $description 21]\",
             \"date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
             \"time\": \"[lc_time_fmt $creation_date %H:%M]\",
             \"location\": \"4.60971, -74.08175\",
             \"occurency\": \"$occurency\",
-            \"client_p\": true,
+            \"client_p\": false,
             \"membership_p\": false
         \},"
     }
@@ -359,11 +340,11 @@ foreach object_id $result(ids) {
 # order by date DESC, pagination
 
 if { $result(count) eq 0 } {
-    set offset [expr $page * 10]
-    
+    ns_log Notice "LIMIT $limit | OFFSET $offset"
     db_foreach select_vehicles "
         SELECT cr.title,
         MAX(cr.creation_date) AS creation_date,
+        'car' AS type,
         COUNT(*) AS occurency
         FROM cr_items ci,
         cr_revisionsx cr
@@ -378,7 +359,7 @@ if { $result(count) eq 0 } {
         GROUP BY cr.title
         HAVING COUNT(*) > 1
         ORDER BY MAX(cr.creation_date) DESC 
-        LIMIT 10 OFFSET $offset;
+        LIMIT $limit OFFSET $offset;
         
     " {
         set description [db_string select_description {
@@ -386,6 +367,7 @@ if { $result(count) eq 0 } {
         } -default ""]
         append json "\{
             \"plate\": \"$title\",
+            \"type\": \"[lindex $description 21]\",
             \"date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
             \"time\": \"[lc_time_fmt $creation_date %H:%M:%S]\",
             \"location\": \"4.60971, -74.08175\",

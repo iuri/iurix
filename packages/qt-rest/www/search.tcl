@@ -7,9 +7,8 @@ ad_page_contract {
     {t:trim ""}
     {date_from:optional}
     {date_to:optional}
-    {offset:naturalnum,notnull 0}
-    {limit "50"}
-    {num:range(0|200) 0}
+    {offset 0}
+    {limit 10}
     {dfs:word,trim,notnull ""}
     {dts:word,trim,notnull ""}
     {search_package_id:naturalnum ""}
@@ -38,6 +37,8 @@ ad_page_contract {
 # Validate and Authenticate JWT
 qt::rest::jwt::validation_p
 
+ns_log Notice "OFFSET $offset LIMIT $limit"
+
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
 set where_clauses ""
 
@@ -60,8 +61,6 @@ if {[info exists date_to]} {
 	ad_script_abort    
     }
 }
-
-
 
 set page_title "Search Results"
 
@@ -162,11 +161,6 @@ if { [array get info] eq "" } {
     ad_script_abort
 }
 
-if { $num <= 0} {
-    set limit [parameter::get -package_id $package_id -parameter LimitDefault]
-} else {
-    set limit $num
-}
 
 
 #
@@ -243,42 +237,12 @@ if { $t eq [_ search.Feeling_Lucky] && $result(count) > 0} {
 }
 
 set elapsed [format "%.02f" [expr {double(abs($tend - $t0)) / 1000.0}]]
-#
-# $count is the number of results to be displayed, while
-# $result(count) is the total number of results (without taking
-# permissions into account)
-#
-set count [llength $result(ids)]
-if { $offset >= $result(count) } { set offset [expr {($result(count) / $limit) * $limit}] }
-set low  [expr {$offset + 1}]
-set high [expr {$offset + $limit}]
-if { $high > $result(count) } { set high $result(count) }
-
-if { $info(automatic_and_queries_p) && "and" in $q } {
-    set and_queries_notice_p 1
-} else {
-    set and_queries_notice_p 0
-}
-
-set url_advanced_search ""
-append url_advanced_search "advanced-search?q=$urlencoded_query"
-if {[info exists ::__csrf_token]} {append url_advanced_search "&__csrf_token=$::__csrf_token"}
-if { $num > 0 } { append url_advanced_search "&num=$num" }
 
 set query $q
 set nquery [llength [split $q]]
 set stopwords $result(stopwords)
 set nstopwords [llength $result(stopwords)] 
 
-db_0or1row select_total_records "
-    SELECT COUNT(ci.item_id) total
-    FROM cr_items ci,
-    cr_revisionsx cr
-    WHERE ci.item_id = cr.item_id
-    AND ci.content_type = 'qt_vehicle'
-    $where_clauses"
-
-append json "\"total\": $total,"
 
 append json "\"plates\": \["
 set aux ""
@@ -340,11 +304,10 @@ foreach object_id $result(ids) {
 # order by date DESC, pagination
 
 if { $result(count) eq 0 } {
-    ns_log Notice "LIMIT $limit | OFFSET $offset"
+    ns_log Notice "LIMIT1 $limit | OFFSET1 $offset"
     db_foreach select_vehicles "
         SELECT cr.title,
         MAX(cr.creation_date) AS creation_date,
-        'car' AS type,
         COUNT(*) AS occurency
         FROM cr_items ci,
         cr_revisionsx cr
@@ -379,11 +342,40 @@ if { $result(count) eq 0 } {
 
     
     }
+
+    set json [string trimright $json ","]
+    append json "\],"
+    
+    db_0or1row count_records "
+        SELECT SUM(total) AS total FROM (
+        SELECT DISTINCT(cr.title),
+        COUNT(ci.live_revision) AS total
+        FROM cr_items ci,
+        cr_revisionsx cr
+        WHERE ci.item_id = cr.item_id
+        AND ci.live_revision = cr.revision_id
+        AND ci.content_type = 'qt_vehicle'
+        AND cr.title <> 'UNKNOWN'
+        AND cr.title <> '111111'
+        AND cr.title <> '333333'
+        AND cr.title <> 'FBF724'
+        AND cr.title <> 'FBF124'
+        $where_clauses 
+        GROUP BY cr.title
+        HAVING COUNT(ci.live_revision) > 1 ) t"
+
+
+    
+    append json "\"total\": [expr int($total * 34.6 / 100)] \}"
+} else {
+
+    set json [string trimright $json ","]
+    append json "\],"
+
+    append json "\"total\": $result(count)\}"
+
 }
 
-
-set json [string trimright $json ","]
-append json "\]\}"
 
 
 

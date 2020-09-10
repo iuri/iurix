@@ -352,7 +352,6 @@ set instant_data [db_list_of_lists select_instant_data {
     GROUP BY 1 ORDER BY hour;
 }]
 
-
 set today_total 0
 set today_female 0
 set today_male 0

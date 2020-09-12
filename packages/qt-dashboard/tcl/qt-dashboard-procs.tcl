@@ -116,10 +116,6 @@ ad_proc qt::dashboard::import_json {
 				     -mime_type "text/plain"
 				]
 		}	    	    
-		set revision_id [content::revision::new \
-				     -item_id $item_id \
-				     -title $name \
-				     -description $l_json]	   	    
 	    } else {
 		ns_log Notice "Face EXISTS"
 		db_1row item_exists {

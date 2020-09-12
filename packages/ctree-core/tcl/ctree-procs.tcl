@@ -45,9 +45,22 @@ SECRET $hmac_secret \n"
     
     set hmac_vrf [ns_crypto::hmac string -digest sha256 "Abracadabra" "What is the magic word?"]
     ns_log Notice "VRF $hmac_vrf"
-    if {$hmac_secret eq $hmac_vrf} {
-	return  1
+    if {$hmac_secret ne $hmac_vrf} {
+
+	ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
+	ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
+	ad_script_abort
     }
+
+    return
+}
+
+
+
+
+
+
+
     return 0
 }
 

@@ -3,7 +3,7 @@ ns_log Notice "Running TCL script luna.tcl"
 
 set url "ws://192.199.241.130:5008/api/subscribe?auth_token=9fb6e731-b342-4952-b0c1-aa1d0b52757b&event_type=extract"
 #set url "wss://javascript.info/article/websocket/demo/hello"
-ws::client::close conn0
+#ws::client::close conn0
 
 set channel [ws::client::open $url]
 ns_log Notice "NEW CHANNEL $channel"

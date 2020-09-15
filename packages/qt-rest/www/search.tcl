@@ -7,8 +7,8 @@ ad_page_contract {
     {t:trim ""}
     {date_from:optional}
     {date_to:optional}
-    {offset 0}
-    {limit 10}
+    {offset:integer 0}
+    {limit:integer 10}
     {dfs:word,trim,notnull ""}
     {dts:word,trim,notnull ""}
     {search_package_id:naturalnum ""}
@@ -33,7 +33,7 @@ ad_page_contract {
     }
     
 }
-
+ns_log Notice "Running SEARCH PLATES"
 # Validate and Authenticate JWT
 qt::rest::jwt::validation_p
 
@@ -44,7 +44,7 @@ set where_clauses ""
 
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
-	append where_clauses " AND cr.creation_date::date >= :date_from::date "
+	append where_clauses " AND o.creation_date::date >= :date_from::date "
 	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
@@ -55,7 +55,7 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
-	append where_clauses " AND cr.creation_date::date <= :date_to::date"
+	append where_clauses " AND o.creation_date::date <= :date_to::date "
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -79,36 +79,33 @@ set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
 
 db_0or1row select_top_plate "
     SELECT cr.title,
-    MAX(cr.creation_date) AS creation_date,
+    MAX(o.creation_date) AS creation_date,
     COUNT(*) AS occurency
     FROM cr_items ci,
-    cr_revisionsx cr
+    cr_revisionsx cr,
+    acs_objects o
     WHERE ci.item_id = cr.item_id
+    AND ci.item_id = o.object_id
     AND ci.content_type = 'qt_vehicle'
-    AND cr.title <> 'UNKNOWN'
-    AND cr.title <> '111111'
-    AND cr.title <> '333333'
-    AND cr.title <> 'FBF724'
-    AND cr.title <> 'FBF124'
+    AND cr.title NOT IN ('UNKNOWN', '111111', '333333', 'FBF724','FBF124', '849500')
     GROUP BY cr.title
     HAVING COUNT(*) > 1
     ORDER BY COUNT(*) DESC
     LIMIT 1
 " -column_array top_plate
 
+
 db_0or1row select_top_plate_month "
     SELECT cr.title,
-    MAX(cr.creation_date) AS creation_date,
+    MAX(o.creation_date) AS creation_date,
     COUNT(*) AS occurency
     FROM cr_items ci,
-    cr_revisionsx cr
+    cr_revisionsx cr,
+    acs_objects o
     WHERE ci.item_id = cr.item_id
+    AND ci.item_id = o.object_id
     AND ci.content_type = 'qt_vehicle'
-    AND cr.title <> 'UNKNOWN'
-    AND cr.title <> '111111'
-    AND cr.title <> '333333'
-    AND cr.title <> 'FBF724'
-    AND cr.title <> 'FBF124'
+    AND cr.title NOT IN ('UNKNOWN', '111111', '333333', 'FBF724','FBF124', '849500')
     $where_clauses
     GROUP BY cr.title
     HAVING COUNT(*) > 1
@@ -117,16 +114,34 @@ db_0or1row select_top_plate_month "
 " -column_array top_plate_month
 
 
-set top_plate(description) [db_string select_description "
-    SELECT cr.description FROM cr_revisionsx cr
-    WHERE cr.title = '$top_plate(title)'
-    AND cr.creation_date = '$top_plate(creation_date)'
-" -default ""]
+if {[info exists top_plate(title)]} {
+    set top_plate(description) [db_string select_description "
+        SELECT cr.description FROM cr_revisionsx cr
+        WHERE cr.title = '$top_plate(title)'
+        AND cr.creation_date = '$top_plate(creation_date)'
+    " -default ""]
+} else {
+    array set top_plate {
+        title ""
+        creation_date ""
+        occurency 0
+        description ""
+    }
+}
 
-set top_plate_month(description) [db_string select_description "
-    SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = '$top_plate_month(title)' AND cr.creation_date = '$top_plate_month(creation_date)'
-" -default ""]
 
+if {[info exists top_plate_month(title)]} {
+    set top_plate_month(description) [db_string select_description "
+        SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = '$top_plate_month(title)' AND cr.creation_date = '$top_plate_month(creation_date)'
+    " -default ""]
+} else {
+    array set top_plate_month {
+        title ""
+        creation_date ""
+        occurency 0
+        description ""
+    }
+}
 
 append json "\{
     \"top_plate\": \{
@@ -304,26 +319,42 @@ foreach object_id $result(ids) {
 # order by date DESC, pagination
 
 if { $result(count) eq 0 } {
-    ns_log Notice "LIMIT1 $limit | OFFSET1 $offset"
-    db_foreach select_vehicles "
+
+    ns_log Notice "
         SELECT cr.title,
-        MAX(cr.creation_date) AS creation_date,
+        MAX(o.creation_date) AS creation_date,       
         COUNT(*) AS occurency
         FROM cr_items ci,
-        cr_revisionsx cr
+        cr_revisionsx cr,
+        acs_objects o
         WHERE ci.item_id = cr.item_id
+        AND ci.item_id = o.object_id 
         AND ci.content_type = 'qt_vehicle'
-        AND cr.title <> 'UNKNOWN'
-        AND cr.title <> '111111'
-        AND cr.title <> '333333'
-        AND cr.title <> 'FBF724'
-        AND cr.title <> 'FBF124'
+        AND cr.title NOT IN ('UNKNOWN', '111111', '333333', 'FBF724','FBF124', '849500')
         $where_clauses 
         GROUP BY cr.title
         HAVING COUNT(*) > 1
         ORDER BY MAX(cr.creation_date) DESC 
-        LIMIT $limit OFFSET $offset;
-        
+        LIMIT $limit OFFSET $offset;        
+
+"
+    
+    db_foreach select_vehicles "
+        SELECT cr.title,
+        MAX(o.creation_date) AS creation_date,       
+        COUNT(*) AS occurency
+        FROM cr_items ci,
+        cr_revisionsx cr,
+        acs_objects o
+        WHERE ci.item_id = cr.item_id
+        AND ci.item_id = o.object_id 
+        AND ci.content_type = 'qt_vehicle'
+        AND cr.title NOT IN ('UNKNOWN', '111111', '333333', 'FBF724','FBF124', '849500')
+        $where_clauses 
+        GROUP BY cr.title
+        HAVING COUNT(*) > 1
+        ORDER BY MAX(cr.creation_date) DESC 
+        LIMIT $limit OFFSET $offset;        
     " {
         set description [db_string select_description {
             SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = :title AND cr.creation_date = :creation_date
@@ -351,8 +382,10 @@ if { $result(count) eq 0 } {
         SELECT DISTINCT(cr.title),
         COUNT(ci.live_revision) AS total
         FROM cr_items ci,
-        cr_revisionsx cr
+        cr_revisionsx cr,
+        acs_objects o
         WHERE ci.item_id = cr.item_id
+        AND ci.item_id = o.object_id
         AND ci.live_revision = cr.revision_id
         AND ci.content_type = 'qt_vehicle'
         AND cr.title <> 'UNKNOWN'
@@ -366,7 +399,7 @@ if { $result(count) eq 0 } {
 
 
     
-    append json "\"total\": [expr int($total * 34.6 / 100)] \}"
+    append json "\"total\": [expr int($total * 30 / 100)] \}"
 } else {
 
     set json [string trimright $json ","]

@@ -275,12 +275,12 @@ ad_proc -public qt::dashboard::person::import {
 } {
 
     
-    ns_log Notice "JSON \n $json_text"
+#    ns_log Notice "JSON \n $json_text"
     if {[llength $json_text] > 0} {
 	array set arr $json_text
 	
 	if {[array exists arr]} {
-	    ns_log Notice "ARRAY \n [parray arr]"	    
+#	    ns_log Notice "ARRAY \n [parray arr]"	    
 	
 	    set item_id [db_nextval "acs_object_id_seq"]
 	    
@@ -298,27 +298,14 @@ ad_proc -public qt::dashboard::person::import {
 	    set storage_type "text"
 	    set parent_id $package_id	    	    
 	    set attributes [lindex $arr(result) 1]
-	    ns_log Notice "ATTRIBS $attributes"
+#	    ns_log Notice "ATTRIBS $attributes"
 	    
 	    set name [lindex [lindex $attributes 0] 3]
 	    set description "$arr(result) timestamp $arr(timestamp) authorization {$arr(authorization)}"
 	    
-	    ns_log Notice "NAME $name"
 	    if {![db_0or1row item_exists {
 		SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :parent_id
 	    }]} {	    
-		ns_log Notice "-item_id $item_id \
-				     -parent_id $parent_id \
-				     -creation_user $creation_user \
-				     -creation_ip $creation_ip \
-                                     -cration_date $creation_date \
-				     -package_id $package_id \
-				     -name $name \
-				     -title $name \
-				     -description $description \
-				     -storage_type $storage_type \
-				     -content_type $content_type \
-				     -mime_type text/plain"	       
 		db_transaction {
 		    set item_id [content::item::new \
 				     -item_id $item_id \
@@ -336,7 +323,6 @@ ad_proc -public qt::dashboard::person::import {
 				]
 		}	    	    
 	    } else {
-		ns_log Notice "Face EXISTS"
 		db_1row item_exists {
 		    SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :parent_id
 		}

@@ -5,18 +5,7 @@ ad_page_contract {} {
 ns_log Notice "Running TCL script listPhotos $user_id"
 
 if {[ns_conn method] eq "GET"} {
-    package req json
-
-    set header [ns_conn header]
-    ns_log Notice "HEADER \n $header"
-    set h [ns_set size $header]
-    ns_log Notice "HEADERS $h"
-    set req [ns_set array $header]
-    ns_log Notice "$req"
     
-    
-    set err_msg ""
-    set status 200
     set album_id [qt::rest::album::get_id -user_id $user_id]
 
     set url [ad_url]
@@ -41,12 +30,10 @@ if {[ns_conn method] eq "GET"} {
     
     ns_log Notice "JSON $json"
     # format JSON output
-    set result "\{\"count\":[llength $photos],\"next\":\"https://iurix.com/REST/listPhotos?offset=20&limit=20\",\"previous\": null,\"results\":$json\}"
+    set result "\{\"count\":[llength $photos],\"next\":\"https://dashboard.qonteo.com/REST/listPhotos?offset=20&limit=20\",\"previous\": null,\"results\":$json\}"
 	  
     
-    # doc_return 200 "application/json" $result    
-    # ns_return -binary $status "application/json;" -header $headers result
-    ns_respond -status $status -type "application/json" -headers $header -string $result  
+    ns_respond -status 200 -type "application/json" -string $result  
     ad_script_abort
     
     

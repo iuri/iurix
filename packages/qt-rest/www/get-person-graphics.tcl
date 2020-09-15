@@ -264,6 +264,7 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 	AND ci.item_id = cr.item_id
 	AND ci.latest_revision = cr.revision_id
 	AND ci.content_type = 'qt_face'
+        $where_clauses
 	GROUP BY range;
 	
     "]

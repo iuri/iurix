@@ -44,6 +44,25 @@ if {[ns_conn method] eq "POST"} {
 		if {[acs_user::site_wide_admin_p -user_id $user(user_id)] eq 1} {
 		    set admin_p true
 		}
+
+		set json_groups ""
+		db_foreach select_group_ids "
+		    select ap.package_id, r.object_id_one as group_id, g.group_name, mr.member_state
+		    from   acs_rels r,
+		    membership_rels mr,
+		    groups g,
+		    application_groups ap
+		    where  r.rel_type      = 'membership_rel'
+		    and    r.object_id_two = $auth_info(user_id)
+		    and    mr.rel_id   = r.rel_id
+		    and    g.group_id  = r.object_id_one
+		    and    ap.group_id = g.group_id
+                    and    ap.group_id <> -2
+		    order by lower(g.group_name)
+		" {
+		    append json_groups "\{\"group_id\": $group_id, \"group_name\": \"$group_name\"\},"
+		}
+		set json_groups [string trimright $json_groups ","]  
 		set err_msg ""
 		set status 200
 		set header [ns_set new]
@@ -57,9 +76,10 @@ if {[ns_conn method] eq "POST"} {
 			\"firstName\": \"$user(first_names)\",
 			\"lastName\": \"$user(last_name)\",
 			\"email\": \"$user(email)\",
-                        \"phonenumber\": \"76543234567\", 
-                        \"country\": \"Brasil\", 
-                        \"city\": \"Salvador\",
+                        \"phonenumber\": \"\", 
+                        \"country\": \"\", 
+                        \"city\": \"\",
+                        \"groups\": \[$json_groups\],
 			\"createdAt\": \"$user(creation_date)\",
 			\"updatedAt\": \"$user(last_visit)\",
 			\"__v\": 0
@@ -101,7 +121,7 @@ if {[ns_conn method] eq "POST"} {
 
     # doc_return 200 "application/json" $result    
     # ns_return -binary $status "application/json;" -header $headers result
-    ns_log Notice "$status | $header | $result"
+    #    ns_log Notice "$status | $header | $result"
     ns_respond -status $status -type "application/json" -headers $header -string $result  
     ad_script_abort
 

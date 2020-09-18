@@ -269,8 +269,8 @@ append result "\"today_total\": $today_total,
     \"week_total\": $week_total,
     \"week_percent\": $week_percent,
     \"total\": $total,
-    \"creation_date\": \"[lc_time_fmt $creation_date %d/%b/%Y]\",
-    \"current_date\": \"[lc_time_fmt $current_date %d/%b/%Y]\"
+    \"creation_date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
+    \"current_date\": \"[lc_time_fmt $current_date %Y-%m-%d]\"
 \}"
 
 

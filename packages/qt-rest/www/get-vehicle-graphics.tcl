@@ -5,7 +5,6 @@ ad_page_contract {
     {date_from:optional}
     {date_to:optional}
 }
-ns_log Notice "Running TCL script get-vehicle-graphics.tcl"
 
 
 # Validate and Authenticate JWT
@@ -164,8 +163,6 @@ set instant_data [db_list_of_lists select_instant_data {
     AND date_trunc('month', o.creation_date::date) = date_trunc('month',:creation_date::date)
     GROUP BY 1 ORDER BY hour;
 }]
-
-ns_log Notice "INSTANTDATA $instant_data"
 set today_total 0
 set yesterday_total 0
 

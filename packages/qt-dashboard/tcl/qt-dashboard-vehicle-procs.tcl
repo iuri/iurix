@@ -193,13 +193,11 @@ ad_proc qt::dashboard::vehicle::import {} {
     
     
 } {
-    ns_log Notice "Running vehicle::import ..."
     package require json
     package require rl_json
     namespace path {::rl_json}
     
     set last_req [util_text_to_url [lindex [split [db_string select_last_record { select MAX(creation_date) FROM cr_items ci, acs_objects o WHERE ci.item_id = o.object_id AND ci.content_type = 'qt_vehicle';} -default [clock scan seconds] ] "+"] 0] ]
-    ns_log Notice "LASTREQ $last_req"
     set url "http://178.62.211.78/io/lpr/trigger_with_response_qonteo.php?camera_id=16&last_req=$last_req&timeout=3&fast_answer=1&output_type=JSON"
     
     
@@ -215,7 +213,6 @@ ad_proc qt::dashboard::vehicle::import {} {
 	    #ns_log Notice "DATA $data"
 	    
 	    foreach {i elem} $data {
-		ns_log Notice "ELEM $elem"		
 		array set arr2 $elem
 		
 		set item_id [db_nextval "acs_object_id_seq"]	    
@@ -252,7 +249,7 @@ ad_proc qt::dashboard::vehicle::import {} {
 				    ]
 		    }	    	    
 		    
-		    ns_log Notice "New ITEM Vehicle Inserted $name"
+		    #ns_log Notice "New ITEM Vehicle Inserted $name"
 		} else {
 		    
 		    db_1row item_exists {
@@ -274,7 +271,7 @@ ad_proc qt::dashboard::vehicle::import {} {
 					 -storage_type "$storage_type" \
 					 -content_type $content_type]
 		    
-		    ns_log Notice "New REVISION Vehicle Inserted $name"
+		    #ns_log Notice "New REVISION Vehicle Inserted $name"
 		    
 		}	    		
 	    }

@@ -4,9 +4,6 @@ ad_page_contract {} {
     {file.tmpfile}
 }
 
-ns_log Notice "Running REST upload-photo"
-
-
 
 if {[ns_conn method] eq "POST"} {
 
@@ -32,14 +29,8 @@ if {[ns_conn method] eq "POST"} {
     #   ns_log Notice "*** ***** *** ** \n DICT \n $dict"
     
     array set arr $dict
-    ns_log Notice "BODY \n [parray arr]"
     if {[array exists arr] && [array size arr] > 0} {
-	
-	ns_log Notice "USERID $arr(user_id)"
-	ns_log Notice "$arr(mime_type)"
-	ns_log Notice "[lindex $arr(person_name) 1]"
-	ns_log Notice ""
-	
+		
 	set user_id $arr(user_id)
 	if {![exists_and_not_null user_id]} {
 	    set user_id [ad_conn user_id]

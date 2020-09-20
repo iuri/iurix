@@ -72,9 +72,16 @@ ad_proc -public qt::rest::album::get_id {
     Returns album_id.
     If it doesn't exist, then it creates a new album
 } {
-    
+
+    if {$name eq ""} {
+	set name "Uploaded Photos $user_id"
+    }
+
+    ns_log Notice "NAME $name"
     db_0or1row select_creation_user {
-	SELECT item_id FROM pa_albumsx WHERE creation_user = :user_id AND object_title = :name
+	SELECT item_id
+	FROM pa_albumsx
+	WHERE creation_user = :user_id AND object_title = :name
     }
     
     if {![exists_and_not_null item_id]} {
@@ -91,7 +98,7 @@ ad_proc qt::rest::album::new {
     Creates a new album and returns its album_id
 } {
     
-    set title "$name $user(name) Album"
+    set title $name
     regsub -all { +} [string tolower "$user_id $name"] {_} name
     regsub -all {/+} $name {-} name
     
@@ -99,10 +106,6 @@ ad_proc qt::rest::album::new {
 	SELECT item_id FROM pa_albumsx WHERE creation_user = :user_id AND object_title = :name
     }]} {
 	set peeraddr [ad_conn  peeraddr]
-	acs_user::get -user_id $user_id -array user
-
-	# ns_log Notice "[parray user]"
-	
 	set story ""
 	set description ""
 	set photographer ""

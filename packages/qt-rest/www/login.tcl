@@ -18,7 +18,6 @@ if {[ns_conn method] eq "POST"} {
 				 -email [string trim $arr(email)] \
 				 -password $arr(password)]
 
-
 	# Handle authentication problems
 	switch $auth_info(auth_status) {
 	    ok {
@@ -70,6 +69,9 @@ if {[ns_conn method] eq "POST"} {
 	    bad_password {
 		set err_msg "BAD PASSWORD"
 		set status 401
+		set header [ns_set new]
+		ns_set put $header "Authorization" "Bearer none"
+
 		set result "\{
 		    \"data\": \"\",
 		    \"errors\":\"$err_msg\","
@@ -78,6 +80,9 @@ if {[ns_conn method] eq "POST"} {
 	    default {
 		set err_msg "AUTH FAILED"
 		set status 403
+		set header [ns_set new]
+		ns_set put $header "Authorization" "Bearer none"
+
 		set result "\{
 		    \"data\": \"\",
 		    \"errors\":\"$err_msg\","
@@ -96,6 +101,7 @@ if {[ns_conn method] eq "POST"} {
 
     # doc_return 200 "application/json" $result    
     # ns_return -binary $status "application/json;" -header $headers result
+    ns_log Notice "$status | $header | $result"
     ns_respond -status $status -type "application/json" -headers $header -string $result  
     ad_script_abort
 

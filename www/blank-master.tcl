@@ -61,6 +61,8 @@ ad_page_contract {
   $Id: blank-master.tcl,v 1.10 2018/11/03 19:47:34 gustafn Exp $
 }
 
+set system_name [parameter::get -parameter "SystemName" -package_id [apm_package_id_from_key acs-kernel] -default [ad_system_name]]
+
 set user_id [ad_conn user_id]
 if {![info exists doc(type)]} { 
     set doc(type) {<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">}

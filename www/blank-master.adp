@@ -2,7 +2,7 @@
 @doc.type;literal@
 <html<if @doc.lang@ not nil> lang="@doc.lang;literal@"</if>>
 <head>
-    <title<if @doc.title_lang@ not nil and @doc.title_lang;literal@ ne @doc.lang;literal@> lang="@doc.title_lang;literal@"</if>>IURIX: @doc.title@</title>
+    <title<if @doc.title_lang@ not nil and @doc.title_lang;literal@ ne @doc.lang;literal@> lang="@doc.title_lang;literal@"</if>@system_name@ @doc.title@</title>
 
 
 <multiple name="meta">    <meta<if @meta.http_equiv@ not nil> http-equiv="@meta.http_equiv;literal@"</if><if @meta.name@ not nil> name="@meta.name;noquote@"</if><if @meta.scheme@ not nil> scheme="@meta.scheme;noquote@"</if><if @meta.lang@ not nil and @meta.lang;literal@ ne @doc.lang;literal@> lang="@meta.lang;literal@"</if> content="@meta.content@">
@@ -20,25 +20,25 @@
 <meta name="msapplication-TileImage" content="/resources/images/ms-icon-144x144.png">
 <meta name="theme-color" content="#ffffff">
 
-<meta property="fb:app_id" content="107027289444477" />
+<meta property="fb:app_id" content="2606237912962831" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://iurix.com" />
-<meta property="og:title" content="IURIX - Software Engeneering" />
-<meta property="og:site_name" content="IURIX - Software Engineering"/>
-<meta property="og:description" content="I.T. CATALIZES YOUR BUSINESS - Creating software for a purpose: to help people succeed in their business!"/>
-<meta property="og:image" content="https://iurix.com/resources/images/iurixshare.png"/>
+<meta property="og:url" content="https://dashboard.qonteo.com" />
+<meta property="og:title" content="QONTEO - Biometrics is everything!" />
+<meta property="og:site_name" content="QONTEO - Biometrics is everything!"/>
+<meta property="og:description" content="We Built an Entire Tech Ecosystem for Business Intelligence. Our solutions make everyday data into a game changer for any industry."/>
+<meta property="og:image" content="https://dashboard.qonteo.com/resources/images/logo-qonteo-200.png"/>
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="200">
 <meta property="og:image:height" content="202">
-<meta name="twitter:image" content="https://iurix.com/resources/images/iurixshare.png" />
+<meta name="twitter:image" content="https://dashboard.qonteo.com/resources/images/logo-qonteo-200.png" />
 
 
 
 <!-- Added by iuri@iurix.com -->
 <!-- Favicon features https://www.favicon-generator.org/  -->
 <!-- creation-date: 2019-07-20 -->
-<link rel="icon" type="image/png" sizes="16x16" href="/resources/images/favicon-16x16.png">
-<link rel="shortcut icon" type="image/x-icon" href="/resources/images/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/resources/images/favicon-qonteo16.png">
+<link rel="shortcut icon" type="image/x-icon" href="/resources/images/favicon-qonteo16.png">
 <!-- END Favicon features -->
 
 

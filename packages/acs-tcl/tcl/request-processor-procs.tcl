@@ -1782,7 +1782,6 @@ ad_proc -private ad_http_cache_control { } {
         ns_setexpires 0
         ns_set put $headers "Pragma" "no-cache"
         ns_set put $headers "Cache-Control" "no-cache"
-        ns_set put $headers "Access-Control-Allow-Origin" "*"
     }
 
     # Prevent subsequent calls of this proc from adding the same

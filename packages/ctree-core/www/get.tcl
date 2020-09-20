@@ -6,6 +6,7 @@ ad_page_contract {
     @creation_date 4 Jul 2020
 } {    
     {cTree:optional}
+    {cTreeId:optional}
     {cTreeName:boolean,optional}
     {description:optional}
     {feedback:optional}
@@ -15,8 +16,8 @@ ad_page_contract {
     {segmentType:optional}
     {segmentVariation:optional}
     
-    {pageSize ""}
-    {pageOffset ""}	
+    {pageSize "20"}
+    {pageOffset "0"}	
 }
 
 #ctree::jwt::validation_p
@@ -38,7 +39,7 @@ if {[ns_conn method] eq "GET"} {
 
     ns_log Notice "BODY \n  [ns_getcontent -as_file false]"
     
-    if {[info exists cTree]} {
+    if { [info exists cTree] } {
 	
 	#Tree's in the argument
 	ns_log  Notice "cTree $cTree"
@@ -50,10 +51,10 @@ if {[ns_conn method] eq "GET"} {
 	}]} {
 	    ns_log Notice "ITEMID $item_id"
 
-	    append json_request "\"cTree\": \"$cTree\","
+	    append json_request "\"id\": \"$cTree\","
 	    
 	    content::item::get -item_id $item_id -revision latest -array_name item
-	    append json_data "\{\"cTree\": \"$item(name)\","
+	    append json_data "\{\"id\": \"$item(name)\","
 	    
 	    if {[info exists cTreeName]} {
 		append json_request "\"cTreeName\": true,"
@@ -79,6 +80,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_type'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "POSTID $id"	    
 		    
@@ -116,6 +118,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_post'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "POSTID $id"
 		    array set arr $desc
@@ -160,6 +163,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_segmenttype'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "SEgmentType $id"
 		    append json_data "\{
@@ -189,6 +193,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_segmentvariation'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "SegmentVaiation $id"
 		    append json_data "\{
@@ -219,6 +224,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_feedback'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "Feedback $id"
 		    append json_data "\{
@@ -248,6 +254,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_description'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "Description $id"
 		    append json_data "\{
@@ -307,6 +314,7 @@ if {[ns_conn method] eq "GET"} {
     
     db_foreach select_trees {
         SELECT item_id, name FROM cr_items WHERE content_type = 'ctree'
+	LIMIT :pageSize OFFSET :pageOffset
     } {
         set title [content::item::get_title -item_id $item_id]
         

@@ -57,7 +57,7 @@ ad_proc -public cr_write_content {
     if {$content_length eq ""} {
 	set content_length 0
     }
-
+    
     switch $storage_type {
         text {
             set text [db_string write_text_content ""]
@@ -93,12 +93,36 @@ ad_proc -public cr_write_content {
 		    # but work around it for now.
 		    set size [file size $filename]
 		    if {!$size} { 
-			ns_set put [ns_conn outputheaders] "Content-Length" 0
+                        ns_set put [ns_conn outputheaders] "Content-Length" 0
 			ns_return 200 text/plain {}
 		    } else {
                         if {[info commands ad_returnfile_background] eq "" || [security::secure_conn_p]} {
+
+                            #ns_log Notice "REVISION $revision_id  [content::revision::item_id -revision_id $revision_id]"
+                            #photo_album::photo::get \
+                             #   -photo_id [content::revision::item_id -revision_id $revision_id] \
+                              #  -array photo
+                            
+                           # if { [array exists photo] } {
+                            #    ns_set put [ns_conn outputheaders] "fb:app_id" "2606237912962831"
+                             #   ns_set put [ns_conn outputheaders] "og:type" "website" />
+
+                            #ns_set put [ns_conn outputheaders] "https://dashboard.qonteo.com/photo-album/images"
+                             #   ns_set put [ns_conn outputheaders] "og:title" "$photo(title)"
+
+                            #ns_set put [ns_conn outputheaders] "og:site_name" "QONTEO - Biometrics is everything!"
+                             #   ns_set put [ns_conn outputheaders] "og:description" "We Built an Entire Tech Ecosystem for Business Intelligence. Our solutions make everyday data into a game changer for any industry."
+                              #  ns_set put [ns_conn outputheaders] "og:image" "https://dashboard.qonteo.com/resources/images/logo-qonteo-200.png"
+
+                            #ns_set put [ns_conn outputheaders] "og:image:type" "image/png"
+                             #   ns_set put [ns_conn outputheaders] "og:image:width" "200"
+                              #  ns_set put [ns_conn outputheaders] "og:image:height" "202"
+                               # ns_set put [ns_conn outputheaders] "twitter:image" "https://dashboard.qonteo.com/resources/images/logo-qonteo-200.png"
+                                
+                            #}
+                                
                             ns_returnfile 200 $mime_type $filename
-                        } else {
+                        } else {                       
                             ad_returnfile_background 200 $mime_type $filename
                         }
 		    }

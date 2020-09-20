@@ -1,49 +1,43 @@
 ad_page_contract {}
 
-
+auth::require_login
 ns_log Notice "Running TCL script index.tcl"
 
 # Retrieves Yesterday's vehicles
 db_0or1row select_vehicles_total {
     SELECT COUNT(ci.item_id) AS total
-    FROM cr_items ci, cr_revisionsx cr
-    WHERE ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND content_type = 'qt_vehicle'
-    AND creation_date BETWEEN now() - INTERVAL '48 hours' AND now() - INTERVAL '24 hours'    
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.content_type = 'qt_vehicle'
+    AND o.creation_date BETWEEN now() - INTERVAL '48 hours' AND now() - INTERVAL '24 hours'    
 } -column_array yesterday
 
 # Retrieves weekly's vehicles
 db_0or1row select_vehicles_total {
     SELECT COUNT(ci.item_id) AS total
-    FROM cr_items ci, cr_revisionsx cr
-    WHERE ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND content_type = 'qt_vehicle'
-    AND creation_date BETWEEN now() - INTERVAL '1 week' AND now()
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.content_type = 'qt_vehicle'
+    AND o.creation_date BETWEEN now() - INTERVAL '1 week' AND now()
 } -column_array week
 
 # Retrieves monthly vehicles 
 db_0or1row select_vehicles_total {
     SELECT COUNT(ci.item_id) AS total
-    FROM cr_items ci, cr_revisionsx cr
-    WHERE ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND content_type = 'qt_vehicle'
-    AND creation_date BETWEEN now() - INTERVAL '1 month' AND now()
-    
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.content_type = 'qt_vehicle'
+    AND o.creation_date BETWEEN now() - INTERVAL '1 month' AND now()
 } -column_array month
 
 
 
 set total [db_string select_vehicles_total {
-    SELECT COUNT(*)
-    FROM cr_items ci, cr_revisionsx cr
-    WHERE ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND content_type = 'qt_vehicle'
-    AND creation_date BETWEEN now() - INTERVAL '24 hours' AND now()
-    
+    SELECT COUNT(ci.item_id)
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.content_type = 'qt_vehicle'
+    AND o.creation_date BETWEEN now() - INTERVAL '24 hours' AND now()
 } -default 0]
 
 array set today [list \
@@ -59,18 +53,19 @@ array set today [list \
 
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set data [db_list_of_lists select_vehicles_grouped_hourly {
-    select date_trunc('hour', cr.creation_date) AS hour, COUNT(1)
-    FROM cr_items ci, cr_revisionsx cr
-    WHERE ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
+set daily_data [db_list_of_lists select_vehicles_grouped_hourly {
+    select date_trunc('hour', o.creation_date) AS hour, COUNT(1)
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
     AND ci.content_type = 'qt_vehicle'
-    AND cr.creation_date BETWEEN now() - INTERVAL '22 hours' AND now()
+  --  AND o.creation_date > now()::date
+    AND o.creation_date BETWEEN now() - INTERVAL '22 hours' AND now()
     GROUP BY 1 ORDER BY hour;
+    
 }]
 
 
-foreach elem $data {
+foreach elem $daily_data {
     set hour [lindex $elem 0]
     set total [lindex $elem 1]
     
@@ -90,7 +85,7 @@ foreach elem $data {
     }
     set hour [expr abs([expr $hour - 5])]
     
-    append data_html "\[\'${hour}h\', $total, \'#292D95\'\],"
+    append daily_data_html "\[\'${hour}h\', $total, \'#05c105\'\],"
 }
 
 
@@ -105,12 +100,11 @@ foreach elem $data {
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set weekly_data [db_list_of_lists select_vehicles_grouped_hourly {
-    select date_trunc('day', cr.creation_date) AS day, COUNT(1)
-    FROM cr_items ci, cr_revisionsx cr
-    WHERE ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
+    select date_trunc('day', o.creation_date) AS day, COUNT(1)
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
     AND ci.content_type = 'qt_vehicle'
-    AND cr.creation_date BETWEEN now() - INTERVAL '1 week' AND now()
+    AND o.creation_date BETWEEN now() - INTERVAL '1 week' AND now()
     GROUP BY 1 ORDER BY day;
 }]
 
@@ -153,7 +147,7 @@ foreach elem $weekly_data {
     ns_log Notice "DAY $day"
 
 
-    append weekly_data_html "\[\'$day\', $total, \'#05c105\'\],"
+    append weekly_data_html "\[\'$day\', $total, \'#292D95\'\],"
     
 }
 

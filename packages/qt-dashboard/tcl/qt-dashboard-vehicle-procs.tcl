@@ -211,8 +211,10 @@ ad_proc qt::dashboard::vehicle::import {} {
 	    # Isolates page data
 	    set data [json get $arr(page)]
 	    #ns_log Notice "DATA $data"
+
 	    
 	    foreach {i elem} $data {
+		set insert_p true
 		array set arr2 $elem
 		
 		set item_id [db_nextval "acs_object_id_seq"]	    
@@ -226,56 +228,77 @@ ad_proc qt::dashboard::vehicle::import {} {
 		set description $elem
 		set plate [lindex $description 3]
 		
-		if {![db_0or1row item_exists {
-		    SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
-		}]} {	    		
-		    db_transaction {
-			set item_id [content::item::new \
-					 -item_id $item_id \
-					 -parent_id $package_id \
-					 -creation_user $creation_user \
-					 -package_id $package_id \
-					 -creation_ip $creation_ip \
-					 -creation_date $creation_date \
-					 -name $name \
-					 -title $plate \
-					 -description $description \
-					 -storage_type "$storage_type" \
-					 -content_type $content_type \
-					 -text $description \
-					 -data $description \
-					 -is_live "t" \
-					 -mime_type "text/plain"
-				    ]
-		    }	    	    
-		    
-		    #ns_log Notice "New ITEM Vehicle Inserted $name"
-		} else {
-		    
-		    db_1row item_exists {
+		if { [regexp {^([0-9]+)$} $plate] } {
+		    ns_log Notice "IMPORTING VEHICLE ERROR: PLATE HAS ONLY NUMBERS NOT INSERTED"
+		    set insert_p false 
+		}
+
+		if {[lindex $elem 3] ne "UNKNOWN" && [db_string repeated_p {
+		    SELECT COUNT(ci.item_id)
+		    FROM cr_items ci, acs_objects o, cr_revisions cr
+		    WHERE ci.item_id = o.object_id
+		    AND ci.item_id = cr.item_id
+		    AND content_type = :content_type
+		    AND cr.title = :plate
+		    AND o.creation_date::timestamp >= :creation_date::timestamp - INTERVAL '9 minutes'
+		} -default 0] > 0 } {
+		    ns_log Notice "ERROR IMPORTING: VEHICLE $plate HAS BEEN SCANNED IN THE LAST 9 MINUTES, $creation_date \n $elem"
+		    # set insert_p false
+		}
+    
+		if {$insert_p eq true} {
+		    if {![db_0or1row item_exists {
 			SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
+		    }]} {	    		
+			db_transaction {
+			    set item_id [content::item::new \
+					     -item_id $item_id \
+					     -parent_id $package_id \
+					     -creation_user $creation_user \
+					     -package_id $package_id \
+					     -creation_ip $creation_ip \
+					     -creation_date $creation_date \
+					     -name $name \
+					     -title $plate \
+					     -description $description \
+					     -storage_type "$storage_type" \
+					     -content_type $content_type \
+					     -text $description \
+					     -data $description \
+					     -is_live "t" \
+					     -mime_type "text/plain"
+					]
+			}	    	    
+			
+			ns_log Notice "New ITEM Vehicle Inserted $plate"
+		    } else {
+			
+			db_1row item_exists {
+			    SELECT item_id FROM cr_items WHERE name = :name AND parent_id = :package_id
+			}
+			
+			set revision_id [content::revision::new \
+					     -item_id $item_id \
+					     -creation_user $creation_user \
+					     -package_id $package_id \
+					     -creation_ip $creation_ip \
+					     -creation_date $creation_date \
+					     -title $plate \
+					     -description $description \
+					     -content $description \
+					     -mime_type "text/plain" \
+					     -publish_date $creation_date \
+					     -is_live "t" \
+					     -storage_type "$storage_type" \
+					     -content_type $content_type]
+			
+			ns_log Notice "New REVISION Vehicle Inserted $plate"
+			
 		    }
-		    
-		    set revision_id [content::revision::new \
-					 -item_id $item_id \
-					 -creation_user $creation_user \
-					 -package_id $package_id \
-					 -creation_ip $creation_ip \
-					 -creation_date $creation_date \
-					 -title $plate \
-					 -description $description \
-					 -content $description \
-					 -mime_type "text/plain" \
-					 -publish_date $creation_date \
-					 -is_live "t" \
-					 -storage_type "$storage_type" \
-					 -content_type $content_type]
-		    
-		    #ns_log Notice "New REVISION Vehicle Inserted $name"
-		    
-		}	    		
+		}
 	    }
 	}
     }
+    
     return 
 }

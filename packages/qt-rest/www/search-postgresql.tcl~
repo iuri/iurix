@@ -1,0 +1,15 @@
+    SELECT cr.title,
+    MAX(o.creation_date) AS creation_date,
+    COUNT(*) AS occurency
+    FROM cr_items ci,
+    cr_revisionsx cr,
+    acs_objects o
+    WHERE ci.item_id = cr.item_id
+    AND ci.item_id = o.object_id
+    AND ci.content_type = 'qt_vehicle'
+    AND cr.title NOT IN ('UNKNOWN', 'FBF724','FBF124')
+    $where_clauses
+    GROUP BY cr.title
+    HAVING COUNT(*) > 1
+    ORDER BY COUNT(*) DESC
+    LIMIT 1

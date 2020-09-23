@@ -1,0 +1,10 @@
+ad_page_contract {}
+
+
+
+db_foreach select_number_plates {
+    SELECT COUNT(ci.item_id) FROM cr_items ci, cr_revisions cr, acs_objects o WHERE ci.item_id = cr.item_id AND ci.item_id = o.object_id AND ci.content_type = 'qt_vehicle' AND cr.title ~ '^[0-9]*$' ;
+    
+} {
+    #content::item::delete -item_id $id
+}

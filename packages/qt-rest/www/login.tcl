@@ -23,8 +23,9 @@ if {[ns_conn method] eq "POST"} {
 	    ok {
 		# set token "[ns_base64encode ${email}:${password}]"
 		# set token [parameter::get_global_value -package_key "tt-rest" -parameter "WebAppAccessToken" -default ""]
+		set user_id $auth_info(user_id)
 		
-		acs_user::get -user_id $auth_info(user_id) -array user
+		acs_user::get -user_id $user_id -array user
 
 		## Begin ad_proc jwt
 		
@@ -41,28 +42,27 @@ if {[ns_conn method] eq "POST"} {
 
 		## Finish ADproc from ix-jwt
 		set admin_p false 
-		if {[acs_user::site_wide_admin_p -user_id $user(user_id)] eq 1} {
+		if {[acs_user::site_wide_admin_p -user_id $user_id] eq 1} {
 		    set admin_p true
 		}
 
 		set json_groups ""
-		db_foreach select_group_ids "
-		    select ap.package_id, r.object_id_one as group_id, g.group_name, mr.member_state
-		    from   acs_rels r,
-		    membership_rels mr,
-		    groups g,
-		    application_groups ap
-		    where  r.rel_type      = 'membership_rel'
-		    and    r.object_id_two = $auth_info(user_id)
+		db_foreach select_groups {
+		    SELECT ap.package_id, r.object_id_one as group_id, g.group_name, mr.member_state
+		    FROM   acs_rels r, membership_rels mr, groups g, application_groups ap
+		    WHERE  r.rel_type      = 'membership_rel'
+		    and    r.object_id_two = :user_id
 		    and    mr.rel_id   = r.rel_id
 		    and    g.group_id  = r.object_id_one
 		    and    ap.group_id = g.group_id
-                    and    ap.group_id <> -2
-		    order by lower(g.group_name)
-		" {
-		    append json_groups "\{\"group_id\": $group_id, \"group_name\": \"$group_name\"\},"
+		    AND    g.group_id != -2
+		    ORDER BY LOWER(g.group_name)
+		} {
+		    append json_groups "\{\"label\": \"$group_name\",\"value\": $group_id\},"
 		}
-		set json_groups [string trimright $json_groups ","]  
+		
+		set json_groups [string trimright $json_groups ","]
+		ns_log notice "JSON groups $json_groups"
 		set err_msg ""
 		set status 200
 		set header [ns_set new]

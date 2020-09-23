@@ -34,7 +34,7 @@ proc explore {parent currency} {
 		ns_log Notice "RATE [parray rate]" 
 		ns_log Notice "NOT INSERTED ALREDY PRESENT "
 	    } else {	    
-		set rate_id [ix_currency::rates::add_currency_history $currency $rate $date]
+		set rate_id [ix_currency::rates::add $currency $rate $date]
 		#set rate_id [expr int(abs(rand()*100))]
 		ns_log Notice "INSERTED"
 	    }

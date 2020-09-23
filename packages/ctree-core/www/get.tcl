@@ -6,6 +6,7 @@ ad_page_contract {
     @creation_date 4 Jul 2020
 } {    
     {cTree:optional}
+    {cTreeId:optional}
     {cTreeName:boolean,optional}
     {description:optional}
     {feedback:optional}
@@ -15,18 +16,11 @@ ad_page_contract {
     {segmentType:optional}
     {segmentVariation:optional}
     
-    {pageSize ""}
-    {pageOffset ""}	
+    {pageSize "20"}
+    {pageOffset "0"}	
 }
 
-if {[ctree::jwt::validation_p] eq 0} {
-    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
-    ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
-    ad_script_abort
-}
-
-
-
+#ctree::jwt::validation_p
 if {[ns_conn method] eq "GET"} {
 
     set myform [ns_getform]
@@ -45,7 +39,7 @@ if {[ns_conn method] eq "GET"} {
 
     ns_log Notice "BODY \n  [ns_getcontent -as_file false]"
     
-    if {[info exists cTree]} {
+    if { [info exists cTree] } {
 	
 	#Tree's in the argument
 	ns_log  Notice "cTree $cTree"
@@ -57,14 +51,14 @@ if {[ns_conn method] eq "GET"} {
 	}]} {
 	    ns_log Notice "ITEMID $item_id"
 
-	    append json_request "\"cTree\": \"$cTree\","
+	    append json_request "\"id\": \"$cTree\","
 	    
 	    content::item::get -item_id $item_id -revision latest -array_name item
-	    append json_data "\"$item(name)\": \{"
+	    append json_data "\{\"id\": \"$item(name)\","
 	    
 	    if {[info exists cTreeName]} {
 		append json_request "\"cTreeName\": true,"
-		append json_data "\"cTreeName\": \"$item(title)\""
+		append json_data "\"cTreeName\": \"$item(title)\","
 	    }
 	    
 	    # If a ctree_post is required, then return post's data
@@ -76,7 +70,7 @@ if {[ns_conn method] eq "GET"} {
 	    ##
 	    if {[info exists postType]} {
 		append json_request "\"postType\": \"id\","
-		append json_data ",\"postType\": \["
+		append json_data "\"postType\": \["
 
 		# Gets all postTypes
 		db_foreach select_posts {
@@ -86,6 +80,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_type'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "POSTID $id"	    
 		    
@@ -95,14 +90,14 @@ if {[ns_conn method] eq "GET"} {
 			\"color\": \"[lindex $desc 1]\", 
 			\"description\": \"[lindex $desc 3]\",
 			\"iconUrl\": \"[lindex $desc 5]\",
-			\"parentsMax\": [lindex $desc 11],
-			\"parentsRequired\": [lindex $desc 13],
+			\"parentsMax\": \"[lindex $desc 11]\",
+			\"parentsRequired\": \"[lindex $desc 13]\",
 			\"prompt\": \"[lindex $desc 15]\"
 		    \},"		    
 		}
 		
 		set json_data [string trimright $json_data ","]
-		append json_data "\]"
+		append json_data "\],"
 	    }	    
 
 
@@ -113,7 +108,7 @@ if {[ns_conn method] eq "GET"} {
 	    ##
 	    if {[info exists post]} {
 		append json_request "\"post\": \"id\","
-		append json_data ",\"post\": \["
+		append json_data "\"post\": \["
 
 		# Gets all postTypes
 		db_foreach select_posts {
@@ -123,6 +118,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_post'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "POSTID $id"
 		    array set arr $desc
@@ -136,7 +132,7 @@ if {[ns_conn method] eq "GET"} {
 		}
 		
 		set json_data [string trimright $json_data ","]
-		append json_data "\]"
+		append json_data "\],"
 	    }	    
 
 
@@ -157,7 +153,7 @@ if {[ns_conn method] eq "GET"} {
 	    ##
 	    if {[info exists segmentType]} {
 		append json_request "\"segmentType\": \"id\","
-		append json_data ",\"segmentType\": \["
+		append json_data "\"segmentType\": \["
 
 		# Gets all segmentType Types
 		db_foreach select_segment_type {
@@ -167,6 +163,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_segmenttype'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "SEgmentType $id"
 		    append json_data "\{
@@ -177,7 +174,7 @@ if {[ns_conn method] eq "GET"} {
 		}
 		
 		set json_data [string trimright $json_data ","]
-		append json_data "\]"		
+		append json_data "\],"		
 	    }
 
 
@@ -186,7 +183,7 @@ if {[ns_conn method] eq "GET"} {
 	    ##
 	    if {[info exists segmentVariation]} {
 		append json_request "\"segmentVariation\": \"id\","
-		append json_data ",\"segmentVariation\": \["
+		append json_data "\"segmentVariation\": \["
 
 		# Gets all segmentVariation Types
 		db_foreach select_segment_variation {
@@ -196,6 +193,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_segmentvariation'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "SegmentVaiation $id"
 		    append json_data "\{
@@ -205,7 +203,7 @@ if {[ns_conn method] eq "GET"} {
 		}
 		
 		set json_data [string trimright $json_data ","]
-		append json_data "\]"	       
+		append json_data "\],"	       
 	    }
 
 
@@ -216,7 +214,7 @@ if {[ns_conn method] eq "GET"} {
 	    ##
 	    if {[info exists feedback]} {
 		append json_request "\"feedback\": \"id\","
-		append json_data ",\"feedback\": \["
+		append json_data "\"feedback\": \["
 
 		# Gets all feedback types
 		db_foreach select_feedback {
@@ -226,6 +224,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_feedback'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "Feedback $id"
 		    append json_data "\{
@@ -235,7 +234,7 @@ if {[ns_conn method] eq "GET"} {
 		}
 		
 		set json_data [string trimright $json_data ","]
-		append json_data "\]"	       
+		append json_data "\],"	       
 	    }
 
 
@@ -245,7 +244,7 @@ if {[ns_conn method] eq "GET"} {
 	    ##
 	    if {[info exists description]} {
 		append json_request "\"description\": \"id\","
-		append json_data ",\"description\": \["
+		append json_data "\"description\": \["
 
 		# Gets all Descriptions types
 		db_foreach select_description {
@@ -255,6 +254,7 @@ if {[ns_conn method] eq "GET"} {
 		    AND ci.latest_revision = cr.revision_id
 		    AND ci.content_type = 'ctree_description'
 		    AND ci.parent_id = :item_id
+		    LIMIT :pageSize OFFSET :pageOffset
 		} {
 		    ns_log Notice "Description $id"
 		    append json_data "\{
@@ -264,7 +264,7 @@ if {[ns_conn method] eq "GET"} {
 		}
 		
 		set json_data [string trimright $json_data ","]
-		append json_data "\]"	       
+		append json_data "\],"	       
 	    }
 
 
@@ -288,12 +288,12 @@ if {[ns_conn method] eq "GET"} {
 
 	    set json_request [string trimright $json_request ","]
 	    set json_data [string trimright $json_data ","]
-	    
+	    append json_data "\}"
 	    set result "\{
 		\"request\": \{$json_request\},
-		\"cTrees\": \{
+		\"cTrees\": \[
 		    $json_data
-		\},
+		\],
 		\"errors\":\{\},
 		\"meta\": \{
 		    \"copyright\": \"Copyright 2019 Collaboration Tree http://www.innovativefuture.org/collaboration-tree/ \",
@@ -310,23 +310,22 @@ if {[ns_conn method] eq "GET"} {
 		
 	}
     }
-    #	set json "\"cTrees\": \["
+    set json "\"cTrees\": \["
     
-    #db_foreach select_trees {
-    #    SELECT item_id, name FROM cr_items WHERE content_type = 'ctree'
-    #} {
-    #    set title [content::item::get_title -item_id $item_id]
-    #    
-    #    append json "\{\"name\":\"$title\"\},"
-    #}
-    #set json [string trimright $json ","]
-    #append json "\]"
+    db_foreach select_trees {
+        SELECT item_id, name FROM cr_items WHERE content_type = 'ctree'
+	LIMIT :pageSize OFFSET :pageOffset
+    } {
+        set title [content::item::get_title -item_id $item_id]
+        
+        append json "\{\"id\":\"$name\", \"name\": \"$title\"\},"
+    }
+    set json [string trimright $json ","]
+    append json "\]"
     
     set result "\{
-	\"request\": \{
-	    \"cTree\": \"$cTree\"	    
-	\},
-	\"data\": null,
+	\"request\": null,
+        $json,
 	\"errors\": \"cTree does not exist!\",
 	\"meta\": \{
 	    \"copyright\": \"Copyright 2019 Collaboration Tree http://www.innovativefuture.org/collaboration-tree/ \",

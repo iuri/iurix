@@ -7,35 +7,36 @@ namespace eval ix_currency {}
 namespace eval ix_currency::rates {}
 
 
-ad_proc -public ix_currency::rates::add_currency_history {currency rate date} {
-    Adds records of currency's rate
+
+ad_proc -public ix_currency::rates::add {currency rate date} {
+    Adds daily currency's rate
 } {
     ns_log Notice "Running ix_currency::rates::add..."
+    set cur_rate 0    
+    db_0or1row select_rate {
+	SELECT rate FROM ix_currency_rates
+	WHERE currency_code = :currency
+	AND creation_date > now () - interval '23 hour'
+	ORDER BY creation_date ;
+    }
     
-    ns_log Notice "$currency $rate $date"
-	return [db_exec_plsql insert_rate {
-	    SELECT ix_currency_rate__new (
-			     :currency,
-			     :rate,
-			     :date
-	     )
-	}]
-    
-#    if {[db_0or1row select_currency {
-#	SELECT rate_id FROM ix_currency_rates
-#	WHERE currency_code = :currency
-#	AND rate = :rate
-    #	AND creation_date = :date
-#}]} {
-#	return [db_exec_plsql insert_rate {
-#	    SELECT ix_currency_rate__new (
-#:currency,
-#			     :rate,
-#   :date
-#	     )
-#	}]
- #   }
-  #  return
+    if {$rate ne $cur_rate } {	   
+	db_transaction {
+	    set rate_id [db_exec_plsql insert_rate {
+		SELECT ix_currency_rate__new (
+					      :currency,
+					      :rate,
+					      :date
+					      )
+	    }]
+	} on_error {
+	    ad_return_complaint 1 "Error inserting new rate <br> <pre>$errmsg</pre>"
+	    ad_script_abort
+	}
+	
+	return $rate_id
+    }	
+    return 0
 }
 
 
@@ -64,29 +65,6 @@ ad_proc -public ix_currency::get_currency_rates {
 
 
 
-ad_proc -public ix_currency::rates::add {currency rate} {
-    Adds daily currency's rate
-} {
-    ns_log Notice "Running ix_currency::rates::add..."
-    set cur_rate 0    
-    db_0or1row select_rate {
-	SELECT rate FROM ix_currency_rates
-	WHERE currency_code = :currency
-	AND creation_date > now () - interval '23 hour'
-	ORDER BY creation_date ;
-    }
-    
-    if {$rate ne $cur_rate } {	   
-	set rate_id [db_exec_plsql insert_rate {
-	    SELECT ix_currency_rate__new (
-					  :currency,
-					  :rate
-					  )
-	}]
-	return $rate_id
-    }	
-    return 
-}
 
 
 ad_proc -public ix_currency::get_xml_ecb_currency_rates {} {
@@ -118,26 +96,27 @@ ad_proc -public ix_currency::get_xml_ecb_currency_rates {} {
     ns_log Notice "DOC \n $doc"
     
     set root [$doc documentElement]
+
+    set l_currencies [list]
     
     proc explore {parent} {
+	upvar l_currencies local_list
 	
 	set type [$parent nodeType]
 	set name [$parent nodeName]
 	
-	#   ns_log Notice  "$parent is a $type node named $name"
+	ns_log Notice  "$parent is a $type node named $name"
 	
 	if {$type != "ELEMENT_NODE"} then return 
 	
-	#ns_log Notice "[llength [$parent attributes]]"
+	ns_log Notice "[llength [$parent attributes]]"
 	if {[llength [$parent attributes]]} {
-	    # ns_log Notice "attributes: [join [$parent attributes] ", "]"
+	    ns_log Notice "attributes: [join [$parent attributes] ", "]"
+	    if { [llength [$parent attributes]] == 1 && $name == "Cube" } {
+		lappend l_currencies [$parent getAttribute time]
+	    }
 	    if { [llength [$parent attributes]] == 2 && $name == "Cube" } {
-		set value1 [$parent getAttribute currency]
-		set value2 [$parent getAttribute rate] 
-		ix_currency::rates::add $value1 $value2
-		
-		
-		#	    ns_log Notice "$value1 $value2"
+		lappend l_currencies [list [$parent getAttribute currency] [$parent getAttribute rate]]
 	    }
 	}
 	
@@ -150,6 +129,11 @@ ad_proc -public ix_currency::get_xml_ecb_currency_rates {} {
     explore $root
     
     $doc delete 
+
+
+    # ix_currency::rates::add $currency $rate $date
+
+    ns_log Notice "CUrrencies $l_currencies"
     
     return 0
 }

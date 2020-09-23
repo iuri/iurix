@@ -9,7 +9,11 @@ ad_library {
 
 
 
+<<<<<<< HEAD
+#ad_schedule_proc -thread t 10 qt::dashboard::vehicle::import
+=======
 ad_schedule_proc -thread t 18 qt::dashboard::vehicle::import
+>>>>>>> b02b7c49ae92f1c787888a4906a703ea33ef9bbf
 
 
 # Local variables:

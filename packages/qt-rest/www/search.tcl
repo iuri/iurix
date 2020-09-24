@@ -320,7 +320,7 @@ if { $result(count) eq 0 } {
     
     db_foreach select_vehicles "
         SELECT cr.title,
-        MAX(o.creation_date) AS creation_date,       
+        MAX(o.creation_date - INTERVAL '5 hours' ) AS creation_date,       
         COUNT(*) AS occurency
         FROM cr_items ci,
         cr_revisions cr,

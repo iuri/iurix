@@ -985,7 +985,6 @@ ad_proc -public site_node::verify_folder_name {
             }
         }
     }
-
     if { $folder ne "" } {
         if { $folder in $existing_urls } {
             # The folder is on the list

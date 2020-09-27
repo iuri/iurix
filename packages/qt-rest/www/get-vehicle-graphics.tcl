@@ -234,18 +234,9 @@ if {$week_total ne 0 && $last_week_total ne 0} {
 }
 		  
 
-
-
-append result "\"today_total\": $today_total,
-    \"today_percent\": $today_percent,
-    \"yesterday_total\": $yesterday_total,
-    \"week_total\": $week_total,
-    \"week_percent\": $week_percent,
-    \"month_total\": $month_total,
-    \"max_hour\": \{\"hour\": [lindex $max_hour 0], \"total\": [lindex $max_hour 1]\},
+append result "\"max_hour\": \{\"hour\": [lindex $max_hour 0], \"total\": [lindex $max_hour 1]\},
     \"max_week_day\": \{\"day\": [lindex $max_week_day 0], \"total\": [lindex $max_week_day 1]\},
-    \"max_month_day\": \{\"day\": \"[lindex $max_month_day 0]\", \"total\": [lindex $max_month_day 1]\}
-\}"
+    \"max_month_day\": \{\"day\": \"[lindex $max_month_day 0]\", \"total\": [lindex $max_month_day 1]\}\}"
 
 ns_respond -status 200 -type "application/json" -string $result
 ad_script_abort

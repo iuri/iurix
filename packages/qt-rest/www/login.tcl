@@ -48,14 +48,11 @@ if {[ns_conn method] eq "POST"} {
 
 		set json_groups ""
 		db_foreach select_groups {
-		    SELECT ap.package_id, r.object_id_one as group_id, g.group_name, mr.member_state
-		    FROM   acs_rels r, membership_rels mr, groups g, application_groups ap
-		    WHERE  r.rel_type      = 'membership_rel'
-		    and    r.object_id_two = :user_id
-		    and    mr.rel_id   = r.rel_id
-		    and    g.group_id  = r.object_id_one
-		    and    ap.group_id = g.group_id
-		    AND    g.group_id != -2
+		    SELECT g.group_id, g.group_name
+		    FROM groups g, group_member_map gm
+		    WHERE g.group_id = gm.group_id
+		    AND g.group_id NOT IN (-1, -2)
+		    AND gm.member_id = :user_id		   
 		    ORDER BY LOWER(g.group_name)
 		} {
 		    append json_groups "\{\"label\": \"$group_name\",\"value\": $group_id\},"

@@ -48,18 +48,12 @@ if {[ns_conn method] eq "POST"} {
 
 		set json_groups ""
 		db_foreach select_groups {
-		    SELECT g.group_id, g.group_name
-		    FROM groups g, group_member_map gm
-		    WHERE g.group_id = gm.group_id
-		    AND g.group_id NOT IN (-1, -2)
-		    AND gm.member_id = :user_id		   
-		    ORDER BY LOWER(g.group_name)
+		    SELECT DISTINCT(g.group_id), g.group_name FROM groups g, group_member_map gm WHERE g.group_id = gm.group_id AND g.group_id NOT IN (-1, -2) AND gm.member_id = :user_id ORDER BY g.group_name
 		} {
 		    append json_groups "\{\"label\": \"$group_name\",\"value\": $group_id\},"
 		}
 		
 		set json_groups [string trimright $json_groups ","]
-		ns_log notice "JSON groups $json_groups"
 		set err_msg ""
 		set status 200
 		set header [ns_set new]

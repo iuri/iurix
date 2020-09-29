@@ -10,11 +10,17 @@
 set i 1
 
 db_foreach select_vehicles {
-    SELECT cr.revision_id, cr.description FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id AND ci.item_id = cr.item_id AND ci.latest_revision = cr.revision_id AND ci.content_type = 'qt_vehicle' AND split_part(cr.description, ' ', 23) = 'class';
-
+    SELECT cr.revision_id, cr.description FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id AND ci.item_id = cr.item_id AND ci.latest_revision = cr.revision_id AND ci.content_type = 'qt_vehicle' AND split_part(cr.description, ' ', 24) = 'car_class' AND split_part(cr.description, ' ', 25) = 'UNKNOWN';
+    
 } {
-    set description [string map {"class" "car_class" "LPR3" "{LPR 3}"} $description]
+    ns_log Notice "DESCRIPTION $description"
+    #    set description [string map {"class" "car_class" "LPR3" "{LPR 3}"} $description]
+    set description [string map {"class UNKNOWN" "car_class Unknown"} $description]
+    
+   ns_log Notice "DESCRIPTION $description"
     ns_log Notice "    update revision: $revision_id"
+
+
     db_transaction {
 	db_dml update_revision {
 	    UPDATE cr_revisions SET description = :description WHERE revision_id = :revision_id

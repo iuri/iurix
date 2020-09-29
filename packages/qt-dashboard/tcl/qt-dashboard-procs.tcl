@@ -50,7 +50,6 @@ ad_proc qt::websocket::listen {} {
     }
 }
 
-<<<<<<< HEAD
 
 ad_proc qt::dashboard::import_json {
     -l_json
@@ -128,5 +127,3 @@ ad_proc qt::dashboard::import_json {
 }
     
     
-=======
->>>>>>> b02b7c49ae92f1c787888a4906a703ea33ef9bbf

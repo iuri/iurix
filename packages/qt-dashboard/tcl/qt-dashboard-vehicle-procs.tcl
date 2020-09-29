@@ -193,6 +193,7 @@ ad_proc qt::dashboard::vehicle::import {} {
     
     
 } {
+    ns_log Notice "Running ad_proc import vehicles"
     package require json
     package require rl_json
     namespace path {::rl_json}

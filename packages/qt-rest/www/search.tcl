@@ -368,8 +368,6 @@ if { $result(count) eq 0 } {
         AND ci.live_revision = cr.revision_id
         AND ci.content_type = 'qt_vehicle'
         AND cr.title <> 'UNKNOWN'
-        AND cr.title <> '111111'
-        AND cr.title <> '333333'
         AND cr.title <> 'FBF724'
         AND cr.title <> 'FBF124'
         $where_clauses 

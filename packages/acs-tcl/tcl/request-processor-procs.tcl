@@ -1784,6 +1784,13 @@ ad_proc -private ad_http_cache_control { } {
         ns_set put $headers "Cache-Control" "no-cache"
     }
 
+
+    # Added the line bellow to force the header request for Evex Rest
+    # Iuri Sampaio (iuri@iurix.com)
+    # 2017-12-23
+    ns_set put $headers "Access-Control-Allow-Origin" "*"
+
+    
     # Prevent subsequent calls of this proc from adding the same
     # headers again.
     ad_conn -set no_http_cache_control_p 1

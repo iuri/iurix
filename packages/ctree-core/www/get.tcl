@@ -291,7 +291,7 @@ if {[ns_conn method] eq "GET"} {
 	    append json_data "\}"
 	    set result "\{
 		\"request\": \{$json_request\},
-		\"cTrees\": \[
+		\"cTree\": \[
 		    $json_data
 		\],
 		\"errors\":\{\},
@@ -310,7 +310,7 @@ if {[ns_conn method] eq "GET"} {
 		
 	}
     }
-    set json "\"cTrees\": \["
+    set json "\"cTree\": \["
     
     db_foreach select_trees {
         SELECT item_id, name FROM cr_items WHERE content_type = 'ctree'

@@ -50,7 +50,6 @@ if {$count eq true} {
     }]
 
     set total 0
-    ns_log Notice "INSTANTDATA $instant_data"
     set today_total 0
     set yesterday_total 0
     

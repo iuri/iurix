@@ -23,8 +23,9 @@ if {[ns_conn method] eq "POST"} {
 	    ok {
 		# set token "[ns_base64encode ${email}:${password}]"
 		# set token [parameter::get_global_value -package_key "tt-rest" -parameter "WebAppAccessToken" -default ""]
+		set user_id $auth_info(user_id)
 		
-		acs_user::get -user_id $auth_info(user_id) -array user
+		acs_user::get -user_id $user_id -array user
 
 		## Begin ad_proc jwt
 		
@@ -41,9 +42,18 @@ if {[ns_conn method] eq "POST"} {
 
 		## Finish ADproc from ix-jwt
 		set admin_p false 
-		if {[acs_user::site_wide_admin_p -user_id $user(user_id)] eq 1} {
+		if {[acs_user::site_wide_admin_p -user_id $user_id] eq 1} {
 		    set admin_p true
 		}
+
+		set json_groups ""
+		db_foreach select_groups {
+		    SELECT DISTINCT(g.group_id), g.group_name FROM groups g, group_member_map gm WHERE g.group_id = gm.group_id AND g.group_id NOT IN (-1, -2) AND gm.member_id = :user_id ORDER BY g.group_name
+		} {
+		    append json_groups "\{\"label\": \"$group_name\",\"value\": $group_id\},"
+		}
+		
+		set json_groups [string trimright $json_groups ","]
 		set err_msg ""
 		set status 200
 		set header [ns_set new]
@@ -57,9 +67,10 @@ if {[ns_conn method] eq "POST"} {
 			\"firstName\": \"$user(first_names)\",
 			\"lastName\": \"$user(last_name)\",
 			\"email\": \"$user(email)\",
-                        \"phonenumber\": \"76543234567\", 
-                        \"country\": \"Brasil\", 
-                        \"city\": \"Salvador\",
+                        \"phonenumber\": \"\", 
+                        \"country\": \"\", 
+                        \"city\": \"\",
+                        \"groups\": \[$json_groups\],
 			\"createdAt\": \"$user(creation_date)\",
 			\"updatedAt\": \"$user(last_visit)\",
 			\"__v\": 0
@@ -101,7 +112,7 @@ if {[ns_conn method] eq "POST"} {
 
     # doc_return 200 "application/json" $result    
     # ns_return -binary $status "application/json;" -header $headers result
-    ns_log Notice "$status | $header | $result"
+    #    ns_log Notice "$status | $header | $result"
     ns_respond -status $status -type "application/json" -headers $header -string $result  
     ad_script_abort
 

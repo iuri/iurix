@@ -5,7 +5,7 @@ ad_page_contract {
     {date_from:optional}
     {date_to:optional}
 }
-ns_log Notice "Running TCL script get-vehicle-graphics.tcl"
+ns_log Notice "Running TCL script get-vehicle-types.tcl"
 
 
 # Validate and Authenticate JWT
@@ -38,33 +38,67 @@ if {[info exists date_to]} {
 
 
 set datasource [db_list_of_lists  select_types_count "
-    SELECT o.creation_date::date AS date, split_part(v.description, ' ', 25) AS type, COUNT(1) AS count FROM qt_vehicle_ti v, acs_objects o WHERE v.item_id = o.object_id $where_clauses GROUP BY date, type, 1 ORDER BY date;
+    SELECT date_trunc('hour', o.creation_date) AS datetime, split_part(cr.description, ' ', 25) AS type, COUNT(1) AS count FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id AND ci.item_id = cr.item_id AND ci.latest_revision = cr.revision_id AND ci.content_type = 'qt_vehicle' $where_clauses GROUP BY datetime, type, 1 ORDER BY type;
 "]
 
+# ns_log Notice "DATASOURCE $datasource"
 
-#lists  total today week month
-set bus [list 0 0 0 0]
-set car [list 0 0 0 0]
-set bike [list 0 0 0 0]
-set suv [list 0 0 0 0]
-set truck [list 0 0 0 0]
-set other [list 0 0 0 0]
-set van [list 0 0 0 0]
+#lists  total today week month today_hour week_day total_avg
+set bus [list 0 0 0 0 0 "" 0]
+set car [list 0 0 0 0 0 "" 0]
+set bike [list 0 0 0 0 0 "" 0]
+set suv [list 0 0 0 0 0 "" 0]
+set truck [list 0 0 0 0 0 "" 0]
+set other [list 0 0 0 0 0 "" 0]
+set van [list 0 0 0 0 0 "" 0]]
+
+# aux storage to day of the week and quantity. USed to get the day of the week, which had the max quantity
+set bus_dows [list]
+set car_dows [list]
+set bike_dows [list]
+set suv_dows [list]
+set truck_dows [list]
+set other_dows [list]
+set van_dows [list]
 
 foreach elem $datasource {
-    lassign $elem date type count
+    lassign $elem datetime type count
+    set datetime [lindex [split $datetime "+"] 0]
     switch -exact $type {
 	"Bus" {
+	    # Calculate total
 	    lset bus 0 [expr [lindex $bus 0] + $count]
-	
-	    if {$date eq $current_date} {
-		lset bus 1 $count
+
+	    # Filter current_date's quantity
+	    if {[lc_time_fmt $datetime "%Y-%m-%d"] eq $current_date} {
+		# calculate total quantity of current date
+		lset bus 1 [expr [lindex $bus 1] + $count]				
+
+		# Get hour of the day with max quantity
+	    	if {$count > [lindex $bus 1]} {
+		    lset bus 4 [lc_time_fmt $datetime %H:%M]
+		}
 	    }
-	    if { [db_string select_week { select extract('week' from :date::date) as week; }] eq
-		 [db_string select_week { select extract('week' from :current_date::date) as week; }] } {
+	    # Filter quantities of the current week
+	    if { [db_string select_week { select extract('week' from :datetime::date) }] eq
+		 [db_string select_week { select extract('week' from :current_date::date) }] } {
+
+		# get day of the week
+		set dow [db_string select_dow { select extract('dow' from :datetime::date) }]
+
+		# store day of the week and respective quantity in a auxiliary list
+		if {[lsearch -index 0 $dows $dow] eq -1} {
+		    lappend bus_dows [list $dow $count] 
+		} else {
+		    set idx [lsearch -index 0 $dows $dow]
+		    lset bus_dows $idx [list $dow [expr $count + [lindex [lindex $dows $idx] 1]]]
+		}
+
+		# Calculate total quantity of the week
 		lset bus 2 [expr [lindex $bus 2] + $count]
-	    }
-	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
+	    }	    
+	    # Filter total quantity of the current month
+	    if {[lc_time_fmt $datetime %m] eq [lc_time_fmt $current_date %m]} {
 		lset bus 3 [expr [lindex $bus 3] + $count]
 	    }	    
 	    
@@ -72,96 +106,60 @@ foreach elem $datasource {
 	    
 	}
 	"Car" {
+	    # Calculate total
 	    lset car 0 [expr [lindex $car 0] + $count]
-	
-	    if {$date eq $current_date} {
-		lset car 1 $count
+
+	    # Filter current_date's quantity
+	    if {[lc_time_fmt $datetime "%Y-%m-%d"] eq $current_date} {
+		# calculate total quantity of current date
+		lset car 1 [expr [lindex $car 1] + $count]				
+
+		# Get hour of the day with max quantity
+	    	if {$count > [lindex $car 1]} {
+		    lset car 4 [lc_time_fmt $datetime %H:%M]
+		}
 	    }
-	    if { [db_string select_week { select extract('week' from :date::date) as week; }] eq
-		 [db_string select_week { select extract('week' from :current_date::date) as week; }] } {
+	    # Filter quantities of the current week
+	    if { [db_string select_week { select extract('week' from :datetime::date) }] eq
+		 [db_string select_week { select extract('week' from :current_date::date) }] } {
+
+		# get day of the week
+		set dow [db_string select_dow { select extract('dow' from :datetime::date) }]
+
+		# store day of the week and respective quantity in a auxiliary list
+		if {[lsearch -index 0 $dows $dow] eq -1} {
+		    lappend car_dows [list $dow $count] 
+		} else {
+		    set idx [lsearch -index 0 $dows $dow]
+		    lset car_dows $idx [list $dow [expr $count + [lindex [lindex $dows $idx] 1]]]
+		}
+
+		# Calculate total quantity of the week
 		lset car 2 [expr [lindex $car 2] + $count]
-	    }
-	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
+	    }	    
+	    # Filter total quantity of the current month
+	    if {[lc_time_fmt $datetime %m] eq [lc_time_fmt $current_date %m]} {
 		lset car 3 [expr [lindex $car 3] + $count]
 	    }	    
-
+	    
 	}
 	"Motorbike" {
-	    lset bike 0 [expr [lindex $bike 0] + $count]
-	
-	    if {$date eq $current_date} {
-		lset bike 1 $count
-	    }
-	    if { [db_string select_week { select extract('week' from :date::date) as week; }] eq
-		 [db_string select_week { select extract('week' from :current_date::date) as week; }] } {
-		lset bike 2 [expr [lindex $bike 2] + $count]
-	    }
-	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
-		lset bike 3 [expr [lindex $bike 3] + $count]
-	    }	    
 	}
 	"SUV/Pickup" {
-	    lset suv 0 [expr [lindex $suv 0] + $count]
-	
-	    if {$date eq $current_date} {
-		lset suv 1 $count
-	    }
-	    if { [db_string select_week { select extract('week' from :date::date) as week; }] eq
-		 [db_string select_week { select extract('week' from :current_date::date) as week; }] } {
-		lset suv 2 [expr [lindex $suv 2] + $count]
-	    }
-	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
-		lset suv 3 [expr [lindex $suv 3] + $count]
-	    }	    
 	}
 	"Truck" {
-	    lset truck 0 [expr [lindex $truck 0] + $count]
-	
-	    if {$date eq $current_date} {
-		lset truck 1 $count
-	    }
-	    if { [db_string select_week { select extract('week' from :date::date) as week; }] eq
-		 [db_string select_week { select extract('week' from :current_date::date) as week; }] } {
-		lset truck 2 [expr [lindex $truck 2] + $count]
-	    }
-	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
-		lset truck 3 [expr [lindex $truck 3] + $count]
-	    }	    
 	}
 	"Unknown" {
-	    lset other 0 [expr [lindex $other 0] + $count]
-	
-	    if {$date eq $current_date} {
-		lset other 1 $count
-	    }
-	    if { [db_string select_week { select extract('week' from :date::date) as week; }] eq
-		 [db_string select_week { select extract('week' from :current_date::date) as week; }] } {
-		lset other 2 [expr [lindex $other 2] + $count]
-	    }
-	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
-		lset other 3 [expr [lindex $other 3] + $count]
-	    }	    
 	}
 	"Van" {
-	    lset van 0 [expr [lindex $van 0] + $count]
-	
-	    if {$date eq $current_date} {
-		lset van 1 $count
-	    }
-	    if { [db_string select_week { select extract('week' from :date::date) as week; }] eq
-		 [db_string select_week { select extract('week' from :current_date::date) as week; }] } {
-		lset van 2 [expr [lindex $van 2] + $count]
-	    }
-	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
-		lset van 3 [expr [lindex $van 3] + $count]
-	    }	    
 	}      
     }
 }
 
+ns_log Notice "DOWS $bus_dows"
 
 append result "\{\"types\": \[ 
-    \{\"bus\": \{\"total\": [lindex $bus 0], \"today\": [lindex $bus 1], \"week\": [lindex $bus 2], \"month\": [lindex $bus 3]\}\},
+    \{\"bus\": \{\"total\": [lindex $bus 0], \"today\": [lindex $bus 1], \"week\": [lindex $bus 2], \"month\": [lindex $bus 3], \"today_hour\": \"[lindex $bus 4]\"\}\},
     \{\"car\": \{\"total\": [lindex $car 0], \"today\": [lindex $car 1], \"week\": [lindex $car 2], \"month\": [lindex $car 3]\}\},
     \{\"bike\": \{\"total\": [lindex $bike 0], \"today\": [lindex $bike 1], \"week\": [lindex $bike 2], \"month\": [lindex $bike 3]\}\},
     \{\"suv\": \{\"total\": [lindex $suv 0], \"today\": [lindex $suv 1], \"week\": [lindex $suv 2], \"month\": [lindex $suv 3]\}\},
@@ -203,8 +201,9 @@ while {[lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $today || 
 if {$yesterday_total eq "" || $yesterday_total eq 0} {
     set yesterday_total [db_string select_yesterday {
 	SELECT COUNT(1) AS total
-	FROM qt_vehicle_ti v, acs_objects o
-	WHERE v.item_id = o.object_id
+	FROM cr_items ci, acs_objects o
+	WHERE ci.item_id = o.object_id
+	AND ci.content_type = :content_type
 	AND o.creation_date::date = :current_date::date - INTERVAL '1 day'
     } -default 1]
 }
@@ -255,7 +254,10 @@ if {$week_total ne 0 && $last_week_total ne 0} {
 		  
 
 set total [db_string select_count_total {
-    SELECT COUNT(DISTINCT(item_id)) FROM qt_vehicle_ti;
+    SELECT COUNT(1)
+    FROM cr_items ci, acs_objects o
+    WHERE ci.item_id = o.object_id
+    AND ci.content_type = :content_type
 } -default 0] 
 
 

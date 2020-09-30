@@ -44,6 +44,7 @@ db_1row group_info {
     where group_id = :add_to_group_id
 }
 
+
 # We assume the group is on side 1... 
 db_1row rel_type_info {}
 
@@ -125,7 +126,6 @@ if { [template::form is_request add_group] } {
 
 if { [template::form is_valid add_group] } {
     db_transaction {
-        ns_log Notice "NEW GROUP"
 	set group_id [group::new \
                           -form_id add_group \
                           -variable_prefix group \

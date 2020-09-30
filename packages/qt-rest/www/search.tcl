@@ -82,30 +82,28 @@ db_0or1row select_top_plate "
     MAX(o.creation_date) AS creation_date,
     COUNT(*) AS occurency
     FROM cr_items ci,
-    cr_revisionsx cr,
+    cr_revisions cr,
     acs_objects o
     WHERE ci.item_id = cr.item_id
     AND ci.item_id = o.object_id
     AND ci.content_type = 'qt_vehicle'
-    AND cr.title NOT IN ('UNKNOWN', '111111', '333333', 'FBF724','FBF124', '849500')
+    AND cr.title NOT IN ('UNKNOWN', 'FBF724','FBF124')
     GROUP BY cr.title
     HAVING COUNT(*) > 1
     ORDER BY COUNT(*) DESC
-    LIMIT 1
-" -column_array top_plate
+    LIMIT 1"  -column_array top_plate
 
 
-db_0or1row select_top_plate_month "
-    SELECT cr.title,
+db_0or1row select_top_plate_month "        SELECT cr.title,
     MAX(o.creation_date) AS creation_date,
     COUNT(*) AS occurency
     FROM cr_items ci,
-    cr_revisionsx cr,
+    cr_revisions cr,
     acs_objects o
     WHERE ci.item_id = cr.item_id
     AND ci.item_id = o.object_id
     AND ci.content_type = 'qt_vehicle'
-    AND cr.title NOT IN ('UNKNOWN', '111111', '333333', 'FBF724','FBF124', '849500')
+    AND cr.title NOT IN ('UNKNOWN', 'FBF724','FBF124')
     $where_clauses
     GROUP BY cr.title
     HAVING COUNT(*) > 1
@@ -116,9 +114,9 @@ db_0or1row select_top_plate_month "
 
 if {[info exists top_plate(title)]} {
     set top_plate(description) [db_string select_description "
-        SELECT cr.description FROM cr_revisionsx cr
-        WHERE cr.title = '$top_plate(title)'
-        AND cr.creation_date = '$top_plate(creation_date)'
+        SELECT cr.description FROM cr_revisions cr, acs_objects o
+        WHERE cr.item_id = o.object_id AND cr.title = '$top_plate(title)'
+        AND o.creation_date = '$top_plate(creation_date)'
     " -default ""]
 } else {
     array set top_plate {
@@ -132,7 +130,7 @@ if {[info exists top_plate(title)]} {
 
 if {[info exists top_plate_month(title)]} {
     set top_plate_month(description) [db_string select_description "
-        SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = '$top_plate_month(title)' AND cr.creation_date = '$top_plate_month(creation_date)'
+        SELECT cr.description FROM cr_revisions cr, acs_objects o WHERE cr.item_id = o.object_id AND cr.title = '$top_plate_month(title)' AND o.creation_date = '$top_plate_month(creation_date)'
     " -default ""]
 } else {
     array set top_plate_month {
@@ -319,41 +317,22 @@ foreach object_id $result(ids) {
 # order by date DESC, pagination
 
 if { $result(count) eq 0 } {
-
-    ns_log Notice "
-        SELECT cr.title,
-        MAX(o.creation_date) AS creation_date,       
-        COUNT(*) AS occurency
-        FROM cr_items ci,
-        cr_revisionsx cr,
-        acs_objects o
-        WHERE ci.item_id = cr.item_id
-        AND ci.item_id = o.object_id 
-        AND ci.content_type = 'qt_vehicle'
-        AND cr.title NOT IN ('UNKNOWN', '111111', '333333', 'FBF724','FBF124', '849500')
-        $where_clauses 
-        GROUP BY cr.title
-        HAVING COUNT(*) > 1
-        ORDER BY MAX(cr.creation_date) DESC 
-        LIMIT $limit OFFSET $offset;        
-
-"
     
     db_foreach select_vehicles "
         SELECT cr.title,
-        MAX(o.creation_date) AS creation_date,       
+        MAX(o.creation_date - INTERVAL '5 hours' ) AS creation_date,       
         COUNT(*) AS occurency
         FROM cr_items ci,
-        cr_revisionsx cr,
+        cr_revisions cr,
         acs_objects o
         WHERE ci.item_id = cr.item_id
         AND ci.item_id = o.object_id 
         AND ci.content_type = 'qt_vehicle'
-        AND cr.title NOT IN ('UNKNOWN', '111111', '333333', 'FBF724','FBF124', '849500')
+        AND cr.title NOT IN ('UNKNOWN', 'FBF724', 'FBF124')
         $where_clauses 
         GROUP BY cr.title
         HAVING COUNT(*) > 1
-        ORDER BY MAX(cr.creation_date) DESC 
+        ORDER BY MAX(o.creation_date) DESC 
         LIMIT $limit OFFSET $offset;        
     " {
         set description [db_string select_description {
@@ -382,15 +361,13 @@ if { $result(count) eq 0 } {
         SELECT DISTINCT(cr.title),
         COUNT(ci.live_revision) AS total
         FROM cr_items ci,
-        cr_revisionsx cr,
+        cr_revisions cr,
         acs_objects o
         WHERE ci.item_id = cr.item_id
         AND ci.item_id = o.object_id
         AND ci.live_revision = cr.revision_id
         AND ci.content_type = 'qt_vehicle'
         AND cr.title <> 'UNKNOWN'
-        AND cr.title <> '111111'
-        AND cr.title <> '333333'
         AND cr.title <> 'FBF724'
         AND cr.title <> 'FBF124'
         $where_clauses 

@@ -47,13 +47,21 @@ if {[ns_conn method] eq "POST"} {
 		}
 
 		set json_groups ""
-		db_foreach select_groups {
+		set groups [db_list_of_lists select_groups {
 		    SELECT DISTINCT(g.group_id), g.group_name FROM groups g, group_member_map gm WHERE g.group_id = gm.group_id AND g.group_id NOT IN (-1, -2) AND gm.member_id = :user_id ORDER BY g.group_name
-		} {
-		    append json_groups "\{\"label\": \"$group_name\",\"value\": $group_id\},"
-		}
-		
-		set json_groups [string trimright $json_groups ","]
+		}]
+
+		if {[llength $groups] eq 1} {		    
+		    append json_groups "\"group\": \{\"label\": \"[lindex [lindex $groups 0] 1]\",\"value\": [lindex [lindex $groups 0] 0]\}"
+		} else {		    
+		    append json_groups "\"group\": \"\",\"groups\": \["
+		    foreach group $groups {
+			append json_groups "\{\"label\": \"[lindex $group 1]\",\"value\": [lindex $group 0]\},"
+		    }
+		    set json_groups [string trimright $json_groups ","]
+		    append json_groups "\]"
+
+		}	
 		set err_msg ""
 		set status 200
 		set header [ns_set new]
@@ -70,7 +78,7 @@ if {[ns_conn method] eq "POST"} {
                         \"phonenumber\": \"\", 
                         \"country\": \"\", 
                         \"city\": \"\",
-                        \"groups\": \[$json_groups\],
+                        $json_groups,
 			\"createdAt\": \"$user(creation_date)\",
 			\"updatedAt\": \"$user(last_visit)\",
 			\"__v\": 0

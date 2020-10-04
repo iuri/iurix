@@ -2,17 +2,14 @@ ad_page_contract {}
 
 ns_log Notice "Running TCL script users/edit"
 
-if {[ix_rest::jwt::validation_p] eq 0} {
-    
-    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
-    ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
-}
+qt::rest::jwt::validation_p
 
+package req json
 set dict [json::json2dict [ns_getcontent -as_file false]]
 #
 # Do something with the dict
 #
- #   ns_log Notice "DICT $dict"
+#   ns_log Notice "DICT $dict"
 # ambiguous option "file": must be acceptedcompression, auth, authpassword, authuser, channel, clientdata, close, compress, content, contentfile,    
 array set arr $dict
 

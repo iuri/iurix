@@ -31,6 +31,9 @@ ad_proc -public qt::rest::jwt::validation_p {} {
     
     
     set token [lindex [ns_set get $header Authorization] 1]
+    if {$token eq ""} {
+	set token [lindex [ns_set get $header authorization] 1]
+    }
     #    ns_log Notice "TOKEN $token"
     
     set token [split $token "."]

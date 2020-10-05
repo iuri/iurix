@@ -1,0 +1,10 @@
+ad_page_contract {}
+
+
+db_foreach select_vehicles {
+    SELECT v.object_id, v.object_title, v.title, v.creation_date::timestamp, o.creation_date::timestamp, v.description FROM qt_vehicle_ti v, acs_objects o WHERE o.object_id = v.item_id ORDER BY v.creation_date ASC LIMIT 10;
+    
+} {
+    ns_log Notice "OBJ $object_id, NAME $object_title, TITLE $title, DATE $creation_date, DESC $description"
+
+}

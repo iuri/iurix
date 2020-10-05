@@ -9,7 +9,7 @@ if { [ns_conn method] eq "POST"} {
     set req [ns_set array $header]
     ns_log Notice "$req"
 
-    qt::rest::jwt::validation_p
+#    qt::rest::jwt::validation_p
     
     set token [lindex [ns_set get $header Authorization] 1]
     if {$token eq ""} {

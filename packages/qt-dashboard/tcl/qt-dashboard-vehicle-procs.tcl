@@ -339,9 +339,14 @@ ad_proc qt::dashboard::vehicle::import_new {
 	set package_id [apm_package_id_from_key qt-dashboard]
 	set creation_ip "178.62.211.78"
 	set creation_date $arr2(first_seen)
-	set name $arr2(id)
 	set description $elem
-	set plate [lindex $description 3]
+	set plate [lindex $elem 3]
+
+	if {$plate eq "UNKNOWN"} {
+	    set name [util_text_to_url $plate]
+	} else {
+	    set name $arr2(id)
+	}
 	
 	if { [regexp {^([0-9]+)$} $plate] } {
 	    ns_log Notice "IMPORTING VEHICLE ERROR: PLATE HAS ONLY NUMBERS NOT INSERTED"

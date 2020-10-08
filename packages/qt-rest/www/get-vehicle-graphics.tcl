@@ -39,14 +39,9 @@ if {[info exists date_to]} {
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 append result "\{\"hours\":\["
 set hourly_data [db_list_of_lists select_grouped_hour "
-    SELECT EXTRACT('hour' FROM o.creation_date) AS hour, 
-    COUNT(1) AS total
-    FROM cr_items ci, acs_objects o, cr_revisions cr
-    WHERE ci.item_id = o.object_id
-    AND ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND ci.content_type = :content_type
-    AND cr.title <> 'UNKNOWN'
+    SELECT EXTRACT('hour' FROM v.creation_date) AS hour, COUNT(1) AS total
+    FROM qt_vehicle_ti v
+    WHERE v.title <> 'UNKNOWN'
     $where_clauses
     GROUP BY hour ORDER BY hour ASC
 "]
@@ -73,10 +68,9 @@ append result "\],"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
-    select EXTRACT('dow' FROM o.creation_date) AS dow, COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
+    select EXTRACT('dow' FROM v.creation_date) AS dow, COUNT(1) AS total
+    FROM qt_vehicle_ti v
+    WHERE 1 = 1
     $where_clauses
     GROUP BY dow ORDER BY dow;
 "]
@@ -116,12 +110,9 @@ append result "\],"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set monthly_data [db_list_of_lists select_vehicles_grouped_daily "
-    SELECT
-    EXTRACT('day' FROM o.creation_date) AS day,
-    COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
+    SELECT EXTRACT('day' FROM v.creation_date) AS day, COUNT(1) AS total
+    FROM qt_vehicle_ti v
+    WHERE 1 = 1
     $where_clauses
     GROUP BY 1 ORDER BY day;
 "]
@@ -155,12 +146,10 @@ append result "\],"
 # Instant Data
 set instant_data [db_list_of_lists select_instant_data {
     SELECT
-    date_trunc('hour', o.creation_date) AS hour,
+    date_trunc('hour', v.creation_date) AS hour,
     COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
-    AND date_trunc('month', o.creation_date::date) = date_trunc('month',:creation_date::date)
+    FROM qt_vehicle_ti v
+    WHERE date_trunc('month', v.creation_date::date) = date_trunc('month',:creation_date::date)
     GROUP BY 1 ORDER BY hour;
 }]
 set today_total 0

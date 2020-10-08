@@ -1,0 +1,10 @@
+ad_page_contract {}
+
+
+db_foreach select_items {
+    SELECT i.item_id FROM cr_items i, acs_objects o WHERE i.item_id = o.object_id AND i.content_type = 'qt_vehicle' ORDER BY o.creation_date DESC LIMIT 100
+} {
+
+    set revisions [db_list_of_lists select_revisions {
+	SELECT DISTINCT(r.title) FROM cr_revisions r WHERE item_id = :item_id
+    }]

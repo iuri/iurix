@@ -77,46 +77,32 @@ set debug_p 0
 set user_id [ad_conn user_id]
 set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
 
-db_0or1row select_top_plate "
-    SELECT cr.title,
-    MAX(o.creation_date) AS creation_date,
-    COUNT(*) AS occurency
-    FROM cr_items ci,
-    cr_revisions cr,
-    acs_objects o
-    WHERE ci.item_id = cr.item_id
-    AND ci.item_id = o.object_id
-    AND ci.content_type = 'qt_vehicle'
-    AND cr.title NOT IN ('UNKNOWN', 'FBF724','FBF124')
-    GROUP BY cr.title
-    HAVING COUNT(*) > 1
-    ORDER BY COUNT(*) DESC
-    LIMIT 1"  -column_array top_plate
+db_0or1row select_top_plate {
+    SELECT title, MAX(creation_date) AS creation_date, COUNT(*) AS occurency FROM qt_vehicle_ti WHERE title != 'UNKNOWN' GROUP BY title HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC  LIMIT 1
+} -column_array top_plate
 
 
-db_0or1row select_top_plate_month "        SELECT cr.title,
-    MAX(o.creation_date) AS creation_date,
-    COUNT(*) AS occurency
-    FROM cr_items ci,
-    cr_revisions cr,
-    acs_objects o
-    WHERE ci.item_id = cr.item_id
-    AND ci.item_id = o.object_id
-    AND ci.content_type = 'qt_vehicle'
-    AND cr.title NOT IN ('UNKNOWN', 'FBF724','FBF124')
+db_0or1row select_top_plate_month "
+    SELECT title, MAX(creation_date) AS creation_date, COUNT(*) AS occurency
+    FROM qt_vehicle_ti
+    WHERE title != 'UNKNOWN'
+    AND EXTRACT('month' FROM creation_date::date) = EXTRACT('month' FROM :creation_date::date)
     $where_clauses
-    GROUP BY cr.title
+    GROUP BY title
     HAVING COUNT(*) > 1
     ORDER BY COUNT(*) DESC
-    LIMIT 1
+    LIMIT 1;
+
+
+
 " -column_array top_plate_month
 
 
 if {[info exists top_plate(title)]} {
     set top_plate(description) [db_string select_description "
-        SELECT cr.description FROM cr_revisions cr, acs_objects o
-        WHERE cr.item_id = o.object_id AND cr.title = '$top_plate(title)'
-        AND o.creation_date = '$top_plate(creation_date)'
+        SELECT description FROM qt_vehicle_ti
+        WHERE title = '$top_plate(title)'
+        AND creation_date = '$top_plate(creation_date)' LIMIT 1
     " -default ""]
 } else {
     array set top_plate {
@@ -130,7 +116,7 @@ if {[info exists top_plate(title)]} {
 
 if {[info exists top_plate_month(title)]} {
     set top_plate_month(description) [db_string select_description "
-        SELECT cr.description FROM cr_revisions cr, acs_objects o WHERE cr.item_id = o.object_id AND cr.title = '$top_plate_month(title)' AND o.creation_date = '$top_plate_month(creation_date)'
+        SELECT description FROM qt_vehicle_ti WHERE title = '$top_plate_month(title)' AND creation_date = '$top_plate_month(creation_date)' LIMIT 1
     " -default ""]
 } else {
     array set top_plate_month {
@@ -319,24 +305,19 @@ foreach object_id $result(ids) {
 if { $result(count) eq 0 } {
     
     db_foreach select_vehicles "
-        SELECT cr.title,
-        MAX(o.creation_date - INTERVAL '5 hours' ) AS creation_date,       
+        SELECT title,
+        MAX(creation_date - INTERVAL '5 hours' ) AS creation_date,
         COUNT(*) AS occurency
-        FROM cr_items ci,
-        cr_revisions cr,
-        acs_objects o
-        WHERE ci.item_id = cr.item_id
-        AND ci.item_id = o.object_id 
-        AND ci.content_type = 'qt_vehicle'
-        AND cr.title NOT IN ('UNKNOWN', 'FBF724', 'FBF124')
-        $where_clauses 
-        GROUP BY cr.title
+        FROM qt_vehicle_ti
+        WHERE title != 'UNKNOWN'
+        $where_clauses         
+        GROUP BY title
         HAVING COUNT(*) > 1
-        ORDER BY MAX(o.creation_date) DESC 
+        ORDER BY MAX(creation_date) DESC
         LIMIT $limit OFFSET $offset;        
     " {
         set description [db_string select_description {
-            SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = :title AND cr.creation_date = :creation_date
+            SELECT cr.description FROM cr_revisionsx cr WHERE cr.title = :title AND cr.creation_date = :creation_date LIMIT 1
         } -default ""]
         append json "\{
             \"plate\": \"$title\",
@@ -357,24 +338,11 @@ if { $result(count) eq 0 } {
     append json "\],"
     
     db_0or1row count_records "
-        SELECT SUM(total) AS total FROM (
-        SELECT DISTINCT(cr.title),
-        COUNT(ci.live_revision) AS total
-        FROM cr_items ci,
-        cr_revisions cr,
-        acs_objects o
-        WHERE ci.item_id = cr.item_id
-        AND ci.item_id = o.object_id
-        AND ci.live_revision = cr.revision_id
-        AND ci.content_type = 'qt_vehicle'
-        AND cr.title <> 'UNKNOWN'
-        AND cr.title <> 'FBF724'
-        AND cr.title <> 'FBF124'
+        SELECT COUNT(DISTINCT(item_id)) AS total
+        FROM qt_vehicle_ti
+        WHERE title <> 'UNKNOWN';
         $where_clauses 
-        GROUP BY cr.title
-        HAVING COUNT(ci.live_revision) > 1 ) t"
-
-
+    "
     
     append json "\"total\": [expr int($total * 30 / 100)] \}"
 } else {

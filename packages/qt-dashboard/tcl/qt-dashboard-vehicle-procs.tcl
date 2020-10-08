@@ -182,7 +182,7 @@ ad_proc -public qt::dashboard::vehicle::export_csv {
 
 
 
-ad_proc qt::dashboard::vehicle::import {} {
+ad_proc qt::dashboard::vehicle::import_from_digital_ocean {} {
     Gets full JSON, converts JSON's response to TCL array, then converts the array into a TCL list, suing rl_json library, isolates page into @data and gets @item_id directly, accessing data with list poperties
     
     JSON's format
@@ -234,18 +234,18 @@ ad_proc qt::dashboard::vehicle::import {} {
 		    set insert_p false 
 		}
 
-		if {[lindex $elem 3] ne "UNKNOWN" && [db_string repeated_p {
-		    SELECT COUNT(ci.item_id)
-		    FROM cr_items ci, acs_objects o, cr_revisions cr
-		    WHERE ci.item_id = o.object_id
-		    AND ci.item_id = cr.item_id
-		    AND content_type = :content_type
-		    AND cr.title = :plate
-		    AND o.creation_date::timestamp >= :creation_date::timestamp - INTERVAL '9 minutes'
-		} -default 0] > 0 } {
-		    ns_log Notice "ERROR IMPORTING: VEHICLE $plate HAS BEEN SCANNED IN THE LAST 9 MINUTES, $creation_date \n $elem"
+		#if {[lindex $elem 3] ne "UNKNOWN" && [db_string repeated_p {
+		#    SELECT COUNT(ci.item_id)
+		#    FROM cr_items ci, acs_objects o, cr_revisions cr
+		#    WHERE ci.item_id = o.object_id
+		#    AND ci.item_id = cr.item_id
+		#    AND content_type = :content_type
+		#    AND cr.title = :plate
+		#    AND o.creation_date::timestamp >= :creation_date::timestamp - INTERVAL '9 minutes'
+		#} -default 0] > 0 } {
+		#    ns_log Notice "ERROR IMPORTING: VEHICLE $plate HAS BEEN SCANNED IN THE LAST 9 MINUTES, $creation_date \n $elem"
 		    # set insert_p false
-		}
+		#}
     
 		if {$insert_p eq true} {
 		    if {![db_0or1row item_exists {
@@ -321,14 +321,14 @@ ad_proc qt::dashboard::vehicle::import_new {
     
     
 } {
-    ns_log Notice "Running ad_proc import vehicles"
+ #   ns_log Notice "Running ad_proc import vehicles new"
     package require json
     set dict [json::json2dict [ns_getcontent -as_file false]]
-    # ns_log Notice "DICT $dict"
+#     ns_log Notice "DICT $dict"
 
     
     foreach {i elem} $dict {
-	ns_log Notice "ELEM $elem"
+#	ns_log Notice "ELEM $elem"
 	set insert_p true
 	array set arr2 $elem
 	
@@ -342,29 +342,30 @@ ad_proc qt::dashboard::vehicle::import_new {
 	set description $elem
 	set plate [lindex $elem 3]
 
+	set name [util_text_to_url $plate]
 	if {$plate eq "UNKNOWN"} {
-	    set name [util_text_to_url $plate]
-	} else {
-	    set name $arr2(id)
+	    set name "$name-$item_id"
 	}
 	
 	if { [regexp {^([0-9]+)$} $plate] } {
 	    ns_log Notice "IMPORTING VEHICLE ERROR: PLATE HAS ONLY NUMBERS NOT INSERTED"
 	    set insert_p false 
 	}
+
+
 	
-	if {[lindex $elem 3] ne "UNKNOWN" && [db_string repeated_p {
-	    SELECT COUNT(ci.item_id)
-	    FROM cr_items ci, acs_objects o, cr_revisions cr
-	    WHERE ci.item_id = o.object_id
-	    AND ci.item_id = cr.item_id
-	    AND content_type = :content_type
-	    AND cr.title = :plate
-	    AND o.creation_date::timestamp >= :creation_date::timestamp - INTERVAL '9 minutes'
-	} -default 0] > 0 } {
-	    ns_log Notice "ERROR IMPORTING: VEHICLE $plate HAS BEEN SCANNED IN THE LAST 9 MINUTES, $creation_date \n $elem"
+	#if {[lindex $elem 3] ne "UNKNOWN" && [db_string repeated_p {
+	 #   SELECT COUNT(ci.item_id)
+	  #  FROM cr_items ci, acs_objects o, cr_revisions cr
+	   # WHERE ci.item_id = o.object_id
+	    #AND ci.item_id = cr.item_id
+	    #AND content_type = :content_type
+	    #AND cr.title = :plate
+	    #AND o.creation_date::timestamp >= :creation_date::timestamp - INTERVAL '9 minutes'
+	#} -default 0] > 0 } {
+	#    ns_log Notice "ERROR IMPORTING: VEHICLE $plate HAS BEEN SCANNED IN THE LAST 9 MINUTES, $creation_date \n $elem"
 	    # set insert_p false
-	}
+	#}
 	
 	if {$insert_p eq "true"} {
 	    if {![db_0or1row item_exists {

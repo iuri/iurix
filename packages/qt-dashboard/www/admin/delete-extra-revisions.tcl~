@@ -1,12 +1,14 @@
 ad_page_contract {}
-dsds
+
 set visited_items [list]
 set i 0
-db_foreach select_revisions {
-    SELECT v.object_id AS revision_id, v.title, v.description, v.creation_date, v.item_id FROM qt_vehicle_ti v ORDER BY v.creation_date ASC 
+db_foreach select_items {
+    SELECT item_id FROM cr_items WHERE content_type = 'qt_vehicle'
 } {
     
     
+    v.object_id AS revision_id, v.title, v.description, v.creation_date, v.item_id FROM qt_vehicle_ti v ORDER BY v.creation_date ASC 
+
     if {[lsearch $visited_items $item_id] eq -1} {
 	set repeated_revisions [db_list select_revision_id {
 	    SELECT object_id FROM qt_vehicle_ti

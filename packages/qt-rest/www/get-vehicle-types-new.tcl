@@ -42,14 +42,14 @@ set datasource [db_list_of_lists  select_types_count "
 "]
 
 
-#lists  total today week month
-set bus [list 0 0 0 0]
-set car [list 0 0 0 0]
-set bike [list 0 0 0 0]
-set suv [list 0 0 0 0]
-set truck [list 0 0 0 0]
-set other [list 0 0 0 0]
-set van [list 0 0 0 0]
+#lists  total today week month today-ASD week-ASD month-ASD
+set bus [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set car [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set bike [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set suv [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set truck [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set other [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set van [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
 
 foreach elem $datasource {
     lassign $elem date type count
@@ -66,10 +66,7 @@ foreach elem $datasource {
 	    }
 	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
 		lset bus 3 [expr [lindex $bus 3] + $count]
-	    }	    
-	    
-
-	    
+	    }	    	    	   
 	}
 	"Car" {
 	    lset car 0 [expr [lindex $car 0] + $count]

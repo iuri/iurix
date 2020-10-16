@@ -1,5 +1,5 @@
 ad_page_contract {}
-dsds
+
 set visited_items [list]
 set i 0
 db_foreach select_revisions {

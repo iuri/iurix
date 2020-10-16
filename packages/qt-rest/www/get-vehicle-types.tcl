@@ -12,7 +12,7 @@ ns_log Notice "Running TCL script get-vehicle-graphics.tcl"
 qt::rest::jwt::validation_p
 
 set current_date  [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
-set creation_date [db_string select_now { SELECT (MIN(o.creation_date) - INTERVAL '5 hour')::date FROM cr_items ci, acs_objects o WHERE ci.item_id = o.object_id and ci.content_type = 'qt_vehicle'}]
+set creation_date [db_string select_creation_date { SELECT (MIN(creation_date) - INTERVAL '5 hour')::date FROM qt_vehicle_ti}]
 set content_type "qt_vehicle"
 set where_clauses ""
 
@@ -42,14 +42,14 @@ set datasource [db_list_of_lists  select_types_count "
 "]
 
 
-#lists  total today week month
-set bus [list 0 0 0 0]
-set car [list 0 0 0 0]
-set bike [list 0 0 0 0]
-set suv [list 0 0 0 0]
-set truck [list 0 0 0 0]
-set other [list 0 0 0 0]
-set van [list 0 0 0 0]
+#lists  total today week month today-ASD week-ASD month-ASD
+set bus [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set car [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set bike [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set suv [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set truck [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set other [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set van [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
 
 foreach elem $datasource {
     lassign $elem date type count

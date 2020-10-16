@@ -44,7 +44,7 @@ set where_clauses ""
 
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
-	append where_clauses " AND o.creation_date::date >= :date_from::date "
+	append where_clauses " AND creation_date::date >= :date_from::date "
 	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
@@ -55,7 +55,7 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
-	append where_clauses " AND o.creation_date::date <= :date_to::date "
+	append where_clauses " AND creation_date::date <= :date_to::date "
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -278,10 +278,9 @@ foreach object_id $result(ids) {
         set title_summary [string map {"<b>" "" "</b>" ""} $title_summary]
         # set creation_date [lc_time_fmt [db_string select_creation_date { SELECT creation_date FROM acs_objects WHERE object_id = :object_id } -default ""] "%q %X" "es_ES"]
         db_0or1row select_object {
-            SELECT o.creation_date, cr.description
-            FROM cr_revisions cr, acs_objects o
-            WHERE o.object_id = cr.revision_id
-            AND cr.revision_id = :object_id 
+            SELECT creation_date, description
+            FROM qt_vehicle_ti
+            WHERE object_id = :object_id 
         }
         
         set occurency [db_string select_revision_count { SELECT COUNT(revision_id) FROM cr_revisions WHERE item_id = (SELECT item_id FROM cr_revisions WHERE revision_id = :object_id) } -default 0]

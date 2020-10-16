@@ -16,7 +16,7 @@ set where_clauses ""
 
 if {[info exists date_from]} {
     if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
-	append where_clauses " AND o.creation_date::date >= :date_from::date "	
+	append where_clauses " AND creation_date::date >= :date_from::date "	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -26,7 +26,7 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {   
     if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
-	append where_clauses " AND o.creation_date::date <= :date_to::date"
+	append where_clauses " AND creation_date::date <= :date_to::date"
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    

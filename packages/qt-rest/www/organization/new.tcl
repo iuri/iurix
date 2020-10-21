@@ -3,7 +3,7 @@
 ns_log Notice "Running TCL script organization/new"
 
 if {[ns_conn method] eq "POST"} {
-    # qt::rest::jwt::validation_p
+    qt::rest::jwt::validation_p
 
     set header [ns_conn header]
     set token [ns_set get $header authorization]
@@ -23,15 +23,14 @@ if {[ns_conn method] eq "POST"} {
 
     if {[info exists name] && [info exists user_id]} {
 	ns_log Notice "name $name | $legal_name $legal_name | reg_number $reg_number | type $type | user_id $user_id"
-
-	  
-	  db_transaction {
-
+	
+	db_transaction {
+	    
 	    # Mainsite node id 696	    
 	    set folder [site_node::verify_folder_name \
 			    -parent_node_id [ad_conn node_id] \
 			    -current_node_id 696 \
-			    -folder [util_text_to_url $name] \
+			    -folder [util_text_to_url "$legal_name-$reg_number"] \
 			    -instance_name $name]
 
 	    ns_log Notice "FOLDER $folder"
@@ -119,7 +118,7 @@ if {[ns_conn method] eq "POST"} {
 	ns_respond -status $status -type "application/json" -string $result  
 	ad_script_abort
     } else {
-	ad_return_complaint 1 "unsupported HTTP method: [ns_conn method]"
+	ad_return_complaint 1 "unsupported HTTP input: [ns_conn method]"
 	ns_respond -status 406 -type "text/html" -string "No content in the payload"
 	ad_script_abort
 	

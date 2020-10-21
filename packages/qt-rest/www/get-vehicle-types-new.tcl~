@@ -18,7 +18,7 @@ set where_clauses ""
 
 if {[info exists date_from]} {
     if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
-	append where_clauses " AND o.creation_date::date >= :date_from::date "	
+	append where_clauses " AND creation_date::date >= :date_from::date "	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -28,7 +28,7 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {   
     if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
-	append where_clauses " AND o.creation_date::date <= :date_to::date"
+	append where_clauses " AND creation_date::date <= :date_to::date"
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -38,11 +38,11 @@ if {[info exists date_to]} {
 
 
 set datasource [db_list_of_lists  select_types_count "
-    SELECT o.creation_date::date AS date, split_part(cr.description, ' ', 25) AS type, COUNT(1) AS count FROM cr_items ci, acs_objects o, cr_revisions cr WHERE ci.item_id = o.object_id AND ci.item_id = cr.item_id AND ci.latest_revision = cr.revision_id AND ci.content_type = 'qt_vehicle' $where_clauses GROUP BY date, type, 1 ORDER BY date;
+    SELECT v.creation_date::date AS date, split_part(v.description, ' ', 25) AS type, COUNT(1) AS count FROM qt_vehicle_ti v WHERE 1 = 1 $where_clauses GROUP BY date, type, 1 ORDER BY date;
 "]
 
 
-#lists  total today week month today_hour 
+#lists  total today week month
 set bus [list 0 0 0 0]
 set car [list 0 0 0 0]
 set bike [list 0 0 0 0]
@@ -175,12 +175,10 @@ append result "\{\"types\": \[
 # Instant Data
 set instant_data [db_list_of_lists select_instant_data {
     SELECT
-    date_trunc('hour', o.creation_date) AS hour,
+    date_trunc('hour', v.creation_date) AS hour,
     COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
-    AND date_trunc('month', o.creation_date::date) = date_trunc('month',:current_date::date)
+    FROM qt_vehicle_ti v
+    WHERE date_trunc('month', v.creation_date::date) = date_trunc('month', :current_date::date)
     GROUP BY 1 ORDER BY hour;
 }]
 
@@ -203,10 +201,8 @@ while {[lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $today || 
 if {$yesterday_total eq "" || $yesterday_total eq 0} {
     set yesterday_total [db_string select_yesterday {
 	SELECT COUNT(1) AS total
-	FROM cr_items ci, acs_objects o
-	WHERE ci.item_id = o.object_id
-	AND ci.content_type = :content_type
-	AND o.creation_date::date = :current_date::date - INTERVAL '1 day'
+	FROM qt_vehicle_ti v
+	WHERE v.creation_date::date = :current_date::date - INTERVAL '1 day'
     } -default 1]
 }
 
@@ -256,10 +252,7 @@ if {$week_total ne 0 && $last_week_total ne 0} {
 		  
 
 set total [db_string select_count_total {
-    SELECT COUNT(1)
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
+    SELECT COUNT(DISTINCT(item_id)) FROM qt_vehicle_ti;
 } -default 0] 
 
 

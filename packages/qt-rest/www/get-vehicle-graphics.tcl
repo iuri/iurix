@@ -2,8 +2,8 @@
 ad_page_contract {
     API REST method to return cr_items qt_vehicle
 } {
-    {date_from:optional}
-    {date_to:optional}
+    {date_from ""}
+    {date_to ""}
 }
 
 
@@ -14,9 +14,9 @@ set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour')
 set content_type "qt_vehicle"
 set where_clauses ""
 
-if {[info exists date_from]} {
+if {$date_from ne ""} {
     if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
-	append where_clauses " AND o.creation_date::date >= :date_from::date "	
+	append where_clauses " AND creation_date::date >= :date_from::date "	
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -24,9 +24,9 @@ if {[info exists date_from]} {
 }
 
 
-if {[info exists date_to]} {   
+if {$date_to ne ""} {   
     if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
-	append where_clauses " AND o.creation_date::date <= :date_to::date"
+	append where_clauses " AND creation_date::date <= :date_to::date"
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -38,23 +38,40 @@ if {[info exists date_to]} {
 
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 append result "\{\"hours\":\["
-set hourly_data [db_list_of_lists select_grouped_hour "
-    SELECT EXTRACT('hour' FROM o.creation_date) AS hour, 
-    COUNT(1) AS total
-    FROM cr_items ci, acs_objects o, cr_revisions cr
-    WHERE ci.item_id = o.object_id
-    AND ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND ci.content_type = :content_type
-    AND cr.title <> 'UNKNOWN'
-    $where_clauses
-    GROUP BY hour ORDER BY hour ASC
-"]
+if {$where_clauses eq ""} {
+    set past_data [qt::dashboard::get_past_totals_per_hour -date_from $date_from -date_to $date_to]
+    set today_data [db_list_of_lists select_grouped_hour "
+	SELECT EXTRACT('hour' FROM v.creation_date) AS hour, COUNT(1) AS total
+	FROM qt_vehicle_ti v
+	WHERE v.title != 'UNKNOWN'
+        AND v.creation_date::date = :creation_date::date
+	GROUP BY hour ORDER BY hour ASC
+    "]
+    foreach elem $past_data {
+	set idx [lsearch -index 0 $today_data [lindex $elem 0]] 
+	if {$idx ne -1} {
+	    lappend hourly_data [list [lindex $elem 0] [expr [lindex [lindex $today_data $idx] 1] + [lindex $elem 1]]]
+	} else {
+	    lappend hourly_data $elem
+	}	    
+    }
+} else {
+    set hourly_data [db_list_of_lists select_grouped_hour "
+	SELECT EXTRACT('hour' FROM v.creation_date) AS hour, COUNT(1) AS total
+	FROM qt_vehicle_ti v
+	WHERE v.title != 'UNKNOWN'
+	$where_clauses
+	GROUP BY hour ORDER BY hour ASC
+    "]
+}
+    
 
-for {set i 0} {$i<24} {incr i} {
+
+for {set i 0} {$i<24} {incr i} {    
     if {[lsearch -index 0 $hourly_data $i] eq -1} {
 	set hourly_data [linsert $hourly_data $i [list $i 0]]				    
     }
+	
 }
 
 set max_hour [list]
@@ -73,10 +90,9 @@ append result "\],"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
-    select EXTRACT('dow' FROM o.creation_date) AS dow, COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
+    select EXTRACT('dow' FROM v.creation_date) AS dow, COUNT(1) AS total
+    FROM qt_vehicle_ti v
+    WHERE 1 = 1
     $where_clauses
     GROUP BY dow ORDER BY dow;
 "]
@@ -116,12 +132,9 @@ append result "\],"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set monthly_data [db_list_of_lists select_vehicles_grouped_daily "
-    SELECT
-    EXTRACT('day' FROM o.creation_date) AS day,
-    COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
+    SELECT EXTRACT('day' FROM v.creation_date) AS day, COUNT(1) AS total
+    FROM qt_vehicle_ti v
+    WHERE 1 = 1
     $where_clauses
     GROUP BY 1 ORDER BY day;
 "]
@@ -155,23 +168,23 @@ append result "\],"
 # Instant Data
 set instant_data [db_list_of_lists select_instant_data {
     SELECT
-    date_trunc('hour', o.creation_date) AS hour,
+    date_trunc('hour', v.creation_date) AS hour,
     COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
-    AND date_trunc('month', o.creation_date::date) = date_trunc('month',:creation_date::date)
+    FROM qt_vehicle_ti v
+    WHERE date_trunc('month', v.creation_date::date) = date_trunc('month',:creation_date::date)
     GROUP BY 1 ORDER BY hour;
 }]
+
 set today_total 0
 set yesterday_total 0
 
 set today $creation_date
 set yesterday [db_string select_yesterday { SELECT (:creation_date::timestamp - INTERVAL '1 day')::date FROM dual}]
 set i [expr [llength $instant_data] - 1]
+
 while {[lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $today || [lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $yesterday} {
     if {[lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $today} {
-	set today_total [expr $today_total + [lindex [lindex $instant_data $i] 1]]							     
+	set today_total [expr $today_total + [lindex [lindex $instant_data $i] 1]]
     }
     if {[lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $yesterday} {
 	set yesterday_total [expr $yesterday_total + [lindex [lindex $instant_data $i] 1]]

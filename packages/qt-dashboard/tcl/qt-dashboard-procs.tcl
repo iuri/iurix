@@ -15,6 +15,198 @@ namespace eval qt::dashboard {}
 namespace eval qt::websocket {}
 
 
+
+ad_proc qt::dashboard::get_past_totals_per_hour_not_cached {
+    {-date_from ""}
+    {-date_to ""}
+} {
+    It returns a list of lists within totals of vehicles per hour starting from yesterday's results untill the very begining
+} {
+
+    set where_clauses ""
+    set current_date [db_string select_timestamp { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
+    
+    if {$date_from ne ""} {
+	if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
+	    append where_clauses " AND date::date >= :date_from::date "	
+	} else {
+	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	    ad_script_abort    
+	}
+    }
+    
+    
+    if {$date_to ne ""} {   
+	if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
+	    append where_clauses " AND date::date <= :date_to::date"
+	} else {
+	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	    ad_script_abort    
+	}
+    }
+    
+    return [db_list_of_lists select_past_totals_per_hour ""]
+}
+
+
+ad_proc qt::dashboard::get_past_totals_per_hour {
+    {-date_from ""}
+    {-date_to ""}
+} {
+    It returns a list of lists within totals of vehicles per hour starting from yesterday's results untill the very begining
+} {
+
+    
+    set where_clauses ""
+    
+    if {$date_from ne ""} {
+	if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
+	    append where_clauses " AND date::date >= :date_from::date "	
+	} else {
+	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	    ad_script_abort    
+	}
+    }
+    
+    
+    if {$date_to ne ""} {   
+	if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
+	    append where_clauses " AND date::date <= :date_to::date"
+	} else {
+	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	    ad_script_abort    
+	}
+    }
+    
+    
+    set result [util_memoize [list qt::dashboard::get_past_totals_per_hour_not_cached -date_from $date_from -date_to $date_to]]
+    
+    if {[llength $result] eq 0} {
+	util_memoize_flush [list qt::dashboard::get_past_totals_per_hour_not_cached -date_from $date_from -date_to $date_to]
+    }
+    
+    return $result
+}
+
+
+
+
+
+
+
+ad_proc qt::dashboard::get_types_total_per_day_not_cached {
+    {-date_from ""}
+    {-date_to ""}
+} {
+    It returns a list of lists within types and totals grouped per day
+
+    date    |    type    | count
+    ------------+------------+-------
+    2020-07-11 | Bus        |    71
+    2020-07-11 | Car        |  5919
+    2020-07-11 | SUV/Pickup |    68
+    2020-07-11 | Truck      |   644
+    2020-07-11 | Unknown    |   334
+    2020-07-11 | Van        |   274
+...
+} {
+
+    set where_clauses ""
+
+    if {$date_from ne ""} {
+	if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
+	    append where_clauses " AND date::date >= :date_from::date "	
+	} else {
+	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	    ad_script_abort    
+	}
+    }
+    
+    
+    if {$date_to ne ""} {   
+	if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
+	    append where_clauses " AND date::date <= :date_to::date"
+	} else {
+	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	    ad_script_abort    
+	}
+    }
+    
+    return [db_list_of_lists select_types_count ""]
+}
+
+
+
+
+
+
+
+ad_proc qt::dashboard::get_types_total_per_day {
+    {-date_from ""}
+    {-date_to ""}
+} {
+    It returns a list of lists within types and totals grouped per day
+
+    date    |    type    | count
+    ------------+------------+-------
+    2020-07-11 | Bus        |    71
+    2020-07-11 | Car        |  5919
+    2020-07-11 | SUV/Pickup |    68
+    2020-07-11 | Truck      |   644
+    2020-07-11 | Unknown    |   334
+    2020-07-11 | Van        |   274
+...
+} {
+
+    set where_clauses ""
+
+    if {$date_from ne ""} {
+	if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
+	    append where_clauses " AND date::date >= :date_from::date "	
+	} else {
+	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	    ad_script_abort    
+	}
+    }
+    
+    
+    if {$date_to ne ""} {   
+	if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
+	    append where_clauses " AND date::date <= :date_to::date"
+	} else {
+	    ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	    ad_script_abort    
+	}
+    }
+
+    set result [util_memoize [list qt::dashboard::get_types_total_per_day_not_cached -date_from $date_from -date_to $date_to]]
+    
+    if {[llength $result] eq 0} {
+	util_memoize_flush [list qt::dashboard::get_types_total_per_day_not_cached -date_from $date_from -date_to $date_to]
+    }
+    
+    return $result
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ad_proc qt::websocket::listen {} {
     It listens to Luna Stats & Events Service to get data faces in the json format
 } {

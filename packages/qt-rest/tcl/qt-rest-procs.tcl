@@ -23,15 +23,18 @@ ad_proc -public qt::rest::jwt::validation_p {} {
 } {
 
     set header [ns_conn header]
-    #    ns_log Notice "HEADER \n $header"
+#        ns_log Notice "HEADER \n $header"
     set h [ns_set size $header]
-    #    ns_log Notice "HEADERS $h"
+ #       ns_log Notice "HEADERS $h"
     set req [ns_set array $header]
-    #    ns_log Notice "$req"
+  #      ns_log Notice "$req"
     
     
     set token [lindex [ns_set get $header Authorization] 1]
-    #    ns_log Notice "TOKEN $token"
+    if {$token eq ""} {
+	set token [lindex [ns_set get $header authorization] 1]
+    }
+   # ns_log Notice "TOKEN $token"
     
     set token [split $token "."]
     set header1 [ns_base64decode [lindex $token 0]]
@@ -51,7 +54,7 @@ ad_proc -public qt::rest::jwt::validation_p {} {
     }
 
 
-    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
+    #    ad_return_complaint 1 "Bad HTTP Request: Invalid Token!"
     ns_respond -status 400 -type "text/html" -string "Bad Request Error HTML 400. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing."
     ad_script_abort
     

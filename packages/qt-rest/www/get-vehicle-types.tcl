@@ -2,8 +2,8 @@
 ad_page_contract {
     API REST method to return cr_items qt_vehicle
 } {
-    {date_from:optional}
-    {date_to:optional}
+    {date_from ""}
+    {date_to ""}
 }
 ns_log Notice "Running TCL script get-vehicle-graphics.tcl"
 
@@ -12,44 +12,25 @@ ns_log Notice "Running TCL script get-vehicle-graphics.tcl"
 qt::rest::jwt::validation_p
 
 set current_date  [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
-set creation_date [db_string select_now { SELECT (MIN(o.creation_date) - INTERVAL '5 hour')::date FROM cr_items ci, acs_objects o WHERE ci.item_id = o.object_id and ci.content_type = 'qt_vehicle'}]
+set creation_date [db_string select_creation_date { SELECT (MIN(creation_date) - INTERVAL '5 hour')::date FROM qt_vehicle_ti}]
 set content_type "qt_vehicle"
-set where_clauses ""
 
-if {[info exists date_from]} {
-    if {![catch {db_1row validate_date { SELECT :date_from::date FROM dual } } errmsg]} {
-	append where_clauses " AND o.creation_date::date >= :date_from::date "	
-    } else {
-	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
-	ad_script_abort    
-    }
-}
+set datasource [qt::dashboard::get_types_total_per_day -date_from $date_from -date_to $date_to]
+# ns_log Notice "$datasource"
 
+set today_data [db_list_of_lists  select_types_count "
+    SELECT v.creation_date::date AS date, split_part(v.description, ' ', 25) AS type, COUNT(1) AS count FROM qt_vehicle_ti v WHERE v.creation_date::date = :current_date::date GROUP BY date, type, 1 ORDER BY date;"]
 
-if {[info exists date_to]} {   
-    if {![catch { db_1row validate_date { select :date_to::date FROM dual } } errmsg]} {
-	append where_clauses " AND o.creation_date::date <= :date_to::date"
-    } else {
-	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
-	ad_script_abort    
-    }
-}
+lappend datasource [lindex $today_data 0]
 
-
-
-set datasource [db_list_of_lists  select_types_count "
-    SELECT o.creation_date::date AS date, split_part(v.description, ' ', 25) AS type, COUNT(1) AS count FROM qt_vehicle_ti v, acs_objects o WHERE v.item_id = o.object_id $where_clauses GROUP BY date, type, 1 ORDER BY date;
-"]
-
-
-#lists  total today week month
-set bus [list 0 0 0 0]
-set car [list 0 0 0 0]
-set bike [list 0 0 0 0]
-set suv [list 0 0 0 0]
-set truck [list 0 0 0 0]
-set other [list 0 0 0 0]
-set van [list 0 0 0 0]
+#lists  total today week month today-ASD week-ASD month-ASD
+set bus [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set car [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set bike [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set suv [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set truck [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set other [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
+set van [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
 
 foreach elem $datasource {
     lassign $elem date type count
@@ -66,10 +47,7 @@ foreach elem $datasource {
 	    }
 	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
 		lset bus 3 [expr [lindex $bus 3] + $count]
-	    }	    
-	    
-
-	    
+	    }	    	   	    
 	}
 	"Car" {
 	    lset car 0 [expr [lindex $car 0] + $count]
@@ -175,12 +153,10 @@ append result "\{\"types\": \[
 # Instant Data
 set instant_data [db_list_of_lists select_instant_data {
     SELECT
-    date_trunc('hour', o.creation_date) AS hour,
+    date_trunc('hour', v.creation_date - INTERVAL '5 hour') AS hour,
     COUNT(1) AS total
-    FROM cr_items ci, acs_objects o
-    WHERE ci.item_id = o.object_id
-    AND ci.content_type = :content_type
-    AND date_trunc('month', o.creation_date::date) = date_trunc('month',:current_date::date)
+    FROM qt_vehicle_ti v
+    WHERE date_trunc('month', v.creation_date::date) = date_trunc('month', :current_date::date)
     GROUP BY 1 ORDER BY hour;
 }]
 
@@ -190,6 +166,8 @@ set yesterday_total 0
 set today $current_date
 set yesterday [db_string select_yesterday { SELECT (:current_date::timestamp - INTERVAL '1 day')::date FROM dual}]
 set i [expr [llength $instant_data] - 1]
+
+
 while {[lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $today || [lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $yesterday} {
     if {[lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $today} {
 	set today_total [expr $today_total + [lindex [lindex $instant_data $i] 1]]							     
@@ -203,9 +181,8 @@ while {[lindex [split [lindex [lindex $instant_data $i] 0] " "] 0] eq $today || 
 if {$yesterday_total eq "" || $yesterday_total eq 0} {
     set yesterday_total [db_string select_yesterday {
 	SELECT COUNT(1) AS total
-	FROM qt_vehicle_ti v, acs_objects o
-	WHERE v.item_id = o.object_id
-	AND o.creation_date::date = :current_date::date - INTERVAL '1 day'
+	FROM qt_vehicle_ti v
+	WHERE v.creation_date::date = :current_date::date - INTERVAL '1 day'
     } -default 1]
 }
 

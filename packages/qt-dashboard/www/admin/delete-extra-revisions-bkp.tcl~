@@ -1,5 +1,5 @@
 ad_page_contract {}
-dsds
+
 set visited_items [list]
 set i 0
 db_foreach select_revisions {
@@ -29,7 +29,7 @@ db_foreach select_revisions {
 		ns_log Notice "REVID $rev_id TITLE $rev_title CREATIONDATE $rev_date ITEMID $rev_item"
 		
 		ns_log Notice "DELETE revision"
-		#content::revision::delete -revision_id $revision_id
+		content::revision::delete -revision_id $revision_id
 	    }
 	}
 	lappend visited_items $item_id   

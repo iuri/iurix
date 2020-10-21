@@ -8,7 +8,7 @@ ad_library {
 }
 
 
-ad_schedule_proc -thread t 18 qt::dashboard::vehicle::import
+#ad_schedule_proc -thread t 18 qt::dashboard::vehicle::import
 
 
 # Local variables:

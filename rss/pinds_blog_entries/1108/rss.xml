@@ -5,11 +5,7 @@
 <link>https://iurix.com/blog/</link>
 <description>Lars Blogger</description>
 <generator>OpenACS 5.0</generator>
-<<<<<<< HEAD
-<lastBuildDate>Wed, 02 Sep 2020 18:01:04 GMT</lastBuildDate>
-=======
-<lastBuildDate>Tue, 28 Jul 2020 16:05:49 GMT</lastBuildDate>
->>>>>>> b02b7c49ae92f1c787888a4906a703ea33ef9bbf
+<lastBuildDate>Wed, 21 Oct 2020 12:08:33 GMT</lastBuildDate>
 <image>
 <title>Lars Blogger</title>
 <url>https://iurix.com/rss-support/images/openacs_logo_rss.gif</url>
@@ -18,162 +14,79 @@
 <height>48</height>
 </image>
 <item>
-<<<<<<< HEAD
-<title>{Webinar: &#34;How Ping Identity Uses Postman across the API Lifecycle&#34;}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185432</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185432</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Register Now for the Postman Webinar with Ping IdentityTitle:&amp;nbsp;âHow Ping Identity Uses Postman across the API Lifecycleâ&amp;nbsp;Date:&amp;nbsp;Wednesday,&amp;nbsp;September&amp;nbsp;9, 2020&amp;nbsp;Time:&amp;nbsp;5:00 p.m. (UTC)Duration:&amp;nbsp;60 minutesPresenters:Joyce Lin, Lead Developer Advocate at PostmanJason Hatchett, Product Manager at Ping IdentityAnthony Dombrowski, Developer Advocate at Ping IdentityGideon McKee, Software Quality Engineer at Ping IdentityHi,&amp;nbsp;&amp;nbs...</description>
-<pubDate>Wed, 02 Sep 2020 18:01:04 GMT</pubDate>
-=======
-<title>{Mesmerize - plus, The Questionable Origin of &#39;Quiz&#39;}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=99653</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=99653</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYJuly 28, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;mesmerize&amp;nbsp;&amp;nbsp;verb&amp;nbsp;|&amp;nbsp;MEZ-muh-ryze&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:to subject to&amp;nbsp;mesmerism;&amp;nbsp;also&amp;nbsp;:hypnotize&amp;nbsp;&amp;nbsp;2&amp;nbsp;:spellbind&amp;nbsp;Scroll down for more about&amp;nbsp;mesmerize&amp;nbsp;&amp;nbsp;TRENDING NOW:krakenrescindcommuteproteanSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border: 0px; outline: 0px; margin: 0px; padding: 0px; font-size: 10px; color: rgb(174, 0, 21); line-heigh...</description>
-<pubDate>Tue, 28 Jul 2020 16:05:49 GMT</pubDate>
+<title>{Dorsal - plus, Put It in the &#39;Frunk&#39;}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=267001</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=267001</guid>
+<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYOctober 21, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;dorsal&amp;nbsp;&amp;nbsp;adjective&amp;nbsp;|&amp;nbsp;DOR-sul&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:relating to or situated near or on the back especially of an animal or of one of its parts&amp;nbsp;&amp;nbsp;2&amp;nbsp;:situated out of or directed away from the axis&amp;nbsp;:&amp;nbsp;abaxial&amp;nbsp;Scroll down for more about&amp;nbsp;dorsal&amp;nbsp;&amp;nbsp;TRENDING NOW:boffostare decisisflylitanySEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border: 0px; out...</description>
+<pubDate>Wed, 21 Oct 2020 12:08:33 GMT</pubDate>
 </item>
 <item>
-<title>{EFF&#39;s birthday month is coming to an end}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=99645</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=99645</guid>
-<description>This is a friendly message from the Electronic Frontier Foundation.Hi Supporter of Digital Freedom,There&#39;s&amp;nbsp;one week left to become an EFF member for just $19.90, in celebration of our founding year!Ongoing support keeps EFF strong, so if you&amp;nbsp;become a&amp;nbsp;monthly or annual recurring member&amp;nbsp;right now, youâll receive an individually-numbered EFF challenge coin&amp;nbsp;as a (literal) token of our appreciation. Challenge coins follow a long tradition of offering a symbol of kinship a...</description>
-<pubDate>Tue, 28 Jul 2020 16:05:37 GMT</pubDate>
+<title>{100 Funny Programmer Quotes}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266985</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266985</guid>
+<description>Best of Better Programming for you100 Funny Programmer QuotesFor when coffee isnât enough to bring a smile to your&amp;nbsp;faceElye7 min readThe Best JavaScript Starter Kits for Your Next ProjectSave time and reduce the amount of boilerplate you have to write every time you start a new projectIndrek Lasn4 min readHow to Avoid the Number One Learning Mistake: A Lack of Deliberate PracticeAccelerate your programming career by learning efficientlySzymon Adamiak6 min readHow Changing Your Thoughts ...</description>
+<pubDate>Wed, 21 Oct 2020 12:07:01 GMT</pubDate>
 </item>
 <item>
-<title>{Repl.it Newsletter: Win $10,000 to work on your language, Minecraft
- on a repl, and more!}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=80735</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=80735</guid>
-<description>Having trouble viewing this email? Click here to access the&amp;nbsp;web&amp;nbsp;version.&#34; height=&#34;14&#34; style=&#34;font-family: inherit; line-height: inherit; margin: 0px; padding: 0px; border: 0px; font-size: inherit; font-style: inherit; font-variant-caps: inherit; font-weight: inherit; font-stretch: inherit; vertical-align: baseline;&#34; class=&#34;&#34;&gt;module Newsletter&#34; height=&#34;14&#34; style=&#34;font-family: inherit; line-height: inherit; margin: 0px; padding: 0px; border: 0px; font-size: inherit; font-style: inherit...</description>
-<pubDate>Mon, 27 Jul 2020 23:26:56 GMT</pubDate>
+<title>{=?utf-8?Q?A_evolu=C3=A7=C3=A3o_do_Java_nos_=C3=BAltimos_5_anos?=
+ =?utf-8?Q?=E2=98=95_e_BigData_com_Apache_Spark=F0=9F=92=A5?=}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266993</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266993</guid>
+<description>+ComputaÃ§Ã£o de borda e Novidades do Elxir e Erlang&amp;nbsp;IA, ML e Engenharia de DadosBig Data com Apache Spark - Parte 4: Spark Machine Learning&amp;nbsp;Neste quarto artigo da sÃ©rie Apache Spark, o autor Srini Penchikala explica os conceitos de machine learning e a biblioteca Spark MLlib para criar uma aplicaÃ§Ã£o de anÃ¡lise preditiva.DesenvolvimentoAs novidades das linguagens Elixir e Erlang no Code BEAM Brasil&amp;nbsp;O Code BEAM Brasil acontecerÃ¡ nos dias 06 e 07 de novembro em formato on-lin...</description>
+<pubDate>Wed, 21 Oct 2020 12:07:01 GMT</pubDate>
 </item>
 <item>
-<title>{Fwd: Industry insights for experimental success with KO cell lines:
- Read article}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=72747</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=72747</guid>
-<description>Your latest product and application news from&amp;nbsp;SelectScienceÂ®.You are subscribed to this service. If this email is no longer relevant, please update your communication preferences&amp;nbsp;here.You can also read this as a&amp;nbsp;web version.&amp;nbsp;Read ArticleHow to achieve research success with knockout modelsGet industry insights&amp;nbsp;into planning knockout experiments from KO expert Dr. Hanna Dreja, Abcamâs Quality Control Scientist, and find out how her team is working with CRISPR to impro...</description>
-<pubDate>Mon, 27 Jul 2020 14:32:32 GMT</pubDate>
->>>>>>> b02b7c49ae92f1c787888a4906a703ea33ef9bbf
+<title>{=?utf-8?Q?Repl=2Eit_Newsletter=3A_Programming_Jam_Results_?=
+ =?utf-8?Q?=F0=9F=8F=86_Achievement_Hunting_=F0=9F=94=AB?=}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266977</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266977</guid>
+<description>Having trouble viewing this email? Click here to access the&amp;nbsp;web&amp;nbsp;version.&#34; height=&#34;14&#34; style=&#34;font-family: inherit; line-height: inherit; margin: 0px; padding: 0px; border: 0px; font-size: inherit; font-style: inherit; font-variant-caps: inherit; font-weight: inherit; font-stretch: inherit; vertical-align: baseline;&#34; class=&#34;&#34;&gt;#!/bin/basil&#34; height=&#34;14&#34; style=&#34;font-family: inherit; line-height: inherit; margin: 0px; padding: 0px; border: 0px; font-size: inherit; font-style: inherit; fon...</description>
+<pubDate>Tue, 20 Oct 2020 20:34:44 GMT</pubDate>
 </item>
 <item>
-<title>{Dulcet - plus, The New &#39;Bubble&#39; Popping Up in Sports}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185428</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185428</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYAugust 19, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;dulcet&amp;nbsp;&amp;nbsp;adjective&amp;nbsp;|&amp;nbsp;DUL-sut&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:sweet to the taste&amp;nbsp;&amp;nbsp;2&amp;nbsp;:pleasing to the ear&amp;nbsp;&amp;nbsp;3&amp;nbsp;:generally pleasing or agreeable&amp;nbsp;Scroll down for more about&amp;nbsp;dulcet&amp;nbsp;&amp;nbsp;TRENDING NOW:derechodenigratefuneralizekrakenSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border: 0px; outline: 0px; margin: 0px; padding: 0px; font-size: 10px; color: rg...</description>
-<pubDate>Wed, 02 Sep 2020 14:31:27 GMT</pubDate>
+<title>{Old MacDonald had a farm, A-I, A-I, ooo}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266968</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266968</guid>
+<description>Your round-up of the latest, greatest data storiesHello Iuri,A farmland-scanning buggy that looks a bit like the love child of&amp;nbsp;Wall-E&amp;nbsp;and a giant refuse bin (no, thatâs not a teaser for the filmâs long-awaited sequel)&amp;nbsp;has been launched&amp;nbsp;to help farmers monitor yields and save money. Itâs powered by solar panels, and its broader aim is to identify new plant species that could be developed for human consumption and might be resistant to climate change. Now that does soun...</description>
+<pubDate>Tue, 20 Oct 2020 15:07:29 GMT</pubDate>
 </item>
 <item>
-<title>{Requite - plus, 6 Obscure Words for Messes}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185424</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185424</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYAugust 25, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;requite&amp;nbsp;&amp;nbsp;verb&amp;nbsp;|&amp;nbsp;rih-KWYTE&amp;nbsp;Definition&amp;nbsp;1a&amp;nbsp;:to make return for&amp;nbsp;:&amp;nbsp;repay&amp;nbsp;&amp;nbsp;b&amp;nbsp;:to make retaliation for&amp;nbsp;:&amp;nbsp;avenge&amp;nbsp;&amp;nbsp;2&amp;nbsp;:&amp;nbsp;to make suitable return to for a benefit or service or for an injury&amp;nbsp;Scroll down for more about&amp;nbsp;requite&amp;nbsp;&amp;nbsp;TRENDING NOW:TartufferyderechodenigratefuneralizeSEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34;...</description>
-<pubDate>Wed, 02 Sep 2020 14:31:16 GMT</pubDate>
+<title>{Visage - plus, What Does &#39;Eighty-Six&#39; Mean?}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266960</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266960</guid>
+<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;WORD OF THE DAYOctober 20, 2020&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;visage&amp;nbsp;&amp;nbsp;noun&amp;nbsp;|&amp;nbsp;VIZ-ij&amp;nbsp;Definition&amp;nbsp;1&amp;nbsp;:the face, countenance, or appearance of a person or sometimes an animal&amp;nbsp;&amp;nbsp;2&amp;nbsp;:aspect,&amp;nbsp;appearance&amp;nbsp;Scroll down for more about&amp;nbsp;visage&amp;nbsp;&amp;nbsp;TRENDING NOW:boffostare decisisflylitanySEE&amp;nbsp;ALL&amp;nbsp;&#34; width=&#34;6&#34; height=&#34;10&#34; border=&#34;0&#34; style=&#34;border: 0px; outline: 0px; margin: 0px; padding: 0px; font-size: 10px; color: rgb(17...</description>
+<pubDate>Tue, 20 Oct 2020 13:44:03 GMT</pubDate>
 </item>
 <item>
-<title>{Fluidified just uploaded a video}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185404</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185404</guid>
-<description>1:00:19Mist | Chill MixFluidifiedYou were sent this email because you chose to receive updates from&amp;nbsp;Fluidified. If you don&#39;t want these updates anymore, you can&amp;nbsp;unsubscribe here.Â© 2020 YouTube, LLC 901 Cherry Ave, San Bruno, CA 94066</description>
-<pubDate>Wed, 02 Sep 2020 14:31:15 GMT</pubDate>
+<title>{Say hello to Lucidspark!}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266944</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266944</guid>
+<description>&amp;nbsp;A virtual whiteboard for all your best ideasWeâd like you to meet the newest product in the Lucid visual collaboration suite: Lucidspark! Because youâre a Lucidchart user, we wanted you to be one of the first to learn about Lucidspark. Itâs a virtual whiteboard that helps you and your team collaborate to bring the best ideas to light. To access Lucidspark, log in using your Lucidchart credentials.Try LucidsparkLucidspark makes it easy to come together as a team and generate winning...</description>
+<pubDate>Tue, 20 Oct 2020 12:44:56 GMT</pubDate>
 </item>
 <item>
-<title>{Present Moment Reminder}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185408</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185408</guid>
-<description>Unsubscribe&amp;nbsp; |&amp;nbsp;&amp;nbsp;Privacy PolicyThis email was sent to&amp;nbsp;iuri@iurix.com&amp;nbsp;by&amp;nbsp;Eckhart Teachings.413 S. Arthur Ave&amp;nbsp; |&amp;nbsp; Louisville &amp;nbsp; |&amp;nbsp; CO&amp;nbsp; |&amp;nbsp; 80027&amp;nbsp;</description>
-<pubDate>Wed, 02 Sep 2020 14:31:15 GMT</pubDate>
+<title>{Blog/News Bootstrap Templates}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266952</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266952</guid>
+<description>&amp;nbsp;NewsM4 - Ultra-modern News/Blog Template&amp;nbsp;A highly modern Bootstrap 4 theme for news websites and blogs. You no longer need to look for news cards and other news-related templates: you get a wide range of great designs you can modify to whatever you want.&amp;nbsp;View live demo websites:&amp;nbsp;Tech News,&amp;nbsp;Economy Blog&amp;nbsp;VIEW LIVE DEMO&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Complete Website Builder Kit Promo - Save 97%!&amp;nbsp;The theme is already included in Complete Website Builder Kit. Get ...</description>
+<pubDate>Tue, 20 Oct 2020 12:44:56 GMT</pubDate>
 </item>
 <item>
-<title>{SQL Indexes Explained, Pt. 2}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185412</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185412</guid>
-<description>&amp;nbsp;&amp;nbsp;&amp;nbsp;SQL Indexes Explained, Pt. 2Sorting a table can make some queries fasterâbut the maintenance cost is untenable. That&#39;s where real database indexes come in, particularly the B-tree index.In this installment of SQL Indexes Explained, Toptal Freelance Database Performance Tuning Expert Mirko MaroviÄ walks through the reasoning behind B-tree indexes and how to use them most effectively.Continue Reading&amp;nbsp;Save to PocketAbout the AuthorMirko MaroviÄDatabase Performance Tunin...</description>
-<pubDate>Wed, 02 Sep 2020 14:31:15 GMT</pubDate>
+<title>{I built the same API with &amp; without Express. Here are the
+ differences. | Louis Petrik in JavaScript In Plain English}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266936</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266936</guid>
+<description>Stories for Iuri SampaioTodayâs highlightsI built the same API with &amp;amp; without Express. Here are the differences.And ran a benchmarkLouis Petrik&amp;nbsp;in&amp;nbsp;JavaScript In Plain English4 min read3 Hours of Creative âFlowâ Every Day Is All You Need to Change Your LifeIf youâre *not* using flow states youâre wasting your life.Tim Denning&amp;nbsp;in&amp;nbsp;The Ascent5 min readâThe Good Men Projectâ Launches Writers Room and More on Patreon!See how The Good Men Project can boost your w...</description>
+<pubDate>Tue, 20 Oct 2020 01:52:03 GMT</pubDate>
 </item>
 <item>
-<title>{=?utf-8?Q?_=5B=F0=9F=90=8DPyTricks=5D=3A_Finding_the_most_common_?=
- =?utf-8?Q?elements_in_an_iterable?=}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185416</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185416</guid>
-<description># collections.Counter lets you find the most common
-# elements in an iterable:
-
-&amp;gt;&amp;gt;&amp;gt; import collections
-&amp;gt;&amp;gt;&amp;gt; c = collections.Counter(&#39;helloworld&#39;)
-
-&amp;gt;&amp;gt;&amp;gt; c
-Counter({&#39;l&#39;: 3, &#39;o&#39;: 2, &#39;e&#39;: 1, &#39;d&#39;: 1, &#39;h&#39;: 1, &#39;r&#39;: 1, &#39;w&#39;: 1})
-
-&amp;gt;&amp;gt;&amp;gt; c.most_common(3)
-[(&#39;l&#39;, 3), (&#39;o&#39;, 2), (&#39;e&#39;, 1)]
-If you think your friends would find this tip useful, please share it with themâIâd really appreciate it.&amp;nbsp;Here&#39;s the link:&amp;nbsp;View in browserTo make sure you keep getting these ema...</description>
-<pubDate>Wed, 02 Sep 2020 14:31:15 GMT</pubDate>
+<title>{Morning Brief 10.19.20: Apple Pay adds holdouts in Ireland; British
+ Airways breach fine cut}</title>
+<link>https://iurix.com/blog/one-entry?entry_id=266928</link>
+<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=266928</guid>
+<description>View in browserView&amp;nbsp;in&amp;nbsp;browserUpcoming EventsMORNING BRIEFINGSubscribeUpcoming&amp;nbsp;EventsSubscribe&amp;nbsp;The information you need to start your day, from PaymentsSource and around the web:Closing the app&#39;s gapThe Bank of Ireland is close to supporting Apple Pay, giving the app coverage of all major Irish banks and continuing Apple&#39;s recent record of winning over holdouts.AIB, Ulster Bank and KBC already support Apple Pay, as do major fintechs such as N26 and Revolut, making Bank of I...</description>
+<pubDate>Tue, 20 Oct 2020 01:50:42 GMT</pubDate>
 </item>
-<<<<<<< HEAD
-<item>
-<title>{Code-Split Your React App With Lazy and Suspense}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185420</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185420</guid>
-<description>Best of Better Programming for youCode-Split Your React App With Lazy and SuspenseOptimize app performance by splitting components, routes, and librariesMarshal Murphy6 min readNew in iOS 14: App AttestProtect your iOS apps from jailbreak tweaksBruno Rocha8 min read5 Practices to Help You Become the Best Developer That You Can BeI started with nothing but some extra time and big dreamsâââso can youAnn Adaya7 min read24 Swift Extensions for Cleaner CodeBe more productive building your mob...</description>
-<pubDate>Wed, 02 Sep 2020 14:31:15 GMT</pubDate>
-</item>
-<item>
-<title>{=?utf-8?Q?TRB_Webinar=3A_Reach_for_the_Sky=E2=80=93Attracting_New?=
- =?utf-8?Q?_Aviation_Career_Professionals?=}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185400</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185400</guid>
-<description>
-
-
-    TRB Webinar: Reach for the SkyâAttracting New Aviation Career Professionals
-
-
-
-
-
-
-      
-        
-          
-
-
-  
-
-
-
-  
-
-
-
-  
-  
-
-
-Preheader TextHaving trouble viewing this email? View it as a Web page. &amp;nbsp;
-
-
-
-
-
-
-
-
-
-TRB Webinar: Reach for the SkyâAttracting New Aviation Career Professionals
-
-
-Older workers are retiring in droves, and new employees are not entering the aviation workforce swiftly enough to replace those leaving. TRB is hosting a webinar on Monday, August 6, 2020 fr...</description>
-<pubDate>Wed, 02 Sep 2020 14:31:05 GMT</pubDate>
-</item>
-<item>
-<title>{An Accidental Atheist | The Good Men Project in Change Becomes You}</title>
-<link>https://iurix.com/blog/one-entry?entry_id=185392</link>
-<guid isPermaLink="true">https://iurix.com/blog/one-entry?entry_id=185392</guid>
-<description>&amp;nbsp;Iuri SampaioTodayâs highlightsAn Accidental AtheistAtheism is a default, not a practice.The Good Men Project&amp;nbsp;in&amp;nbsp;Change Becomes You6 min readReact Native Search ComponentAn iOS-like Search Component in React Native.Karthik Balasubramanian&amp;nbsp;in&amp;nbsp;Timeless3 min readIntroduction to Face RecognitionAn introduction to the core concepts of Face Recognition; explore the basics with a sample implementation.Vikas Solegaonkar&amp;nbsp;in&amp;nbsp;Towards Data Science6 min readTake Your Li...</description>
-<pubDate>Wed, 02 Sep 2020 14:30:55 GMT</pubDate>
-</item>
-=======
->>>>>>> b02b7c49ae92f1c787888a4906a703ea33ef9bbf
 </channel>
 </rss>
 

@@ -122,12 +122,19 @@ if {[ns_conn method] eq "GET"} {
 		} {
 		    ns_log Notice "POSTID $id"
 		    array set arr $desc
+		    ns_log Notice "PAST DESC $desc"
+		    set desc1 ""
+		    foreach {field value} $desc {
+			ns_log Notice "$field $value"
+			append desc1 "\"$field\": \"$value\","
+		    }
+		    set desc1 [string trimright $desc1 ","]
+		    
 		    append json_data "\{
-			\"id\": \"$name\",
-			\"name\": \"$arr(title)\",
+			\"type\": \"$arr(type)\",
+			\"title\": \"$arr(title)\",
 			\"rating\": $arr(rating),
-			\"childCount\": $arr(childCount),
-			\"description\": \"$desc\"
+			\"description\":\[\{$desc1\}\]
 		    \},"		    
 		}
 		

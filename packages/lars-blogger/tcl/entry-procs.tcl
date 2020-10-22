@@ -264,9 +264,9 @@ ad_proc -public lars_blogger::entry::do_notifications {
 ad_proc lars_blogger::entry::trackback { -entry_id } {
     sends trackback ping (if enabled)
 } {
-    ns_log Notice "ENTRY TRACKBACK PING ..."
-    if {[parameter::get -parameter EnableAutoDiscoveryAndPing -default "1"]} {
-
+    ns_log Notice "ENTRY TRACKBACK PING ... [parameter::get -package_id [apm_package_id_from_key lars-blogger] -parameter EnableAutoDiscoveryAndPing -default 1]"
+    if {[parameter::get -package_id [apm_package_id_from_key lars-blogger] -parameter EnableAutoDiscoveryAndPing -default 1] ne 0} {
+	
 	lars_blogger::entry::get -entry_id $entry_id -array entry
 	set url [ad_url][pinds_blog_entry__url $entry_id]
 	set excerpt [string range $entry(content) 0 [parameter::get -parameter TrackbackMaxExcerpt -default 200]]

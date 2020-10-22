@@ -341,7 +341,7 @@ ad_proc -public ix_mail::email::new {
 
 		    set file_item_id [content::item::new \
 					  -name "$filename" \
-					  -title "$filenmame" \
+					  -title "$filename" \
 					  -parent_id $mail_item_id \
 					  -package_id $package_id \
 					  -storage_type "file" \
@@ -368,7 +368,7 @@ ad_proc -public ix_mail::email::new {
 		    
 		    ns_log Notice "REVISION $file_revision_id"
 
-		    item::publish -item_id $file_item_id -revision_id $file_revision_id
+		    content::item::publish -item_id $file_item_id -revision_id $file_revision_id
 		}
 	    }
 	    

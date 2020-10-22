@@ -23,6 +23,114 @@ set today_data [db_list_of_lists  select_types_count "
 
 lappend datasource [lindex $today_data 0]
 
+
+
+
+
+
+set ds_asd_today [db_list_of_lists select_avg_interval_per_type {
+    WITH
+    cte1 AS (
+	     SELECT v1.title,
+	     SPLIT_PART(v1.description, ' ', 25) AS type,
+	     MIN(v1.creation_date::timestamp) AS min_entry
+	     FROM qt_vehicle_ti v1
+	     WHERE v1.creation_date::date = :current_date::date
+	     AND v1.title != 'UNKNOWN'
+	     AND SPLIT_PART(v1.description, ' ', 21) = 'Cam14'
+	     GROUP BY v1.title, type
+	     ORDER BY min_entry ASC
+    ),
+    cte2 AS (
+	     SELECT v2.title,
+	     SPLIT_PART(v2.description, ' ', 25) AS type,
+	     MAX(v2.creation_date::timestamp) AS max_exit
+	     FROM qt_vehicle_ti v2
+	     WHERE v2.creation_date::date = :current_date
+	     AND SPLIT_PART(v2.description, ' ', 21) = 'Cam11'
+	     AND v2.title != 'UNKNOWN'	     
+	     GROUP BY v2.title, type
+	     ORDER BY max_exit ASC
+    )
+    SELECT cte1.type, AVG(cte2.max_exit - cte1.min_entry) AS diff
+    FROM cte1, cte2
+    WHERE cte2.max_exit BETWEEN cte1.min_entry AND cte1.min_entry + INTERVAL '30 minutes'
+    GROUP BY cte1.type
+    ORDER BY cte1.type    
+} ]
+
+
+
+set ds_asd_week [db_list_of_lists select_avg_interval_per_type {
+    WITH
+    cte1 AS (
+	     SELECT v1.title,
+	     SPLIT_PART(v1.description, ' ', 25) AS type,
+	     MIN(v1.creation_date::timestamp) AS min_entry
+	     FROM qt_vehicle_ti v1
+	     WHERE EXTRACT('week' FROM v1.creation_date::date) = EXTRACT('week' FROM :current_date::date)
+	     AND v1.title != 'UNKNOWN'
+	     AND SPLIT_PART(v1.description, ' ', 21) = 'Cam14'
+	     GROUP BY v1.title, type
+	     ORDER BY min_entry ASC
+    ),
+    cte2 AS (
+	     SELECT v2.title,
+	     SPLIT_PART(v2.description, ' ', 25) AS type,
+	     MAX(v2.creation_date::timestamp) AS max_exit
+	     FROM qt_vehicle_ti v2
+	     WHERE EXTRACT('week' FROM v2.creation_date::date) = EXTRACT('week' FROM :current_date::date)
+	     AND SPLIT_PART(v2.description, ' ', 21) = 'Cam11'
+	     AND v2.title != 'UNKNOWN'	     
+	     GROUP BY v2.title, type
+	     ORDER BY max_exit ASC
+    )
+    SELECT cte1.type, AVG(cte2.max_exit - cte1.min_entry) AS diff
+    FROM cte1, cte2
+    WHERE cte2.max_exit BETWEEN cte1.min_entry AND cte1.min_entry + INTERVAL '30 minutes'
+    GROUP BY cte1.type
+    ORDER BY cte1.type    
+} ]
+
+
+
+
+set ds_asd_month [db_list_of_lists select_avg_interval_per_type {
+    WITH
+    cte1 AS (
+	     SELECT v1.title,
+	     SPLIT_PART(v1.description, ' ', 25) AS type,
+	     MIN(v1.creation_date::timestamp) AS min_entry
+	     FROM qt_vehicle_ti v1
+	     WHERE EXTRACT('month' FROM v1.creation_date::date) = EXTRACT('month' FROM :current_date::date)
+	     AND v1.title != 'UNKNOWN'
+	     AND SPLIT_PART(v1.description, ' ', 21) = 'Cam14'
+	     GROUP BY v1.title, type
+	     ORDER BY min_entry ASC
+    ),
+    cte2 AS (
+	     SELECT v2.title,
+	     SPLIT_PART(v2.description, ' ', 25) AS type,
+	     MAX(v2.creation_date::timestamp) AS max_exit
+	     FROM qt_vehicle_ti v2
+	     WHERE EXTRACT('month' FROM v2.creation_date::date) = EXTRACT('month' FROM :current_date::date)
+	     AND SPLIT_PART(v2.description, ' ', 21) = 'Cam11'
+	     AND v2.title != 'UNKNOWN'	     
+	     GROUP BY v2.title, type
+	     ORDER BY max_exit ASC
+    )
+    SELECT cte1.type, AVG(cte2.max_exit - cte1.min_entry) AS diff
+    FROM cte1, cte2
+    WHERE cte2.max_exit BETWEEN cte1.min_entry AND cte1.min_entry + INTERVAL '30 minutes'
+    GROUP BY cte1.type
+    ORDER BY cte1.type    
+} ]
+
+
+
+
+ns_log Notice "MONTH $ds_asd_month"
+
 #lists  total today week month today-ASD week-ASD month-ASD
 set bus [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
 set car [list 0 0 0 0 00:00:00 00:00:00 00:00:00]
@@ -47,7 +155,11 @@ foreach elem $datasource {
 	    }
 	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
 		lset bus 3 [expr [lindex $bus 3] + $count]
-	    }	    	   	    
+	    }
+
+	    lset bus 4 "[lindex [split [lindex [lindex $ds_asd_today [lsearch -index 0 $ds_asd_today $type]] 1] "."] 0] MIN"
+	    lset bus 5 "[lindex [split [lindex [lindex $ds_asd_week [lsearch -index 0 $ds_asd_week $type]] 1] "."] 0] MIN"
+	    lset bus 6 "[lindex [split [lindex [lindex $ds_asd_month [lsearch -index 0 $ds_asd_month $type]] 1] "."] 0] MIN"
 	}
 	"Car" {
 	    lset car 0 [expr [lindex $car 0] + $count]
@@ -63,6 +175,9 @@ foreach elem $datasource {
 		lset car 3 [expr [lindex $car 3] + $count]
 	    }	    
 
+	    lset car 4 "[lindex [split [lindex [lindex $ds_asd_today [lsearch -index 0 $ds_asd_today $type]] 1] "."] 0] MIN"
+	    lset car 5 "[lindex [split [lindex [lindex $ds_asd_week [lsearch -index 0 $ds_asd_week $type]] 1] "."] 0] MIN"
+	    lset car 6 "[lindex [split [lindex [lindex $ds_asd_month [lsearch -index 0 $ds_asd_month $type]] 1] "."] 0] MIN"
 	}
 	"Motorbike" {
 	    lset bike 0 [expr [lindex $bike 0] + $count]
@@ -76,7 +191,12 @@ foreach elem $datasource {
 	    }
 	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
 		lset bike 3 [expr [lindex $bike 3] + $count]
-	    }	    
+	    }    
+
+	    lset bike 4 "[lindex [split [lindex [lindex $ds_asd_today [lsearch -index 0 $ds_asd_today $type]] 1] "."] 0] MIN"
+	    lset bike 5 "[lindex [split [lindex [lindex $ds_asd_week [lsearch -index 0 $ds_asd_week $type]] 1] "."] 0] MIN"
+	    lset bike 6 "[lindex [split [lindex [lindex $ds_asd_month [lsearch -index 0 $ds_asd_month $type]] 1] "."] 0] MIN"
+
 	}
 	"SUV/Pickup" {
 	    lset suv 0 [expr [lindex $suv 0] + $count]
@@ -90,7 +210,14 @@ foreach elem $datasource {
 	    }
 	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
 		lset suv 3 [expr [lindex $suv 3] + $count]
-	    }	    
+	    }
+
+	    lset suv 4 "[lindex [split [lindex [lindex $ds_asd_today [lsearch -index 0 $ds_asd_today $type]] 1] "."] 0] MIN"
+
+	    lset suv 5 "[lindex [split [lindex [lindex $ds_asd_week [lsearch -index 0 $ds_asd_week $type]] 1] "."] 0] MIN"
+
+	    lset suv 6 "[lindex [split [lindex [lindex $ds_asd_month [lsearch -index 0 $ds_asd_month $type]] 1] "."] 0] MIN"
+
 	}
 	"Truck" {
 	    lset truck 0 [expr [lindex $truck 0] + $count]
@@ -104,7 +231,11 @@ foreach elem $datasource {
 	    }
 	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
 		lset truck 3 [expr [lindex $truck 3] + $count]
-	    }	    
+	    }
+
+	    lset truck 4 "[lindex [split [lindex [lindex $ds_asd_today [lsearch -index 0 $ds_asd_today $type]] 1] "."] 0] MIN"
+	    lset truck 5 "[lindex [split [lindex [lindex $ds_asd_week [lsearch -index 0 $ds_asd_week $type]] 1] "."] 0] MIN"
+	    lset truck 6 "[lindex [split [lindex [lindex $ds_asd_month [lsearch -index 0 $ds_asd_month $type]] 1] "."] 0] MIN"
 	}
 	"Unknown" {
 	    lset other 0 [expr [lindex $other 0] + $count]
@@ -118,7 +249,11 @@ foreach elem $datasource {
 	    }
 	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
 		lset other 3 [expr [lindex $other 3] + $count]
-	    }	    
+	    }
+
+	    lset other 4 "[lindex [split [lindex [lindex $ds_asd_today [lsearch -index 0 $ds_asd_today $type]] 1] "."] 0] MIN"
+	    lset other 5 "[lindex [split [lindex [lindex $ds_asd_week [lsearch -index 0 $ds_asd_week $type]] 1] "."] 0] MIN"
+	    lset other 6 "[lindex [split [lindex [lindex $ds_asd_month [lsearch -index 0 $ds_asd_month $type]] 1] "."] 0] MIN"
 	}
 	"Van" {
 	    lset van 0 [expr [lindex $van 0] + $count]
@@ -132,20 +267,24 @@ foreach elem $datasource {
 	    }
 	    if {[lc_time_fmt $date -format %m] eq [lc_time_fmt $date -format %m]} {
 		lset van 3 [expr [lindex $van 3] + $count]
-	    }	    
+	    }
+
+	    lset van 4 "[lindex [split [lindex [lindex $ds_asd_today [lsearch -index 0 $ds_asd_today $type]] 1] "."] 0] MIN"
+	    lset van 5 "[lindex [split [lindex [lindex $ds_asd_week [lsearch -index 0 $ds_asd_week $type]] 1] "."] 0] MIN"
+	    lset van 6 "[lindex [split [lindex [lindex $ds_asd_month [lsearch -index 0 $ds_asd_month $type]] 1] "."] 0] MIN"
 	}      
     }
 }
 
 
 append result "\{\"types\": \[ 
-    \{\"bus\": \{\"total\": [lindex $bus 0], \"today\": [lindex $bus 1], \"week\": [lindex $bus 2], \"month\": [lindex $bus 3]\}\},
-    \{\"car\": \{\"total\": [lindex $car 0], \"today\": [lindex $car 1], \"week\": [lindex $car 2], \"month\": [lindex $car 3]\}\},
-    \{\"bike\": \{\"total\": [lindex $bike 0], \"today\": [lindex $bike 1], \"week\": [lindex $bike 2], \"month\": [lindex $bike 3]\}\},
-    \{\"suv\": \{\"total\": [lindex $suv 0], \"today\": [lindex $suv 1], \"week\": [lindex $suv 2], \"month\": [lindex $suv 3]\}\},
-    \{\"truck\": \{\"total\": [lindex $truck 0], \"today\": [lindex $truck 1], \"week\": [lindex $truck 2], \"month\": [lindex $truck 3]\}\},
-    \{\"other\": \{\"total\": [lindex $other 0], \"today\": [lindex $other 1], \"week\": [lindex $other 2], \"month\": [lindex $other 3]\}\},
-    \{\"van\": \{\"total\": [lindex $van 0], \"today\": [lindex $van 1], \"week\": [lindex $van 2], \"month\": [lindex $van 3]\}\}\],"
+    \{\"bus\": \{\"total\": [lindex $bus 0], \"today\": [lindex $bus 1], \"week\": [lindex $bus 2], \"month\": [lindex $bus 3], \"asd_today\": \"[lindex $bus 4]\", \"asd_week\": \"[lindex $bus 5]\", \"asd_month\": \"[lindex $bus 6]\"\}\},
+    \{\"car\": \{\"total\": [lindex $car 0], \"today\": [lindex $car 1], \"week\": [lindex $car 2], \"month\": [lindex $car 3], \"asd_today\": \"[lindex $car 4]\", \"asd_week\": \"[lindex $car 5]\", \"asd_month\": \"[lindex $car 6]\"\}\},
+    \{\"bike\": \{\"total\": [lindex $bike 0], \"today\": [lindex $bike 1], \"week\": [lindex $bike 2], \"month\": [lindex $bike 3], \"asd_today\": \"[lindex $bike 4]\", \"asd_week\": \"[lindex $bike 5]\", \"asd_month\": \"[lindex $bike 6]\"\}\},
+    \{\"suv\": \{\"total\": [lindex $suv 0], \"today\": [lindex $suv 1], \"week\": [lindex $suv 2], \"month\": [lindex $suv 3], \"asd_today\": \"[lindex $suv 4]\", \"asd_week\": \"[lindex $suv 5]\", \"asd_month\": \"[lindex $suv 6]\"\}\},
+    \{\"truck\": \{\"total\": [lindex $truck 0], \"today\": [lindex $truck 1], \"week\": [lindex $truck 2], \"month\": [lindex $truck 3], \"asd_today\": \"[lindex $truck 4]\", \"asd_week\": \"[lindex $truck 5]\", \"asd_month\": \"[lindex $truck 6]\"\}\},
+    \{\"other\": \{\"total\": [lindex $other 0], \"today\": [lindex $other 1], \"week\": [lindex $other 2], \"month\": [lindex $other 3], \"asd_today\": \"[lindex $other 4]\", \"asd_week\": \"[lindex $other 5]\", \"asd_month\": \"[lindex $other 6]\"\}\},
+    \{\"van\": \{\"total\": [lindex $van 0], \"today\": [lindex $van 1], \"week\": [lindex $van 2], \"month\": [lindex $van 3], \"asd_today\": \"[lindex $van 4]\", \"asd_week\": \"[lindex $van 5]\", \"asd_month\": \"[lindex $van 6]\"\}\}\],"
 
 
 
@@ -243,8 +382,12 @@ append result "\"today_total\": $today_total,
     \"week_percent\": $week_percent,
     \"total\": $total,
     \"creation_date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
-    \"current_date\": \"[lc_time_fmt $current_date %Y-%m-%d]\"
-\}"
+    \"current_date\": \"[lc_time_fmt $current_date %Y-%m-%d]\"\}"
+
+
+
+
+
 
 
 

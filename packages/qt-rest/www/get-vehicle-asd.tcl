@@ -35,68 +35,51 @@ if {[info exists date_to]} {
 
 
 
-set total_asd "00:00"
-set count_asd 0
+set total_entries [db_string select_count_exits {
+     SELECT COUNT(revision_id) FROM qt_vehicle_ti WHERE SPLIT_PART(description, ' ', 21) = 'Cam14'
+} -default 0]
 
-db_multirow entries select_entries {
-    SELECT revision_id, title, creation_date
-    FROM qt_vehicle_ti
-    WHERE creation_date::date > '2020-09-30'
-    AND  SPLIT_PART(description, ' ', 21) = 'Cam14'
-    ORDER BY creation_date ASC
-} {
-    
-
-    set min_entry [db_string select_min_entry {
-	SELECT MIN(creation_date)
-	FROM qt_vehicle_ti
-	WHERE title = :title
-	AND SPLIT_PART(description, ' ', 21) = 'Cam14'
-	AND creation_date::timestamp BETWEEN :creation_date::timestamp AND :creation_date::timestamp + INTERVAL '1 hour' ;
-    } -default ""]
-    
-    set max_exit [db_string select_max_exit {
-	SELECT MAX(creation_date)
-	FROM qt_vehicle_ti
-	WHERE title = :title
-	AND SPLIT_PART(description, ' ', 21) = 'Cam11'
-	AND creation_date::timestamp BETWEEN :creation_date::timestamp AND :creation_date::timestamp + INTERVAL '1 hour' ;
-    } -default ""]
-    
-    set asd [db_string diff_timestamp { SELECT :max_exit::timestamp - :min_entry::timestamp FROM dual } -default ""]
-    # ns_log Notice "REVISIONID $revision_id \n PAIRED EXIT: $max_exit" 
-    
-    
-    if {$asd ne ""} {
-	incr count_asd
-	append detailed_entries "\{\"plate\": \"$title\", \"entry_datetime\": \"$creation_date\", \"exit_datetime\": \"$max_exit\", \"duration\": \"$asd\"\},"
-    } else {
-	# append detailed_entries "\{\"plate\": \"$title\", \"entry_datetime\": \"$creation_date\"\},"
-    }
-    
-}
-
-set detailed_entries [string trimright $detailed_entries ","]
-set total_entries [set entries:rowcount]
-
-ns_log Notice "TOTAL $total_asd | $count_asd"
-
-#db_multirow exits select_exits {
-#--     SELECT title, creation_date FROM qt_vehicle_ti WHERE SPLIT_PART(description, ' ', 21) = 'Cam11'
-#} {
-#    append detailed_exits "\{\"plate\": \"$title\", \"datetime\": \"$creation_date\"\},"
-#}
-#set detailed_exits [string trimright $detailed_exits ","]
-#set total_exits [set exits:rowcount]
 set total_exits [db_string select_count_exits {
      SELECT COUNT(revision_id) FROM qt_vehicle_ti WHERE SPLIT_PART(description, ' ', 21) = 'Cam11'
 } -default 0]
 
 
+db_multirow avg_types select_avg_interval_per_type {
+    WITH
+    cte1 AS (
+	     SELECT v1.title,
+	     SPLIT_PART(v1.description, ' ', 25) AS type,
+	     MIN(v1.creation_date::timestamp) AS min_entry
+	     FROM qt_vehicle_ti v1
+	     WHERE v1.creation_date::date > '2020-09-30'
+	     AND v1.title != 'UNKNOWN'
+	     AND SPLIT_PART(v1.description, ' ', 21) = 'Cam14'
+	     GROUP BY v1.title, type
+	     ORDER BY min_entry ASC
+    ),
+    cte2 AS (
+	     SELECT v2.title,
+	     SPLIT_PART(v2.description, ' ', 25) AS type,
+	     MAX(v2.creation_date::timestamp) AS max_exit
+	     FROM qt_vehicle_ti v2
+	     WHERE v2.creation_date::date > '2020-09-30'
+	     AND SPLIT_PART(v2.description, ' ', 21) = 'Cam11'
+	     AND v2.title != 'UNKNOWN'	     
+	     GROUP BY v2.title, type
+	     ORDER BY max_exit ASC
+    )
+    SELECT cte1.type, AVG(cte2.max_exit - cte1.min_entry) AS diff
+    FROM cte1, cte2
+    WHERE cte2.max_exit BETWEEN cte1.min_entry AND cte1.min_entry + INTERVAL '30 minutes'
+    GROUP BY cte1.type
+    ORDER BY cte1.type    
+} {    
+    lappend avg_types "\"$type\": \{\"today\": \"$diff\", \"week\": \"$diff\", \"month\": \"$diff\"\},"    
+}
 
-#append result "\{\"total_entries\": $total_entries, \"total_exits\": $total_exits, \"entries\": \[$detailed_entries\], \"exits\": \[$detailed_exits\]\}"
-append result "\{\"total_entries\": $total_entries, \"total_exits\": $total_exits, \"entries\": \[$detailed_entries\]\}"
+set avg_types [string trimright $avg_types ","]
 
+append result "\{\"total_entries\": $total_entries, \"total_exits\": $total_exits, \"avg_types\": \[$avg_types\]\}"
 
 
 

@@ -36,7 +36,7 @@ ad_form -name new -html {enctype multipart/form-data} -form {
     # to read file streams and assign their content to new variables: lines1 and lines2
     set json [read $f1]
 
-    ns_log Notice "JSON \n $json"
+ #   ns_log Notice "JSON \n $json"
     ctree::import_json -jsonText $json
     
     

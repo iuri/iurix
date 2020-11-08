@@ -61,11 +61,6 @@ SECRET $hmac_secret \n"
 
 
 
-    return 0
-}
-
-
-
 ad_proc -public ctree::import_json {
     -jsonText
 } {

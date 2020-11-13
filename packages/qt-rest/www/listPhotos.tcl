@@ -10,7 +10,7 @@ if {[ns_conn method] eq "GET"} {
 
     set url [ad_url]
     # Gets user's Album
-    ns_log Notice "ALBUM $album_id"
+ #   ns_log Notice "ALBUM $album_id"
     
     
     # Gets Albums's photos
@@ -20,15 +20,15 @@ if {[ns_conn method] eq "GET"} {
     foreach photo_id $photos {
 	photo_album::photo::get -photo_id $photo_id -array photo
 	set package_url [photo_album::photo::package_url -photo_id $photo_id]
-	ns_log Notice "PHOTO URL $package_url"
-	ns_log Notice "PHOTO \n [parray photo]"
+#	ns_log Notice "PHOTO URL $package_url"
+#	ns_log Notice "PHOTO \n [parray photo]"
 	append json "\{\"id\": \"$photo_id\", \"name\": \"$photo(caption)\", \"url\": \"${url}${package_url}images/$photo(thumb_live_revision)\"\},"
     }
 
     set json [string trimright $json ","]
     append json "\]"
     
-    ns_log Notice "JSON $json"
+  #  ns_log Notice "JSON $json"
     # format JSON output
     set result "\{\"count\":[llength $photos],\"next\":\"https://dashboard.qonteo.com/REST/listPhotos?offset=20&limit=20\",\"previous\": null,\"results\":$json\}"
 	  

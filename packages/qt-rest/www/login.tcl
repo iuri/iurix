@@ -2,12 +2,12 @@ ns_log Notice "Running TCL script user/login"
 
 if {[ns_conn method] eq "POST"} {
     package req json
-
+    ns_log Notice "[ns_getcontent -as_file false]"
     set dict [json::json2dict [ns_getcontent -as_file false]]
     #
     # Do something with the dict
     #
-
+    ns_log Notice "DICT $dict"
     array set arr $dict
     if {[array exists arr] && [array size arr] > 0} {
 

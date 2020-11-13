@@ -131,10 +131,11 @@ if {[ns_conn method] eq "GET"} {
 		    set desc1 [string trimright $desc1 ","]
 		    
 		    append json_data "\{
-			\"type\": \"$arr(type)\",
-			\"title\": \"$arr(title)\",
+                        \"id\": \"$name\",
 			\"rating\": $arr(rating),
-			\"description\":\[\{$desc1\}\]
+                        \"title\": \"$arr(title)\",
+			\"type\": \"$arr(type)\",
+			\"description\":\[\]
 		    \},"		    
 		}
 		

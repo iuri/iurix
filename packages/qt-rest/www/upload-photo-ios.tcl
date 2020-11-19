@@ -21,7 +21,7 @@ if {[ns_conn method] eq "POST"} {
 	ns_log Notice "No Form was submited"
     } else {
 #	ns_log Notice "FORM"
-	ns_set print $myform
+#	ns_set print $myform
 	for {set i 0} {$i < [ns_set size $myform]} {incr i} {
      	    set varname [ns_set key $myform $i]
 	    set varvalue [ns_set value $myform $i]
@@ -74,9 +74,9 @@ if {[ns_conn method] eq "POST"} {
     # POST request
     #callback qt::rest::get_photo_features
     #set h [util::http::post -url $url -headers $req_headers -timeout 600 -body $content]
-    set h [ns_httpopen POST $url $req_headers 600 $content]
+    #set h [ns_httpopen POST $url $req_headers 600 $content]
     #set h [ns_http run -method POST -headers $req_headers -timeout 600 -body $content $url]
-    ns_log Notice "HTTP $h"
+    #ns_log Notice "HTTP $h"
     ns_respond -status 200 -type "application/json" -string "ok"
     
 } else {

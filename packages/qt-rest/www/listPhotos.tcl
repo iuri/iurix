@@ -20,9 +20,12 @@ if {[ns_conn method] eq "GET"} {
     foreach photo_id $photos {
 	photo_album::photo::get -photo_id $photo_id -array photo
 	set package_url [photo_album::photo::package_url -photo_id $photo_id]
-#	ns_log Notice "PHOTO URL $package_url"
-#	ns_log Notice "PHOTO \n [parray photo]"
-	append json "\{\"id\": \"$photo_id\", \"name\": \"$photo(caption)\", \"url\": \"${url}${package_url}images/$photo(thumb_live_revision)\"\},"
+	#	ns_log Notice "PHOTO URL $package_url"
+	# ns_log Notice "PHOTO \n [parray photo]"
+	set desc "[qt::util::quotejson $photo(description)]"
+	# ns_log Notice "DESC $desc"
+	
+	append json "\{\"id\": \"$photo_id\", \"name\": \"$photo(caption)\", \"description\": \"$desc\", \"url\": \"${url}${package_url}images/$photo(thumb_live_revision)\"\},"
     }
 
     set json [string trimright $json ","]

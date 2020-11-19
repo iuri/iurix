@@ -16,6 +16,21 @@ ad_library {
 namespace eval qt::rest {}
 namespace eval qt::rest::jwt {}
 namespace eval qt::rest::user {}
+namespace eval qt::util {}
+
+ad_proc -public qt::util::quotejson { str } {
+    Quote a JSON string. In particular this means escaping
+    single and double quotes, as well as new lines, tabs etc.
+    @author Iuri de Araujo
+} {
+    regsub -all {\\} $str {\\\\} str
+    regsub -all {"} $str {\"} str
+    regsub -all {\n} $str {\\n} str
+    regsub -all {\t} $str {\\t} str
+    return $str
+}
+
+
 
 ad_proc -public qt::rest::jwt::validation_p {} {
     Validates jwt sent from client side. HMAC validation

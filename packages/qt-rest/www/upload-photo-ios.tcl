@@ -2,14 +2,6 @@ ad_page_contract {} {}
 
 ns_log Notice "Running REST upload-photo-ios"
 
-
-set header [ns_conn header]
-#ns_log Notice "HEADER \n $header"
-set h [ns_set size $header]
-#ns_log Notice "HEADERS $h"
-set req [ns_set array $header]
-#ns_log Notice "$req"
-
 #ns_log Notice "[ns_getcontent -as_file false]"
  
 if {[ns_conn method] eq "POST"} {

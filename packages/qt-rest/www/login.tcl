@@ -61,7 +61,18 @@ if {[ns_conn method] eq "POST"} {
 		    set json_groups [string trimright $json_groups ","]
 		    append json_groups "\]"
 
-		}	
+		}
+
+
+		
+		set portrait_id [acs_user::get_portrait_id -user_id $user_id]
+		if {$portrait_id != 0} {
+		    set portrait_url "https://dashboard.qonteo.com/shared/portrait-bits.tcl?user_id=$user_id"		    
+		} else {
+		    set portrait_url ""
+		}
+
+		
 		set err_msg ""
 		set status 200
 		set header [ns_set new]
@@ -75,7 +86,8 @@ if {[ns_conn method] eq "POST"} {
 			\"firstName\": \"$user(first_names)\",
 			\"lastName\": \"$user(last_name)\",
 			\"email\": \"$user(email)\",
-                        \"phonenumber\": \"\", 
+                        \"phonenumber\": \"\",
+                        \"portrait_url\": \"$portrait_url\",
                         \"country\": \"\", 
                         \"city\": \"\",
                         $json_groups,

@@ -1,5 +1,5 @@
 
-#ns_log Notice "Running TCL script import-vehicle.tcl"
+ns_log Notice "Running TCL script import-vehicle.tcl"
 
 if { [ns_conn method] eq "POST"} {
     

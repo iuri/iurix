@@ -328,7 +328,7 @@ ad_proc qt::dashboard::vehicle::import_new {
 
     
     foreach {i elem} $dict {
-#	ns_log Notice "ELEM $elem"
+	ns_log Notice "ELEM $elem"
 	set insert_p true
 	array set arr2 $elem
 	

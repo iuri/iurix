@@ -40,7 +40,7 @@ set total_entries [db_string select_count_exits {
 } -default 0]
 
 set total_exits [db_string select_count_exits {
-     SELECT COUNT(revision_id) FROM qt_vehicle_ti WHERE SPLIT_PART(description, ' ', 21) = 'Cam11'
+    SELECT COUNT(revision_id) FROM qt_vehicle_ti  WHERE SPLIT_PART(description, ' ', 21) = 'Cam11'
 } -default 0]
 
 

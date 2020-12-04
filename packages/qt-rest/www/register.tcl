@@ -97,7 +97,7 @@ if {[ns_conn method] eq "POST"} {
 		        \"isVerified\": \"$user(email_verified_p)\",
 		        \"isAdmin\": $admin_p,
 		        \"_id\": $user(user_id),
-			\"firstName\": \"$user(first_names)\",
+			\"firstNames\": \"$user(first_names)\",
 			\"lastName\": \"$user(last_name)\",
 			\"email\": \"$user(email)\",
                         \"phonenumber\": \"\",

@@ -2,14 +2,20 @@
 ad_page_contract {
     API REST method to return cr_items qt_vehicle
 } {
+    {group_id:integer 0}
     {date_from:optional}
     {date_to:optional}
     {age_range_p:boolean,optional}
     {heatmap_p:boolean,optional}
 }
+ns_log Notice "Running TCL script get-person-graphics.tcl"
 
 # Validate and Authenticate JWT
 qt::rest::jwt::validation_p
+ns_log Notice "GROUPID $group_id "
+ns_log Notice "[group::get -group_id $group_id -array group]"
+
+
 
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
 set content_type qt_face

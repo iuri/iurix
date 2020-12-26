@@ -2,12 +2,12 @@ ns_log Notice "Running TCL script user/login"
 
 if {[ns_conn method] eq "POST"} {
     package req json
-    ns_log Notice "[ns_getcontent -as_file false]"
+    # ns_log Notice "[ns_getcontent -as_file false]"
     set dict [json::json2dict [ns_getcontent -as_file false]]
     #
     # Do something with the dict
     #
-    ns_log Notice "DICT $dict"
+    #ns_log Notice "DICT $dict"
     array set arr $dict
     if {[array exists arr] && [array size arr] > 0} {
 
@@ -48,7 +48,7 @@ if {[ns_conn method] eq "POST"} {
 
 		set json_groups ""
 		set groups [db_list_of_lists select_groups {
-		    SELECT DISTINCT(g.group_id), g.group_name FROM groups g, group_member_map gm WHERE g.group_id = gm.group_id AND g.group_id NOT IN (-1, -2) AND gm.member_id = :user_id ORDER BY g.group_name
+		    SELECT DISTINCT(g.group_id), g.group_name FROM groups g, group_member_map gm WHERE g.group_id = gm.group_id AND g.group_id NOT IN (-1, -2, 12169343) AND gm.member_id = :user_id ORDER BY g.group_name
 		}]
 
 		if {[llength $groups] eq 1} {		    

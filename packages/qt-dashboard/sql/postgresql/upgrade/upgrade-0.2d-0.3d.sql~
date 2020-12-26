@@ -1,0 +1,18 @@
+-- Create custom sort function 
+CREATE OR REPLACE FUNCTION custom_sort(text[], timestamptz)
+RETURNS INT AS $$
+  BEGIN
+    -- RAISE NOTICE 'VALUE: %', $2;
+    --FOR i in array_lower($1, 1)..array_upper($1, 1) LOOP
+    --  RAISE NOTICE 'DOW: %', $1[i];
+    --END LOOP; 
+    RETURN SELECT j FROM (
+      SELECT generate_series(array_lower($1,1),array_upper($1,1))
+    ) g(j)
+    WHERE $1[j] = EXTRACT('dow' FROM $2::date)::text
+    LIMIT 1;
+    
+   --RAISE NOTICE 'RESULT: %', j;
+  END;
+$$ LANGUAGE plpgsql;
+	    

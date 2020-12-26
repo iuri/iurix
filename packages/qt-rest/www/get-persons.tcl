@@ -11,6 +11,7 @@ ad_page_contract {
 
 
 ns_log Notice "Running TCL script get-persons.tcl"
+ns_log Notice "GROUPID $group_id "
 
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
 set content_type qt_face

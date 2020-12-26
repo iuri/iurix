@@ -13,7 +13,9 @@ ns_log Notice "Running TCL script get-person-graphics.tcl"
 # Validate and Authenticate JWT
 qt::rest::jwt::validation_p
 ns_log Notice "GROUPID $group_id "
-ns_log Notice "[group::get -group_id $group_id -array group]"
+# group::get -group_id $group_id -array group
+# ns_log Notice "[parray group]"
+
 
 
 
@@ -39,6 +41,12 @@ if {[info exists date_to]} {
 	ad_script_abort    
     }
 }
+
+
+
+if {$group_id eq 12169276} {
+    append where_clauses " AND (SPLIT_PART(cr.description, ' ', 37) = 'CCPN002\}' OR SPLIT_PART(cr.description, ' ', 37) = 'CCPN001\}')"
+} 
 
 
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql

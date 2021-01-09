@@ -1,6 +1,6 @@
-# /packages/qt-rest/www/get-vehicle-graphics.tcl
+# /packages/qt-rest/www/get-person-totals.tcl
 ad_page_contract {
-    API REST method to return cr_items qt_vehicle
+    API REST method to return cr_items qt_face
 } {
     {group_id:integer 0}
     {date_from:optional}
@@ -8,7 +8,7 @@ ad_page_contract {
     {age_range_p:boolean,optional}
     {heatmap_p:boolean,optional}
 }
-ns_log Notice "Running TCL script get-person-graphics.tcl"
+ns_log Notice "Running TCL script get-person-totals.tcl"
 
 # Validate and Authenticate JWT
 qt::rest::jwt::validation_p
@@ -47,149 +47,203 @@ if {[info exists date_to]} {
 
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
+set weekly_data [db_list_of_lists select_week_totals_totem "
     SELECT date_trunc('day', o.creation_date) AS day,
-    COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN 1 END),
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN 1 END),
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END),
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END),
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END),
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END)
     FROM qt_face_tx f, acs_objects o WHERE f.item_id = o.object_id
-    AND o.creation_date::date > :creation_date::date - INTERVAL '7 days'
-    AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}'
+    AND o.creation_date::date > :creation_date::date - INTERVAL '14 days'
     GROUP BY 1 ORDER BY day"]
 
 
-ns_log Notice "Weekly data $weekly_data"
+# weekly_data Format
+# list date total1 total2 female1 female2 male1 male2
 
-set today_totals1 [lindex $weekly_data end]
-ns_log Notice "TODAY $today_totals1"
+# ns_log Notice "Weekly data $weekly_data"
 
-set yesterday_totals1 [lindex $weekly_data [expr [llength $weekly_data] -2]]
-ns_log Notice "YESTERDAY $yesterday_totals1"
 
-set week_totals1 [list 0 0 0]
+# list date total1 total2 female1 female2 male1 male2
+set today_totals [lindex $weekly_data end]
+
+# list date total1 total2 female1 female2 male1 male2
+set yesterday_totals [lindex $weekly_data end-1]
+
+
+set i 0
+set previous_week_totals [list 0 0 0]
+set week_totals [list 0 0 0]
 foreach elem $weekly_data {
-    ns_log Notice "ELEM $elem"
-    set week_totals1 [list \
-			 [expr [lindex $week_totals1 0] + [lindex $elem 1]] \
-			 [expr [lindex $week_totals1 1] + [lindex $elem 2]] \
-			 [expr [lindex $week_totals1 2] + [lindex $elem 3]] ]
+    #    ns_log Notice "ELEM $elem"
+    if {$i < 8} {
+        set previous_week_totals [list \
+				      [expr [lindex $previous_week_totals 0] + [lindex $elem 1]] \
+				      [expr [lindex $previous_week_totals 1] + [lindex $elem 2]] \
+				      [expr [lindex $previous_week_totals 2] + [lindex $elem 3]] \
+				      [expr [lindex $previous_week_totals 3] + [lindex $elem 4]] \
+				      [expr [lindex $previous_week_totals 4] + [lindex $elem 5]] \
+				      [expr [lindex $previous_week_totals 5] + [lindex $elem 6]] ]
+    } else {
+	set week_totals [list \
+			     [expr [lindex $week_totals 0] + [lindex $elem 1]] \
+			     [expr [lindex $week_totals 1] + [lindex $elem 2]] \
+			     [expr [lindex $week_totals 2] + [lindex $elem 3]] \
+			     [expr [lindex $week_totals 3] + [lindex $elem 4]] \
+			     [expr [lindex $week_totals 4] + [lindex $elem 5]] \
+			     [expr [lindex $week_totals 5] + [lindex $elem 6]] ]	
+    }
+    incr i
 }
 
-db_0or1row select_totals_totem1 "
-    SELECT
-    COUNT(1) AS total1,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS total_female1,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS total_male1
-    FROM qt_face_tx f, acs_objects o WHERE f.item_id = o.object_id
-    AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}'"
 
+# Percentage & maths
+## Today # list date total1 total2 female1 female2 male1 male2
+### Totem1
 
-
-# Retrieves vehicles grouped by hour
-# Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
-    SELECT date_trunc('day', o.creation_date) AS day,
-    COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
-    FROM qt_face_tx f, acs_objects o WHERE f.item_id = o.object_id
-    AND o.creation_date::date > :creation_date::date - INTERVAL '7 days'
-    AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}'
-    GROUP BY 1 ORDER BY day"]
-
-
-ns_log Notice "Weekly data $weekly_data"
-
-set today_totals2 [lindex $weekly_data end]
-ns_log Notice "TODAY $today_totals2"
-
-set yesterday_totals2 [lindex $weekly_data [expr [llength $weekly_data] -2]]
-ns_log Notice "YESTERDAY $yesterday_totals2"
-
-set week_totals2 [list 0 0 0]
-foreach elem $weekly_data {
-    ns_log Notice "ELEM $elem"
-    set week_totals2 [list \
-			 [expr [lindex $week_totals2 0] + [lindex $elem 1]] \
-			 [expr [lindex $week_totals2 1] + [lindex $elem 2]] \
-			 [expr [lindex $week_totals2 2] + [lindex $elem 3]] ]
+if { [lindex $today_totals 1] ne 0 && [lindex $yesterday_totals 1] ne 0 } {
+    lappend percentages [format "%.2f" [expr [format "%.2f" [expr [expr [lindex $today_totals 1] * 100] / [lindex $yesterday_totals 1]] ] / 100]]
+    # ns_log Notice "TODAY TOTEM1 % [lindex $today_totals 1]  [lindex $yesterday_totals 1] [lindex $percentages 0]" 
+} else {
+    lappend percentages 0
 }
 
-db_0or1row select_totals_totem1 "
+
+### Totem2
+if { [lindex $today_totals 2] ne 0 && [lindex $yesterday_totals 2] ne 0 } {
+    lappend percentages [format "%.2f" [expr [format "%.2f" [expr [expr [lindex $today_totals 2] * 100] / [lindex $yesterday_totals 2]] ] / 100]]
+    # ns_log Notice "TODAY TOTEM2 % [lindex $today_totals 1]  [lindex $yesterday_totals 1] [lindex $percentages 1]" 
+} else {
+    lappend percentages 0
+}
+
+### Total
+if { [expr [lindex $today_totals 1] + [lindex $today_totals 2]] ne 0 && [expr [lindex $yesterday_totals 1] + [lindex $yesterday_totals 2]] ne 0 } {
+    lappend percentages [format "%.2f" [expr [format "%.2f" [expr [expr [expr [lindex $today_totals 1] + [lindex $today_totals 2]] * 100] / [expr [lindex $yesterday_totals 1] + [lindex $yesterday_totals 2]] ]] / 100]]
+    # ns_log Notice "TODAY TOTEM1 % [lindex $today_totals 1]  [lindex $yesterday_totals 1] [lindex $percentages 0]" 
+} else {
+    lappend percentages 0
+}
+
+
+
+
+
+
+
+## Week
+### Totem1
+if {[lindex $week_totals 0] ne 0 && [lindex $previous_week_totals 0] ne 0} {
+    lappend percentages [format "%.2f" [expr [format "%.2f" [expr [expr [lindex $week_totals 0] * 100] / [lindex $previous_week_totals 0]]] / 100]]
+   # ns_log Notice "WEEK TOTEM1 % [lindex $week_totals 0] [lindex $previous_week_totals 0] [lindex $percentages 2]"
+    
+} else {
+    lappend percentages 0
+}
+
+### Totem2
+if {[lindex $week_totals 1] ne 0 && [lindex $previous_week_totals 1] ne 0} {
+    lappend percentages [format "%.2f" [expr [format "%.2f" [expr [expr [lindex $week_totals 1] * 100] / [lindex $previous_week_totals 1]]] / 100]]
+    # ns_log Notice "WEEK TOTEM2 % [lindex $week_totals 1] [lindex $previous_week_totals 1] [lindex $percentages 3]"
+    
+} else {
+    lappend percentages 0
+}
+
+### Total
+if {[expr [lindex $week_totals 0] + [lindex $week_totals 1]] ne 0 && [expr [lindex $previous_week_totals 0] + [lindex $previous_week_totals 1]] ne 0} {
+    lappend percentages [format "%.2f" [expr [format "%.2f" [expr [expr [expr [lindex $week_totals 0] + [lindex $week_totals 1]] * 100] / [expr [lindex $previous_week_totals 0] + [lindex $previous_week_totals 1]]]] / 100]]
+    # ns_log Notice "WEEK TOTEM2 % [lindex $week_totals 1] [lindex $previous_week_totals 1] [lindex $percentages 3]"
+    
+} else {
+    lappend percentages 0
+}
+
+
+
+# Total
+db_0or1row select_totems_totals "
     SELECT
-    COUNT(1) AS total2,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS total_female2,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS total_male2
-    FROM qt_face_tx f, acs_objects o WHERE f.item_id = o.object_id
-    AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}'"
-
-
-
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN 1 END) AS total_totem1,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN 1 END) AS total_totem2,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END) AS total_female1,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END) AS total_female2,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END) AS total_male1,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END) AS total_male2
+    FROM qt_face_tx f"
 
 
 append result "\{
     \"totemone\": \{	
 	\"today\": \{
-	    \"count\": [lindex $today_totals1 1],
-	    \"female\": [lindex $today_totals1 2],
-	    \"male\": [lindex $today_totals1 3]
+	    \"count\": [lindex $today_totals 1],
+            \"percent\": [lindex $percentages 0],
+	    \"female\": [lindex $today_totals 3],
+	    \"male\": [lindex $today_totals 5]
 	\},
 	\"yesterday\": \{
-	    \"total\": [lindex $yesterday_totals1 1],
-	    \"female\": [lindex $yesterday_totals1 2],
-	    \"male\": [lindex $yesterday_totals1 3]
+	    \"total\": [lindex $yesterday_totals 1],
+	    \"female\": [lindex $yesterday_totals 3],
+	    \"male\": [lindex $yesterday_totals 5]
 	\},
 	\"week\": \{
-	    \"total\": [lindex $week_totals1 0],
-	    \"female\": [lindex $week_totals1 1],
-	    \"male\": [lindex $week_totals1 2]
+	    \"total\": [lindex $week_totals 0],
+            \"percent\": [lindex $percentages 3],
+	    \"female\": [lindex $week_totals 2],
+	    \"male\": [lindex $week_totals 4]
 	\},
 	\"total\": \{
-	    \"count\": $total1,
+	    \"count\": $total_totem1,
 	    \"female\": $total_female1,
 	    \"male\": $total_male1
 	\}
     \},
     \"totemtwo\": \{	
 	\"today\": \{
-	    \"count\": [lindex $today_totals2 1],
-	    \"female\": [lindex $today_totals2 2],
-	    \"male\": [lindex $today_totals2 3]
+	    \"count\": [lindex $today_totals 2],
+            \"percent\": [lindex $percentages 1],
+	    \"female\": [lindex $today_totals 4],
+	    \"male\": [lindex $today_totals 6]
 	\},
 	\"yesterday\": \{
-	    \"total\": [lindex $yesterday_totals2 1],
-	    \"female\": [lindex $yesterday_totals2 2],
-	    \"male\": [lindex $yesterday_totals2 3]
+	    \"total\": [lindex $yesterday_totals 2],
+	    \"female\": [lindex $yesterday_totals 4],
+	    \"male\": [lindex $yesterday_totals 6]
 	\},
 	\"week\": \{
-	    \"total\": [lindex $week_totals2 0],
-	    \"female\": [lindex $week_totals2 1],
-	    \"male\": [lindex $week_totals2 2]
+	    \"total\": [lindex $week_totals 1],
+            \"percent\": [lindex $percentages 4],
+	    \"female\": [lindex $week_totals 3],
+	    \"male\": [lindex $week_totals 5]
 	\},
 	\"total\": \{
-	    \"count\": $total2,
+	    \"count\": $total_totem2,
 	    \"female\": $total_female2,
 	    \"male\": $total_male2
 	\}
     \},
     \"totemtotal\": \{
 	\"today\": \{
-	    \"count\": [expr  [lindex $today_totals1 1] +  [lindex $today_totals2 1]],
-	    \"female\": [expr  [lindex $today_totals1 2] +  [lindex $today_totals2 2]],
-	    \"male\": [expr  [lindex $today_totals1 3] +  [lindex $today_totals2 3]]
-	\},
+	    \"count\": [expr [lindex $today_totals 1] + [lindex $today_totals 2]],
+            \"percent\": [lindex $percentages 2],
+	    \"female\": [expr [lindex $today_totals 3] + [lindex $today_totals 4]],
+	    \"male\": [expr [lindex $today_totals 5] + [lindex $today_totals 6]]
+        \},
 	\"yesterday\": \{
-	    \"total\": [expr [lindex $yesterday_totals1 1] +  [lindex $yesterday_totals2 1]],
-	    \"female\": [expr [lindex $yesterday_totals1 2] +  [lindex $yesterday_totals2 2]],
-	    \"male\": [expr [lindex $yesterday_totals1 3] +  [lindex $yesterday_totals2 3]]
+	    \"total\": [expr [lindex $yesterday_totals 1] +  [lindex $yesterday_totals 2]],
+	    \"female\": [expr [lindex $yesterday_totals 3] +  [lindex $yesterday_totals 4]],
+	    \"male\": [expr [lindex $yesterday_totals 5] +  [lindex $yesterday_totals 6]]
 	\},
 	\"week\": \{
-	    \"total\": [expr [lindex $week_totals1 0] +  [lindex $week_totals2 0]],
-	    \"female\": [expr [lindex $week_totals1 1] +  [lindex $week_totals2 1]],
-	    \"male\": [expr [lindex $week_totals1 2] +  [lindex $week_totals2 2]]
+	    \"total\": [expr [lindex $week_totals 0] +  [lindex $week_totals 1]],
+            \"percent\": [lindex $percentages 5],
+	    \"female\": [expr [lindex $week_totals 2] +  [lindex $week_totals 3]],
+	    \"male\": [expr [lindex $week_totals 4] +  [lindex $week_totals 5]]
 	\},
 	\"total\": \{
-	    \"count\": [expr $total1 + $total2],
+	    \"count\": [expr $total_totem1 + $total_totem2],
 	    \"female\": [expr $total_female1 + $total_female2],
 	    \"male\": [expr $total_male1 + $total_male2]
 	\}

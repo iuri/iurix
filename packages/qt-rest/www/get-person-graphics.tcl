@@ -1,8 +1,9 @@
-# /packages/qt-rest/www/get-vehicle-graphics.tcl
+# /packages/qt-rest/www/get-person-graphics.tcl
 ad_page_contract {
-    API REST method to return cr_items qt_vehicle
+    API REST method to return cr_items qt_face
 } {
     {group_id:integer 0}
+    {totem ""}
     {date_from:optional}
     {date_to:optional}
     {age_range_p:boolean,optional}
@@ -44,9 +45,20 @@ if {[info exists date_to]} {
 
 
 
-if {$group_id eq 12169276} {
-    append where_clauses " AND (SPLIT_PART(cr.description, ' ', 37) = 'CCPN002\}' OR SPLIT_PART(cr.description, ' ', 37) = 'CCPN001\}')"
-} 
+ns_log Notice "TOTEM $totem   ***"
+switch totem {
+    1  {
+	append where_clauses " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}'"
+    }
+    2  {
+	append where_clauses " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}'"
+    }
+    default {
+	if {$group_id eq 12169276} {
+	    append where_clauses " AND (SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' OR SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}')"
+	}
+    }
+}
 
 
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
@@ -54,15 +66,13 @@ append result "\{\"hours\":\["
 set hourly_data [db_list_of_lists select_grouped_per_hour "
     SELECT EXTRACT('hour' FROM o.creation_date) AS hour,
     COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
-    FROM cr_items ci, acs_objects o, cr_revisions cr
-    WHERE ci.item_id = o.object_id
-    AND ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND ci.content_type = :content_type
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
+    FROM qt_face_tx f, acs_objects o
+    WHERE f.item_id = o.object_id
     $where_clauses
-    GROUP BY 1 ORDER BY hour ASC    
+    GROUP BY 1
+    ORDER BY hour ASC    
 "]
 
 for {set i 0} {$i<24} {incr i} {
@@ -99,13 +109,10 @@ append result "\],"
 set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
     SELECT EXTRACT('dow' FROM o.creation_date) AS dow,
     COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
-    FROM cr_items ci, acs_objects o, cr_revisions cr
-    WHERE ci.item_id = o.object_id
-    AND ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id    
-    AND ci.content_type = :content_type
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
+    FROM qt_face_tx f, acs_objects o
+    WHERE f.item_id = o.object_id
     $where_clauses
     GROUP BY 1 ORDER BY dow;
 "]
@@ -176,13 +183,10 @@ append result "\],"
 set monthly_data [db_list_of_lists select_month_per_day "
     SELECT EXTRACT('day' FROM o.creation_date) AS day,
     COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
-    FROM cr_items ci, acs_objects o, cr_revisions cr
-    WHERE ci.item_id = o.object_id
-    AND ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND ci.content_type = :content_type
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
+    FROM qt_face_tx f, acs_objects o
+    WHERE f.item_id = o.object_id
     $where_clauses
     GROUP BY 1 ORDER BY day;
 "]
@@ -232,13 +236,10 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
     db_foreach select_week_grouped_hourly {
 	select date_trunc('hour', o.creation_date) AS hour,
 	COUNT(1) AS total,
-	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
-	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
-	FROM cr_items ci, acs_objects o, cr_revisions cr
-	WHERE ci.item_id = o.object_id
-	AND ci.item_id = cr.item_id
-	AND ci.latest_revision = cr.revision_id
-	AND ci.content_type = :content_type
+	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
+	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
+	FROM qt_face_tx f, acs_objects o
+	WHERE f.item_id = o.object_id
 	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
 	GROUP BY 1 ORDER BY hour ASC    
     } {	
@@ -269,15 +270,12 @@ if {[info exists age_range_p] && $age_range_p eq true} {
     append result "\"ageRanges\":\["
     set l_age_ranges [db_list_of_lists select_ranges "
 	SELECT
-	CASE WHEN SPLIT_PART(cr.description, ' ', 4) <> 'undefined' THEN ROUND(SPLIT_PART(cr.description, ' ', 4)::numeric) END AS range,
+	CASE WHEN SPLIT_PART(f.description, ' ', 4) <> 'undefined' THEN ROUND(SPLIT_PART(f.description, ' ', 4)::numeric) END AS range,
 	COUNT(1) AS total,
-	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS total_female,
-	COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS total_male
-	FROM cr_items ci, acs_objects o, cr_revisions cr
-	WHERE ci.item_id = o.object_id
-	AND ci.item_id = cr.item_id
-	AND ci.latest_revision = cr.revision_id
-	AND ci.content_type = 'qt_face'
+	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS total_female,
+	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS total_male
+	FROM qt_face_tx f, acs_objects o
+	WHERE f.item_id = o.object_id
         $where_clauses
 	GROUP BY range;
 	
@@ -356,16 +354,14 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 set instant_data [db_list_of_lists select_instant_data {
     SELECT date_trunc('hour', o.creation_date) AS hour,
     COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '0' THEN ci.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(cr.description, ' ', 8) = '1' THEN ci.item_id END) AS male
-    FROM cr_items ci, acs_objects o, cr_revisions cr
-    WHERE ci.item_id = o.object_id
-    AND ci.item_id = cr.item_id
-    AND ci.latest_revision = cr.revision_id
-    AND ci.content_type = :content_type
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
+    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
+    FROM qt_face_tx f, acs_objects o
+    WHERE f.item_id = o.object_id
     AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
     GROUP BY 1 ORDER BY hour;
 }]
+
 
 set today_total 0
 set today_female 0

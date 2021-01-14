@@ -14,6 +14,8 @@ ad_page_contract {
     {search_package_id:naturalnum ""}
     {scope ""}
     {object_type:token ""}
+    {type "qt_vehicle"}
+    
 } -validate {
     valid_dfs -requires dfs {
         if {![array exists symbol2interval]} {
@@ -77,76 +79,76 @@ set debug_p 0
 set user_id [ad_conn user_id]
 set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
 
-db_0or1row select_top_plate {
-    SELECT title, MAX(creation_date) AS creation_date, COUNT(*) AS occurency FROM qt_vehicle_ti WHERE title != 'UNKNOWN' GROUP BY title HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC  LIMIT 1
-} -column_array top_plate
+
+if {$type eq "qt_vehicle"} {
+    db_0or1row select_top_plate {
+        SELECT title, MAX(creation_date) AS creation_date, COUNT(*) AS occurency FROM qt_vehicle_ti WHERE title != 'UNKNOWN' GROUP BY title HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC  LIMIT 1
+    } -column_array top_plate
+    
+    
+    db_0or1row select_top_plate_month "
+        SELECT title, MAX(creation_date) AS creation_date, COUNT(*) AS occurency
+        FROM qt_vehicle_ti
+        WHERE title != 'UNKNOWN'
+        AND EXTRACT('month' FROM creation_date::date) = EXTRACT('month' FROM :creation_date::date) 
+        $where_clauses
+        GROUP BY title
+        HAVING COUNT(*) > 1
+        ORDER BY COUNT(*) DESC
+        LIMIT 1;
+    " -column_array top_plate_month
 
 
-db_0or1row select_top_plate_month "
-    SELECT title, MAX(creation_date) AS creation_date, COUNT(*) AS occurency
-    FROM qt_vehicle_ti
-    WHERE title != 'UNKNOWN'
-    AND EXTRACT('month' FROM creation_date::date) = EXTRACT('month' FROM :creation_date::date)
-    $where_clauses
-    GROUP BY title
-    HAVING COUNT(*) > 1
-    ORDER BY COUNT(*) DESC
-    LIMIT 1;
-
-
-
-" -column_array top_plate_month
-
-
-if {[info exists top_plate(title)]} {
-    set top_plate(description) [db_string select_description "
-        SELECT description FROM qt_vehicle_ti
-        WHERE title = '$top_plate(title)'
-        AND creation_date = '$top_plate(creation_date)' LIMIT 1
-    " -default ""]
-} else {
-    array set top_plate {
-        title ""
-        creation_date ""
-        occurency 0
-        description ""
+    if {[info exists top_plate(title)]} {
+        set top_plate(description) [db_string select_description "
+            SELECT description FROM qt_vehicle_ti
+            WHERE title = '$top_plate(title)'
+            AND creation_date = '$top_plate(creation_date)' LIMIT 1
+        " -default ""]
+    } else {
+        array set top_plate {
+            title ""
+            creation_date ""
+            occurency 0
+            description ""
+        }
     }
-}
-
-
-if {[info exists top_plate_month(title)]} {
-    set top_plate_month(description) [db_string select_description "
-        SELECT description FROM qt_vehicle_ti WHERE title = '$top_plate_month(title)' AND creation_date = '$top_plate_month(creation_date)' LIMIT 1
-    " -default ""]
-} else {
-    array set top_plate_month {
-        title ""
-        creation_date ""
-        occurency 0
-        description ""
+    
+    
+    if {[info exists top_plate_month(title)]} {
+        set top_plate_month(description) [db_string select_description "
+            SELECT description FROM qt_vehicle_ti WHERE title = '$top_plate_month(title)' AND creation_date = '$top_plate_month(creation_date)' LIMIT 1
+        " -default ""]
+    } else {
+        array set top_plate_month {
+            title ""
+            creation_date ""
+            occurency 0
+            description ""
+        }
     }
+    
+    append json "
+        \"top_plate\": \{
+            \"plate\": \"$top_plate(title)\",
+            \"date\": \"[lc_time_fmt $top_plate(creation_date) %Y-%m-%d]\",
+            \"time\": \"[lc_time_fmt $top_plate(creation_date) %H:%M]\",
+            \"location\": \"4.60971, -74.08175\",
+            \"occurency\": \"$top_plate(occurency)\",
+            \"client_p\": true,
+            \"membership_p\": false
+        \},
+        \"top_plate_month\": \{
+            \"plate\": \"$top_plate_month(title)\",
+            \"date\": \"[lc_time_fmt $top_plate_month(creation_date) %Y-%m-%d]\",
+            \"time\": \"[lc_time_fmt $top_plate_month(creation_date) %H:%M]\",
+            \"location\": \"4.60971, -74.08175\",
+            \"occurency\": \"$top_plate_month(occurency)\",
+            \"client_p\": true,
+            \"membership_p\": false
+        \},"
+   
 }
-
-append json "\{
-    \"top_plate\": \{
-        \"plate\": \"$top_plate(title)\",
-        \"date\": \"[lc_time_fmt $top_plate(creation_date) %Y-%m-%d]\",
-        \"time\": \"[lc_time_fmt $top_plate(creation_date) %H:%M]\",
-        \"location\": \"4.60971, -74.08175\",
-        \"occurency\": \"$top_plate(occurency)\",
-        \"client_p\": true,
-        \"membership_p\": false
-    \},
-    \"top_plate_month\": \{
-        \"plate\": \"$top_plate_month(title)\",
-        \"date\": \"[lc_time_fmt $top_plate_month(creation_date) %Y-%m-%d]\",
-        \"time\": \"[lc_time_fmt $top_plate_month(creation_date) %H:%M]\",
-        \"location\": \"4.60971, -74.08175\",
-        \"occurency\": \"$top_plate_month(occurency)\",
-        \"client_p\": true,
-        \"membership_p\": false
-    \},"
-
 
 if {[callback::impl_exists -impl $driver -callback search::driver_info]} {
     array set info [lindex [callback -impl $driver search::driver_info] 0]
@@ -243,7 +245,18 @@ set stopwords $result(stopwords)
 set nstopwords [llength $result(stopwords)] 
 
 
-append json "\"plates\": \["
+switch $type {
+    "qt_vehicle" {
+        append json "\"plates\": \["
+    }
+    "qt_face" {
+        append json "\"persons\": \["
+    }
+    default {
+        append json "\plates\": \["
+    }
+}
+
 set aux ""
 foreach object_id $result(ids) {
     if {[catch {
@@ -279,22 +292,28 @@ foreach object_id $result(ids) {
         # set creation_date [lc_time_fmt [db_string select_creation_date { SELECT creation_date FROM acs_objects WHERE object_id = :object_id } -default ""] "%q %X" "es_ES"]
         db_0or1row select_object {
             SELECT creation_date, description
-            FROM qt_vehicle_ti
+            FROM ${type}_ti
             WHERE object_id = :object_id 
         }
         
         set occurency [db_string select_revision_count { SELECT COUNT(revision_id) FROM cr_revisions WHERE item_id = (SELECT item_id FROM cr_revisions WHERE revision_id = :object_id) } -default 0]
         
-        append json "\{
-            \"plate\": \"$title_summary\",
-            \"type\": \"[lindex $description 21]\",
-            \"date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
-            \"time\": \"[lc_time_fmt $creation_date %H:%M]\",
-            \"location\": \"4.60971, -74.08175\",
-            \"occurency\": \"$occurency\",
-            \"client_p\": false,
-            \"membership_p\": false
-        \},"
+        switch $type {
+            "qt_face" {
+            }
+            default {
+                append json "\{
+                    \"plate\": \"$title_summary\",
+                    \"type\": \"[lindex $description 21]\",
+                    \"date\": \"[lc_time_fmt $creation_date %Y-%m-%d]\",
+                    \"time\": \"[lc_time_fmt $creation_date %H:%M]\",
+                    \"location\": \"4.60971, -74.08175\",
+                    \"occurency\": \"$occurency\",
+                    \"client_p\": false,
+                    \"membership_p\": false
+                \},"
+            }
+        }
     }
 }
 
@@ -307,8 +326,8 @@ if { $result(count) eq 0 } {
         SELECT title,
         MAX(creation_date - INTERVAL '5 hours' ) AS creation_date,
         COUNT(*) AS occurency
-        FROM qt_vehicle_ti
-        WHERE title != 'UNKNOWN'
+        FROM ${type}_ti
+        WHERE title != 'UNKNOWN' 
         $where_clauses         
         GROUP BY title
         HAVING COUNT(*) > 1
@@ -338,8 +357,8 @@ if { $result(count) eq 0 } {
     
     db_0or1row count_records "
         SELECT COUNT(DISTINCT(item_id)) AS total
-        FROM qt_vehicle_ti
-        WHERE title <> 'UNKNOWN';
+        FROM ${type}_ti
+        WHERE title <> 'UNKNOWN'
         $where_clauses 
     "
     

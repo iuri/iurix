@@ -14,6 +14,7 @@ ns_log Notice "Running TCL script get-person-graphics.tcl"
 # Validate and Authenticate JWT
 qt::rest::jwt::validation_p
 ns_log Notice "GROUPID $group_id "
+#ns_log Notice "DATE FROM $date_from  | DATE TO $date_to"
 # group::get -group_id $group_id -array group
 # ns_log Notice "[parray group]"
 
@@ -46,11 +47,11 @@ if {[info exists date_to]} {
 
 
 ns_log Notice "TOTEM $totem   ***"
-switch totem {
-    1  {
+switch $totem {
+   "1"  {
 	append where_clauses " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}'"
     }
-    2  {
+    "2" {
 	append where_clauses " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}'"
     }
     default {
@@ -176,7 +177,7 @@ append result "\],"
 
 
 
-
+ns_log Notice "$where_clauses"
 
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
@@ -187,6 +188,7 @@ set monthly_data [db_list_of_lists select_month_per_day "
     COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
     FROM qt_face_tx f, acs_objects o
     WHERE f.item_id = o.object_id
+    AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
     $where_clauses
     GROUP BY 1 ORDER BY day;
 "]

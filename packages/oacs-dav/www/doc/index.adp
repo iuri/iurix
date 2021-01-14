@@ -11,8 +11,8 @@ handlers for WebDAV methods for objects that belong to that
 package.</p>
 <h2>Installation</h2>
 <p>Install through the APM. If you install file-storage, WebDAV
-support is installed automatically. In addtion you should check the
-tDAV specific configuration parameters to the AOLserver
+support is installed automatically. In addition you should check
+the tDAV specific configuration parameters to the AOLserver
 configuration file. The default parameters work fine, they will
 create webdav URLs like <em>yoursite/</em>dav/*</p>
 <p>You can visit the /webdav-support/ page to control webdav access
@@ -28,7 +28,7 @@ the <code>dav</code> service contract. Each content type should
 implement the <code>dav</code> service contract with the
 implementation name the same as the content_type. This includes
 operations for every WebDAV method. Some operations do not make
-sense for certian object types. Specifically, content_items, which
+sense for certain object types. Specifically, content_items, which
 are mapped to WebDAV resources, should not perform a MKCOL (make
 collection) method. Likewise, a content_folder, or WebDAV
 collection, should not allow a PUT method. In addition to the
@@ -58,16 +58,16 @@ OpenACS oacs_dav::handle_request.</p>
 <p>oacs_dav::handle_request determines the package_id that should
 handle the URI. This is based on the standard OpenACS site_node Tcl
 API. After the package is found, the root folder for that package
-is retreived from the dav_package_folder_map table. Using the
+is retrieved from the dav_package_folder_map table. Using the
 folder_id, and the URI of the request, the
 <code>content_item__get_id</code> pl/sql(plpgsql) procedure is
 called to find the item_id for the request. If no item_id is found
 and the requested method is PUT, a new item should be created. If
 the method is not PUT, a 404 error should be returned.</p>
 <p>oacs_dav::handle_request will call the service contract
-implemenation for the content_type of the item. If the request is a
-PUT, first the dav_put_type service contract for the package_key of
-the request is called. For file-storage this returns
+implementation for the content_type of the item. If the request is
+a PUT, first the dav_put_type service contract for the package_key
+of the request is called. For file-storage this returns
 "file_storage_object" so items created by PUT are created
 as file_storage_objects instead of generic content_revisions.</p>
 <p>The service contract implementation for each operation must

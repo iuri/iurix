@@ -2,7 +2,7 @@ ad_page_contract {
     Generates package specs for every enabled version.
     @author Jon Salz (jsalz@arsdigita.com)
     @creation-date 17 April 2000
-    @cvs-id $Id: write-all-specs.tcl,v 1.7.2.2 2015/09/12 16:47:24 gustafn Exp $
+    @cvs-id $Id: write-all-specs.tcl,v 1.9 2018/01/31 20:21:52 gustafn Exp $
 } {
 }
 
@@ -25,7 +25,7 @@ db_foreach apm_get_all_packages {
     order by upper(pretty_name)
 } {
     if { $distribution_uri eq "" } {
-	ns_log Debug "Generating package specificaiton for $package_key"
+	ns_log Debug "Generating package specification for $package_key"
 	ns_write "<li>$pretty_name $version_name... "
 	if { [catch { 
 	    apm_package_install_spec $version_id 

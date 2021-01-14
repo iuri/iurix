@@ -3,7 +3,7 @@ ad_library {
     
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-01-14
-    @cvs-id $Id: msg-type-procs.tcl,v 1.4.2.2 2015/12/09 21:21:43 gustafn Exp $
+    @cvs-id $Id: msg-type-procs.tcl,v 1.5 2017/08/07 23:47:57 gustafn Exp $
 }
 
 namespace eval acs_sc::msg_type {}

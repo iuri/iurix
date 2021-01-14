@@ -4,7 +4,7 @@ ad_library {
 
     @creation-date 2002-05-27
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: sweep-procs.tcl,v 1.24.2.1 2015/09/12 11:06:47 gustafn Exp $
+    @cvs-id $Id: sweep-procs.tcl,v 1.28.2.3 2020/11/09 17:38:57 antoniop Exp $
 
 }
 
@@ -13,14 +13,26 @@ namespace eval notification::sweep {
     ad_proc -public cleanup_notifications {} {
         Clean up the notifications that have been sent out (DRB: inefficiently...).
     } {
-        # LARS:
-        # Also sweep the dynamic notification requests that have been sent out
-        db_dml delete_dynamic_requests {}
+        # before the killing starts, remove invalid requests
+        foreach request_id [db_list select_invalid_request_ids {
+           select request_id
+             from notification_requests
+            where
+                  -- LARS
+                  -- Also sweep the dynamic notification requests that have been sent out
+                  (dynamic_p = 't' and
+                   exists (select 1
+                           from    notifications n,
+                                   notification_user_map num
+                           where   n.type_id = type_id
+                           and     n.object_id = object_id
+                           and     num.notification_id = n.notification_id
+                           and     num.user_id = user_id))
 
-	# before the killing starts, remove invalid requests
-	foreach request_id [db_list select_invalid_request_ids {}] {
-	    notification::request::delete -request_id $request_id
-	}
+               or not acs_permission.permission_p(object_id, user_id, 'read')
+        }] {
+            notification::request::delete -request_id $request_id
+        }
 
         # Get the list of the ones to kill
         set notification_id_list [db_list select_notification_ids {}]
@@ -31,7 +43,7 @@ namespace eval notification::sweep {
         }
 
     }
-    
+
     ad_proc -public sweep_notifications {
         {-interval_id:required}
         {-batched_p 0}
@@ -42,7 +54,28 @@ namespace eval notification::sweep {
         # order it by user_id
         # make sure the users have not yet received this notification with outer join
         # on the mapping table and a null check
-        set notifications [db_list_of_ns_sets select_notifications {}]
+        set notifications [db_list_of_ns_sets select_notifications {
+            select notification_id,
+                   notif_subject,
+                   notif_text,
+                   notif_html,
+                   file_ids,
+                   user_id,
+                   type_id,
+                   delivery_method_id,
+                   response_id,
+                   notif_date,
+                   notif_user
+            from notifications inner join notification_requests using (type_id, object_id)
+              inner join acs_objects on (notification_requests.request_id = acs_objects.object_id)
+              left outer join notification_user_map using (notification_id, user_id)
+            where sent_date is null
+              and creation_date <= notif_date
+              and (notif_date is null or notif_date < current_timestamp)
+              and interval_id = :interval_id
+              and acs_permission.permission_p(notification_requests.object_id, notification_requests.user_id, 'read')
+          order by user_id, type_id, notif_date
+        }]
 
         if {$batched_p} {
             set prev_user_id 0
@@ -51,7 +84,7 @@ namespace eval notification::sweep {
             set list_of_notification_ids [list]
             set batched_content_text ""
             set batched_content_html ""
-	    set batched_file_ids [list]
+            set batched_file_ids [list]
             set summary_text "[_ notifications.Contents]/n"
             set summary_html "<h4>[_ notifications.Contents]</h4><ul>"
 
@@ -86,28 +119,28 @@ namespace eval notification::sweep {
                             # System name is used in the subject
                             set system_name [ad_system_name]
                             notification::delivery::send \
-                                    -to_user_id $prev_user_id \
-                                    -notification_type_id $prev_type_id \
-                                    -subject "[_ notifications.lt_system_name_-_Batched]" \
-                                    -content_text "$summary_text $batched_content_text" \
-                                    -content_html "$summary_html </ul><hr>$batched_content_html" \
-				    -file_ids $batched_file_ids \
-                                    -delivery_method_id $prev_deliv_method_id
-                            
+                                -to_user_id $prev_user_id \
+                                -notification_type_id $prev_type_id \
+                                -subject "[_ notifications.lt_system_name_-_Batched]" \
+                                -content_text "$summary_text $batched_content_text" \
+                                -content_html "$summary_html </ul><hr>$batched_content_html" \
+                                -file_ids $batched_file_ids \
+                                -delivery_method_id $prev_deliv_method_id
+
                             ns_log Debug "NOTIF-BATCHED: marking notifications"
                             foreach not_id $list_of_notification_ids {
-                                # Mark it as sent
+                            # Mark it as sent
                                 notification::mark_sent \
-                                        -notification_id $not_id \
-                                        -user_id $prev_user_id
-                            }         
+                                    -notification_id $not_id \
+                                    -user_id $prev_user_id
+                            }
                         }
 
                         # Reset things
                         set list_of_notification_ids [list]
                         set batched_content_text ""
                         set batched_content_html ""
-			set batched_file_ids [list]
+                        set batched_file_ids [list]
                         set summary_text "[_ notifications.Contents]/n"
                         set summary_html "<h4>[_ notifications.Contents]</h4><ul>"
                     } else {
@@ -118,7 +151,7 @@ namespace eval notification::sweep {
                 if {$notif eq "STOP"} {
                     continue
                 }
-                
+
 
                 # append content to built-up content
                 ns_log Debug "NOTIF-BATCHED: appending one notif!"
@@ -142,8 +175,8 @@ namespace eval notification::sweep {
                 append batched_content_text "[_ notifications.SUBJECT] [ns_set get $notif notif_subject]\n[ns_set get $notif notif_text]\n=====================\n"
                 append batched_content_html "<a name=[ns_set get $notif notification_id]>[_ notifications.SUBJECT]</a> [ns_set get $notif notif_subject]\n $notif_html <hr><p>"
 
-		set batched_file_ids [concat [ns_set get $notif file_ids] $batched_file_ids]
-		
+                lappend batched_file_ids {*}[ns_set get $notif file_ids]
+
                 lappend list_of_notification_ids [ns_set get $notif notification_id]
 
                 # Set the vars
@@ -151,7 +184,7 @@ namespace eval notification::sweep {
                 set prev_type_id $type_id
                 set prev_deliv_method_id [ns_set get $notif delivery_method_id]
             }
-            
+
         } else {
             # Unbatched
             foreach notif $notifications {
@@ -164,19 +197,18 @@ namespace eval notification::sweep {
                         -subject [ns_set get $notif notif_subject] \
                         -content_text [ns_set get $notif notif_text] \
                         -content_html [ns_set get $notif notif_html] \
-			-file_ids [ns_set get $notif file_ids] \
+                        -file_ids [ns_set get $notif file_ids] \
                         -reply_object_id [ns_set get $notif response_id] \
                         -delivery_method_id [ns_set get $notif delivery_method_id]
-                    
-                    # Markt it as sent
+
+                        # Mark it as sent
                     notification::mark_sent \
-                            -notification_id [ns_set get $notif notification_id] \
-                            -user_id [ns_set get $notif user_id]
+                        -notification_id [ns_set get $notif notification_id] \
+                        -user_id [ns_set get $notif user_id]
                 }
             }
-        } 
+        }
     }
-
 }
 
 # Local variables:

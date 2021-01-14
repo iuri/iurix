@@ -2,7 +2,7 @@ ad_page_contract {
     Show package instances
     @author Gustaf Neumann
     @creation-date 3 Sept 2014
-    @cvs-id $Id: package-instances.tcl,v 1.3 2015/06/27 16:41:07 gustafn Exp $
+    @cvs-id $Id: package-instances.tcl,v 1.4 2018/08/15 16:59:53 gustafn Exp $
 } {
     {package_key:token,notnull}
 }
@@ -24,9 +24,9 @@ db_foreach get_version_info {
     select package_id, instance_name from apm_packages where package_key = :package_key
     order by package_id
 } {
-    set urls [site_node::get_url_from_object_id -object_id $package_id]
-    if {[llength $urls] > 0} {
-        foreach url $urls {
+    set URLs [site_node::get_url_from_object_id -object_id $package_id]
+    if {[llength $URLs] > 0} {
+        foreach url $URLs {
             set node_id [dict get [site_node::get -url $url] node_id]
             set delete_href [export_vars -base /admin/applications/application-delete { node_id return_url }]
             set smap_href [export_vars -base /admin/site-map { {root_id $node_id} return_url }]

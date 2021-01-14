@@ -15,7 +15,7 @@ all the attribute columns for each content type.</p>
 contain data in any text or binary format. To accommodate searches
 across multiple file types, the content repository uses an
 Intermedia index with the INSO filtering option. The INSO filter
-automatically detects the the file type of a binary object, and
+automatically detects the file type of a binary object, and
 extracts text from it for indexing. Most common file types are
 supported, including PDF and Microsoft Word, and Excel and
 PowerPoint.</p>
@@ -113,5 +113,5 @@ method, which a dispatch method can call by reflection.</li>
 <a href="mailto:karlg\@arsdigita.com">karlg\@arsdigita.com</a>
 <br>
 
-Last Modified: $&zwnj;Id: search.html,v 1.1.1.1.30.2 2017/04/21 14:53:08
-gustafn Exp $
+Last Modified: $&zwnj;Id: search.html,v 1.2 2017/08/07 23:47:47 gustafn
+Exp $

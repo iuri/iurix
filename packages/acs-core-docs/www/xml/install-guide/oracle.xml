@@ -2110,7 +2110,7 @@ SQL&gt; drop tablespace <emphasis>table_space_name</emphasis> including contents
       </tgroup>
     </informaltable>
 
-    <para><phrase role="cvstag">($Id: oracle.xml,v 1.21.14.6 2017/06/17 08:29:28 gustafn Exp $)</phrase></para>
+    <para><phrase role="cvstag">($Id: oracle.xml,v 1.22 2017/08/07 23:47:55 gustafn Exp $)</phrase></para>
   </sect2>
 
 

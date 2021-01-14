@@ -6,7 +6,7 @@ ad_library {
 
     @author Gustaf Neumann (neumann@wu-wien.ac.at)
     @creation-date 2015-06-11
-    @cvs-id $Id: tcltrace-procs.tcl,v 1.2.2.4 2017/05/31 11:48:36 gustafn Exp $
+    @cvs-id $Id: tcltrace-procs.tcl,v 1.4.2.5 2020/08/20 05:22:28 gustafn Exp $
 }
 
 
@@ -35,8 +35,8 @@ namespace eval ::tcltrace {
 		regsub {/$} $name /index name
 		set fullname [ad_tmpdir]/ns_saved$name.html
 		ns_log notice "before-ns_return: save content of ns_return to file:$fullname"
-		set dirname [file dirname $fullname]
-		if {![file isdirectory $dirname]} {
+		set dirname [ad_file dirname $fullname]
+		if {![ad_file isdirectory $dirname]} {
 		    file mkdir $dirname
 		}
 		set f [open $fullname w]
@@ -55,7 +55,7 @@ namespace eval ::tcltrace {
 	@param cmd the full command as executed by Tcl
 	@param op the trace operation 
     } {
-	lassign $cmd cmdname severity msg
+	set msg [join [lassign $cmd cmdname severity]]
 	set severity [string totitle $severity]
 	if {![info exists ::__log_severities]} {
 	    set ::__log_severities [::parameter::get_from_package_key \
@@ -73,10 +73,30 @@ namespace eval ::tcltrace {
 	}
     }
 
-    ad_proc -private before { cmd op } {
-        Simple trace proc for arbitraty commands. simply reports traces to error.log.
+    ad_proc -private before {
+        {-details:boolean false}
+        cmd
+        op
     } {
-        ns_log notice "trace: $cmd"
+        
+        Generic trace proc for arbitrary commands. Simply reports
+        calls to function (optionally with full context) to the error.log.
+
+        @param details when set, use ad_log for reporting with full context
+        @param cmd the full command as executed by Tcl
+	@param op the trace operation 
+
+    } {
+        set log_cmd [expr {$details_p ? "ad_log" : "ns_log"}]
+        set abbrev_cmd [lmap w $cmd {
+            regsub -all \n $w {\n} w
+            regsub -all \r $w {\r} w            
+            if {[string length $w] > 100} {
+                set w [string range $w 0 100]...
+            }
+            set w
+        }]
+        $log_cmd notice "trace: [join $abbrev_cmd { }]"
     }
    
 }

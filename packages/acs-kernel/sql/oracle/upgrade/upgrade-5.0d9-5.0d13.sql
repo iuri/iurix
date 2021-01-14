@@ -10,7 +10,7 @@
 --
 -- @creation-date 2000-05-18
 --
--- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.3.22.1 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.7.2.1 2019/08/14 07:31:43 gustafn Exp $
 --
 
 -- Should have been added earlier, at least now we save the 4.6.3 - 5.0 upgrade
@@ -561,7 +561,7 @@ as
    -- N_GENERATIONS is how far the current DESCENDANT_ID is from
    -- OBJECT_ID.
 
-   -- This function will verfy that each actually descendant of
+   -- This function will verify that each actually descendant of
    -- OBJECT_ID has a row in the index table. It does not check that
    -- there aren't extraneous rows or that the ancestors of OBJECT_ID
    -- are maintained correctly.
@@ -971,7 +971,7 @@ show errors
 -- @author Bryan Quinn (bquinn@arsdigita.com)
 -- @author Jon Salz (jsalz@mit.edu)
 -- @creation-date 2000/04/30
--- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.3.22.1 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.7.2.1 2019/08/14 07:31:43 gustafn Exp $
 
 
 
@@ -2757,7 +2757,7 @@ show errors
 --
 -- @creation-date 2000-05-18
 --
--- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.3.22.1 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.7.2.1 2019/08/14 07:31:43 gustafn Exp $
 --
 
 -------------------
@@ -3910,7 +3910,7 @@ show errors
 --
 -- @author Lars Pind (lars@pinds.com)
 -- @creation-date 2000-22-18
--- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.3.22.1 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.7.2.1 2019/08/14 07:31:43 gustafn Exp $
 --
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 --
@@ -4047,7 +4047,7 @@ as
 
   function violation (
     --/** Checks to see if there a relational constraint is violated
-    --    by the precense of the specified relation. If not, returns 
+    --    by the presence of the specified relation. If not, returns 
     --    null. If so, returns an appropriate error string.
     -- 
     --    @author Oumi Mehrotra (oumi@arsdigita.com)
@@ -4626,7 +4626,7 @@ show errors
 --
 -- @author rhs@mit.edu
 -- @creation-date 2000-09-05
--- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.3.22.1 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.0d9-5.0d13.sql,v 1.7.2.1 2019/08/14 07:31:43 gustafn Exp $
 --
 
 
@@ -4653,9 +4653,9 @@ as
     node_id             in site_nodes.node_id%TYPE
   );
 
-  -- Return the node_id of a url. If the url begins with '/' then the
+  -- Return the node_id of a URL. If the url begins with '/' then the
   -- parent_id must be null. This will raise the no_data_found
-  -- exception if there is no mathing node in the site_nodes table.
+  -- exception if there is no matching node in the site_nodes table.
   -- This will match directories even if no trailing slash is included
   -- in the url.
 
@@ -5120,7 +5120,7 @@ select r.rel_type as viol_rel_type, r.rel_id as viol_rel_id,
 --
 --           What are all the segments in the system that a party has to 
 --           be in if the party were to be on side :rel_side of a relation
---           in segement :rel_segment?  
+--           in segment :rel_segment?  
 --
 --           We want not only the direct required_segments (which we could
 --           get from the rel_constraints table directly), but also the 
@@ -5166,11 +5166,11 @@ where rc.rel_segment in (
 --                          tell you which segment -- you can get that info
 --                          from rel_constraints table or other views.
 --
--- Another Note: not all segemnts in rel_segemnts are returned by this view.
+-- Another Note: not all segments in rel_segments are returned by this view.
 -- This view only returns segments S that have at least one rel_constraints row
 -- where rel_segment = S.  Segments that have no constraints defined on them
 -- can be said to have dependency_level=0, hence the outer join and nvl in the
--- example query above (see "Answer:").  I could have embeded that logic into
+-- example query above (see "Answer:").  I could have embedded that logic into
 -- this view, but that would unnecessarily degrade performance.
 --
 create or replace view rc_segment_dependency_levels as

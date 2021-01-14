@@ -1,6 +1,6 @@
 ad_library {
 
-    Procs for http client comunication
+    Procs for HTTP client communication
 
     @author Antonio Pisano
     @creation-date 2014-02-13
@@ -21,7 +21,7 @@ ad_proc -private util::http::set_cookies {
     {-pattern ""}
 } {
     Extracts cookies from response headers. This is done reading every <code>set-cookie</code> header
-    and populating a ns_set of request headers suitable for issuing <code>util::http</code> requests.
+    and populating an ns_set of request headers suitable for issuing <code>util::http</code> requests.
 
     @param resp_headers Response headers, in a list form as returned by <code>util::http</code> API.
 
@@ -68,7 +68,7 @@ ad_proc -public util::http::basic_auth {
     -username:required
     -password:required
 } {
-    Builds BASIC authentication header for a HTTP request
+    Builds BASIC authentication header for an HTTP request
 
     @param headers  ns_set of request headers that will be populated with auth header.
                     If not specified, a new ns_set will be created. Existing header
@@ -123,7 +123,7 @@ ad_proc -public util::http::cookie_auth {
                         authentication data. If not specified, this will refer to every cookie
                         received into <code>set-cookie</code> response headers.
 
-    @auth_form          Form to put our data into. If not specified, there must be only one form
+    @param auth_form    Form to put our data into. If not specified, there must be only one form
                         on the login page, otherwise proc will throw an error.
 
     @return ns_set of headers containing authentication data
@@ -132,33 +132,31 @@ ad_proc -public util::http::cookie_auth {
         set headers [ns_set create headers]
     }
 
-    # Normalize url. Slashes at the end can make
-    # the same url don't look the same for the
-    # server, if we retrieve the same url from
+    # Normalize url. Slashes at the end can make the same url don't
+    # look the same for the server, if we retrieve the same url from
     # the 'action' attribute of the form.
     set auth_url [string trimright $auth_url "/"]
     set base_url [split $auth_url "/"]
     set base_url [lindex $base_url 0]//[lindex $base_url 2]
 
     # Call login url to obtain login form
-    array set r [util::http::get -url $auth_url -preference $preference]
+    set r [util::http::get -url $auth_url -preference $preference]
 
     # Get cookies from response
     util::http::set_cookies \
-      -resp_headers $r(headers) \
-      -headers      $headers \
-      -cookie_names $auth_cookies
+        -resp_headers [dict get $r headers] \
+        -headers      $headers \
+        -cookie_names $auth_cookies
 
     # Obtain and export form vars not provided explicitly
-    set form [util::html::get_forms -html $r(page)]
+    set form [util::html::get_forms -html [dict get $r page]]
     set form [util::html::get_form -forms $form -id $auth_form]
 
-    array set f $form
-    array set a $f(attributes)
-    # Action could be different from original login url
-    # I take that from form attributes.
-    if {[info exists a(action)]} {
-        set auth_url ${base_url}${a(action)}
+    set a [dict get $form attributes]
+    # Action could be different from original login url I take that
+    # from form attributes.
+    if {[dict exists $a action]} {
+        set auth_url ${base_url}[dict get $a action]
         set auth_url [string trimright $auth_url "/"]
     }
 
@@ -169,17 +167,21 @@ ad_proc -public util::http::cookie_auth {
     # Join form vars with our vars
     set formvars [join [list $formvars $auth_vars] "&"]
 
-    # Call login url with authentication parameters. Just retrieve the first response, as it
-    # is common for login pages to redirect somewhere, but we just need to steal the cookies.
-    array set r [util::http::post \
-        -url $auth_url -body $formvars \
-        -headers $headers -max_depth 0 -preference $preference]
+    # Call login url with authentication parameters. Just retrieve the
+    # first response, as it is common for login pages to redirect
+    # somewhere, but we just need to steal the cookies.
+    set r [util::http::post \
+               -url $auth_url \
+               -body $formvars \
+               -headers $headers \
+               -max_depth 0 \
+               -preference $preference]
 
     # Get cookies from response
     util::http::set_cookies \
-      -resp_headers $r(headers) \
-      -headers      $headers \
-      -cookie_names $auth_cookies
+        -resp_headers [dict get $r headers] \
+        -headers      $headers \
+        -cookie_names $auth_cookies
 
     return $headers
 }
@@ -203,9 +205,15 @@ ad_proc -public util::http::available {
 
     @param force_ssl specifies whether we want to use SSL despite the
     url being in http:// form. Default behavior is to use SSL on
-    https:// urls only.
+    https:// URLs only.
 
 } {
+    set ssl_p [expr {$force_ssl_p || [string match "https://*" $url]}]
+    set key ::util::http::available($ssl_p,$preference,$spool_p)
+    if {[info exists $key]} {
+        return [set $key]
+    }
+
     if {$force_ssl_p || [string match "https://*" $url]} {
         set apis [lindex [apis] 1]
     } else {
@@ -220,31 +228,33 @@ ad_proc -public util::http::available {
         }
     }
 
+    set $key ""
     foreach p $preference {
-       if {$p in $apis} {
-           return $p
-       }
+        if {$p in $apis} {
+            set $key $p
+            break
+        }
     }
 
-    return ""
+    return [set $key]
 }
 
 ad_proc -private util::http::native_https_api_not_cached {
 } {
-    Obtains the right https native API
+    Obtains the right HTTPS native API
 } {
-    # Since NaviServer 4.99.12 ns_http handles also https
+    # Since NaviServer 4.99.12 ns_http handles also HTTPS
     if {[apm_version_names_compare \
              [ns_info patchlevel] "4.99.12"] >= 0} {
-        return [info commands ns_http]
+        return [namespace which ns_http]
     }
     # Default: check if we have ns_ssl
-    return [info commands ns_ssl]
+    return [namespace which ns_ssl]
 }
 
 ad_proc -private util::http::native_https_api {
 } {
-    Obtains implemented apis for http communication
+    Obtains implemented apis for HTTP communication
 } {
     set key ::util::http::native_https_api
     if {[info exists $key]} {
@@ -256,7 +266,7 @@ ad_proc -private util::http::native_https_api {
 
 ad_proc -private util::http::apis_not_cached {
 } {
-    Obtains implemented apis for http communication
+    Obtains implemented apis for HTTP communication
 } {
     set http  [list]
     set https [list]
@@ -265,7 +275,7 @@ ad_proc -private util::http::apis_not_cached {
         lappend https "curl"
     }
 
-    if {[info commands ns_http] ne ""} {
+    if {[namespace which ns_http] ne ""} {
         lappend http  "native"
     }
 
@@ -278,7 +288,7 @@ ad_proc -private util::http::apis_not_cached {
 
 ad_proc -private util::http::apis {
 } {
-    Obtains implemented apis for http communication
+    Obtains implemented apis for HTTP communication
 } {
     set key ::util::http::apis
     if {[info exists $key]} {
@@ -298,7 +308,7 @@ ad_proc -private util::http::get_channel_settings {
 } {
     Helper proc to get encoding based on content_type (From xotcl/tcl/http-client-procs)
 } {
-    # In the following, I realise a IANA/MIME charset resolution
+    # In the following, I realize an IANA/MIME charset resolution
     # scheme which is compliant with RFC 3023 which deals with
     # treating XML media types properly.
     #
@@ -356,8 +366,8 @@ ad_proc -private util::http::get_channel_settings {
     #
     # (C) If neither A or B apply (e.g., because an invalid charset
     # name was given to the charset parameter), we default to
-    # "binary". This corresponds to the behaviour of
-    # [ns_encodingfortype].  Also note, that the RFCs 3023 and 2616 do
+    # "binary". This corresponds to the behavior of
+    # [ns_encodingfortype].  Also note that the RFCs 3023 and 2616 do
     # not state any procedure when "invalid" charsets etc. are
     # identified. I assume, RFC-compliant clients have to ignore them
     # which means keep the channel in- and output unfiltered (encoding
@@ -401,11 +411,11 @@ ad_proc util::http::get {
     -spool:boolean
     {-preference {native curl}}
 } {
-    Issue an http GET request to <code>url</code>.
+    Issue an HTTP GET request to <code>url</code>.
 
     @param headers specifies an ns_set of extra headers to send
     to the server when doing the request.  Some options exist that
-    allow to avoid the need to specify headers manually, but headers
+    allow one to avoid the need to specify headers manually, but headers
     will always take precedence over options.
 
     @param gzip_response informs the server that we are
@@ -414,7 +424,7 @@ ad_proc util::http::get {
 
     @param force_ssl specifies whether we want to use SSL
     despite the url being in http:// form.  Default behavior is to use
-    SSL on https:// urls only.
+    SSL on https:// URLs only.
 
     @param spool enables file spooling of the request on the file
     specified. It is useful when we expect large responses from the
@@ -430,8 +440,10 @@ ad_proc util::http::get {
     @param timeout Timeout in seconds. The value can be an integer,
     a floating point number or an ns_time value.
 
-    @return Returns the data as dict with elements <code>headers</code>, <code>page</code>,
-    <code>file</code>, <code>status</code>, and <code>modified</code>.
+    @return Returns the data as dict with elements
+    <code>headers</code>, <code>page</code>, <code>file</code>,
+    <code>status</code>, <code>time</code> (elapsed request time in
+    ns_time format), and <code>modified</code>.
 
 } {
     return [util::http::request \
@@ -475,8 +487,8 @@ ad_proc util::http::post {
     how big can the whole body payload get before we start spooling
     its content to a file. This is important in case of big file
     uploads, when keeping the entire request in memory is just not
-    feasible. The handling of the spooling is taken care of in the
-    api. This value takes into account also the encoding required by
+    feasible. The handling of the spooling is taken care of in the API.
+    This value takes into account also the encoding required by
     the content type, so its value could not reflect the exact length
     of body's string representation.
 
@@ -500,11 +512,13 @@ ad_proc util::http::post {
     If <code>-base64</code> flag is set, files will be base64 encoded
     (useful for some kind of form).
 
-    @param -formvars Other form variables can be passes in<code>-formvars</code>
-    easily by the use of <code>export_vars -url</code> and will be
-    translated for the proper type of form. URL variables, as with GET
-    requests, are also sent, but an error is thrown if URL variables
-    conflict with those specified in other ways.
+    @param formvars Other form variables can be passed easily
+    through<code>-formvars</code> using <code>export_vars -url</code>
+    and will be translated for the proper type of form. This is useful
+    when we intend to send files together with variables to a
+    form. URL variables, as with GET requests, are also sent, but an
+    error is thrown if URL variables conflict with those specified in
+    other ways.
 
     <p> Default behavior is to build payload as an
     'application/x-www-form-urlencoded' payload if no files are
@@ -513,7 +527,7 @@ ad_proc util::http::post {
     multipart.
 
     @param headers specifies an ns_set of extra headers to send to the
-    server when doing the request.  Some options exist that allow to
+    server when doing the request.  Some options exist that allow one to
     avoid the need to specify headers manually, but headers will
     always take precedence over options.
 
@@ -528,7 +542,7 @@ ad_proc util::http::post {
 
     @param force_ssl specifies whether we want to use SSL despite the
     url being in http:// form.  Default behavior is to use SSL on
-    https:// urls only.
+    https:// URLs only.
 
     @param spool enables file spooling of the request on the file
     specified. It is useful when we expect large responses from the
@@ -540,7 +554,7 @@ ad_proc util::http::post {
     states that method should not change when 301 or 302 are returned,
     and that GET should be used on a 303 response, but most HTTP
     clients fail in respecting this and switch to a GET request
-    independently. This options forces this kinds of redirect to
+    independently. This option forces this kinds of redirect to
     conserve their original method.
 
     @param max_depth is the maximum number of redirects the proc is
@@ -563,8 +577,10 @@ ad_proc util::http::post {
     @param timeout Timeout in seconds. The value can be an integer,
     a floating point number or an ns_time value.
 
-    @return Returns the data as dict with elements <code>headers</code>, <code>page</code>,
-    <code>file</code>, <code>status</code>, and <code>modified</code>.
+    @return Returns the data as dict with elements
+    <code>headers</code>, <code>page</code>, <code>file</code>,
+    <code>status</code>, <code>time</code> (elapsed request time in
+    ns_time format), and <code>modified</code>.
 
 } {
     set this_proc [lindex [info level 0] 0]
@@ -592,7 +608,7 @@ ad_proc util::http::post {
     }
 
     set req_content_type [ns_set iget $headers "content-type"]
-    
+
     set payload {}
     set payload_file {}
     set payload_file_fd {}
@@ -600,7 +616,7 @@ ad_proc util::http::post {
     # Request will be multipart if required by the flag, if we have
     # files or if set up manually by the headers
     if {$multipart_p ||
-        $files ne {} ||
+        [llength $files] != 0 ||
         [string match -nocase "*multipart/form-data*" $req_content_type]} {
 
         # delete every manually set content-type header...
@@ -609,64 +625,64 @@ ad_proc util::http::post {
         }
         # ...replace it with our own...
         set boundary [ns_sha1 [list [clock clicks -milliseconds] [clock seconds]]]
-        set req_content_type "multipart/form-data; boundary=$boundary"        
+        set req_content_type "multipart/form-data; boundary=$boundary"
         ns_set put $headers "Content-type" $req_content_type
         # ...and get the proper encoding for the content.
         set enc [util::http::get_channel_settings $req_content_type]
 
         # Transform files into binaries
-        foreach file $files {
-            unset -nocomplain f
-            array set f $file
-
-            if {![info exists f(data)]} {
-                if {![info exists f(file)]} {
+        foreach f $files {
+            if {![dict exists $f data]} {
+                if {![dict exists $f file]} {
                     return -code error "${this_proc}:  No file specified"
                 }
-                if {![file exists $f(file)]} {
-                    return -code error "${this_proc}:  Error reading file: $f(file) not found"
+                set file [dict get $f file]
+                if {![ad_file exists $file]} {
+                    return -code error "${this_proc}:  Error reading file: $file not found"
                 }
-                if {![file readable $f(file)]} {
-                    return -code error "${this_proc}:  Error reading file: $f(file) permission denied"
+                if {![ad_file readable $file]} {
+                    return -code error "${this_proc}:  Error reading file: $file permission denied"
                 }
 
-                if {![info exists f(filename)]} {
-                    set f(filename) [file tail $f(file)]
-                }
+                dict set f filename [expr {[dict exists $f filename] ?
+                                            [dict get $f filename] :
+                                            [ad_file tail $file]}]
             }
 
+            # Filename and fieldname must be in the file dict at this
+            # point
             foreach key {filename fieldname} {
-                if {![info exists f($key)]} {
+                if {![dict exists $f $key]} {
                     return -code error "${this_proc}:  '$key' missing for file POST"
                 }
+                set $key [dict get $f $key]
             }
 
-            # Check that we don't already have this var specified in the url
-            if {[info exists urlvars($f(fieldname))]} {
-                return -code error "${this_proc}:  file field '$f(fieldname)' already specified as url variable"
+            # Check that we don't already have this var specified in
+            # the url
+            if {[info exists urlvars($fieldname)]} {
+                return -code error "${this_proc}:  file field '$fieldname' already specified as url variable"
             }
             # Track form variables sent as files
-            set filevars($f(fieldname)) 1
+            set filevars($fieldname) 1
 
-            if {![info exists f(mime_type)]} {
-                set f(mime_type) [ns_guesstype $f(filename)]
-                if {$f(mime_type) in {"*/*" ""}} {
-                    set f(mime_type) "application/octet-stream"
+            if {![dict exists $f mime_type]} {
+                set mime_type [ns_guesstype $filename]
+                if {$mime_type in {"*/*" ""}} {
+                    set mime_type "application/octet-stream"
                 }
+            } else {
+                set mime_type [dict get $f mime_type]
             }
 
-            if {$base64_p} {
-                set transfer_encoding base64
-            } else {
-                set transfer_encoding binary
-            }
+            set transfer_encoding [expr {$base64_p ? "base64" : "binary"}]
 
             set content [list --$boundary \
                              \r\n \
                              "Content-Disposition: form-data; " \
-                             "name=\"$f(fieldname)\"; filename=\"$f(filename)\"" \
+                             "name=\"$fieldname\"; filename=\"$filename\"" \
                              \r\n \
-                             "Content-Type: $f(mime_type)" \
+                             "Content-Type: $mime_type" \
                              \r\n \
                              "Content-transfer-encoding: $transfer_encoding" \
                              \r\n \
@@ -680,9 +696,9 @@ ad_proc util::http::post {
                          $payload_file_fd]
             lassign $app payload payload_file payload_file_fd
 
-            if {[info exists f(data)]} {
+            if {[dict exists $f data]} {
                 set app [append_to_payload \
-                             -content $f(data) \
+                             -content [dict get $f data] \
                              $enc \
                              $max_body_size \
                              $payload \
@@ -690,7 +706,7 @@ ad_proc util::http::post {
                              $payload_file_fd]
             } else {
                 set app [append_to_payload \
-                             -file $f(file) \
+                             -file $file \
                              $enc \
                              $max_body_size \
                              $payload \
@@ -707,7 +723,6 @@ ad_proc util::http::post {
                          $payload_file \
                          $payload_file_fd]
             lassign $app payload payload_file payload_file_fd
-
         }
 
         # Translate urlencoded vars into multipart variables
@@ -715,6 +730,7 @@ ad_proc util::http::post {
             set formvar [split $formvar  =]
             set key [lindex $formvar 0]
             set val [join [lrange $formvar 1 end] =]
+            set val [ad_urldecode_query $val]
 
             if {[info exists filevars($key)]} {
                 return -code error "${this_proc}:  Variable '$key' already specified as file variable"
@@ -735,7 +751,6 @@ ad_proc util::http::post {
                          $payload_file \
                          $payload_file_fd]
             lassign $app payload payload_file payload_file_fd
-
         }
 
         set content "--$boundary--\r\n"
@@ -747,7 +762,7 @@ ad_proc util::http::post {
                      $payload_file \
                      $payload_file_fd]
         lassign $app payload payload_file payload_file_fd
-        
+
     } else {
         # If people specified a content type we won't overwrite it,
         # otherwise this will be a 'application/x-www-form-urlencoded'
@@ -771,7 +786,7 @@ ad_proc util::http::post {
     lassign $app payload payload_file payload_file_fd
 
     if {$payload_file_fd ne ""} {close $payload_file_fd}
-    
+
     return [util::http::request \
                 -method          POST \
                 -body            $payload \
@@ -787,7 +802,6 @@ ad_proc util::http::post {
                 -gzip_response=$gzip_response_p \
                 -post_redirect=$post_redirect_p \
                 -spool=$spool_p]
-
 }
 
 ad_proc -private util::http::append_to_payload {
@@ -808,57 +822,75 @@ ad_proc -private util::http::append_to_payload {
             spooling_file_handle}
 
 } {
+    set encode_p [expr {$encoding ni [list "binary" [encoding system]]}]
+
     set payload_size [string length $payload]
 
+    # Get content size
     if {$file eq ""} {
-        if {$encoding ne "binary"} {set content [encoding convertto $encoding $content]}
         set content_size [string length $content]
     } else {
-        # At first check length by file size, so we don't have to read
-        # anything...
-        set content_size [file size $file]
-        set rfd [open $file r]
-        fconfigure $rfd -translation binary
+        set content_size [ad_file size $file]
     }
 
-    # ...file as it is could be small enough, now let's check with
-    # encoding...
+    # Content size seems ok. Now try applying encoding
     if {$spool_file eq "" &&
-        $payload_size + $content_size <= $max_size &&
-        $file ne ""} {
-        set content [read $rfd]; close $rfd
-        if {$base64_p} {set content [base64::encode $content]}
-        if {$encoding ne "binary"} {set content [encoding convertto $encoding $content]}
+        $payload_size + $content_size <= $max_size} {
+        if {$file ne ""} {
+            set rfd [open $file r]
+            fconfigure $rfd -translation binary
+            set content [read $rfd]
+            close $rfd
+        }
+        if {$base64_p} {
+            set content [base64::encode $content]
+        }
+        if {$encode_p} {
+            set content [encoding convertto $encoding $content]
+        }
         set content_size [string length $content]
     }
 
     if {$spool_file eq "" &&
         $payload_size + $content_size <= $max_size} {
+        ## Payload small enough:
+        # just append new content
         return [list ${payload}${content} {} {}]
-    } else {
-        if {$spool_file eq ""} {
-            set spool_file [ad_tmpnam]
-            set wfd [open $spool_file w]
-            # Flush previously collected payload. As it was already
-            # properly encoded, use the binary translation...
-            fconfigure $wfd -translation binary
-            puts -nonewline $wfd $payload
-            # ...then switch to the proper one.
-            fconfigure $wfd -translation $encoding
-        }
-        if {$file ne ""} {
-            if {$base64_p} {
-                # TODO: it's tricky to base64 encode without slurping
-                # the whole file (exec + pipes?)
-                error "Base64 encoding currently supported only for in-memory file POSTing"
-            }
-            fcopy $rfd $wfd
-            close $rfd
-        } else {
-            puts -nonewline $wfd $content
-        }
-        return [list {} $spool_file $wfd]
     }
+
+    ## Payload is too big:
+
+    if {$spool_file eq ""} {
+        # create the spool file
+        set spool_file [ad_tmpnam]
+        set wfd [open $spool_file w]
+        fconfigure $wfd -translation binary
+        # flush currently collected payload
+        puts -nonewline $wfd $payload
+        # set required encoding for next content
+        if {$encode_p} {
+            fconfigure $wfd -encoding $encoding
+        }
+    }
+
+    # output content to spool file
+    if {$file ne ""} {
+        if {$base64_p} {
+            # TODO: it's tricky to base64 encode without slurping
+            # the whole file (exec + pipes?)
+            error "Base64 encoding currently supported only for in-memory file POSTing"
+        }
+        set rfd [open $file r]
+        fconfigure $rfd -translation binary
+        fconfigure $wfd -translation binary
+        fcopy $rfd $wfd
+        fconfigure $wfd -translation auto
+        close $rfd
+    } else {
+        puts -nonewline $wfd $content
+    }
+
+    return [list {} $spool_file $wfd]
 }
 
 ad_proc -private util::http::follow_redirects {
@@ -911,7 +943,7 @@ ad_proc -private util::http::follow_redirects {
     once the request is over.
 
     @param headers specifies an ns_set of extra headers to send to the
-    server when doing the request.  Some options exist that allow to
+    server when doing the request.  Some options exist that allow one to
     avoid the need to specify headers manually, but headers will
     always take precedence over options.
 
@@ -926,7 +958,7 @@ ad_proc -private util::http::follow_redirects {
 
     @param force_ssl specifies whether we want to use SSL despite the
     url being in http:// form.  Default behavior is to use SSL on
-    https:// urls only.
+    https:// URLs only.
 
     @param spool enables file spooling of the request on the file
     specified. It is useful when we expect large responses from the
@@ -938,7 +970,7 @@ ad_proc -private util::http::follow_redirects {
     states that method should not change when 301 or 302 are returned,
     and that GET should be used on a 303 response, but most HTTP
     clients fail in respecting this and switch to a GET request
-    independently. This options forces this kinds of redirect to
+    independently. This option forces this kinds of redirect to
     conserve their original method.
 
     @param max_depth is the maximum number of redirects the proc is
@@ -961,9 +993,11 @@ ad_proc -private util::http::follow_redirects {
     @param timeout Timeout in seconds. The value can be an integer,
     a floating point number or an ns_time value.
 
-    @return Returns the data as dict with elements <code>headers</code>, <code>page</code>,
-    <code>file</code>, <code>status</code>, and <code>modified</code> from the last
-    followed redirect, or an empty string if request was not a redirection.
+    @return Returns the data as dict with elements
+    <code>headers</code>, <code>page</code>, <code>file</code>,
+    <code>status</code>, <code>time</code> (elapsed request time in
+    ns_time format), and <code>modified</code> from the last followed
+    redirect, or an empty string if request was not a redirection.
 
 } {
     ## Redirection management ##
@@ -983,7 +1017,7 @@ ad_proc -private util::http::follow_redirects {
     }
 
     #
-    # A redirect from http might point to https, which in turn
+    # A redirect from HTTP might point to HTTPS, which in turn
     # might not be configured. So we have to go through
     # util::http::request again.
     #
@@ -1005,7 +1039,7 @@ ad_proc -private util::http::follow_redirects {
         set multipart_p [string match -nocase "*multipart/form-data*" $req_content_type]
         # I decided to don't translate into urlvars a multipart payload.
         # This makes sense if we think that in a multipart payload we have
-        # many informations, such as mime_type, which cannot be put into url.
+        # some information, such as mime_type, which cannot be put into url.
         # Receiving a GET redirect after a POST is very common, so I won't throw an error
         if {!$multipart_p} {
             if {$gzip_request_p} {
@@ -1075,7 +1109,7 @@ ad_proc -private util::http::request {
     Issue an HTTP request either GET or POST to the url specified.
 
     @param headers specifies an ns_set of extra headers to send to the
-    server when doing the request.  Some options exist that allow to
+    server when doing the request.  Some options exist that allow one to
     avoid the need to specify headers manually, but headers will
     always take precedence over options.
 
@@ -1104,7 +1138,7 @@ ad_proc -private util::http::request {
 
     @param force_ssl specifies whether we want to use SSL despite the
     url being in http:// form. Default behavior is to use SSL on
-    https:// urls only.
+    https:// URLs only.
 
     @param spool enables file spooling of the request on the file
     specified. It is useful when we expect large responses from the
@@ -1116,7 +1150,7 @@ ad_proc -private util::http::request {
     states that method should not change when 301 or 302 are returned,
     and that GET should be used on a 303 response, but most HTTP
     clients fail in respecting this and switch to a GET request
-    independently. This options forces this kinds of redirect to
+    independently. This option forces this kinds of redirect to
     conserve their original method. Notice that, as from RFC, a 303
     redirect won't send again any data to the server, as specification
     says we can assume variables to have been received.
@@ -1141,8 +1175,10 @@ ad_proc -private util::http::request {
     @param timeout Timeout in seconds. The value can be an integer,
     a floating point number or an ns_time value.
 
-    @return Returns the data as dict with elements <code>headers</code>, <code>page</code>,
-    <code>file</code>, <code>status</code>, and <code>modified</code>.
+    @return Returns the data as dict with elements
+    <code>headers</code>, <code>page</code>, <code>file</code>,
+    <code>status</code>, <code>time</code> (elapsed request time in
+    ns_time format), and <code>modified</code>.
 
 } {
     set this_proc [lindex [info level 0] 0]
@@ -1176,19 +1212,125 @@ ad_proc -private util::http::request {
 
 namespace eval util::http::native {}
 
-ad_proc -private util::http::native::timeout {input} {
+# This conversion is not needed (anymore?) for native implementation
+# ad_proc -private util::http::native::timeout {input} {
 
-    Convert the provided value to a ns_time format
-    used by NaviServer
+#     Convert the provided value to an ns_time format
+#     used by NaviServer
 
+# } {
+#     if {[string is integer -strict $input]} {
+#         return $input:0
+#     } elseif {[string is double -strict $input]} {
+#         set secs [expr {int($input)}]
+#         return $secs:[expr {($input - $secs)*1000000}]
+#     }
+#     return $input
+# }
+ad_proc -private util::http::native::run {
+    -url
+    {-method GET}
+    {-headers ""}
+    {-body ""}
+    {-body_file ""}
+    {-timeout 30}
+    -force_ssl:boolean
+    -gzip_response:boolean
+    -spool:boolean
 } {
-    if {[string is integer -strict $input]} {
-        return $input:0
-    } elseif {[string is double -strict $input]} {
-        set secs [expr {int($input)}]
-        return $secs:[expr {($input - $secs)*1000000}]
+    Over time, Naviserver ns_http capabilities, return values and
+    arguments changed. This proc, probably meant to be transitional,
+    supports the different api variants with a common interface.
+
+    Parameters have the same meaning documented in util::http::native::request
+
+    @see util::http::native::request
+
+    @return a dict in the format returned by 'ns_http run' command on
+            a modern Naviserver.
+} {
+    if {[apm_version_names_compare [ns_info patchlevel] "4.99.15"] == 1} {
+        set cmd [list ns_http run \
+                     -timeout $timeout \
+                     -method $method \
+                     -headers $headers]
+        if {[regexp {https://([^/]+)/} $url . hostname]} {
+            lappend cmd -hostname $hostname
+        }
+        if {$body_file ne ""} {
+            lappend cmd -body_file $body_file
+        } elseif {$body ne ""} {
+            lappend cmd -body $body
+        }
+        if {$spool_p} {
+            lappend cmd -spoolsize 0
+        }
+        lappend cmd $url
+        #ns_log notice "NS_HTTP $cmd"
+        set r [{*}$cmd]
+    } else {
+        # Older Naviservers used different commands depending if http
+        # or https was required
+        if {$force_ssl_p || [string match "https://*" $url]} {
+            set http_api [util::http::native_https_api]
+            if {$http_api eq ""} {
+                error "${this_proc}:  SSL not enabled"
+            }
+        } else {
+            set http_api "ns_http"
+        }
+
+        set queue_cmd [list $http_api queue \
+                           -timeout $timeout \
+                           -method $method \
+                           -headers $headers]
+        if {$body_file ne ""} {
+            lappend queue_cmd -body_file $body_file
+        } elseif {$body ne ""} {
+            lappend queue_cmd -body $body
+        }
+        lappend queue_cmd $url
+
+        # Older Naviservers would specify additional arguments:
+        # - ns_set for response headers in the command line.
+        # - variables where request's body, status and spool file would be returned
+        set resp_headers [ns_set create resp_headers]
+        set wait_cmd [list $http_api wait -headers $resp_headers -status status -timeout $timeout]
+        if {$spool_p} {
+            lappend wait_cmd -spoolsize 0 -file spool_file
+            set page ""
+        } else {
+            lappend wait_cmd -result page
+        }
+
+        if {$gzip_response_p} {
+            # NaviServer since 4.99.6 can decompress response transparently
+            if {[apm_version_names_compare [ns_info patchlevel] "4.99.5"] == 1} {
+                lappend wait_cmd -decompress
+            }
+        }
+
+        # Queue call to the url and wait for response: older
+        # Naviservers would queue and wait for the request complete in
+        # separate steps
+        set start_time [ns_time get]
+        set r [{*}$wait_cmd [{*}$queue_cmd]]
+        set end_time [ns_time get]
+        # Older Naviservers would not return request time. As a
+        # fallback, we calculate this manually.
+        set time [ns_time diff $end_time $start_time]
+
+        set r [dict create \
+                   body $page \
+                   time $time \
+                   headers $resp_headers \
+                   status $status]
+        if {[info exists spool_file]} {
+            dict set r file $spool_file
+        }
     }
-    return $input
+
+    return $r
 }
 
 ad_proc -private util::http::native::request {
@@ -1209,10 +1351,10 @@ ad_proc -private util::http::native::request {
 } {
 
     Issue an HTTP request either GET or POST to the url specified.
-    This is the native implementation based on NaviServer HTTP api.
+    This is the native implementation based on NaviServer HTTP API.
 
     @param headers specifies an ns_set of extra headers to send to the
-    server when doing the request.  Some options exist that allow to
+    server when doing the request.  Some options exist that allow one to
     avoid the need to specify headers manually, but headers will
     always take precedence over options.
 
@@ -1241,7 +1383,7 @@ ad_proc -private util::http::native::request {
 
     @param force_ssl specifies whether we want to use SSL despite the
     url being in http:// form. Default behavior is to use SSL on
-    https:// urls only.
+    https:// URLs only.
 
     @param spool enables file spooling of the request on the file
     specified. It is useful when we expect large responses from the
@@ -1253,7 +1395,7 @@ ad_proc -private util::http::native::request {
     states that method should not change when 301 or 302 are returned,
     and that GET should be used on a 303 response, but most HTTP
     clients fail in respecting this and switch to a GET request
-    independently. This options forces this kinds of redirect to
+    independently. This option forces this kinds of redirect to
     conserve their original method. Notice that, as from RFC, a 303
     redirect won't send again any data to the server, as specification
     says we can assume variables to have been received.
@@ -1272,24 +1414,16 @@ ad_proc -private util::http::native::request {
     @param timeout Timeout in seconds. The value can be an integer,
     a floating point number or an ns_time value.
 
-    @return Returns the data as dict with elements <code>headers</code>, <code>page</code>,
-    <code>file</code>, <code>status</code>, and <code>modified</code>.
+    @return Returns the data as dict with elements
+    <code>headers</code>, <code>page</code>, <code>file</code>,
+    <code>status</code>, <code>time</code> (elapsed request time in
+    ns_time format), and <code>modified</code>.
 
 } {
     set this_proc [lindex [info level 0] 0]
 
     if {![regexp "^(https|http)://*" $url]} {
         return -code error "${this_proc}:  Invalid url:  $url"
-    }
-
-    # Check whether we will use ssl or not
-    if {$force_ssl_p || [string match "https://*" $url]} {
-        set http_api [util::http::native_https_api]
-        if {$http_api eq ""} {
-            return -code error "${this_proc}:  SSL not enabled"
-        }
-    } else {
-        set http_api "ns_http"
     }
 
     if {$headers eq ""} {
@@ -1317,7 +1451,7 @@ ad_proc -private util::http::native::request {
 
     # zlib is mandatory when requiring compression
     if {$gzip_request_p || $gzip_response_p} {
-        if {[info commands zlib] eq ""} {
+        if {[namespace which zlib] eq ""} {
             return -code error "${this_proc}:  zlib support not enabled"
         }
     }
@@ -1333,7 +1467,7 @@ ad_proc -private util::http::native::request {
         }
 
         set enc [util::http::get_channel_settings $content_type]
-        if {$enc ne "binary"} {
+        if {$enc ni [list "binary" [encoding system]]} {
             set body [encoding convertto $enc $body]
         }
 
@@ -1342,43 +1476,26 @@ ad_proc -private util::http::native::request {
         }
     }
 
-
     ## Issuing of the request
-
-    set queue_cmd [list $http_api queue \
-                       -timeout [timeout $timeout] \
-                       -method $method \
-                       -headers $headers]
-    if {$body_file ne ""} {
-        lappend queue_cmd -body_file $body_file
-    } elseif {$body ne ""} {
-        lappend queue_cmd -body $body
-    }
-    lappend queue_cmd $url
-
-    set resp_headers [ns_set create resp_headers]
-    set wait_cmd [list $http_api wait -headers $resp_headers -status status]
-    if {$spool_p} {
-        lappend wait_cmd -spoolsize 0 -file spool_file
-        set page ""
-    } else {
-        lappend wait_cmd -result page
-    }
-
-    if {$gzip_response_p} {
-        # NaviServer since 4.99.6 can decompress response transparently
-        if {[apm_version_names_compare [ns_info patchlevel] "4.99.5"] == 1} {
-            lappend wait_cmd -decompress
-        }
-    }
-    
-    # Queue call to the url and wait for response
-    {*}$wait_cmd [{*}$queue_cmd]
-
-    if {[info exists spool_file]} {
+    set r [util::http::native::run \
+               -url $url \
+               -method $method \
+               -headers $headers \
+               -body $body \
+               -body_file $body_file \
+               -timeout $timeout \
+               -force_ssl=$force_ssl_p \
+               -gzip_response=$gzip_response_p \
+               -spool=$spool_p]
+    set resp_headers [dict get $r headers]
+    set status       [dict get $r status]
+    set time         [dict get $r time]
+    if {[dict exists $r file]} {
+        set spool_file [dict get $r file]
         set page "${this_proc}: response spooled to '$spool_file'"
     } else {
         set spool_file ""
+        set page [dict get $r body]
     }
 
     # Get values from response headers, then remove them
@@ -1392,7 +1509,7 @@ ad_proc -private util::http::native::request {
 
 
     # Redirection handling
-    if {$depth <= $max_depth} {
+    if {$depth < $max_depth} {
         incr depth
         set redirection [util::http::follow_redirects \
                              -url             $url \
@@ -1435,7 +1552,7 @@ ad_proc -private util::http::native::request {
 
     # Translate into proper encoding
     set enc [util::http::get_channel_settings $content_type]
-    if {$enc ne "binary"} {
+    if {$enc ni [list "binary" [encoding system]]} {
         set page [encoding convertfrom $enc $page]
     }
 
@@ -1445,6 +1562,7 @@ ad_proc -private util::http::native::request {
                 page     $page \
                 file     $spool_file \
                 status   $status \
+                time     $time \
                 modified $last_modified]
 }
 
@@ -1518,7 +1636,7 @@ ad_proc -private util::http::curl::request {
     when ssl native capabilities are not available.
 
     @param headers specifies an ns_set of extra headers to send to the
-    server when doing the request.  Some options exist that allow to
+    server when doing the request.  Some options exist that allow one to
     avoid the need to specify headers manually, but headers will
     always take precedence over options.
 
@@ -1552,7 +1670,7 @@ ad_proc -private util::http::curl::request {
     capable of receiving gzipped responses.  If server complies to our
     indication, the result will be automatically decompressed.
 
-    @param force_ssl is ignored when using curl http client
+    @param force_ssl is ignored when using curl HTTP client
     implementation and is only kept for cross compatibility.
 
     @param spool enables file spooling of the request on the file
@@ -1565,12 +1683,12 @@ ad_proc -private util::http::curl::request {
     states that method should not change when 301 or 302 are returned,
     and that GET should be used on a 303 response, but most HTTP
     clients fail in respecting this and switch to a GET request
-    independently. This options forces this kinds of redirect to
+    independently. This option forces this kinds of redirect to
     conserve their original method.
     Be aware that curl allows the POSTing of 303 requests only since
     version 7.26. Versions prior than this will follow 303 redirects
     by GET method. If following by POST is a requirement, please
-    consider switching to the native http client implementation, or
+    consider switching to the native HTTP client implementation, or
     update curl.
 
     @param max_depth is the maximum number of redirects the proc is
@@ -1589,8 +1707,10 @@ ad_proc -private util::http::curl::request {
     before 7.32.0 just accept integer, the granularity is set to
     seconds.
 
-    @return Returns the data as dict with elements <code>headers</code>, <code>page</code>,
-    <code>file</code>, <code>status</code>, and <code>modified</code>.
+    @return Returns the data as dict with elements
+    <code>headers</code>, <code>page</code>, <code>file</code>,
+    <code>status</code>, <code>time</code> (elapsed request time in
+    ns_time format), and <code>modified</code>.
 
 } {
     set this_proc [lindex [info level 0] 0]
@@ -1605,7 +1725,7 @@ ad_proc -private util::http::curl::request {
 
     # Determine whether we want to gzip the request.
     # Default is no, can't know whether the server accepts it.
-    # We could at the http api level (TODO?)
+    # We could at the HTTP API level (TODO?)
     set req_content_encoding [ns_set iget $headers "content-encoding"]
     if {$req_content_encoding ne ""} {
         set gzip_request_p [string match "*gzip*" $req_content_encoding]
@@ -1614,7 +1734,7 @@ ad_proc -private util::http::curl::request {
     }
 
     # Curls accepts gzip by default, so if gzip response is not required
-    # we have to ask explicitly for a plain text enconding
+    # we have to ask explicitly for a plain text encoding
     set req_accept_encoding [ns_set iget $headers "accept-encoding"]
     if {$req_accept_encoding ne ""} {
         set gzip_response_p [string match "*gzip*" $req_accept_encoding]
@@ -1624,7 +1744,7 @@ ad_proc -private util::http::curl::request {
 
     # zlib is mandatory when compressing the input
     if {$gzip_request_p} {
-        if {[info commands zlib] eq ""} {
+        if {[namespace which zlib] eq ""} {
             return -code error "${this_proc}:  zlib support not enabled"
         }
     }
@@ -1731,8 +1851,13 @@ ad_proc -private util::http::curl::request {
     set resp_headers_tmpfile [ad_tmpnam]
     lappend cmd -D $resp_headers_tmpfile
     lappend cmd $url
-    
+
+    set start_time [ns_time get]
     set response [{*}$cmd]
+    set end_time [ns_time get]
+
+    # elapsed time
+    set time [ns_time diff $end_time $start_time]
 
     # Parse headers from dump file
     set resp_headers [ns_set create resp_headers]
@@ -1757,7 +1882,7 @@ ad_proc -private util::http::curl::request {
     set page   [string range $response 0 end-4]
 
     # Redirection handling
-    if {$depth <= $max_depth} {
+    if {$depth < $max_depth} {
         incr depth
         set redirection [util::http::follow_redirects \
                              -url             $url \
@@ -1788,7 +1913,7 @@ ad_proc -private util::http::curl::request {
 
     # Translate into proper encoding
     set enc [util::http::get_channel_settings $content_type]
-    if {$enc ne "binary"} {
+    if {$enc ni [list "binary" [encoding system]]} {
         set page [encoding convertfrom $enc $page]
     }
 
@@ -1803,6 +1928,7 @@ ad_proc -private util::http::curl::request {
                 page     $page \
                 file     $spool_file \
                 status   $status \
+                time     $time \
                 modified $last_modified]
 }
 
@@ -1848,511 +1974,7 @@ ad_proc -public util::link_responding_p {
 }
 
 
-#########################
-## Deprecated HTTP api ##
-#########################
 
-ad_proc -deprecated -public util_link_responding_p {
-    url
-    {list_of_bad_codes "404"}
-} {
-    Returns 1 if the URL is responding (generally we think that anything other than 404 (not found) is okay).
-
-    @see util::link_responding_p
-} {
-    util::link_responding_p -url $url -list_of_bad_codes $list_of_bad_codes
-}
-
-ad_proc -public -deprecated util_get_http_status {
-    url
-    {use_get_p 1}
-    {timeout 30}
-} {
-    Returns the HTTP status code, e.g., 200 for a normal response
-    or 500 for an error, of a URL.  By default this uses the GET method
-    instead of HEAD since not all servers will respond properly to a
-    HEAD request even when the URL is perfectly valid.  Note that
-    this means AOLserver may be sucking down a lot of bits that it
-    doesn't need.
-
-    @see util::get_http_status
-} {
-    return [util::get_http_status -url $url -use_get_p $use_get_p -timeout $timeout]
-}
-
-ad_proc -deprecated -public ad_httpget {
-    -url
-    {-headers ""}
-    {-timeout 30}
-    {-depth 0}
-} {
-    Just like ns_httpget, but first headers is an ns_set of
-    headers to send during the fetch.
-
-    ad_httpget also makes use of Conditional GETs (if called with a
-    Last-Modified header).
-
-    Returns the data in array get form with array elements page status modified.
-
-    @see util::http::get
-} {
-    ns_log debug "Getting {$url} {$headers} {$timeout} {$depth}"
-
-    if {[incr depth] > 10} {
-        return -code error "ad_httpget:  Recursive redirection:  $url"
-    }
-
-    lassign [ns_httpopen GET $url $headers $timeout] rfd wfd headers
-    close $wfd
-
-    set response [ns_set name $headers]
-    set status [lindex $response 1]
-    set last_modified [ns_set iget $headers last-modified]
-
-    if {$status == 302 || $status == 301} {
-        set location [ns_set iget $headers location]
-        if {$location ne ""} {
-            ns_set free $headers
-            close $rfd
-            return [ad_httpget -url $location -timeout $timeout -depth $depth]
-        }
-    } elseif { $status == 304 } {
-        # The requested variant has not been modified since the time specified
-        # A conditional get didn't return anything.  return an empty page and
-        set page {}
-
-        ns_set free $headers
-        close $rfd
-    } else {
-        set length [ns_set iget $headers content-length]
-        if { $length eq "" } {set length -1}
-
-        set type [ns_set iget $headers content-type]
-        set_encoding $type $rfd
-
-        set err [catch {
-            while 1 {
-                set buf [_ns_http_read $timeout $rfd $length]
-                append page $buf
-                if { "" eq $buf } break
-                if {$length > 0} {
-                    incr length -[string length $buf]
-                    if {$length <= 0} break
-                }
-            }
-        } errMsg]
-        ns_set free $headers
-        close $rfd
-
-        if {$err} {
-            return -code error -errorinfo $::errorInfo $errMsg
-        }
-    }
-
-    # order matters here since we depend on page content
-    # being element 1 in this list in util_httpget
-    return [list page $page \
-                status $status \
-                modified $last_modified]
-}
-
-ad_proc -deprecated -public util_httpget {
-    url {headers ""} {timeout 30} {depth 0}
-} {
-    util_httpget simply calls util::http::get which also returns
-    status and last_modfied
-
-    @see util::http::get
-} {
-    return [dict get [util::http::get -url $url -headers $headers -timeout $timeout -depth $depth] page]
-}
-
-# httppost; give it a URL and a string with formvars, and it
-# returns the page as a Tcl string
-# formvars are the posted variables in the following form:
-#        arg1=value1&arg2=value2
-
-# in the event of an error or timeout, -1 is returned
-
-ad_proc -deprecated -public util_httppost {url formvars {timeout 30} {depth 0} {http_referer ""}} {
-    Returns the result of POSTing to another Web server or -1 if there is an error or timeout.
-    formvars should be in the form \"arg1=value1&arg2=value2\".
-    <p>
-    post is encoded as application/x-www-form-urlencoded.  See util_http_file_upload
-    for file uploads via post (encoded multipart/form-data).
-    <p>
-    @see util_http_file_upload
-} {
-    if { [catch {
-        if {[incr depth] > 10} {
-            return -code error "util_httppost:  Recursive redirection:  $url"
-        }
-        set http [util_httpopen POST $url "" $timeout $http_referer]
-        set rfd [lindex $http 0]
-        set wfd [lindex $http 1]
-
-        #headers necessary for a post and the form variables
-
-        _ns_http_puts $timeout $wfd "Content-type: application/x-www-form-urlencoded \r"
-        _ns_http_puts $timeout $wfd "Content-length: [string length $formvars]\r"
-        _ns_http_puts $timeout $wfd \r
-        _ns_http_puts $timeout $wfd "$formvars\r"
-        flush $wfd
-        close $wfd
-
-        set rpset [ns_set new [_ns_http_gets $timeout $rfd]]
-        while 1 {
-            set line [_ns_http_gets $timeout $rfd]
-            if { $line eq "" } break
-            ns_parseheader $rpset $line
-        }
-
-        set headers $rpset
-        set response [ns_set name $headers]
-        set status [lindex $response 1]
-        if {$status == 302} {
-            set location [ns_set iget $headers location]
-            if {$location ne ""} {
-                ns_set free $headers
-                close $rfd
-                return [util_httpget $location {}  $timeout $depth]
-            }
-        }
-        set length [ns_set iget $headers content-length]
-        if { "" eq $length } {set length -1}
-        set type [ns_set iget $headers content-type]
-        set_encoding $type $rfd
-        set err [catch {
-            while 1 {
-                set buf [_ns_http_read $timeout $rfd $length]
-                append page $buf
-                if { "" eq $buf } break
-                if {$length > 0} {
-                    incr length -[string length $buf]
-                    if {$length <= 0} break
-                }
-            }
-        } errMsg]
-        ns_set free $headers
-        close $rfd
-        if {$err} {
-            return -code error -errorinfo $::errorInfo $errMsg
-        }
-    } errmgs ] } {return -1}
-    return $page
-}
-
-# system by Tracy Adams (teadams@arsdigita.com) to permit AOLserver to POST
-# to another Web server; sort of like ns_httpget
-
-ad_proc -deprecated -public util_httpopen {
-    method
-    url
-    {rqset ""}
-    {timeout 30}
-    {http_referer ""}
-} {
-    Like ns_httpopen but works for POST as well; called by util_httppost
-} {
-
-    if { ![string match "http://*" $url] } {
-        return -code error "Invalid url \"$url\":  _httpopen only supports HTTP"
-    }
-    set url [split $url /]
-    set hp [split [lindex $url 2] :]
-    set host [lindex $hp 0]
-    set port [lindex $hp 1]
-    if { [string match $port ""] } {set port 80}
-    set uri /[join [lrange $url 3 end] /]
-    set fds [ns_sockopen -nonblock $host $port]
-    set rfd [lindex $fds 0]
-    set wfd [lindex $fds 1]
-    if { [catch {
-        _ns_http_puts $timeout $wfd "$method $uri HTTP/1.0\r"
-        _ns_http_puts $timeout $wfd "Host: $host\r"
-        if {$rqset ne ""} {
-            for {set i 0} {$i < [ns_set size $rqset]} {incr i} {
-                _ns_http_puts $timeout $wfd \
-                    "[ns_set key $rqset $i]: [ns_set value $rqset $i]\r"
-            }
-        } else {
-            _ns_http_puts $timeout $wfd \
-                "Accept: */*\r"
-
-            _ns_http_puts $timeout $wfd "User-Agent: Mozilla/1.01 \[en\] (Win95; I)\r"
-            _ns_http_puts $timeout $wfd "Referer: $http_referer \r"
-        }
-
-    } errMsg] } {
-        #close $wfd
-        #close $rfd
-        if { [info exists rpset] } {ns_set free $rpset}
-        return -1
-    }
-    return [list $rfd $wfd ""]
-
-}
-
-ad_proc -deprecated -public util_http_file_upload { -file -data -binary:boolean -filename
-    -name {-mime_type */*} {-mode formvars}
-    {-rqset ""} url {formvars {}} {timeout 30}
-    {depth 10} {http_referer ""}
-} {
-    Implement client-side HTTP file uploads as multipart/form-data as per
-    RFC 1867.
-    <p>
-
-    Similar to <a href="proc-view?proc=util_httppost">util_httppost</a>,
-    but enhanced to be able to upload a file as <tt>multipart/form-data</tt>.
-    Also useful for posting to forms that require their input to be encoded
-    as <tt>multipart/form-data</tt> instead of as
-    <tt>application/x-www-form-urlencoded</tt>.
-
-    <p>
-
-    The switches <tt>-file /path/to/file</tt> and <tt>-data
-    $raw_data</tt> are mutually exclusive.  You can specify one or the
-    other, but not both.  NOTE: it is perfectly valid to not specify
-    either, in which case no file is uploaded, but form variables are
-    encoded using <tt>multipart/form-data</tt> instead of the usual
-    encoding (as noted aboved).
-
-    <p>
-
-    If you specify either <tt>-file</tt> or <tt>-data</tt> you
-    <strong>must</strong> supply a value for <tt>-name</tt>, which is
-    the name of the <tt>&lt;INPUT TYPE="file" NAME="..."&gt;</tt> form
-    tag.
-
-    <p>
-
-    Specify the <tt>-binary</tt> switch if the file (or data) needs
-    to be base-64 encoded.  Not all servers seem to be able to handle
-    this.  (For example, http://mol-stage.usps.com/mml.adp, which
-            expects to receive an XML file doesn't seem to grok any kind of
-            Content-Transfer-Encoding.)
-
-    <p>
-
-    If you specify <tt>-file</tt> then <tt>-filename</tt> is optional
-    (it can be inferred from the name of the file).  However, if you
-    specify <tt>-data</tt> then it is mandatory.
-
-    <p>
-
-    If <tt>-mime_type</tt> is not specified then <tt>ns_guesstype</tt>
-    is used to try and find a mime type based on the <i>filename</i>.
-    If <tt>ns_guesstype</tt> returns <tt>*/*</tt> the generic value
-    of <tt>application/octet-stream</tt> will be used.
-
-    <p>
-
-    Any form variables may be specified in one of four formats:
-    <ul>
-    <li><tt>array</tt> (list of key value pairs like what [array get] returns)
-    <li><tt>formvars</tt> (list of url encoded formvars, i.e. foo=bar&x=1)
-    <li><tt>ns_set</tt> (an ns_set containing key/value pairs)
-    <li><tt>vars</tt> (a list of Tcl vars to grab from the calling environment)
-    </ul>
-
-    <p>
-
-    <tt>-rqset</tt> specifies an ns_set of extra headers to send to
-    the server when doing the POST.
-
-    <p>
-
-    timeout, depth, and http_referer are optional, and are included
-    as optional positional variables in the same order they are used
-    in <tt>util_httppost</tt>.  NOTE: <tt>util_http_file_upload</tt> does
-    not (currently) follow any redirects, so depth is superfulous.
-
-    @author Michael A. Cleverly (michael@cleverly.com)
-    @creation-date 3 September 2002
-
-    @see util::http::post
-} {
-
-    # sanity checks on switches given
-    if {$mode ni {formvars array ns_set vars}} {
-        error "Invalid mode \"$mode\"; should be one of: formvars,\
-            array, ns_set, vars"
-    }
-
-    if {[info exists file] && [info exists data]} {
-        error "Both -file and -data are mutually exclusive; can't use both"
-    }
-
-    if {[info exists file]} {
-        if {![file exists $file]} {
-            error "Error reading file: $file not found"
-        }
-
-        if {![file readable $file]} {
-            error "Error reading file: $file permission denied"
-        }
-
-        set fp [open $file]
-        fconfigure $fp -translation binary
-        set data [read $fp]
-        close $fp
-
-        if {![info exists filename]} {
-            set filename [file tail $file]
-        }
-
-        if {$mime_type eq "*/*" || $mime_type eq ""} {
-            set mime_type [ns_guesstype $file]
-        }
-    }
-
-    set boundary [ns_sha1 [list [clock clicks -milliseconds] [clock seconds]]]
-    set payload {}
-
-    if {[info exists data] && [string length $data]} {
-        if {![info exists name]} {
-            error "Cannot upload file without specifing form variable -name"
-        }
-
-        if {![info exists filename]} {
-            error "Cannot upload file without specifing -filename"
-        }
-
-        if {$mime_type eq "*/*" || $mime_type eq ""} {
-            set mime_type [ns_guesstype $filename]
-
-            if {$mime_type eq "*/*" || $mime_type eq ""} {
-                set mime_type application/octet-stream
-            }
-        }
-
-        if {$binary_p} {
-            set data [base64::encode base64]
-            set transfer_encoding base64
-        } else {
-            set transfer_encoding binary
-        }
-
-        append payload --$boundary \
-            \r\n \
-            "Content-Disposition: form-data; " \
-            "name=\"$name\"; filename=\"$filename\"" \
-            \r\n \
-            "Content-Type: $mime_type" \
-            \r\n \
-            "Content-transfer-encoding: $transfer_encoding" \
-            \r\n \
-            \r\n \
-            $data \
-            \r\n
-    }
-
-
-    set variables [list]
-    switch -- $mode {
-        array {
-            set variables $formvars
-        }
-
-        formvars {
-            foreach formvar [split $formvars &] {
-                set formvar [split $formvar  =]
-                set key [lindex $formvar 0]
-                set val [join [lrange $formvar 1 end] =]
-                lappend variables $key $val
-            }
-        }
-
-        ns_set {
-            for {set i 0} {$i < [ns_set size $formvars]} {incr i} {
-                set key [ns_set key $formvars $i]
-                set val [ns_set value $formvars $i]
-                lappend variables $key $val
-            }
-        }
-
-        vars {
-            foreach key $formvars {
-                upvar 1 $key val
-                lappend variables $key $val
-            }
-        }
-    }
-
-    foreach {key val} $variables {
-        append payload --$boundary \
-            \r\n \
-            "Content-Disposition: form-data; name=\"$key\"" \
-            \r\n \
-            \r\n \
-            $val \
-            \r\n
-    }
-
-    append payload --$boundary-- \r\n
-
-    if { [catch {
-        if {[incr depth -1] <= 0} {
-            return -code error "util_http_file_upload:\
-                Recursive redirection: $url"
-        }
-
-        lassign [util_httpopen POST $url $rqset $timeout $http_referer] rfd wfd
-
-        _ns_http_puts $timeout $wfd \
-            "Content-type: multipart/form-data; boundary=$boundary\r"
-        _ns_http_puts $timeout $wfd "Content-length: [string length $payload]\r"
-        _ns_http_puts $timeout $wfd \r
-        _ns_http_puts $timeout $wfd "$payload\r"
-        flush $wfd
-        close $wfd
-
-        set rpset [ns_set new [_ns_http_gets $timeout $rfd]]
-        while 1 {
-            set line [_ns_http_gets $timeout $rfd]
-            if { $line eq "" } break
-            ns_parseheader $rpset $line
-        }
-
-        set headers $rpset
-        set response [ns_set name $headers]
-        set status [lindex $response 1]
-        set length [ns_set iget $headers content-length]
-        if { "" eq $length } { set length -1 }
-        set type [ns_set iget $headers content-type]
-        set_encoding $type $rfd
-        set err [catch {
-            while 1 {
-                set buf [_ns_http_read $timeout $rfd $length]
-                append page $buf
-                if { "" eq $buf } break
-                if {$length > 0} {
-                    incr length -[string length $buf]
-                    if {$length <= 0} break
-                }
-            }
-        } errMsg]
-
-        ns_set free $headers
-        close $rfd
-
-        if {$err} {
-            return -code error -errorinfo $::errorInfo $errMsg
-        }
-    } errmsg] } {
-        if {[info exists wfd] && $wfd in [file channels]} {
-            close $wfd
-        }
-
-        if {[info exists rfd] && $rfd in [file channels]} {
-            close $rfd
-        }
-
-        set page -1
-    }
-
-    return $page
-}
 
 #
 # Local variables:

@@ -1,8 +1,8 @@
 ad_library {
-    
+
     Initializes mappings of package directories to URLs.
 
-    @cvs-id $Id: acs-subsite-init.tcl,v 1.2.28.1 2015/09/10 08:21:35 gustafn Exp $
+    @cvs-id $Id: acs-subsite-init.tcl,v 1.3.2.1 2019/05/16 09:27:52 gustafn Exp $
     @author Richard Li
     @creation-date 12 August 2000
 

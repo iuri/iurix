@@ -5,7 +5,7 @@ ad_page_contract {
     @author Gustaf Neumann
 
     @creation-date 2003-05-28
-    @cvs-id $Id: application-delete.tcl,v 1.6.2.2 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: application-delete.tcl,v 1.8.2.1 2019/03/13 11:30:21 antoniop Exp $
 } {
     {node_id:naturalnum,multiple ""}
     {package_id:naturalnum,multiple ""}
@@ -24,7 +24,7 @@ foreach id $package_id {
 ns_log notice "package_id <$package_id> node_id <$node_id>"
 
 set num [expr {[llength $node_id] + [llength $package_id]}]
-set page_title "Delete [ad_decode $num 1 "Application" "Applications"]"
+set page_title "Delete [expr {$num == 1 ? "Application" : "Applications"}]"
 set context [list [list "." "Applications"] $page_title]
 set yes_url [export_vars -base [ad_conn url] { node_id:multiple package_id:multiple return_url { confirm_p 1 } }]
 set no_url $return_url
@@ -34,7 +34,7 @@ if { !$confirm_p } {
 
     if { $num == 0 } {
         ad_returnredirect .
-        return
+        ad_script_abort
     }
 
     append listing <ul>\n
@@ -90,6 +90,7 @@ db_transaction {
 }
      
 ad_returnredirect $return_url
+ad_script_abort
 
 
 #

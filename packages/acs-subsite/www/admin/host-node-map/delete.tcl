@@ -1,7 +1,7 @@
 ad_page_contract {
     @author Mark Dettinger (mdettinger@arsdigita.com)
     @creation-date 2000-10-24
-    @cvs-id $Id: delete.tcl,v 1.4.2.1 2015/09/10 08:21:43 gustafn Exp $
+    @cvs-id $Id: delete.tcl,v 1.6 2018/01/19 14:09:48 gustafn Exp $
 } {
     host
     node_id:naturalnum,notnull
@@ -17,6 +17,7 @@ db_dml host_node_delete {
 }
 
 ad_returnredirect index
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

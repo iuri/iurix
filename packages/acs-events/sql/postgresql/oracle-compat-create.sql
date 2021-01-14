@@ -5,7 +5,7 @@
 -- @author jowell@jsabino.com
 -- @creation-date 2001-06-26
 --
--- $Id: oracle-compat-create.sql,v 1.5.4.1 2017/04/21 15:50:24 gustafn Exp $
+-- $Id: oracle-compat-create.sql,v 1.7 2018/03/31 11:29:28 gustafn Exp $
 
 
 
@@ -40,21 +40,21 @@ BEGIN
 	             when 'SUNDAY'    then 1
 	             when 'SUN'       then 1
 		     when 'MONDAY'    then 2
-		     when 'MON'	then 2
-		     when 'TUESDAY'	then 3
-		     when 'TUES'	then 3
-		     when 'TUE'	then 3
+		     when 'MON'	      then 2
+		     when 'TUESDAY'   then 3
+		     when 'TUES'      then 3
+		     when 'TUE'	      then 3
 		     when 'WEDNESDAY' then 4
-		     when 'WED'	then 4
-		     when 'WEDS'	then 4
+		     when 'WED'	      then 4
+		     when 'WEDS'      then 4
 		     when 'THURSDAY'  then 5
-		     when 'THURS'	then 5
-		     when 'THUR'	then 5
-		     when 'THU'	then 5
-		     when 'FRIDAY'	then 6
-		     when 'FRI'	then 6
-		     when 'SATURDAY'	then 7
-		     when 'SAT'	then 7
+		     when 'THURS'     then 5
+		     when 'THUR'      then 5
+		     when 'THU'	      then 5
+		     when 'FRIDAY'    then 6
+		     when 'FRI'	      then 6
+		     when 'SATURDAY'  then 7
+		     when 'SAT'	      then 7
 		     else -1
 		end) into v_dow
        from dual;

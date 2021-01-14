@@ -4,7 +4,7 @@
 
   @creation-date 2016-03-22
   @author Gustaf Neumann
-  @cvs-id $Id: xowiki-mode-procs.tcl,v 1.1.2.1 2016/03/23 11:57:25 gustafn Exp $
+  @cvs-id $Id: xowiki-mode-procs.tcl,v 1.3.2.2 2020/08/26 18:46:08 gustafn Exp $
 }
 
 namespace eval ::xowiki {
@@ -42,10 +42,13 @@ namespace eval ::xowiki {
     }
 
     :public method toggle {} {
+      #
+      # Switch state of the toggle
+      #
       set oldState [:get]
       :set [expr {!$oldState}]
     }
-    
+
     :public method set {value:boolean} {
       #
       # Set the mode to the specified value
@@ -62,11 +65,14 @@ namespace eval ::xowiki {
   ::xowiki::Mode create ::xowiki::mode::admin {
     :public object method default {} {
       # Admins are per default in admin-mode
-      return [::xo::cc permission -object_id [xo::cc package_id] -privilege admin -party_id [xo::cc user_id]]
+      return [::xo::cc permission \
+                  -object_id [xo::cc package_id] \
+                  -privilege admin \
+                  -party_id [xo::cc user_id]]
     }
   }
   #
-  # one might create more such mode handler e.g. in an -init.tcl file.
+  # one might create more such mode handler e.g. in a *-init.tcl file.
   #
 }
 

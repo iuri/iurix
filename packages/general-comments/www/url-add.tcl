@@ -1,14 +1,14 @@
 # /packages/general-comments/www/url-add.tcl
 
 ad_page_contract {
-    Attaches a url to a comment
+    Attaches a URL to a comment
 
     @param parent_id The id of the comment to attach to
     
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: url-add.tcl,v 1.5.2.2 2016/05/21 10:15:38 gustafn Exp $
+    @cvs-id $Id: url-add.tcl,v 1.7 2018/05/01 08:49:35 gustafn Exp $
 } {
     parent_id:notnull,naturalnum
     { return_url:localurl {} }

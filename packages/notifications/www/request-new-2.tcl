@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-24
-    @cvs-id $Id: request-new-2.tcl,v 1.4.2.2 2016/05/21 10:18:18 gustafn Exp $
+    @cvs-id $Id: request-new-2.tcl,v 1.7 2018/06/07 17:09:17 hectorr Exp $
 } {
     type_id:naturalnum,notnull
     object_id:naturalnum,notnull
@@ -14,8 +14,8 @@ ad_page_contract {
 
 set user_id [ad_conn user_id]
 
-# Check that the object can be subcribed to
-notification::security::require_notify_object -object_id $object_id
+# Check that the object can be subscribed to
+permission::require_permission -party_id $user_id -object_id $object_id -privilege "read"
 
 # Add the request
 notification::request::new \
@@ -27,7 +27,7 @@ notification::request::new \
 
 ad_returnredirect $return_url
 
-        
+
 
 # Local variables:
 #    mode: tcl

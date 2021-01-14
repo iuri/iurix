@@ -3,10 +3,10 @@ ad_page_contract {			#
 
     TODO: Support to merge more than two accounts at the same time
 
-    @cvs-id $Id: merge.tcl,v 1.6.2.3 2016/09/13 10:53:35 gustafn Exp $
+    @cvs-id $Id: merge.tcl,v 1.8 2018/02/02 00:04:50 gustafn Exp $
 } {
     user_id:naturalnum,notnull
-    user_id_from_search
+    user_id_from_search:naturalnum,notnull
 } -properties {
     context:onevalue
     first_names:onevalue

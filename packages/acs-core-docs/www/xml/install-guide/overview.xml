@@ -38,7 +38,7 @@
     </listitem>
   </orderedlist>
 
-  <para> Specific instructions are available for Mac OS X and
+  <para> Specific instructions are available for macOS and
     Windows2000 (see <xref linkend="mac-installation"/> or
     <xref linkend="win2k-installation"/>).</para>
 
@@ -302,7 +302,7 @@ createdb <replaceable>$OPENACS_SERVICE_NAME</replaceable></action></screen>
         </para>
       </listitem>
     </itemizedlist>
-    <para><phrase role="cvstag">($Id: overview.xml,v 1.29.2.2 2016/06/23 08:32:46 gustafn Exp $)</phrase></para>
+    <para><phrase role="cvstag">($Id: overview.xml,v 1.31 2018/07/04 10:20:42 gustafn Exp $)</phrase></para>
   </sect2>
 
 </sect1>

@@ -5,7 +5,7 @@
 -- Authors:      Michael Pih (pihman@arsdigita.com)
 --               Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: content-type.sql,v 1.11.8.2 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: content-type.sql,v 1.13 2018/04/05 07:04:40 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -182,10 +182,10 @@ begin
   select 
     decode(count(*),0,0,1) into table_exists 
   from 
-    user_tables u, acs_object_types objet
+    user_tables u, acs_object_types object
   where 
-    objet.object_type = drop_type.content_type and
-    u.table_name = upper(objet.table_name);
+    object.object_type = drop_type.content_type and
+    u.table_name = upper(object.table_name);
 
   if table_exists = 1 and drop_table_p = 't' then
     select 

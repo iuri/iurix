@@ -17,7 +17,7 @@ ad_page_contract {
 
     @author philg@mit.edu
     @creation-date 12/19/98
-    @cvs-id $Id: display-sql.tcl,v 1.8.2.2 2016/05/28 15:39:53 gustafn Exp $
+    @cvs-id $Id: display-sql.tcl,v 1.9 2017/08/07 23:47:54 gustafn Exp $
 } {
     url:notnull
     {package_key:token ""}

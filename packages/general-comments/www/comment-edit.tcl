@@ -1,14 +1,14 @@
 # /packages/general-comments/www/comment-edit.tcl
 
 ad_page_contract {
-    Displays a form for editing a commment
+    Displays a form for editing a comment
     
     @param comment_id The id of the comment to edit
     
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-edit.tcl,v 1.6.2.2 2016/05/21 10:15:38 gustafn Exp $
+    @cvs-id $Id: comment-edit.tcl,v 1.9 2018/03/25 22:39:35 hectorr Exp $
 } { 
     comment_id:naturalnum,notnull
     { revision_id:naturalnum {} }
@@ -47,6 +47,7 @@ if { ![db_0or1row get_comment {
            r.revision_id = :revision_id
 }] } {
     ad_return_complaint 1 "The comment_id does not refer to a valid comment."
+    ad_script_abort
 }
 
 set page_title "[_ general-comments.Edit_comment_on]: [acs_object_name $object_id]"

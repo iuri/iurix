@@ -8,10 +8,11 @@ ad_page_contract {
     @author Lars Pind (lars@pinds.com)
     @creation-date 1 July 2000
     
-    @cvs-id $Id: content-page-view.tcl,v 1.10.2.4 2016/05/19 23:58:34 gustafn Exp $
+    @cvs-id $Id: content-page-view.tcl,v 1.17 2018/07/26 09:57:28 gustafn Exp $
 } {
     version_id:naturalnum,optional
     source_p:boolean,optional,trim,notnull
+    {compiled_p:boolean,optional,trim,notnull 0}
     path:trim,notnull
 } -properties {
     title:onevalue
@@ -26,11 +27,22 @@ set default_source_p [ad_get_client_property -default 0 acs-api-browser api_doc_
 
 if { ![info exists source_p] } {
     set source_p $default_source_p
-    if {$source_p eq ""} {set source_p 0}
+    if {$source_p eq ""} {
+        set source_p 0
+    }
+}
+#
+# Allow compiled_p only for swas
+#
+if {$compiled_p && ![acs_user::site_wide_admin_p]} {
+    set complied_p 0
 }
 
-if { ![info exists version_id] && 
-        [regexp {^packages/([^ /]+)/} $path . package_key] } {
+#
+# If there is no version_id, try to get if from the provided path
+#
+if { ![info exists version_id]
+     && [regexp {^/?packages/([^ /]+)/} $path . package_key] } {
     db_0or1row version_id_from_package_key {
         select version_id 
           from apm_enabled_package_versions 
@@ -60,35 +72,52 @@ if {![file readable $::acs::rootdir/$path] || [file isdirectory $::acs::rootdir/
     } else {
 	set link [subst {<p>Go back to <a href="[ns_quotehtml [ad_conn package_url]]">API Browser</a>.}]
     }
-    ad_return_warning "No such content page" [subst {
-	The file '$path' was not found. Maybe the url contains a typo.
-	$link
-    }]
-    return
-}
+    ad_return_warning \
+        "No such content page" \
+        [subst {
+            The file '$path' was not found. Maybe the url contains a typo.
+            $link
+        }]
+    ad_script_abort
 
-set mime_type [ns_guesstype $path]
-if {![string match "text/*" $mime_type] && [file extension $path] ne ".xql"} {
-    set source_p 0
-    set source_link 0
 } else {
-    set source_link 1
-}
-if { $source_p } {
-    set file_contents [template::util::read_file $::acs::rootdir/$path]
-    if {[file extension $path] eq ".tcl"} {
-        set file_contents [apidoc::tclcode_to_html $file_contents]
+
+    set mime_type [ns_guesstype $path]
+    if {![string match "text/*" $mime_type] && [file extension $path] ne ".xql"} {
+        set source_p 0
+        set source_link 0
     } else {
-        set file_contents [ns_quotehtml $file_contents]
+        set source_link 1
     }
+    if { $source_p } {
+        set contents_title "File Contents"
+        set file_contents [template::util::read_file $::acs::rootdir/$path]
+        set compiled_file_contents ""
+        switch [file extension $path] {
+            ".tcl" {
+                set file_contents [apidoc::tclcode_to_html $file_contents]
+            }
+            ".adp" {
+                if {$compiled_p} {
+                    set contents_title "Compiled ADP File"
+                    set file_contents [apidoc::tclcode_to_html [template::adp_compile -file $::acs::rootdir/$path]]
+                } else {
+                    set file_contents [ns_quotehtml $file_contents]
+                }
+            }
+            default {
+                set file_contents [ns_quotehtml $file_contents]
+            }
+        }
+    }
+
+    template::util::list_to_multirow xql_links [::apidoc::xql_links_list \
+                                                    -include_compiled [acs_user::site_wide_admin_p] \
+                                                    $path]
+    set title [file tail $path]
+    set script_documentation [api_script_documentation $path]
+
 }
-
-template::util::list_to_multirow xql_links [::apidoc::xql_links_list $path]
-
-
-set title [file tail $path]
-set script_documentation [api_script_documentation $path]
-
 
 # Local variables:
 #    mode: tcl

@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date Fri Oct 13 08:45:58 2000
-    @cvs-id $Id: package-deinstall.tcl,v 1.3.2.2 2015/09/18 07:39:03 gustafn Exp $
+    @cvs-id $Id: package-deinstall.tcl,v 1.5 2018/01/20 22:45:12 gustafn Exp $
 } {
     version_id:naturalnum
 }
@@ -26,6 +26,7 @@ db_transaction {
     if {![apm_version_installed_p $version_id] } {
 	ad_return_complaint 1 "Database Error: The database returned the following error
 	message <pre><blockquote>[ns_quotehtml $errmsg]</blockquote></pre>"
+        ad_script_abort
     }
 }
 

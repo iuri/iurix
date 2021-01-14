@@ -2,7 +2,7 @@ ad_library {
 
     Set up a scheduled process to send out email messages.
 
-    @cvs-id $Id: acs-messaging-init.tcl,v 1.4.2.1 2015/09/10 08:21:32 gustafn Exp $
+    @cvs-id $Id: acs-messaging-init.tcl,v 1.5 2017/08/07 23:47:57 gustafn Exp $
     @author John Prevost <jmp@arsdigita.com>
     @creation-date 2000-10-28
 

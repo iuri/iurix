@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 6 Nov 2000
-    @cvs-id $Id: simple-add-2.tcl,v 1.9.2.1 2015/09/12 11:06:20 gustafn Exp $
+    @cvs-id $Id: simple-add-2.tcl,v 1.11 2018/01/19 14:18:32 gustafn Exp $
 } {
     folder_id:naturalnum,notnull
     title:notnull,trim
@@ -37,7 +37,7 @@ if { [string is false [permission::permission_p -party_id $user_id -object_id $f
 fs::do_notifications -folder_id $folder_id -filename $url -item_id $item_id -action "new_url"
 
 ad_returnredirect "?folder_id=$folder_id"
-
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

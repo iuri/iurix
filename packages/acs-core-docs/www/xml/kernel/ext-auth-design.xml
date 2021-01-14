@@ -65,7 +65,7 @@ Marklund
     
     @param authority_id The ID of the authority to ask to verify the user. Defaults to local authority.
     @param username Authority specific username of the user.
-    @param passowrd The password as the user entered it.
+    @param password The password as the user entered it.
     
 }
 </literal>
@@ -305,12 +305,12 @@ auth::registration::get_optional_attributes
 
     <sect2>
       <sect2info>
-        <title>EXT-AUTH #4: Rewrite login &amp; register pagse to use
+        <title>EXT-AUTH #4: Rewrite login &amp; register pages to use
 APIs
 </title>
       </sect2info>
 
-      <sect2 id="ext-auth_#4__rewrite_login_&amp;_register_pagse_">
+      <sect2 id="ext-auth_#4__rewrite_login_&amp;_register_pages_">
         <title>EXT-AUTH
 #4: Rewrite login &amp; register pages to use APIs
 </title>
@@ -397,7 +397,7 @@ ad_form -name user_add -form {
    }
    # TODO: form builder validation of account_status
    # We&#39;re logged in
-   ad_returnrediredt $return_url
+   ad_returnredirect $return_url
    ad_script_abort
 }
 </programlisting>
@@ -425,7 +425,7 @@ switch $registratoin_info(reg_status) {
     }
 }
 # User is registered and logged in
-ad_returnrediredt $return_url
+ad_returnredirect $return_url
 </programlisting>
             </sect3>
             <sect3>
@@ -701,7 +701,7 @@ ad_proc -public auth::password::get_forgotten_url {
 ad_proc -public auth::password::can_retrieve_p {
     {-authority_id:required}
 } {
-    Returns whether the given authority can retrive forgotten passwords. 
+    Returns whether the given authority can retrieve forgotten passwords. 
     
     @param authority_id The ID of the authority that the user is trying to log into.
     @return 1 if the authority allows retrieving passwords, 0 otherwise.
@@ -1955,7 +1955,7 @@ around June 6).
         <title>Internal Design
 </title>
         <para>We keep a record of which authenticated users have requested
-pags on the site in the last x minutes (typically about 5), and
+pages on the site in the last x minutes (typically about 5), and
 thus are considered to be currently online. We&#39;ve already made the
 changes necessary to security-procs.tcl to do this on an earlier
 project, but haven&#39;t quite finished the work and put it back into
@@ -2289,7 +2289,7 @@ ad_proc -public auth::authority::new {
    }
 }
 ad_proc -public auth::authority::delete {
-  {-authority_id:requied}
+  {-authority_id:required}
 } {
    db_exec delete_authority {
       delete from auth_authorities 

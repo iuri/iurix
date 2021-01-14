@@ -10,8 +10,9 @@
 main text markers to divvy the Tcl library file into neat
 compartments: namespace, procedure and directive. Each of these
 divisions has its own text marker(s). In the end, your Tcl file
-should look somthing like this:
+should look something like this:
 <blockquote><pre><code><kbd>
+
 [------------------------------------------------------]
 [------  <em>ignored text at beginning of file</em>  -----------]
 [------------------------------------------------------]
@@ -31,7 +32,7 @@ should look somthing like this:
      # <font color="red">\@param</font><em>&lt;name&gt;</em><em>&lt;default value&gt;</em><em>&lt;description&gt;</em>
      # <em>&lt;continued description&gt;</em>
 
-     # <font color="red">\@param</font> ... <em>&lt;info for other paramaters&gt;</em>
+     # <font color="red">\@param</font> ... <em>&lt;info for other parameters&gt;</em>
 
      # <font color="red">\@option</font><em>&lt;name&gt;</em><em>&lt;default value&gt;</em><em>&lt;description&gt;</em>
      # <em>&lt;continued description&gt;</em>
@@ -109,7 +110,8 @@ When default-value information is not included, the entry value
 will be marked as <em>required</em> if it is a parameter, or
 display no information if it is an option.
 <p>For example: the fictional procedure grant_permission might be
-preceded by these comments:</p><blockquote><pre><code># \@public grant_permission
+preceded by these comments:</p><blockquote><pre><code>
+# \@public grant_permission
 # checks for whether or not a user has the privilege 
 # to manipulate an object in a specific manner
 
@@ -132,7 +134,7 @@ In the above example <code>user_id</code> and
 <code>object_id</code> would be marked as required,
 <code>alert_admin_email</code> would show no default-value
 description, and <code>granter_id</code> and
-<code>privilege_id</code> would show the the default info from
+<code>privilege_id</code> would show the default info from
 above.
 <p>On to <strong>\@see</strong> directive markers:</p><blockquote># \@see <em>&lt;type of reference&gt;</em><em>&lt;name
 of reference&gt;</em><em>&lt;url of
@@ -143,7 +145,7 @@ all namespaces will be described within their own static html page,
 and all procedure information is anchor-referenced:
 <blockquote><pre><code>
 # \@see namespace util util.html
-# \@see proc template::multirow::create multiow.html#template::multirow::create
+# \@see proc template::multirow::create multirow.html#template::multirow::create
 # \@see url <em>&lt;a picture of wally my dog&gt;</em> http://my.page.net/dogs/wally.jpg
 # \@see proc doc::util::eat_chicken
 </code></pre></blockquote>

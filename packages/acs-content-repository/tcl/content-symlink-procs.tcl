@@ -1,13 +1,10 @@
-# 
-
 ad_library {
     
     Procedures for content symlink
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
-    @arch-tag: 31c66882-e912-4db4-84fe-8a2b0890ffb0
-    @cvs-id $Id: content-symlink-procs.tcl,v 1.6.2.1 2015/09/10 08:21:17 gustafn Exp $
+    @cvs-id $Id: content-symlink-procs.tcl,v 1.8 2018/08/15 16:24:28 gustafn Exp $
 }
 
 namespace eval ::content::symlink {}

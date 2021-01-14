@@ -4,7 +4,7 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-10-23
-  @cvs-id $Id: delete.tcl,v 1.2.2.5 2017/04/22 18:15:50 gustafn Exp $
+  @cvs-id $Id: delete.tcl,v 1.4 2018/01/19 14:16:01 gustafn Exp $
 } {
   template_demo_note_id:naturalnum,notnull,multiple
 } -validate {
@@ -26,6 +26,7 @@ foreach template_demo_note_id $template_demo_note_id {
 cache flush notes*
 
 ad_returnredirect "./"
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

@@ -4,7 +4,7 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-10-23
-  @cvs-id $Id: index.tcl,v 1.2.14.1 2015/09/10 08:22:13 gustafn Exp $
+  @cvs-id $Id: index.tcl,v 1.3 2017/08/07 23:48:02 gustafn Exp $
 } -properties {
   notes:multirow
 }

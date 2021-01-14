@@ -6,7 +6,7 @@
 -- @author Bruno Mattarollo (bruno.mattarollo@ams.greenpeace.org)
 --
 -- @creation-date 2000-09-10
--- @cvs-id $Id: message-catalog.sql,v 1.14.14.1 2017/04/21 16:06:05 gustafn Exp $
+-- @cvs-id $Id: message-catalog.sql,v 1.15.2.1 2020/08/25 13:38:12 antoniop Exp $
 --
 
 create table lang_user_timezone (
@@ -26,6 +26,14 @@ create table lang_message_keys (
                        on delete cascade
                        constraint lang_message_keys_p_key_nn
                        not null,
+
+    -- This optional column allows to bind the message key to the
+    -- lifetime of an acs_object: upon object's deletion, the message
+    -- key will be automatically deleted from the system.
+    object_id          integer constraint lang_message_keys_object_id_fk
+                       references acs_objects(object_id)
+                       on delete cascade,
+
     description        clob,
     constraint lang_message_keys_pk
     primary key (message_key, package_key)

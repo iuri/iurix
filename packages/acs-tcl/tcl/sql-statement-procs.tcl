@@ -2,12 +2,12 @@ ad_library {
     Procs for manipulating SQL statements
 
     @author lars@pinds.com, May 2000
-    @cvs-id $Id: sql-statement-procs.tcl,v 1.4.2.1 2015/09/10 08:21:59 gustafn Exp $
+    @cvs-id $Id: sql-statement-procs.tcl,v 1.5.2.1 2019/11/22 16:21:43 gustafn Exp $
 
     How to use this:
 
     You simply call ad_sql_append any number of times, then ad_sql_get to feed to the database.
-    What you gain from using these two procs is that the parts of the sql statement will
+    What you gain from using these two procs is that the parts of the SQL statement will
     always be output in the right sequence.
 
 
@@ -27,7 +27,7 @@ ad_proc -public ad_sql_get {
 } {
     @param sqlarrayname array reference
 
-    @return a sql statement constructed from the pieces provided via ad_sql_append
+    @return a SQL statement constructed from the pieces provided via ad_sql_append
 
     @see ad_sql_append
 } {

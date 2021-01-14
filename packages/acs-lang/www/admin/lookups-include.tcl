@@ -1,4 +1,11 @@
-# Include takes arguments full_key and message_key_list
+ad_include_contract {
+    Display message key occurrences on the system.
+
+    Note: upstream codebase seems to not mention this file anywhere.
+} {
+    package_key:token,notnull
+    message_key_list:notnull
+}
 
 set full_key_pattern "${package_key}.([join $message_key_list "|"])"
 

@@ -74,17 +74,6 @@
 </fullquery>
 
  
-<fullquery name="package_insert_default_comment.select_comments">      
-      <querytext>
-      
-	    select acs_object__name(:user_id) as author,
-	           current_timestamp as creation_date
-	      
-	
-      </querytext>
-</fullquery>
-
- 
 <fullquery name="package_object_attribute_list.attributes_select">      
       <querytext>
 
@@ -224,19 +213,12 @@ select 1;
 </partialquery>
 
 
-<partialquery name="package_attribute_default.creation_date">      
-      <querytext>now()</querytext>
-</partialquery>
-
-<partialquery name="package_attribute_default.last_modified">      
-      <querytext>now()</querytext>
-</partialquery>
-
 <fullquery name="package_function_p.function_p">      
       <querytext>
 	select 1 from dual
       </querytext>
 </fullquery>
+
 
 <fullquery name="package_exec_plsql.exec_func_plsql">      
       <querytext>

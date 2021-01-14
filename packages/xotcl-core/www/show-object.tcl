@@ -1,8 +1,8 @@
 ad_page_contract {
-  Show an xotcl class or object
-  
+  Show an XOTcl class or object
+
   @author Gustaf Neumann
-  @cvs-id $Id: show-object.tcl,v 1.22.2.21 2017/07/31 08:17:18 gustafn Exp $
+  @cvs-id $Id: show-object.tcl,v 1.27.2.5 2020/08/08 08:08:20 gustafn Exp $
 } -query {
   {object:nohtml,trim ::xotcl::Object}
   {show_methods:range(0|2),notnull 1}
@@ -36,7 +36,7 @@ if {$scope ne ""} {
 }
 
 if {!$isobject} {
-  ad_return_complaint 1 "Unable to access object '$object'. 
+  ad_return_complaint 1 "Unable to access object '$object'.
     Might this be a temporary object?"
   ad_script_abort
 }
@@ -45,7 +45,7 @@ if {$scope ne ""} {
   auth::require_login
 }
 
-interp alias {} DO {} ::xo::api scope_eval $scope 
+interp alias {} DO {} ::xo::api scope_eval $scope
 
 # get object fully qualified
 set object [DO namespace origin $object]
@@ -162,7 +162,7 @@ proc class_summary {c scope} {
     #
     set llength [expr {8 + [string length $c]}]
     set pstart "&nbsp;\\<br>[string repeat {&nbsp;} 10]"
-    
+
     foreach p $parameters {
       if {[llength $p]>1} {
         lassign $p p default
@@ -174,7 +174,7 @@ proc class_summary {c scope} {
     }
   }
   append line "<p>\n"
-  
+
   return "<pre>$line</pre>"
 }
 
@@ -202,10 +202,10 @@ if {$isclass} {
   }
 
   # Display just up to two extra two levels of heritage to keep the
-  # class in quesiton in focus.
+  # class in question in focus.
   set heritage [DO xo::getObjectProperty $object heritage]
   set subclasses [DO xo::getObjectProperty $object subclass]
-  
+
   if {[llength $heritage] > $above} {
     # In case we have nothing to show from the subclasses,
     # show one more superclass to provide a better overview.
@@ -215,9 +215,9 @@ if {$isclass} {
     if {[llength $heritage] > $above} {
       set heritage [lrange $heritage 0 $above-1]
     }
-  } 
+  }
   lappend class_hierarchy {*}$heritage
-  
+
   if {$object ni $class_hierarchy} {
     lappend class_hierarchy $object
   }
@@ -244,7 +244,11 @@ if {[nsv_exists api_library_doc $index]} {
   if { [info exists doc_elements(param)] && [llength $doc_elements(param)] > 0} {
     append output "<dt><b>Documented Parameters:</b></dt><dd><dl>\n"
     foreach par $doc_elements(param) {
-      append output "<dt><em>-[lindex $par 0]</em></dt><dd>[lrange $par 1 end]</dd>\n"
+      if {[regexp {^\s*(\S+)\s*(.*)$} $par . param desc]} {
+        append output "<dt><em>$param</em></dt><dd>$desc</dd>\n"
+      } else {
+        ad_log warning "show_object: ignoring invalid parameter description <$par>"
+      }
     }
     append output "</dl></dd>"
   }
@@ -258,7 +262,7 @@ if {[nsv_exists api_library_doc $index]} {
     append output "<dt><b>Created:</b>\n<dd>[lindex $doc_elements(creation-date) 0]\n"
   }
   if { [info exists doc_elements(author)] } {
-    append output "<dt><b>Author[ad_decode [llength $doc_elements(author)] 1 "" "s"]:</b>\n"
+    append output "<dt><b>Author[expr {[llength $doc_elements(author)] > 1 ? "s" : ""}]:</b>\n"
     foreach author $doc_elements(author) {
       append output "<dd>[::apidoc::format_author $author]\n"
     }
@@ -303,7 +307,7 @@ if {$show_source} {
 
 proc api_src_doc {out show_source scope object proc m} {
   set output "<a name='$proc-$m'></a><li>$out"
-  if { $show_source } { 
+  if { $show_source } {
     append output \
         "<pre class='code'>" \
         [::apidoc::tcl_to_html [::xo::api proc_index $scope $object $proc $m]] \
@@ -353,7 +357,7 @@ if {$show_methods} {
         set out [local_api_documentation -proc_type $type $show_methods $scope $object instproc $m]
         if {$out ne ""} {
           append method_output "<a name='instproc-$m'></a><li>$out"
-          if { $show_source } { 
+          if { $show_source } {
             append method_output \
                 "<pre class='code'>" \
                 [::apidoc::tcl_to_html [::xo::api proc_index $scope $object instproc $m]] \
@@ -416,20 +420,25 @@ if {!$as_img} {
                     $class_hierarchy]
   set dot ""
   catch {set dot [::util::which dot]}
-  # final ressort for cases, where ::util::which is not available
+  # final resort for cases, where ::util::which is not available
   if {$dot eq "" && [file executable /usr/bin/dot]} {set dot /usr/bin/dot}
   if {$dot eq ""} {
     #ns_return 404 plain/text "dot not found"
     ns_log warning "program 'dot' is not available"
     #ad_script_abort
   } else {
- 
+
     set tmpnam [ad_tmpnam]
     set tmpfile $tmpnam.svg
     set f [open $tmpnam.dot w]; puts $f $dot_code; close $f
 
     #ns_log notice "svg $tmpnam dot $tmpnam.dot"
-    set f [open "|$dot  -Tsvg -o $tmpfile" w]; puts $f $dot_code; close $f
+    set f [open "|$dot  -Tsvg -o $tmpfile" w]; puts $f $dot_code
+    try {
+      close $f
+    } on error {errorMsg} {
+      ns_log warning "dot returned $errorMsg"
+    }
     set f [open  $tmpfile]; set svg [read $f]; close $f
 
     # delete the first three lines generated from dot

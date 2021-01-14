@@ -1,14 +1,14 @@
 ad_page_contract {
-    
+
     Offers links to other pages, and lets the user type the name of a specific procedure.
     If about_package_key is set to an installed package, then this page will automatically
     return /package-view page for the package-key, which is a handy way of integrating
     static docs with evolving api, especially for core packages.
 
-    @about_package_key a package-key
+    @param  about_package_key a package-key
     @author Jon Salz (jsalz@mit.edu)
     @author Lars Pind (lars@pinds.com)
-    @cvs-id $Id: index.tcl,v 1.7.2.2 2016/05/14 12:38:51 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.11.2.2 2020/09/01 14:13:51 antoniop Exp $
 } {
     about_package_key:token,trim,optional
 } -properties {
@@ -29,9 +29,16 @@ if  { [info exists about_package_key] } {
     multirow create disabled_packages
     multirow create uninstalled_packages
 
-    if { [db_0or1row get_local_package_version_id {} ] } {
+    if { [db_0or1row get_local_package_version_id {
+        select min(version_id)
+          from apm_package_version_info
+        where installed_p = 't'
+          and enabled_p = 't'
+          and package_key = :about_package_key
+    }] } {
         rp_form_update version_id $version_id
         rp_internal_redirect package-view
+        ad_script_abort
     }
 
 } else {

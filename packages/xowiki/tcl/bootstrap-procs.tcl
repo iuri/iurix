@@ -4,16 +4,17 @@
   @creation-date 2014-04-14
   @author Günter Ernst
   @author Gustaf Neumann
-  @cvs-id $Id: bootstrap-procs.tcl,v 1.3.2.20 2017/05/31 09:56:48 antoniop Exp $
+  @cvs-id $Id: bootstrap-procs.tcl,v 1.11.2.16 2020/08/08 08:08:20 gustafn Exp $
 }
 
 ::xo::library require menu-procs
+::xo::library require -package xotcl-core 30-widget-procs
 
 namespace eval ::xowiki {
   # minimal implementation of Bootstrap "navbar"
   # currently only "dropdown" elements are supported within the navbar
-  # TODO: add support to include: 
-  # - forms 
+  # TODO: add support to include:
+  # - forms
   # - buttons
   # - text
   # - Non-nav links
@@ -29,36 +30,25 @@ namespace eval ::xowiki {
         {containerClass "container-fluid"}
         {navbarClass "navbar navbar-default navbar-static-top"}
       }
-  
+
   BootstrapNavbar instproc init {} {
-    ::xo::Page requireJS "/resources/xowiki/jquery/jquery.min.js"
-    set css [parameter::get_global_value -package_key xowiki -parameter BootstrapCSS] 
-    set js  [parameter::get_global_value -package_key xowiki -parameter BootstrapJS]
-    #
-    # TODO: We should dynamically be able to determine (some of) the
-    # CSP directives. However, for the time being, the urls below are
-    # trusted.
-    #
-    security::csp::require script-src maxcdn.bootstrapcdn.com
-    security::csp::require style-src maxcdn.bootstrapcdn.com
-    security::csp::require font-src maxcdn.bootstrapcdn.com
-    
-    foreach url $css {::xo::Page requireCSS $url}
-    foreach url $js  {::xo::Page requireJS  $url}
+    ::xo::Page requireJS urn:ad:js:jquery
+    ::xo::Page requireCSS urn:ad:css:bootstrap3
+    ::xo::Page requireJS  urn:ad:js:bootstrap3
     next
   }
 
- 
+
   BootstrapNavbar ad_instproc render {} {
     http://getbootstrap.com/components/#navbar
   } {
-    html::nav -class [my navbarClass] -role "navigation" {
+    html::nav -class [:navbarClass] -role "navigation" {
       #
-      # Render the pull down menues
-      # 
-      html::div -class [my containerClass] {
+      # Render the pull down menus
+      #
+      html::div -class [:containerClass] {
         set rightMenuEntries {}
-        foreach entry [my children] {
+        foreach entry [:children] {
           if {[$entry istype ::xowiki::BootstrapNavbarDropdownMenu]} {
             $entry render
           } else {
@@ -74,36 +64,38 @@ namespace eval ::xowiki {
         }
       }
     }
-  }              
-  
+  }
+
 
   #
   # BootstrapNavbarDropdownMenu
-  #  
+  #
   ::xo::tdom::Class create BootstrapNavbarDropdownMenu \
       -superclass Menu \
       -parameter {
         text
         header
         {brand false}
-      }    
+      }
 
   BootstrapNavbarDropdownMenu ad_instproc render {} {doku} {
     # TODO: Add support for group-headers
     # get group header
     set group " "
-    
+
     html::ul -class "nav navbar-nav" {
       html::li -class "dropdown" {
         set class "dropdown-toggle"
-        if {[my brand]} {lappend class "navbar-brand"}
+        if {[:brand]} {lappend class "navbar-brand"}
         html::a -href "\#" -class $class -data-toggle "dropdown" {
-          html::t [my text] 
+          html::t [:text]
           html::b -class "caret"
         }
         html::ul -class "dropdown-menu" {
-          foreach dropdownmenuitem [my children] {
-            if {[$dropdownmenuitem set group] ne "" && [$dropdownmenuitem set group] ne $group } {
+          foreach dropdownmenuitem [:children] {
+            if {[$dropdownmenuitem set group] ne ""
+                && [$dropdownmenuitem set group] ne $group
+              } {
               if {$group ne " "} {
                 html::li -class "divider"
               }
@@ -115,33 +107,33 @@ namespace eval ::xowiki {
       }
     }
   }
-  
+
   #
   # BootstrapNavbarDropdownMenuItem
-  #  
+  #
   ::xo::tdom::Class create BootstrapNavbarDropdownMenuItem \
       -superclass MenuItem \
       -parameter {
         {href "#"}
         helptext
-      }        
-  
+      }
+
   BootstrapNavbarDropdownMenuItem ad_instproc render {} {doku} {
-    html::li -class [expr {[my set href] eq "" ? "disabled": ""}] {
-      html::a [my get_attributes target href title id] {
-        html::t [my text]
+    html::li -class [expr {${:href} eq "" ? "disabled": ""}] {
+      html::a [:get_attributes target href title id] {
+        html::t ${:text}
       }
     }
-    if {[my exists listener] && [my set listener] ne ""} {
-      lassign [my listener] type body
-      template::add_event_listener -event $type -id [my set id] \
+    if {[info exists :listener] && ${:listener} ne ""} {
+      lassign ${:listener} type body
+      template::add_event_listener -event $type -id ${:id} \
           -preventdefault=false -script $body
     }
   }
-  
+
   #
   # BootstrapNavbarDropzone
-  #  
+  #
   ::xo::tdom::Class create BootstrapNavbarDropzone \
       -superclass MenuComponent \
       -parameter {
@@ -151,7 +143,7 @@ namespace eval ::xowiki {
       }
 
   BootstrapNavbarDropzone instproc js {-uploadlink:required} {
-    html::script -type "text/javascript" -nonce $::__csp_nonce {
+    html::script -type "text/javascript" -nonce [security::csp::nonce] {
       html::t [subst -nocommands {
         + function($) {
           'use strict';
@@ -160,11 +152,11 @@ namespace eval ::xowiki {
           var uploadForm = document.getElementById('js-upload-form');
           var progressBar = document.getElementById('dropzone-progress-bar');
           var uploadFileRunning = 0;
-          
+
           var startUpload = function(files, csrf) {
             if (typeof files !== "undefined") {
               for (var i=0, l=files.length; i<l; i++) {
-                 // Send the file as multiple single requests and 
+                 // Send the file as multiple single requests and
                  // not as a single post containing all entries. This
                  // gives users with older NaviServers or AOLserver the chance
                  // drop multiple files.
@@ -232,7 +224,7 @@ namespace eval ::xowiki {
     }
   }
 
- 
+
   BootstrapNavbarDropzone ad_instproc render {} {doku} {
     if {${:href} ni {"" "#"}} {
       html::li {
@@ -252,7 +244,7 @@ namespace eval ::xowiki {
       }
       html::li {
         html::div -class "upload-drop-zone" -id "drop-zone" {
-          html::t "DropZone"
+          html::span {html::t "DropZone"}
           html::div -class "progress" {
             html::div -style "width: 0%;" -class "progress-bar" -id dropzone-progress-bar {
               html::span -class "sr-only" {html::t ""}
@@ -260,13 +252,13 @@ namespace eval ::xowiki {
           }
         }
       }
-      my js -uploadlink ${:href}&uploader=${:uploader}
+      :js -uploadlink ${:href}&uploader=${:uploader}
     }
   }
 
   #
   # BootstrapNavbarModeButton
-  #  
+  #
   ::xo::tdom::Class create BootstrapNavbarModeButton \
       -superclass MenuItem \
       -parameter {
@@ -275,14 +267,14 @@ namespace eval ::xowiki {
         {button}
         {CSSclass "checkbox-slider--b-flat"}
         {spanStyle "padding-left: 6px; padding-right: 6px;"}
-      }        
+      }
 
   BootstrapNavbarModeButton instproc js {} {
     #
     # In the current implementation, the page refreshes itself after
     # successful mode change. This could be made configurable.
     #
-    html::script -type "text/javascript" -nonce $::__csp_nonce {
+    html::script -type "text/javascript" -nonce [security::csp::nonce] {
       html::t {
         function mode_button_ajax_submit(form) {
           $.ajax({
@@ -295,26 +287,26 @@ namespace eval ::xowiki {
         };
       }
       html t [subst {
-        document.getElementById('[my id]').addEventListener('click', function (event) {
+        document.getElementById('[:id]').addEventListener('click', function (event) {
           mode_button_ajax_submit(this.form);
         });
       }]
     }
   }
-  
+
   BootstrapNavbarModeButton ad_instproc render {} {doku} {
     html::li {
       html::form -class "form" -method "POST" -action ${:href} {
         html::div -class "checkbox ${:CSSclass}" {
           html::label -class "checkbox-inline" {
             set checked [expr {${:on} ? {-checked true} : ""}]
-            html::input -id [my id] -class "debug form-control" -name "debug" -type "checkbox" {*}$checked
+            html::input -id [:id] -class "debug form-control" -name "debug" -type "checkbox" {*}$checked
             html::span -style ${:spanStyle} {html::t ${:text}}
             html::input -name "modebutton" -type "hidden" -value "${:button}"
           }
         }
       }
-      my js
+      :js
     }
   }
 
@@ -345,46 +337,46 @@ namespace eval ::xowiki {
   #
   # ::xo::library source_dependent
   # =======================================================
-  
-  
+
+
   # --------------------------------------------------------------------------
-  # Render MenuBar in bootstap fashion
+  # Render MenuBar in bootstrap fashion
   # --------------------------------------------------------------------------
   ::xowiki::MenuBar instproc render-bootstrap {} {
-    set dict [my content]
+    set dict [:content]
     set mb [::xowiki::BootstrapNavbar \
-                -id [my get_prop $dict id] \
+                -id [:get_prop $dict id] \
                 -menubar [self] {
                   foreach {att value} $dict {
                     if {$att eq "id"} continue
-                    switch [my get_prop $value kind] {
+                    switch [:get_prop $value kind] {
                       "DropZone" {
                         ::xowiki::BootstrapNavbarDropzone \
-                            -text [my get_prop $value label] \
-                            -href [my get_prop $value url] \
-                            -uploader [my get_prop $value uploader] {}
+                            -text [:get_prop $value label] \
+                            -href [:get_prop $value url] \
+                            -uploader [:get_prop $value uploader] {}
                       }
                       "ModeButton" {
                         template::head::add_css -href "/resources/xotcl-core/titatoggle/titatoggle-dist.css"
 
                         ::xowiki::BootstrapNavbarModeButton \
-                            -text [my get_prop $value label] \
-                            -href [my get_prop $value url] \
-                            -button [my get_prop $value button admin] \
-                            -on [my get_prop $value on] {}
+                            -text [:get_prop $value label] \
+                            -href [:get_prop $value url] \
+                            -button [:get_prop $value button admin] \
+                            -on [:get_prop $value on] {}
                       }
                       "MenuButton" {
                         # render erverthing as a dropdown
                         ::xowiki::BootstrapNavbarDropdownMenu \
-                            -text [my get_prop $value label] {
+                            -text [:get_prop $value label] {
                               #ns_log notice "... dropdown att $att menu $value"
                               foreach {item_att item} $value {
                                 if {[string match {[a-z]*} $item_att]} continue
                                 ::xowiki::BootstrapNavbarDropdownMenuItem \
-                                    -text [my get_prop $item label] \
-                                    -href [my get_prop $item url] \
-                                    -group [my get_prop $item group] \
-                                    -listener [my get_prop $item listener] \
+                                    -text [:get_prop $item label] \
+                                    -href [:get_prop $item url] \
+                                    -group [:get_prop $item group] \
+                                    -listener [:get_prop $item listener] \
                                     {}
                               }
                             }
@@ -412,18 +404,18 @@ namespace eval ::xo::Table {
 
   ::xowiki::BootstrapTable instproc init {} {
     set trn_mixin [expr {[lang::util::translator_mode_p] ?"::xo::TRN-Mode" : ""}]
-    my render_with BootstrapTableRenderer $trn_mixin
+    :render_with BootstrapTableRenderer $trn_mixin
     next
   }
-  
+
   Class create BootstrapTableRenderer \
       -superclass TABLE3 \
       -instproc init_renderer {} {
         next
-        my set css.table-class "table table-striped"
-        my set css.tr.even-class even
-        my set css.tr.odd-class odd
-        my set id [::xowiki::Includelet js_name [::xowiki::Includelet html_id [self]]]
+        set :css.table-class "table table-striped"
+        set :css.tr.even-class even
+        set :css.tr.odd-class odd
+        set :id [::xowiki::Includelet js_name [::xowiki::Includelet html_id [self]]]
       }
 
   BootstrapTableRenderer instproc render-body {} {
@@ -435,14 +427,29 @@ namespace eval ::xo::Table {
         }
       }
     }
-    set children [my children]
+    ad_try {
+      set children [:children]
+    } on error {errorMsg} {
+      html::div -class "alert alert-danger" {
+        html::span -class danger {
+          html::t $errorMsg
+        }
+      }
+      return
+    }
     html::tbody {
-      foreach line [my children] {
-        html::tr -class [expr {[my incr __rowcount]%2 ? [my set css.tr.odd-class] : [my set css.tr.even-class] }] {
+      foreach line [:children] {
+        html::tr -class [expr {[incr :__rowcount]%2 ? ${:css.tr.odd-class} : ${:css.tr.even-class} }] {
           foreach field [[self]::__columns children] {
             if {[$field hide]} continue
             if {[$field istype HiddenField]} continue
-            html::td  [concat [list class list] [$field html]] { 
+            if {![$field exists CSSclass]} {
+              # TODO: remove me when message does not show up
+              ns_log warning "CSSclass missing $field\n[$field serialize]"
+              $field set CSSclass ""
+            }
+            set CSSclass [list "list" {*}[$field CSSclass]]
+            html::td [concat [list class  $CSSclass] [$field html]] {
               $field render-data $line
             }
           }
@@ -454,72 +461,79 @@ namespace eval ::xo::Table {
   BootstrapTableRenderer instproc render-bulkactions {} {
     set bulkactions [[self]::__bulkactions children]
     html::div -class "btn-group" -role group -aria-label "Bulk actions" {
-      html::t "Bulk-Actions:"
+      html::t "#xotcl-core.Bulk_actions#:"
       set bulkaction_container [[lindex $bulkactions 0] set __parent]
       set name [$bulkaction_container set __identifier]
 
-      foreach ba $bulkactions {
-        set id [::xowiki::Includelet html_id $ba]
+      foreach bulk_action $bulkactions {
+        set id [::xowiki::Includelet html_id $bulk_action]
         html::ul -class compact {
           html::li {
+            #
             # For some reason, btn-secondary seems not to be available
             # for the "a" tag, so we set the border-color manually.
+            #
             html::a -class "btn btn-secondary" -rule button \
-                -title [$ba tooltip] -href # \
+                -title [$bulk_action tooltip] -href # \
                 -style "border-color: #ccc;" \
                 -id $id {
-                  html::t [$ba label]
+                  html::t [$bulk_action label]
                 }
           }
         }
-        template::add_body_script -script [subst {
-          document.getElementById('$id').addEventListener('click', function (event) {
-            acs_ListBulkActionClick('$name','[$ba url]');
-          }, false);
+        set script [subst {
+          acs_ListBulkActionClick("$name","[$bulk_action url]");
         }]
+        if {[$bulk_action confirm_message] ne ""} {
+          set script [subst {
+            if (confirm('[$bulk_action confirm_message]')) {
+              $script
+            }
+          }]
+        }
+        template::add_event_listener \
+            -id $id \
+            -preventdefault=false \
+            -script $script
       }
     }
   }
 
   BootstrapTableRenderer instproc render {} {
-    ::xo::Page requireCSS "//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"
-    security::csp::require style-src maxcdn.bootstrapcdn.com
-    security::csp::require font-src maxcdn.bootstrapcdn.com
-    
-    if {![my isobject [self]::__actions]} {my actions {}}
-    if {![my isobject [self]::__bulkactions]} {my __bulkactions {}}
+    ::xo::Page requireCSS urn:ad:css:bootstrap3
+
+    if {![nsf::is object [self]::__actions]} {:actions {}}
+    if {![nsf::is object [self]::__bulkactions]} {:__bulkactions {}}
     set bulkactions [[self]::__bulkactions children]
-    if {[llength $bulkactions]>0} {
+    if {[llength $bulkactions] > 0} {
       set name [[self]::__bulkactions set __identifier]
-    } else {
-      set name [::xowiki::Includelet js_name [self]]
-    }
-    if {[llength $bulkactions]>0} {
-      html::div -id [my set id]_wrapper -class "table-responsive" {
-        html::form -name $name -id $name -method POST { 
-          html::div -id [my set id]_container {
-            html::table -id [my set id] -class [my set css.table-class] {
-              my render-actions
-              my render-body
+      html::div -id ${:id}_wrapper -class "table-responsive" {
+        html::form -name $name -id $name -method POST {
+          html::div -id ${:id}_container {
+            html::table -id ${:id} -class ${:css.table-class} {
+              :render-actions
+              :render-body
             }
-            if {[llength $bulkactions]>0} { my render-bulkactions }
+            :render-bulkactions
           }
         }
       }
     } else {
-      #nesting forms inside a xowf page will place the action buttons at the wrong place!
-      html::div -id [my set id]_wrapper -class "table-responsive" {
-        html::div -id [my set id]_container {
-          html::table -id [my set id] -class [my set css.table-class] {
-            my render-actions
-            my render-body
+      set name [::xowiki::Includelet js_name [self]]
+      #
+      # Nesting forms inside an xowf page will place the action
+      # buttons at the wrong place!
+      #
+      html::div -id ${:id}_wrapper -class "table-responsive" {
+        html::div -id ${:id}_container {
+          html::table -id ${:id} -class ${:css.table-class} {
+            :render-actions
+            :render-body
           }
-          if {[llength $bulkactions]>0} { my render-bulkactions }
         }
       }
     }
   }
-
   #Class create BootstrapTableRenderer::AnchorField -superclass TABLE::AnchorField
 
   Class create BootstrapTableRenderer::AnchorField \
@@ -532,11 +546,11 @@ namespace eval ::xo::Table {
             </ul>
         " \
       -instproc render-data {line} {
-        set __name [my name]
-        if {[$line exists $__name.href] &&
-            [set href [$line set $__name.href]] ne ""} {
+        set __name ${:name}
+        if {[$line exists $__name.href]
+            && [set href [$line set $__name.href]] ne ""
+          } {
           # use the CSS class rather from the Field than not the line
-          my instvar CSSclass
           $line instvar [list $__name.title title] [list $__name.target target]
           if {[$line exists $__name.onclick]} {
             set id [::xowiki::Includelet html_id $line]
@@ -544,8 +558,9 @@ namespace eval ::xo::Table {
                 -id $id \
                 -script "[$line set $__name.onclick];"
           }
-          html::a [my get_local_attributes href title {CSSclass class} target id] {
-            return "[next]"
+          set CSSclass ${:CSSclass}
+          html::a [:get_local_attributes href title {CSSclass class} target id] {
+            return [next]
           }
         }
         next

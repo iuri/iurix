@@ -3,7 +3,7 @@ ad_library {
 
     @creation-date 23 October 2000
     @author Peter Marklund (peter@collaboraid.biz)
-    @cvs-id $Id: acs-lang-init.tcl,v 1.9.24.1 2015/09/10 08:21:25 gustafn Exp $
+    @cvs-id $Id: acs-lang-init.tcl,v 1.10 2017/08/07 23:47:56 gustafn Exp $
 }
 
 # Cache I18N messages in memory for fast lookups

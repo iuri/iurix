@@ -1,12 +1,12 @@
 ad_page_contract {
     Parameters page.
-    
+
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-06-13
-    @cvs-id $Id: parameters.tcl,v 1.21.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: parameters.tcl,v 1.25.2.4 2020/10/17 16:41:27 gustafn Exp $
 } {
     {package_id:naturalnum "[ad_conn package_id]"}
-    package_key:optional
+    package_key:token,optional
     {scope "instance"}
     {return_url:localurl,optional "[ad_conn url]?[ad_conn query]"}
     {section ""}
@@ -14,7 +14,7 @@ ad_page_contract {
 
 if { $scope eq "global" } {
     permission::require_permission \
-        -object_id [acs_lookup_magic_object security_context_root] \
+        -object_id [acs_magic_object security_context_root] \
         -privilege admin
     db_1row select_pretty_name {}
 
@@ -48,17 +48,17 @@ if { $package_url eq [subsite::get_element -element url] } {
 if { $scope ne "global" } {
 
     if {![info exists package_key] || $package_key eq ""} {
-	set package_key [apm_package_key_from_id $package_id]
+        set package_key [apm_package_key_from_id $package_id]
     }
     set global_parameters [db_list get_global_parameters {
-	select parameter_name from apm_parameters where package_key = :package_key and scope = 'global'
-    }] 
+        select parameter_name from apm_parameters where package_key = :package_key and scope = 'global'
+    }]
     if {[llength $global_parameters] > 0} {
-	#
-	# Just provide a link to the global parameters in case these exist
-	#
-	set global_parameter_label [join [lsort $global_parameters] ", "]
-	set global_param_url [export_vars -base /shared/parameters {package_key return_url package_id {scope global}}]
+        #
+        # Just provide a link to the global parameters in case these exist
+        #
+        set global_parameter_label [join [lsort $global_parameters] ", "]
+        set global_param_url [export_vars -base /shared/parameters {package_key return_url package_id {scope global}}]
     }
 }
 
@@ -82,15 +82,9 @@ if {$section ne ""} {
 array set sections {}
 
 db_foreach select_params {} {
-    if { $section_name eq "" } {
-        set section_name "main"
-        set section_pretty "Main"
-    } else {
-        set section_name [string map {- {_} " " {_}} $section_name]
-        set section_pretty [string map {_ { }} $section_name]
-        set section_pretty "[string toupper [string index $section_pretty 0]][string range $section_pretty 1 end]"
-    }
-    
+    set section_name [string map {- {_} " " {_}} $section_name]
+    set section_pretty [string totitle [string map {_ { }} $section_name]]
+
     if { ![info exists sections($section_name)] } {
         set sec [list "-section" $section_name {legendtext "$section_pretty"}]
         ad_form -extend -name parameters -form [list $sec]
@@ -101,7 +95,7 @@ db_foreach select_params {} {
         set focus_elm $parameter_name
     }
 
-    switch $datatype {
+    switch -- $datatype {
         text {
             set widget textarea
             set html [list cols 100 rows 15]
@@ -117,15 +111,17 @@ db_foreach select_params {} {
                  [list html $html]]
 
     set file_val [ad_parameter_from_file $parameter_name $package_key]
-    if { $file_val ne "" } { 
-        set display_warning_p 1 
-        lappend elm [list after_html "<br><span style=\"color: red; font-weight: bold;\">$file_val (*)</span>"]
+    if { $file_val ne "" } {
+        set display_warning_p 1
+        lappend elm [list after_html [subst {
+            <br><span style="color: red; font-weight: bold;">$file_val (*)</span>
+        }]]
     }
-    
+
     ad_form -extend -name parameters -form [list $elm]
 
     set param($parameter_name) $attr_value
-    
+
     incr counter
 }
 
@@ -143,16 +139,14 @@ if { $counter > 0 } {
             if { [info exists $c__parameter_name] } {
                 if { $scope eq "instance" } {
                     parameter::set_value \
-	                -package_id $package_id \
-	                -parameter $c__parameter_name \
-	                -value [set $c__parameter_name]
-                    callback subsite::parameter_changed -package_id $package_id -parameter $c__parameter_name -value [set $c__parameter_name]
+                        -package_id $package_id \
+                        -parameter $c__parameter_name \
+                        -value [set $c__parameter_name]
                 } else {
                     parameter::set_global_value \
                         -package_key $package_key \
                         -parameter $c__parameter_name \
                         -value [set $c__parameter_name]
-                    callback subsite::global_parameter_changed -package_key $package_key -parameter $c__parameter_name -value [set $c__parameter_name]
                 }
             }
         }

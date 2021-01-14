@@ -4,7 +4,7 @@ ad_page_contract {
     @param repository_id 
     @author Jon Griffin (jon@jongriffin.com)
     @creation-date 17 Sept 2001
-    @cvs-id $Id: view-one-reference.tcl,v 1.4.2.2 2016/01/02 17:39:23 gustafn Exp $
+    @cvs-id $Id: view-one-reference.tcl,v 1.5 2017/08/07 23:47:57 gustafn Exp $
 } {
     repository_id:naturalnum,notnull
 } -properties {

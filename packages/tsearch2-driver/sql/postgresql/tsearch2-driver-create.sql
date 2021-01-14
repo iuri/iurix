@@ -3,8 +3,7 @@
 -- 
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2004-06-05
--- @arch-tag: 25662a8a-e960-4888-bd9f-3e7a8fff5637
--- @cvs-id $Id: tsearch2-driver-create.sql,v 1.2 2005/02/17 17:18:25 jeffd Exp $
+-- @cvs-id $Id: tsearch2-driver-create.sql,v 1.3 2018/08/15 16:53:10 gustafn Exp $
 --
 
 -- FIXME need to load tsearch2.sql from postgresql/share/contrib

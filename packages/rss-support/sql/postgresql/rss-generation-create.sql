@@ -75,8 +75,8 @@ BEGIN
     PERFORM acs_attribute__create_attribute (
 	  'rss_gen_subscr',			-- object_type
 	  'LASTBUILD',				-- attribute_name
-	  'integer',				-- datatype
-	  'Last Build',			-- pretty_name
+	  'timestamp',				-- datatype
+	  'Last Build',			        -- pretty_name
 	  'Last Builds',			-- pretty_plural
 	  null,					-- table_name
 	  null,					-- column_name
@@ -122,6 +122,8 @@ create table rss_gen_subscrs (
    constraint rss_gen_subscrs_impl_con_un
    unique (impl_id,summary_context_id)
 );
+
+create index rss_gen_subscrs_lastbuild_idx on rss_gen_subscrs(lastbuild);
 
 comment on table rss_gen_subscrs is '
    Table for storing the different parts of the site we will generate

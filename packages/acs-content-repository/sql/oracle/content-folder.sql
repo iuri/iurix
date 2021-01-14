@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: content-folder.sql,v 1.22.10.1 2017/04/21 17:14:16 antoniop Exp $
+-- $Id: content-folder.sql,v 1.23 2017/08/07 23:47:46 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:

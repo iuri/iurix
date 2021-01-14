@@ -3,12 +3,13 @@ ad_page_contract {
 
     @author Peter Marklund (peter@collaboraid.biz)
     @creation-date 2002-10-07
-    @cvs-id $Id: reload-cache.tcl,v 1.1.24.1 2015/09/10 08:21:30 gustafn Exp $
+    @cvs-id $Id: reload-cache.tcl,v 1.3 2018/01/19 21:23:51 gustafn Exp $
 }
 
 lang::message::cache
 
 ad_returnredirect "index"
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

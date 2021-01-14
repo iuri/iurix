@@ -36,13 +36,15 @@
   <msg key="delete_all_instances">Alle %pretty_plural% dieses Wikis löschen</msg>
   <msg key="delete_all_items">Alle Einträge dieser Art löschen</msg>
   <msg key="delete_confirm">Löschen bestätigen?</msg>
+  <msg key="Delete_selected">Ausgewählte löschen</msg>
   <msg key="delete_title">Lösche diese Seite ...</msg>
   <msg key="details">Details</msg>
+  <msg key="duplicate">Duplizieren</msg>
   <msg key="edit">Bearbeiten</msg>
   <msg key="Edit_category">Kategorienbaum bearbeiten</msg>
   <msg key="edit_link">bearbeiten</msg>
   <msg key="edit_title">Diese Seite bearbeiten ...</msg>
-  <msg key="entries_using_form">Einträge für das Formular %form%</msg>
+  <msg key="entries_using_form">Einträge für Formular %form%</msg>
   <msg key="error-delete_entries_first">Dieses Formular wird noch von %count% Einträgen verwendet. Bitte löschen Sie diese, bevor Sie das Formular löschen.</msg>
   <msg key="error-form_constraint-invalid_characters">Form constraint enthält ungültige Zeichen</msg>
   <msg key="error-form_constraint-unknown_attribute">From field &#39;%name%&#39; (class %class%) enthält das unbekannte Attribut &#39;%entry%&#39;
@@ -130,12 +132,12 @@
   <msg key="listing_title">Inhaltsverzeichnis der %pretty_plural%</msg>
   <msg key="listing_title_all">Liste aller Arten von %pretty_plural% </msg>
   <msg key="Manage_categories">Kategorien verwalten</msg>
-  <msg key="menu-Clipboard-Add">Hinzufügen</msg>
+  <msg key="menu-Clipboard-Add">Zum Clipboad hinzufügen</msg>
   <msg key="menu-Clipboard-Clear">Leeren</msg>
   <msg key="menu-Clipboard-Content">Inhalt</msg>
   <msg key="menu-Clipboard-Copy">Kopieren</msg>
-  <msg key="menu-Clipboard-Use-Copy">Kopieren</msg>
-  <msg key="menu-Clipboard-Use-Export">Export</msg>
+  <msg key="menu-Clipboard-Use-Copy">Inhalt in Ordner kopieren</msg>
+  <msg key="menu-Clipboard-Use-Export">Inhalt exportieren</msg>
   <msg key="menu-New">Neu</msg>
   <msg key="menu-New-File">Datei</msg>
   <msg key="menu-New-Folder">Ordner</msg>
@@ -150,10 +152,11 @@
   <msg key="menu-Package-Subscribe">Abonnieren</msg>
   <msg key="menu-Package-Toc">Inhaltsverzeichnis</msg>
   <msg key="menu-Page">Diese Seite</msg>
-  <msg key="menu-Page-Delete">Seite löschen</msg>
-  <msg key="menu-Page-Edit">Seite bearbeiten</msg>
+  <msg key="menu-Page-Delete">Löschen</msg>
+  <msg key="menu-Page-Edit">Bearbeiten</msg>
   <msg key="menu-Page-Revisions">Revisionen</msg>
-  <msg key="menu-Page-Show">Seite anzeigen</msg>
+  <msg key="menu-Page-Show">Objekt anzeigen</msg>
+  <msg key="menu-Page-View">Anzeigen</msg>
   <msg key="minute">Minute</msg>
   <msg key="minutes">Minuten</msg>
   <msg key="modified_page">die veränderte Seite</msg>
@@ -208,8 +211,8 @@
   <msg key="PodcastItem-subtitle">Untertitel</msg>
   <msg key="PodcastItem_pretty_name">Podcast Item</msg>
   <msg key="PodcastItem_pretty_plural">Podcast Items</msg>
-  <msg key="popular_tags_label">Häufig verwendete Schlagworte</msg>
-  <msg key="popular_tags_link">häufige Schlagworte</msg>
+  <msg key="popular_tags_label">Häufig verwendete Schlagwörter</msg>
+  <msg key="popular_tags_link">häufige Schlagwörter</msg>
   <msg key="portlet_page_does_not_exist_error_short">Die ausgewählte Seite existiert nicht</msg>
   <msg key="portlet_title_exists_error_long">Ändern Sie entweder den Namen des existierenden Portlets oder den Titel der Xowiki-Seite, die Sie zum Portal hinzufügen wollen.</msg>
   <msg key="portlet_title_exists_error_short">Es gibt bereits ein Portlet mit dem Titel &#39;%page_title%&#39; in diesem Portal.</msg>
@@ -252,9 +255,32 @@
   <msg key="week">Woche</msg>
   <msg key="weeks">Wochen</msg>
   <msg key="width">Breite</msg>
-  <msg key="workflow_definition-validate_workflow">%errorMsg%
-</msg>
+  <msg key="workflow_definition-validate_workflow">%errorMsg%</msg>
   <msg key="year">Jahr</msg>
   <msg key="years">Jahren</msg>
-  <msg key="your_tags_label">Persönliche Schlagworte</msg>
+  <msg key="your_tags_label">Persönliche Schlagwörter</msg>
+  <msg key="questions">Fragen</msg>
+  <msg key="answers">Antworten</msg>
+  <msg key="words">Wörter</msg>
+  <msg key="number">Zahl</msg>
+  <msg key="single_word">Einzelwort</msg>
+  <msg key="multiple_words">Mehrere Worte</msg>
+  <msg key="multiple_lines">Mehrere Zeilen</msg>
+  <msg key="file_upload">Dateiabgabe</msg>
+
+  <msg key="autosave_pending">geändert</msg>
+  <msg key="autosave_saved">Änderung gespeichert</msg>
+  <msg key="autosave_rejected">Änderung zurückgewiesen</msg>
+
+  <msg key="Urgency">Wichtigkeit</msg>
+  <msg key="urgency_low">niedrig</msg>
+  <msg key="urgency_normal">mittel</msg>    
+  <msg key="urgency_high">hoch</msg> 
+  <msg key="Send_message_to">Schicke Nachricht an</msg>
+  <msg key="Enter_message">Nachrichtentext</msg>  
+  <msg key="Message">Nachricht</msg>
+  <msg key="Send">Abschicken</msg>
+
+  <msg key="From">Von</msg>
+  <msg key="to">bis</msg>
 </message_catalog>

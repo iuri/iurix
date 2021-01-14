@@ -1,9 +1,9 @@
 ad_library {
-    Procs for driver paramaters service contract implementations.
+    Procs for driver parameters service contract implementations.
 
     @author Simon Carstensen (simon@collaobraid.biz)
     @creation-date 2003-08-27
-    @cvs-id $Id: driver-procs.tcl,v 1.7.12.2 2015/09/10 08:21:12 gustafn Exp $
+    @cvs-id $Id: driver-procs.tcl,v 1.13.2.1 2019/09/11 13:10:22 antoniop Exp $
 }
 
 namespace eval auth {}
@@ -17,7 +17,7 @@ namespace eval auth::driver {}
 #
 #####
 
-ad_proc -public auth::driver::get_parameters { 
+ad_proc -public auth::driver::get_parameters {
     {-impl_id:required}
 } {
     Returns a list of names of parameters for the driver
@@ -31,13 +31,13 @@ ad_proc -public auth::driver::get_parameters {
 
     set parameters {}
 
-    with_catch errmsg {
+    ad_try {
         set parameters [acs_sc::invoke \
                             -error \
                             -impl_id $impl_id \
                             -operation GetParameters]
-    } {
-        ns_log Error "Error getting parameters for impl_id $impl_id: $errmsg\n$::errorInfo"
+    } on error {errorMsg} {
+        ad_log Error "Error getting parameters for impl_id $impl_id: $errorMsg"
     }
     return $parameters
 }
@@ -88,7 +88,7 @@ ad_proc -public auth::driver::set_parameter_value {
     @creation-date 2003-08-27
 } {
     set exists_p [db_string param_exists_p {}]
- 
+
     if { $exists_p } {
         db_dml update_parameter {} -clobs [list $value]
     } else {
@@ -96,10 +96,14 @@ ad_proc -public auth::driver::set_parameter_value {
     }
 }
 
-ad_proc -public auth::driver::GetParameters { 
+ad_proc -deprecated -public auth::driver::GetParameters {
     {-impl_id:required}
 } {
     Returns a list of names of parameters for the driver
+
+    This proc duplicates auth::driver::get_parameters
+
+    @see auth::driver::get_parameters
 
     @author Simon Carstensen (simon@collaboraid.biz)
     @creation-date 2003-08-27

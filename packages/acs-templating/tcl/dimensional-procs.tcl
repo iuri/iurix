@@ -1,7 +1,7 @@
 ad_library {
     Definition of dimensional selection bar widget and helper functions.
 
-    @cvs-id $Id: dimensional-procs.tcl,v 1.1.2.5 2015/09/11 10:49:15 gustafn Exp $
+    @cvs-id $Id: dimensional-procs.tcl,v 1.3 2018/12/20 13:02:06 gernst Exp $
 }
 
 #
@@ -66,7 +66,10 @@ ad_proc ad_dimensional {
         set style [parameter::get \
                        -package_id [ad_conn subsite_id] \
                        -parameter DefaultDimensionalStyle \
-                       -default "dimensional"]
+                       -default [parameter::get \
+                                     -package_id [apm_package_id_from_key "acs-templating"] \
+                                     -parameter DefaultDimensionalStyle \
+                                     -default "dimensional"]]
     }
 
     #

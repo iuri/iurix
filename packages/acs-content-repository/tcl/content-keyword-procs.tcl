@@ -4,8 +4,7 @@ ad_library {
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
-    @arch-tag: dc56be97-e611-4f34-a5b6-264b46a6ad7b
-    @cvs-id $Id: content-keyword-procs.tcl,v 1.5 2014/10/27 16:39:11 victorg Exp $
+    @cvs-id $Id: content-keyword-procs.tcl,v 1.6.2.1 2019/03/13 10:11:27 antoniop Exp $
 }
 
 namespace eval ::content::keyword {}
@@ -254,11 +253,12 @@ ad_proc -public content::keyword::get_options_flat {
 } {
     Returns a flat options list of the keywords with the given parent_id.
 } {
-    return [db_list_of_lists select_keyword_options [subst {
-    select heading, keyword_id
-    from   cr_keywords
-    where  [ad_decode $parent_id "" "parent_id is null" "parent_id = :parent_id"]
-    order  by lower(heading)}]]
+    return [db_list_of_lists select_keyword_options {
+        select heading, keyword_id
+        from   cr_keywords
+        where  ((:parent_id is null and parent_id is null) or parent_id = :parent_id)
+        order  by lower(heading)
+    }]
 }
 
 ad_proc -public content::keyword::item_get_assigned {

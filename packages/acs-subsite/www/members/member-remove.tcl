@@ -3,7 +3,7 @@ ad_page_contract {
     
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-06-02
-    @cvs-id $Id: member-remove.tcl,v 1.4.2.2 2017/06/19 17:16:16 antoniop Exp $
+    @cvs-id $Id: member-remove.tcl,v 1.8 2018/01/05 22:40:56 gustafn Exp $
 } {
     user_id:naturalnum,multiple
     {return_url:localurl "."}
@@ -20,6 +20,7 @@ foreach id $user_id {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

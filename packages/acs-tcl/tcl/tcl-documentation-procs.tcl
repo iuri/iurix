@@ -8,7 +8,7 @@ ad_library {
     @author Bryan Quinn (bquinn@arsdigita.com)
 
     @creation-date 16 June 2000
-    @cvs-id tcl-documentation-procs.tcl,v 1.6 2002/09/23 11:25:02 jeffd Exp
+    @cvs-id $Id: tcl-documentation-procs.tcl,v 1.61.2.9 2020/11/27 09:27:43 gustafn Exp $
 }
 
 ####################
@@ -120,7 +120,7 @@ ad_proc -private ad_complaints_count {} {
     return [llength $::ad_page_contract_complaints]
 }
 
-ad_proc -private ad_complaints_get_list {} {
+ad_proc -public ad_complaints_get_list {} {
     Returns the list of complaints encountered so far.
 
     @author Lars Pind (lars@pinds.com)
@@ -201,7 +201,7 @@ ad_proc -private ad_page_contract_get_validation_passed_p { key } {
 ####################
 
 ad_proc ad_page_contract_eval { args } {
-    This just uplevels it's args. We need this proc, so that the return -code statements
+    This just uplevels its args. We need this proc, so that the return -code statements
     get processed correctly inside a catch block. This processing is namely done by the
     proc invocation.
 
@@ -231,8 +231,8 @@ ad_proc -public ad_page_contract {
     args
 } {
     Specifies the contract between programmer and graphic designer for a page.
-    When called with the magic "documentation-gathering" flag set (to
-                                                                   be defined), the proc will record the information about this page, so
+    When called with the magic "documentation-gathering" flag set
+    (to be defined), the proc will record the information about this page, so
     it can be displayed as documentation. When called during normal
     page execution, it will validate the query string and set
     corresponding variables in the caller's environment.
@@ -371,16 +371,20 @@ ad_proc -public ad_page_contract {
     <dd>Pluggable filter, installed by default, that makes sure the value is a natural number, i.e.
     non-decimal numbers >= 0.
 
+    <dt><a href="proc-view?proc=ad_page_contract_filter_proc_oneof"><b>oneof</b></a>
+    <dd>Pluggable filter, installed by default, that makes sure the value X contained in
+    the set of the provided values. Usage example: <code>color:oneof(red|blue|green)</code>
+
     <dt><a href="proc-view?proc=ad_page_contract_filter_proc_range"><b>range</b></a>
     <dd>Pluggable filter, installed by default, that makes sure the value X is in range
-    [Y, Z]. To use it say something like: <code>foo:(1|100)</code>
+    [Y, Z]. Usage example: <code>foo:range(1|100)</code>
 
     <dt><a href="proc-view?proc=ad_page_contract_filter_proc_nohtml"><b>nohtml</b></a>
     <dd>Pluggable filter, installed by default, that disallows any and all html.
 
     <dt><a href="proc-view?proc=ad_page_contract_filter_proc_html"><b>html</b></a>
-    <dd>Pluggable filter, installed by default, that only allows certain, safe allowed tags to pass (see
-                                                                                                     <a href="proc-view?proc=ad_html_security_check">ad_html_security_check</a>).
+    <dd>Pluggable filter, installed by default, that only allows certain, safe allowed tags to pass
+    (see <a href="proc-view?proc=ad_html_security_check">ad_html_security_check</a>).
     The purpose of screening naughty html is to prevent users from uploading
     HTML with tags that hijack page formatting or execute malicious code on the users's computer.
 
@@ -433,8 +437,8 @@ ad_proc -public ad_page_contract {
     can be used in place of flags
     (see <a href="proc-view?proc=ad_page_contract_filter"><code>ad_page_contract_filter</code></a>).
     There's also an interface for pluggable <b>filter rules</b>, which determine
-    what filters are applied to arguments (see <a
-                                           href="proc-view?proc=ad_page_contract_filter_rule"><code>ad_page_contract_filter_rule</code></a>).
+    what filters are applied to arguments
+    (see <a href="proc-view?proc=ad_page_contract_filter_rule"><code>ad_page_contract_filter_rule</code></a>).
 
     <p>
 
@@ -447,8 +451,8 @@ ad_proc -public ad_page_contract {
 
     <h3>Default Values</h3>
 
-    <strong>Default values</strong> are filled in from left to right (or top to
-                                                                      bottom), so it can depend on the values or variables that comes
+    <strong>Default values</strong> are filled in from left to right
+    (or top to bottom), so it can depend on the values or variables that comes
     before it, like in the example above. Default values are <strong>only used when
     the argument is not supplied</strong>, thus you can't use default values to override the
     empty string. (This behavior has been questioned and may have to
@@ -511,16 +515,17 @@ ad_proc -public ad_page_contract {
 
     <p>
 
-    @param docstring the documentation for your page;
-    will be parsed like ad_proc and ad_library.
+    @param docstring The documentation for your page;
+                     will be parsed like ad_proc and ad_library.
 
-    @param query the query arguments that this page accepts. The query
-    argument takes form of a list of argument specs. See above.
+    @param args If the first argument is not a switch, it should be the query arguments that this page accepts,
+                in the form of a list of argument specs. See above.
+                Otherwise, the query arguments can be passed with the -query switch.
 
-    @param properties what properties the resulting document will contain.
+    @param properties What properties the resulting document will contain.
 
     @param form Optionally supply the parameters directly here instead of fetching them from the page's form (ns_getform).
-    This should be a reference to an ns_set.
+                This should be a reference to an ns_set.
 
     @author Lars Pind (lars@pinds.com)
     @author Yonatan Feldman (yon@arsdigita.com)
@@ -536,20 +541,17 @@ ad_proc -public ad_page_contract {
     ####################
 
 
-    if { [llength $args] == 0 } {
-        set query [list]
-    } else {
+    set query [list]
 
+    if { [llength $args] > 0 } {
         set valid_args { validate errors return_errors properties }   ;# add type later
 
         # If the first arg isn't a switch, it should be the query
         if { [string index [lindex $args 0] 0] ne "-" } {
-            set query [lindex $args 0]
-            set args [lrange $args 1 end]
+            set args [lassign $args query]
         } else {
             # otherwise, accept a -query argument
             lappend valid_args query
-            set query [list]
         }
 
         ad_arg_parser $valid_args $args
@@ -626,7 +628,9 @@ ad_proc -public ad_page_contract {
             set apc_default_value($name) [lindex $element 1]
         }
 
-        set pre_flag_list [split [string tolower $flags] ,]
+        set pre_flag_list [split $flags ,]
+        # set pre_flag_list [split [string tolower $flags] ,]
+
         set flag_list [list]
 
         # find parameterized flags
@@ -652,7 +656,7 @@ ad_proc -public ad_page_contract {
         # Apply filter rules
         #
 
-        foreach filter_rule [nsv_array names ad_page_contract_filter_rules] {
+        foreach filter_rule [array names ::acs::ad_page_contract_filter_rules] {
             [ad_page_contract_filter_rule_proc $filter_rule] $name flag_list
         }
 
@@ -749,7 +753,7 @@ ad_proc -public ad_page_contract {
     }
 
     # If there are no query arguments to process, we're done
-    if { ![info exists query] || $query eq "" } {
+    if { $query eq "" } {
         return
     }
 
@@ -936,11 +940,11 @@ ad_proc -public ad_page_contract {
 
                 foreach filter $apc_filters($formal_name) {
                     set ::ad_page_contract_errorkeys [concat $formal_name:$filter $::ad_page_contract_errorkeys]
+                    set filter_proc [ad_page_contract_filter_proc $filter]
                     if { ![info exists apc_filter_parameters($formal_name:$filter)] } {
-                        set filter_ok_p [[ad_page_contract_filter_proc $filter] $formal_name actual_value]
+                        set filter_ok_p [$filter_proc $formal_name actual_value]
                     } else {
-                        set filter_ok_p [[ad_page_contract_filter_proc $filter] $formal_name actual_value \
-                                             $apc_filter_parameters($formal_name:$filter)]
+                        set filter_ok_p [$filter_proc $formal_name actual_value $apc_filter_parameters($formal_name:$filter)]
                     }
                     set ::ad_page_contract_errorkeys [lrange $::ad_page_contract_errorkeys 1 end]
 
@@ -1062,14 +1066,17 @@ ad_proc -public ad_page_contract {
             }
 
         } else {
-
-            # no value supplied for this arg spec
-
+            #
+            # No value supplied for this arg spec.
+            #
             if { [info exists apc_default_value($formal_name)] } {
-
-                # Only use the default value if there has been no complaints so far
-                # Why? Because if there are complaints, the page isn't going to serve anyway,
-                # and because one default value may depend on another variable having a correct value.
+                #
+                # Only use the default value if there has been no
+                # complaints so far Why? Because if there are
+                # complaints, the page isn't going to serve anyway,
+                # and because one default value may depend on another
+                # variable having a correct value.
+                #
                 if { [ad_complaints_count] == 0 } {
                     # we need to set the default value
                     if { [info exists apc_internal_filter($formal_name:array)] } {
@@ -1079,9 +1086,11 @@ ad_proc -public ad_page_contract {
                     }
                 }
 
-            } elseif { ![info exists apc_internal_filter($formal_name:optional)]} {
+            } elseif { ![info exists apc_internal_filter($formal_name:optional)]
+                       && ![info exists ::ad_page_contract_validations_passed($formal_name)] } {
                 #
-                # The element is not optional.
+                # The element is not optional and it was not already
+                # flagged by the notnull constraint.
                 #
                 # Before we complain, we check, if a multirow or array
                 # with the name are already defined in the target
@@ -1094,7 +1103,8 @@ ad_proc -public ad_page_contract {
                 #
                 set multirow_name $formal_name:rowcount
                 if {![uplevel $level [list info exists $multirow_name]]
-                    && ![uplevel $level [list info exists $formal_name]] } {
+                    && ![uplevel $level [list info exists $formal_name]]
+                } {
                     ad_complain -key $formal_name [_ acs-tcl.lt_You_must_supply_a_val]
                 }
             }
@@ -1188,12 +1198,12 @@ ad_proc -public ad_page_contract {
                 foreach elm [ad_complaints_get_list] {
                     template::multirow append complaints $elm
                 }
-                if {[catch {
+                ad_try {
                     set html [ad_parse_template \
                                   -params [list complaints [list context $::ad_page_contract_context] \
-                                               [list prev_url [get_referrer]] \
-                                              ] "/packages/acs-tcl/lib/complain"]
-                } errorMsg]} {
+                                               [list prev_url [util::get_referrer]] \
+                                              ] [template::themed_template "/packages/acs-tcl/lib/complain"]]
+                } on error {errorMsg} {
                     set errorCode $::errorCode
                     #
                     # Check, if we were called from "ad_script_abort" (intentional abortion)
@@ -1204,7 +1214,7 @@ ad_proc -public ad_page_contract {
                         #
                         return ""
                     }
-                    ad_log error "problem rendering complain page: $errorMsg ($errorCode)"
+                    ad_log error "problem rendering complain page: $errorMsg ($errorCode) $::errorInfo"
                     set html "Invalid input"
                 }
                 ns_return 422 text/html $html
@@ -1239,8 +1249,8 @@ ad_proc ad_include_contract {docstring args} {
 
     Define interface between a page and an <include> similar to the
     page_contract. This is a light-weight implementation based on the
-    ad_page_contract. It allows to check the passed arguments (types,
-                                                               optionality) and can be used for setting defaults the usual way.
+    ad_page_contract. It allows one to check the passed arguments (types,
+    optionality) and can be used for setting defaults the usual way.
     Using ad_include_contracts helps to improve documentation of
     included content.
 
@@ -1301,8 +1311,7 @@ ad_proc ad_include_contract {docstring args} {
 #
 ####################
 #
-# ad_page_contract_filters($flag) = [list $type $priority $proc_name $doc_string [info script]]
-#
+# ad_page_contract_filters($flag) = [list $type $proc_name $doc_string $script $priority]
 # ad_page_contract_mutex(filters) = mutex
 #
 # types are: internal, filter, post
@@ -1310,7 +1319,7 @@ ad_proc ad_include_contract {docstring args} {
 
 if { [apm_first_time_loading_p] } {
 
-    nsv_array set ad_page_contract_filters {
+    set internal_filters {
         multiple  {internal}
         array     {internal}
         optional  {internal}
@@ -1319,12 +1328,13 @@ if { [apm_first_time_loading_p] } {
         verify    {internal}
         cached    {internal}
     }
+    nsv_array set ad_page_contract_filters $internal_filters
+    array set ::acs::ad_page_contract_filters $internal_filters
+    nsv_array set ad_page_contract_filter_rules {}
+    array set ::acs::ad_page_contract_filter_rules {}
 
-    nsv_array set ad_page_contract_filter_rules [list]
-
-    nsv_set ad_page_contract_mutex filters [ns_mutex create]
-    nsv_set ad_page_contract_mutex filter_rules [ns_mutex create]
-
+    nsv_set ad_page_contract_mutex filters [ns_mutex create page_contract_filter]
+    nsv_set ad_page_contract_mutex filter_rules [ns_mutex create page_contract_filter_rule]
 }
 
 ad_proc -public ad_page_contract_filter {
@@ -1366,8 +1376,9 @@ ad_proc -public ad_page_contract_filter {
     <p>
 
     The filter proc <b>must</b> return either 1 if it accepts the value or 0 if it rejects it.
-    Any problem with the value is reported using <b><code>ad_complain</code></b> (see documentation
-                                                                                  for this). <b>Note:</b> Any modifications you make to value from inside your code block <b>will modify
+    Any problem with the value is reported using <b><code>ad_complain</code></b>
+    (see documentation for this). <b>Note:</b>
+    Any modifications you make to value from inside your code block <b>will modify
     the actual value being set in the page.</b>
 
     <p>
@@ -1439,8 +1450,9 @@ ad_proc -public ad_page_contract_filter {
             ns_log Warning [_ acs-tcl.lt_Multiple_definitions_]
         }
     }
-
-    nsv_set ad_page_contract_filters $name [list $type $proc_name $doc_string $script $priority]
+    set filter_info [list $type $proc_name $doc_string $script $priority]
+    set ::acs::ad_page_contract_filters($name) $filter_info
+    nsv_set ad_page_contract_filters $name $filter_info
     ns_mutex unlock $mutex
 
     #
@@ -1451,7 +1463,7 @@ ad_proc -public ad_page_contract_filter {
     # If you declare a filter like this: ad_page_contract_filter foo { name value } { ... }
     # it turns into this proc:
     # ad_proc ad_page_contract_filter_proc_foo { name value_varname } { upvar $value_varname value ; ... }
-    # so that when the filtger proc is passed the name of a variable, the body of the proc
+    # so that when the filter proc is passed the name of a variable, the body of the proc
     # will have access to that variable as if the value had been passed.
 
     lassign $proc_args arg0 arg1 arg2
@@ -1469,6 +1481,9 @@ ad_proc ad_page_contract_filter_type { filter } {
     @author Lars Pind (lars@pinds.com)
     @creation-date 25 July 2000
 } {
+    if {[info exists ::acs::ad_page_contract_filters($filter)]} {
+        return [lindex [set ::acs::ad_page_contract_filters($filter)] 0]
+    }
     if { [nsv_exists ad_page_contract_filters $filter] } {
         return [lindex [nsv_get ad_page_contract_filters $filter] 0]
     } else {
@@ -1482,7 +1497,13 @@ ad_proc ad_page_contract_filter_proc { filter } {
     @author Lars Pind (lars@pinds.com)
     @creation-date 25 July 2000
 } {
-    return [lindex [nsv_get ad_page_contract_filters $filter] 1]
+    #
+    # No need to go to the nsv causing mutex locks; note that the
+    # name of the filter-procs is more or less hardcoded in the
+    # doc-strings above.
+    #
+    return ad_page_contract_filter_proc_$filter
+    #return [lindex [nsv_get ad_page_contract_filters $filter] 1]
 }
 
 ad_proc ad_page_contract_filter_script { filter } {
@@ -1492,7 +1513,8 @@ ad_proc ad_page_contract_filter_script { filter } {
     @author Lars Pind (lars@pinds.com)
     @creation-date 25 July 2000
 } {
-    return [lindex [nsv_get ad_page_contract_filters $filter] 3]
+    return [lindex [set ::acs::ad_page_contract_filters($filter)] 3]
+    #return [lindex [nsv_get ad_page_contract_filters $filter] 3]
 }
 
 ad_proc ad_page_contract_filter_priority { filter } {
@@ -1502,7 +1524,8 @@ ad_proc ad_page_contract_filter_priority { filter } {
     @author Lars Pind (lars@pinds.com)
     @creation-date 25 July 2000
 } {
-    return [lindex [nsv_get ad_page_contract_filters $filter] 4]
+    return [lindex [set ::acs::ad_page_contract_filters($filter)] 4]
+    #return [lindex [nsv_get ad_page_contract_filters $filter] 4]
 }
 
 ad_proc ad_page_contract_filter_invoke {
@@ -1524,11 +1547,8 @@ ad_proc ad_page_contract_filter_invoke {
     @creation-date 25 July 2000
 } {
     upvar $value_varname value
-    if { $parameters eq "" } {
-        set filter_result [[ad_page_contract_filter_proc $filter] $name value]
-    } else {
-        set filter_result [[ad_page_contract_filter_proc $filter] $name value $parameters]
-    }
+    set filter_proc [ad_page_contract_filter_proc $filter]
+    set filter_result [$filter_proc $name value {*}$parameters]
     if { $filter_result } {
         ad_page_contract_set_validation_passed $name:$filter
     }
@@ -1542,8 +1562,7 @@ ad_proc ad_page_contract_filter_invoke {
 ####################
 
 #
-# ad_page_contract_filter_rules($name) = [list $proc_name $doc_string [info script]]
-#
+# ad_page_contract_filter_rules($name) = [list $proc_name $doc_string $script]
 # ad_page_contract_mutex(filter_rules) = mutex
 #
 
@@ -1580,39 +1599,47 @@ ad_proc ad_page_contract_filter_rule {
     if { [llength $proc_args] != 2 } {
         return -code error [_ acs-tcl.lt_The_proc_must_accept_]
     }
-    
+
     set script [info script]
     set proc_name ad_page_contract_filter_rule_proc_$name
-    
+    set rule_key ::acs::ad_page_contract_filter_rules($name)
+
     set mutex [nsv_get ad_page_contract_mutex filter_rules]
     ns_mutex lock $mutex
-    
-    if { [nsv_exists ad_page_contract_filter_rules $name] } {
+
+    if {[info exists $rule_key]} {
+        set prior_script [set $rule_key]
+    } elseif { [nsv_exists ad_page_contract_filter_rules $name] } {
         set prior_script [ad_page_contract_filter_rule_script $name]
-        if { $script ne $prior_script } {
-            ns_log Warning "Multiple definitions of the ad_page_contract_filter_rule \"$name\" in $script and $prior_script"
-        }
     }
-    
-    nsv_set ad_page_contract_filter_rules $name [list $proc_name $doc_string $script]
+
+    if { [info exists prior_script] && $script ne $prior_script } {
+        ns_log Warning "Multiple definitions of the ad_page_contract_filter_rule \"$name\" in $script and $prior_script"
+    }
+
+    set rule_info [list $proc_name $doc_string $script]
+    nsv_set ad_page_contract_filter_rules $name $rule_info
+    set $rule_key $rule_info
     ns_mutex unlock $mutex
-    
+
     # same trick as ad_page_contract_filter does.
-    
+
     lassign $proc_args arg0 arg1
     ad_proc $proc_name [list $arg0 ${arg1}_varname] $doc_string "upvar \$${arg1}_varname $arg1\n$body"
 }
-    
+
 ad_proc ad_page_contract_filter_rule_proc { filter } {
     Returns the proc that executes the given ad_page_contract default-filter.
 } {
-    return [lindex [nsv_get ad_page_contract_filter_rules $filter] 0]
+    return [lindex $::acs::ad_page_contract_filter_rules($filter) 0]
+    #return [lindex [nsv_get ad_page_contract_filter_rules $filter] 0]
 }
 
 ad_proc ad_page_contract_filter_rule_script { filter } {
     Returns the proc that executes the given ad_page_contract default-filter.
 } {
-    return [lindex [nsv_get ad_page_contract_filter_rules $filter] 2]
+    return [lindex $::acs::ad_page_contract_filter_rules($filter) 2]
+    #return [lindex [nsv_get ad_page_contract_filter_rules $filter] 2]
 }
 
 ####################
@@ -1627,16 +1654,19 @@ ad_page_contract_filter integer { name value } {
     @author Lars Pind (lars@pinds.com)
     @creation-date 25 July 2000
 } {
+    #
+    # We can't really use "string is integer -strict", since it allows
+    # numbers, which are invalid for e.g. SQL... e.g. "0x40".
+    #
+    ## First simple a quick check avoiding the slow regexp
+    #if {[string is integer -strict $value]} {
+    #    return 1
+    #}
 
-    # First simple a quick check avoiding the slow regexp
-    if {[string is integer -strict $value]} {
-        return 1
-    }
-
-    if { [regexp {^(-)(.*)$} $value match sign rest] } {
+    if { [regexp {^(-)?(\d+)$} $value _ sign rest] } {
         # Trim the value for any leading zeros
         set value $sign[util::trim_leading_zeros $rest]
-        # the string might be still to large, so check again...
+        # the string might be still too large, so check again...
         if {[string is integer -strict $value]} {
             return 1
         }
@@ -1653,10 +1683,13 @@ ad_page_contract_filter naturalnum { name value } {
     @creation-date 25 July 2000
 } {
 
+    # We can't really use "string is integer -strict", since it allows
+    # numbers, which are invalid for e.g. SQL... e.g. "0x40".
+    #
     # First a simple quick check to avoid the slow regexp
-    if {[string is integer -strict $value] && $value >= 0} {
-        return 1
-    }
+    # if {[string is integer -strict $value] && $value >= 0} {
+    #    return 1
+    # }
 
     # Check with leading zeros, but no "-" allowed, so it must be positive
     if { [regexp {^(0*)([1-9][0-9]*|0)$} $value match zeros value] } {
@@ -1692,6 +1725,21 @@ ad_page_contract_filter range { name value range } {
     }
     return 1
 }
+
+ad_page_contract_filter oneof { name value set } {
+    Checks whether the value is contained in the set of provided values.
+    Example spec:     w:oneof(red|green)
+
+    @author Gustaf Neumann
+    @creation-date Feb, 2018
+} {
+    if { $value ni $set } {
+        ad_complain [_ acs-tcl.lt_name_is_not_valid]
+        return 0
+    }
+    return 1
+}
+
 
 ad_page_contract_filter sql_identifier { name value } {
     Checks whether the value is a valid SQL identifier
@@ -1900,12 +1948,12 @@ ad_page_contract_filter -type post time24 { name time } {
     }
 
     if {
-        "" eq $time(hours) \
-            || "" eq $time(minutes) \
-            || "" eq $time(seconds) \
-            || $time(hours) < 0 || $time(hours) > 23 \
-            || $time(minutes) < 0 || $time(minutes) > 59 \
-            || $time(seconds) < 0 || $time(seconds) > 59
+        "" eq $time(hours)
+        || "" eq $time(minutes)
+        || "" eq $time(seconds)
+        || $time(hours) < 0 || $time(hours) > 23
+        || $time(minutes) < 0 || $time(minutes) > 59
+        || $time(seconds) < 0 || $time(seconds) > 59
     } {
         ad_complain [_ acs-tcl.lt_Invalid_time_timetime_2]
         return 0
@@ -2156,7 +2204,7 @@ ad_page_contract_filter path { name value } {
 }
 
 ad_page_contract_filter localurl { name value } {
-    Checks whether the value is a an acceptable
+    Checks whether the value is an acceptable
     (non-external) url, which can be used
     in ad_returnredirect without throwing an error.
 
@@ -2214,7 +2262,7 @@ ad_proc ad_page_contract_verify_datasources {} {
     Check if all the datasources (properties) promised in the page contract have
     actually been set.
 
-    @author Chrisitan Brechbuehler <christian@arsdigita.com>
+    @author Christian Brechbuehler <christian@arsdigita.com>
     @creation-date 13 Aug 2000
 } {
     # for now this is a dummy proc.
@@ -2227,7 +2275,7 @@ ad_proc ad_page_contract_verify_datasources {} {
 ad_proc ad_page_contract_handle_datasource_error {error} {
     Output a diagnostic page.  Treats both special and generic error messages.
 
-    @author Chrisitan Brechbuehler <christian@arsdigita.com>
+    @author Christian Brechbuehler <christian@arsdigita.com>
     @creation-date 13 Aug 2000
 } {
     set complaint_template [parameter::get_from_package_key \
@@ -2239,7 +2287,7 @@ ad_proc ad_page_contract_handle_datasource_error {error} {
     ns_return 422 text/html [ad_parse_template \
                                  -params [list [list exception_count $exception_count] \
                                               [list exception_text $exception_text] \
-                                              [list prev_url  [get_referrer]] \
+                                              [list prev_url  [util::get_referrer]] \
                                              ]  $complaint_template]
 }
 

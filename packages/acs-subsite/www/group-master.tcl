@@ -73,8 +73,8 @@ if { $untrusted_user_id == 0 } {
 #
 util_get_user_messages -multirow user_messages
 
-# 
-# Set acs-lang urls
+#
+# Set acs-lang URLs
 #
 set acs_lang_url [apm_package_url_from_key "acs-lang"]
 set num_of_locales [llength [lang::system::get_locales]]
@@ -139,7 +139,7 @@ ad_context_bar_multirow -- $context_tmp
 
 #
 # Curriculum specific bar
-#   TODO: remove this and add a more systematic / package independent way 
+#   TODO: remove this and add a more systematic / package independent way
 #   TODO  of getting this content here
 #
 set curriculum_bar_p [expr {

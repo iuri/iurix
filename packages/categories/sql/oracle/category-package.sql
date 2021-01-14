@@ -298,9 +298,9 @@ CREATE OR REPLACE PACKAGE BODY CATEGORY AS
 	and left_ind > v_old_left_ind;
 
 	if (change_parent.parent_id is null) then
-	   select 1, max(right_ind)+1 into v_new_left_ind, v_new_right_ind
+	   select 1, coalesce(max(right_ind)+1, 1) into v_new_left_ind, v_new_right_ind
 	   from categories
-	   where tree_id = change_parent.tree_id;
+	   where tree_id = change_parent.tree_id and right_ind > 0;
 	else
 	   select left_ind, right_ind into v_new_left_ind, v_new_right_ind
 	   from categories

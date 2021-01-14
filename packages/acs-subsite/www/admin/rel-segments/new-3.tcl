@@ -1,5 +1,3 @@
-# /packages/mbryzek-subsite/www/admin/rel-segments/new-3.tcl
-
 ad_page_contract {
 
     Creates a relational segment. Finished by asking the user to
@@ -7,7 +5,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Dec 13 20:00:25 2000
-    @cvs-id $Id: new-3.tcl,v 1.7.2.4 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: new-3.tcl,v 1.9.2.2 2019/12/13 14:17:42 antoniop Exp $
 
 } {
     group_id:integer,notnull
@@ -20,14 +18,14 @@ ad_page_contract {
     segment_name:onevalue
 } -validate {
     group_in_scope_p -requires {group_id:notnull} {
-	if { ![application_group::contains_party_p -party_id $group_id -include_self]} {
-	    ad_complain "The group either does not exist or does not belong to this subsite."
-	}
+        if { ![application_group::contains_party_p -party_id $group_id -include_self]} {
+            ad_complain "The group either does not exist or does not belong to this subsite."
+        }
     }
     relation_in_scope_p -requires {rel_id:notnull permission_p} {
-	if { ![application_group::contains_relation_p -rel_id $rel_id]} {
-	    ad_complain "The relation either does not exist or does not belong to this subsite."
-	}
+        if { ![application_group::contains_relation_p -rel_id $rel_id]} {
+            ad_complain "The relation either does not exist or does not belong to this subsite."
+        }
     }
 }
 
@@ -36,18 +34,18 @@ ad_page_contract {
 permission::require_permission -object_id $group_id -privilege "read"
 
 db_transaction {
-    set segment_id [rel_segments_new -context_id $group_id $group_id $rel_type $segment_name]
+    set segment_id [rel_segment::new -context_id $group_id $group_id $rel_type $segment_name]
 } on_error {
     # Let's see if this segment already exists
     set segment_id [db_string select_segment_id {
-	select s.segment_id
-	  from rel_segments s
-	 where s.group_id = :group_id
-	   and s.rel_type = :rel_type
+        select s.segment_id
+          from rel_segments s
+         where s.group_id = :group_id
+           and s.rel_type = :rel_type
     } -default ""]
     if { $segment_id eq "" } {
-	ad_return_error "Error creating segment" $errmsg
-	ad_script_abort
+        ad_return_error "Error creating segment" $errmsg
+        ad_script_abort
     }
 }
 
@@ -57,7 +55,7 @@ db_transaction {
 if { ![db_string segments_exists_p {}] } {
     # No more segments... can't create constraints
     ad_returnredirect $return_url
-    return
+    ad_script_abort
 }
 
 

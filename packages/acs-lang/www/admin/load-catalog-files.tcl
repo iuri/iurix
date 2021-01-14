@@ -3,12 +3,13 @@ ad_page_contract {
 
     @author Peter Marklund (peter@collaboraid.biz)
     @creation-date 2002-10-07
-    @cvs-id $Id: load-catalog-files.tcl,v 1.5.24.1 2015/09/10 08:21:28 gustafn Exp $
+    @cvs-id $Id: load-catalog-files.tcl,v 1.7 2018/01/19 21:23:51 gustafn Exp $
 }
 
 lang::catalog::import
 
 ad_returnredirect "index"
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

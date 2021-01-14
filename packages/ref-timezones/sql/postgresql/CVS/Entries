@@ -1,5 +1,5 @@
-/00-timezones.ctl/1.7/Wed Feb 13 19:01:26 2008//Topenacs-5-9-compat
-/01-timezone-rules.ctl/1.7/Wed Feb 13 19:01:27 2008//Topenacs-5-9-compat
-/ref-timezones-create.sql/1.12.4.1/Sat Apr 22 12:07:20 2017//Topenacs-5-9-compat
-/ref-timezones-drop.sql/1.5/Sat Mar 30 18:50:28 2013//Topenacs-5-9-compat
+/00-timezones.ctl/1.7/Wed Feb 13 19:01:26 2008//Toacs-5-10
+/01-timezone-rules.ctl/1.7/Wed Feb 13 19:01:27 2008//Toacs-5-10
+/ref-timezones-create.sql/1.13/Mon Aug  7 23:48:14 2017//Toacs-5-10
+/ref-timezones-drop.sql/1.5/Sat Mar 30 18:50:28 2013//Toacs-5-10
 D

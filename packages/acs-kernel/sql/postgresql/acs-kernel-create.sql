@@ -5,7 +5,7 @@
 --
 -- @author Michael Yoon (michael@arsdigita.com)
 -- @creation-date 2000/07/29
--- @cvs-id $Id: acs-kernel-create.sql,v 1.9.18.1 2016/08/31 18:16:58 gustafn Exp $
+-- @cvs-id $Id: acs-kernel-create.sql,v 1.10 2017/08/07 23:47:56 gustafn Exp $
 --
 
 --\set ECHO queries

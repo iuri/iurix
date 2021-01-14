@@ -37,7 +37,7 @@
   </itemizedlist>
 
   <para>
-	Acknowledgments for versions of the above documents go (in no
+	Acknowledgements for versions of the above documents go (in no
 	particular order) to Bryan Quinn, Adam Farkas, Brian Stein, Doug
 	Hoffman, Ravi Jasuja, Hiro Iwashima, Ryan Lee, Jonathan Goler, Audrey
 	Mcloghlin, Doug Harris, Zvi Boshernitzan, Michael Yoon, Cesar Brea,
@@ -63,7 +63,7 @@
     url="http://openacs.org/forums/">OpenACS forums</ulink>.
   </para>
 
-  <para><phrase role="cvstag">($Id: credits.xml,v 1.12.14.5 2017/06/18 09:08:36 gustafn Exp $)</phrase></para>
+  <para><phrase role="cvstag">($Id: credits.xml,v 1.14 2018/04/04 18:51:56 hectorr Exp $)</phrase></para>
 
     <section id="install-origins" xreflabel="Where did this document come from?">
     <title>Where did this document come from?</title>

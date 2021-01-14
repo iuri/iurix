@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-06-02
-    @cvs-id $Id: index.tcl,v 1.11.2.6 2017/04/28 17:52:45 antoniop Exp $
+    @cvs-id $Id: index.tcl,v 1.13.2.1 2019/05/16 09:54:29 gustafn Exp $
 } {
     page:naturalnum,optional
     {search ""}
@@ -22,11 +22,11 @@ ad_form \
     -has_submit 1 \
     -html { style "float:right;" } \
     -form {
-	{search:text,optional
+        {search:text,optional
             {label ""}
-	    {html {length 20 placeholder "[_ acs-kernel.common_Search]"} }
-	    {value $search}
-	}
+            {html {length 20 placeholder "[_ acs-kernel.common_Search]"} }
+            {value $search}
+        }
     } -on_submit {}
 
 list::create \
@@ -36,7 +36,7 @@ list::create \
     -page_flush_p 1 \
     -page_size 250 \
     -page_query_name select_applications \
-    -actions { 
+    -actions {
         "#acs-subsite.Add_application#" application-add "#acs-subsite.Add_new_app#"
     } \
     -bulk_actions {
@@ -53,7 +53,7 @@ list::create \
         }
         instance_name {
             label "[_ acs-subsite.Name]"
-            link_url_eval {../../$name/}
+            link_url_eval {[site_node::get_url -node_id $node_id]}
         }
         name {
             label "[_ acs-subsite.URL]"
@@ -82,8 +82,8 @@ list::create \
             link_html { title "#acs-subsite.Delete_this_application#" }
         }
     } -filters {
-	search {
-	    hide_p 1
+        search {
+            hide_p 1
             where_clause {(:search is null or upper(coalesce(coalesce(m.message, md.message), p.instance_name) || n.name || pt.pretty_name) like '%' || upper(:search) || '%')}
         }
     }

@@ -217,7 +217,7 @@ represented by the node. In most cases this will be a package instance.</para>
     directory_p char(1) not null
             constraint site_nodes_directory_p_ck
             check (directory_p in (&#39;t&#39;, &#39;f&#39;)),
-        -- Should urls that are logical children of this node be
+        -- Should URLs that are logical children of this node be
     -- mapped to this node?
         pattern_p   char(1) default &#39;f&#39; not null
             constraint site_nodes_pattern_p_ck
@@ -257,7 +257,7 @@ as
     node_id     in site_nodes.node_id%TYPE
   );
 
-  -- Return the node_id of a url. If the url begins with &#39;/&#39; then the
+  -- Return the node_id of a URL. If the url begins with &#39;/&#39; then the
   -- parent_id must be null. This will raise the no_data_found
   -- exception if there is no matching node in the site_nodes table.
   -- This will match directories even if no trailing slash is included

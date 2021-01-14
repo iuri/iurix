@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author rhs@mit.edu
     @creation-date 2000-09-09
-    @cvs-id $Id: delete.tcl,v 1.6.2.1 2015/09/10 08:21:47 gustafn Exp $
+    @cvs-id $Id: delete.tcl,v 1.8 2018/01/19 14:09:48 gustafn Exp $
 
 } {
     expand:integer,multiple
@@ -19,6 +19,7 @@ if {$root_id == $node_id} {
 site_node::delete -node_id $node_id
 
 ad_returnredirect [export_vars -base . {expand:multiple root_id}]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

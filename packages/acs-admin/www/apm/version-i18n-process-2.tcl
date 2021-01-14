@@ -3,9 +3,9 @@ ad_page_contract {
 
     @author Peter Marklund (peter@collaboraid.biz)
     @creation-date 8 October 2002
-    @cvs-id $Id: version-i18n-process-2.tcl,v 1.19.2.2 2017/04/22 18:17:05 gustafn Exp $  
+    @cvs-id $Id: version-i18n-process-2.tcl,v 1.23.2.1 2019/03/13 09:50:36 antoniop Exp $
 } {
-    version_id:naturalnum,notnull    
+    version_id:naturalnum,notnull
     {files:multiple,notnull}
     {file_action:multiple}
     {number_of_keys:integer,notnull ""}
@@ -32,7 +32,7 @@ if { [info exists skip_button] } {
 set message_key_list [list]
 for { set counter 1 } { $counter <= $number_of_keys } { incr counter } {
     if { [info exists replace_p($counter)] } {
-        if { ([info exists message_keys($counter)] && $message_keys($counter) ne "") } {
+        if { [info exists message_keys($counter)] && $message_keys($counter) ne "" } {
             lappend message_key_list $message_keys($counter)
         } else {
             ad_return_complaint 1 "<li>Message key number $counter is empty. Cannot replace text with empty key</li>"
@@ -50,11 +50,11 @@ set page_title "Internationalizing file $next_file"
 set context_bar [ad_context_bar $page_title]
 
 # Figure out which actions to take on the selected adp:s
-set replace_text_p [ad_decode [lsearch -exact $file_action replace_text] "-1" "0" "1"]
-set replace_tags_p [ad_decode [lsearch -exact $file_action replace_tags] "-1" "0" "1"]
+set replace_text_p [expr {"replace_text" in $file_action}]
+set replace_tags_p [expr {"replace_tags" in $file_action}]
 
 # We need either or both of the actions to be selected
-if { (! $replace_text_p) && (! $replace_tags_p) } {
+if { ! $replace_text_p && ! $replace_tags_p } {
     ad_return_complaint 1 "Invalid HTML Parameters: you must choose an action to take on selected adp files, either replace_text or replace_tags or both."
     ad_script_abort
 }
@@ -68,8 +68,7 @@ if { $replace_text_p } {
     ns_log Notice "Replacing text in file $text_file with message tags"
     append processing_html_result "<h3>Text replacements for $text_file</h3>"
     set adp_text_result_list [lang::util::replace_adp_text_with_message_tags "$::acs::rootdir/$text_file" write $message_key_list]
-    set text_replacement_list [lindex $adp_text_result_list 0]
-    set text_untouched_list [lindex $adp_text_result_list 1]
+    lassign $adp_text_result_list text_replacement_list text_untouched_list
 
     append processing_html_result "<b>Replaced [llength $text_replacement_list] texts</b>: <br>"
     foreach text_replacement $text_replacement_list {
@@ -108,7 +107,7 @@ if { $replace_tags_p } {
 
         append processing_html_result "Did $number_of_replacements replacements, see the log file for details"
     }
-}    
+}
 
 # Remove the processed file from the file list.
 set files [lrange $files $number_of_processed_files end]

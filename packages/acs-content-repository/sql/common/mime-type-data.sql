@@ -112,6 +112,10 @@ insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - Gif
 insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - Image Exchange Format' , 'image/ief'                     , 'ief' );
 insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - Jpeg'            , 'image/jpeg'                    , 'jpg' );
 insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - PNG'             , 'image/png'                     , 'png' );
+insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - HEIC'             , 'image/heic'                     , 'heic' );
+insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - HEIC sequence'   , 'image/heic-sequence'          , 'heics' );
+insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - HEIF'             , 'image/heif'                     , 'heif' );
+insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - HEIF sequence'   , 'image/heif-sequence'          , 'heifs' );
 insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - TIFF'            , 'image/tiff'                    , 'tif' );
 insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - WAP wireless bitmap'     , 'image/vnd.wap.wbmp'            , 'wbmp');
 insert into cr_mime_types (label,mime_type,file_extension) values ( 'Image - CMU Raster'      , 'image/x-cmu-raster'            , 'ras' );
@@ -159,6 +163,7 @@ insert into cr_mime_types (label,mime_type,file_extension) values ( 'Conference 
 insert into cr_mime_types (label,mime_type,file_extension) values ( 'VRML'                    , 'x-world/x-vrml'                , 'vrml');
 insert into cr_mime_types (label,mime_type,file_extension) values ( 'Xuda'                    , 'xuda/gen-cert'                 , 'xuda');
 insert into cr_mime_types (label,mime_type,file_extension) values ('Enhanced text'            , 'text/enhanced'                 , 'etxt');
+insert into cr_mime_types (label,mime_type,file_extension) values ('Markdown text'            , 'text/markdown'                 , 'mtxt');
 insert into cr_mime_types (label,mime_type,file_extension) values ('Fixed-width text'         , 'text/fixed-width'              , 'ftxt');
 insert into cr_mime_types (label,mime_type,file_extension) values ('OpenOffice Spreadsheet'   , 'application/vnd.sun.xml.calc', 'sxc');
 insert into cr_mime_types (label,mime_type,file_extension) values ('OpenOffice Spreadsheet Template', 'application/vnd.sun.xml.calc.template', 'stc');
@@ -383,6 +388,10 @@ insert into cr_extension_mime_type_map (extension, mime_type) values ( 'pgm','im
 insert into cr_extension_mime_type_map (extension, mime_type) values ( 'pgn','application/x-chess-pgn' );
 insert into cr_extension_mime_type_map (extension, mime_type) values ( 'pict','image/x-pict' );
 insert into cr_extension_mime_type_map (extension, mime_type) values ( 'png','image/png' );
+insert into cr_extension_mime_type_map (extension, mime_type) values ( 'heic','image/heic' );
+insert into cr_extension_mime_type_map (extension, mime_type) values ( 'heics','image/heic-sequence' );
+insert into cr_extension_mime_type_map (extension, mime_type) values ( 'heif','image/heif' );
+insert into cr_extension_mime_type_map (extension, mime_type) values ( 'heifs','image/heif-sequence' );
 insert into cr_extension_mime_type_map (extension, mime_type) values ( 'pnm','image/x-portable-anymap' );
 insert into cr_extension_mime_type_map (extension, mime_type) values ( 'ppm','image/x-portable-pixmap' );
 insert into cr_extension_mime_type_map (extension, mime_type) values ( 'ppt','application/vnd.ms-powerpoint' );

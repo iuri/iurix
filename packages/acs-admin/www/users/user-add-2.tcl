@@ -1,9 +1,9 @@
 ad_page_contract {
     Processes a new user created by an admin
-    @cvs-id $Id: user-add-2.tcl,v 1.11.2.3 2017/01/26 11:50:08 gustafn Exp $
+    @cvs-id $Id: user-add-2.tcl,v 1.14.2.1 2019/12/03 17:15:14 gustafn Exp $
 } -query {
     user_id:naturalnum,notnull
-    password
+    password:optional
     {referer "/acs-admin/users"}
 } -properties {
     context:onevalue
@@ -26,15 +26,15 @@ foreach var_name [array names user] {
     set $var_name $user($var_name)
 }
 
+if { ![info exists password] || $password eq "" } {
+    set password [security::get_client_property_password]
+}
+
 if { $password eq "" } {
     set password [ad_generate_random_string]
 }
 
-set administration_name [db_string admin_name {
-      select first_names || ' ' || last_name
-      from persons
-      where person_id = :admin_user_id
-}]
+set administration_name [person::name -person_id $admin_user_id]
 
 set context [list [list "./" "Users"] "Notify added user"]
 set system_name [ad_system_name]

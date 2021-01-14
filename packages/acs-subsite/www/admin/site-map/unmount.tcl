@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author rhs@mit.edu
     @creation-date 2000-09-12
-    @cvs-id $Id: unmount.tcl,v 1.5.2.1 2015/09/10 08:21:48 gustafn Exp $
+    @cvs-id $Id: unmount.tcl,v 1.7 2018/01/19 14:09:48 gustafn Exp $
 
 } {
     node_id:naturalnum,notnull
@@ -15,6 +15,7 @@ ad_page_contract {
 site_node::unmount -node_id $node_id
 
 ad_returnredirect [export_vars -base . {expand:multiple root_id}]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

@@ -1,12 +1,12 @@
 ad_page_contract {
 
-    Delete a package instance. If the package is 
+    Delete a package instance. If the package is
     mounted it will be unmounted before deletion and an
     attempt will be made to delete the node.
 
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date Mon Oct 23 14:58:57 2000
-    @cvs-id $Id: instance-delete.tcl,v 1.10.2.4 2017/01/10 13:27:16 antoniop Exp $
+    @cvs-id $Id: instance-delete.tcl,v 1.12.2.4 2019/12/17 13:07:46 antoniop Exp $
 
 } {
     package_id:naturalnum
@@ -25,19 +25,30 @@ db_transaction {
     # you were at when you clicked "delete" or its parent (the case mentioned above).
 
     set parent [site_node::closest_ancestor_package \
-		    -node_id $node_id \
-		    -package_key acs-subsite \
-		    -element url]
+                    -node_id $node_id \
+                    -package_key acs-subsite \
+                    -element url]
 
     # node_id was null so we're not deleting a mounted subsite instance
     if {$parent eq "" } {
-	set parent [ad_conn subsite_url]
+        set parent [ad_conn subsite_url]
     }
 
     if { $node_id ne "" } {
+        #
         # The package is mounted, unmount it and delete it together
-        # with the site node
+        # with the site node.
+        #
         site_node::unmount -node_id $node_id
+        #
+        # Since we do not want to delete the potentially shared
+        # service packages, delete just the service nodes but not the
+        # packages behind it.
+        #
+        site_node::delete_service_nodes -node_id $node_id
+        #
+        # Finally, delete the site-nodes and the packages under it.
+        #
         site_node::delete -node_id $node_id \
             -delete_subnodes -delete_package
     } else {
@@ -46,16 +57,17 @@ db_transaction {
     }
 
 } on_error {
-    if {[db_string instance_delete_doubleclick_ck {
-	select decode(count(*), 0, 0, 1) from apm_packages
-	where package_id = :package_id
-    } -default 0]} {
-	ad_return_error "Error Deleting Instance" "The following error was returned:
-	<blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote>"
+    if {[db_0or1row instance_delete_doubleclick_ck {
+        select 1 from apm_packages
+        where package_id = :package_id
+    }]} {
+        ad_return_error "Error Deleting Instance" "The following error was returned:
+        <blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote>"
     }
 }
-	
+
 ad_returnredirect ${parent}admin/site-map
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

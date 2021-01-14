@@ -6,7 +6,7 @@ ad_page_contract {
     @author Phong Nguyen <phong@arsdigita.com>
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-add-3.tcl,v 1.12.2.2 2016/05/21 10:15:38 gustafn Exp $
+    @cvs-id $Id: comment-add-3.tcl,v 1.13.2.1 2019/11/16 15:19:04 gustafn Exp $
 } {
     comment_id:naturalnum,notnull
     object_id:naturalnum,notnull
@@ -19,9 +19,10 @@ ad_page_contract {
     { attach_p:boolean "f" }
 }    
 
-# This authentication actually is not necessary anymore due to the fact that we already check for the permission
-# afterwards, so it should be enough to query the user_id from the connection to allow anonymous users who have
-# create permissions to access the site.
+# This authentication actually is not necessary anymore due to the
+# fact that we already check for the permission afterwards, so it
+# should be enough to query the user_id from the connection to allow
+# anonymous users who have create permissions to access the site.
 
 # authenticate the user
 # set user_id [auth::require_login]
@@ -35,7 +36,7 @@ permission::require_permission -object_id $object_id -privilege general_comments
 set creation_ip [ad_conn peeraddr]
 set is_live [parameter::get -parameter AutoApproveCommentsP -default {t}]
 
-general_comment_new \
+general_comments_new \
     -object_id $object_id \
     -comment_id $comment_id \
     -title $title \

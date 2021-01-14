@@ -6,13 +6,13 @@ ad_page_contract {
     @author Bruno Mattarollo <bruno.mattarollo@ams.greenpeace.org>
     @author Christian Hvid
     @creation-date 30 October 2001
-    @cvs-id $Id: edit-localized-message.tcl,v 1.20.2.3 2016/05/20 19:55:32 gustafn Exp $
+    @cvs-id $Id: edit-localized-message.tcl,v 1.24.2.7 2019/12/20 21:47:58 gustafn Exp $
 
 } {
-    locale
-    package_key
-    message_key
-    show:optional
+    locale:word
+    package_key:token
+    message_key:token
+    show:word,optional
     {usage_p:boolean "f"}
     {return_url:localurl {}}
 }
@@ -44,12 +44,22 @@ set context [list [list [export_vars -base package-list { locale }] $locale_labe
 set create_p [string equal $current_locale $default_locale]
 
 set description_edit_url [export_vars -base edit-description { locale package_key message_key show }]
+set default_locale_edit_url [export_vars -base edit-localized-message { {locale $default_locale} package_key message_key return_url }]
 
 set usage_hide_url [export_vars -base [ad_conn url] { locale package_key message_key show return_url }]
 set usage_show_url [export_vars -base [ad_conn url] { locale package_key message_key show {usage_p 1} return_url }]
 
-set delete_url [export_vars -base message-delete { locale package_key message_key show {return_url {[ad_return_url]}} }]
+set delete_url      [export_vars -base message-delete       { locale package_key message_key show {return_url {[ad_return_url]}} }]
+set undelete_url    [export_vars -base message-undelete     { locale package_key message_key show {return_url {[ad_return_url]}} }]
+set unregister_url  [export_vars -base message-unregister   { locale package_key message_key show {return_url {[ad_return_url]}} }]
 
+set deleted_p [db_string get_deleted_p {
+    select deleted_p
+    from   lang_messages
+    where  package_key = :package_key
+    and    message_key = :message_key
+    and    locale = :current_locale
+} -default false]
 
 ad_form -name message_form -form {
     {locale:text(hidden),optional {value $current_locale}}
@@ -62,23 +72,25 @@ ad_form -name message_form -form {
         {label "Message Key"}
         {value "$package_key.$message_key"}
     }
-    {description:text(inform)
+    {description:text(inform),optional
         {label "Description"}
-        {after_html {}}
+        {mode display}
+        {after_html {(<a href='[ns_quotehtml $description_edit_url]'>Edit</a>)}}
     }
-} 
+}
 
 if { $default_locale ne $current_locale } {
     ad_form -extend -name message_form -form {
         {original_message:text(inform)
             {label "$default_locale_label Message"}
+            {after_html {(<a href="[ns_quotehtml $default_locale_edit_url]">Edit</a>)}}
         }
     }
 }
-    
+
 ad_form -extend -name message_form -form {
-    {message:text(textarea)
-        {label "$locale_label Message"} 
+    {message:text(textarea),optional
+        {label "$locale_label Message"}
         {html { rows 6 cols 40 } }
     }
     {comment:text(textarea),optional
@@ -117,18 +129,14 @@ ad_form -extend -name message_form -form {
         and    cu.user_id = lm.creation_user
     }]
 
-    if { ([info exists message] && $message ne "") } {
+    if { [info exists message] } {
         set message $message
     } else {
         set message $original_message
     }
     set original_message [ns_quotehtml $original_message]
 
-    if { $description eq "" } {
-        set description [subst {(<a href="[ns_quotehtml $description_edit_url]">add description</a>)}]
-    } else {
-        set description "[ad_text_to_html -- $description] [subst { (<a href="[ns_quotehtml $description_edit_url]">edit</a>)}]"
-    }
+    set description "[ad_text_to_html -- $description]"
 
     # Augment the audit trail with info on who created the first message
     if { $current_locale ne $default_locale && $translated_p } {
@@ -158,30 +166,30 @@ ad_form -extend -name message_form -form {
                                      where  lm2.package_key = :package_key
                                      and    lm2.message_key = :message_key
                                      and    lm2.locale = :current_locale
-                                     )                                     
+                                     )
             }
-        } 
+        }
 
         set first_translated_message [subst {
-	    <ul> <li>First translated by
-	    [acs_community_member_link -user_id $creation_user_id -label $creation_user_name] on $creation_date
-	    </li></ul>
-	}]
+            <ul> <li>First translated by
+            [acs_community_member_link -user_id $creation_user_id -label $creation_user_name] on $creation_date
+            </li></ul>
+        }]
     } else {
         set first_translated_message ""
     }
 } -on_submit {
 
     set first_translated_message ""
-    
-    with_catch errmsg {
-	# Call semantic and sanity checks on the key before registering.
-	lang::message::check $locale $package_key $message_key $message
-    } {
-	template::form::set_error message message $errmsg
-	break
+
+    ad_try {
+        # Call semantic and sanity checks on the key before registering.
+        lang::message::check $locale $package_key $message_key $message
+    } on error {errorMsg} {
+        template::form::set_error message message $errorMsg
+        break
     }
-    
+
     # Register message via acs-lang
     lang::message::register -comment $comment $locale $package_key $message_key $message
 

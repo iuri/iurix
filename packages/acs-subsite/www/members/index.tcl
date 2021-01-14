@@ -1,14 +1,15 @@
 ad_page_contract {
     List and manage subsite members.
-    
+
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-06-02
-    @cvs-id $Id: index.tcl,v 1.20.2.9 2017/07/04 23:26:49 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.26 2018/09/24 08:21:52 gustafn Exp $
 } {
     {group_id:integer,notnull ""}
     {member_state "approved"}
     {orderby:token "name,asc"}
     page:naturalnum,optional
+    {page_size:naturalnum 50}
 } -validate {
     member_state_valid -requires { member_state } {
         if { $member_state ni [group::possible_member_states] } {
@@ -56,6 +57,14 @@ if { $show_member_list_to != 0
 #
 set user_id [ad_conn user_id]
 set admin_p [permission::permission_p -party_id $user_id -object_id $group_id -privilege "admin"]
+
+if {!$admin_p && $page_size > 50} {
+    #
+    # Do not allow end-user to get full list of all members (which
+    # might be thousands). Fall back to default.
+    #
+    set page_size 50
+}
 
 set approved_member_p [group::party_member_p -group_id $group_id -party_id $user_id]
 set show_member_list_p [expr {
@@ -122,7 +131,7 @@ if { !$show_member_list_p } {
     set orderby_option {
         name {
             label "[_ acs-subsite.Name]"
-            orderby "lower(p.first_names || ' ' || p.last_name)"
+            orderby "lower(p.last_name || ' ' || p.first_names)"
         }
     }
     if {!$hide_email_p} {
@@ -142,7 +151,7 @@ if { !$show_member_list_p } {
         -name "members" \
         -multirow "members" \
         -row_pretty_plural "members" \
-        -page_size 50 \
+        -page_size $page_size \
         -page_flush_p t \
         -page_query_name members_pagination \
         -actions $actions \
@@ -170,7 +179,7 @@ if { !$show_member_list_p } {
                 hide_p $hide_member_state_p
             }
             member_state_change {
-                label {Action}
+                label {[_ acs-subsite.Action]}
                 display_template {
                     <if @members.approve_url@ not nil>
                     <a href="@members.approve_url@" class="button">#acs-subsite.Approve#</a>
@@ -212,7 +221,7 @@ if { !$show_member_list_p } {
 
     set show_partial_email_p [expr {$user_id == 0}]
 
-    db_multirow -extend { 
+    db_multirow -extend {
         email_url
         member_state_pretty
         remove_url
@@ -237,7 +246,7 @@ if { !$show_member_list_p } {
         set member_state_pretty [group::get_member_state_pretty -member_state $member_state]
         set user_email [email_image::get_user_email -user_id $user_id]
         if { $admin_p } {
-            switch $member_state {
+            switch -- $member_state {
                 approved {
                     if { $member_admin_p == 0 } {
                         set make_admin_url [export_vars -base make-admin { user_id }]

@@ -4,7 +4,7 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-10-23
-  @cvs-id $Id: index.tcl,v 1.2.2.2 2017/01/26 11:51:47 gustafn Exp $
+  @cvs-id $Id: index.tcl,v 1.5 2018/05/09 15:33:29 hectorr Exp $
 } -query {
   orderby:token,optional
 } -properties {

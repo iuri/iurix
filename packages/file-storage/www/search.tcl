@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 14 Nov 2000
-    @cvs-id $Id: search.tcl,v 1.4.10.2 2016/01/02 20:13:30 gustafn Exp $
+    @cvs-id $Id: search.tcl,v 1.6 2018/04/30 07:57:40 gustafn Exp $
 } {
     query:trim,notnull
 } -properties {
@@ -26,7 +26,7 @@ regsub -all {\*} $query {%} query
 set query "%${query}%"
 regsub -all {%+} $query {%} query
 
-db_multirow results results {}
+db_multirow results get_ids_and_titles {}
 
 # get the (lowercased) original back to feed to the template
 

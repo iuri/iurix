@@ -3,7 +3,7 @@ ad_page_contract {
     Adds a parameter to a version.
     @author Todd Nightingale [tnight@arsdigita.com]
     @creation-date 17 April 2000
-    @cvs-id $Id: parameter-delete.tcl,v 1.7.2.1 2015/09/10 08:21:02 gustafn Exp $
+    @cvs-id $Id: parameter-delete.tcl,v 1.9 2018/05/16 17:08:51 antoniop Exp $
 } {
     parameter_id:naturalnum,notnull
     section_name:notnull
@@ -14,15 +14,6 @@ db_1row apm_package_by_version_id {
     select pretty_name, version_name, package_key
     from apm_package_version_info 
     where version_id = :version_id
-}
-
-# LARS hack
-set sections [lindex [apm_parameter_section_slider $package_key] 0 3]
-foreach section $sections {
-    if {$section_name eq [lindex $section 1]} {
-        set section_name [lindex $section 0]
-        break
-    }
 }
 
 set return_url [export_vars -base "version-parameters" { version_id section_name }]

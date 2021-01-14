@@ -1,12 +1,10 @@
-# /packages/mbryzek-subsite/www/admin/rel-segments/constraints-redirect.tcl
-
 ad_page_contract {
 
     Optionally redirects user to enter constraints
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Jan  4 11:20:37 2001
-    @cvs-id $Id: constraints-redirect.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: constraints-redirect.tcl,v 1.6.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     segment_id:naturalnum,notnull
@@ -20,11 +18,11 @@ if {$operation eq "yes"} {
     ad_returnredirect "constraints/new?rel_segment=$segment_id&[export_vars return_url]"
 } else {
     if { $return_url eq "" } {
-	set return_url [export_vars -base one segment_id]
+        set return_url [export_vars -base one segment_id]
     }
     ad_returnredirect $return_url
 }
-
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

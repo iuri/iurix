@@ -2,7 +2,7 @@ ad_page_contract {
    
     @author Emmanuelle Raffenne (eraffenne@gmail.com)
     @creation-date 22-feb-2010
-    @cvs-id $Id: unmap.tcl,v 1.1.6.3 2016/05/20 19:55:32 gustafn Exp $
+    @cvs-id $Id: unmap.tcl,v 1.3 2018/01/19 21:23:51 gustafn Exp $
 
 } {
     extension:notnull
@@ -17,6 +17,7 @@ if { $return_url eq "" } {
 db_dml extension_unmap {}
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

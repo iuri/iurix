@@ -3,8 +3,7 @@
 -- 
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2005-01-23
--- @arch-tag: 2abf85db-45a1-4444-856d-683a01be7937
--- @cvs-id $Id: upgrade-0.3d4-0.3d5.sql,v 1.3 2013/03/30 22:50:45 gustafn Exp $
+-- @cvs-id $Id: upgrade-0.3d4-0.3d5.sql,v 1.4 2018/08/15 16:53:10 gustafn Exp $
 --
 
 -- old define_function_args ('rss_gen_subscr__new','subscr_id,impl_id,summary_context_id,timeout,lastbuild,object_type,creation_date;now,creation_user,creation_ip,context_id')

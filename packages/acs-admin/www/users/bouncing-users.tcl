@@ -4,11 +4,11 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-24
-    @cvs-id $Id: bouncing-users.tcl,v 1.3.2.1 2015/09/10 08:21:08 gustafn Exp $
+    @cvs-id $Id: bouncing-users.tcl,v 1.5 2018/02/02 00:04:50 gustafn Exp $
 
 } {
-    {page ""}
-    {page_size 25}
+    {page:naturalnum ""}
+    {page_size:naturalnum 25}
     {orderby:token "username,asc"}
 }
 

@@ -301,7 +301,7 @@ END OF TEMPLATE -->
 		Reduced number of insert cr_child_rels operations, just when
 		needed:
 	      </para>
-	      <para>cr_child_rels provide only little benefit (allow to use
+	      <para>cr_child_rels provide only little benefit (allow one to use
 	      roles in a child-rel), but the common operation is a well available
 	      in cr_items via the parent_id. cr_child_rels do not help for
 	      recursive queries either. One option would be to add an additional
@@ -325,7 +325,7 @@ END OF TEMPLATE -->
 		  </para></listitem>
 		  <listitem><para>
 		    CSRF support is optional for packages where CSRF is less
-		    dangerous, and such requests are wanted (e.g. search and api-browser)
+		    dangerous, and such requests are wanted (e.g. search and API-browser)
 		  </para></listitem>
 		</itemizedlist>
 	      </para></listitem>
@@ -344,7 +344,7 @@ END OF TEMPLATE -->
 		(<ulink url="/xowiki/CSP">CSP</ulink>; see https://www.w3.org/TR/CSP/)
 		<itemizedlist>
 		  <listitem><para>
-		    Removed &quot;javascript:*&quot; links (all such urls are removed
+		    Removed &quot;javascript:*&quot; links (all such URLs are removed
 		    from the 90 packages in oacs-5-9, excluding js libraries
 		    (ajaxhelper) and richtext code)
 		  </para></listitem>
@@ -509,7 +509,7 @@ END OF TEMPLATE -->
 	      </para></listitem>
 	      <listitem><para>
 		Improved exception handling (often, a
-		&quot;catch&quot; swallows to much, e.g. 
+		&quot;catch&quot; swallows one too much, e.g. 
 		script_aborts), introducing
 		&quot;ad_exception&quot;.
 	      </para></listitem>
@@ -582,7 +582,7 @@ END OF TEMPLATE -->
 		<listitem><para>Get rid of various pesky &quot;MISSING FORMWIDGET:
 		...formbutton:ok&quot; messages
 		</para></listitem>
-		<listitem><para>Improved support for javascript event handlers in
+		<listitem><para>Improved support for JavaScript event handlers in
 		template::head
 		</para></listitem>
 		<listitem><para>New functions
@@ -669,7 +669,7 @@ END OF TEMPLATE -->
 		<listitem><para> &quot;ns_md5&quot; and
 		&quot;ns_parseurl&quot;: improve compatibility between
 		AOLserver and NaviServer </para></listitem>
-		<listitem><para> &quot;ad_dom_sanitize_html&quot;: allow to
+		<listitem><para> &quot;ad_dom_sanitize_html&quot;: allow one to
 		specify different sets of tags, attributes and protocols and
 		&quot;ad_dom_fix_html&quot;, which is a light weight tidy
 		variant.  </para></listitem>
@@ -906,7 +906,7 @@ END OF TEMPLATE -->
 	      </para></listitem>
 	      <listitem><para>
 		Added option &quot;-path_encode&quot; to methods
-		&quot;pretty_link&quot; and &quot;folder_path&quot; to allow to
+		&quot;pretty_link&quot; and &quot;folder_path&quot; to allow one to
 		control, whether the result should be encoded or not (default
 		true)
 	      </para></listitem>
@@ -932,7 +932,7 @@ END OF TEMPLATE -->
 		    attribute based on form-field names
 		  </para></listitem>
 		  <listitem><para>
-		    richtext: allow to specify
+		    richtext: allow one to specify
 		    &quot;extraAllowedContent&quot; via
 		    options
 		  </para></listitem>
@@ -1022,7 +1022,7 @@ END OF TEMPLATE -->
 		Added support for optional user tracking in database
 	      </para></listitem>
 	      <listitem><para>
-		Added support for monitoring response-time for certain urls via
+		Added support for monitoring response-time for certain URLs via
 		munin
 	      </para></listitem>
 	      <listitem><para>
@@ -1253,7 +1253,7 @@ END OF TEMPLATE -->
  	    theme styling </para></listitem>
 
 	    <listitem><para>
-	      Notification chunks are now theme-able as well (using ad_include_contrat)
+	      Notification chunks are now theme-able as well (using ad_include_contract)
 	    </para></listitem>
 
 	    <listitem><para>
@@ -1296,7 +1296,7 @@ END OF TEMPLATE -->
 	    </para></listitem>
 	    
 	    <listitem><para>
-	      New api function "ad_log" having the same interface as
+	      New API function "ad_log" having the same interface as
 	      ns_log, but which logs the calling information (like URL
 	      and call-stack) to ease tracking of errors.
 	    </para></listitem>	  
@@ -1583,7 +1583,7 @@ END OF TEMPLATE -->
           using URLs which include the embedded package&#39;s package key.  An example
           embeddable package might be a rewritten "attachments" package.  The current
           implementation requires a global instance be mounted, and client packages
-          generate urls to that global instance.  Among other things, this leads to
+          generate URLs to that global instance.  Among other things, this leads to
           the user navigating to the top-level subsite, losing any subsite theming
           that might be associated with a community.  Using "embeds", a rewritten
           package would run in the client package&#39;s context, maintaining theming and
@@ -1788,7 +1788,7 @@ END OF TEMPLATE -->
     <title>Release 5.1.2</title>
     <itemizedlist>
       <listitem>
-        <para>Translations syncronized with the translation server.
+        <para>Translations synchronized with the translation server.
         Basque and Catalan added.
         </para>
       </listitem>
@@ -1806,7 +1806,7 @@ END OF TEMPLATE -->
         <para>This is the first release using the newest adjustment to the versioning convention.  The OpenACS 5.1.1 tag will apply to OpenACS core as well as to the most recent released version of every package, including .LRN.</para>
       </listitem>
       <listitem>
-        <para>Translations syncronized with the translation server.
+        <para>Translations synchronized with the translation server.
         </para>
       </listitem>
       <listitem>
@@ -1950,7 +1950,7 @@ END OF TEMPLATE -->
 
       <listitem>
         <para>
-          External authenticaiton.
+          External authentication.
 
           Integrate with outside user databases through e.g. LDAP, RADIUS, Kerberos, MS Active Directory. 
           Imports user information through IMS Enterprise 1.1 format. Easily extended to support other 
@@ -2072,7 +2072,7 @@ END OF TEMPLATE -->
 
 
 
-    <para><phrase role="cvstag">($Id: release-notes.xml,v 1.30.2.10 2017/08/05 13:14:31 gustafn Exp $)</phrase></para>
+    <para><phrase role="cvstag">($Id: release-notes.xml,v 1.39 2018/08/05 21:26:03 gustafn Exp $)</phrase></para>
   </sect2>
 
 

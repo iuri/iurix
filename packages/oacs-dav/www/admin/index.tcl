@@ -6,7 +6,7 @@ ad_page_contract {
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-02-15
-    @cvs-id $Id: index.tcl,v 1.1.1.1.18.1 2015/09/12 19:00:43 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.2 2017/08/07 23:48:13 gustafn Exp $
 } {
     
 } -properties {

@@ -9,6 +9,7 @@
   <msg key="admin_title">Amministra questo pacchetto...</msg>
   <msg key="ago">%time% fa</msg>
   <msg key="All_pages">Tutti gli elementi</msg>
+  <msg key="answers">Risposte</msg>
   <msg key="Answers_for_Surveys">Risposte_al_Questionario</msg>
   <msg key="attached_images">Immagini allegate</msg>
   <msg key="attached_media">Media allegato</msg>
@@ -20,6 +21,7 @@
   <msg key="choiceInteraction_maxChoices_help_text">Scelta Singola significa che solo una risposta è corretta.</msg>
   <msg key="choiceInteraction_simpleChoice">Inserisci alcune scelte.</msg>
   <msg key="choose_file">Scegli file</msg>
+  <msg key="ckeip_help">Modalità &#34;In loco&#34;</msg>
   <msg key="clear">sgombera</msg>
   <msg key="CompoundField-validate_compound">%errorMsg%</msg>
   <msg key="Configure">Configura</msg>
@@ -36,8 +38,10 @@
   <msg key="delete_all_instances">Elimina tutti i %pretty_plural% di questa istanza</msg>
   <msg key="delete_all_items">Elimina tutti gli elementi analoghi di questa istanza</msg>
   <msg key="delete_confirm">Confermi la cancellazione?</msg>
+  <msg key="Delete_selected">Elimina selezionati</msg>
   <msg key="delete_title">Elimina questa pagina...</msg>
   <msg key="details">Link Dettaglio</msg>
+  <msg key="duplicate">Duplicare</msg>
   <msg key="edit">Edita</msg>
   <msg key="Edit_category">Edita Albero di Categorie</msg>
   <msg key="edit_link">edita tag</msg>
@@ -47,7 +51,7 @@
   <msg key="error-form_constraint-invalid_characters">Il vincolo form contiene caratteri invalidi</msg>
   <msg key="error-form_constraint-unknown_attribute">Il campo form &#39;%name%&#39; (class %class%) contiene attributi sconosciuti &#39;%entry%&#39;</msg>
   <msg key="error-form_constraint-unknown_editor">Editor %editor% sconosciuto. I valori possibili sono: %editors%</msg>
-  <msg key="error-form_constraint-unknown_spec_entry">Il campo form &#39;%name%&#39; (class %class%) ha una specifica sconosciuta &#39;%entry%&#39;</msg>
+  <msg key="error-form_constraint-unknown_spec_entry">Il campo form &#39;%name%&#39; ha una specifica sconosciuta &#39;%entry%&#39;</msg>
   <msg key="error-includelet-adp_syntax_invalid">Sintassi: adp &amp;lt;nome di file adp&amp;gt; {&amp;lt;lista argomenti&amp;gt;}&lt;br/&gt; Lista argomenti non valida: &#39;%adp%&#39;; deve essere nella forma: coppie attributo valore (numero pari di elementi)</msg>
   <msg key="error-includelet-dash_syntax_invalid">&lt;pre&gt;%errMsg%&lt;/pre&gt; La lista argomenti deve contenere coppie attributo valore (attributi con il trattino)</msg>
   <msg key="error-includelet-error_during_adp_evaluation">la valutazione del file adp ha ritornato il messaggio di errore: %errorMsg%</msg>
@@ -71,6 +75,7 @@
   <msg key="File-name-help_text">Può essere ottenuto dal nome del file caricato</msg>
   <msg key="File_pretty_name">File Wiki</msg>
   <msg key="File_pretty_plural">File Wiki</msg>
+  <msg key="file_upload">Caricamento File</msg>
   <msg key="form-created">Creato da</msg>
   <msg key="Form-form">Form</msg>
   <msg key="Form-form_constraints">Vincoli Form</msg>
@@ -92,6 +97,7 @@
   <msg key="Form_pretty_name">Wiki Form</msg>
   <msg key="Form_pretty_plural">Wiki Form</msg>
   <msg key="formfield-author">Autore</msg>
+  <msg key="formfield-correct_when-help_text">Condizione tale per cui la risposta è corretta, specificata come predicato seguito da argomenti (Tcl words). I predicati predefiniti sono &#34;eq&#34;, &#34;gt&#34;, &#34;ge&#34;, &#34;lt&#34;, &#34;le&#34;, &#34;btwn&#34;, &#34;in&#34;, &#34;contains&#34;, &#34;match&#34;, &#34;answer_words&#34;</msg>
   <msg key="formfield-image_url-help_text">URL HTTP dell&#39;immagine (puoi trascinare un#immagine mostrata da un browser web qui)</msg>
   <msg key="formfield-import_archive-help_text">Seleziona il Nome di un File .zip o .tar.gz</msg>
   <msg key="formfield-import_archive-label">Importa Archivio</msg>
@@ -152,6 +158,7 @@
   <msg key="menu-Page-Edit">Edita Pagina</msg>
   <msg key="menu-Page-Revisions">Revisioni</msg>
   <msg key="menu-Page-Show">Mostra Pagina</msg>
+  <msg key="menu-Page-View">Visualizza</msg>
   <msg key="minute">minuto</msg>
   <msg key="minutes">minuti</msg>
   <msg key="modified_page">pagina modificata</msg>
@@ -159,6 +166,8 @@
   <msg key="months">mesi</msg>
   <msg key="most_frequent_visitors">Visitatori Più Frequenti</msg>
   <msg key="most_popular_pages">Pagine Più Popolari</msg>
+  <msg key="multiple_lines">Più linee</msg>
+  <msg key="multiple_words">Più parole</msg>
   <msg key="name">Nome</msg>
   <msg key="new">Nuova Pagina</msg>
   <msg key="new_page">Nuova Pagina</msg>
@@ -169,6 +178,7 @@
   <msg key="no_data">nessun dato</msg>
   <msg key="notifications">Notifiche</msg>
   <msg key="notifications_title">Gestisci notifiche...</msg>
+  <msg key="number">Numero</msg>
   <msg key="numeric-validate_numeric">Valore numerico non valido</msg>
   <msg key="Object_pretty_name">Oggetto Wiki</msg>
   <msg key="Object_pretty_plural">Oggetti Wiki</msg>
@@ -204,7 +214,7 @@
   <msg key="PageTemplate_pretty_plural">Template Wiki Page</msg>
   <msg key="party_id-validate_party_id_check">Il valore non è un party_id valido</msg>
   <msg key="permissions_manage_package">Gestisci i Permessi per il Wiki: %package_name%</msg>
-  <msg key="permissions_manage_page">Gestisci i Permessi per la pagina: %package_name%</msg>
+  <msg key="permissions_manage_page">Gestisci i Permessi per la pagina: %page_name%</msg>
   <msg key="PlainPage_pretty_name">Wiki Plain Page</msg>
   <msg key="PlainPage_pretty_plural">Wiki Plain Page</msg>
   <msg key="Please_open">Prego aprire</msg>
@@ -219,7 +229,7 @@
   <msg key="PodcastItem_pretty_plural">Elementi Podcast</msg>
   <msg key="popular_tags_label">Tag popolari</msg>
   <msg key="popular_tags_link">tag popolari</msg>
-  <msg key="portlet_name_does_not_exist_error_long">Non esiste una pagina accessibile dal titolo &#34;%page_name%&#34;</msg>
+  <msg key="portlet_page_does_not_exist_error_long">Non esiste una pagina accessibile dal titolo &#34;%page_name%&#34;</msg>
   <msg key="portlet_page_does_not_exist_error_short">La pagina specificata non esiste</msg>
   <msg key="portlet_title_exists_error_long">Prego modifica il nome del portlet esistente o il titolo della pagina xowiki che vuoi aggiungere al portale.</msg>
   <msg key="portlet_title_exists_error_short">Un portlet dal titolo &#39;%page_title%&#39; esiste già  in questo portale.</msg>
@@ -229,6 +239,7 @@
   <msg key="publish_status">Pubblicato</msg>
   <msg key="QtiInteraction_weight">Peso</msg>
   <msg key="QtiInteraction_weight_help_text">Per il punteggio complessivo della domanda, ogni interazione viene pesata per il suo valore.</msg>
+  <msg key="questions">Domande</msg>
   <msg key="recently_changed_pages">Pagine Modificate di Recente</msg>
   <msg key="recently_changed_pages_by_categories">Pagine Modificate di Recente (per categorie)</msg>
   <msg key="references_label">Riferimenti a questa Pagina:</msg>
@@ -248,6 +259,7 @@
   <msg key="Selection">Selezione</msg>
   <msg key="shuffle">Mescola le Risposte</msg>
   <msg key="shuffle_help_text">L&#39;ordine delle risposte deve essere presentato casualmente?</msg>
+  <msg key="single_word">Parola singola</msg>
   <msg key="Size">Dimensione</msg>
   <msg key="subscribe">Iscriviti</msg>
   <msg key="title">Titolo</msg>
@@ -263,6 +275,7 @@
   <msg key="week">settimana</msg>
   <msg key="weeks">settimane</msg>
   <msg key="width">Larghezza</msg>
+  <msg key="words">Parole</msg>
   <msg key="workflow_definition-validate_workflow">%errorMsg%</msg>
   <msg key="year">anno</msg>
   <msg key="years">anni</msg>

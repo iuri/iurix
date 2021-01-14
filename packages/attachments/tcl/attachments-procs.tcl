@@ -14,7 +14,7 @@ ad_library {
     Attachments
 
     @author Arjun Sanyal (arjun@openforce.net)
-    @cvs-id $Id: attachments-procs.tcl,v 1.18.2.1 2015/09/10 08:30:12 gustafn Exp $
+    @cvs-id $Id: attachments-procs.tcl,v 1.23.2.8 2019/08/14 14:28:25 hectorr Exp $
 }
 
 namespace eval attachments {
@@ -22,7 +22,7 @@ namespace eval attachments {
     ad_proc -public root_folder_p {
         {-package_id:required}
     } {
-        Returns 1 if the package_id has an fs_folder mapped to it
+        @return 1 if the package_id has an fs_folder mapped to it
     } {
         return [db_string root_folder_p_select {} -default 0]
     }
@@ -43,7 +43,7 @@ namespace eval attachments {
     ad_proc -public root_folder_map_p {
         {-package_id:required}
     } {
-        Returns 1 if the package_id has an fs_folder mapped to it
+        @return 1 if the package_id has an fs_folder mapped to it
     } {
         # this is a duplicate (Ben)
         return [root_folder_p -package_id $package_id]
@@ -91,23 +91,73 @@ namespace eval attachments {
     } {
         toggle approved_p for attachment
     } {
-        if {$approved_p eq ""} {
-            set approved_p [ad_decode [db_string select_attachment_approved_p {}] f t f]
-        }
-
         db_dml toggle_approved_p {}
     }
 
     ad_proc -public get_package_key {} {
+        @return the package key (attachments)
+    } {
         return attachments
     }
 
-    ad_proc -public get_url {
+    ad_proc -public get_url {} {
+        @return the value of the RelativeUrl package parameter
     } {
         return [parameter::get  \
             -package_id [apm_package_id_from_key [get_package_key]] \
             -parameter RelativeUrl
         ]
+    }
+
+    ad_proc -private get_attachments_url {
+        {-base_url ""}
+    } {
+
+        As 'attachments::get_url' returns the value of the attachments package
+        'RelativeUrl' parameter, which can change at any time, it could happen
+        that previously mounted attachments have a different url and are not
+        found anymore.
+
+        We try our best here to find a mounted attachments package under
+        'base_url' to mitigate this, probably flawed, package logic.
+
+        In the future, probably a better method should be used for URL resolving
+        that is not so broken.
+
+        The whole thing is even more weird, as the attachments package is
+        currently a singleton that auto-mounts on /attachments, so i am tempted
+        to replace this whole thing with just that, but anyway...
+
+        @param base_url The base URL where to look for the attachments package.
+
+        @return The attachments package URL under 'base_url', or "" if none is
+                found.
+
+        @see attachments::get_url
+
+    } {
+        if {![ns_conn isconnected]} {
+            return "${base_url}[attachments::get_url]"
+        } else {
+            #
+            # Get some context
+            #
+            set url             "[ad_conn package_url]${base_url}"
+            set relative_url    "${url}[attachments::get_url]"
+            #
+            # Is this URL an attachments package? Otherwise try to find one...
+            #
+            set package_key [dict get [site_node::get_from_url -url "$relative_url"] package_key]
+            if {$package_key eq "attachments"} {
+                return $relative_url
+            } else {
+                set url_node_id [site_node::get_node_id -url $url]
+                return [site_node::get_children \
+                            -package_key "attachments" \
+                            -element "url" \
+                            -node_id $url_node_id]
+            }
+        }
     }
 
     ad_proc -public add_attachment_url {
@@ -117,7 +167,9 @@ namespace eval attachments {
         {-return_url ""}
         {-pretty_name ""}
     } {
-        return "[attachments::get_url]/attach?pretty_object_name=[ns_urlencode $pretty_name]&folder_id=$folder_id&object_id=$object_id&return_url=[ns_urlencode $return_url]"
+        @return the url that can be used to attach something to an object
+    } {
+        return "[get_attachments_url]/attach?pretty_object_name=[ns_urlencode $pretty_name]&folder_id=$folder_id&object_id=$object_id&return_url=[ns_urlencode $return_url]"
     }
 
     ad_proc -public goto_attachment_url {
@@ -126,7 +178,9 @@ namespace eval attachments {
         {-attachment_id:required}
         {-base_url ""}
     } {
-        return "${base_url}[attachments::get_url]/go-to-attachment?object_id=$object_id&attachment_id=$attachment_id"
+        @return the url to go to an attachment
+    } {
+        return "[get_attachments_url -base_url ${base_url}]/go-to-attachment?object_id=$object_id&attachment_id=$attachment_id"
     }
 
     ad_proc -public detach_url {
@@ -134,13 +188,17 @@ namespace eval attachments {
         {-object_id:required}
         {-attachment_id:required}
         {-base_url ""}
-	{-return_url ""}
+        {-return_url ""}
     } {
-        return "${base_url}[attachments::get_url]/detach?object_id=$object_id&attachment_id=$attachment_id&return_url=[ad_urlencode $return_url]"
+        @return the url to detach an attached item from an object
+    } {
+        return "[get_attachments_url -base_url ${base_url}]/detach?object_id=$object_id&attachment_id=$attachment_id&return_url=[ad_urlencode $return_url]"
     }
 
     ad_proc -public graphic_url {
         {-package_id ""}
+    } {
+        @return the attachment icon
     } {
         return "<img valign=bottom src=\"[attachments::get_url]/graphics/file.gif\">"
     }
@@ -148,44 +206,117 @@ namespace eval attachments {
     ad_proc -public get_attachments {
         {-object_id:required}
         {-base_url ""}
-	{-return_url ""}
+        {-return_url ""}
     } {
-        returns a list of attachment ids and names which are approved: {item_id name url detach_url}
+        @return a list of attachment ids and names which are approved:
+        {item_id name url detach_url}
     } {
-        set lst [db_list select_attachments {}]
-        set lst_with_urls [list]
+        return [get_all_attachments \
+                    -object_id $object_id \
+                    -base_url $base_url \
+                    -return_url $return_url \
+                    -approved_only -add_detach_url]
+    }
 
-        foreach item_id $lst {
-            if { [content::extlink::is_extlink -item_id $item_id] } {
-              set label [content::extlink::name -item_id $item_id]
-            } else {
-              set label [fs::get_object_prettyname -object_id $item_id]
-            }
-            set append_lst [list [goto_attachment_url -object_id $object_id -attachment_id $item_id -base_url $base_url]]
-	    lappend append_lst [detach_url -object_id $object_id -attachment_id $item_id -base_url $base_url -return_url $return_url]
-            lappend lst_with_urls [concat [list $item_id $label] $append_lst]
+    ad_proc -public get_title {
+        {-attachment_id:required}
+    } {
+        @param attachment_id ID of the attachment (item_id)
+        @return The title of the attachment (string)
+    } {
+        #
+        # Try our best to get the 'title', depending on the object type
+        #
+        set title ""
+        set object_type [acs_object_type $attachment_id]
+        if {[content::extlink::is_extlink -item_id $attachment_id]} {
+            #
+            # URL
+            #
+            set title [content::extlink::name -item_id $attachment_id]
+        } elseif {[content::item::is_subclass \
+                        -object_type $object_type \
+                        -supertype "content_item"]} {
+            #
+            # Content item, or subtype
+            #
+            set title [content::item::get_title -item_id $attachment_id]
+        } elseif {[content::item::is_subclass \
+                        -object_type $object_type \
+                        -supertype "content_revision"]} {
+            #
+            # Content revision, or subtype
+            #
+            set title [content::revision::get_title -revision_id $attachment_id]
+        } else {
+            #
+            # Let's try the 'title' column on 'acs_objects'
+            #
+            set title [acs_object::get_element \
+                            -object_id $attachment_id \
+                            -element "title"]
+        }
+        #
+        # If everything fails, set the 'attachment_id' as title
+        #
+        if {$title eq ""} {
+            set title $attachment_id
         }
 
-        return $lst_with_urls
+        return $title
     }
 
     ad_proc -public get_all_attachments {
         {-object_id:required}
         {-base_url ""}
+        {-return_url ""}
+        -approved_only:boolean
+        -add_detach_url:boolean
     } {
-        returns a list of attachment ids and names: {item_id name approved_p url}
+        @return a list representing attachments and their UI URLs.
+
+        @param object_id object to check for attachments.
+        @param base_url URL path that will be prepended to generated URLs.
+        @param return_url only meaningful if we are also generating
+                          detach_url, is the location we will return
+                          to after detaching.
+        @param approved_only flag deciding if we want to return only
+                             attachments that have been approved. All
+                             attachments will be returned when this is
+                             not specified.
+        @param add_detach_url flag deciding whether we want to
+                              generate also detach_url in the result.
+
+        @return list of lists in the format {item_id name url} or
+                {item_id name url detach_url} when
+                <code>add_detach_url</code> is specified.
     } {
-        set lst [db_list select_attachments {}]
         set lst_with_urls [list]
 
-        foreach item_id $lst {
-            if { [content::extlink::is_extlink -item_id $item_id] } {
-              set label [content::extlink::name -item_id $item_id]
-            } else {
-              set label [fs::get_object_name -object_id $item_id] 
+        foreach item_id [db_list_of_lists select_attachments {
+            select item_id from attachments
+             where object_id = :object_id
+               and (not :approved_only_p or approved_p)}] {
+            #
+            # Set the attachment 'label'
+            #
+            set label [attachments::get_title -attachment_id $item_id]
+            #
+            # Set the attachment URL
+            #
+            set url [goto_attachment_url \
+                         -object_id     $object_id \
+                         -attachment_id $item_id \
+                         -base_url      $base_url]
+            set element [list $item_id $label $url]
+            if {$add_detach_url_p} {
+                lappend element [detach_url \
+                                     -object_id     $object_id \
+                                     -attachment_id $item_id \
+                                     -base_url      $base_url \
+                                     -return_url    $return_url]
             }
-            set append_lst [list [goto_attachment_url -object_id $object_id -attachment_id $item_id -base_url $base_url]]
-            lappend lst_with_urls [concat [list $item_id $label] $append_lst]
+            lappend lst_with_urls $element
         }
 
         return $lst_with_urls
@@ -206,7 +337,7 @@ namespace eval attachments {
         set cbar_list [fs_context_bar_list -extra_vars $extra_vars -folder_url "attach" -file_url "attach" -root_folder_id $root_folder_id -final $final $folder_id]
 
         template::multirow create $multirow url label
-    
+
         if { $root_folder_id ne "" && $cbar_list ne "" } {
             template::multirow append $multirow "attach?${extra_vars}&folder_id=$root_folder_id" [_ attachments.Top]
             foreach elm $cbar_list {
@@ -220,7 +351,7 @@ namespace eval attachments {
             template::multirow append $multirow "" [_ attachments.Top]
         }
     }
-    
+
 }
 
 # Local variables:

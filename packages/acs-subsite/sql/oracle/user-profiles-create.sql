@@ -3,7 +3,7 @@
 --
 -- @author oumi@arsdigita.com
 -- @creation-date 2000-02-02
--- @cvs-id $Id: user-profiles-create.sql,v 1.3.22.1 2016/08/31 18:57:41 gustafn Exp $
+-- @cvs-id $Id: user-profiles-create.sql,v 1.4 2017/08/07 23:47:58 gustafn Exp $
 --
 
 -------------------------------

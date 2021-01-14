@@ -8,8 +8,8 @@
     <singleton-p>t</singleton-p>
     <implements-subsite-p>f</implements-subsite-p>
     <inherit-templates-p>t</inherit-templates-p>
-    
-    <version name="5.9.1" url="http://openacs.org/repository/download/apm/acs-admin-5.9.1.apm">
+
+    <version name="5.10.0d11" url="http://openacs.org/repository/download/apm/acs-admin-5.10.0d11.apm">
         <owner url="mailto:dhogaza@pacifier.com">Don Baccus</owner>
         <summary>An interface for Site-wide administration of an OpenACS Installation.</summary>
         <release-date>2017-08-06</release-date>
@@ -20,16 +20,18 @@
         <license>GPL</license>
         <maturity>3</maturity>
 
-        <provides url="acs-admin" version="5.9.1"/>
+        <provides url="acs-admin" version="5.10.0d11"/>
         <requires url="acs-kernel" version="5.9.1"/>
-	<requires url="acs-tcl" version="5.9.1"/>
+	<requires url="acs-tcl" version="5.10.0d35"/>
 	<requires url="acs-templating" version="5.9.1"/>
         <requires url="acs-mail-lite" version="5.9.1"/>
-	
+	<requires url="acs-authentication" version="5.10.0d2"/>
+
         <callbacks>
         </callbacks>
         <parameters>
-        <!-- No version parameters -->
+          <parameter scope="instance" datatype="number" min_n_values="1"  max_n_values="1" name="ExpireCertificateWarningPeriod" default="14" description="Warn system administrator about expiring certificate(s) specified number of days in advance (use -1 to deactivate the feature)" section_name="certificates"/>
+          <parameter scope="instance" datatype="string" min_n_values="1"  max_n_values="1" name="ExpireCertificateEmail" default="" description="Email address for expire notification. When empty, use email address from [ad_host_administrator]" section_name="certificates"/>	  
         </parameters>
 
     </version>

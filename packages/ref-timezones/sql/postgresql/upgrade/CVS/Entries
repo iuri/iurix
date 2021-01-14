@@ -1,5 +1,6 @@
-/upgrade-0.2d-0.3.sql/1.2/Sat Mar 30 18:50:28 2013//Topenacs-5-9-compat
-/upgrade-5.2.0d1-5.2.0d2.sql/1.2/Sat Mar 30 18:50:28 2013//Topenacs-5-9-compat
-/upgrade-5.2.2-5.2.3b1.sql/1.3/Mon Oct 27 16:41:53 2014//Topenacs-5-9-compat
-/upgrade-timezones.ctl/1.1/Thu Mar 19 14:04:41 2009//Topenacs-5-9-compat
+/upgrade-0.2d-0.3.sql/1.2/Sat Mar 30 18:50:28 2013//Toacs-5-10
+/upgrade-5.10.0d1-5.10.0d2.sql/1.1/Sun Aug 19 10:59:34 2018//Toacs-5-10
+/upgrade-5.2.0d1-5.2.0d2.sql/1.2/Sat Mar 30 18:50:28 2013//Toacs-5-10
+/upgrade-5.2.2-5.2.3b1.sql/1.3/Mon Oct 27 16:41:53 2014//Toacs-5-10
+/upgrade-timezones.ctl/1.1/Thu Mar 19 14:04:41 2009//Toacs-5-10
 D

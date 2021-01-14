@@ -9,7 +9,7 @@ aa_register_case -cats {api smoke} check_xotcl {
   proc ? {cmd expected {msg ""}} {
    set r [uplevel $cmd]
    if {$msg eq ""} {set msg $cmd}
-   aa_true $msg [expr {$r eq $expected}]
+   aa_true $msg {$r eq $expected}
    #if {$r ne $expected} {
    #  test errmsg "$msg returned '$r' ne '$expected'"
    #} else {
@@ -30,7 +30,7 @@ aa_register_case -cats {api smoke} check_xotcl {
   } else {
     ? {set x new} new "ns_cache version seems sufficiently up to date"
   }
-  
+
   ? {expr {[::xotcl::Object info methods serialize] ne ""}} 1 "Serialize method available"
 
   set errorMsg ""
@@ -39,8 +39,9 @@ aa_register_case -cats {api smoke} check_xotcl {
   } else {
     aa_true "Serializer avalilable" 1
   }
-  
+
 }
+
 # Local variables:
 #    mode: tcl
 #    tcl-indent-level: 2

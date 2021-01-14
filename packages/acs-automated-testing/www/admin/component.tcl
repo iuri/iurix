@@ -1,5 +1,5 @@
 ad_page_contract {
-  @cvs-id $Id: component.tcl,v 1.5.2.2 2016/06/09 08:19:39 gustafn Exp $
+  @cvs-id $Id: component.tcl,v 1.8 2018/05/16 22:04:59 hectorr Exp $
 } {
   component_id:token,notnull
   package_key:nohtml
@@ -16,11 +16,11 @@ set context [list $title]
 
 set component_bodys {}
 foreach component [nsv_get aa_test components] {
-  if {$component_id eq [lindex $component 0] && $package_key eq [lindex $component 1]} {
-    set component_desc [lindex $component 2]
-    set component_file [lindex $component 3]
-    set component_body [lindex $component 4]
-  }
+    if {$component_id eq [lindex $component 0] && $package_key eq [lindex $component 1]} {
+        set component_desc [lindex $component 2]
+        set component_file [lindex $component 3]
+        set component_body [lindex $component 4]
+    }
 }
 
 ad_return_template

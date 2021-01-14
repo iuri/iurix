@@ -3,7 +3,7 @@ ad_page_contract {
     @author Gustaf Neumann <neumann@wu-wien.ac.at>
     @creation-date 23 Dez 2008
 
-    @cvs-id $Id: delete-user.tcl,v 1.2.2.3 2016/05/20 19:52:59 gustafn Exp $
+    @cvs-id $Id: delete-user.tcl,v 1.4 2018/01/19 13:40:40 gustafn Exp $
 } {
   user_id:naturalnum,notnull
   {return_url:localurl .}
@@ -24,6 +24,8 @@ if {$permanent} {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
+
 # Local variables:
 #    mode: tcl
 #    tcl-indent-level: 4

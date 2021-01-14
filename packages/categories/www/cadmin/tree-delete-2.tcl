@@ -3,10 +3,10 @@ ad_page_contract {
     This page checks whether the category tree can be deleted and deletes it.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-delete-2.tcl,v 1.12.2.1 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 }
@@ -28,6 +28,8 @@ if {![info exists object_id]} {
 } else {
     ad_returnredirect [export_vars -no_empty -base object-map {locale object_id ctx_id}]
 }
+ad_script_abort
+
 
 # Local variables:
 #    mode: tcl

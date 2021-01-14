@@ -1,16 +1,37 @@
-# 
-
 ad_library {
-    
+
     Tests for content item
-    
+
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-05-28
-    @cvs-id $Id: content-item-test-procs.tcl,v 1.10.2.3 2017/04/21 14:53:08 gustafn Exp $
-    
+    @cvs-id $Id: content-item-test-procs.tcl,v 1.13.2.2 2020/08/26 16:02:36 antoniop Exp $
 }
 
-aa_register_case content_item {
+aa_register_case \
+    -cats {api db} \
+    -procs {
+        ad_generate_random_string
+        content::folder::delete
+        content::folder::is_empty
+        content::folder::is_folder
+        content::folder::is_root
+        content::folder::new
+        content::folder::get_index_page
+        content::folder::get_label
+        content::folder::is_registered
+        content::folder::register_content_type
+        content::item::delete
+        content::item::get
+        content::item::get_id
+        content::item::get_latest_revision
+        content::item::new
+        content::item::rename
+        content::item::update
+        content::type::attribute::new
+        content::type::delete
+        content::type::new
+    } \
+    content_item {
     content item test
 } {
 
@@ -18,19 +39,50 @@ aa_register_case content_item {
         -rollback \
         -test_code {
 
+            # <= 0 because it is -4 for Postgres and 0 for
+            # Oracle... Here we assume every normal folder will have
+            # something bigger than 0
+            set root_folder_id [db_string get_root_folder {
+                select min(item_id) from cr_items
+                where content_type = 'content_folder'
+                and parent_id <= 0
+            }]
+            aa_true "Folder $root_folder_id is a root folder" \
+                [content::folder::is_root -folder_id $root_folder_id]
+
             #########################################################
             # create a cr_folder
             #########################################################
+            set first_folder_label [ad_generate_random_string]
             set first_folder_id [db_nextval "acs_object_id_seq"]
             set returned_first_folder_id [content::folder::new \
                                               -folder_id $first_folder_id \
+                                              -label $first_folder_label \
                                               -name "test_folder_${first_folder_id}"]
+
+            aa_false "Folder $first_folder_id is not a root folder" \
+                [content::folder::is_root -folder_id $first_folder_id]
+
+            aa_false "'content_revision' is not registered on the folder" \
+                [content::folder::is_registered \
+                     -folder_id $first_folder_id \
+                     -content_type content_revision]
 
             content::folder::register_content_type \
                 -folder_id $first_folder_id \
-                -content_type "content_revision" 
+                -content_type "content_revision"
 
-            aa_true "Folder created" [expr {$first_folder_id == $returned_first_folder_id}]
+            aa_true "'content_revision' is now registered on the folder" \
+                [content::folder::is_registered \
+                     -folder_id $first_folder_id \
+                     -content_type content_revision]
+
+            aa_true "Folder created" {$first_folder_id == $returned_first_folder_id}
+
+            aa_true "Folder is a folder" [content::folder::is_folder -item_id $first_folder_id]
+
+            aa_equals "Folder has the right label" \
+                $first_folder_label [content::folder::get_label -folder_id $first_folder_id]
 
             set is_empty [content::folder::is_empty -folder_id $first_folder_id]
             aa_true "Folder is empty" [string is true $is_empty]
@@ -43,7 +95,7 @@ aa_register_case content_item {
             set returned_second_folder_id [content::folder::new \
                                                -folder_id $second_folder_id \
                                                -name "test_folder_${second_folder_id}"]
-            aa_true "Folder 2 created" [expr {$second_folder_id == $returned_second_folder_id}]
+            aa_true "Folder 2 created" {$second_folder_id == $returned_second_folder_id}
 
 
             #########################################################
@@ -60,26 +112,39 @@ aa_register_case content_item {
                                             -attributes [list [list title "$test_name"]]
                                        ]
 
-            aa_true "First item created" [expr {$first_item_id == $returned_first_item_id}]
+            aa_true "First item created" {$first_item_id == $returned_first_item_id}
 
-            aa_true "first item exists" [expr {[content::item::get -item_id $first_item_id] == 1}]
+            aa_false "First item is not a folder" [content::folder::is_folder -item_id $first_item_id]
+
+            aa_true "first item exists" {[content::item::get -item_id $first_item_id] == 1}
 
             aa_true "First item's revision exists" \
-                [expr \
-                     {![string equal "" \
-                            [db_string get_revision {
-                                select latest_revision from cr_items, cr_revisions
-                                where latest_revision=revision_id and cr_items.item_id = :first_item_id
-                            } -default ""]]}]
+                {[db_string get_revision {
+                    select latest_revision from cr_items, cr_revisions
+                    where latest_revision=revision_id and cr_items.item_id = :first_item_id
+                } -default ""] ne ""}
 
             # check the folder is not empty now.
             set is_empty [content::folder::is_empty -folder_id $first_folder_id]
             aa_true "Folder 1 is not empty" [string is false $is_empty]
 
             #########################################################
+            # create an index cr_item
+            #########################################################
+
+            set index_item_id [content::item::new \
+                                   -name index \
+                                   -parent_id $first_folder_id \
+                                   -is_live "t" \
+                                   -attributes [list [list title "$test_name"]]]
+
+            aa_equals "Items $index_item_id is index in a folder $first_folder_id" \
+                $index_item_id [content::folder::get_index_page -folder_id $first_folder_id]
+
+            #########################################################
             # create a cr_item with evil string
             #########################################################
-            
+
             set evil_string {-Bad [BAD] \077 \{ $Bad }
             set evil_test_name  "${evil_string}cr_test_item[ad_generate_random_string]"
             aa_log "evil_test_name is $evil_test_name"
@@ -91,34 +156,31 @@ aa_register_case content_item {
                                            -attributes [list [list title "${evil_test_name}"]]
                                        ]
 
-            aa_true "Evil_name item created" [expr {$evil_item_id == $returned_evil_item_id}]
+            aa_true "Evil_name item created" {$evil_item_id == $returned_evil_item_id}
 
-            aa_true "Evil_name item exists" [expr \
-                                                 [content::item::get \
-                                                      -item_id $evil_item_id \
-                                                      -revision latest \
-                                                      -array_name evil_name] == 1]
+            aa_true "Evil_name item exists" {[content::item::get \
+                                                  -item_id $evil_item_id \
+                                                  -revision latest \
+                                                  -array_name evil_name] == 1}
             aa_true "Evil_name item's revision exists" \
-                [expr \
-                     {$evil_name(latest_revision) ne ""}]
+                {$evil_name(latest_revision) ne ""}
 
             #########################################################
             # delete the evil_name item
             #########################################################
-            
+
             # in oracle content_item.del is not a function and cannot
             # return true or false so we have to rely on a query to
             # see if the item exists or not
-            
+
             content::item::delete -item_id $evil_item_id
             array unset evil_name
-            aa_true "evil_name item no longer exists" [expr \
+            aa_true "evil_name item no longer exists" {
                 [content::item::get \
                      -item_id $evil_item_id \
                      -revision "latest" \
-                     -array_name evil_name] == 0]
-            aa_true "evil_name item revision does not exist" [expr \
-                                                              ![info exists evil(latest_revision)]]
+                     -array_name evil_name] == 0}
+            aa_true "evil_name item revision does not exist" {![info exists evil(latest_revision)]}
 
 
             #########################################################
@@ -144,11 +206,11 @@ aa_register_case content_item {
                 -pretty_name "Attribute Name" \
                 -pretty_plural "Attribute Names" \
                 -column_spec "text"
-            
+
             # todo test that new item is NOT allowed to be created
             # unless registered by catching error when creating new
             # item
-            
+
             #########################################################
             # register new type to folder
             #########################################################
@@ -170,17 +232,16 @@ aa_register_case content_item {
             # check that the item exists
             #########################################################
 
-            aa_true "New Type item created" [expr {$new_type_item_id == $returned_new_type_item_id}]
-            aa_true "New Type item exists" [expr {[content::item::get \
+            aa_true "New Type item created" {$new_type_item_id == $returned_new_type_item_id}
+            aa_true "New Type item exists" {[content::item::get \
                                                       -item_id $new_type_item_id \
                                                       -revision "latest" \
-                                                      -array_name new_type_item] == 1}]
+                                                      -array_name new_type_item] == 1}
 
             #########################################################
             # check that extended attribute exists
             #########################################################
-            aa_true "Extended attribute set" [expr [string equal "attribute_value" \
-                               $new_type_item(attribute_name)]]
+            aa_equals "Extended attribute set" "attribute_value" $new_type_item(attribute_name)
 
             #########################################################
             # test update of item and attributes
@@ -193,13 +254,14 @@ aa_register_case content_item {
                 -item_id $new_type_item_id \
                 -revision "latest" \
                 -array_name new_type_item
-            aa_true "Item updated $new_type_item(name) $new_type_item(publish_status)" [expr {($new_type_item(name)) eq "new_name" && ($new_type_item(publish_status) eq "live")} ]
-            
+            aa_true "Item updated $new_type_item(name) $new_type_item(publish_status)" \
+                {$new_type_item(name) eq "new_name" && $new_type_item(publish_status) eq "live"}
+
             #########################################################
             # copy it
             #########################################################
             #TODO
-            
+
             #########################################################
             # move the copy
             #########################################################
@@ -222,8 +284,8 @@ aa_register_case content_item {
                 -item_id $new_type_item_id \
                 -array_name renamed_item
             aa_true "Item renamed" \
-                [expr {$new_name eq $renamed_item(name)}]
-                     
+                {$new_name eq $renamed_item(name)}
+
 
             #########################################################
             # publish it
@@ -238,8 +300,8 @@ aa_register_case content_item {
 
             #########################################################
             # new from tmpfile
-            #########################################################            
-            set tmp_item_name [ns_mktemp "__content_item_test_XXXXXX"] 
+            #########################################################
+            set tmp_item_name [ns_mktemp "__content_item_test_XXXXXX"]
             set tmp_item_id [content::item::new \
                                  -name $tmp_item_name \
                                  -title $tmp_item_name \
@@ -247,14 +309,14 @@ aa_register_case content_item {
                                  -tmp_filename $::acs::rootdir/packages/acs-content-repository/tcl/test/test.html]
 
             aa_true "Tmp_filename added cr_item exists" \
-                [expr {[content::item::get_id \
+                {[content::item::get_id \
                             -item_path $tmp_item_name \
                             -root_folder_id $first_folder_id] \
-                           eq $tmp_item_id}]
+                           eq $tmp_item_id}
 
             aa_true "Tmp_filename added cr_revision exists" \
-                [expr {[content::item::get_latest_revision \
-                            -item_id $tmp_item_id] ne ""}]
+                {[content::item::get_latest_revision \
+                            -item_id $tmp_item_id] ne ""}
             #########################################################
             # delete first folder and everything in it to clean up
             #########################################################

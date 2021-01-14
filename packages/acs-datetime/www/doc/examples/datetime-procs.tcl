@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author  ron@arsdigita.com
     @creation-date 2000/12/01
-    @cvs-id  $Id: datetime-procs.tcl,v 1.3.2.1 2015/09/10 08:21:22 gustafn Exp $
+    @cvs-id  $Id: datetime-procs.tcl,v 1.4 2017/08/07 23:47:55 gustafn Exp $
 } -properties {
     dt_examples:multirow
 }

@@ -5,7 +5,7 @@ ad_page_contract {
     @param write_p Set to 1 if you want the specification file written to disk.
     @author Jon Salz [jsalz@arsdigita.com]
     @creation-date 9 May 2000
-    @cvs-id $Id: version-generate-info.tcl,v 1.5.2.1 2015/09/10 08:21:04 gustafn Exp $
+    @cvs-id $Id: version-generate-info.tcl,v 1.7 2018/01/19 21:23:51 gustafn Exp $
 } {
     {version_id:naturalnum,notnull}
     {write_p:boolean 0}
@@ -23,6 +23,7 @@ if { $write_p } {
     ad_script_abort
 } else {
     ns_return 200 text/plain [apm_generate_package_spec $version_id]
+    ad_script_abort
 }
 
 

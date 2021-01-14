@@ -6,7 +6,7 @@ ad_page_contract {
   @author mbryzek@mit.edu
 
   @creation-date 2000-09-18
-  @cvs-id $Id: index.tcl,v 1.21.12.2 2015/10/20 08:01:05 gustafn Exp $
+  @cvs-id $Id: index.tcl,v 1.24 2018/05/09 15:33:28 hectorr Exp $
 } {
 } -properties {
     context:onevalue

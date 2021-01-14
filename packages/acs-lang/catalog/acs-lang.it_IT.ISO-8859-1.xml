@@ -3,6 +3,7 @@
 
   <msg key="Actions">Azioni</msg>
   <msg key="Administration_of_Localization">Gestione della Localizzazione</msg>
+  <msg key="all_locales">tutte le localizzazioni</msg>
   <msg key="all_packages">tutti i pacchetti</msg>
   <msg key="Are_you_sure_you_want_to_export_all_I18N_messages_to_catalog_files">Sei sicuro/a di voler esportare tutti i messaggi di localizzazione nel file catalog?</msg>
   <msg key="Are_you_sure_you_want_to_import_all_I18N_messages_from_catalog_files">Sei sicuro/a di voler importare tutti i messaggi di localizzazione dal file catalog?</msg>
@@ -17,8 +18,10 @@
   <msg key="Current_system_timezone_is">Il fuso orario di sistema corrente é &lt;strong&gt;%timezone%&lt;/strong&gt;</msg>
   <msg key="Default_Locale_For_Language">Locale di Default per la Lingua</msg>
   <msg key="Delete_this_locale">Elimina questo locale</msg>
+  <msg key="Deleted">Eliminato</msg>
   <msg key="Disable_this_locale">Disabilita questo locale</msg>
   <msg key="Edit_definition_of_locale">Modifica la definizione del locale</msg>
+  <msg key="Edit_history">Storico modifiche</msg>
   <msg key="Edit_localized_messages_for">Modifica i messaggi localizzati per %locales.locale_label%</msg>
   <msg key="Edit_this_message">Modifica questo messaggio</msg>
   <msg key="Enable_this_locale">Abilita questo locale</msg>
@@ -47,6 +50,8 @@
   <msg key="localization-abday">{Dom} {Lun} {Mar} {Mer} {Gio} {Ven} {Sab}</msg>
   <msg key="localization-abmon">{Gen} {Feb} {Mar} {Apr} {Mag} {Giu} {Lug} {Ago} {Set} {Ott} {Nov} {Dic}</msg>
   <msg key="localization-am_str">AM</msg>
+  <msg key="localization-byte">byte</msg>
+  <msg key="localization-bytes">bytes</msg>
   <msg key="localization-currency_symbol">€?</msg>
   <msg key="localization-d_fmt">%d/%m/%y</msg>
   <msg key="localization-d_t_fmt">%a %d %B %Y %H:%M %Z</msg>

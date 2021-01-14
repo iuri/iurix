@@ -7,7 +7,7 @@ ad_library {
     @author Timo Hentschel (timo@timohentschel.de)
 
     @creation-date 17 February 2004
-    @cvs-id $Id: category-list-procs.tcl,v 1.8.2.3 2017/04/21 20:25:40 gustafn Exp $
+    @cvs-id $Id: category-list-procs.tcl,v 1.10.2.1 2019/10/05 13:02:10 gustafn Exp $
 }
 
 namespace eval category::list {}
@@ -97,7 +97,7 @@ ad_proc -public category::list::get_pretty_list {
     @param category_delimiter string that separates the categories in the pretty list
     @param category_link optional link for every category-name
     @param category_link_eval optional command that returns the link for every category-name.
-                              normaly this would be a export_vars command that could
+                              normally this would be a export_vars command that could
                               contain __category_id and __tree_id which refer to
                               category_id and tree_id of the category-name the link will wrap.
     @param category_link_html optional list of key value pairs for additional html in a link.
@@ -105,7 +105,7 @@ ad_proc -public category::list::get_pretty_list {
     @param tree_colon string that separates a tree-name from the category-names in that tree.
     @param tree_link optional link for every tree-name
     @param tree_link_eval optional command that returns the link for every tree-name.
-                          normaly this would be a export_vars command that could
+                          normally this would be a export_vars command that could
                           contain __tree_id which refer to tree_id of the tree-name
                           the link will wrap.
     @param tree_link_html optional list of key value pairs for additional html in a link.
@@ -213,7 +213,7 @@ ad_proc -public category::list::prepare_display {
     @param category_delimiter string that separates the categories in the pretty list
     @param category_link optional link for every category-name
     @param category_link_eval optional command that returns the link for every category-name.
-                              normaly this would be a export_vars command that could
+                              normally this would be a export_vars command that could
                               contain __category_id and __tree_id which refer to
                               category_id and tree_id of the category-name the link will wrap.
     @param category_link_html optional list of key value pairs for additional html in a link.
@@ -221,7 +221,7 @@ ad_proc -public category::list::prepare_display {
     @param tree_colon string that separates a tree-name from the category-names in that tree.
     @param tree_link optional link for every tree-name
     @param tree_link_eval optional command that returns the link for every tree-name.
-                          normaly this would be a export_vars command that could
+                          normally this would be a export_vars command that could
                           contain __tree_id which refer to tree_id of the tree-name
                           the link will wrap.
     @param tree_link_html optional list of key value pairs for additional html in a link.
@@ -268,7 +268,7 @@ ad_proc -public category::list::prepare_display {
     }
     set valid_tree_ids ""
     foreach tree_id $tree_ids {
-	if {[lsearch -integer $exclude_tree_ids $tree_id] == -1} {
+	if {$tree_id ni $exclude_tree_ids} {
 	    lappend valid_tree_ids $tree_id
 	}
     }

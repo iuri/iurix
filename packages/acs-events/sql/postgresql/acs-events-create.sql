@@ -2,7 +2,7 @@
 --
 -- @author smeeks@arsdigita.com
 -- @creation-date 2000-11-16
--- @cvs-id $Id: acs-events-create.sql,v 1.20 2014/10/27 16:39:34 victorg Exp $
+-- @cvs-id $Id: acs-events-create.sql,v 1.27 2018/07/12 11:50:16 antoniop Exp $
 
 -- Create the objects and packages for the ACS Events service
 
@@ -20,26 +20,26 @@
 CREATE OR REPLACE FUNCTION inline_0(
 
 ) RETURNS integer AS $$
-DECLARE 
-    attr_id acs_attributes.attribute_id%TYPE; 
+DECLARE
+    attr_id acs_attributes.attribute_id%TYPE;
 BEGIN
 
-    -- Event object     
-    PERFORM acs_object_type__create_type ( 
-        'acs_event',	-- object_type
+    -- Event object
+    PERFORM acs_object_type__create_type (
+        'acs_event',    -- object_type
         'ACS Event',	-- pretty_name
         'ACS Events',	-- pretty_plural
-        'acs_object', -- supertype
-        'ACS_EVENTS',	-- table_name
-        'EVENT_ID',	-- id_column
+        'acs_object',   -- supertype
+        'acs_events',	-- table_name
+        'event_id',	-- id_column
         null,		-- package_name (default)
         'f',		-- abstract_p (default)
         null,		-- type_extension_table (default)
         null		-- name_method (default)
-    ); 
+    );
 
    -- Event attributes
-    attr_id := acs_attribute__create_attribute ( 
+    attr_id := acs_attribute__create_attribute (
         'acs_event',       -- object_type
         'timespan_id',     -- attribute_name
         'integer',	     -- datatype
@@ -54,7 +54,7 @@ BEGIN
         'type_specific',   -- storage (default)
         'f'		     -- static_p (default)
     );
-     attr_id := acs_attribute__create_attribute ( 
+     attr_id := acs_attribute__create_attribute (
         'acs_event',       -- object_type
         'activity_id',     -- attribute_name
         'integer',	     -- datatype
@@ -69,7 +69,7 @@ BEGIN
         'type_specific',   -- storage (default)
         'f'		     -- static_p (default)
     );
-    attr_id := acs_attribute__create_attribute ( 
+    attr_id := acs_attribute__create_attribute (
         'acs_event',       -- object_type
         'recurrence_id',   -- attribute_name
         'integer',	     -- datatype
@@ -83,8 +83,8 @@ BEGIN
         null,		     -- sort_order (default)
         'type_specific',   -- storage (default)
         'f'		     -- static_p (default)
-    ); 
-    attr_id := acs_attribute__create_attribute ( 
+    );
+    attr_id := acs_attribute__create_attribute (
         'acs_event',	     -- object_type
         'name',	     -- attribute_name
         'string',	     -- datatype
@@ -98,8 +98,8 @@ BEGIN
         null,		     -- sort_order (default)
         'type_specific',   -- storage (default)
         'f'		     -- static_p (default)
-    ); 
-    attr_id := acs_attribute__create_attribute ( 
+    );
+    attr_id := acs_attribute__create_attribute (
         'acs_event',	     -- object_type
         'description',     -- attribute_name
         'string',	     -- datatype
@@ -113,8 +113,8 @@ BEGIN
         null,		     -- sort_order (default)
         'type_specific',   -- storage (default)
         'f'		     -- static_p (default)
-    ); 
-    attr_id := acs_attribute__create_attribute ( 
+    );
+    attr_id := acs_attribute__create_attribute (
         'acs_event',	     -- object_type
         'status_summary',  -- attribute_name
         'string',	     -- datatype
@@ -128,11 +128,11 @@ BEGIN
         null,		     -- sort_order (default)
         'type_specific',   -- storage (default)
         'f'		     -- static_p (default)
-    ); 
-    attr_id := acs_attribute__create_attribute ( 
+    );
+    attr_id := acs_attribute__create_attribute (
         'acs_event',	     -- object_type
         'html_p',	     -- attribute_name
-        'string',	     -- datatype
+        'boolean',	     -- datatype
         'HTML?',	     -- pretty_name
         null,		     -- pretty_plural
         null,		     -- table_name (default)
@@ -143,8 +143,8 @@ BEGIN
         null,		     -- sort_order (default)
         'type_specific',   -- storage (default)
         'f'		     -- static_p (default)
-    ); 
-    attr_id := acs_attribute__create_attribute ( 
+    );
+    attr_id := acs_attribute__create_attribute (
         'acs_event',         -- object_type
         'related_link_url',  -- attribute_name
         'string',	       -- datatype
@@ -158,8 +158,8 @@ BEGIN
         null,		       -- sort_order (default)
         'type_specific',     -- storage (default)
         'f'		       -- static_p (default)
-    ); 
-    attr_id := acs_attribute__create_attribute ( 
+    );
+    attr_id := acs_attribute__create_attribute (
         'acs_event',          -- object_type
         'related_link_text',  -- attribute_name
         'string',		-- datatype
@@ -173,11 +173,11 @@ BEGIN
         null,			-- sort_order (default)
         'type_specific',	-- storage (default)
         'f'			-- static_p (default)
-    ); 
-    attr_id := acs_attribute__create_attribute ( 
+    );
+    attr_id := acs_attribute__create_attribute (
         'acs_event',		        -- object_type
         'redirect_to_rel_link_p',     -- attribute_name
-        'string',			-- datatype
+        'boolean',			-- datatype
         'Redirect to Related Link?',  -- pretty_name
         null,				-- pretty_plural
         null,				-- table_name (default)
@@ -188,7 +188,22 @@ BEGIN
         null,				-- sort_order (default)
         'type_specific',		-- storage (default)
         'f'				-- static_p (default)
-    ); 
+    );
+    attr_id := acs_attribute__create_attribute (
+        'acs_event',	     -- object_type
+        'location',          -- attribute_name
+        'string',	     -- datatype
+        'Location',          -- pretty_name
+        'Locations',         -- pretty_plural
+        null,		     -- table_name (default)
+        null,		     -- column_name (default)
+        null,		     -- default_value (default)
+        1,		     -- min_n_values (default)
+        1,		     -- max_n_values (default)
+        null,		     -- sort_order (default)
+        'type_specific',     -- storage (default)
+        'f'		     -- static_p (default)
+    );
 
     return 0;
 
@@ -202,16 +217,16 @@ drop function inline_0 ();
 -- Events table
 create table acs_events (
     event_id            integer
-                        constraint acs_events_fk references acs_objects(object_id) on delete cascade
-                        constraint acs_events_pk primary key,
+                        constraint acs_events_event_id_fk references acs_objects(object_id) on delete cascade
+                        constraint acs_events_event_id_pk primary key,
     --
     -- Need additional columns for attributes not inherited from activity, e.g.
     -- activity.name = "Bootcamp" and event.name = "December Bootcamp"
     --
-    -- The Event API supports methods to retrieve name/description from 
+    -- The Event API supports methods to retrieve name/description from
     -- either the event (if defined) or the underlying activity (if not defined)
     --
-    -- acs_event__get_name() 
+    -- acs_event__get_name()
     -- acs_event__get_description()
     -- acs_event__get_html_p()
     -- acs_event__get_status_summary()
@@ -223,10 +238,10 @@ create table acs_events (
     html_p              boolean,
     status_summary	varchar(255),
     --
-    -- The following three columns encapsulate the remaining attributes of an Event: 
-    -- the activity that takes place during the event, its timespan (a collection of time 
-    -- intervals during which the event occurs), and an optional recurrence specification 
-    -- that identifies how events repeat in time.
+    -- The following four columns encapsulate the remaining attributes of an Event:
+    -- the activity that takes place during the event, its timespan (a collection of time
+    -- intervals during which the event occurs), and an optional recurrence specification
+    -- that identifies how events repeat in time, and its location.
     --
     activity_id         integer
                         constraint acs_events_activity_id_fk
@@ -240,18 +255,19 @@ create table acs_events (
     recurrence_id       integer
                         constraint acs_events_recurrence_id_fk
                         references recurrences,
+    location            varchar(255),
     --
     -- a link which points to a page related to the event
     -- this could be either additional detail or a substitution
     -- for the link in some application view, e.g. drill-down from
     -- calendar.
     --
-    related_link_url    text,  
+    related_link_url    text,
     related_link_text   text,
     --
     -- Interpretation of this column is application dependent, but it is
     -- suggested that if this is 't', then related_link_{url|text} should be
-    -- used as the link in summary views in an application.  Otherwise, 
+    -- used as the link in summary views in an application.  Otherwise,
     -- related_link_{url|text} should be available in a detail view
     -- of the event.
     redirect_to_rel_link_p  boolean
@@ -261,10 +277,12 @@ create table acs_events (
 
 -- This is important to prevent locking on update of master table.
 -- See  http://www.arsdigita.com/bboard/q-and-a-fetch-msg.tcl?msg_id=000KOh
-create index acs_events_activity_id_ids on acs_events(activity_id);
+create index acs_events_activity_id_idx on acs_events(activity_id);
 
 -- This is useful for looking up instances of an event
 create index acs_events_recurrence_id_idx on acs_events(recurrence_id);
+
+create index acs_events_timespan_id_idx on acs_events(timespan_id);
 
 comment on table acs_events is '
     A relationship between a time span and an activity.
@@ -288,6 +306,10 @@ comment on column acs_events.status_summary is '
 
 comment on column acs_events.timespan_id is '
     The time span associated with this event.
+';
+
+comment on column acs_events.location is '
+    The location associated with this event.
 ';
 
 comment on column acs_events.activity_id is '
@@ -318,8 +340,8 @@ comment on table acs_event_party_map is '
 
 -- This view makes the temporal information easier to access
 create view acs_events_dates as
-select e.*, 
-       start_date, 
+select e.*,
+       start_date,
        end_date
 from   acs_events e,
        timespans s,
@@ -336,14 +358,15 @@ comment on view acs_events_dates is '
 -- This view provides an alternative to the get_name and get_description
 -- functions
 create view acs_events_activities as
-select event_id, 
+select event_id,
        coalesce(e.name, a.name) as name,
        coalesce(e.description, a.description) as description,
        coalesce(e.html_p, a.html_p) as html_p,
        coalesce(e.status_summary, a.status_summary) as status_summary,
        e.activity_id,
        timespan_id,
-       recurrence_id
+       recurrence_id,
+       location
 from   acs_events e,
        acs_activities a
 where  e.activity_id = a.activity_id;
@@ -354,7 +377,7 @@ comment on view acs_events_activities is '
 ';
 
 -- These views should make it easier to find recurrences that
--- need to be populated further, e.g. 
+-- need to be populated further, e.g.
 --
 --     select   recurrence_id
 --     from     partially_populated_events p, acs_event_party_map m
@@ -364,9 +387,9 @@ comment on view acs_events_activities is '
 --     group by recurrence_id
 --
 create view partially_populated_event_ids as
-select   min(event_id) as event_id, 
+select   min(event_id) as event_id,
          db_populated_until
-from     acs_events e, 
+from     acs_events e,
          recurrences r
 where    e.recurrence_id = r.recurrence_id
 and      (recur_until > db_populated_until or recur_until is null)
@@ -378,9 +401,9 @@ comment on view partially_populated_event_ids is '
 ';
 
 create view partially_populated_events as
-select  e.event_id, 
-        timespan_id, 
-        activity_id, 
+select  e.event_id,
+        timespan_id,
+        activity_id,
         recurrence_id,
         db_populated_until
 from    acs_events e,
@@ -397,7 +420,7 @@ comment on view partially_populated_events is '
 --
 -- Quick reference for the API supported for the Event object.  Note that every procedure
 -- takes event_id as the first argument, we're just leave it out for compactness.
--- 
+--
 --     new          (...)
 --     delete       ()
 --
@@ -424,7 +447,7 @@ comment on view partially_populated_events is '
 
 
 -- backwards compatible 13 param version
-CREATE OR REPLACE FUNCTION acs_event__new ( 
+CREATE OR REPLACE FUNCTION acs_event__new (
        integer,
        varchar,
        text,
@@ -446,12 +469,10 @@ $$ LANGUAGE plpgsql;
 
 
 
--- added
-select define_function_args('acs_event__new','event_id;null,name;null,description;null,html_p;null,status_summary;null,timespan_id;null,activity_id;null,recurrence_id;null,object_type;acs_event,creation_date;now(),creation_user;null,creation_ip;null,context_id;null,package_id;null');
 
 --
--- procedure acs_event__new/14
-
+-- procedure acs_event__new/14-18
+--
      -- Creates a new event (20.10.10)
      --
      -- @author W. Scott Meeks
@@ -469,8 +490,15 @@ select define_function_args('acs_event__new','event_id;null,name;null,descriptio
      -- @param creation_user     acs_object param
      -- @param creation_ip       acs_object param
      -- @param context_id        acs_object param
+     -- @param package_id        acs_object param
+     -- @param location          location
+     -- @param related_link_url  URL
+     -- @param related_link_text anchor for URL
+     -- @param redirect_to_rel_link_p activation flag
      --
      -- @return The id of the new event.
+
+select define_function_args('acs_event__new','event_id;null,name;null,description;null,html_p;null,status_summary;null,timespan_id;null,activity_id;null,recurrence_id;null,object_type;acs_event,creation_date;now(),creation_user;null,creation_ip;null,context_id;null,package_id;null,location;null,related_link_url;null,related_link_text;null,redirect_to_rel_link_p;false');
 
 CREATE OR REPLACE FUNCTION acs_event__new(
    new__event_id  integer,         -- default null,
@@ -486,10 +514,13 @@ CREATE OR REPLACE FUNCTION acs_event__new(
    new__creation_user integer,     -- default null,
    new__creation_ip varchar,       -- default null,
    new__context_id integer,        -- default null
-   new__package_id integer         -- default null
+   new__package_id integer,        -- default null
+   new__location varchar default NULL,
+   new__related_link_url varchar default NULL,
+   new__related_link_text varchar default NULL,
+   new__redirect_to_rel_link_p boolean default NULL
 
 ) RETURNS integer AS $$
-	-- acs_events.event_id%TYPE
 DECLARE
        v_event_id	    acs_events.event_id%TYPE;
 BEGIN
@@ -506,10 +537,13 @@ BEGIN
 	    );
 
        insert into acs_events
-            (event_id, name, description, html_p, status_summary, activity_id, timespan_id, recurrence_id)
+            (event_id, name, description, html_p, status_summary,
+	    activity_id, timespan_id, recurrence_id, location,
+	    related_link_url, related_link_text, redirect_to_rel_link_p)
        values
-            (v_event_id, new__name, new__description, new__html_p, new__status_summary, new__activity_id, new__timespan_id,
-             new__recurrence_id);
+            (v_event_id, new__name, new__description, new__html_p, new__status_summary,
+	    new__activity_id, new__timespan_id, new__recurrence_id, new__location,
+	    new__related_link_url, new__related_link_text, new__redirect_to_rel_link_p);
 
        return v_event_id;
 
@@ -519,8 +553,6 @@ $$ LANGUAGE plpgsql;
 
 
 
--- added
-select define_function_args('acs_event__delete','event_id');
 
 --
 -- procedure acs_event__delete/1
@@ -536,6 +568,8 @@ select define_function_args('acs_event__delete','event_id');
        --
        -- @return 0 (procedure dummy)
 
+select define_function_args('acs_event__delete','event_id');
+
 CREATE OR REPLACE FUNCTION acs_event__delete(
    delete__event_id integer
 ) RETURNS integer AS $$
@@ -547,10 +581,10 @@ BEGIN
        where  event_id = delete__event_id;
 
        -- acs_events and acs_event_party_map deleted via on delete cascade
-       PERFORM acs_object__delete(delete__event_id); 
+       PERFORM acs_object__delete(delete__event_id);
 
        -- Check for no more instances and delete recurrence if exists
-       if not acs_event__instances_exist_p(v_recurrence_id) then 
+       if not acs_event__instances_exist_p(v_recurrence_id) then
             PERFORM recurrence__delete(v_recurrence_id);
        end if;
 
@@ -569,7 +603,7 @@ select define_function_args('acs_event__delete_all_recurrences','recurrence_id;n
 -- procedure acs_event__delete_all_recurrences/1
 --
 
-     -- Deletes all instances of an event with the same (non-null) recurrence_id.  
+     -- Deletes all instances of an event with the same (non-null) recurrence_id.
      --
      -- @author W. Scott Meeks
      --
@@ -584,9 +618,9 @@ DECLARE
        rec_event				record;
 BEGIN
        if delete_all_recurrences__recurrence_id is not null then
-            for rec_event in 
-	      select event_id 
-	      from acs_events 
+            for rec_event in
+	      select event_id
+	      from acs_events
 	      where  recurrence_id = delete_all_recurrences__recurrence_id
 	    loop
                 PERFORM acs_event__delete(rec_event.event_id);
@@ -611,7 +645,7 @@ select define_function_args('acs_event__delete_all','event_id');
      --
      -- Deletes all instances of a recurring event with this event_id
      -- Use acs_event__delete for events with no recurrence
-     --  
+     --
      --
      -- @author W. Scott Meeks
      --
@@ -650,7 +684,7 @@ select define_function_args('acs_event__get_name','event_id');
 --
 
      --
-     -- Returns the name or the name of the activity associated with the event if 
+     -- Returns the name or the name of the activity associated with the event if
      -- name is null.
      -- Equivalent functionality to get_name provided by acs_event_activity view
      --
@@ -658,19 +692,19 @@ select define_function_args('acs_event__get_name','event_id');
      --
      -- @param event_id                      id of event to get name for
      --
-     -- @return The name or the name of the activity associated with the event if name is null. 
+     -- @return The name or the name of the activity associated with the event if name is null.
      --
 
 CREATE OR REPLACE FUNCTION acs_event__get_name(
    get_name__event_id integer
 
 ) RETURNS varchar AS $$
-DECLARE    
-       v_name acs_events.name%TYPE; 
+DECLARE
+       v_name acs_events.name%TYPE;
 BEGIN
 
        select coalesce(e.name, a.name) into v_name
-       from   acs_events e 
+       from   acs_events e
        left join acs_activities a
        on (e.activity_id = a.activity_id)
        where e.event_id = get_name__event_id;
@@ -690,7 +724,7 @@ select define_function_args('acs_event__get_description','event_id');
 -- procedure acs_event__get_description/1
 --
      --
-     -- Returns the description or the description of the activity associated 
+     -- Returns the description or the description of the activity associated
      -- with the event if description is null.
      -- Equivalent functionality to get_description provided by acs_event_activity view
      --
@@ -698,13 +732,13 @@ select define_function_args('acs_event__get_description','event_id');
      --
      -- @param event_id                      id of event to get description for
      --
-     -- @return The description or the description of the activity associated with the event if description is null. 
+     -- @return The description or the description of the activity associated with the event if description is null.
      --
 CREATE OR REPLACE FUNCTION acs_event__get_description(
    get_description__event_id integer
 ) RETURNS text AS $$
 DECLARE
-       v_description		    acs_events.description%TYPE; 
+       v_description		    acs_events.description%TYPE;
 BEGIN
 
        select coalesce(e.description, a.description) into v_description
@@ -728,7 +762,7 @@ select define_function_args('acs_event__get_html_p','event_id');
 -- procedure acs_event__get_html_p/1
 --
      --
-     -- Returns html_p or html_p of the activity associated with the event if 
+     -- Returns html_p or html_p of the activity associated with the event if
      -- html_p is null.
       --
      -- @author W. Scott Meeks
@@ -742,7 +776,7 @@ CREATE OR REPLACE FUNCTION acs_event__get_html_p(
 
 ) RETURNS boolean AS $$
 DECLARE
-       v_html_p		acs_events.html_p%TYPE; 
+       v_html_p		acs_events.html_p%TYPE;
 BEGIN
        select coalesce(e.html_p, a.html_p) into v_html_p
        from  acs_events e
@@ -763,7 +797,7 @@ select define_function_args('acs_event__get_status_summary','event_id');
 --
 -- procedure acs_event__get_status_summary/1
 --
-     -- Returns status_summary or status_summary of the activity associated with the event if 
+     -- Returns status_summary or status_summary of the activity associated with the event if
      -- status_summary is null.
      --
      -- @author W. Scott Meeks
@@ -773,10 +807,10 @@ select define_function_args('acs_event__get_status_summary','event_id');
      -- @return The status_summary or status_summary of the activity associated with the event if status_summary is null.
      --
 CREATE OR REPLACE FUNCTION acs_event__get_status_summary(
-   get_status_summary__event_id integer 
+   get_status_summary__event_id integer
 ) RETURNS boolean AS $$
 DECLARE
-       v_status_summary		acs_events.status_summary%TYPE; 
+       v_status_summary		acs_events.status_summary%TYPE;
 BEGIN
        select coalesce(e.status_summary, a.status_summary) into v_status_summary
        from  acs_events e
@@ -856,9 +890,9 @@ BEGIN
         select start_date,
                end_date into v_one_start_date,
                v_one_end_date
-        from time_intervals, 
-             timespans, 
-             acs_events 
+        from time_intervals,
+             timespans,
+             acs_events
         where time_intervals.interval_id = timespans.interval_id
           and timespans.timespan_id = acs_events.timespan_id
           and event_id=p_event_id;
@@ -867,15 +901,15 @@ raise notice 'v_one_start_date = %',v_one_start_date;
             select *
             from time_intervals
             where interval_id in (select interval_id
-                                  from timespans 
+                                  from timespans
                                   where timespan_id in (select timespan_id
-                                                        from acs_events 
-                                                        where recurrence_id = (select recurrence_id 
+                                                        from acs_events
+                                                        where recurrence_id = (select recurrence_id
                                                                                from acs_events where event_id = p_event_id)))
            and (p_edit_past_events_p = 't' or start_date >= v_one_start_date)
         LOOP
-                PERFORM time_interval__edit(v_timespan.interval_id, 
-                                            (to_char(v_timespan.start_date,'yyyy-mm-dd') || ' ' || to_char(p_start_date,'hh24:mi:ss')) :: timestamptz, 
+                PERFORM time_interval__edit(v_timespan.interval_id,
+                                            (to_char(v_timespan.start_date,'yyyy-mm-dd') || ' ' || to_char(p_start_date,'hh24:mi:ss')) :: timestamptz,
                                             (to_char(v_timespan.end_date,'yyyy-mm-dd') || ' ' || to_char(p_end_date,'hh24:mi:ss')) :: timestamptz);
         END LOOP;
 
@@ -1006,9 +1040,9 @@ CREATE OR REPLACE FUNCTION acs_event__recurs_p(
 DECLARE
        v_result	      boolean;
 BEGIN
-       select (case when recurrence_id is null 
+       select (case when recurrence_id is null
 	             then false
-                     else true 
+                     else true
                 end) into v_result
        from   acs_events
        where  event_id = recurs_p__event_id;
@@ -1038,13 +1072,13 @@ select define_function_args('acs_event__instances_exist_p','recurrence_id');
 CREATE OR REPLACE FUNCTION acs_event__instances_exist_p(
    instances_exist_p__recurrence_id integer
 ) RETURNS boolean AS $$
-	
+
 DECLARE
         v_result				integer;
 BEGIN
         -- Only need to check if any rows exist.
         select count(*) into v_result
-        from   dual 
+        from   dual
         where exists (select recurrence_id
                       from   acs_events
                       where  recurrence_id = instances_exist_p__recurrence_id);
@@ -1098,21 +1132,18 @@ $$ LANGUAGE plpgsql;
 
 
 
--- added
-select define_function_args('acs_event__new_instance','event_id,date_offset');
-
 --
 -- procedure acs_event__new_instance/2
 --
      -- Create a new instance of an event, with dateoffset from the start_date
      -- and end_date of event identified by event_id. Note that dateoffset
-     -- is an interval, not an integer.  This function is used internally by 
-     -- insert_instances. Since this function is internal, there is no need 
+     -- is an interval, not an integer.  This function is used internally by
+     -- insert_instances. Since this function is internal, there is no need
      -- to overload a function that has an integer for the dateoffset.
      --
      -- @author W. Scott Meeks
      --
-     -- @param event_id      Id of event to reference 
+     -- @param event_id      Id of event to reference
      -- @param date_offset    Offset from reference event, in date interval
      --
      -- @return  event_id of new event created.
@@ -1133,7 +1164,7 @@ BEGIN
        from   acs_events
        where  event_id = new_instance__event_id;
 
-       -- Get object parameters                
+       -- Get object parameters
        select * into object_row
        from   acs_objects
        where  object_id = new_instance__event_id;
@@ -1155,8 +1186,12 @@ BEGIN
 	    now(),		      -- creation_date (default)
             object_row.creation_user, -- creation_user
             object_row.creation_ip,   -- creation_ip
-            object_row.context_id,     -- context_id
-            object_row.package_id     -- context_id
+            object_row.context_id,    -- context_id
+            object_row.package_id,    -- package_id
+	    event_row.location,        -- location
+	    event_row.related_link_url,      -- related_link_url
+	    event_row.related_link_text,     -- related_link_text
+	    event_row.redirect_to_rel_link_p -- redirect_to_rel_link_p
 	    );
 
       return v_event_id;
@@ -1164,51 +1199,46 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-
-
-
--- added
-select define_function_args('acs_event__insert_instances','event_id,cutoff_date;null');
-
 --
 -- procedure acs_event__insert_instances/2
 --
      -- This is the key procedure creating recurring events.  This procedure
      -- uses the interval set and recurrence information referenced by the event
-     -- to insert additional information to represent the recurrences.   
+     -- to insert additional information to represent the recurrences.
      -- Events will be added up until the earlier of recur_until and
-     -- cutoff_date.  The procedure enforces a hard internal 
-     -- limit of adding no more than 10,000 recurrences at once to reduce the 
+     -- cutoff_date.  The procedure enforces a hard internal
+     -- limit of adding no more than 10,000 recurrences at once to reduce the
      -- risk of demolishing the DB because of application bugs.  The date of the
      -- last recurrence added is marked as the db_populated_until date.
      --
-     -- The application is responsible for calling this function again if 
-     -- necessary to populate to a later date.  
+     -- The application is responsible for calling this function again if
+     -- necessary to populate to a later date.
      --
-     -- JS: Note that the following Oracle functions do not have any equivalent 
+     -- JS: Note that the following Oracle functions do not have any equivalent
      -- JS: (at least in an obvious way) in Postgres: next_day, add_months, last_day.
-     -- JS: Ports of these functions are in oracle-compat-create.sql. 
+     -- JS: Ports of these functions are in oracle-compat-create.sql.
      -- JS:
      -- JS: To understand the port, it is important to keep in mind the subtle but
      -- JS: important differences in the way Oracle and Postgres do date arithmetic.
      -- JS: Compatibility with Oracle requires that all integers involved in date arithmetic
-     -- JS: be converted to Postgres day intervals, hence the typecasting. The typecasting 
-     -- JS: function to_interval (also in oracle-compat-create.sql) is simply a convenience 
+     -- JS: be converted to Postgres day intervals, hence the typecasting. The typecasting
+     -- JS: function to_interval (also in oracle-compat-create.sql) is simply a convenience
      -- JS: so that the code will not be littered by escaped quotes.
      -- JS:
-     -- JS: NOTE: There seems to be some weirdness going on with recurrence 
+     -- JS: NOTE: There seems to be some weirdness going on with recurrence
      -- JS: when moving from non-DST to DST dates (email me for the gory details).
      -- JS: Not sure if a Postgres bug or feature.
-     -- 
+     --
      -- @author W. Scott Meeks
      --
-     -- @param event_id              The id of the event to recur.  If the 
+     -- @param event_id              The id of the event to recur.  If the
      --                              event's recurrence_id is null, nothing happens.
-     -- @param cutoff_date           Determines how far out to prepopulate the DB.  
+     -- @param cutoff_date           Determines how far out to prepopulate the DB.
      --                              Default is now() plus the value of the
      --                              EventFutureLimit site parameter.
      --
      -- @return 0 (procedure dummy)
+select define_function_args('acs_event__insert_instances','event_id,cutoff_date;null');
 
 CREATE OR REPLACE FUNCTION acs_event__insert_instances(
    insert_instances__event_id integer,
@@ -1247,7 +1277,7 @@ BEGIN
         select * into recurrence_row
         from   recurrences
         where  recurrence_id = event_row.recurrence_id;
-        
+
 
         -- Set cutoff date to stop populating the DB with recurrences
         -- EventFutureLimit is in years. (a parameter of the service)
@@ -1256,13 +1286,13 @@ BEGIN
         else
            v_stop_date := insert_instances__cutoff_date;
         end if;
-        
+
         -- Events only populated until max(cutoff_date, recur_until)
         -- If recur_until null, then defaults to cutoff_date
         if recurrence_row.recur_until < v_stop_date then
            v_stop_date := recurrence_row.recur_until;
         end if;
-        
+
         -- Figure out the date to start from.
 	-- JS: I do not understand why the date must be truncated to the midnight of the event date
         select min(start_date)
@@ -1275,27 +1305,27 @@ BEGIN
         else
            v_start_date := recurrence_row.db_populated_until;
         end if;
-        
+
         v_current_date   := v_start_date;
         v_last_date_done := v_start_date;
         v_n_intervals    := recurrence_row.every_nth_interval;
-        
+
         -- Case off of the interval_name to make code easier to read
         select interval_name into v_interval_name
-        from   recurrences r, 
+        from   recurrences r,
                recurrence_interval_types t
         where  recurrence_id   = recurrence_row.recurrence_id
         and    r.interval_type = t.interval_type;
-        
+
         -- Week has to be handled specially.
         -- Start with the beginning of the week containing the start date.
-        if v_interval_name = 'week' 
+        if v_interval_name = 'week'
 	then
             v_current_date := next_day(v_current_date - to_interval(7,'days'),'SUNDAY');
             v_days_of_week := recurrence_row.days_of_week;
             v_days_length  := char_length(v_days_of_week);
         end if;
-        
+
         -- Check count to prevent runaway in case of error
         v_instance_count := 0;
 
@@ -1303,17 +1333,17 @@ BEGIN
         while v_instance_count < 10000 and (date_trunc('day',v_last_date_done) <= date_trunc('day',v_stop_date))
         loop
             v_instance_count := v_instance_count + 1;
-        
+
             -- Calculate next date based on interval type
 
 	    -- Add next day, skipping every v_n_intervals
-	    if v_interval_name = 'day' 
+	    if v_interval_name = 'day'
 	    then
                 v_current_date := v_current_date + to_interval(v_n_intervals,'days');
 	    end if;
-        
+
 	    -- Add a full month, skipping by v_n_intervals months
-            if v_interval_name = 'month_by_date' 
+            if v_interval_name = 'month_by_date'
 	    then
                 v_current_date := add_months(v_current_date, v_n_intervals);
 	    end if;
@@ -1323,7 +1353,7 @@ BEGIN
                 -- Find last day of month before correct month
                 v_last_day := add_months(last_day(v_current_date), v_n_intervals - 1);
                 -- Find correct week and go to correct day of week
-                v_current_date := next_day(v_last_day + 
+                v_current_date := next_day(v_last_day +
 				              to_interval(7 * (to_number(to_char(v_current_date,'W'),'99')::INT - 1),
 							  'days'),
                                             to_char(v_current_date, 'DAY'));
@@ -1347,7 +1377,7 @@ BEGIN
 
 	        -- JS: Execute a dynamically created query on the fly...
 	        FOR rec_execute IN
-		EXECUTE 'select ' || recurrence_row.custom_func 
+		EXECUTE 'select ' || recurrence_row.custom_func
 				    || '(' || quote_literal(v_current_date)
 				    || ',' || v_n_intervals || ') as current_date'
 		LOOP
@@ -1355,10 +1385,10 @@ BEGIN
 		END LOOP;
 
             end if;
-        
+
             -- Check to make sure we are not going past Trunc because dates are not integral
             exit when date_trunc('day',v_current_date) > date_trunc('day',v_stop_date);
-        
+
             -- Have to handle week specially
             if v_interval_name = 'week' then
                 -- loop over days_of_week extracting each day number
@@ -1368,7 +1398,7 @@ BEGIN
                 while v_days_index <= v_days_length loop
                     v_day_num   := SUBSTR(v_days_of_week, v_days_index, 1);
                     v_week_date := (v_current_date ::timestamp + to_interval(v_day_num,'days')) :: timestamptz;
-	           if date_trunc('day',v_week_date) > date_trunc('day',v_start_date) 
+	           if date_trunc('day',v_week_date) > date_trunc('day',v_start_date)
 		       and date_trunc('day',v_week_date) <= date_trunc('day',v_stop_date) then
                          -- This is where we add the event
                          v_event_id := acs_event__new_instance(
@@ -1377,7 +1407,7 @@ BEGIN
                          );
                          v_last_date_done := v_week_date;
 
-                     else if date_trunc('day',v_week_date) > date_trunc('day',v_stop_date) 
+                     else if date_trunc('day',v_week_date) > date_trunc('day',v_stop_date)
 		          then
                              -- Gone too far
                              exit;
@@ -1395,13 +1425,13 @@ BEGIN
                 -- All other interval types
                 -- This is where we add the event
                 v_event_id := acs_event__new_instance(
-                    insert_instances__event_id,						    -- event_id 
+                    insert_instances__event_id,						    -- event_id
                     date_trunc('day',v_current_date ::timestamp) - date_trunc('day',v_event_date ::timestamp)   -- offset
                 );
                 v_last_date_done := v_current_date;
             end if;
         end loop;
-        
+
         update recurrences
         set    db_populated_until = v_last_date_done
         where  recurrence_id      = recurrence_row.recurrence_id;
@@ -1449,7 +1479,7 @@ BEGIN
 --             end_date   = end_date + shift__end_offset
 --       where  event_id   = shift__event_id;
 
-	  -- Can not update view, so we do it the hard way 
+	  -- Can not update view, so we do it the hard way
 	  -- (as if we make the rule anyways)
 	  for rec_events in
 	      select t.*
@@ -1499,13 +1529,13 @@ CREATE OR REPLACE FUNCTION acs_event__shift(
 ) RETURNS integer AS $$
 DECLARE
 BEGIN
-	
+
        return acs_event__shift (
 	            shift__event_id,
 	            to_interval(shift__start_offset,'days'),
 	            to_interval(shift__end_offset,'days')
 		    );
-				    
+
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1560,10 +1590,10 @@ BEGIN
 				    from   acs_events
 				    where  event_id = shift_all__event_id)
 	loop
-	
+
 	    PERFORM acs_event__shift(
 			rec_events.event_id,
-			shift_all__start_offset,	       
+			shift_all__start_offset,
 			shift_all__end_offset
 			);
 	end loop;
@@ -1606,13 +1636,12 @@ CREATE OR REPLACE FUNCTION acs_event__shift_all(
 ) RETURNS integer AS $$
 DECLARE
 BEGIN
-	
+
        return acs_event__shift_all (
 	            shift_all__event_id,
 	            to_interval(shift_all__start_offset,'days'),
 	            to_interval(shift_all__end_offset,'days')
 		    );
-				    
+
 END;
 $$ LANGUAGE plpgsql;
-

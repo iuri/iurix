@@ -3,7 +3,7 @@
 --
 -- @author Jeff Davis (davis@xarg.net)
 -- @creation-date 2000-09-10
--- @cvs-id $Id: ad-locales.sql,v 1.33.6.3 2017/04/21 16:06:05 gustafn Exp $
+-- @cvs-id $Id: ad-locales.sql,v 1.34.2.1 2019/03/14 10:23:05 antoniop Exp $
 --
 
 -- ****************************************************************************
@@ -19,7 +19,7 @@ create table ad_locales (
   locale		varchar(30)
                         constraint ad_locales_locale_pk
                         primary key,
-  language		char(3) 
+  language		varchar(3)
                         constraint ad_locales_language_nn
 			not null,
   country		char(2) 

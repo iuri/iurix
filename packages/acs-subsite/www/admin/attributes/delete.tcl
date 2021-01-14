@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Nov 12 18:03:50 2000
-    @cvs-id $Id: delete.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: delete.tcl,v 1.5 2017/08/07 23:47:58 gustafn Exp $
 
 } {
     attribute_id:notnull,naturalnum,attribute_dynamic_p

@@ -1,13 +1,10 @@
-# packages/acs-content-repository/tcl/acs-content-repository-callback-procs.tcl
-
 ad_library {
     
     Callback procs for acs-content-repository
     
     @author Malte Sussdorff (sussdorff@sussdorff.de)
     @creation-date 2005-06-15
-    @arch-tag: d9aec4df-102d-4b0d-8d0e-3dc470dbe783
-    @cvs-id $Id: acs-content-repository-callback-procs.tcl,v 1.6.2.1 2015/09/10 08:21:16 gustafn Exp $
+    @cvs-id $Id: acs-content-repository-callback-procs.tcl,v 1.8 2018/08/15 16:24:28 gustafn Exp $
 }
 
 

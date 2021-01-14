@@ -14,11 +14,11 @@
 	</if>
     </div>
 </if>
-<include src="folder-chunk" &="folder_id" &="n_past_days" allow_bulk_actions="1" &="return_url" &="category_id">
+<include src="folder-chunk" &="folder_id" &="n_past_days" allow_bulk_actions="1" &="return_url" &="category_id" &="orderby">
 <p>
 <include src="/packages/notifications/lib/notification-widget" type="fs_fs_notif"
 	 object_id="@folder_id;literal@"
-	 pretty_name="@folder_name@"
+	 pretty_name="@folder_name;literal@"
 	 url="@folder_url;literal@" >
 
 <if @webdav_url@ not nil>

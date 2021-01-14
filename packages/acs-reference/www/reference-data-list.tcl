@@ -3,7 +3,7 @@ ad_page_contract {
     
     @author Jon Griffin (jon@jongriffin.com)
     @creation-date 2000-10-04
-    @cvs-id $Id: reference-data-list.tcl,v 1.2.18.2 2016/01/02 17:39:23 gustafn Exp $
+    @cvs-id $Id: reference-data-list.tcl,v 1.3 2017/08/07 23:47:57 gustafn Exp $
 } {
 } -properties {
     context_bar:onevalue

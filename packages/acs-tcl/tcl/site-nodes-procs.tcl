@@ -5,14 +5,14 @@ ad_library {
     @author rhs@mit.edu
     @author yon (yon@openforce.net)
     @creation-date 2000-09-06
-    @cvs-id $Id: site-nodes-procs.tcl,v 1.93.2.23 2018/01/19 19:38:54 gustafn Exp $
+    @cvs-id $Id: site-nodes-procs.tcl,v 1.141.2.29 2020/12/01 09:26:41 gustafn Exp $
 
 }
 
 
 #####################################################################
 #
-# For the sitenodes implmementation there are two versions available.
+# For the sitenodes implementation there are two versions available.
 # One has the option to use either the classical site-nodes code based
 # on nsvs or the newer XOTcl based code. The classical code has the
 # disadvantage that it takes a while on start-up, uses a lot of
@@ -20,7 +20,7 @@ ad_library {
 # version is much faster from a factor of two to a several thousand
 # times - but requires XOTcl, which has not made it yet to the
 # acs-core procs. So, the implementation checks, if the installation
-# fullfills the requirements of the new code, if not, it falls back to
+# fulfills the requirements of the new code, if not, it falls back to
 # the classical implementation.
 #
 # Some timings:
@@ -61,12 +61,15 @@ set UseXotclSiteNodes 0
 #
 # Turn on UseXotclSiteNodes in cases, where all requirements are met.
 # The XOTcl classes below depend on XOTcl 2, xotcl-core (in particular
-# 05-db-procs.tcl). The current implementation does not support
-# oracle, the implementation does not distinguish btw. AOLserver and
+# 05-db-procs.tcl). The current implementation should work with Oracle
+# 11gR2 (Aug 2013) or newer, probably one "limit" clause has to be
+# replaced. The implementation does not distinguish btw. AOLserver and
 # NaviServer (uses simply ns_cache_eval for speed and simplicity).
-#
+# The code depends on xotcl-core only because of the xo::db interface,
+# which should be turned into mainstream OpenACS after the OpenACS
+# 5.10 release.
 
-if {[info commands ::nx::Object] ne ""
+if {[namespace which ::nx::Object] ne ""
     && [ns_info name] eq "NaviServer"
     && [db_driverkey ""] eq "postgresql"
     && [db_string check_base_tables {select 1 from pg_class where relname = 'apm_package_versions'} -default 0]
@@ -107,13 +110,14 @@ ad_proc -public site_node::new {
 
     set node_id [package_instantiate_object -var_list $var_list site_node]
 
-    #Now update the nsv caches.  We don't need to update the object_id and package_key caches
-    #because nothing is mounted here yet.
+    # Now update the nsv caches.  We don't need to update the
+    # object_id and package_key caches because nothing is mounted here
+    # yet.
 
     # Grab the lock so our URL key doesn't change on us midstream
     ns_mutex lock [nsv_get site_nodes_mutex mutex]
 
-    with_finally -code {
+    ad_try {
         set url [site_node::get_url -node_id $parent_id]
         append url $name
         if { $directory_p == "t" } { append url "/" }
@@ -124,11 +128,35 @@ ad_proc -public site_node::new {
                  object_id "" object_type "" \
                  package_key "" package_id "" \
                  instance_name "" package_type ""]
-    } -finally {
+    } finally {
         ns_mutex unlock [nsv_get site_nodes_mutex mutex]
     }
 
     return $node_id
+}
+
+ad_proc -public site_node::delete_service_nodes  {
+    {-node_id:required}
+} {
+    Unmount and delete all (shared) service packages under this
+    site_node.
+
+    @param node_id starting node_id
+} {
+    set sub_node_urls [site_node::get_children \
+                           -node_id $node_id]
+    foreach sub_node_url $sub_node_urls {
+        set sub_node_id [site_node::get_element -url $sub_node_url -element node_id]
+        set package_id [site_node::get_object_id -node_id $sub_node_id]
+        if {$package_id ne ""
+            && [db_0or1row is_apm_service {
+                select 1 from apm_services
+                where service_id = :package_id
+            }]} {
+            site_node::unmount -node_id $sub_node_id
+            site_node::delete -node_id $sub_node_id
+        }
+    }
 }
 
 ad_proc -public site_node::delete {
@@ -164,14 +192,14 @@ ad_proc -public site_node::delete {
     # delete nodes in reverse order, starting from leaves
     foreach node_id [lreverse $nodes_to_delete] {
         # first delete package_id under this node...
-        set package_id [site_node::get_object_id \
-                            -node_id $node_id]
+        set package_id [site_node::get_object_id -node_id $node_id]
+        set url [site_node::get_url -node_id $node_id]
         if {$delete_package_p} {
             apm_package_instance_delete $package_id
         }
         # ...then the node itself
         db_exec_plsql delete_site_node {}
-        update_cache -node_id $node_id
+        update_cache -node_id $node_id -url $url -object_id $package_id
     }
 }
 
@@ -187,7 +215,7 @@ ad_proc -public site_node::mount {
 
     ns_mutex lock [nsv_get site_nodes_mutex mutex]
 
-    with_finally -code {
+    ad_try {
         #Now update the nsv caches.
         array set node [site_node::get_from_node_id -node_id $node_id]
 
@@ -213,24 +241,22 @@ ad_proc -public site_node::mount {
                  package_key $package_key package_id $package_id \
                  instance_name $instance_name package_type $package_type]
 
-        set url_by_object_id [list $node(url)]
-        if { [nsv_exists site_node_url_by_object_id $object_id] } {
-            set url_by_object_id [concat [nsv_get site_node_url_by_object_id $object_id] $url_by_object_id]
-            set url_by_object_id [lsort \
-                                      -decreasing \
-                                      -command util::string_length_compare \
-                                      $url_by_object_id]
-        }
+        set url_by_object_id [site_node::get_url_from_object_id -object_id $object_id]
+        lappend url_by_object_id $node(url)
+        set url_by_object_id [lsort \
+                                  -decreasing \
+                                  -command util::string_length_compare \
+                                  $url_by_object_id]
         nsv_set site_node_url_by_object_id $object_id $url_by_object_id
 
         if { $package_key ne "" } {
             set url_by_package_key [list $node(url)]
             if { [nsv_exists site_node_url_by_package_key $package_key] } {
-                set url_by_package_key [concat [nsv_get site_node_url_by_package_key $package_key] $url_by_package_key]
+                set url_by_package_key [linsert $url_by_package_key 0 [nsv_get site_node_url_by_package_key $package_key]]
             }
             nsv_set site_node_url_by_package_key $package_key $url_by_package_key
         }
-    } -finally {
+    } finally {
         ns_mutex unlock [nsv_get site_nodes_mutex mutex]
     }
 
@@ -263,11 +289,12 @@ ad_proc -public site_node::rename {
     # We need to update the cache for all the child nodes as well
     set node_url [get_url -node_id $node_id]
     set child_node_ids [get_children -all -node_id $node_id -element node_id]
+    set node_object_id [dict get [site_node::get -node_id $node_id] object_id]
 
     db_dml rename_node {}
     db_dml update_object_title {}
 
-    update_cache -sync_children -node_id $node_id
+    update_cache -sync_children -node_id $node_id -url $node_url -object_id $node_object_id
 }
 
 ad_proc -public site_node::instantiate_and_mount {
@@ -316,13 +343,13 @@ ad_proc -public site_node::instantiate_and_mount {
             set node_id [site_node::new -name $node_name -parent_id $parent_node_id]
         } else {
             # Check that there isn't already a package mounted at the node
-            array set node [get -url $url]
-
-            if { [info exists node(object_id)] && $node(object_id) ne "" } {
-                error "Cannot mount package at url $url as package $node(object_id) is already mounted there"
+            set node [get -url $url]
+            set object_id [expr {[dict exists $node object_id] ? [dict get $node object_id] : ""}]
+            if { $object_id ne "" } {
+                error "Cannot mount package at url $url as package $object_id is already mounted there"
             }
 
-            set node_id $node(node_id)
+            set node_id [dict get $node node_id]
         }
     }
 
@@ -360,10 +387,10 @@ ad_proc -public site_node::unmount {
                 -arg_list [list package_id $package_id node_id $node_id]
         }
     }
-
+    set url [site_node::get_url -node_id $node_id]
     db_dml unmount_object {}
     db_dml update_object_package_id {}
-    update_cache -node_id $node_id
+    update_cache -node_id $node_id -url $url -object_id $package_id
 }
 
 ad_proc -private site_node::init_cache {} {
@@ -374,24 +401,29 @@ ad_proc -private site_node::init_cache {} {
     nsv_array reset site_node_url_by_object_id [list]
     nsv_array reset site_node_url_by_package_key [list]
 
-    set root_node_id [db_string get_root_node_id {} -default {}]
-    if { $root_node_id ne "" } {
-        site_node::update_cache -sync_children -node_id $root_node_id
+    if {[db_0or1row get_root_node {
+        select node_id, object_id
+        from site_nodes
+        where parent_id is null
+    }]} {
+        update_cache -sync_children -node_id $node_id -url "/" -object_id $object_id
     }
 }
 
 ad_proc -private site_node::update_cache {
     {-sync_children:boolean}
     {-node_id:required}
+    {-url}
+    {-object_id}
 } {
-    Brings the in memory copy of the site nodes hierarchy in sync with the
+    Brings the in-memory copy of the site nodes hierarchy in sync with the
     database version. Only updates the given node and its children.
 } {
     # don't let any other thread try to do a concurrent update
     # until cache is fully updated
     ns_mutex lock [nsv_get site_nodes_mutex mutex]
 
-    with_finally -code {
+    ad_try {
 
         # Lars: We need to record the object_id's touched, so we can sort the
         # object_id->url mappings again. We store them sorted by length of the URL
@@ -450,7 +482,7 @@ ad_proc -private site_node::update_cache {
 
         set cur_obj_ids [list]
         db_foreach $query_name {} {
-            if {$parent_id eq ""} {
+            if {$parent_id eq "" || ![nsv_exists site_node_url_by_node_id $parent_id]} {
                 # url of root node
                 set url "/"
             } else {
@@ -494,7 +526,7 @@ ad_proc -private site_node::update_cache {
                                                                -command util::string_length_compare \
                                                                [nsv_get site_node_url_by_object_id $object_id] ]
         }
-    } -finally {
+    } finally {
         ns_mutex unlock [nsv_get site_nodes_mutex mutex]
     }
 }
@@ -538,8 +570,7 @@ ad_proc -public site_node::get_element {
 
     @see site_node::get
 } {
-    array set node [site_node::get -node_id $node_id -url $url]
-    return $node($element)
+    return [dict get [site_node::get -node_id $node_id -url $url] $element]
 }
 
 ad_proc -public site_node::get_from_node_id {
@@ -602,9 +633,15 @@ ad_proc -public site_node::exists_p {
     {-url:required}
 } {
     Returns 1 if a site node exists at the given url and 0 otherwise.
+    The provided URL has to start with a slash.
 
+    @param url URL path starting with a slash.
     @author Peter Marklund
 } {
+
+    ns_log notice "OLD nsv-based site_node::exists_p <$url>"
+
+
     set url_no_trailing [string trimright $url "/"]
     return [nsv_exists site_nodes "$url_no_trailing/"]
 }
@@ -659,7 +696,7 @@ ad_proc -public site_node::get_url {
 ad_proc -public site_node::get_url_from_object_id {
     {-object_id:required}
 } {
-    returns a list of urls for site_nodes that have the given object
+    Return a list of URLs for site_nodes that have the given object
     mounted or the empty list if there are none. The
     url:s will be returned in descending order meaning any children will
     come before their parents. This ordering is useful when deleting site nodes
@@ -675,23 +712,22 @@ ad_proc -public site_node::get_url_from_object_id {
 ad_proc -public site_node::get_node_id {
     {-url:required}
 } {
-    return the node_id for this url
+    @return the node_id for this url
 } {
-    array set node [get -url $url]
-    return $node(node_id)
+    return [dict get [get -url $url] node_id]
 }
 
 ad_proc -public site_node::get_node_id_from_object_id {
     {-object_id:required}
 } {
-    return the site node id associated with the given object_id
+    @return the site node id associated with the given object_id
 } {
     set urls [get_url_from_object_id -object_id $object_id]
     if {[llength $urls] == 0} {
         set url ""
     } else {
         if {[llength $urls] > 1} {
-            ad_log warning "get_node_id_from_object_id for object $object_id returns [llength $urls] urls, first one is returned"
+            ad_log warning "get_node_id_from_object_id for object $object_id returns [llength $urls] URLs, first one is returned"
         }
         set url [lindex $urls 0]
     }
@@ -705,40 +741,38 @@ ad_proc -public site_node::get_node_id_from_object_id {
 ad_proc -public site_node::get_parent_id {
     {-node_id:required}
 } {
-    return the parent_id of this node
+    @return the parent_id of this node
 } {
-    array set node [get -node_id $node_id]
-    return $node(parent_id)
+    return [dict get [get -node_id $node_id] parent_id]
 }
 
 ad_proc -public site_node::get_parent {
     {-node_id:required}
 } {
-    return the parent node of this node
+    @return the parent node of this node
 } {
-    array set node [get -node_id $node_id]
-    return [get -node_id $node(parent_id)]
+    return [get -node_id [get_parent_id -node_id $node_id]]
 }
 
 ad_proc -public site_node::get_ancestors {
     {-node_id:required}
     {-element ""}
 } {
-    return the ancestors of this node
+    @return the ancestors of this node
 } {
     set result [list]
     set array_result_p [string equal $element ""]
 
     while {$node_id ne "" } {
-        array set node [get -node_id $node_id]
+        set node [get -node_id $node_id]
 
         if {$array_result_p} {
-            lappend result [array get node]
+            lappend result $node
         } else {
-            lappend result $node($element)
+            lappend result [dict get $node $element]
         }
 
-        set node_id $node(parent_id)
+        set node_id [dict get $node parent_id]
     }
 
     return $result
@@ -747,10 +781,9 @@ ad_proc -public site_node::get_ancestors {
 ad_proc -public site_node::get_object_id {
     {-node_id:required}
 } {
-    return the object_id for this node
+    @return the object_id for this node
 } {
-    array set node [get -node_id $node_id]
-    return $node(object_id)
+    return [dict get [get -node_id $node_id] object_id]
 }
 
 ad_proc -public site_node::get_children {
@@ -769,13 +802,13 @@ ad_proc -public site_node::get_children {
 
     @option all          Set this if you want all children, not just direct children
 
-    @option package_type If specified, this will limit the returned nodes to those with an
-    package of the specified package type (normally apm_service or
-                                           apm_application) mounted. Conflicts with the -package_key option.
+    @option package_type If specified, this will limit the returned nodes to those
+    with a package of the specified package type (normally apm_service or
+    apm_application) mounted. Conflicts with the -package_key option.
 
     @param package_key   If specified, this will limit the returned nodes to those with a
     package of the specified package key mounted. Conflicts with the
-    -package_type option. Can take one or more packges keys as a Tcl list.
+    -package_type option. Can take one or more packages keys as a Tcl list.
 
     @param filters       Takes a list of { element value element value ... } for filtering
     the result list. Only nodes where element is value for each of the
@@ -858,7 +891,7 @@ ad_proc -public site_node::get_children {
     }
 
     # if we had filters or were getting a particular element then we
-    # have our results in return_val otherwise it's just urls
+    # have our results in return_val otherwise it's just URLs
     if { $element ne ""
          || [llength $filters] > 0} {
         return $return_val
@@ -874,7 +907,7 @@ ad_proc -public site_node::closest_ancestor_package {
     {-include_self:boolean}
     {-element "object_id"}
 } {
-    Starting with the node at with given id, or at given url,
+    Starting with the node of the given id, or at given url,
     climb up the site map and return the id of the first not-null
     mounted object. If no ancestor object is found the empty string is
     returned.
@@ -883,22 +916,22 @@ ad_proc -public site_node::closest_ancestor_package {
     <code>include_self</code> is set.
 
     @param url          The url of the node to start from. You must provide
-                        either url or node_id. An empty url is taken to mean
-                        the main site.
+    either url or node_id. An empty url is taken to mean
+    the main site.
     @param node_id      The id of the node to start from. Takes precedence
-                        over any provided url.
+    over any provided url.
     @param package_key  Restrict search to objects of this package type. You
-                        may supply a list of package_keys.
+    may supply a list of package_keys.
     @param include_self Return the package_id at the passed-in node if it is
-                        of the desired package_key. Ignored if package_key is
-                        empty.
+    of the desired package_key. Ignored if package_key is
+    empty.
 
     @return The id of the first object found and an empty string if no object
     is found. Throws an error if no node with given url can be found.
 
     @author Peter Marklund
 } {
-    # Make sure we have a url to work with
+    # Make sure we have a URL to work with
     if { $url eq "" } {
         if { $node_id eq "" } {
             set url "/"
@@ -909,10 +942,10 @@ ad_proc -public site_node::closest_ancestor_package {
 
     # should we return the package at the passed-in node/url?
     if { $include_self_p && $package_key ne ""} {
-        array set node_array [site_node::get -url $url]
+        set node [site_node::get -url $url]
 
-        if {$node_array(package_key) in $package_key} {
-            return $node_array($element)
+        if {[dict get $node package_key] in $package_key} {
+            return [dict get $node $element]
         }
     }
 
@@ -922,13 +955,13 @@ ad_proc -public site_node::closest_ancestor_package {
         set url [string trimright $url /]
         set url [string range $url 0 [string last / $url]]
 
-        array set node_array [site_node::get -url $url]
+        set node [site_node::get -url $url]
 
         # are we looking for a specific package_key?
         if { $package_key eq ""
-             || $node_array(package_key) in $package_key
+             || [dict get $node package_key] in $package_key
          } {
-            set elm_value $node_array($element)
+            set elm_value [dict get $node $element]
         }
     }
 
@@ -973,18 +1006,19 @@ ad_proc -public site_node::verify_folder_name {
     if { $parent_node(package_key) ne "" } {
         # Find all the page or directory names under this package
         foreach path [glob -nocomplain -types d "[acs_package_root_dir $parent_node(package_key)]/www/*"] {
-            lappend existing_urls [lindex [file split $path] end]
+            lappend existing_urls [lindex [ad_file split $path] end]
         }
         foreach path [glob -nocomplain -types f "[acs_package_root_dir $parent_node(package_key)]/www/*.adp"] {
-            lappend existing_urls [file rootname [lindex [file split $path] end]]
+            lappend existing_urls [file rootname [lindex [ad_file split $path] end]]
         }
         foreach path [glob -nocomplain -types f "[acs_package_root_dir $parent_node(package_key)]/www/*.tcl"] {
-            set name [file rootname [lindex [file split $path] end]]
-            if { [lsearch $existing_urls $name] == -1 } {
+            set name [file rootname [lindex [ad_file split $path] end]]
+            if { $name ni $existing_urls } {
                 lappend existing_urls $name
             }
         }
     }
+
     if { $folder ne "" } {
         if { $folder in $existing_urls } {
             # The folder is on the list
@@ -1014,206 +1048,6 @@ ad_proc -public site_node::verify_folder_name {
     }
     return $folder
 }
-
-
-
-##############
-#
-# Deprecated Procedures
-#
-#############
-
-
-ad_proc -public site_node_delete_package_instance {
-    {-node_id:required}
-} {
-    Wrapper for apm_package_instance_delete
-
-    @author Arjun Sanyal (arjun@openforc.net)
-    @creation-date 2002-05-02
-} {
-    db_transaction {
-        set package_id [site_node::get_object_id -node_id $node_id]
-        site_node::unmount -node_id $node_id
-        apm_package_instance_delete $package_id
-    } on_error {
-        site_node::update_cache -node_id $node_id
-    }
-}
-
-ad_proc -public site_map_unmount_application {
-    { -sync_p "t" }
-    { -delete_p "f" }
-    node_id
-} {
-    Unmounts the specified node.
-
-    @author Michael Bryzek (mbryzek@arsdigita.com)
-    @creation-date 2001-02-07
-
-    @param sync_p If "t", we flush the in-memory site map
-    @param delete_p If "t", we attempt to delete the site node. This
-    will fail if you have not cleaned up child nodes
-    @param node_id The node_id to unmount
-
-} {
-    db_transaction {
-        site_node::unmount -node_id $node_id
-
-        if {$delete_p == "t"} {
-            site_node::delete -node_id $node_id
-        }
-    }
-}
-
-ad_proc -public site_node_id {url} {
-    Returns the node_id of a site node. Throws an error if there is no
-    matching node.
-} {
-    return [site_node::get_node_id -url $url]
-}
-
-ad_proc -public site_nodes_sync {args} {
-    Brings the in memory copy of the url hierarchy in sync with the
-    database version.
-} {
-    site_node::init_cache
-}
-
-ad_proc -deprecated -warn site_node_closest_ancestor_package {
-    { -default "" }
-    { -url "" }
-    package_keys
-} {
-    <p>
-    Use site_node::closest_ancestor_package. Note that
-    site_node_closest_ancestor_package will include the passed-in node in the
-    search, whereas the new proc doesn't by default. If you want to include
-    the passed-in node, call site_node::closest_ancestor_package with the
-    -include_self flag
-    </p>
-
-    <p>
-    Finds the package id of a package of specified type that is
-    closest to the node id represented by url (or by ad_conn url).Note
-    that closest means the nearest ancestor node of the specified
-    type, or the current node if it is of the correct type.
-
-    <p>
-
-    Usage:
-
-    <pre>
-    # Pull out the package_id of the subsite closest to our current node
-    set pkg_id [site_node::closest_ancestor_package -include_self -package_key "acs-subsite"]
-    </pre>
-
-    @author Michael Bryzek (mbryzek@arsdigita.com)
-    @creation-date 1/17/2001
-
-    @param default The value to return if no package can be found
-    @param current_node_id The node from which to start the search
-    @param package_keys The type(s) of the package(s) for which we are looking
-
-    @return <code>package_id</code> of the nearest package of the
-    specified type (<code>package_key</code>). Returns $default if no
-    such package can be found.
-
-    @see site_node::closest_ancestor_package
-} {
-    if {$url eq ""} {
-        set url [ad_conn url]
-    }
-
-    # Try the URL as is.
-    if {[catch {nsv_get site_nodes $url} result] == 0} {
-        array set node $result
-        if {$node(package_key) in $package_keys} {
-            return $node(package_id)
-        }
-    }
-
-    # Add a trailing slash and try again.
-    if {[string index $url end] ne "/"} {
-        append url "/"
-        if {[catch {nsv_get site_nodes $url} result] == 0} {
-            array set node $result
-            if {$node(package_key) in $package_keys} {
-                return $node(package_id)
-            }
-        }
-    }
-
-    # Try successively shorter prefixes.
-    while {$url ne ""} {
-        # Chop off last component and try again.
-        set url [string trimright $url /]
-        set url [string range $url 0 [string last / $url]]
-
-        if {[catch {nsv_get site_nodes $url} result] == 0} {
-            array set node $result
-            if {$node(pattern_p) == "t"
-                && $node(object_id) ne ""
-                && $node(package_key) in $package_keys} {
-                return $node(package_id)
-            }
-        }
-    }
-
-    return $default
-}
-
-ad_proc -deprecated -public site_node_closest_ancestor_package_url {
-    { -default "" }
-    { -package_key {} }
-} {
-    Returns the url stub of the nearest application of the specified
-    type.
-
-    @author Michael Bryzek (mbryzek@arsdigita.com)
-    @creation-date 2001-02-05
-
-    @param package_key The types of packages for which we're looking (defaults to subsite packages)
-    @param default The default value to return if no package of the
-    specified type was found
-
-    @see site::node::closest_ancestor_package
-} {
-    if {$package_key eq ""} {
-        set package_key [subsite::package_keys]
-    }
-
-    set subsite_pkg_id [site_node::closest_ancestor_package \
-                            -include_self \
-                            -package_key $package_key \
-                            -url [ad_conn url] ]
-
-    if {$subsite_pkg_id eq ""} {
-        # No package was found... return the default
-        return $default
-    }
-
-    return [lindex [site_node::get_url_from_object_id -object_id $subsite_pkg_id] 0]
-}
-
-ad_proc -public site_node::conn_url {
-} {
-    Use this in place of ns_conn url when referencing host_nodes.
-    This proc returns the appropriate ns_conn url value, depending on
-    if host_node_map is used for current connection, or hostname's
-    domain.
-} {
-    set ns_conn_url [ns_conn url]
-    set subsite_get_url [subsite::get_url]
-    set joined_url [file join $subsite_get_url $ns_conn_url]
-    # join drops ending slash for some cases. Add back if appropriate.
-    if { [string index $ns_conn_url end] eq "/" && [string index $joined_url end] ne "/" } {
-        append joined_url "/"
-    }
-    return $joined_url
-}
-
-
 #####################################################################
 # old end of file
 #####################################################################
@@ -1236,28 +1070,27 @@ if {$UseXotclSiteNodes} {
         #####################################################
         #
         #    This class capsulates access to site-nodes stored in the
-        #    database.  It is written in a style to support the the needs
+        #    database.  It is written in a style to support the needs
         #    of the Tcl-based API above.
         #
         # @author Gustaf Neumann
 
         ::nx::Class create SiteNode {
 
-            #
-            # @method get
-            #    returns a site node from url or site-node with all its context info
-            #
-
             :public method get {
                 {-url ""}
                 {-node_id ""}
             } {
+                #
+                # @return a site node from url or site-node with all its context info
+                #
+
                 if {$url eq "" && $node_id eq ""} {
                     error "site_node::get \"must pass in either url or node_id\""
                 }
 
                 #
-                # make sure, we have a node_id
+                # Make sure, we have a node_id.
                 #
                 if {$node_id eq ""} {
                     set node_id [:get_node_id -url $url]
@@ -1272,12 +1105,12 @@ if {$UseXotclSiteNodes} {
             #
 
             :protected method properties {
-                 -node_id:integer,required
-             } {
+                -node_id:integer,required
+            } {
                 #
-                # Get url, since it is not returned by the later query.
+                # Get URL, since it is not returned by the later query.
 
-                # TODO: I did not want to modifiy the query for the time
+                # TODO: I did not want to modify the query for the time
                 # being. When doing the Oracle support, the retrieval of the URL
                 # should be moved into the query below....
                 #
@@ -1310,24 +1143,29 @@ if {$UseXotclSiteNodes} {
                 {-element ""}
             } {
                 #
-                # Fitering happens here exactly like in the nsv-based version. If should be possible to
-                # realize (at least some of the) filtering via the SQL query
+                # Filtering happens here exactly like in the nsv-based
+                # version. If should be possible to realize (at least
+                # some of the) filtering via the SQL query.
                 #
                 if {$all} {
                     #
-                    # the following query is just for PG, TODO: Oracle is missing
+                    # The following query is just for PG.  Note that
+                    # the query should not return the root of the
+                    # tree.
                     #
-                    set child_urls [::xo::dc list [current method]-all {
-                        select site_node__url(children.node_id)
-                        from site_nodes as parent, site_nodes as children
-                        where parent.node_id = :node_id
-                        and children.tree_sortkey between parent.tree_sortkey and tree_right(parent.tree_sortkey)
-                        and children.tree_sortkey <> parent.tree_sortkey
-                    }]
+                    set child_urls [::xo::dc list -prepare integer [current method]-all [subst {
+                        WITH RECURSIVE site_node_tree AS (
+                            select node_id, parent_id from site_nodes where node_id = :node_id
+                        UNION ALL
+                            select child.node_id, child.parent_id from site_node_tree, site_nodes as child
+                            where  child.parent_id = site_node_tree.node_id
+                        ) select [xo::dc map_function_name site_node__url(node_id)]
+                          from site_node_tree where node_id != :node_id
+                    }]]
                 } else {
                     if {$package_key ne ""} {
                         #
-                        # Simple optimization for package_keys; seems to be frequenty used.
+                        # Simple optimization for package_keys; seems to be frequently used.
                         # We leave the logic below unmodified, which could be optimized as well.
                         #
                         set package_key_clause "and package_id = object_id and package_key = :package_key"
@@ -1387,12 +1225,29 @@ if {$UseXotclSiteNodes} {
                 return $return_val
             }
 
+            :method has_children {
+                -node_id:required,integer,1..1
+            } {
+                #
+                # Check, if the provided site-node has children.
+                #
+                # @return boolean value.
+                #
+                # ns_log notice "non-cached version of has_children called with $node_id"
+
+                ::xo::dc get_value -prepare integer has_children {
+                    select case when exists
+                    (select 1 from site_nodes where parent_id = :node_id)
+                    then 1 else 0 end
+                    from dual
+                }
+            }
 
             #
             # @method get_urls_from_object_id
             #
-            #    returns a list of urls for site_nodes that have the given
-            #    object mounted or the empty list if there are none. The urls
+            #    returns a list of URLs for site_nodes that have the given
+            #    object mounted or the empty list if there are none. The URLs
             #    will be returned in descending order meaning any children
             #    will come before their parents. This ordering is useful when
             #    deleting site nodes as we must delete child site nodes before
@@ -1402,21 +1257,24 @@ if {$UseXotclSiteNodes} {
             :public method get_urls_from_object_id {
                 -object_id:required
             } {
-                #
-                # the following query is just for PG, TODO: Oracle is missing
-                #
-                set child_urls [::xo::dc list [current method]-all {
-                    select site_node__url(node_id)
+                set child_urls [::xo::dc list -prepare integer [current method]-all [subst {
+                    select [xo::dc map_function_name site_node__url(node_id)] as url
                     from site_nodes
                     where object_id = :object_id
-                    order by tree_sortkey desc
-                }]
+                    order by url desc
+                }]]
             }
 
             :public method get_urls_from_package_key {
                 -package_key:required
             } {
-                return [::xo::dc list [current method]-urls-from-package-key {
+                #
+                # Return potentially multiple URLs based on a package key.
+                #
+                # @param package_key
+                #
+
+                return [::xo::dc list -prepare varchar [current method]-urls-from-package-key {
                     select site_node__url(node_id)
                     from site_nodes n, apm_packages p
                     where p.package_key = :package_key
@@ -1424,14 +1282,16 @@ if {$UseXotclSiteNodes} {
                 }]
             }
 
-            #
-            # @method get_node_id get_package_url
-            #   just a small stub for a special case for method
-            #   get_urls_from_package_key
-            #
             :public method get_package_url {
                 -package_key:required
             } {
+                #
+                # Legacy interface: previous implementations of the
+                # site-nodes assumed, that there is just one site-node
+                # entry available for a package-key. This method
+                # returns just the first answer form
+                # get_urls_from_package_key
+                #
                 return [lindex [:get_urls_from_package_key -package_key $package_key] 0]
             }
 
@@ -1453,25 +1313,35 @@ if {$UseXotclSiteNodes} {
             #
             :public forward get_url ::xo::db::sql::site_node url
 
-            #
-            # @method flush_cache
-            #    a stub to be overloaded by the cache manager
-            #
-            :public method flush_cache {{-node_id ""} {-with_subtree:boolean}} {;}
+            :public method flush_cache {-node_id:required,1..1 {-with_subtree:boolean} {-url ""}} {
+                #
+                #  This is a stub method to be overloaded by some
+                #  cache managers.
+                #
+            }
 
             # Create an object "site_node" to provide a user-interface close
             # to the classical one.
             :create site_node
         }
 
+        #
+        # For these URLs we assume that the site_node will never
+        # change, or require a broadcase flush, or reboot.
+        #
+        # TODO: make me configurable, after release of 5.10.
+        site_node eval {
+            set :static_site_nodes {/ 1 /dotlrn 1 /dotlrn/ 1 /register/ 1 /SYSTEM/ 1}
+        }
+
         #####################################################
         # Caching
         #####################################################
 
-        if {[info commands ::ns_cache_names] ne ""} {
-            set createCache [expr {"xo_site_nodes" ni [::ns_cache_names]}]
+        if {[namespace which ::ns_cache_names] ne ""} {
+            set createCache [expr {"site_nodes_cache" ni [::ns_cache_names]}]
         } else {
-            set createCache [catch {ns_cache flush xo_site_nodes NOTHING}]
+            set createCache [catch {ns_cache flush site_nodes_cache NOTHING}]
         }
         if {$createCache} {
             #
@@ -1479,73 +1349,167 @@ if {$UseXotclSiteNodes} {
             # file like the following:
             #
             # ns_section ns/server/${server}/acs/acs-tcl
-            #   ns_param SiteNodesCacheSize        2000000
-            
-            foreach {cache parameter default} {
-                xo_site_nodes          SiteNodesCacheSize        2000000
-            } {
-                set size [parameter::get_from_package_key \
-                              -package_key acs-tcl \
-                              -parameter $parameter \
-                              -default $default]
-                ns_log notice "site-nodes: create cache $cache -size $size"
-                ns_cache create $cache -size $size
+            #   ns_param SiteNodesCacheSize              10000000
+            #   ns_param SiteNodesCachePartitions               2
+            #   ns_param SiteNodesChildenCacheSize       10000000
+            #   ns_param SiteNodesChildenCachePartitions        2
+            #   ns_param SiteNodesIdCacheSize              200000
+            #
+            ::acs::KeyPartitionedCache create ::acs::site_nodes_cache \
+                -package_key acs-tcl \
+                -parameter SiteNodesCache \
+                -default_size 2000000
+            #
+            # In case we have "ns_hash" defined, we can use the
+            # "HashKeyPartitionedCache". Otherwise fall back to the
+            # plain cache.
+            #
+            if {[::acs::icanuse "ns_hash"]} {
+                ::acs::HashKeyPartitionedCache create ::acs::site_nodes_id_cache \
+                    -package_key acs-tcl \
+                    -parameter SiteNodesIdCache \
+                    -default_size 100000
+            } else {
+                ::acs::Cache create ::acs::site_nodes_id_cache \
+                    -package_key acs-tcl \
+                    -parameter SiteNodesIdCache \
+                    -default_size 100000
             }
+
+            ::acs::KeyPartitionedCache create ::acs::site_nodes_children_cache \
+                -package_key acs-tcl \
+                -parameter SiteNodesChildenCache \
+                -default_size 100000
         }
 
         #
-        # SiteNodeCache is a mixin class for caching the SiteNode objects.
+        # SiteNodesCache is a mixin class for caching the SiteNode objects.
         # Add/remove caching methods as wanted. Removing the registry of
         # the object mixin deactivates caching for these methods
         # completely.
         #
-        ::nx::Class create SiteNodeCache {
+        ::nx::Class create SiteNodesCache {
 
             :public method get_children {
-                -node_id:required
-                {-all:switch} {-package_type ""} {-package_key ""} {-filters ""} {-element ""}
+                -node_id:required,integer,1..1
+                {-all:switch}
+                {-package_type ""}
+                {-package_key ""}
+                {-filters ""}
+                {-element ""}
             } {
-                ns_cache_eval xo_site_nodes get_children-$node_id-$all-$package_type-$package_key-$filters-$element { next }
+                #
+                # Cache get_children operations, except, when "-all"
+                # was specified.  The underlying operation can be quite
+                # expensive, when huge site-node trees are
+                # explored. Since the argument list influences the
+                # results, we cache for every parameter combination.
+                #
+                # Since this cache contains subtrees, we have to flush
+                # trees, which is implemented via pattern flushes. So
+                # we use a separate cache to avoid long locks on
+                # site-nodes in general.
+                #
+                if {$all} {
+                    #
+                    # Don't cache when $all is specified - seldom
+                    # used, a pain for invalidating.
+                    #
+                    next
+                } else {
+                    ::acs::site_nodes_children_cache eval -partition_key $node_id \
+                        get_children-$node_id-$all-$package_type-$package_key-$filters-$element {
+                            next
+                        }
+                }
+            }
+
+            :method has_children {
+                -node_id:required,integer,1..1
+            } {
+                ::acs::site_nodes_children_cache eval -partition_key $node_id \
+                    has_children-$node_id {
+                        next
+                    }
             }
 
             :public method get_node_id {-url:required} {
-                return [ns_cache_eval xo_site_nodes id-$url { next }]
+                #
+                # Cache the result of the upstream implementation of
+                # get_node_id in the acs::site_nodes_id_cache cache.
+                #
+                acs::site_nodes_id_cache eval id-$url { next }
             }
 
-            :protected method properties {-node_id:required} {
-                set key ::xo_site_nodes_property($node_id)
-                if {[info exists $key]} {
-                    return [set $key]
+            :protected method properties {-node_id:required,integer,1..1} {
+                return [acs::per_request_cache eval -key acs-tcl.site_nodes_property($node_id) {
+                    ::acs::site_nodes_cache eval -partition_key $node_id $node_id { next }
+                }]
+            }
+
+            :public method get_url {-node_id:required,1..1} {
+                #
+                # I'ts a pain, but OpenACS and the its regression test
+                # call "get_url" a few times with an empty node_id.
+                # Shortcut these calls here to avoid problems with the
+                # non-numeric partition_key.
+                #
+                if {$node_id eq ""} {
+                    set result ""
+                } else {
+                    set result [::acs::site_nodes_cache eval \
+                                    -partition_key $node_id \
+                                    url-$node_id { next }]
                 }
-                set $key [ns_cache_eval xo_site_nodes p-$node_id { next }]
-                return [set $key]
+                return $result
             }
 
-            :public method get_url {-node_id:required} {
-                ns_cache_eval xo_site_nodes url-$node_id { next }
+            :public method get_urls_from_object_id {-object_id:required,integer,1..1} {
+                #
+                # Cache the result of the upstream implementation of
+                # get_urls_from_object_id in the acs::site_nodes_cache.
+                #
+                ::acs::site_nodes_cache eval -partition_key $object_id urls-$object_id { next }
             }
 
-            :public method get_urls_from_object_id {-object_id:required} {
-                ns_cache_eval xo_site_nodes urls-$object_id { next }
-            }
-
-            # The cache value from the following method is currently not
-            # flushed, but just used for package keys, not instances, so it
-            # should be safe.
             :public method get_package_url {-package_key:required} {
-                ns_cache_eval xo_site_nodes package_url-$package_key { next }
+                #
+                # Cache the result of the upstream implementation of
+                # get_package_url in the acs::site_nodes_cache.
+                #
+                # Note: The cache value from the following method is
+                # currently not flushed, but just used for package
+                # keys, not instances, so it should be safe.
+                #
+                ::acs::site_nodes_cache eval -partition_key 0 package_url-$package_key { next }
             }
 
-            :protected method flush_all {patterns} {
-                foreach pattern $patterns {
-                    foreach key [ns_cache names xo_site_nodes $pattern] {
-                        #:msg ......key=$key
-                        ::xo::clusterwide ns_cache flush xo_site_nodes $key
-                    }
+            :method flush_per_request_cache {} {
+                array unset ::__node_id
+            }
+
+            :public method flush_pattern {{-partition_key ""} pattern} {
+                #
+                # Flush from the site-nodes caches certain
+                # information. The method hides the actual caching
+                # structure and is as well provided in conformance
+                # with the alternative implementations
+                # above. Depending on the specified pattern, it
+                # reroutes the flushing request to different caches.
+                #
+
+                :flush_per_request_cache
+
+                switch -glob -- $pattern {
+                    id-*           {set cache site_nodes_id_cache}
+                    get_children-* -
+                    has_children   {set cache site_nodes_children_cache}
+                    default        {set cache site_nodes_cache}
                 }
+                ::acs::$cache flush_pattern -partition_key $partition_key $pattern
             }
 
-            :public method flush_cache {{-node_id ""} {-with_subtree:boolean true}} {
+            :public method flush_cache {-node_id:required,1..1 {-with_subtree:boolean true} {-url ""}} {
                 #
                 # Flush entries from site-node tree, including the current node,
                 # the root of flushed (sub)tree. If the node_id is not provided,
@@ -1553,45 +1517,168 @@ if {$UseXotclSiteNodes} {
                 # the whole tree.
                 #
 
+                :flush_per_request_cache
+
                 set old_url [:get_url -node_id $node_id]
 
                 if {$node_id eq "" || $old_url eq "/"} {
-                    foreach i [ns_cache names xo_site_nodes] {
-                        ::xo::clusterwide ns_cache flush xo_site_nodes $i
-                    }
+                    #
+                    # When no node_id is given or the URL is specified
+                    # as top-url, flush all caches. This happens
+                    # e.g. in the regression test.
+                    #
+                    #ns_log notice "FLUSHALL"
+                    ::acs::site_nodes_cache flush_all
+                    ::acs::site_nodes_id_cache flush_all
+                    ::acs::site_nodes_children_cache flush_all
+
                 } else {
-                    set limit_clause [expr {$with_subtree ? "" : "limit 1"}]
                     #
-                    # the following query is just for PG, TODO: Oracle is missing
+                    # Get subtree from db
                     #
-                    set tree [::xo::dc list_of_lists [current method]-flush-tree "
-            select site_node__url(children.node_id), children.node_id, children.object_id
-            from site_nodes as parent, site_nodes as children
-            where parent.node_id = :node_id
-            and children.tree_sortkey between parent.tree_sortkey and tree_right(parent.tree_sortkey)
-            $limit_clause
-          "]
+                    set tree [::xo::dc list_of_lists -prepare {integer boolean} get_subtree [subst {
+                        WITH RECURSIVE site_node_tree AS (
+                            select node_id, parent_id, object_id from site_nodes where node_id = :node_id
+                        UNION ALL
+                            select child.node_id, child.parent_id, child.object_id from site_node_tree, site_nodes as child
+                            where  child.parent_id = site_node_tree.node_id
+                              and :with_subtree
+                        ) select [xo::dc map_function_name site_node__url(node_id)], node_id, object_id from site_node_tree
+                    }]]
                     foreach entry $tree {
                         lassign $entry url node_id object_id
-                        foreach key [list p-$node_id url-$node_id urls-$object_id] {
-                            ::xo::clusterwide ns_cache flush xo_site_nodes $key
+                        foreach key [list $node_id url-$node_id] {
+                            ::acs::site_nodes_cache flush -partition_key $node_id $key
                         }
-                        :flush_all get_children-$node_id-*
+                        if {$object_id ne ""} {
+                            ::acs::site_nodes_cache flush -partition_key $object_id urls-$object_id
+                        }
+                        :flush_pattern -partition_key $node_id get_children-$node_id-*
+                        ::acs::site_nodes_children_cache flush -partition_key $node_id has_children-$node_id
                     }
                     regsub {/$} $old_url "" old_url
-                    :flush_all id-$old_url*
+                    :flush_pattern id-$old_url*
                 }
             }
-
         }
 
-        # Turn on caching by registering the mixin (backward compatibility
-        # for early XOTcl2-versions, probably not needed anymore).
-        if {[package require nsf] >= "2.0.0"} {
-            site_node object mixins add SiteNodeCache
-        } else {
-            site_node object mixin add SiteNodeCache
+        ::nx::Class create SiteNodeUrlspaceCache {
+            #
+            # Cache site-node information via ns_urlspace. We can use
+            # the URL trie, which supports tree match operations, for
+            # tree information. This means that for example for .vuh
+            # handlers it is not necessary to cache the full url for
+            # obtaining the site-node, like it was until now:
+            #
+            #    3839 id-/storage/view/installers/windows-installer/installer.htm
+            #    3839 id-/storage/view/aolserver/install.tgz
+            #    3839 id-/storage/view/tutorial/OpenACS_Tutorial.htm
+            #    3839 id-/storage/view/openacs-dotlrn-conference-2007-spring/Methodology_ALPE.pdf
+            #    3839 id-/storage/view/xowiki-resources/Assessment.jpg
+            #    3839 id-/storage/view/tutorial-page-map.png
+            #    ...
+            #
+            # Providing a single entry like
+            #
+            #    ns_urlspace set -key sitenode /storage/* 3839
+            #
+            # is sufficient for replacing all entries above.
+            #
+
+            :public method get_node_id {-url:required} {
+                #
+                # Get node_id for the provided URL. We have to
+                # determine the partial URL for determining the site
+                # node.
+                #
+                # @return node_id (integer)
+                #
+
+                #
+                # This is the main interface of the
+                # SiteNodeUrlspaceCache to provide a first-level
+                # cache.
+                #
+
+                # Try per-request caching
+                #
+                if {[dict exists ${:static_site_nodes} $url]} {
+                    set key :node_id($url)
+                } else {
+                    set key ::__node_id($url)
+                }
+                if {[info exists $key]} {
+                    #ns_log notice "==== returning cached value [set $key]"
+                    return [set $key]
+                }
+
+                #
+                # Try to get value from urlspace
+                #
+                set ID [ns_urlspace get -id $::acs::siteNodesID -key sitenode $url]
+                if {$ID eq ""} {
+                    #
+                    # Get value the classical way, caching potentially
+                    # the full url path in the site_nodes_id_cache.
+                    #
+                    set ID [next]
+                    #ns_log notice "--- get_node_id from site_nodes_id_cache <$url> -> <$ID>"
+                    if {$ID ne ""} {
+                        #
+                        # We got a valid ID. If we would add blindly a
+                        # node_id for the returned URL (e.g. for "/*")
+                        # and some other subnode is not jet resolved,
+                        # we would obtain later the node_id of the
+                        # parent_node although there is a subnode.
+                        #
+                        # We could address this by e.g. pre-caching
+                        # all "inner nodes" or similar, but this
+                        # requires a deeper analysis of larger sites.
+                        #
+                        # In earlier versions, we had here
+                        #   ... {[site_node::get_children -node_id $ID] eq ""} ...
+                        # but on site_node trees with huge number of entries,
+                        # this is a waste.
+                        #
+                        if {![:has_children -node_id $ID]} {
+                            #
+                            # We are on a leaf-node of the site node
+                            # tree. Get the shortened url and save it
+                            # in the urlspace.
+                            #
+                            set short_url [site_node::get_url -node_id $ID]
+                            set cmd [list ns_urlspace set -id $::acs::siteNodesID -key sitenode $short_url* $ID]
+                            #ns_log notice "--- get_node_id save in urlspace <$cmd> -> <$ID>"
+                            {*}$cmd
+                            #ns_log notice "---\n[join [ns_urlspace list -id $::acs::siteNodesID] \n]"
+                        }
+                        return [set $key $ID]
+                    }
+                }
+                return $ID
+            }
+
+            :public method flush_cache {-node_id:required,1..1 {-with_subtree:boolean true} {-url ""}} {
+                #
+                # Cleanup in the urlspace tree: Clear always the
+                # full subtree via "-recurse" (maybe not always
+                # necessary).
+                #
+
+                ns_urlspace unset -id $::acs::siteNodesID -recurse -key sitenode $url
+                next
+            }
+
+
+         }
+        site_node object mixins add SiteNodesCache
+        if {[namespace which ns_urlspace] ne ""} {
+            set ::acs::siteNodesID [ns_urlspace new]
+            ns_log notice \
+                "... using ns_urlspace $::acs::siteNodesID for reduced redundancy in site node caches"
+            site_node object mixins add SiteNodeUrlspaceCache
         }
+
     }
 
     #####################################################################
@@ -1627,23 +1714,41 @@ if {$UseXotclSiteNodes} {
     } {
         mount object at site node
     } {
+
         db_dml mount_object {}
         db_dml update_object_package_id {}
 
-        # Flush all values for this node and its ancestors
-        set ancestors [site_node::get_ancestors -node_id $node_id -element node_id]
-        foreach n $ancestors {
-            site_node::update_cache -sync_children -node_id $n
-        }
+        #
+        # We have to flush from the parent_url (which might be a leaf
+        # turning into an inner node)
+        #
+        set parent_node_id [site_node::get_parent_id -node_id $node_id]
+        set url [site_node::get_url -node_id $parent_node_id]
 
-        # DAVEB update context_id if it is passed in
-        # some code relies on context_id to be set by
-        # instantiate_and_mount so we can't assume
-        # anything at this point. Callers that need to set context_id
-        # for example, when an unmounted package is mounted,
-        # should pass in the correct context_id
+        site_node::update_cache -sync_children -node_id $node_id -url $url -object_id $object_id
+        #
+        # The parent_node_id should in a mount operation never be
+        # empty.
+        #
+        ::acs::site_nodes_cache flush_pattern \
+            -partition_key $parent_node_id \
+            get_children-$parent_node_id-*
+        ::acs::site_nodes_children_cache flush \
+            -partition_key $parent_node_id has_children-$parent_node_id
+
+        #
+        # DAVEB: update context_id if it is passed in some code relies
+        # on context_id to be set by instantiate_and_mount so we can't
+        # assume anything at this point. Callers that need to set
+        # context_id for example, when an unmounted package is
+        # mounted, should pass in the correct context_id.
+        #
         if {[info exists context_id]} {
-            db_dml update_package_context_id ""
+            db_dml update_package_context_id {
+                update acs_objects
+                set context_id = :context_id
+                where object_id = :object_id
+            }
         }
 
         set package_key [apm_package_key_from_id $object_id]
@@ -1657,29 +1762,52 @@ if {$UseXotclSiteNodes} {
 
     ad_proc -private site_node::init_cache {} {
         Initialize the site node cache; actually, this means flushing the
-        cache in case we have root site node.
+        cache in case we have a root site node.
     } {
-        ns_log notice "site_node::init_cache"
-        set root_node_id [::db_string get_root_node_id {} -default {}]
-        if { $root_node_id ne "" } {
+        #ns_log notice "site_node::init_cache"
+        if {[db_0or1row get_root_node {
+            select node_id as root_node_id
+            from site_nodes
+            where parent_id is null
+        }]} {
+            #
             # If we are called during the *-init procs, the database
             # interface might not be initialized yet. However, in this
             # situation, there is nothing to flush yet.
-            if {[info commands ::xo::db::sql::site_node] ne ""} {
+            #
+            if {[namespace which ::xo::db::sql::site_node] ne ""} {
+                #ns_log notice "call [list ::xo::site_node flush_cache -node_id $root_node_id]"
                 ::xo::site_node flush_cache -node_id $root_node_id
             }
         }
+        #ns_log notice "site_node::init_cache $root_node_id DONE"
     }
 
     ad_proc -private site_node::update_cache {
         {-sync_children:boolean}
         {-node_id:required}
+        {-url ""}
+        {-object_id ""}
     } {
-        Brings the in memory copy of the site nodes hierarchy in sync with the
+        Brings the in-memory copy of the site nodes hierarchy in sync with the
         database version. Only updates the given node and its children.
     } {
-        #ns_log Notice "site_node::update_cache for node_id $node_id"
-        ::xo::site_node flush_cache -node_id $node_id -with_subtree $sync_children_p
+        ::xo::site_node flush_cache -node_id $node_id -with_subtree $sync_children_p -url $url
+
+        set parent_node_id [site_node::get_parent_id -node_id $node_id]
+        if {$parent_node_id ne ""} {
+            ::xo::site_node flush_pattern -partition_key $parent_node_id get_children-$parent_node_id-*
+        }
+
+        #
+        # In case update_cache is called after the deletion of the node
+        # in the database, it is still necessary to flush for the
+        # original object_id, but this can't be handled in the
+        # recursive query of method "flush_cache".
+        #
+        if {$object_id ne ""} {
+            ::acs::site_nodes_cache flush -partition_key $object_id urls-$object_id
+        }
     }
 
     ad_proc -public site_node::get {
@@ -1715,14 +1843,16 @@ if {$UseXotclSiteNodes} {
         {-url:required}
     } {
         Returns 1 if a site node exists at the given url and 0 otherwise.
+
+        @param url URL path starting with a slash.
     } {
-
-        set url_no_trailing [string trimright $url "/"]
-
-        # get_node_id returns always a node_id, which might be the node_id
-        # of the root. In order to check, whether the provided url is
-        # really a site-node, we do an inverse lookup and check whether
-        # the returned node_id has the same url as the provided one.
+        set url_no_trailing [expr {"url" eq "/" ? "/" : [string trimright $url "/"]}]
+        #
+        # The function "get_node_id" returns always a node_id, which
+        # might be the node_id of the root. In order to check, whether
+        # the provided URL is really a site-node, we do an inverse
+        # lookup and check whether the returned node_id has the same
+        # URL as the provided one.
         #
         set node_id [::xo::site_node get_node_id -url $url_no_trailing]
         return [expr {[::xo::site_node get_url -node_id $node_id] eq "$url_no_trailing/"}]
@@ -1734,8 +1864,8 @@ if {$UseXotclSiteNodes} {
     } {
         return the url of this node_id
 
-        @notrailing If true then strip any
-        trailing slash ('/'). This means the empty string is returned for the root.
+        @param notrailing If true then strip any trailing slash ('/').
+               This means the empty string is returned for the root.
     } {
         set url [::xo::site_node get_url -node_id $node_id]
         if { $notrailing_p } {
@@ -1747,7 +1877,7 @@ if {$UseXotclSiteNodes} {
     ad_proc -public site_node::get_url_from_object_id {
         {-object_id:required}
     } {
-        returns a list of urls for site_nodes that have the given object
+        Returns a list of URLs for site_nodes that have the given object
         mounted or the empty list if there are none. The
         url:s will be returned in descending order meaning any children will
         come before their parents. This ordering is useful when deleting site nodes
@@ -1772,13 +1902,13 @@ if {$UseXotclSiteNodes} {
 
         @option all          Set this if you want all children, not just direct children
 
-        @option package_type If specified, this will limit the returned nodes to those with an
-        package of the specified package type (normally apm_service or
-                                               apm_application) mounted. Conflicts with the -package_key option.
+        @option package_type If specified, this will limit the returned nodes to those with
+        a package of the specified package type (normally apm_service or
+        apm_application) mounted. Conflicts with the -package_key option.
 
         @param package_key   If specified, this will limit the returned nodes to those with a
         package of the specified package key mounted. Conflicts with the
-        -package_type option. Can take one or more packges keys as a Tcl list.
+        -package_type option. Can take one or more packages keys as a Tcl list.
 
         @param filters       Takes a list of { element value element value ... } for filtering
         the result list. Only nodes where element is value for each of the
@@ -1840,7 +1970,7 @@ if {$UseXotclSiteNodes} {
         </pre>
 
         @param default The value to return if no package can be found
-        @param current_node_id The node from which to start the search
+        @param url The url of the node from which to start the search
         @param package_keys The type(s) of the package(s) for which we are looking
 
         @return <code>package_id</code> of the nearest package of the
@@ -1863,6 +1993,225 @@ if {$UseXotclSiteNodes} {
     #
     # End of overwritten procs.
     #
+
+    # temporary helper for testing in ds/shell
+    #
+    #array set top [site_node::get -url /]
+    #array set ds [site_node::get -url /ds]
+    ##set n [site_node::new -name a2 -parent_id $ds(node_id)]
+    #array set a2 [site_node::get -url /ds/a2]
+    #set n $a2(node_id)
+
+    #site_node::get_children -package_key attachments -node_id $ds(node_id)
+    #site_node::get_children -package_key attachments -node_id $top(node_id)
+    #foreach k [ns_cache_keys xo_site_nodes get_children*] {lappend _ $k=[ns_cache_get xo_site_nodes $k]}
+
+    #site_node::mount -node_id $n -object_id 1226
+    #site_node::unmount -node_id $n
+
+    #set _
+
+}
+
+
+########################################################################
+# deprecated site-nodes-procs.tcl
+########################################################################
+
+ad_proc -deprecated site_node_delete_package_instance {
+    {-node_id:required}
+} {
+    Wrapper for apm_package_instance_delete
+
+    @author Arjun Sanyal (arjun@openforc.net)
+    @creation-date 2002-05-02
+    @see site_node::delete
+} {
+    db_transaction {
+        set package_id [site_node::get_object_id -node_id $node_id]
+        site_node::unmount -node_id $node_id
+        apm_package_instance_delete $package_id
+    } on_error {
+        site_node::update_cache -node_id $node_id
+    }
+}
+
+ad_proc -deprecated site_map_unmount_application {
+    { -sync_p "t" }
+    { -delete_p "f" }
+    node_id
+} {
+    Unmounts the specified node.
+
+    @author Michael Bryzek (mbryzek@arsdigita.com)
+    @creation-date 2001-02-07
+
+    @param sync_p If "t", we flush the in-memory site map
+    @param delete_p If "t", we attempt to delete the site node. This
+    will fail if you have not cleaned up child nodes
+    @param node_id The node_id to unmount
+    @see site_node::unmount
+
+} {
+    db_transaction {
+        site_node::unmount -node_id $node_id
+
+        if {$delete_p == "t"} {
+            site_node::delete -node_id $node_id
+        }
+    }
+}
+
+ad_proc -deprecated site_node_id {url} {
+    Returns the node_id of a site node. Throws an error if there is no
+    matching node.
+    @see site_node::get_node_id
+} {
+    return [site_node::get_node_id -url $url]
+}
+
+ad_proc -deprecated site_nodes_sync {args} {
+    Brings the in-memory copy of the url hierarchy in sync with the
+    database version.
+
+    @see site_node::init_cache
+} {
+    site_node::init_cache
+}
+
+ad_proc -deprecated -warn site_node_closest_ancestor_package {
+    { -default "" }
+    { -url "" }
+    package_keys
+} {
+    <p>
+    Use site_node::closest_ancestor_package. Note that
+    site_node_closest_ancestor_package will include the passed-in node in the
+    search, whereas the new proc doesn't by default. If you want to include
+    the passed-in node, call site_node::closest_ancestor_package with the
+    -include_self flag
+    </p>
+
+    <p>
+    Finds the package id of a package of specified type that is
+    closest to the node id represented by url (or by ad_conn url).Note
+    that closest means the nearest ancestor node of the specified
+    type, or the current node if it is of the correct type.
+
+    <p>
+
+    Usage:
+
+    <pre>
+    # Pull out the package_id of the subsite closest to our current node
+    set pkg_id [site_node::closest_ancestor_package -include_self -package_key "acs-subsite"]
+    </pre>
+
+    @author Michael Bryzek (mbryzek@arsdigita.com)
+    @creation-date 1/17/2001
+
+    @param default The value to return if no package can be found
+    @param url The url of the node from which to start the search
+    @param package_keys The type(s) of the package(s) for which we are looking
+
+    @return <code>package_id</code> of the nearest package of the
+    specified type (<code>package_key</code>). Returns $default if no
+    such package can be found.
+
+    @see site_node::closest_ancestor_package
+} {
+    if {$url eq ""} {
+        set url [ad_conn url]
+    }
+
+    # Try the URL as is.
+    if {[catch {nsv_get site_nodes $url} result] == 0} {
+        array set node $result
+        if {$node(package_key) in $package_keys} {
+            return $node(package_id)
+        }
+    }
+
+    # Add a trailing slash and try again.
+    if {[string index $url end] ne "/"} {
+        append url "/"
+        if {[catch {nsv_get site_nodes $url} result] == 0} {
+            array set node $result
+            if {$node(package_key) in $package_keys} {
+                return $node(package_id)
+            }
+        }
+    }
+
+    # Try successively shorter prefixes.
+    while {$url ne ""} {
+        # Chop off last component and try again.
+        set url [string trimright $url /]
+        set url [string range $url 0 [string last / $url]]
+
+        if {[catch {nsv_get site_nodes $url} result] == 0} {
+            array set node $result
+            if {$node(pattern_p) == "t"
+                && $node(object_id) ne ""
+                && $node(package_key) in $package_keys
+            } {
+                return $node(package_id)
+            }
+        }
+    }
+
+    return $default
+}
+
+ad_proc -deprecated site_node_closest_ancestor_package_url {
+    { -default "" }
+    { -package_key {} }
+} {
+    Returns the url stub of the nearest application of the specified
+    type.
+
+    @author Michael Bryzek (mbryzek@arsdigita.com)
+    @creation-date 2001-02-05
+
+    @param package_key The types of packages for which we're looking (defaults to subsite packages)
+    @param default The default value to return if no package of the
+    specified type was found
+
+    @see site::node::closest_ancestor_package
+} {
+    if {$package_key eq ""} {
+        set package_key [subsite::package_keys]
+    }
+
+    set subsite_pkg_id [site_node::closest_ancestor_package \
+                            -include_self \
+                            -package_key $package_key \
+                            -url [ad_conn url] ]
+
+    if {$subsite_pkg_id eq ""} {
+        # No package was found... return the default
+        return $default
+    }
+
+    return [lindex [site_node::get_url_from_object_id -object_id $subsite_pkg_id] 0]
+}
+
+ad_proc -deprecated site_node::conn_url {
+} {
+    Use this in place of ns_conn url when referencing host_nodes.
+    This proc returns the appropriate ns_conn url value, depending on
+    if host_node_map is used for current connection, or hostname's
+    domain.
+    @see ad_conn
+} {
+    set ns_conn_url [ns_conn url]
+    set subsite_get_url [subsite::get_url]
+    set joined_url [ad_file join $subsite_get_url $ns_conn_url]
+    # join drops ending slash for some cases. Add back if appropriate.
+    if { [string index $ns_conn_url end] eq "/" && [string index $joined_url end] ne "/" } {
+        append joined_url "/"
+    }
+    return $joined_url
 }
 
 #

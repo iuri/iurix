@@ -47,7 +47,7 @@ procedure. This distinction is important to understand in order to use
 interpreter) between HTTP requests. If it didn&#39;t, that would affect (and
 complicate) our use of script-global variables dramatically, which would then
 be better described as <emphasis>thread</emphasis>-global variables. Given
-AOLserver&#39;s behaviour, however, &quot;script-global&quot; is a more
+AOLserver&#39;s behavior, however, &quot;script-global&quot; is a more
 appropriate term.</para>
 
 </sect2>
@@ -191,7 +191,7 @@ case, pass-by-value is expensive, and you&#39;d use pass-by-reference.
 <blockquote><para><emphasis>The transformation of the array into a list and back to an
 array takes, in our test environment, approximately 10 microseconds per entry
 of 100 character&#39;s length. Thus you can process about 100 entries per
-milisecond. The time depends almost completely on the number of entries, and
+millisecond. The time depends almost completely on the number of entries, and
 almost not at all on the size of the entries.</emphasis></para></blockquote>
 
 <para>
@@ -324,7 +324,7 @@ hash table, so <computeroutput>ns_set</computeroutput>s are slower than arrays w
 entries is large. 
 </para>
 
-<para><phrase role="cvstag">($Id: programming-with-aolserver.xml,v 1.7.2.1 2017/06/17 10:28:29 gustafn Exp $)</phrase></para>
+<para><phrase role="cvstag">($Id: programming-with-aolserver.xml,v 1.10 2018/09/30 15:53:28 gustafn Exp $)</phrase></para>
 
 </sect2>
 

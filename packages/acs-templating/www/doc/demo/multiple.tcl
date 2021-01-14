@@ -1,5 +1,5 @@
 ad_page_contract {
-  @cvs-id $Id: multiple.tcl,v 1.2.28.1 2015/09/10 08:22:11 gustafn Exp $
+  @cvs-id $Id: multiple.tcl,v 1.3 2017/08/07 23:48:02 gustafn Exp $
   @datasource users multirow
   Complete list of sample users
   @column first_name First name of the user.

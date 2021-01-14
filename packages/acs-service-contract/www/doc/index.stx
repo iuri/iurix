@@ -5,7 +5,7 @@ ACS Service Contract Documentation
     To facilitate greater code reuse, application integration, 
     and package extensibility within the OpenACS.
 
-    To do this acs-service-contract defines an api for the creation
+    To do this acs-service-contract defines an API for the creation
     of interfaces and discovery of interface implementations.
 
   Background
@@ -34,7 +34,7 @@ ACS Service Contract Documentation
     documentation through ad_proc.
 
     The Service Contract interface specification was inspired by
-    WDSL, the interface specfication for web services.
+    WDSL, the interface specification for web services.
 
   Hitchiker's Guide to Service Contract Definitions
 
@@ -97,7 +97,7 @@ ACS Service Contract Documentation
 		 acs_sc_msg_type__new (name, spec):
 
 	   defines a type based on spec. Spec should
-	   be a string (possibly emtpy) that defines the
+	   be a string (possibly empty) that defines the
 	   names and types that compose this type.
 	   example 'ObjectDisplay.Name.InputType' as name
            'object_id:integer' as spec.
@@ -130,7 +130,7 @@ ACS Service Contract Documentation
 
 	- (tcl) acs_sc_binding_exists_p (contract, impl): 
 		returns boolean whether a binding exists between
-		a given contract name and implmentation.
+		a given contract name and implementation.
 
      Dispatching    
 
@@ -140,7 +140,7 @@ ACS Service Contract Documentation
   Examples
 
     Included in the service contract package are examples for oracle
-    and postgresql of a trivial contract.
+    and PostgreSQL of a trivial contract.
   
     Also the search contract functions as a non-trivial core contract
     used by openacs4.

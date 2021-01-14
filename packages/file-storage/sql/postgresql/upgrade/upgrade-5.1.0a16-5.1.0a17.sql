@@ -3,7 +3,7 @@
 -- 
 -- @author Stan Kaufman (skaufman@epimetrics.com)
 -- @creation-date 2005-09-28
--- @cvs-id $Id: upgrade-5.1.0a16-5.1.0a17.sql,v 1.4 2013/03/31 12:01:24 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.1.0a16-5.1.0a17.sql,v 1.5 2017/12/29 11:32:49 gustafn Exp $
 --
 
 -- add package_id to acs_objects for all objects in FS (see Tip 42)
@@ -173,7 +173,7 @@ BEGIN
              new_file__creation_ip,     -- creation_ip
              new_file__indb_p,          -- storage_type
              null,                      -- item_id
-             new_file__package_id       -- pacakge_id
+             new_file__package_id       -- package_id
         );
 
 END;

@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Mon Dec 11 11:30:53 2000
-    @cvs-id $Id: delete-2.tcl,v 1.2.12.4 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: delete-2.tcl,v 1.4 2018/01/19 14:09:48 gustafn Exp $
 
 } {
     role:notnull
@@ -30,6 +30,7 @@ if {$operation eq "Yes, I really want to delete this role"} {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

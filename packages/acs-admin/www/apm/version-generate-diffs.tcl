@@ -6,7 +6,7 @@ ad_page_contract {
     @param context_p Set to 0 if you don't want the diffs to be listed with context.
     @author Jon Salz [jsalz@arsdigita.com]
     @creation-date 9 May 2000
-    @cvs-id $Id: version-generate-diffs.tcl,v 1.4.2.3 2017/06/20 19:34:23 antoniop Exp $
+    @cvs-id $Id: version-generate-diffs.tcl,v 1.5 2017/08/07 23:47:45 gustafn Exp $
 } {
     {version_id:integer}
     {context_p:boolean 1}

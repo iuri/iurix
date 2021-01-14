@@ -1,5 +1,5 @@
 # -*- tcl-*-
-# $Id: CGI2.page,v 1.4.4.1 2017/07/25 06:30:50 gustafn Exp $
+# $Id: CGI2.page,v 1.5 2017/08/07 23:48:31 gustafn Exp $
 ::xowiki::Object new -title "CGI2" -text {
   #
   # The classes and objects here are all local to the object, 

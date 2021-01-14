@@ -66,7 +66,7 @@ on an object and make appropriate links to files from the
 recording and editing user comments. An optional <tt class="computeroutput">return_url</tt> can be specified which will be
 provided as a link to the user within the <tt class="computeroutput">general-comments</tt> pages. This is useful for
 the user to return to the original page after making a comment.</p><p>The other procedure, <a href="/api-doc/proc-view?proc=general_comments_create_link" target="_top">general_comments_create_link</a>, is a wrapper procedure
-that returns an html fragment for a link which points to the
+that returns an HTML fragment for a link which points to the
 location of the mounted <tt class="computeroutput">general_comments</tt> package. There are various
 switches that will be useful to package developers:</p><ul>
 <li><p>
@@ -91,7 +91,7 @@ notice.</p><p>
 <span class="phrase">Note:</span> In the alpha release of
 <tt class="computeroutput">general-comments</tt>, the tcl
 procedures were defined within a namespace and encountered problems
-with the api browser not being able to display them properly. These
+with the API browser not being able to display them properly. These
 procedures have now been moved out of the namespace and the old
 ones are marked as deprecated. The final version will completely
 remove all traces of the namespace procedures.</p><p><span class="phrase">PL/SQL API</span></p><p>None. Uses PL/SQL functions provided by ACS Messaging.</p>
@@ -166,7 +166,7 @@ Whom?</em></td>
 <td align="left" valign="middle">0.1</td><td align="left" valign="middle">Creation</td><td align="left" valign="middle">10/26/2000</td><td align="left" valign="middle">Phong Nguyen</td>
 </tr>
 </tbody></table>
-</div><p>Last modified: $&zwnj;Id: design.html,v 1.2.2.2 2017/04/21 20:11:53
+</div><p>Last modified: $&zwnj;Id: design.html,v 1.3 2017/08/07 23:48:12
 gustafn Exp $</p>
 </div>
 </div>

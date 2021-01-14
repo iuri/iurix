@@ -59,13 +59,13 @@ structure of the composite page looks like this as a graph.</p>
 <p>Any (sub)page can have 0 or 1 master and 0 or more included
 pages. Each page has its own <em>separate</em> scope for variables.
 Arguments can be passed to dependent pages as attributes to
-<code>&lt;inlcude&gt;</code>, or as properties to
+<code>&lt;include&gt;</code>, or as properties to
 <code>&lt;master&gt;</code>. The directed graph of pages will often
 be be acyclic, as in the example, but this is not required.</p>
 <h3>Evaluation Order</h3>
 <p>Sometimes it is of interest in which order the different parts
 are evaluated. The "code" always runs first, followed by
-the template. The <code>&lt;inlcude&gt;</code> tag causes the
+the template. The <code>&lt;include&gt;</code> tag causes the
 subpage to be evaluated at this point of the template, and the rest
 of the including template is evaluated after that&#39;s done. This
 is like a procedure call. In contrast, the
@@ -110,7 +110,7 @@ code/template pair. This is the standard situation, where the
 them. In some situations, the following facility can help to reduce
 duplication or to handle special situations more effectively.</p>
 <p>The "code" part can divert to another page by calling
-<code>template::set_file</code> to modify the file name stub of the
+<code>template::set_file</code> to modify the filename stub of the
 page being processed. For convenience,
 <code>ad_return_template</code> can be used with the same effect;
 it is a wrapper for <code>template::set_file</code>, and it
@@ -137,7 +137,7 @@ code which calls <code>template::set_file</code> (directly or
 through <code>ad_return_template</code>). All scripts and the
 template are executed in the <em>same</em> scope, i.e., they share
 variables.</p>
-<p>Furthermore either of the final files can be omitted if it is
+<p>Furthermore, either of the final files can be omitted if it is
 not needed, giving three basic possibilities.</p>
 <center><table cellspacing="0" cellpadding="0" border="0">
 <tr>

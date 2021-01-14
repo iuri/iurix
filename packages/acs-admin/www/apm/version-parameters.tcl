@@ -1,11 +1,11 @@
-ad_page_contract { 
+ad_page_contract {
     List all the files in a particular version of a package.
 
     @param version_id The package to be processed.
     @author tnight@arsdigita.com
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date 12 September 2000
-    @cvs-id $Id: version-parameters.tcl,v 1.11.2.1 2015/09/10 08:21:05 gustafn Exp $
+    @cvs-id $Id: version-parameters.tcl,v 1.15 2018/10/15 16:52:00 hectorr Exp $
 } {
     {orderby:token "parameter_name"}
     {version_id:naturalnum,notnull}
@@ -14,7 +14,7 @@ ad_page_contract {
 
 db_1row apm_package_by_version_id {
     select pretty_name, version_name, package_key
-    from apm_package_version_info 
+    from apm_package_version_info
     where version_id = :version_id
 }
 
@@ -37,13 +37,13 @@ set elements_list {
     description {
         label "Description"
         orderby description
-    }    
+    }
 }
 
 #DRB: sql_clauses must not contain RDBMS-specific query clauses.
 set sql_clauses ""
 
-if { ([info exists dimensional_list] && $dimensional_list ne "") } {
+if { $dimensional_list ne "" } {
     append sql_clauses [ad_dimensional_sql $dimensional_list]
     lappend elements_list section_name {
         label "Section"
@@ -69,7 +69,7 @@ append sql_clauses " [template::list::orderby_clause -orderby -name parameters_l
 
 db_multirow -extend {actions} parameters parameter_table {} {
     set actions [subst {\[<font size="-1">
-        <a href="[ns_quotehtml [export_vars -base parameter-delete {parameter_id version_id section_name}]]">delete</a> | 
+        <a href="[ns_quotehtml [export_vars -base parameter-delete {parameter_id version_id section_name}]]">delete</a> |
         <a href="[ns_quotehtml [export_vars -base parameter-edit {version_id parameter_id}]]">edit</a></font>\]
     }]
 }
@@ -83,19 +83,6 @@ set filter_html ""
 if { $dimensional_list ne "" } {
     set filter_html [ad_dimensional $dimensional_list]
 }
-
-# LARS hack
-set sections [lindex $dimensional_list 0 3]
-foreach section $sections {
-    if {$section_name eq [lindex $section 0]} {
-        set section_name [lindex $section 1]
-        break
-    }
-}
-
-
-
-
 
 
 # Local variables:

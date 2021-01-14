@@ -6,13 +6,13 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Dec 14 12:12:51 2000
-    @cvs-id $Id: index.tcl,v 1.1.1.1.30.1 2015/09/10 08:21:46 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.3 2018/01/19 14:09:48 gustafn Exp $
 
 } {
 }
 
 ad_returnredirect ../rel-types/
-
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

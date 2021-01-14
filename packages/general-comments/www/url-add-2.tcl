@@ -1,12 +1,12 @@
 # /packages/general-comments/www/url-add-2.tcl
 
 ad_page_contract {
-    Inserts a url for object_id into the database
+    Inserts a URL for object_id into the database
     
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: url-add-2.tcl,v 1.6.2.2 2016/05/21 10:15:38 gustafn Exp $
+    @cvs-id $Id: url-add-2.tcl,v 1.8 2018/05/01 08:49:35 gustafn Exp $
 } {
     attach_id:naturalnum,notnull
     parent_id:naturalnum,notnull

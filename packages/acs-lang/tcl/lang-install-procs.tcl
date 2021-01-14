@@ -3,7 +3,7 @@ ad_library {
 
     @creation-date 20050129
     @author Jeff Davis davis@xarg.net
-    @cvs-id $Id: lang-install-procs.tcl,v 1.4.18.1 2015/09/10 08:21:25 gustafn Exp $
+    @cvs-id $Id: lang-install-procs.tcl,v 1.5 2017/08/07 23:47:56 gustafn Exp $
 }
 
 namespace eval ::install::xml::action {}

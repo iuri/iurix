@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Peter Marklund
     @creation-date 17 April 2000
-    @cvs-id $Id: file-watch.tcl,v 1.12.2.3 2016/05/20 19:52:59 gustafn Exp $
+    @cvs-id $Id: file-watch.tcl,v 1.14 2018/01/19 13:40:40 gustafn Exp $
 } {
     version_id:naturalnum,notnull
     paths:multiple
@@ -19,6 +19,7 @@ foreach path $paths {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

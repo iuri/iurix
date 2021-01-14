@@ -5,7 +5,7 @@
 -- @author Phong Nguyen <phong@arsdigita.com>
 -- @author Jon Griffin <jon@jongriffin.com>
 -- @creation-date 2000-08-27
--- @cvs-id $Id: acs-messaging-packages.sql,v 1.20.4.5 2017/02/11 23:54:57 gustafn Exp $
+-- @cvs-id $Id: acs-messaging-packages.sql,v 1.21 2017/08/07 23:47:57 gustafn Exp $
 --
 -- updated for OpenACS by Jon Griffin
 --

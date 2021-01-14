@@ -5,7 +5,7 @@ ad_library {
 
     @creation-date 3 December 2002
     @author Peter Marklund (peter@collaboraid.biz)
-    @cvs-id $Id: lang-audit-procs.tcl,v 1.5.22.1 2015/09/10 08:21:25 gustafn Exp $
+    @cvs-id $Id: lang-audit-procs.tcl,v 1.6 2017/08/07 23:47:56 gustafn Exp $
 }
 
 namespace eval lang::audit {

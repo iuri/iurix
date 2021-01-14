@@ -3,7 +3,7 @@
 --
 -- @author rhs@mit.edu
 -- @creation-date 2000-08-22
--- @cvs-id $Id: groups-create.sql,v 1.12.10.2 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: groups-create.sql,v 1.13.2.1 2020/04/12 08:52:42 gustafn Exp $
 --
 
 ----------------------------
@@ -269,6 +269,7 @@ create index group_elem_idx_group_idx on group_element_index (group_id);
 create index group_elem_idx_element_idx on group_element_index (element_id);
 create index group_elem_idx_rel_id_idx on group_element_index (rel_id);
 create index group_elem_idx_rel_type_idx on group_element_index (rel_type);
+create index group_elem_idx_container_idx on group_element_index(container_id);
 
 -- The index on container_id is not very good
 -- and in some cases can be quite detrimental

@@ -3,11 +3,11 @@ ad_page_contract {
     Deletes a category from a category tree
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: category-delete-2.tcl,v 1.13.2.1 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
     category_id:naturalnum,multiple
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 }
@@ -26,6 +26,7 @@ db_transaction {
 }
 
 ad_returnredirect [export_vars -no_empty -base tree-view {tree_id locale object_id ctx_id}]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

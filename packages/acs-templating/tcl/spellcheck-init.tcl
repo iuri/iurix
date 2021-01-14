@@ -2,7 +2,7 @@ ad_library {
 
     Set up the path to the spell-checker in an nsv cache.
 
-    @cvs-id $Id: spellcheck-init.tcl,v 1.16.12.1 2015/09/10 08:22:07 gustafn Exp $
+    @cvs-id $Id: spellcheck-init.tcl,v 1.20 2018/11/03 19:52:29 gustafn Exp $
     @author Ola Hansson (ola@polyxena.net)
     @creation-date 2003-10-04
 
@@ -27,11 +27,11 @@ set dialects_p [parameter::get_from_package_key \
 set dicts ""
 set default_lang ""
 #
-# GN: note, that under windows, the binary will be called aspell.exe
+# GN: note that under windows, the binary will be called aspell.exe
 #
 if { [string match "*aspell*" $bin] } {
     # aspell
-    with_catch errmsg {
+    ad_try {
         set dicts [exec $bin dump dicts]
         set default_lang [exec $bin config lang]
         if { !$dialects_p } {
@@ -40,8 +40,8 @@ if { [string match "*aspell*" $bin] } {
             # one of the names in the pull-down menu.
             set default_lang [string range $default_lang 0 1]
         }
-    } {
-        ns_log Warning "Gettings dicts and default_lang for aspell failed with error message: \"$errmsg\""
+    } on error {errorMsg} {
+        ns_log Warning "Gettings dicts and default_lang for aspell failed with error message: \"$errorMsg\""
 	ns_log Notice "You might want to upgrade to a more recent version of Aspell ... http://aspell.sourceforge.net/"
     }
 } elseif { [string match "*ispell*" $bin] } {
@@ -51,7 +51,7 @@ if { [string match "*aspell*" $bin] } {
     set default_lang ""
 } 
 
-#Do we include all availabale dicts or not ?
+#Do we include all available dicts or not ?
 set use_dicts_p [parameter::get_from_package_key \
 		    -package_key acs-templating \
 		    -parameter SpellcheckUseDictsP \

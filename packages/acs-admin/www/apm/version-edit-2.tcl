@@ -2,7 +2,7 @@ ad_page_contract {
     Edit a package version
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date 17 April 2000
-    @cvs-id $Id: version-edit-2.tcl,v 1.13.2.1 2015/09/10 08:21:04 gustafn Exp $
+    @cvs-id $Id: version-edit-2.tcl,v 1.16 2018/01/20 22:45:12 gustafn Exp $
 
 } {
     version_id:naturalnum,notnull
@@ -57,6 +57,7 @@ if {$old_version_name eq $version_name} {
 if { $version_changed_p && $version_uri eq $old_version_uri } {
     ad_return_complaint 1 {You have changed the version number but not the version URL. When creating
         a package for a new version, you must select a new URL for the version.}
+    ad_script_abort
 }
 
 if { $upgrade_p && [db_string apm_version_uri_unique_ck {
@@ -64,6 +65,7 @@ if { $upgrade_p && [db_string apm_version_uri_unique_ck {
     where version_uri = :version_uri
 } -default 0] } {
     ad_return_complaint 1 "A version with the URL $version_uri already exists."
+    ad_script_abort
 }
 
 db_transaction {
@@ -92,6 +94,7 @@ I was unable to update your version for the following reason:
 }
 
 ad_returnredirect "version-generate-info?version_id=$version_id&write_p=1"
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

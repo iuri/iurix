@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author Yonatan Feldman (yon@arsdigita.com)
     @creation-date August 15, 2000
-    @cvs-id $Id: alphabetical-index.tcl,v 1.6.6.1 2015/09/10 08:21:43 gustafn Exp $
+    @cvs-id $Id: alphabetical-index.tcl,v 1.7 2017/08/07 23:47:58 gustafn Exp $
 
 } {}
 

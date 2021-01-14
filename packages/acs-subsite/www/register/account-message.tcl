@@ -1,7 +1,7 @@
 ad_page_contract {
     Inform the user of an account status message.
     
-    @cvs-id $Id: account-message.tcl,v 1.2.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: account-message.tcl,v 1.3 2017/08/07 23:47:59 gustafn Exp $
 } {
     {message:html ""}
     {return_url:localurl ""}

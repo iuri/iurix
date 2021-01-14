@@ -7,7 +7,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Jan  4 10:54:36 2001
-    @cvs-id $Id: constraints-create.tcl,v 1.5.2.4 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: constraints-create.tcl,v 1.6.2.1 2020/01/02 17:36:08 antoniop Exp $
 
 } {
     group_id:notnull,naturalnum
@@ -23,7 +23,13 @@ ad_page_contract {
 set context [list [list "[ad_conn package_url]admin/groups/" "Groups"] [list [export_vars -base one group_id] "One Group"] "Add constraint"]
 set export_vars [export_vars -form {group_id rel_type return_url}]
 
-db_1row select_props {}
+db_1row select_props {
+    select (select group_name from groups
+            where group_id = :group_id) as group_name,
+           t.pretty_name as rel_type_pretty_name
+      from acs_object_types t
+     where t.object_type = :rel_type
+}
 
 ad_return_template
 

@@ -6,7 +6,7 @@ ad_page_contract {
     @author Phong Nguyen <phong@arsdigita.com>
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-add-2.tcl,v 1.7.2.2 2016/05/21 10:15:38 gustafn Exp $
+    @cvs-id $Id: comment-add-2.tcl,v 1.8 2017/08/07 23:48:12 gustafn Exp $
 } {
     object_id:naturalnum,notnull
     { object_name "[acs_object_name $object_id]" }

@@ -2,12 +2,19 @@ ad_page_contract {
 
     Show all objects mapped to a category.
 
+    apisano 2019-03-15: note that objects will be correctly displayed
+    here only if one takes care of maintaining the corresponding
+    records in acs_named_objects, as explained in
+    /doc/tutorial-categories and /categories/doc/o. To my knowledge,
+    the only package where this actually happened is the FAQ... Why
+    was acs_objects.title not enough of a name?
+
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: category-usage.tcl,v 1.10.2.4 2019/12/20 21:18:10 gustafn Exp $
 } {
     category_id:naturalnum,notnull
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     {page:integer,optional 1}
     {orderby:token,optional object_name}
@@ -36,7 +43,7 @@ set category_name [category::get_name $category_id $locale]
 set page_title "Objects using category \"$category_name\" of tree \"$tree_name\""
 set url_vars [export_vars -no_empty {category_id tree_id locale object_id}]
 
-set context_bar [category::context_bar $tree_id $locale [value_if_exists object_id]]
+set context_bar [category::context_bar $tree_id $locale [expr {[info exists object_id] ? $object_id : ""}]]
 lappend context_bar "\"$category_name\" Usage"
 
 template::list::create -name items_list -multirow items \
@@ -74,7 +81,13 @@ request create
 request set_param page -datatype integer -value 1
 
 # execute query to count objects and pages
-paginator create get_category_usages $p_name "" -pagesize 20 -groupsize 10 -contextual -timeout 0
+paginator create get_category_usages $p_name {
+      select n.object_id
+      from category_object_map m, acs_named_objects n
+      where acs_permission.permission_p(m.object_id, :user_id, 'read') = 't'
+      and m.category_id = :category_id
+      and n.object_id = m.object_id
+} -pagesize 20 -groupsize 10 -contextual -timeout 0
 
 set first_row [paginator get_row $p_name $page]
 set last_row [paginator get_row_last $p_name $page]

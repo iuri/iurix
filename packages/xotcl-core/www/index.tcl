@@ -2,7 +2,7 @@ ad_page_contract {
   Show classes defined in the connection threads
 
   @author Gustaf Neumann
-  @cvs-id $Id: index.tcl,v 1.8.2.3 2016/05/27 08:43:44 gustafn Exp $
+  @cvs-id $Id: index.tcl,v 1.10.2.1 2020/08/26 18:50:43 gustafn Exp $
 } -query {
   {all_classes:notnull 0}
 } -properties {
@@ -66,8 +66,8 @@ foreach cl [lsort $classes] {
   if {!$all_classes && ([string match "::xotcl::*" $cl] || [string match "::nx::*" $cl])} {
     continue
   }
-  
-  append output "<li><b><a name='$cl'>[::xo::api object_link {} $cl]</b> <ul>"
+
+  append output "<li><b><a name='$cl'></a>[::xo::api object_link {} $cl]</b> <ul>"
 
   append output [info_classes $cl superclass]
   append output [info_classes $cl subclass 1]
@@ -81,7 +81,7 @@ foreach cl [lsort $classes] {
     if {$infos ne ""} {
       append output "<li><em>$key:</em> $infos</li>\n"
     }
-    
+
   }
 
   set infos ""

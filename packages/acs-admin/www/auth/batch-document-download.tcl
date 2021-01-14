@@ -1,5 +1,5 @@
 ad_page_contract {
-    Download a whole batch xml document.
+    Download a whole batch XML document.
 
     @author Peter Marklund
 } {
@@ -13,6 +13,7 @@ set document [db_string select_document {
 }]
 
 ns_return 200 text/plain $document
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

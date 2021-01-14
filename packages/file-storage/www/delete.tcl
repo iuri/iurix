@@ -34,7 +34,12 @@ if {$root_folders_count > 0} {
 
 set object_id_list [join $object_id "','"]
 
-db_multirow -extend {delete_message} delete_list get_to_be_deleted {} {
+db_multirow -extend {delete_message} delete_list get_to_be_deleted [subst {
+    select fs.object_id as fs_object_id, fs.type, fs.name, fs.parent_id,
+    acs_permission.permission_p(fs.object_id, :user_id, 'delete') as delete_p
+    from fs_objects fs
+    where fs.object_id in ('$object_id_list')
+}] {
 	  if {$delete_p} {
 	      set delete_message ""
 	      incr allowed_count
@@ -59,7 +64,7 @@ ad_form -extend -name delete_confirm -on_submit {
     db_transaction {
         template::multirow foreach delete_list {
             if {$delete_p} {
-                switch $type {
+                switch -- $type {
                     folder {
                         fs::delete_folder \
                             -folder_id $fs_object_id \

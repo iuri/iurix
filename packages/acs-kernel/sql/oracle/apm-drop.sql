@@ -3,7 +3,7 @@
 -- @author Bryan Quinn (bquinn)
 -- @creation-date Mon Sep 18 16:46:56 2000
 --
--- $Id: apm-drop.sql,v 1.1 2001/03/20 22:51:55 donb Exp $
+-- $Id: apm-drop.sql,v 1.2 2018/05/17 12:09:46 antoniop Exp $
 --
 
 drop package apm_service;
@@ -16,11 +16,6 @@ drop package apm;
 drop table apm_package_dependencies;
 drop table apm_parameter_values;
 drop table apm_parameters;
-drop view apm_file_info;
-drop index apm_package_files_by_version;
-drop index apm_package_files_by_path;
-drop table apm_package_files;
-drop table apm_package_file_types;
 drop view apm_enabled_package_versions;
 drop view apm_package_version_info;
 drop table apm_package_owners;

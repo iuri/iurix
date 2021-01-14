@@ -2,35 +2,183 @@ ad_library {
     Automated tests.
 
     @author Peter Marklund
-    @creation-date 20 April 2004
-    @cvs-id $Id: acs-automated-testing-procs.tcl,v 1.3.16.1 2015/09/10 08:21:14 gustafn Exp $
+    @creation-date 26 July 2018
 }
 
-aa_register_case -cats {web smoke} -libraries tclwebtest tclwebtest_example {
-    A simple test case demonstrating the use of tclwebtest (HTTP level testing).
+aa_register_case \
+    -cats {api web} \
+    -procs {
+        acs::test::user::create
+        acs::test::http
+        acs::test::login
+        acs::test::logout
+    } \
+    webtest_example {
 
-    @author Peter Marklund
+    A simple test case demonstrating the use of web tests (via
+    HTTP/HTTPS).
+
+    @author Gustaf Neumann
 } {
-    set user_id [db_nextval acs_object_id_seq]
 
-    aa_run_with_teardown \
-        -test_code {
-            # Create test user
-            array set user_info [twt::user::create -user_id $user_id]
+    aa_run_with_teardown -test_code {
+        set user_id [db_nextval acs_object_id_seq]
 
-            # Login user
-            twt::user::login $user_info(email) $user_info(password)
+        # Create test user
+        set user_info [acs::test::user::create -user_id $user_id]
+        set request_info [list session user_info $user_info]
+        acs::test::confirm_email -user_id $user_id
 
-            # Visit homepage
-            twt::do_request "/"
+        ########################################################################################
+        aa_section "Visit homepage as anonymous user, last name of user should not show up"
+        ########################################################################################
+        set d [acs::test::http /]
+        acs::test::reply_contains_no $d [dict get $user_info last_name]
 
-	    # Logout user
-            twt::user::logout
+        # Login user
+        #set d [acs::test::login $user_info]
 
-        } -teardown_code {
-            # TODO: delete test user
-            twt::user::delete -user_id $user_id
+        ########################################################################################
+        aa_section "Visit homepage with request_info, should login, last name of user should be contained"
+        ########################################################################################
+        aa_log "USER_INFO $user_info"
+        set d [acs::test::http -depth 3 -user_info $user_info /]
+
+        acs::test::reply_has_status_code $d 200
+        acs::test::reply_contains $d [dict get $user_info last_name]
+        aa_equals "login [dict get $d login]" [dict get $d login] via_login
+        aa_true "cookies are not empty '[dict get $d session cookies]'" {[dict get $d session cookies] ne ""}
+
+        ########################################################################################
+        aa_section "Make a second request, now the cookie should be used"
+        ########################################################################################
+        set d [acs::test::http -depth 3 -last_request $d /]
+        acs::test::reply_has_status_code $d 200
+        acs::test::reply_contains $d [dict get $user_info last_name]
+        aa_equals "login [dict get $d login]" [dict get $d login] via_cookie
+
+        ########################################################################################
+        aa_section "Logout user"
+        ########################################################################################
+        set d [acs::test::logout -last_request $d]
+
+        ########################################################################################
+        aa_section "Visit homepage, last name of user should not show up"
+        ########################################################################################
+        set d [acs::test::http -last_request $d  /]
+        acs::test::reply_contains_no $d [dict get $user_info last_name]
+
+    } -teardown_code {
+        acs::test::user::delete -user_id $user_id
+    }
+}
+
+aa_register_case \
+    -cats {api smoke production_safe} \
+    -procs {
+        aa::coverage::proc_coverage
+    } \
+    aa__coverage_proc_coverage {
+
+        Simple test for the aa::coverage::proc_coverage proc.
+
+        @author Héctor Romojaro <hector.romojaro@gmail.com>
+        @creation-date 2019-09-03
+} {
+    set cases [list]
+
+    set result    [aa::coverage::proc_coverage]
+    lappend cases [list cmd {aa::coverage::proc_coverage} result "$result"]
+    set result    [aa::coverage::proc_coverage -package_key "acs-tcl"]
+    lappend cases [list cmd {aa::coverage::proc_coverage -package_key "acs-tcl"} result "$result"]
+    set result    [aa::coverage::proc_coverage -package_key "acs-kernel"]
+    lappend cases [list cmd {aa::coverage::proc_coverage -package_key "acs-kernel"} result "$result"]
+    set result    [aa::coverage::proc_coverage -package_key "acs-automated-testing"]
+    lappend cases [list cmd {aa::coverage::proc_coverage -package_key "acs-automated-testing"} result "$result"]
+
+    foreach testcase $cases {
+        dict with testcase {
+            aa_equals "$cmd dict size" "[dict size $result]" "3"
+            aa_true "$cmd procs type" {
+                [string is integer [dict get $result procs]] &&
+                [dict get $result procs] >= 0
+            }
+            aa_true "$cmd covered type" {
+                [string is integer [dict get $result covered]] &&
+                [dict get $result covered] >= 0
+            }
+            aa_true "$cmd covered <= procs" {
+                [dict get $result covered] <= [dict get $result procs]
+            }
+            aa_true "$cmd coverage type" {
+                [dict get $result coverage] >= 0 &&
+                [dict get $result coverage] <= 100
+            }
         }
+    }
+}
+
+aa_register_case \
+    -cats {api smoke production_safe} \
+    -procs {
+        aa::coverage::proc_covered_p
+        aa::coverage::proc_list
+    } \
+    aa__coverage_proc_proc_list_covered {
+
+        Simple test for the aa::coverage::proc_list and aa::coverage::proc_covered_p procs.
+
+        @author Héctor Romojaro <hector.romojaro@gmail.com>
+        @creation-date 2019-09-03
+} {
+    set total_proc_list [aa::coverage::proc_list]
+
+    foreach proc_info $total_proc_list {
+        dict with proc_info {
+            aa_equals "global: dict size" "[dict size $proc_info]" "3"
+            aa_true "global: package_key not empty" {[dict get $proc_info package_key] ne ""}
+            aa_true "global: proc_name not empty" {[dict get $proc_info proc_name] ne ""}
+            aa_true "global proc $proc_name: covered_p is boolean" {[string is boolean [dict get $proc_info covered_p]]}
+            aa_true "global proc $proc_name: covered_p and aa::coverage::proc_covered_p are coherent" {
+                bool([dict get $proc_info covered_p]) ==
+                bool([aa::coverage::proc_covered_p [dict get $proc_info proc_name]])
+            }
+        }
+    }
+
+    set package_list {acs-tcl acs-kernel acs-automated-testing}
+    foreach package $package_list {
+        set package_proc_list [aa::coverage::proc_list -package_key $package]
+        foreach proc_info $package_proc_list {
+            dict with proc_info {
+                aa_equals "package $package: dict size" "[dict size $proc_info]" "2"
+                aa_true "package $package: proc_name not empty" {[dict get $proc_info proc_name] ne ""}
+                aa_true "package $package proc $proc_name: covered_p is boolean" {[string is boolean [dict get $proc_info covered_p]]}
+                aa_true "package $package proc $proc_name: covered_p and aa::coverage::proc_covered_p are coherent" {
+                    bool([dict get $proc_info covered_p]) ==
+                    bool([aa::coverage::proc_covered_p [dict get $proc_info proc_name]])
+                }
+            }
+        }
+    }
+}
+
+aa_register_case \
+    -cats {api smoke production_safe} \
+    -procs {
+        aa::coverage::proc_coverage_level
+    } \
+    aa__coverage_proc_coverage_level {
+
+        Simple test for the aa::coverage::proc_coverage_level proc.
+
+        @author Héctor Romojaro <hector.romojaro@gmail.com>
+        @creation-date 2019-09-03
+} {
+    set values {0 very_low 1 very_low 24.999 very_low 25 low 49 low 50.00 medium 74.9 medium 75 high 99 high 100 full}
+    dict for {value result} $values {
+        aa_equals "aa::coverage::proc_coverage_level $value" "[aa::coverage::proc_coverage_level $value]" "$result"
+    }
 }
 
 # Local variables:

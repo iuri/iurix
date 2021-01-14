@@ -3,10 +3,10 @@ ad_page_contract {
     Unmapping a category tree from an object.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-unmap-2.tcl,v 1.10.2.1 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,notnull
     ctx_id:naturalnum,optional
 } 
@@ -22,6 +22,7 @@ if {$tree(site_wide_p) == "f"} {
 category_tree::unmap -tree_id $tree_id -object_id $object_id
 
 ad_returnredirect [export_vars -no_empty -base object-map {locale object_id ctx_id}]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

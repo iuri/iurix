@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author Malte Sussdorff (malte.sussdorff@cognovis.de)
     @creation-date 2007-09-29
-    @cvs-id $Id: css-edit.tcl,v 1.4.2.4 2016/05/20 19:55:32 gustafn Exp $
+    @cvs-id $Id: css-edit.tcl,v 1.7 2018/05/15 12:29:10 antoniop Exp $
 } {
     {file_location}
     {css_location}
@@ -30,10 +30,7 @@ if {[file exists $file_location] && [file extension $file_location] eq ".css"} {
 	set package_id [ad_conn package_id]
 	set css_path "<a href='[ns_quotehtml $css_location]'>$css_location</a>"
 	set fp [open $file_location "r"]
-	set css_content ""
-	while { [gets $fp line] >= 0 } {
-	    append css_content "$line \n"
-	}
+	set css_content [read $fp]
 	close $fp
 
 	set item_id [content::item::get_id_by_name -name $file_location -parent_id $package_id]
@@ -58,13 +55,10 @@ if {[file exists $file_location] && [file extension $file_location] eq ".css"} {
 	    }
 	    append revision_html "</ol>"
 	    file stat $file_location file_stat_arr
-	    # mcordova: ugly things until I figure out how to do that in a
-	    # better way...
-	    set item_id [content::item::get_id_by_name -name $file_location -parent_id $package_id]
 	    ns_log Notice " * * * the file $file_location (cr_item_id: $item_id) has that modif time: \[$file_stat_arr(mtime)\]"
-	    #todo compare file mtime with live revision time
-	    ## if they are not the same date, show user a warning
-	    # recommening to make a new revision...
+	    # todo compare file mtime with live revision time if they
+	    # are not the same date, show user a warning recommending
+	    # to make a new revision...
 	} else {
 	    append revision_html "<em>no revisions yet</em>"
 	}
@@ -91,8 +85,8 @@ if {[file exists $file_location] && [file extension $file_location] eq ".css"} {
 	
 	# Write the new content to the file
 	if {[file exists $file_location] && [file extension $file_location] eq ".css"} {
-	    set fp [open "${file_location}" "w"]
-	    puts $fp "$css_content"
+	    set fp [open $file_location "w"]
+	    puts -nonewline $fp $css_content
 	    close $fp
 	}
 
@@ -101,9 +95,13 @@ if {[file exists $file_location] && [file extension $file_location] eq ".css"} {
 
     } -after_submit {
 	ad_returnredirect $return_url
+        ad_script_abort
+
     } -cancel_url $return_url
+
 } else {
     ad_returnredirect $return_url
+    ad_script_abort
 }
 
 # Local variables:

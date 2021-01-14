@@ -12,7 +12,7 @@ ad_library {
  
     @author Peter Harper (peter.harper@open-msg.com)
     @creation-date 24 July 2001
-    @cvs-id $Id: example-procs.tcl,v 1.3.24.1 2015/09/10 08:21:13 gustafn Exp $
+    @cvs-id $Id: example-procs.tcl,v 1.4 2017/08/07 23:47:46 gustafn Exp $
 }
  
 ad_proc -public aa_example_write_audit_entry {

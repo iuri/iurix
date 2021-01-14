@@ -1,11 +1,11 @@
 # /Users/matthewburke/development/web/bitdojo/packages/categories/tcl/tagcloud-procs.tcl
 ad_library {
-     
+
      Procs to generate a tag cloud for a given category tree.
 
      @author Matthew Burke (matt-oacs@bluedino.net)
      @creation-date Sun Oct  2 16:58:34 2005
-     @cvs-id
+     @cvs-id $Id: tagcloud-procs.tcl,v 1.8.2.1 2019/03/15 13:28:50 antoniop Exp $
 }
 
 
@@ -60,7 +60,7 @@ ad_proc -public category::tagcloud::tagcloud {
     Generate a tag cloud for the categories in the given category
     tree.
 
-    @option tree_id tree_id of the tree fro which to generate the cloud.
+    @option tree_id tree_id of the tree for which to generate the cloud.
     @return HTML fragment for the tag cloud.
     @author Matthew Burke (matt-oacs@bluedino.net)
 } {
@@ -104,7 +104,17 @@ ad_proc -private category::tagcloud::get_tags_no_mem {
     # so we should check for the reader's locale and use that
     # or the default_locale, but ...
 
-    set tag_list [db_list_of_lists tagcloud_get_keys {}]
+    set tag_list [db_list_of_lists tagcloud_get_keys {
+        select category_id, count(com.object_id), min(trans.name)
+           from categories
+	   natural left join category_object_map com
+	   natural join category_trees
+           natural join category_translations trans
+        where tree_id = :tree_id
+	  and trans.locale = :default_locale
+          and acs_permission.permission_p(com.object_id, :user_id, 'read')
+        group by category_id
+    }]
 }
 
 

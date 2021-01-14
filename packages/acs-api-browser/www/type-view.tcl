@@ -2,11 +2,14 @@ ad_page_contract {
 
     Displays information about a type.
 
-    @cvs-id $Id: type-view.tcl,v 1.4.2.1 2015/09/10 08:21:12 gustafn Exp $
+    This page is currently in a non working state, as well as the
+    api_type_documentation api it makes use of.
+
+    @cvs-id $Id: type-view.tcl,v 1.8.2.1 2019/09/10 12:57:29 antoniop Exp $
 
 } {
     version_id:naturalnum,optional
-    type
+    type:token
 } -properties {
     title:onevalue
     context:onevalue

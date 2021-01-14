@@ -22,6 +22,7 @@
   <msg key="Element_is_too_long_Singular">%label% ha un carattere di troppo.</msg>
   <msg key="Enhanced_Text">Testo Aumentato</msg>
   <msg key="Enter_your_search_text">Inserisci la tuta stringa di ricerca qui</msg>
+  <msg key="filter_clear">Cancella</msg>
   <msg key="Fixed_width_Text">Testo a grandezza fissa</msg>
   <msg key="Format">Formato</msg>
   <msg key="Formats">Formati</msg>
@@ -67,11 +68,15 @@
   <msg key="Invalid_currency">Valuta non valida</msg>
   <msg key="Invalid_decimal_number">Errore nella parte decimale</msg>
   <msg key="Invalid_email_format">Formato email non valido</msg>
+  <msg key="Invalid_enumeration">Enumerazione non valida</msg>
+  <msg key="Invalid_enumeration_duplicate_elements">Enumerazione non valida. &#34;%value%&#34; non contiene valori unici.</msg>
   <msg key="Invalid_filename">Nome del file non valido</msg>
   <msg key="Invalid_integer">Intero non valido</msg>
   <msg key="Invalid_keyword">Parola chiave non valida</msg>
   <msg key="Invalid_natural_number">Numero naturale non valido</msg>
+  <msg key="Invalid_number">Numero non valido</msg>
   <msg key="Invalid_url">Url non valida</msg>
+  <msg key="Invalid_url_element">URL non valido: &#34;%value%&#34;. Si prega di usare solo caratteri minuscoli, numeri e trattini, ad es. &#34;foo-bar&#34;.</msg>
   <msg key="Link_Title">Titolo Link</msg>
   <msg key="lt_Checkuncheck_all_rows">Seleziona/Deseleziona tutte le righe</msg>
   <msg key="lt_Checkuncheck_this_row">Seleziona/Deseleziona questa riga e scegli un&#39;azione da eseguire sotto</msg>
@@ -80,6 +85,7 @@
   <msg key="lt_No_value_supplied_for_-field_pretty-">Nessun valore specificato per %field_pretty%</msg>
   <msg key="lt_The_-field_pretty-_must_be_non_negative">%field_pretty% deve essere un intero positivo</msg>
   <msg key="lt_When_specifying_a_non">Quando si specifica una pagina diversa da zero, è necessario fornire anche page_query o page_query_name</msg>
+  <msg key="Markdown_Text">Testo Markdown</msg>
   <msg key="Meridian">Meridiano</msg>
   <msg key="Minutes">Minuti</msg>
   <msg key="minutes">minuti</msg>

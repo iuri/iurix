@@ -8,7 +8,7 @@
 
 <h2>Audit Trail</h2>
 
-@first_translated_message;noquote@
+<if @first_translated_message@ not nil>@first_translated_message;noquote@</if>
 
 <include src="audit-include" current_locale="@current_locale;literal@" message_key="@message_key;literal@" package_key="@package_key;literal@">
 
@@ -27,6 +27,12 @@
 
 <if @create_p;literal@ true>
   <ul class="action-links">
-    <li> <a href="@delete_url@">Delete this message</a></li>
+    <if @deleted_p;literal@ true>
+      <li> <a href="@undelete_url@" title="Undelete this message">Undelete this message</a> </li>
+      <li> <a href="@unregister_url@" title="Delete this message permanently (unregister)">Delete this message permanently in all locales (unregister)</a> </li>
+    </if>
+    <else>
+      <li> <a href="@delete_url@" title="Delete this message">Delete this message</a></li>
+    </else>
   </ul>
 </if>

@@ -4,7 +4,7 @@ ad_library {
     @author Timo Hentschel (timo@timohentschel.de)
 
     @creation-date 16 April 2003
-    @cvs-id $Id: categories-init.tcl,v 1.4.8.1 2015/09/10 08:30:18 gustafn Exp $
+    @cvs-id $Id: categories-init.tcl,v 1.5 2017/08/07 23:48:05 gustafn Exp $
 }
 
 category::reset_translation_cache

@@ -3,7 +3,7 @@ ad_library {
 
   @author Gustaf Neumann
   @creation-date 2007-10-11
-  @cvs-id $Id: 04-library-procs.tcl,v 1.3.8.4 2017/04/21 14:00:24 gustafn Exp $
+  @cvs-id $Id: 04-library-procs.tcl,v 1.6.2.1 2019/05/08 14:22:01 gustafn Exp $
 }
 
 #
@@ -13,7 +13,7 @@ ad_library {
 # Top of file:
 #
 #     ::xo::library doc {
-#         .....your comment goes here .... 
+#         .....your comment goes here ....
 #     }
 #
 # Load a required file:
@@ -23,7 +23,7 @@ ad_library {
 #
 #     ::xo::library require filename
 #
-#   The library to be loaded must be defined with a 
+#   The library to be loaded must be defined with a
 #   ::xo::library doc {...}
 #
 # Source files extending classes of the current file.
@@ -42,7 +42,7 @@ namespace eval ::xo {
   library proc doc {comment} {
     ad_library $comment
     nsv_set [self]-loaded [info script] 1
-    #my log "--loaded nsv_set [self]-loaded [info script] 1"
+    #:log "--loaded nsv_set [self]-loaded [info script] 1"
   }
 
   library ad_proc require {{-package ""} filename} {
@@ -58,7 +58,7 @@ namespace eval ::xo {
 
     @param filename filename without path and .tcl suffix
   } {
-    #my log "--loaded nsv_set [self]-loaded [info script] 1"
+    #:log "--loaded nsv_set [self]-loaded [info script] 1"
     nsv_set [self]-loaded [info script] 1
     set myfile [file tail [info script]]
     set dirname [file dirname [info script]]
@@ -68,19 +68,19 @@ namespace eval ::xo {
       set otherfile [acs_root_dir]/packages/$package/tcl/$filename.tcl
     }
     set vn [self]
-    #my log "--exists otherfile $otherfile => [nsv_exists $vn $otherfile]"
+    #:log "--exists otherfile $otherfile => [nsv_exists $vn $otherfile]"
     if {[nsv_exists $vn $otherfile]} {
       nsv_set $vn $otherfile [lsort -unique [concat [nsv_get $vn $otherfile] [info script]]]
-      #my log "--setting nsv_set $vn $otherfile [lsort -unique [concat [nsv_get $vn $otherfile] $myfile]]"
+      #:log "--setting nsv_set $vn $otherfile [lsort -unique [concat [nsv_get $vn $otherfile] $myfile]]"
     } else {
       nsv_set $vn $otherfile [info script]
-      #my log "--setting nsv_set $vn $otherfile $myfile"
+      #:log "--setting nsv_set $vn $otherfile $myfile"
     }
-    #my log "--source when not loaded [self]-loaded $otherfile: [nsv_exists [self]-loaded $otherfile]"
-    #my log "--loaded = [lsort [nsv_array names [self]-loaded]]"
+    #:log "--source when not loaded [self]-loaded $otherfile: [nsv_exists [self]-loaded $otherfile]"
+    #:log "--loaded = [lsort [nsv_array names [self]-loaded]]"
 
     if {![nsv_exists [self]-loaded $otherfile]} {
-      my log "--sourcing $otherfile"
+      :log "--sourcing $otherfile"
       apm_source $otherfile
       nsv_set [self]-loaded $otherfile 1
     }
@@ -101,10 +101,10 @@ namespace eval ::xo {
     set myfile [file tail [info script]]
     set dirname [file dirname [info script]]
     set vn [self]
-    #my log "--check nsv_exists $vn $dirname/$myfile [nsv_exists $vn $dirname/$myfile]"
+    #:log "--check nsv_exists $vn $dirname/$myfile [nsv_exists $vn $dirname/$myfile]"
     if {[nsv_exists $vn $dirname/$myfile]} {
       foreach file [nsv_get $vn $dirname/$myfile] {
-        my log "--sourcing dependent $file"
+        :log "--sourcing dependent $file"
         apm_source $file
       }
     }

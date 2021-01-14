@@ -1,6 +1,6 @@
 ad_page_contract {
     Interface for specifying a list of users to sign up as a batch
-    @cvs-id $Id: user-batch-add-2.tcl,v 1.7.2.3 2016/01/02 21:14:10 gustafn Exp $
+    @cvs-id $Id: user-batch-add-2.tcl,v 1.9 2018/01/21 00:38:38 gustafn Exp $
 } -query {
     userlist
     from
@@ -88,9 +88,8 @@ while {[regexp {(.[^\n]+)} $userlist match_fodder row] } {
 <div><code>
 [ns_quotehtml $errmsg]
 </code></div>"
-        return
+        ad_script_abort
     }
-
 }
 
 ad_return_template

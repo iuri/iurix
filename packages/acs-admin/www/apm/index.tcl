@@ -4,7 +4,7 @@ ad_page_contract {
     @param orderyby The parameter to order everything in the page by.
     @param owned_by Display packages owned by whom.
     @author Jon Salz (jsalz@arsdigita.com)
-    @cvs-id $Id: index.tcl,v 1.29.2.1 2015/09/10 08:21:01 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.30.2.4 2019/03/13 09:37:19 antoniop Exp $
 } {
     { orderby:token "package_key" }
     { owned_by:word "everyone" }
@@ -17,22 +17,22 @@ set context [list [list "../developer" "Developer's Administration"] $page_title
 
 set user_id [ad_conn user_id]
 
-# Determine the user's email address.  If its not registered, put in a default.  
-set my_email [db_string email_by_user_id {
-    select email from parties where party_id = :user_id
-} -default "me"]
+# Determine the user's email address to filter packages belonging to 'me'
+set my_email [party::get -party_id $user_id -element email]
 
 set dimensional_list {
     {
         supertype "Package Type:" all {
-	    { apm_application "Applications" { where "[db_map apm_application]" } }
-	    { apm_service "Services" { where "t.package_type = 'apm_service'"} }
+	    { apm_application "Applications" { where {t.package_type = 'apm_application'} } }
+	    { apm_service "Services" { where {t.package_type = 'apm_service'}} }
 	    { all "All" {} }
 	}
     }
     {
 	owned_by "Owned by:" everyone {
-	    { me "Me" {where "[db_map everyone]"} }
+	    { me "Me" {where {exists (select 1 from apm_package_owners o
+                                      where o.version_id = v.version_id
+                                      and owner_uri='mailto:' || :my_email)}} }
 	    { everyone "Everyone" {where "1 = 1"} }
 	}
     }
@@ -86,36 +86,35 @@ template::list::create -name package_list \
         }
     } -filters {owned_by {} supertype {} status {}}
 
-set performance_p [parameter::get -package_id [ad_acs_kernel_id] -parameter PerformanceModeP -default 1] 
-set reload_links_p [ad_decode [ns_set iget [rp_getform] reload_links_p] \
-                        "" 0 [ns_set iget [rp_getform] reload_links_p]]
+set performance_p [parameter::get -package_id [ad_acs_kernel_id] -parameter PerformanceModeP -default 1]
+set reload_links_p [string is true -strict [ns_set iget [rp_getform] reload_links_p]]
 
 db_multirow -extend {package_url maintained status action_html} packages apm_table {} {
     set package_url [export_vars -base version-view {version_id}]
-    set maintained [ad_decode $distribution_uri "" "Locally" "Externally"]
-    
+    set maintained [expr {$distribution_uri eq "" ? "Locally" : "Externally"}]
+
     if { $installed_p == "t" } {
-		if { $enabled_p == "t" } {
-		    set status "Enabled"
-		} else {
-		    set status "Disabled"
-		}
+        if { $enabled_p == "t" } {
+            set status "Enabled"
+        } else {
+            set status "Disabled"
+        }
     } elseif { $superseded_p } {
-		set status "Superseded"
+        set status "Superseded"
     } else {
-		set status "Uninstalled"
+        set status "Uninstalled"
     }
-    
+
     set file_link_list [list]
     lappend file_link_list "<a href=\"version-files?version_id=$version_id\">view files</a>"
     if { $installed_p == "t" && $enabled_p == "t" } {
         if {!$performance_p} {
             lappend file_link_list "<a href=\"package-watch?package_key=$package_key\">watch all files</a>"
-        } 
+        }
         if { !$reload_links_p || [apm_version_load_status $version_id] eq "needs_reload"} {
             lappend file_link_list "<a href=\"version-reload?version_id=$version_id\">reload changed</a>"
-        } 
-    } 
+        }
+    }
     set action_html [join $file_link_list " | "]
 }
 

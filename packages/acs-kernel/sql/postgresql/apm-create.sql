@@ -6,7 +6,7 @@
 -- @author Bryan Quinn (bquinn@arsdigita.com)
 -- @author Jon Salz (jsalz@mit.edu)
 -- @creation-date 2000/04/30
--- @cvs-id $Id: apm-create.sql,v 1.75.4.2 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: apm-create.sql,v 1.79.2.3 2019/08/19 07:00:18 gustafn Exp $
 
 -----------------------------
 --     PACKAGE OBJECT	   --
@@ -290,7 +290,7 @@ $$;
 comment on column apm_package_versions.release_date is $$
 This tracks when the package was released. Releasing a package means
 freezing the code and files, creating an archive, and making the
-package available for donwload. XXX (bquinn): I'm skeptical about the
+package available for download. XXX (bquinn): I'm skeptical about the
 usefulness of storing this information here.
 $$;
 
@@ -669,7 +669,7 @@ comment on column apm_package_callbacks.type is '
   values are given by the Tcl proc apm_supported_callback_types.
 ';
 
--- Ths view facilitates accessing information about package versions by joining
+-- This view facilitates accessing information about package versions by joining
 -- the apm_package_types information and acs_object_types information (which is
 -- invariant across versions) with the specific version information.
 
@@ -692,20 +692,6 @@ create view apm_package_version_info as
 create view apm_enabled_package_versions as
     select * from apm_package_version_info
     where  enabled_p = 't';
-
-create table apm_package_db_types (
-    db_type_key      varchar(50)
-                       constraint apm_package_db_types_pk primary key,
-    pretty_db_name   varchar(200)
-                       constraint apm_package_db_types_name_nn not null
-);
-
-comment on table apm_package_db_types is '
-  A list of all the different kinds of database engines that an APM package can
-  support.  This table is initialized in acs-tcl/tcl/apm-init.tcl rather than in
-  PL/SQL in order to guarantee that the list of supported database engines is
-  consistent between the bootstrap code and the package manager.
-';
 
 create table apm_parameters (
 	parameter_id		integer constraint apm_parameters_parameter_id_fk 
@@ -734,9 +720,9 @@ create table apm_parameters (
 	max_n_values		integer default 1 not null
 			        constraint apm_parameters_max_n_values_ck
 			        check (max_n_values >= 0),
-	constraint apm_paramters_attr_name_un
+	constraint apm_parameters_attr_name_un
 	unique (parameter_name, package_key),
-	constraint apm_paramters_n_values_ck
+	constraint apm_parameters_n_values_ck
 	check (min_n_values <= max_n_values)
 );
 
@@ -920,7 +906,7 @@ attr_id := acs_attribute__create_attribute (
    'min_n_values',
    'number',
    'Minimum Number of Values',
-   'Minimum Numer of Values Settings',
+   'Minimum Number of Values Settings',
    null,
    null,
    1,

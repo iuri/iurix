@@ -2,7 +2,7 @@
 -- acs-kernel/sql/acs-permissions-create.sql
 --
 -- The ACS core permissioning system. The knowledge level of system
--- allows you to define a hierarchichal system of privilages.  The
+-- allows you to define a hierarchichal system of privileges.  The
 -- operational level allows you to grant to any party a privilege on
 -- any object.
 --
@@ -10,7 +10,7 @@
 --
 -- @creation-date 2000-08-13
 --
--- @cvs-id $Id: acs-permissions-create.sql,v 1.13.12.1 2016/07/01 14:04:39 gustafn Exp $
+-- @cvs-id $Id: acs-permissions-create.sql,v 1.15 2017/12/24 13:10:49 gustafn Exp $
 --
 
 

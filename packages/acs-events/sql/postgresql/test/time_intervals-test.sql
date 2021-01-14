@@ -5,7 +5,7 @@
 -- @author jowell@jsabino.com
 -- @creation-date 2001-06-26
 --
--- $Id: time_intervals-test.sql,v 1.3 2013/03/30 13:00:30 gustafn Exp $
+-- $Id: time_intervals-test.sql,v 1.4 2018/03/27 12:22:17 hectorr Exp $
 
 -- Note: These tests use the semi-ported utPLSQL regression package
 \i utest-create.sql
@@ -26,7 +26,7 @@ BEGIN
 				    'ut_time_intervals'
 				    );
 
-	-- Store keys that are in the table prior to the regresion test
+	-- Store keys that are in the table prior to the regression test
 	create table ut_interval_ids as select interval_id from time_intervals;
 
 	return 0;

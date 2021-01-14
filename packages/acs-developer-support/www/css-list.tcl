@@ -6,7 +6,7 @@ ad_page_contract {
     
     @author Malte Sussdorff (malte.sussdorff@cognovis.de)
     @creation-date 2007-09-29
-    @cvs-id $Id: css-list.tcl,v 1.2.4.3 2016/05/20 19:55:32 gustafn Exp $
+    @cvs-id $Id: css-list.tcl,v 1.4 2018/05/15 21:20:25 hectorr Exp $
 } {
     {return_url:localurl ""}
     {css_list}
@@ -25,7 +25,7 @@ foreach css $css_list {
 	set file_location "[acs_package_root_dir [lindex $css_path_list 2]]/www/resources/[join [lrange $css_path_list 3 end] /]"
 	set edit_location [export_vars -base "css-edit" -url {file_location return_url {css_location $css}}]
     } elseif {[apm_version_id_from_package_key $path_root] ne ""} {
-	# THis is a package key, but not resources directory
+	# This is a package key, but not resources directory
 	set package_key $path_root
 	set file_location "[acs_package_root_dir $package_key]/www/[join [lrange $css_path_list 2 end] /]"
 	set edit_location [export_vars -base "css-edit" -url {file_location return_url {css_location $css}}]

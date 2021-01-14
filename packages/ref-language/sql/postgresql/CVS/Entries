@@ -1,4 +1,4 @@
-/00-languages.ctl/1.5/Thu May 13 16:57:20 2010//Topenacs-5-9-compat
-/ref-language-create.sql/1.5/Sun Oct 17 21:06:09 2010//Topenacs-5-9-compat
-/ref-language-drop.sql/1.5/Mon Oct 27 16:41:53 2014//Topenacs-5-9-compat
-D/upgrade////
+/00-languages.ctl/1.5/Thu May 13 16:57:20 2010//
+/ref-language-create.sql/1.5/Sun Oct 17 21:06:09 2010//
+/ref-language-drop.sql/1.5/Mon Oct 27 16:41:53 2014//
+D

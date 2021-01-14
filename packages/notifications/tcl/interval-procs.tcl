@@ -4,7 +4,7 @@ ad_library {
 
     @creation-date 2002-05-24
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: interval-procs.tcl,v 1.4.24.1 2015/09/12 11:06:45 gustafn Exp $
+    @cvs-id $Id: interval-procs.tcl,v 1.5 2017/08/07 23:48:13 gustafn Exp $
 
 }
 

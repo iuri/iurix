@@ -2,7 +2,7 @@ ad_page_contract {
 
     Grants or revokes site-wide admin privileges.
     @author Andrew Spencer (andrew@fallingblue.com)
-    @cvs-id $Id: modify-admin-privileges.tcl,v 1.5.2.3 2015/10/20 10:45:00 gustafn Exp $
+    @cvs-id $Id: modify-admin-privileges.tcl,v 1.9 2018/06/23 16:30:58 gustafn Exp $
 
 } {
     user_id:naturalnum,notnull,verify
@@ -13,7 +13,8 @@ ad_page_contract {
 set confirmed_url [export_vars -base /acs-admin/users/modify-admin-privileges {
     user_id:sign(max_age=60) action:sign {confirmed_p 1}
 }]
-set return_url [export_vars -base /acs-admin/users/one {user_id}]
+
+set return_url [acs_community_member_admin_url -user_id $user_id]
 
 set context [list [list "./" "Users"] "Modify privileges"]
 
@@ -26,9 +27,12 @@ if {$confirmed_p} {
 
     ad_returnredirect $return_url
 
-    # We need to flush all permission checks pertaining to this user.
-    # this is expensive so maybe we should check if we in fact are cacheing.
-    util_memoize_flush_regexp "^permission::.*-party_id $user_id"
+    #
+    # Flush all permission checks pertaining to this user.
+    #
+    permission::cache_flush -party_id $user_id
+    
+    ad_script_abort
 }
 
 acs_user::get -user_id $user_id -array user_info

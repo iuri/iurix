@@ -14,10 +14,10 @@
 
 ad_page_contract {
 
-    Creates a new fs root folder and maps it to the passed in packge_id
+    Creates a new fs root folder and maps it to the passed in package_id
 
     @author Arjun Sanyal (arjun@openforce.net)
-    @cvs-id $Id: new-root-folder-map-2.tcl,v 1.4.20.2 2017/02/01 16:04:17 gustafn Exp $
+    @cvs-id $Id: new-root-folder-map-2.tcl,v 1.6 2018/01/31 20:32:52 gustafn Exp $
 
 } -query {
     {package_id:naturalnum,notnull,notnull}

@@ -57,7 +57,7 @@
 	If you can, put code in the Tcl file, not between <code>&lt;%
 	%&gt;</code> in the adp page.
       <li>
-	Put HTML in the adp page, not int the Tcl program.  Put
+	Put HTML in the adp page, not in the Tcl program.  Put
 	reusable HTML fragments in a separate adp file (think of it as 
 	a widget) that will be <code>&lt;include&gt;</code>d from
 	several pages.  Prefer this to writing a Tcl proc that returns 
@@ -436,7 +436,7 @@ append body "
 	<td valign="top">
 	  <pre>
 <font color="#999999">ad_page_contract {
-    @cvs-id $Id: migration.html,v 1.3.2.2 2017/04/22 18:30:26 gustafn Exp $
+    @cvs-id $Id: migration.html,v 1.4.2.1 2019/10/05 13:29:58 gustafn Exp $
 } {
 }</font>	  
 	  </pre>
@@ -444,7 +444,7 @@ append body "
 	<td valign="top">
 	  <pre>
 <font color="#999999">ad_page_contract {
-    @cvs-id $Id: migration.html,v 1.3.2.2 2017/04/22 18:30:26 gustafn Exp $
+    @cvs-id $Id: migration.html,v 1.4.2.1 2019/10/05 13:29:58 gustafn Exp $
 } {
 } -properties {
     header:onevalue
@@ -661,6 +661,6 @@ if { [db_table_exists "bboard_email_alerts"] } {
       <a href="mailto:iwashima@mit.edu">Hiro Iwashima</a> 
 
     </address>
-Last modified: $Id: migration.html,v 1.3.2.2 2017/04/22 18:30:26 gustafn Exp $
+Last modified: $Id: migration.html,v 1.4.2.1 2019/10/05 13:29:58 gustafn Exp $
   </body>
 </html>

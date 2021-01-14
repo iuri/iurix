@@ -2,6 +2,7 @@
 <message_catalog package_key="attachments" locale="en_US" charset="ISO-8859-1">
 
   <msg key="Action">Action</msg>
+  <msg key="Add_Attachment">Add Attachment</msg>
   <msg key="Add_File">Add File</msg>
   <msg key="Add_folder_Link">Add folder Link</msg>
   <description key="Add_folder_Link">Used as a header on the page for creating a new root folder. A root folder is a folder linked to a certain package instance.
@@ -32,8 +33,7 @@ Please fix.</description>
 
   <msg key="lt_Attach_a_File_to_pret">Attach a File to %pretty_object_name%</msg>
   <msg key="lt_contentscontent_size_">%contents.content_size% item</msg>
-  <msg key="lt_contentscontent_size__1">%contents.content_size% byte</msg>
-  <msg key="lt_Created_by_the_attach">Created by the attachments packge</msg>
+  <msg key="lt_Created_by_the_attach">Created by the attachments package</msg>
   <msg key="lt_dont_know_how_to_deal">Don't know how to deal with attachment type %content_type%</msg>
   <msg key="lt_Error_Attachment_root">Error: Attachment root folder and file storage root folder are different!</msg>
   <msg key="lt_Error_empty_folder_id">Error: empty folder_id!</msg>

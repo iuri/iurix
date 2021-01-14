@@ -6,10 +6,10 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Jan  2 12:08:12 2001
-    @cvs-id $Id: rel-type-add.tcl,v 1.5.2.4 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: rel-type-add.tcl,v 1.7 2018/07/03 13:26:27 michaela Exp $
 
 } {
-    group_id:naturalnum,notnull
+    group_id:integer,notnull
     { return_url:localurl "" }
 } -properties {
     context:onevalue

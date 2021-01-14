@@ -6,7 +6,7 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: test.tcl,v 1.5.2.1 2015/09/12 11:06:35 gustafn Exp $
+    @cvs-id $Id: test.tcl,v 1.6 2017/08/07 23:48:12 gustafn Exp $
 } { 
 } -properties {
     page_title:onevalue

@@ -1,14 +1,14 @@
 ad_library {
-  XOTcl API for api browser, defines the methods
+  XOTcl API for the API browser, defines the methods
   ad_proc (for object specific methods),
   ad_instproc (for tradional methods) and
-  ad_odc (for documenting classes). Syntax for the methods
+  ad_doc (for documenting classes). Syntax for the methods
   ad_proc and ad_instproc is like oacs ad_proc, ad_doc
   receives one argument, similar to ad_library.
 
   @author Gustaf Neumann
   @creation-date 2005-05-13
-  @cvs-id $Id: 03-doc-procs.tcl,v 1.7.2.21 2017/04/15 10:12:03 gustafn Exp $
+  @cvs-id $Id: 03-doc-procs.tcl,v 1.22.2.5 2020/08/08 08:08:20 gustafn Exp $
 }
 
 # Per default, the content of the ::xotcl:: namespace is not serialized;
@@ -36,7 +36,7 @@ ad_library {
   }
 
   #
-  # Support functions for the the OpenACS API browser
+  # Support functions for the OpenACS API browser
   #
   :public object method method_label { -kind:switch proc_spec } {
     switch [llength $proc_spec] {
@@ -48,12 +48,16 @@ ad_library {
       }
     }
     if {[info exists method]} {
-      set isNx [:scope_eval $scope \
-                    ::nsf::directdispatch $obj ::nsf::methods::object::info::hastype ::nx::Class]
-      if {$kind} {
-        return [set :methodLabel($isNx-$methodType)]
-      } else {
-        return "$obj [set :methodLabel($isNx-$methodType)] $method"
+      set isObject [:scope_eval $scope ::nsf::is object $obj]
+      if {$isObject} {
+        set isNx [:scope_eval $scope \
+                      ::nsf::directdispatch $obj ::nsf::methods::object::info::hastype ::nx::Class]
+        if {$kind} {
+          set result [set :methodLabel($isNx-$methodType)]
+        } else {
+          set result "$obj [set :methodLabel($isNx-$methodType)] $method"
+        }
+        return $result
       }
     }
     return $proc_spec
@@ -63,7 +67,7 @@ ad_library {
     #
     # Return HTML code for a debug switch that lets an admin turn
     # debugging of functions and methods on and off. This
-    # functionality is only allowed to site-wide admins
+    # functionality is only allowed to site-wide admins.
     #
     if {![acs_user::site_wide_admin_p]
         || [info commands ::nsf::method::property] eq ""
@@ -86,7 +90,7 @@ ad_library {
       3 {lassign $proc_spec obj methodType method; set scope ""}
       4 {lassign $proc_spec scope obj methodType method}
       default {
-        ns_log notice "Unexpected format <$proc_spec> consists of [llength $proc_spec] parts"
+        ns_log notice "[self] debug_widget: Unexpected format <$proc_spec> consists of [llength $proc_spec] parts"
         return ""
       }
     }
@@ -97,8 +101,12 @@ ad_library {
     } elseif {$methodType eq "Class"} {
       return ""
     } else {
-      ns_log warning "unexpected method type <$methodType>"
+      ns_log warning "[self] debug_widget unexpected method type <$methodType>"
       set modifier ""
+    }
+    set isObject [:scope_eval $scope ::nsf::is object $obj]
+    if {!$isObject} {
+      return ""
     }
     set debug_p [:scope_eval $scope ::nsf::method::property $obj {*}$modifier $method debug]
 
@@ -113,35 +121,29 @@ ad_library {
     # it multiple times).
     #
     if {$::__form_id eq "1"} {
-      #
-      # jquery is just needed for the used ajax call
-      #
-      template::head::add_javascript -src //code.jquery.com/jquery-1.11.3.min.js
-      security::csp::require script-src code.jquery.com
 
       template::add_body_script -script {
         function ajax_submit(form) {
-          //console.log(form);
-          $.ajax({
-            type: "POST",
-            url: "/xotcl/admin/toggle-debug",
-            data: $(form).serialize(),
-            success: function(msg) {},
-            error: function(){alert("failure");}
-          });
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/xotcl/admin/toggle-debug', true);
+          xhr.onreadystatechange = function() {
+            if (this.readyState == 4) {
+              if (this.status != 200) {
+                alert('AJAX submit unexpected response: ' + this.status);
+              }
+            }
+          }
+          xhr.send(new FormData(form));
         };
       }
     }
 
     #
-    # Add the required js and CSS. We use here bootstrap + titatoggle.
+    # Add the required js and CSS. We use here bootstrap + titatoggle,
+    # and assume, we have bootstrap3 installed
     #
-    template::head::add_css -href https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css
-    template::head::add_javascript -src https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js -order 1
-
-    security::csp::require style-src maxcdn.bootstrapcdn.com
-    security::csp::require script-src maxcdn.bootstrapcdn.com
-    security::csp::require font-src maxcdn.bootstrapcdn.com
+    #template::head::add_css -href urn:ad:css:bootstrap3
+    #template::head::add_javascript -src urn:ad:js:bootstrap3
 
     template::head::add_css -href "/resources/xotcl-core/titatoggle/titatoggle-dist.css"
     #
@@ -175,7 +177,7 @@ ad_library {
     if {[nsv_exists api_proc_doc $proc_index]} {
       return "<a href='/api-doc/proc-view?proc=[ns_urlencode $proc_index]'>$method</a>"
     } else {
-      if {[::xo::getObjectProperty $obj ${kind} $method] eq ""} {
+      if {[::xo::getObjectProperty $obj $kind $method] eq ""} {
         return $method<SUP>C</SUP>
       } else {
         return $method
@@ -201,7 +203,10 @@ ad_library {
 
   :public object method scope {} {
     if {[info exists ::xotcl::currentThread]} {
-      # we are in an xotcl thread; the body won't be accessible directly
+      #
+      # We are in an XOTcl thread; the body won't be accessible
+      # by default without the explicit scope.
+      #
       return $::xotcl::currentThread
     }
     return ""
@@ -242,9 +247,13 @@ ad_library {
   }
 
   :public object method object_url {{-show_source 0} {-show_methods 1} scope obj} {
-    #set object [:scope_eval $scope nsf::object::qualify $obj]
-    set object [:scope_eval $scope namespace origin $obj]
-    return [export_vars -base /xotcl/show-object {object show_source show_methods}]
+    set isObject [:scope_eval $scope ::nsf::is object $obj]
+    if {$isObject} {
+      set object [:scope_eval $scope namespace origin $obj]
+      return [export_vars -base /xotcl/show-object {object show_source show_methods}]
+    } else {
+      return .
+    }
   }
 
   :public object method object_index {scope obj} {
@@ -295,6 +304,10 @@ ad_library {
   }
 
   :public object method get_doc_block {text {restVar ""}} {
+    #
+    # Get the (first) documentation block of the provided text (which
+    # might be e.g. the body of a method)
+    #
     set lines [split $text \n]
     set docBlock ""
     set i 0
@@ -317,7 +330,7 @@ ad_library {
   :public object method update_object_doc {scope obj doc_string} {
     ns_log notice "update_object_doc $scope $obj ..."
     #
-    # Update the api browser nsvs with information about the provided
+    # Update the API browser nsvs with information about the provided
     # object.
     #
 
@@ -361,6 +374,9 @@ ad_library {
                  flags $flags \
                 ]
     #ns_log notice "proc_index <$proc_index> -> $doc"
+    if {![nsv_exists api_proc_doc $proc_index]} {
+      nsv_lappend api_proc_doc_scripts [dict get $doc script] $proc_index
+    }
     nsv_set api_proc_doc $proc_index $doc
     nsv_set api_library_doc $proc_index $doc
 
@@ -474,12 +490,12 @@ ad_library {
         if {$isFlag} {
           dict lappend doc switches $name
           dict lappend doc flags $name $flags
-          #my log "default_value $proc_name: $sw -> '[lindex $f 1]' <$pair/$f>"
+          #:log "default_value $proc_name: $sw -> '[lindex $f 1]' <$pair/$f>"
           if {$flags eq "switch" && $default eq ""} {
             set default "false"
           }
         }
-        #my log "default_value $proc_name: $sw -> 'default' <$pair/$f>"
+        #:log "default_value $proc_name: $sw -> 'default' <$pair/$f>"
         if {[llength $def] > 1} {lappend defaults $name $default}
       }
       dict set doc default_values $defaults
@@ -487,7 +503,7 @@ ad_library {
     }
 
     # argument documentation finished
-    set proc_index [::xo::api proc_index $scope $obj ${inst}proc $proc_name]
+    set proc_index [string trimleft [::xo::api proc_index $scope $obj ${inst}proc $proc_name] :]
     if {![nsv_exists api_proc_doc $proc_index]} {
       nsv_lappend api_proc_doc_scripts [dict get $doc script] $proc_index
     }
@@ -507,6 +523,10 @@ ad_library {
   }
 
   :public object method get_object_source {scope obj} {
+    if {![nsf::is object $obj]} {
+      ns_log warning "[self] get_object_source: argument passed as obj is not an object: $obj"
+      return ""
+    }
     set init_block [:get_init_block $scope $obj]
     if {$init_block ne ""} {
       set dummy [:get_doc_block $init_block body]
@@ -660,7 +680,7 @@ ad_library {
 #   <code>instprocs</code>, and
 #   <code>procs</code>.
 #   @author Gustaf Neumann
-#   @cvs-id $Id: 03-doc-procs.tcl,v 1.7.2.21 2017/04/15 10:12:03 gustafn Exp $
+#   @cvs-id $Id: 03-doc-procs.tcl,v 1.22.2.5 2020/08/08 08:08:20 gustafn Exp $
 # }
 # ::Test ad_proc my-class-specific-proc {x y} {
 #   This is a proc of Class Test merely for testing purposes...

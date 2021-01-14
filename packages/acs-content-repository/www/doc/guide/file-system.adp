@@ -14,7 +14,7 @@ repository using the same basic operations as in a file system:</p>
 <li>A freshly installed content repository consists of a single
 "root" folder (analogous to the root directory
 <kbd>/</kbd> in UNIX or an empty partition in Windows or
-MacOS).</li><li>You organize items by creating subfolders under the root.</li><li>You can move or copy items from one folder to another.</li><li>You can create "links" or "shortcuts" for
+macOS).</li><li>You organize items by creating subfolders under the root.</li><li>You can move or copy items from one folder to another.</li><li>You can create "links" or "shortcuts" for
 items to make them accessible from within other directories.</li><li>Each item has a "file name" and an absolute
 "path" that is determined by its location on a particular
 branch of the repository tree. For example, the path to an item
@@ -62,7 +62,7 @@ approach may have the following advantages:</p>
 <ul>
 <li>Content management systems can take advantage of the folder
 structure to implement an intuitive user interface analogous to
-familiar desktop tools (Windows Explorer, MacOS Finder, etc.).</li><li>You can use the content repository API to constraint the type
+familiar desktop tools (Windows Explorer, macOS Finder, etc.).</li><li>You can use the content repository API to constraint the type
 of content that a folder may contain (except for the index page).
 For example, it is possible to limit the contents of the
 "Press" folder to items of type "Press
@@ -77,7 +77,7 @@ times might wish to store the content for each instance in its own
 content root. Creating your own content (and template) root also
 has the advantage that you will not accidentally access another
 package&#39;s content nor will another package access your content.
-Not that that could do any harm, because you have secured all your
+Note that could do any harm, because you have secured all your
 content through appropriate permissions.</p>
 <p>We only talk about creating content roots from here on —
 creating template roots is completely analogous. You create your
@@ -94,8 +94,7 @@ begin
   );
   -- Store v_my_content_root in a safe place
 end;
-/ 
-</pre>
+/ </pre>
 <p>The important point is that you have to pass in <kbd>0</kbd> for
 the <kbd>parent_id</kbd>. This <kbd>parent_id</kbd> is special in
 that it indicates folders with no parent.</p>
@@ -117,5 +116,5 @@ resolved.</p>
 <a href="mailto:karlg\@arsdigita.com">karlg\@arsdigita.com</a>
 <br>
 
-Last Modified: $&zwnj;Id: file-system.html,v 1.1.1.1.30.2 2017/04/21
-14:53:08 gustafn Exp $
+Last Modified: $&zwnj;Id: file-system.html,v 1.2 2017/08/07 23:47:47
+gustafn Exp $

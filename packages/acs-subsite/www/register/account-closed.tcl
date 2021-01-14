@@ -1,7 +1,7 @@
 ad_page_contract {
     Inform the user that his/her account is closed
 
-    @cvs-id $Id: account-closed.tcl,v 1.9.6.1 2015/09/10 08:21:51 gustafn Exp $
+    @cvs-id $Id: account-closed.tcl,v 1.10 2017/08/07 23:47:59 gustafn Exp $
 } {
 
 }

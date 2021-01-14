@@ -5,10 +5,10 @@ Requirements}</property>
 Requirements</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="" leftLabel=""
-		    title=""
-		    rightLink="" rightLabel="">
-		<div class="sect1" lang="en">
+			leftLink="" leftLabel=""
+			title=""
+			rightLink="" rightLabel="">
+		    <div class="sect1" lang="en">
 <div class="titlepage">
 <div><h2 class="title" style="clear: both">
 <a name="noquote-requirements" id="noquote-requirements"></a>HTMLQuoting as
@@ -18,7 +18,7 @@ Part of the Templating System - Requirements</h2></div><hr>
 <a name="The_Templating_System" id="The_Templating_System"></a>The Templating System.</h3></div></div><p>Templating systems, as deployed by most web software, serve to
 distinguish the programming logic of the system from the
 presentation that is output to the user.</p><p>Before introduction of a templating systems to ACS, pages were
-built by outputting HTML text directly from Tcl code. Therefore it
+built by outputting HTML text directly from Tcl code. Therefore, it
 was hard for a designer or a later reviewer to change the
 appearance of the page. "Change the color of the table? How do
 I do that when I cannot even find the body tag?" At this point
@@ -133,8 +133,8 @@ uglier in its own subtle way. The trick is to remember that our
 templating still supports all the ADP features, including embedding
 Tcl code in the template. Thus instead of referring to the multirow
 variable with the \@forums.name\@ variable substitutions, we use
-&lt;%= [ns_quotehtml \@forums.name\@] %&gt;.
-This works correctly, but obviously breaks the abstraction barrier
+&lt;%= [ns_quotehtml \@forums.name\@] %&gt;. This
+works correctly, but obviously breaks the abstraction barrier
 between ADP and Tcl syntaxes. The practical result of breaking the
 abstraction is that every occurrence of Tcl code in an ADP template
 will have to be painstakingly reviewed and converted once ADPs
@@ -148,7 +148,7 @@ Strangely, this otherwise sad fact allows us to deploy a very
 radical but much more robust solution to the problem.</p>
 </div><div class="sect2" lang="en">
 <div class="titlepage"><div><h3 class="title">
-<a name="Quote_Always,_Except_When_Told_Not_to"></a>Quote Always, Except
+<a name="Quote_Always,_Except_When_Told_Not_to" id="Quote_Always,_Except_When_Told_Not_to"></a>Quote Always, Except
 When Told Not to.</h3></div></div><p>At the time when we came to realize how serious the quoting
 deficiencies of ACS 4.0 were, we were about two weeks away from the
 release of a project for the German Bank. There was simply no time
@@ -195,8 +195,8 @@ public. Explanation on how to port your existing modules and the
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="" leftLabel="" leftTitle=""
-		    rightLink="" rightLabel="" rightTitle=""
-		    homeLink="" homeLabel="" 
-		    upLink="" upLabel=""> 
-		
+			leftLink="" leftLabel="" leftTitle=""
+			rightLink="" rightLabel="" rightTitle=""
+			homeLink="" homeLabel="" 
+			upLink="" upLabel=""> 
+		    

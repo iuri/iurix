@@ -3,7 +3,7 @@ ad_page_contract {
 
   @author Don Baccus (dhogaza@pacifier.com)
   @creation-date 2000-10-23
-  @cvs-id $Id: add-edit.tcl,v 1.3.2.3 2017/04/22 18:15:50 gustafn Exp $
+  @cvs-id $Id: add-edit.tcl,v 1.4 2017/08/07 23:48:03 gustafn Exp $
 
   Example script that allows for the creation or editing of a simple note
   object type, using ad_form and package Tcl API tools.

@@ -200,7 +200,7 @@
       <formalpara>
         <title>Operating System</title>
         <para>OpenACS is designed for a Unix-like system.  It is
-          developed primarily in Linux.  It can be run on Mac OS X,
+          developed primarily in Linux.  It can be run on macOS,
           and in Windows within VMWare.</para>
       </formalpara>
       
@@ -224,7 +224,7 @@
         </listitem>
         <listitem>
           <formalpara>
-            <title>Mac OS X</title>
+            <title>macOS</title>
             <para><xref linkend="mac-installation"/></para>
           </formalpara>
         </listitem>
@@ -476,7 +476,7 @@
       <formalpara>
         <title>Database</title>
         <para>The data on your site (for example, user names and passwords,
-          calender entries, and notes) is stored in the database.
+          calendar entries, and notes) is stored in the database.
           OpenACS separates the database with an abstraction layer,
           which means that several different databases all function
           identically.  While you can run the core OpenACS on any
@@ -586,5 +586,5 @@
       </itemizedlist>
     </listitem>
   </itemizedlist>
-  <para><phrase role="cvstag">($Id: software.xml,v 1.26.2.6 2017/06/17 10:15:42 gustafn Exp $)</phrase></para>
+  <para><phrase role="cvstag">($Id: software.xml,v 1.29 2018/07/04 10:20:42 gustafn Exp $)</phrase></para>
 </sect1>

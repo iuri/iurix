@@ -6,7 +6,7 @@ ad_proc -private db_available_pools {dbn} {
     We define this here in 20-db-bootstrap-procs.tcl rather than
     acs-tcl/tcl/00-database-procs.tcl, as we also need to call it from
     db_bootstrap_set_db_type, below, and from db_bootstrap_checks,
-    before all the rest of the db_* api code in 00-database-procs.tcl
+    before all the rest of the db_* API code in 00-database-procs.tcl
     is sourced.
 
     @param dbn The database name to use.  If empty_string, uses the default database.
@@ -17,7 +17,12 @@ ad_proc -private db_available_pools {dbn} {
     if { $dbn eq "" } {
         set dbn $::acs::default_database
     }
-    return [nsv_get db_available_pools $dbn]
+    # When updating from versions before 5.10.0d4, namespace variable
+    # might not be initialized. Get values from conf in this case.
+    if {![info exists ::acs::db_pools($dbn)]} {
+        db_bootstrap_set_db_type errors
+    }
+    return $::acs::db_pools($dbn)
 }
 
 ad_proc -private db_pool_to_dbn_init {} {
@@ -29,9 +34,10 @@ ad_proc -private db_pool_to_dbn_init {} {
 
     @see db_driverkey
 } {
-    foreach dbn [nsv_array names db_available_pools] {
+    foreach dbn [array names ::acs::db_pools] {
         foreach pool [db_available_pools $dbn] {
             nsv_set db_pool_to_dbn $pool $dbn
+            set ::acs::db_pool_to_dbn($pool) $dbn
         }
     }
 }
@@ -63,7 +69,7 @@ ad_proc db_bootstrap_set_db_type { errors } {
     # There are some problems with this approach:
     #
     # 1. The "AvailablePool" parameter specifies the pools to be used by the ACS. 
-    #    The default pool needn't be listed as an available pool, therefore in a
+    #    The default pool needn't be listed as an available pool, therefore, in a
     #    mixed db environment the check strategy described above might not actually
     #    be checking any pool designated for ACS use.
     #
@@ -79,7 +85,7 @@ ad_proc db_bootstrap_set_db_type { errors } {
     #
     # 2. There was no checking to make sure that *all* pools are correctly
     #    configured.  Even in an Oracle-only environment one could easy mistype a
-    #    user name or the like for one of the pools set aside for ACS use, and
+    #    username or the like for one of the pools set aside for ACS use, and
     #    this would not be cleanly caught and reported.
     #
     # 3. There was no checking to make sure that *all* pools are of the same RDBMS
@@ -112,6 +118,9 @@ ad_proc db_bootstrap_set_db_type { errors } {
     set config_path "ns/server/$server_name/acs/database"
     set all_pools [ns_db pools]
 
+    # unset namespaced array of database pools
+    array unset -nocomplain ::acs::db_pools
+
     set database_names [ns_config $config_path {database_names}]
 
     if { [llength $database_names] <= 0 } {
@@ -133,7 +142,7 @@ ad_proc db_bootstrap_set_db_type { errors } {
                 # all_pools to ensure that the pool is valid.
 
                 set dbn_pools [ns_config $config_path "pools_${dbn}"]
-                nsv_set db_available_pools $dbn $dbn_pools
+                set ::acs::db_pools($dbn) $dbn_pools
                 ns_log Notice "$proc_name: For database '$dbn', the following pools are available: $dbn_pools"
             }
 
@@ -162,13 +171,14 @@ ad_proc db_bootstrap_set_db_type { errors } {
                 }
             }
         }
-
-        nsv_set {db_available_pools} $default_dbn $dbn_pools
+        set ::acs::db_pools($default_dbn) $dbn_pools
     }
-
+    set ::acs::db_pools("") $::acs::db_pools($::acs::default_database)
+    
     set pools [db_available_pools {}]
     if { [llength $pools] <= 0 } {
-        nsv_set {db_available_pools} $default_dbn $all_pools
+        set ::acs::db_pools($default_dbn) $all_pools
+        set ::acs::db_pools("") $all_pools        
         set pools $all_pools
         ns_log Notice "$proc_name: Using ALL database pools for OpenACS."
     }
@@ -188,7 +198,7 @@ ad_proc db_bootstrap_set_db_type { errors } {
     # with the OpenACS default database pools:
     #
     # TODO: For now the below pool-checking code runs ONLY for the
-    # default database.  Should probalby extend the checking to all
+    # default database.  Should probably extend the checking to all
     # configured databases:
     #
     # --atp@piskorski.com, 2003/03/17 00:53 EST
@@ -238,11 +248,11 @@ ad_proc db_bootstrap_set_db_type { errors } {
                 nsv_set ad_database_type . $this_suffix
                 #
                 # For the time being, keep the info in the nsv for
-                # backwards compatibility and and a version in a
+                # backwards compatibility and a version in a
                 # per-thead (namespaced) variable
                 #
                 set ::acs::database_type $this_suffix
-                
+
             } elseif { ![string match $this_suffix [nsv_get ad_database_type .]] } {
                 ns_log Notice "$proc_name: Database pool \"$pool\" type \"$this_suffix\" differs from \"[nsv_get ad_database_type .]\"."
                 lappend bad_pools "<li>Database pool \"$pool\" is of type \"$this_suffix\".  The

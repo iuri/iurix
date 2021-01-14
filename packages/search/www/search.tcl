@@ -1,7 +1,7 @@
 ad_page_contract {
     @author Neophytos Demetriou <k2pts@cytanet.com.cy>
     @creation-date September 01, 2001
-    @cvs-id $Id: search.tcl,v 1.40.2.7 2017/02/05 11:40:32 gustafn Exp $
+    @cvs-id $Id: search.tcl,v 1.41.2.1 2020/10/08 11:15:29 antoniop Exp $
 } {
     q:trim
     {t:trim ""}
@@ -34,7 +34,7 @@ ad_page_contract {
             ad_complain "dts: invalid interval"
         }
     }
-    
+
     csrf { csrf::validate }
 }
 
@@ -52,7 +52,6 @@ set debug_p 0
 
 set user_id [ad_conn user_id]
 set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
-
 if {[callback::impl_exists -impl $driver -callback search::driver_info]} {
     array set info [lindex [callback -impl $driver search::driver_info] 0]
 #    array set info [list package_key intermedia-driver version 1 automatic_and_queries_p 1  stopwords_p 1]
@@ -73,7 +72,7 @@ if { $num <= 0} {
 
 
 #
-# Work out the date restriction 
+# Work out the date restriction
 #
 set df ""
 set dt ""
@@ -99,7 +98,7 @@ if {$search_package_id eq "" && [parameter::get -package_id $package_id -paramet
     set subsite_packages [concat [ad_conn subsite_id] [subsite::util::packages -node_id [ad_conn node_id]]]
     lappend params $subsite_packages
     set search_package_id $subsite_packages
-} elseif {$search_package_id ne ""} { 
+} elseif {$search_package_id ne ""} {
   lappend params $search_package_id
 }
 
@@ -128,7 +127,6 @@ if {[callback::impl_exists -impl $driver -callback search::search]} {
     array set result [acs_sc::invoke -contract FtsEngineDriver -operation search \
 			  -call_args $params -impl $driver]
 }
-
 set tend [clock clicks -milliseconds]
 
 if { $t eq [_ search.Feeling_Lucky] && $result(count) > 0} {
@@ -170,10 +168,9 @@ if { $num > 0 } { append url_advanced_search "&num=$num" }
 set query $q
 set nquery [llength [split $q]]
 set stopwords $result(stopwords)
-set nstopwords [llength $result(stopwords)] 
+set nstopwords [llength $result(stopwords)]
 
 template::multirow create searchresult title_summary txt_summary url_one object_id
-
 
 foreach object_id $result(ids) {
     if {[catch {
@@ -185,11 +182,9 @@ foreach object_id $result(ids) {
             #ns_log warning "SEARCH search/www/search.tcl callback::datasource::$object_type not found"
             array set datasource [acs_sc::invoke -contract FtsContentProvider -operation datasource \
 				      -call_args [list $object_id] -impl $object_type]
-
             set url_one [acs_sc::invoke -contract FtsContentProvider -operation url \
 			     -call_args [list $object_id] -impl $object_type]
         }
-
         search::content_get txt $datasource(content) $datasource(mime) $datasource(storage_type) $object_id
         if {[callback::impl_exists -impl $driver -callback search::summary]} {
             set title_summary [lindex [callback -impl $driver search::summary -query $q -text $datasource(title)] 0]

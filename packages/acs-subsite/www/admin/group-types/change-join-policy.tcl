@@ -1,12 +1,10 @@
-# /packages/acs-subsite/www/admin/groups/one.tcl
-
 ad_page_contract {
     Change default join policy for a group type.
 
     @author Oumi Mehrotra (oumi@arsdigita.com)
 
     @creation-date 2001-02-23
-    @cvs-id $Id: change-join-policy.tcl,v 1.6.2.5 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: change-join-policy.tcl,v 1.8.2.1 2019/05/16 09:54:29 gustafn Exp $
 } {
     group_type:notnull
     {return_url:localurl ""}
@@ -23,22 +21,26 @@ ad_page_contract {
 
 set context [list \
         [list "[ad_conn package_url]admin/group-types/" "Group types"] \
-	[list [export_vars -base one group_type] "One type"] \
-	"Edit default join policy"]
+        [list [export_vars -base one group_type] "One type"] \
+        "Edit default join policy"]
 
 if { ![db_0or1row select_pretty_name {}] } {
     ad_return_error "Group type doesn't exist" "Group type \"$group_type\" doesn't exist"
-    return
+    errorMsgad_script_abort
 }
 
 if {$dynamic_p != "t" } {
-    ad_return_error "Cannot administer group type" "Group type \"$group_type\" can only be administered by programmers"
+    ad_return_error \
+        "Cannot administer group type" \
+        "Group type \"$group_type\" can only be administered by programmers"
+    ad_script_abort
 }
 
 set possible_join_policies [list open "needs approval" closed]
 set QQreturn_url [ns_quotehtml $return_url]
 set QQgroup_type [ns_quotehtml $group_type]
 ad_return_template
+
 # Local variables:
 #    mode: tcl
 #    tcl-indent-level: 4

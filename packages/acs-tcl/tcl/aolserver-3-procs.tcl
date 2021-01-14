@@ -5,7 +5,7 @@ ad_library {
 
     @creation-date 27 Feb 2000
     @author Jon Salz [jsalz@arsdigita.com]
-    @cvs-id $Id: aolserver-3-procs.tcl,v 1.7.2.3 2017/04/22 18:11:54 gustafn Exp $
+    @cvs-id $Id: aolserver-3-procs.tcl,v 1.9 2017/10/01 12:16:05 gustafn Exp $
 }
 
 # -1 = Not there or value was ""
@@ -24,7 +24,7 @@ proc ns_dbformvalue {formdata column type valuebyref} {
     set value [ns_set get $formdata $column]
 
     if { [string match $value ""] } {
-        switch $type {
+        switch -- $type {
 	    
 	    date      {
 		set value [ns_buildsqldate \
@@ -62,7 +62,7 @@ proc ns_dbformvalue {formdata column type valuebyref} {
 
 proc ns_dbformvalueput {htmlform column type value} {
 
-    switch $type {
+    switch -- $type {
 
 	date {
 	    set retval [ns_formvalueput $htmlform $column.NULL f]

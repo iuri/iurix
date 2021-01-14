@@ -2,10 +2,10 @@ ad_page_contract {
     Form to add/edit a category tree.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-form.tcl,v 1.12.2.1 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,optional
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {

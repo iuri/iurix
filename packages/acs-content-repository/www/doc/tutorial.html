@@ -9,7 +9,7 @@
       
       <h2>How to use the content repository</h2>
       
-      by <a href="http://rubick.com">Jade Rubick</a>
+      by <a href="http://web.archive.org/web/20180809082906/http://www.rubick.com/">Jade Rubick</a>
       
       <h3>Why use the content repository?</h3>
       
@@ -170,7 +170,7 @@
       &quot;content type&quot;, because they have data associated with
       them, such as when they are due, and what needs to be done. </p>
 
-      <p>I thus need to to </p>
+      <p>I thus need to </p>
 
       <blockquote><pre>
           --create the content type
@@ -645,7 +645,10 @@ $$ language plpgsql;
 </pre></blockquote>
 
 
-Note that this example is for projects rather than tasks. This is because for the application I'm writing, projects are what tasks are stored inside of. A project has many component tasks. If you were writing another application, or if I wasn't doing anythign with projects, then this would be creating a folder for just tasks.
+Note that this example is for projects rather than tasks. This is
+because for the application I'm writing, projects are what tasks are
+stored inside of. A project has many component tasks. If you were
+writing another application, or if I was not doing anything with projects, then this would be creating a folder for just tasks.
 
 <P>
 Typically, this definition would go in your <code>sql/postgresql/project-manager-create.sql</code> file. If this file is broken in several parts, this would go in the project-manager-create-functions.sql portion.
@@ -742,7 +745,9 @@ The only place content templates are used in OpenACS are in the 5.0 version of f
 
 <h3>Troubleshooting</h3>
 
-One problem I ran into while trying to get my SQL create and drop scripts working was that sometimes I wasn't able to delete a content type because I would get errors like these:
+One problem I ran into while trying to get my SQL create and drop
+scripts working was that sometimes I was not able to delete a content
+type because I would get errors like these:
 
 <blockquote><pre>
 Referential Integrity: attempting to delete live_revision: 658

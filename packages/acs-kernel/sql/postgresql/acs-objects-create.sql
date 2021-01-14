@@ -10,7 +10,7 @@
 --
 -- @creation-date 2000-05-18
 --
--- @cvs-id $Id: acs-objects-create.sql,v 1.67.2.4 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: acs-objects-create.sql,v 1.71.2.4 2019/11/15 14:43:09 antoniop Exp $
 --
 
 -----------------------------
@@ -253,7 +253,9 @@ create table acs_objects (
 -- create index acs_objects_context_object_idx onacs_objects (context_id, object_id);
 
 create index acs_objects_creation_user_idx on acs_objects (creation_user);
+create index acs_objects_creation_date_idx on acs_objects (creation_date);
 create index acs_objects_modify_user_idx on acs_objects (modifying_user);
+create index acs_objects_last_modified_idx on acs_objects (last_modified);
 
 create index acs_objects_package_idx on acs_objects (package_id);
 create index acs_objects_title_idx on acs_objects(title);
@@ -298,7 +300,7 @@ comment on column acs_objects.context_id is $$
  The context_id column points to an object that provides a context for
  this object. Often this will reflect an observed hierarchy in a site,
  for example a bboard message would probably list a bboard topic as
- it's context, and a bboard topic might list a sub-site as it's
+ its context, and a bboard topic might list a sub-site as its
  context. Whenever we ask a question of the form "can user X perform
  action Y on object Z", the acs security model will defer to an
  object's context if there is no information about user X's
@@ -528,6 +530,19 @@ comment on table acs_static_attr_values is '
 ------------------------
 -- ACS_OBJECT PACKAGE --
 ------------------------
+
+--
+-- Create an SQL schema to allow the same dot notation as in
+-- Oracle. The advantage of this notation is that the function can be
+-- called identically for PostgreSQL and Oracle, so much duplicated
+-- code can be removed.
+--
+--
+-- TODO: handling of schema names in define_function_args, port all
+-- acs_object api to the dot notation.
+--
+CREATE SCHEMA acs_object;
+
 
 select define_function_args('acs_object__initialize_attributes','object_id');
 
@@ -817,9 +832,18 @@ CREATE OR REPLACE FUNCTION acs_object__delete(
 DECLARE
   obj_type record;
 BEGIN
-  
+
+   -- Also child relationships must be deleted. On delete cascade
+   -- would not help here, as only tuple in acs_rels would go, while
+   -- related acs_object would stay.
+   PERFORM acs_object__delete(object_id)
+     from acs_objects where object_id in
+     (select rel_id from acs_rels where
+          object_id_one = delete__object_id or
+          object_id_two = delete__object_id);
+
   -- GN: the following deletion operation iterates over the id_columns
-  -- of the acs_object_types of the type tree for the obejct and
+  -- of the acs_object_types of the type tree for the object and
   -- performs manual deletions in these tables by trying to delete the
   -- delete__object_id from the id_column.  This deletion includes as
   -- well the deletion in acs_objects.
@@ -859,15 +883,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- function name
-select define_function_args('acs_object__name','object_id');
-
-
-
 --
 -- procedure acs_object__name/1
 --
-CREATE OR REPLACE FUNCTION acs_object__name(
+CREATE OR REPLACE FUNCTION acs_object.name(
    name__object_id integer
 ) RETURNS varchar AS $$
 DECLARE
@@ -926,6 +945,18 @@ BEGIN
   
 END;
 $$ LANGUAGE plpgsql stable strict;
+
+-- Backward compatibility definition for acs_object.name
+select define_function_args('acs_object__name','object_id');
+
+CREATE OR REPLACE FUNCTION acs_object__name(
+   name__object_id integer
+) RETURNS varchar AS $$
+BEGIN
+  RETURN acs_object.name(name__object_id);
+END;
+$$ LANGUAGE plpgsql stable strict;
+
 
 
 -- function default_name
@@ -1274,19 +1305,18 @@ DECLARE
   v_return               text; 
   v_storage              text;
 BEGIN
-   if value_in is null then 
-	-- this will fail more cryptically in the execute so catch now. 
-	raise exception 'acs_object__set_attribute: attempt to set % to null for object_id %',attribute_name_in, object_id_in;
-   end if;
 
-   v_storage := acs_object__get_attribute_storage(object_id_in, attribute_name_in);
-
+   v_storage    := acs_object__get_attribute_storage(object_id_in, attribute_name_in);
    v_column     := acs_object__get_attr_storage_column(v_storage);
    v_table_name := acs_object__get_attr_storage_table(v_storage);
    v_key_sql    := acs_object__get_attr_storage_sql(v_storage);
 
-   execute 'update ' || v_table_name || ' set ' || quote_ident(v_column) || ' = ' || quote_literal(value_in) || ' where ' || v_key_sql;
-
+   if value_in is null then
+      execute 'update ' || v_table_name || ' set ' || v_column || ' = NULL where ' || v_key_sql;   
+   else
+      execute 'update ' || v_table_name || ' set ' || quote_ident(v_column) || ' = ' || quote_literal(value_in) || ' where ' || v_key_sql;
+   end if;
+   
    return 0; 
 END;
 $$ LANGUAGE plpgsql;
@@ -1451,7 +1481,7 @@ BEGIN
    -- N_GENERATIONS is how far the current DESCENDANT_ID is from
    -- OBJECT_ID.
 
-   -- This function will verfy that each actually descendant of
+   -- This function will verify that each actually descendant of
    -- OBJECT_ID has a row in the index table. It does not check that
    -- there aren't extraneous rows or that the ancestors of OBJECT_ID
    -- are maintained correctly.

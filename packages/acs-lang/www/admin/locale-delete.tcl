@@ -1,14 +1,12 @@
-# /packages/acs-lang/www/admin/locale-delete.tcl
-
 ad_page_contract {
 
     Deletes a locale
 
     @author Bruno Mattarollo <bruno.mattarollo@ams.greenpeace.org>
     @creation-date 19 march 2002
-    @cvs-id $Id: locale-delete.tcl,v 1.7.2.1 2015/09/10 08:21:28 gustafn Exp $
+    @cvs-id $Id: locale-delete.tcl,v 1.9.2.1 2019/12/20 21:47:58 gustafn Exp $
 } {
-    locale
+    locale:word
     confirm_p:boolean,optional
 }
 
@@ -27,8 +25,9 @@ set context [list $page_title]
 set form_export_vars [export_vars -form { locale {confirm_p 1} }]
 
 
-if { ([info exists confirm_p] && $confirm_p ne "") && [template::util::is_true $confirm_p] } {
-
+if { [info exists confirm_p] && $confirm_p ne ""
+     && [template::util::is_true $confirm_p]
+ } {
     db_transaction {
 
         db_dml delete_messages { delete from lang_messages where locale = :locale }

@@ -1,4 +1,4 @@
-# $Id: zz-postload.tcl,v 1.2.2.3 2017/06/30 17:24:16 gustafn Exp $
+# $Id: zz-postload.tcl,v 1.3.2.1 2020/07/13 12:02:33 gustafn Exp $
 # Name:        00-ad-postload.tcl
 # Author:      Jon Salz <jsalz@mit.edu>
 # Date:        24 Feb 2000
@@ -34,7 +34,8 @@ foreach init_item [nsv_get ad_after_server_initialization .] {
 # the subdirectory and it would not be searched.
 
 proc __is_xql {arg} { 
-    return [expr {[file isdirectory $arg] || [file extension $arg] eq ".xql"}]}
+    return [expr {[file isdirectory $arg] || [file extension $arg] eq ".xql"}]
+}
 
 # We need to load query files for the top-level stuff in www and Tcl
 # dirs is the list of directories to walk for xql files.  Packages .xql

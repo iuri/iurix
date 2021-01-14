@@ -3,16 +3,13 @@
 <property name="doc(title)">Groups, Context, Permissions</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="templates" leftLabel="Prev"
-		    title="
-Chapter 11. Development Reference"
-		    rightLink="subsites" rightLabel="Next">
-		<div class="sect1">
+			leftLink="templates" leftLabel="Prev"
+			title="Chapter 11. Development
+Reference"
+			rightLink="subsites" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="permissions" id="permissions"></a>Groups, Context, Permissions</h2></div></div></div><div class="authorblurb">
-<p>By Pete Su</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><div class="sect2">
+<a name="permissions" id="permissions"></a>Groups, Context, Permissions</h2></div></div></div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">By Pete Su</span></p><span style="color: red">&lt;/authorblurb&gt;</span><div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="permissions-overview" id="permissions-overview"></a>Overview</h3></div></div></div><p>The OpenACS 5.9.0 Permissions system allows developers and
 administrators to set access control policies at the object level,
@@ -196,14 +193,14 @@ organizations of users and groups of users.</p></li><li class="listitem"><p>The 
 user rights.</p></li><li class="listitem"><p>The Context hierarchy allows you to define organize default
 permissions in a hierarchical fashion.</p></li>
 </ol></div><p>A PL/SQL or Tcl API is then used to check permissions in
-application pages.</p><div class="cvstag">($&zwnj;Id: permissions.xml,v 1.17.6.1 2016/06/23
-08:32:46 gustafn Exp $)</div>
+application pages.</p><p><span class="cvstag">($&zwnj;Id: permissions.xml,v 1.18 2017/08/07
+23:47:54 gustafn Exp $)</span></p>
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="templates" leftLabel="Prev" leftTitle="Using Templates in OpenACS"
-		    rightLink="subsites" rightLabel="Next" rightTitle="Writing OpenACS Application
+			leftLink="templates" leftLabel="Prev" leftTitle="Using Templates in OpenACS"
+			rightLink="subsites" rightLabel="Next" rightTitle="Writing OpenACS Application
 Pages"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="dev-guide" upLabel="Up"> 
-		
+			homeLink="index" homeLabel="Home" 
+			upLink="dev-guide" upLabel="Up"> 
+		    

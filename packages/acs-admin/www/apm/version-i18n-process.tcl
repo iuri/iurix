@@ -4,9 +4,9 @@ ad_page_contract {
 
     @author Peter Marklund (peter@collaboraid.biz)
     @creation-date 8 October 2002
-    @cvs-id $Id: version-i18n-process.tcl,v 1.5.2.2 2016/01/02 21:14:10 gustafn Exp $  
+    @cvs-id $Id: version-i18n-process.tcl,v 1.7.2.1 2019/03/13 09:52:04 antoniop Exp $
 } {
-    version_id:naturalnum,notnull    
+    version_id:naturalnum,notnull
     {files:multiple}
     {file_action:multiple}
 }
@@ -21,8 +21,8 @@ set page_title "Internationalization of $pretty_name $version_name"
 set context_bar [ad_context_bar $page_title]
 
 # Figure out which actions to take on the selected adp:s
-set replace_text_p [ad_decode [lsearch -exact $file_action replace_text] "-1" "0" "1"]
-set replace_tags_p [ad_decode [lsearch -exact $file_action replace_tags] "-1" "0" "1"]
+set replace_text_p [expr {"replace_text" in $file_action}]
+set replace_tags_p [expr {"replace_tags" in $file_action}]
 
 # If no texts should be replaced we need not give the user a choice of keys to use and
 # can go straight to the processing
@@ -39,8 +39,7 @@ set file [lindex $files 0]
 set full_file_name "$::acs::rootdir/$file"
 
 set adp_report_list [lang::util::replace_adp_text_with_message_tags "$::acs::rootdir/$file" report]
-set adp_replace_list [lindex $adp_report_list 0]
-set adp_no_replace_list [lindex $adp_report_list 1]
+lassign $adp_report_list adp_replace_list adp_no_replace_list
 
 if { [llength $adp_replace_list] == 0 } {
     # There are no replacements to choose keys for so go straight to the processing result page

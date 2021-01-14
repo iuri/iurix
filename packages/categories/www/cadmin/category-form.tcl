@@ -2,12 +2,12 @@ ad_page_contract {
     Form to add/edit a category.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: category-form.tcl,v 1.14.2.3 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
     category_id:naturalnum,optional
-    {parent_id:naturalnum,optional [db_null]}
-    {locale ""}
+    {parent_id:naturalnum,optional ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -26,8 +26,8 @@ if {[info exists category_id]} {
 }
 
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar $page_title
 
 set languages [lang::system::get_locale_options]
@@ -43,16 +43,29 @@ ad_form -name category_form -action category-form \
     set name ""
     set description ""
 } -edit_request {
-    if {![db_0or1row check_translation_existence ""]} {
-	set default_locale [parameter::get -parameter DefaultLocale -default en_US]
-	db_1row get_default_translation ""
+    set category_info [category::get \
+                           -category_id $category_id \
+                           -locale [parameter::get -parameter DefaultLocale -default en_US]]
+    if {$category_info ne ""} {
+        set description [dict get $category_info description]
+        set name [dict get $category_info name]
     }
 } -on_submit {
     set description [util_close_html_tags $description 4000]
 } -new_data {
-    category::add -category_id $category_id -tree_id $tree_id -parent_id $parent_id -locale $language -name $name -description $description
+    category::add \
+        -category_id $category_id \
+        -tree_id $tree_id \
+        -parent_id $parent_id \
+        -locale $language \
+        -name $name \
+        -description $description
 } -edit_data {
-    category::update -category_id $category_id -locale $language -name $name -description $description
+    category::update \
+        -category_id $category_id \
+        -locale $language \
+        -name $name \
+        -description $description
 } -after_submit {
     ad_returnredirect [export_vars -no_empty -base tree-view {tree_id locale object_id ctx_id}]
     ad_script_abort

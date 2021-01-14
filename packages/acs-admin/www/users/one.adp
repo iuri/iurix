@@ -2,7 +2,7 @@
 <property name="doc(title)">@user_info.first_names;noquote@ @user_info.last_name;noquote@</property>
 <property name="context">@context;literal@</property>
 
-<h2>Basic Information</h2>
+<h1>Basic Information</h1>
 
 <include src="/packages/acs-subsite/lib/user-info" user_id="@user_id;literal@" return_url="@return_url;literal@">
 
@@ -10,8 +10,13 @@
 <li>User ID:  @user_id;literal@</li>
 <li><a href="@user_info.url;noi18n@">View community member page</a></li>
 <li>Registration date:  @user_info.creation_date_pretty@</li>
-<li>Registration IP: <a href="./ip-info?ip=@user_info.creation_ip@">@user_info.creation_ip@</a> (<a href="@user_info.by_ip_url@" title="Other registrations from this IP address">others</a>)</li>
-<li>Last visit: @user_info.last_visit_pretty@ from </li>
+<li>Registration IP: <a href="@ip_info_url@?ip=@user_info.creation_ip@">@user_info.creation_ip@</a> (<a href="@user_info.by_ip_url@" title="Other registrations from this IP address">others</a>)</li>
+<li>Last visit: @user_info.last_visit_pretty@</li>
+<li>Last contribution: @user_info.last_contrib@
+<if @user_info.last_contrib_ip@ not nil>
+    from <a href="@ip_info_url@?ip=@user_info.last_contrib_ip@">@user_info.last_contrib_ip@</a> (<a href="@user_info.last_contrib_ip_url@" title="Other registrations from this IP address">others</a>)
+</if>
+</li>
 
 
 <if @portrait_url@ not nil>
@@ -34,7 +39,7 @@
 </else>
 
 <h2>This user is a member of the following groups:</h2>
-<p>Note: These are the groups to which the user has been granted 
+<p>Note: These are the groups to which the user has been granted
 <em>direct</em> membership.</p>
 
 <ul>
@@ -55,17 +60,9 @@ above.
   </multiple>
 </ul>
 
-<multiple name="user_contributions">
+<h2>Contributions of this user</h2>
 
-  <h2>@user_contributions.pretty_plural@</h2>
-  <ul>
-  
-  <group column="pretty_name">
-    <li>@user_contributions.creation_date@: @user_contributions.object_name@</li>
-  </group>
-  </ul>
-  
-</multiple>
+<p>Number of contributions of this user: <a href="./one-contributions?user_id=@user_id@">@number_contributions@</a></p>
 
 <h2>Administrative Actions</h2>
 
@@ -101,5 +98,3 @@ above.
 <li><a href="@portrait_manage_url;noi18n@">Manage this user's portrait</a></li>
 <li><a href="become?user_id=@user_id;literal@">Login as this user</a></li>
 </ul>
-
-

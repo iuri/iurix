@@ -3,7 +3,7 @@ ad_page_contract {
     Subscribe a person or a group to a notification of an object and a type.
 
     @author Natalia Pérez (nperper@it.uc3m.es)
-    @create-date 2005-03-28
+    @creation-date 2005-03-28
 
 } {
   object_id:naturalnum,notnull
@@ -64,23 +64,27 @@ element create notify delivery_method_id\
     -value [lindex $delivery_methods 0 1]
 
 
-set username ""        
 if {[template::form is_valid notify]} {
     template::form get_values notify party_id interval_id type_id delivery_method_id
     
     db_foreach get_user {} {
-        if {[notification::request::get_request_id -user_id $user_id -type_id $type_id -object_id $object_id] eq ""} {
-                notification::request::new -type_id $type_id -user_id $user_id -object_id $object_id -interval_id $interval_id \
+        if {[notification::request::get_request_id \
+                 -user_id $user_id \
+                 -type_id $type_id \
+                 -object_id $object_id] eq ""} {
+            notification::request::new \
+                -type_id $type_id \
+                -user_id $user_id \
+                -object_id $object_id \
+                -interval_id $interval_id \
                 -delivery_method_id $delivery_method_id
-            }
+        }
     }
         
     #if party_id is a group of users then returnredirect, else we get an error
-    db_0or1row get_user_name {}
-    if {$username eq ""} {
+    if {![db_0or1row user_p {}]} {
         ad_returnredirect $return_url
-    }
-    
+    }    
     
     # Add the subscribe
     notification::request::new \
@@ -122,7 +126,9 @@ template::list::create \
 	}
     }
     
-db_multirow notify_users notify_users {}
+db_multirow -extend {name} notify_users notify_users {} {
+    set author [person::name -person_id $request_user_id]
+}
 
 
 

@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-08-07
-    @cvs-id $Id: group-join.tcl,v 1.2.18.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: group-join.tcl,v 1.4 2018/01/19 14:09:48 gustafn Exp $
 } {
     {return_url:localurl "."}
 }
@@ -35,6 +35,7 @@ if { !$member_p } {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

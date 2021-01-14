@@ -1,12 +1,10 @@
-# /packages/mbryzek-subsite/www/admin/attribute-add.tcl
-
 ad_page_contract {
 
     Adds attributes
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Nov  7 12:14:42 2000
-    @cvs-id $Id: add-2.tcl,v 1.6.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: add-2.tcl,v 1.8.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     object_type:notnull,trim
@@ -23,9 +21,9 @@ ad_page_contract {
     datatypes:multirow
 } -validate {
     dynamic_type -requires {object_type:notnull} {
-	if { ![package_type_dynamic_p $object_type] } {
-	    ad_complain "The specified object type, $object_type, is not dynamic and therefore cannot be modified."
-	}
+        if { ![package_type_dynamic_p $object_type] } {
+            ad_complain "The specified object type, $object_type, is not dynamic and therefore cannot be modified."
+        }
     }
 }
 
@@ -63,6 +61,7 @@ if {$datatype eq "enumeration"} {
 } else {
     ad_returnredirect $return_url
 }
+ad_script_abort
 
 
 # Local variables:

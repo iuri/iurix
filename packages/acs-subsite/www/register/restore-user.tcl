@@ -1,6 +1,6 @@
 ad_page_contract {
     The page restores a user from the deleted state.
-    @cvs-id $Id: restore-user.tcl,v 1.5.24.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: restore-user.tcl,v 1.8 2018/01/21 00:35:30 gustafn Exp $
 } {
     {return_url:localurl {[ad_pvt_home]}}
 }
@@ -13,7 +13,7 @@ set user_id [auth::require_login -account_status closed]
 
 set member_state [acs_user::get_element -user_id $user_id -element member_state]
 
-switch $member_state {
+switch -- $member_state {
     deleted {
         
         # They presumably deleted themselves  
@@ -26,7 +26,10 @@ switch $member_state {
         # May be a double-click
     }
     default {
-        ad_return_error "[_ acs-subsite.lt_Problem_with_authenti]" "[_ acs-subsite.lt_There_was_a_problem_w]"
+        ad_return_error \
+            [_ acs-subsite.lt_Problem_with_authenti] \
+            [_ acs-subsite.lt_There_was_a_problem_w]
+        ad_script_abort
     }
 }
 

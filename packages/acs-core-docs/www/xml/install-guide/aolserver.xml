@@ -88,7 +88,7 @@ cd /usr/local/src/aolserver
           installs them.</para>
       <para>Debian users, see
           warning above, but if you do use apt-get for AOLserver
-          3.3+ad13 and postgresql from apt-get may need to 
+          3.3+ad13 and PostgreSQL from apt-get may need to 
           make these symlinks: <computeroutput>ln -s
           /usr/include/postgresql/ /usr/include/pgsql</computeroutput>
           and <computeroutput>ln -s /usr/lib/postgresql /usr/local/pgsql</computeroutput>)</para>
@@ -157,7 +157,7 @@ chmod 755 nsd-postgres</action></screen>
         <title>Install tDOM</title>
         <para>Download the <link linkend="source-tdom">tDOM
         tarball</link>, unpack it, adjust the configuration file to match our patched
-        distribution of aolserver, and compile it.</para>
+        distribution of AOLserver, and compile it.</para>
       </formalpara>
       <screen>[root root]# <userinput>cd /usr/local/src</userinput>
 [root src]# <userinput>wget --passive http://www.tdom.org/tDOM-0.7.8.tar.gz</userinput>
@@ -373,6 +373,6 @@ set address 0.0.0.0</screen>
     </listitem>
   </orderedlist>
 
-  <para><phrase role="cvstag">($Id: aolserver.xml,v 1.22.14.2 2017/04/22 17:18:48 gustafn Exp $)</phrase></para>
+  <para><phrase role="cvstag">($Id: aolserver.xml,v 1.25 2018/09/30 15:53:28 gustafn Exp $)</phrase></para>
 
 </sect1>

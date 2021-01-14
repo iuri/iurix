@@ -3,7 +3,7 @@ ad_library {
     Procs to add, edit, and remove notes for My First Package.
 
     @author oumi@arsdigita.com
-    @cvs-id $Id: note-procs.tcl,v 1.2.22.2 2017/06/30 17:25:35 gustafn Exp $
+    @cvs-id $Id: note-procs.tcl,v 1.4 2018/05/17 14:17:35 gustafn Exp $
 
 }
 
@@ -16,7 +16,7 @@ ad_proc -public mfp::note::get {
 } { 
     This proc retrieves a note.  This is annoying code that is only
     here because we wanted to give you a working tutorial in 5.0 that
-    uses content repository, but the Tcl api for content repository
+    uses content repository, but the Tcl API for content repository
     won't be complete until 5.1.  At least we can use the pregenerated views for select and edit.
 } {
     upvar 1 $array row

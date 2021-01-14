@@ -3,17 +3,15 @@
 <property name="doc(title)">Request Processor Requirements</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="security-notes" leftLabel="Prev"
-		    title="
-Chapter 15. Kernel Documentation"
-		    rightLink="rp-design" rightLabel="Next">
-		<div class="sect1">
+			leftLink="security-notes" leftLabel="Prev"
+			title="Chapter 15. Kernel
+Documentation"
+			rightLink="rp-design" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="rp-requirements" id="rp-requirements"></a>Request Processor Requirements</h2></div></div></div><div class="authorblurb">
-<p>By <a class="ulink" href="http://planitia.org" target="_top">Rafael H. Schloming</a>
-</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><div class="sect2">
+<a name="rp-requirements" id="rp-requirements"></a>Request Processor Requirements</h2></div></div></div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">By <a class="ulink" href="http://planitia.org" target="_top">Rafael H.
+Schloming</a>
+</span></p><span style="color: red">&lt;/authorblurb&gt;</span><div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="rp-requirements-intro" id="rp-requirements-intro"></a>Introduction</h3></div></div></div><p>The following is a requirements document for the OpenACS 4.0
 request processor. The major enhancements in the 4.0 version
@@ -79,8 +77,8 @@ Scalability</strong></span></p>
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="security-notes" leftLabel="Prev" leftTitle="Security Notes"
-		    rightLink="rp-design" rightLabel="Next" rightTitle="Request Processor Design"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="kernel-doc" upLabel="Up"> 
-		
+			leftLink="security-notes" leftLabel="Prev" leftTitle="Security Notes"
+			rightLink="rp-design" rightLabel="Next" rightTitle="Request Processor Design"
+			homeLink="index" homeLabel="Home" 
+			upLink="kernel-doc" upLabel="Up"> 
+		    

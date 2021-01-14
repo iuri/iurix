@@ -63,7 +63,7 @@ should have an evtry in that extension of the acs_objects table.
 simply join the acs_named_objects table to get the names and
 package_ids in an easy and - more importantly - fast and scalable
 way.</p>
-<p>The only shortcomming of this solution is the disregard of
+<p>The only shortcoming of this solution is the disregard of
 internationalization, but in cases where there objects in more than
 one language, it should be the triggers / pl/sql procs task to make
 sure that acs_named_objects contains names in the default language
@@ -116,7 +116,7 @@ begin
             operation_name =&gt; 'PageUrl',
             operation_desc =&gt; 'Returns the package specific url to a page
 that displays an object',
-            operation_iscachable_p =&gt; 'f',
+            operation_iscacheable_p =&gt; 'f',
             operation_nargs =&gt; 1,
             operation_inputtype =&gt; 'AcsObject.PageUrl.InputType',
             operation_outputtype =&gt; 'AcsObject.PageUrl.OutputType'
@@ -161,14 +161,14 @@ end;
 The appropriate tcl-procs look like the following:
 <pre>
 ad_proc -public apm_pageurl { object_id } {
-    Service Contract Proc to resolve a url for a package_id
+    Service Contract Proc to resolve a URL for a package_id
 } {
     return
 }
 
 namespace eval acs_user {
     ad_proc -public pageurl { object_id } {
-        Service Contract Proc to resolve a url for a user_id
+        Service Contract Proc to resolve a URL for a user_id
     } {
         return "shared/community-member?user_id=$object_id"
     }

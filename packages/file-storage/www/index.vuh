@@ -4,7 +4,7 @@
 # enables WebDAV as well as just making it easier to download stuff
 # @author Dave Bauer (dave@thedesignexperience.org)
 # @creation-date 2003-10-19
-# @cvs-id $Id: index.vuh,v 1.5.2.3 2017/07/11 14:31:29 gustafn Exp $
+# @cvs-id $Id: index.vuh,v 1.6 2017/08/07 23:48:11 gustafn Exp $
 
 set full_uri [ad_conn url]
 set extra_uri [ad_conn path_info]

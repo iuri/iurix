@@ -4,7 +4,7 @@ ad_library {
 
     @author Jon Salz (jsalz@arsdigita.com)
     @creation-date 11 Aug 2000
-    @cvs-id $Id: object-procs.tcl,v 1.11.12.1 2015/09/10 08:21:58 gustafn Exp $
+    @cvs-id $Id: object-procs.tcl,v 1.14.2.4 2020/05/18 21:20:20 gustafn Exp $
 
 }
 
@@ -20,7 +20,7 @@ ad_proc -private acs_lookup_magic_object_no_cache { name } {
     return [db_string magic_object_select {} ]
 }
 
-ad_proc -private acs_lookup_magic_object { name } {
+ad_proc -private -deprecated acs_lookup_magic_object { name } {
     Non memoized version of acs_magic_object.
 
     @return the magic object's object ID 
@@ -39,7 +39,9 @@ ad_proc -public acs_magic_object { name } {
 
     @error if no object exists with that magic name.
 } {
-    return [util_memoize [list acs_lookup_magic_object $name]]
+    return [acs::per_thread_cache eval -key acs-tcl.acs_magic_object($name) {
+        acs_lookup_magic_object_no_cache $name
+    }]
 }
 
 ad_proc -public acs_object_name { object_id } {
@@ -47,7 +49,9 @@ ad_proc -public acs_object_name { object_id } {
     Returns the name of an object.
 
 } {
-    return [db_string object_name_get {}]
+    return [db_string object_name_get {
+        select acs_object.name(:object_id) from dual
+    }]
 }
 
 ad_proc -public acs_object_type { object_id } {
@@ -75,7 +79,23 @@ ad_proc -public acs_object::get {
     @param array An array in the caller's namespace into which the info should be delivered (upvared)
 } {
     upvar 1 $array row
-    db_1row select_object {} -column_array row
+    db_1row select_object {
+        select o.object_id,
+               o.title,
+               o.package_id,
+               o.object_type,
+               o.context_id,
+               o.security_inherit_p,
+               o.creation_user,
+               to_char(o.creation_date, 'YYYY-MM-DD HH24:MI:SS') as creation_date_ansi,
+               o.creation_ip,
+               to_char(o.last_modified, 'YYYY-MM-DD HH24:MI:SS') as last_modified_ansi,
+               o.modifying_user,
+               o.modifying_ip,
+               acs_object.name(o.object_id) as object_name
+        from   acs_objects o
+        where  o.object_id = :object_id
+    } -column_array row
 }
 
 ad_proc -public acs_object::package_id {
@@ -93,7 +113,7 @@ ad_proc -public acs_object::package_id {
     return [util_memoize [list acs_object::package_id_not_cached -object_id $object_id]]
 }
 
-ad_proc -public acs_object::package_id_not_cached {
+ad_proc -private acs_object::package_id_not_cached {
     {-object_id:required}
 } {
     Gets the package_id of the object

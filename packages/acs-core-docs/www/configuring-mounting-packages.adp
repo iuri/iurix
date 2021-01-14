@@ -3,20 +3,16 @@
 <property name="doc(title)">Mounting OpenACS packages</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="configuring-install-packages" leftLabel="Prev"
-		    title="
-Chapter 4. Configuring a new OpenACS
-Site"
-		    rightLink="configuring-configuring-packages" rightLabel="Next">
-		<div class="sect1">
+			leftLink="configuring-install-packages" leftLabel="Prev"
+			title="Chapter 4. Configuring a
+new OpenACS Site"
+			rightLink="configuring-configuring-packages" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="configuring-mounting-packages" id="configuring-mounting-packages"></a>Mounting OpenACS packages</h2></div></div></div><div class="authorblurb">
-<p>by <a class="ulink" href="mailto:jade\@rubick.com" target="_top">Jade Rubick</a>
-</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><div class="sect2">
+<a name="configuring-mounting-packages" id="configuring-mounting-packages"></a>Mounting OpenACS packages</h2></div></div></div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">by <a class="ulink" href="mailto:jade\@rubick.com" target="_top">Jade Rubick</a>
+</span></p><span style="color: red">&lt;/authorblurb&gt;</span><div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idp140592104632200" id="idp140592104632200"></a>Mounting OpenACS packages</h3></div></div></div><p>After you&#39;ve installed your packages, you have to
+<a name="idp140682188559080" id="idp140682188559080"></a>Mounting OpenACS packages</h3></div></div></div><p>After you&#39;ve installed your packages, you have to
 'mount' them in order to make them appear on your
 website.</p><p>Make sure you are logged in, and then click on the
 'Admin' or 'Control Panel' link to get to the
@@ -37,8 +33,8 @@ http://www.yoursite.com/intranet/calendar.</p>
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="configuring-install-packages" leftLabel="Prev" leftTitle="Installing OpenACS packages"
-		    rightLink="configuring-configuring-packages" rightLabel="Next" rightTitle="Configuring an OpenACS package"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="configuring-new-site" upLabel="Up"> 
-		
+			leftLink="configuring-install-packages" leftLabel="Prev" leftTitle="Installing OpenACS packages"
+			rightLink="configuring-configuring-packages" rightLabel="Next" rightTitle="Configuring an OpenACS package"
+			homeLink="index" homeLabel="Home" 
+			upLink="configuring-new-site" upLabel="Up"> 
+		    

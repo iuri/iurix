@@ -1,12 +1,12 @@
 # /packages/general-comments/www/comment-add.tcl
 
 ad_page_contract {
-    Displays a form for adding a commment to a page
+    Displays a form for adding a comment to a page
 
     @author Phong Nguyen <phong@arsdigita.com>
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: comment-add.tcl,v 1.6.2.2 2016/05/21 10:15:38 gustafn Exp $
+    @cvs-id $Id: comment-add.tcl,v 1.8 2018/03/25 22:39:35 hectorr Exp $
 } { 
     object_id:naturalnum,notnull
     { object_name "[acs_object_name $object_id]" }

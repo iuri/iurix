@@ -4,7 +4,7 @@ ad_library {
 
     @author yon (yon@openforce.net)
     @creation-date May 12, 2002
-    @cvs-id $Id: parameter-procs.tcl,v 1.19.4.5 2018/12/20 18:25:06 gustafn Exp $
+    @cvs-id $Id: parameter-procs.tcl,v 1.26.2.3 2021/01/05 17:10:17 gustafn Exp $
 
 }
 
@@ -43,6 +43,11 @@ ad_proc -public parameter::set_global_value {
 
     db_exec_plsql set_parameter_value {}
 
+    callback subsite::global_parameter_changed \
+        -package_key $package_key \
+        -parameter $parameter \
+        -value $value
+
     return [ad_parameter_cache -set $value $package_key $parameter]
 }
 
@@ -55,8 +60,8 @@ ad_proc -public parameter::get_global_value {
 } {
     Get the value of a global package parameter.
 
-    @param localize should we attempt to localize the parameter 
-    @param boolean insure boolean parameters are normalized to 0 or 1
+    @param localize should we attempt to localize the parameter
+    @param boolean ensure boolean parameters are normalized to 0 or 1
     @param package_key identifies the package to which the global param belongs
     @param parameter which parameter's value to get
     @param default what to return if we don't find a value. Defaults to returning the empty string.
@@ -92,16 +97,7 @@ ad_proc -public parameter::get_global_value {
     # Special parsing for boolean parameters, true and false can be written
     # in many different ways
     if { $boolean_p } {
-        if { [catch { 
-            if { [template::util::is_true $value] } {
-                set value 1
-            } else {
-                set value 0
-            }
-        } errmsg] } {
-                        ns_log Error "Parameter $parameter not a boolean:\n$::errorInfo"
-            set value $default
-        }
+        set value [template::util::is_true $value]
     }
 
     return $value
@@ -112,9 +108,9 @@ ad_proc -public parameter::set_value {
     {-parameter:required}
     {-value:required}
 } {
-    Set the value of a package instance parameter
+    Set the value of a package instance parameter.
 
-    @param package_id what package to set the parameter in. defaults to
+    @param package_id what package to set the parameter in. Defaults to
     [ad_conn package_id]
     @param parameter which parameter's value to set
     @param value what value to set said parameter to
@@ -125,7 +121,12 @@ ad_proc -public parameter::set_value {
 
     db_exec_plsql set_parameter_value {}
 
-    return [ad_parameter_cache -set $value $package_id $parameter]
+    callback subsite::parameter_changed \
+        -package_id $package_id \
+        -parameter $parameter \
+        -value $value
+
+    return [ad_parameter_cache -delete -set $value $package_id $parameter]
 }
 
 ad_proc -public parameter::get {
@@ -137,9 +138,9 @@ ad_proc -public parameter::get {
 } {
     Get the value of a package instance parameter.
 
-    @param localize should we attempt to localize the parameter 
-    @param boolean insure boolean parameters are normalized to 0 or 1
-    @param package_id what package to get the parameter from. defaults to
+    @param localize should we attempt to localize the parameter
+    @param boolean ensure boolean parameters are normalized to 0 or 1
+    @param package_id what package to get the parameter from. Defaults to
     [ad_conn package_id]
     @param parameter which parameter's value to get
     @param default what to return if we don't find a value. Defaults to returning the empty string.
@@ -154,22 +155,22 @@ ad_proc -public parameter::get {
     set value ""
 
     # 1. check whether there is a parameter by this name specified for
-    # the packagin in the parameter file.  The name
-    # ad_parameter_from_file is a misnomer, since the it checks
+    # the package in the parameter file.  The name
+    # ad_parameter_from_file is a misnomer, since it checks
     # ns_config values
     #
     if {$package_id ne ""} {
-	set package_key ""
+        set package_key ""
         # This can fail at server startup--OpenACS calls parameter::get to
         # get the size of the util_memoize cache so it can setup the cache.
-        # apm_package_key_from_id needs that cache, but on server start 
+        # apm_package_key_from_id needs that cache, but on server start
         # when the toolkit tries to get the parameter for the cache size
         # the cache doesn't exist yet, so apm_package_key_from_id fails
         if {![catch {
             set package_key [apm_package_key_from_id $package_id]
         }]} {
-	    set value [ad_parameter_from_file $parameter $package_key]
-	}
+            set value [ad_parameter_from_file $parameter $package_key]
+        }
     }
 
     # 2. check the parameter cache
@@ -190,16 +191,7 @@ ad_proc -public parameter::get {
     # Special parsing for boolean parameters, true and false can be written
     # in many different ways
     if { $boolean_p } {
-        if { [catch { 
-            if { [template::util::is_true $value] } {
-                set value 1
-            } else {
-                set value 0
-            }
-        } errmsg] } {
-                        ns_log Error "Parameter $parameter not a boolean:\n$::errorInfo"
-            set value $default
-        }
+        set value [template::util::is_true $value]
     }
 
     return $value
@@ -211,7 +203,7 @@ ad_proc -public parameter::set_from_package_key {
     {-value:required}
 } {
     sets an instance parameter for the package corresponding to package_key.
-    
+
     Note that this makes the assumption that the package is a singleton
     and does not set the value for all packages corresponding to package_key.
 
@@ -232,34 +224,57 @@ ad_proc -public parameter::get_from_package_key {
     {-default ""}
 } {
     Gets an instance parameter for the package corresponding to package_key.
-    
+
     Note that this makes the assumption that the package is a singleton.
 
     New packages should use global parameters instead.
 
-    @param package_key what package to get the parameter from. we will try
-    to get the package_id from the package_key. this
-    may cause an error if there are more than one
-    instance of this package
+    @param package_key what package to get the parameter from. We will try
+           to get the package_id from the package_key. This
+           may cause an error if there are more than one
+           instance of this package
     @param parameter which parameter's value to get
     @param default what to return if we don't find a value
 } {
-    # 1. check to see if this parameter is being set in the server's
-    # configuration file; this value has highest precedence
+    #
+    # 1. Check to see if this parameter is being set in the server's
+    #    configuration file; this value has highest precedence.
+    #
     set value [ad_parameter_from_file $parameter $package_key]
 
-    # 2. try to get a package_id for this package_key and use the standard
-    # parameter::get function to get the value
+    #
+    # 2. Try to get the value from a global package parameter.
+    #
     if {$value eq ""} {
-        if {[catch {
+        set value [parameter::get_global_value \
+                       -localize=$localize_p \
+                       -boolean=$boolean_p \
+                       -package_key $package_key \
+                       -parameter $parameter \
+                       -default ""]
+    }
+
+    #
+    # 3. Try to get the value from the package_id of this package_key
+    #    and use the standard parameter::get function to get the
+    #    value. Note that this lookup only makes sense for singleton
+    #    packages.
+    #
+    if {$value eq ""} {
+        if {[db_string check_singleton {
+            select 1 from apm_package_types
+            where package_key = :package_key
+            and singleton_p = 't'
+        } -default 0]} {
             set value [parameter::get \
-                             -localize=$localize_p \
-                             -boolean=$boolean_p \
-                             -package_id [apm_package_id_from_key $package_key] \
-                             -parameter $parameter \
-                             -default $default \
-                            ]
-        } errorMsg]} {
+                           -localize=$localize_p \
+                           -boolean=$boolean_p \
+                           -package_id [apm_package_id_from_key $package_key] \
+                           -parameter $parameter \
+                           -default $default \
+                          ]
+        } else {
+            ns_log notice "tried to lookup parameter $parameter from non-singleton package $package_key"
             set value $default
         }
     }

@@ -3,8 +3,7 @@
 -- 
 -- @author Don Baccus (dhogaza@pacifier.com)
 -- @creation-date 2005-10-28
--- @arch-tag: dab7cf3d-a947-43d4-ba54-66f34c66d9d0
--- @cvs-id $Id: upgrade-5.2.0b5-5.2.0b6.sql,v 1.2.14.1 2017/04/21 14:53:07 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.2.0b5-5.2.0b6.sql,v 1.6.2.1 2019/08/10 18:09:52 gustafn Exp $
 --
 
 create or replace package content_item
@@ -13,7 +12,7 @@ as
 --/** 
 --Content items store the overview of the content published on a
 --website. The actual content is stored in content revisions. It is
---implemented this way so that there can be mulitple versions of the
+--implemented this way so that there can be multiple versions of the
 --actual content while the main idea remains constant. For example: If
 --there is a review for the movie "Terminator," there will exist a
 --content item by the name "terminator" with all the right parameters
@@ -51,7 +50,7 @@ function new (
   --    @param description   A short description for the item (4000 characters maximum)
   --    @param mime_type     The file type of the item, defaults to 'text/plain'
   --    @param nls_language  The language for the item, used for Intermedia search
-  --    @param text          The text content of the new revision, 4000 charcters maximum.
+  --    @param text          The text content of the new revision, 4000 characters maximum.
   --                         Cannot be specified simultaneously with the <tt>data</tt>
   --                         parameter
   --    @param data          The blob content of the new revision. Cannot be specified 
@@ -99,7 +98,7 @@ function new (
 
 
 function is_published (
-  --/** Determins whether an item is published or not.
+  --/** Determines whether an item is published or not.
   --    @author Michael Pih
   --    @param item_id		The item ID
   --    @return 't' if the item is published, 'f' otherwise
@@ -116,7 +115,7 @@ function is_publishable (
   --	3) any 'publishing_wf' workflows are finished
   --    @author Michael Pih
   --    @param item_id		The item ID
-  --    @return 't' if the item is publishable in it's present state, 
+  --    @return 't' if the item is publishable in its present state,
   --            Otherwise, returns 'f'
   --*/
   item_id		in cr_items.item_id%TYPE

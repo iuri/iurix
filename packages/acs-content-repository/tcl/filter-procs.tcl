@@ -15,7 +15,7 @@ namespace eval content {
 
 
 ad_proc -public content::get_template_root {} {
-    Find the directory in the file system where templates are stored.
+    Find the directory in the filesystem where templates are stored.
     There are a variety of ways in which this can be set. The proc
     looks for that directory in the following places in this order:
     (1) the TemplateRoot parameter of the package for which the request is
@@ -117,7 +117,8 @@ ad_proc -public content::get_content { { content_type {} } } {
     }
 
     # Get the table name
-    set table_name [db_string get_table_name ""]
+    set table_name [acs_object_type::get_table_name \
+                        -object_type $content_type]
 
     upvar content content
 
@@ -138,27 +139,6 @@ ad_proc -public content::get_template_url {} {
 }
 
 
-ad_proc -deprecated -public content::get_folder_labels { { varname "folders" } } {
-    Set a data source in the calling frame with folder URL and label
-    Useful for generating a context bar.
-
-    This function returns a hard-coded name for the root level. One should use for path generation for items the
-    appropriate API, such as e.g. content::item::get_virtual_path
-
-    @see content::item::get_virtual_path 
-} {
-
-    variable item_id
-
-    # this repeats the query used to look up the item in the first place
-    # but there does not seem to be a clear way around this
-
-    # build the folder URL out as we iterate over the query
-    set query [db_map get_url]
-    db_multirow -extend {url} $varname ignore_get_url $query  {
-        append url "$name/"
-    }
-}
 
 ad_proc -public content::get_content_value { revision_id } {
     @return content element corresponding to the provided revision_id
@@ -233,7 +213,7 @@ ad_proc -public content::init {
     # Make sure that a live revision exists
     if { $rev_id eq "" } {
       if {"best" eq $revision} {
-	  # lastest_revision unless live_revision is set, then live_revision
+	  # latest_revision unless live_revision is set, then live_revision
 	  set revision_id [::content::item::get_best_revision -item_id $item_id]
       } else {
 	  # default live_revision
@@ -283,7 +263,7 @@ ad_proc -public content::init {
 
 content::get_content $content_type
 
-if { \"text/html\" ne \$content(mime_type) && !\[ad_html_text_convertable_p -from \$content(mime_type) -to text/html\] } {
+if { \"text/html\" ne \$content(mime_type) && !\[ad_html_text_convertible_p -from \$content(mime_type) -to text/html\] } {
     \# don't render its content
     cr_write_content -revision_id \$content(revision_id)
     ad_script_abort
@@ -310,9 +290,15 @@ ad_return_template
 
 
 
-ad_proc -public content::deploy { url_stub } {
-    render the template and write it to the file system
+ad_proc -deprecated content::deploy { url_stub } {
+    render the template and write it to the filesystem
     with template::util::write_file
+
+    DEPRECATED: since its birth ~2003 this proc refers to a
+    nonexistent variable and is therefore broken.
+
+    @see modern ways to produce templated content e.g. theme packages or
+         xowiki pages
 } {
     set output_path $::acs::pageroot$url_stub
 

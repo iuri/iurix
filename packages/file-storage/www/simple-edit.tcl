@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Ben Adida
     @creation-date 01 April 2002
-    @cvs-id $Id: simple-edit.tcl,v 1.12.2.1 2015/09/12 11:06:20 gustafn Exp $
+    @cvs-id $Id: simple-edit.tcl,v 1.14 2018/01/19 14:18:32 gustafn Exp $
 } {
     object_id:naturalnum,notnull
 }
@@ -39,6 +39,7 @@ ad_form -extend -edit_request {
 								       -element_name category_id]
     }
     ad_returnredirect [export_vars -base . folder_id]
+    ad_script_abort
 }
 
 set pretty_name "$name"

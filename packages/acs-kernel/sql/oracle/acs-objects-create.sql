@@ -10,7 +10,7 @@
 --
 -- @creation-date 2000-05-18
 --
--- @cvs-id $Id: acs-objects-create.sql,v 1.25.6.1 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: acs-objects-create.sql,v 1.26.2.1 2019/08/14 07:31:43 gustafn Exp $
 --
 
 -----------------------------
@@ -1021,7 +1021,7 @@ as
    -- N_GENERATIONS is how far the current DESCENDANT_ID is from
    -- OBJECT_ID.
 
-   -- This function will verfy that each actually descendant of
+   -- This function will verify that each actually descendant of
    -- OBJECT_ID has a row in the index table. It does not check that
    -- there aren't extraneous rows or that the ancestors of OBJECT_ID
    -- are maintained correctly.

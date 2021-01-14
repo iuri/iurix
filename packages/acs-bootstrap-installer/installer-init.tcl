@@ -1,8 +1,8 @@
-#      Initializes datastrctures for the installer.
+#      Initializes data structures for the installer.
 
 #      @creation-date 02 October 2000
 #      @author Bryan Quinn
-#      @cvs-id $Id: installer-init.tcl,v 1.3.10.1 2015/09/10 08:21:15 gustafn Exp $
+#      @cvs-id $Id: installer-init.tcl,v 1.5 2018/07/10 19:24:50 hectorr Exp $
 
 
 # Create a mutex for the installer

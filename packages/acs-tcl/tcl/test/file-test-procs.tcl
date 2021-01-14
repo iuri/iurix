@@ -1,54 +1,59 @@
 ad_library {
-    Sweep the all the files in the system looking for systematic errors.
+    Sweep all the files in the system looking for systematic errors.
 
     @author Jeff Davis
     @creation-date 2005-02-28
-    @cvs-id $Id: file-test-procs.tcl,v 1.10.2.4 2017/04/22 18:11:54 gustafn Exp $
+    @cvs-id $Id: file-test-procs.tcl,v 1.21.2.4 2020/07/13 12:02:33 gustafn Exp $
 }
 
-aa_register_case -cats {smoke production_safe} files__tcl_file_syntax_errors {
-    Test all known Tcl files for successful parsing "(in the [info complete] sense at least)" and other common errors.
+aa_register_case \
+    -cats {smoke production_safe} \
+    -procs {apm_get_installed_versions apm_get_package_files} \
+    files__tcl_file_syntax_errors {
 
-    @author Jeff Davis davis@xarg.net
+        Test all known Tcl files for successful parsing "(in the [info complete] sense at least)" and other common errors.
+
+        @author Jeff Davis davis@xarg.net
 } {
-    set good 0
-    set nfiles 0
-    # couple of local helper procs 
-    proc ::tcl_p {file} { 
-        return [expr {[string match {*.tcl} $file] || [file isdirectory $file]}]
-    }
-
     # if startdir is not $::acs::rootdir/packages, then somebody checked in the wrong thing by accident
     set startdir $::acs::rootdir/packages
 
     aa_log "Checks starting from $startdir"
 
-    #inspect every Tcl file in the directory tree starting with $startdir
-    foreach file [ad_find_all_files -check_file_func ::tcl_p $startdir] { 
-        incr nfiles
+    # get tcl files from installed packages
+    set files [list]
+    apm_get_installed_versions -array installed_versions
+    foreach {package_key version} [array get installed_versions] {
+        lappend files {*}[lmap f [apm_get_package_files \
+                                      -package_key $package_key] {
+            if {[ad_file extension $f] ne ".tcl"} continue
+            set f $startdir/$package_key/$f
+        }]
+    }
 
+    #inspect every Tcl file in the directory tree starting with $startdir
+    foreach file $files {
         set fp [open $file "r"]
         set data [read $fp]
         close $fp
 
         # Check that the file parses
-        if {! [info complete $data] } {
-            aa_log_result fail "$file parses successfully"
-        } else {
-            incr good
-        }
+        aa_true "$file parses successfully" [info complete $data]
     }
-    aa_log "$good good of $nfiles checked"
 }
 
-aa_register_case -cats {smoke production_safe} -error_level error files__tcl_file_common_errors {
+aa_register_case \
+    -cats {smoke production_safe} \
+    -error_level error \
+    -procs {} \
+    files__tcl_file_common_errors {
     Check for some common error patterns.
 
     @author Jeff Davis davis@xarg.net
 } {
     # couple of local helper procs
     proc ::tcl_p {file} {
-        return [expr {[string match {*.tcl} $file] || [file isdirectory $file]}]
+        return [expr {[string match {*.tcl} $file] || [ad_file isdirectory $file]}]
     }
 
     # if startdir is not $::acs::rootdir/packages, then somebody checked in the wrong thing by accident
@@ -57,28 +62,31 @@ aa_register_case -cats {smoke production_safe} -error_level error files__tcl_fil
     aa_log "Checks starting from $startdir"
     set count 0
     #inspect every Tcl file in the directory tree starting with $startdir
-    foreach file [ad_find_all_files -check_file_func ::tcl_p $startdir] { 
+    foreach file [ad_find_all_files -check_file_func ::tcl_p $startdir] {
 
-        if {[string match "*/acs-tcl/tcl/test/file-test-procs.tcl" $file]} continue
-
+        if {[string match "*/acs-tcl/tcl/test/file-test-procs.tcl" $file]} {
+            continue
+        }
         set fp [open $file "r"]
         set data [read $fp]
         close $fp
 
-        if {[string first @returns $data] > -1} { 
+        if {[string first @returns $data] > -1} {
             aa_log_result fail "$file should not contain '@returns'.  @returns is probably a typo of @return"
         }
-
     }
-
     aa_log "Checked $count Tcl files"
 }
 
-aa_register_case -cats {smoke production_safe} files__check_info_files {
-    Check that all the info files parse correctly and are
-    internally consistent.
+aa_register_case \
+    -cats {smoke production_safe} \
+    -procs {apm_read_package_info_file} \
+    files__check_info_files {
 
-    @author Jeff Davis davis@xarg.net
+        Check that all the info files parse correctly and are
+        internally consistent.
+
+        @author Jeff Davis davis@xarg.net
 } {
     foreach spec_file [glob -nocomplain "$::acs::rootdir/packages/*/*.info"] {
         set errp 0
@@ -86,6 +94,10 @@ aa_register_case -cats {smoke production_safe} files__check_info_files {
             aa_log_result fail "$spec_file returned $errMsg"
             set errp 1
         } else {
+            # Skip uninstalled packages
+            if {![apm_package_installed_p $version(package.key)]} {
+                continue
+            }
             regexp {packages/([^/]*)/} $spec_file match key
             if {$version(package.key) ne $key } {
                 aa_log_result fail "MISMATCH DIRECTORY/PACKAGE KEY: $spec_file $version(package.key) != $key"
@@ -120,14 +132,23 @@ aa_register_case -cats {smoke production_safe} files__check_info_files {
         }
         if {!$errp} {
             aa_log_result pass "$spec_file no errors"
-        } 
+        }
     }
 }
 
-aa_register_case -cats {smoke production_safe} files__check_upgrade_ordering { 
-    Check that all the upgrade files are well ordered (non-overlapping and v1 > v2)
+aa_register_case \
+    -cats {smoke production_safe} \
+    -procs {
+        apm_get_package_files
+        apm_guess_db_type
+        apm_version_sortable
+    } \
+    files__check_upgrade_ordering {
 
-    @author Jeff Davis davis@xarg.net
+        Check that all the upgrade files are well ordered
+        (non-overlapping and v1 > v2).
+
+        @author Jeff Davis davis@xarg.net
 } {
     foreach dir [lsort [glob -nocomplain -types f "$::acs::rootdir/packages/*/*.info"]] {
 
@@ -143,12 +164,12 @@ aa_register_case -cats {smoke production_safe} files__check_upgrade_ordering {
                 # DRB: Ignore old upgrade scripts that aren't in the proper place.  We
                 # still have old ACS 3 -> ACS 4 upgrade scripts lying around, and
                 # I don't want to report them as failures nor delete them ...
-		if { [string first sql $file] == -1 &&
+                if { [string first sql $file] == -1 &&
                      [string first upgrade $file] == -1 } {
                     set db [apm_guess_db_type $package $file]
-                    if {[string is space $db] 
+                    if {[string is space $db]
                         || $db eq $db_type} {
-                        set tail [file tail $file]
+                        set tail [ad_file tail $file]
                         if {[regexp {\-(.*)-(.*).sql} $tail match v1 v2]} {
                             set v1s [apm_version_sortable $v1]
                             set v2s [apm_version_sortable $v2]
@@ -185,29 +206,40 @@ aa_register_case -cats {smoke production_safe} files__check_upgrade_ordering {
     }
 }
 
+aa_register_case \
+    -cats {smoke} \
+    -procs {
+        apm_get_installed_versions
+        apm_get_package_files
+        db_qd_internal_prepare_queryfile_content
+        xml_parse
+    } \
+    files__check_xql_files {
 
+        Check for some common errors in the xql files like
+        missing rdbms, missing corresponding Tcl files, etc.
 
+        Not production safe since malformed xql can crash AOLserver in the parse.
 
-aa_register_case -cats {smoke} files__check_xql_files {
-    Check for some common errors in the xql files like 
-    missing rdbms, missing corresponding Tcl files, etc.
-
-    Not production safe since malformed xql can crass AOLserver in the parse.
-
-    @author Jeff Davis davis@xarg.net
+        @author Jeff Davis davis@xarg.net
 } {
-    # couple of local helper procs 
-    proc ::xql_p {file} { 
-        return [expr {[string match {*.xql} $file] || [file isdirectory $file]}]
-    }
-    
     # if startdir is not $::acs::rootdir/packages, then somebody checked in the wrong thing by accident
     set startdir $::acs::rootdir/packages
-    
+
     aa_log "Checks starting from $startdir"
 
-    #inspect every Tcl file in the directory tree starting with $startdir
-    foreach file [ad_find_all_files -check_file_func ::xql_p $startdir] { 
+    # get xql files from installed packages
+    set files [list]
+    apm_get_installed_versions -array installed_versions
+    foreach {package_key version} [array get installed_versions] {
+        lappend files {*}[lmap f [apm_get_package_files \
+                                      -package_key $package_key \
+                                      -file_types {query_file}] {
+            set f $startdir/$package_key/$f
+        }]
+    }
+
+    foreach file $files {
 
         set fp [open $file "r"]
         set data [read $fp]
@@ -215,15 +247,8 @@ aa_register_case -cats {smoke} files__check_xql_files {
         ns_log debug "acs_tcl__check_xql_files: read $file"
         set data [db_qd_internal_prepare_queryfile_content $data]
 
-        if { [catch {set parse [xml_parse $data]} errMsg] } {
-            ns_log warning "acs_tcl__check_xql_files: failed parse $file $errMsg"
-            aa_log_result fail "XML Parse Error: $file [ns_quotehtml $errMsg]"
-        } else {
-            # lets walk the nodes and check they are what we want to see.
-
-            # We are done so just let it go man.
-
-        }
+        set parse_failed_p [catch {set parse [xml_parse $data]} errMsg]
+        aa_false "xql $file correctly parsed" $parse_failed_p
 
         # Errors:
         #   .xql files without .tcl
@@ -234,11 +259,11 @@ aa_register_case -cats {smoke} files__check_xql_files {
 
         regexp {(.*)[.]xql$} $file match base
 
-        if {![file exists ${base}.tcl] && ![file exists ${base}.vuh]} {
+        if {![ad_file exists ${base}.tcl] && ![ad_file exists ${base}.vuh]} {
             # the file did not exist so we must have a -db extension...
             regexp {(.*?)(-)?([A-Za-z_]*)[.]xql$} $file match base dummy db
 
-            if { $db ne "" 
+            if { $db ne ""
                  && $dummy ne ""
                  && ![string match $db oracle]
                  && ![string match $db postgresql] } {
@@ -273,8 +298,8 @@ aa_register_case -cats {smoke} files__check_xql_files {
 
     foreach xql [array names allxql] {
         # check there is a corresponding .tcl file
-        if {![file exists ${xql}.tcl]
-            && ![file exists ${xql}.vuh]} {
+        if {![ad_file exists ${xql}.tcl]
+            && ![ad_file exists ${xql}.vuh]} {
             # JCD: Hack to exclude calendar/www/views which is the only current file which has
             # no associated Tcl file.
             if {[string first calendar/www/views $allxql($xql)] <  0} {
@@ -289,18 +314,156 @@ aa_register_case -cats {smoke} files__check_xql_files {
             if {[info exists onexql(${xql}-oracle)]
                 && !([info exists onexql(${xql}-postgresql)]
                      || [info exists onexql(${xql})]) } {
-                aa_log_result fail "No postgresql or generic $allxql($xql)" 
+                aa_log_result fail "No postgresql or generic $allxql($xql)"
             }
             if {[info exists onexql(${xql}-postgresql)]
                 && !([info exists onexql(${xql}-oracle)]
                      || [info exists onexql(${xql})]) } {
-                aa_log_result fail "No oracle or generic $allxql($xql)" 
+                aa_log_result fail "No oracle or generic $allxql($xql)"
             }
-
         }
     }
 }
 
+aa_register_case \
+    -cats {production_safe} \
+    -error_level notice \
+    -procs {} \
+    files__trailing_whitespace {
+
+        Looks for trailing whitespace: spaces or tabs at the end of lines.
+        Currently, only checks on .tcl files.
+
+        @author Héctor Romojaro <hector.romojaro@gmail.com>
+
+        @creation-date 2018-07-24
+
+} {
+    # if startdir is not $::acs::rootdir/packages, then somebody checked in the wrong thing by accident
+    set startdir $::acs::rootdir/packages
+
+    aa_log "Checks starting from $startdir"
+
+    # get tcl files from installed packages
+    set files [list]
+    apm_get_installed_versions -array installed_versions
+    foreach {package_key version} [array get installed_versions] {
+        lappend files {*}[lmap f [apm_get_package_files \
+                                      -package_key $package_key] {
+            if {[ad_file extension $f] ne ".tcl"} continue
+            set f $startdir/$package_key/$f
+        }]
+    }
+
+    #inspect every Tcl file in the directory tree starting with $startdir
+    set count 0
+    set good 0
+    foreach file $files {
+        set f [open $file "r"]
+        set line_numbers ""
+        incr count
+        set whitespace_count 0
+        set line_number 0
+
+        # Check for trailing whitespace in every line
+        while {[gets $f line] >= 0} {
+            incr line_number
+            set last_line $line
+            if {[regexp {[ \t]+$} $line]} {
+                # Found trailing whitespace!
+                incr whitespace_count
+                lappend line_numbers $line_number
+            }
+        }
+        close $f
+
+        # Check for empty lines at the end of the file
+        if {[regexp {^\s*$} $last_line]} {
+            incr whitespace_count
+            lappend line_numbers "end of file"
+        }
+
+        # Check results on $file
+        if { $whitespace_count == 0 } {
+            incr good
+        } else {
+            aa_log_result fail "$file: trailing whitespace in lines: $line_numbers"
+        }
+    }
+    aa_log "$good of $count tcl files checked have no trailing whitespace"
+}
+
+aa_register_case \
+    -cats {smoke production_safe} \
+    -error_level warning \
+    -procs {} \
+    files__page_contracts {
+
+    Checks for files without 'ad_page_contract', 'ad_include_contract'
+    or '::xowiki::Package initialize -ad_doc' in both 'www' and 'lib'
+    package directories.
+
+    There are cases, where includelets are not stored in 'lib' but 'www', or
+    have 'ad_page_contract' instead of 'ad_include_contract'.
+
+    Checking if the location of includelets is correct is not so clear, so we
+    avoid doing this in this particular test.
+
+    @author Héctor Romojaro <hector.romojaro@gmail.com>
+
+    @creation-date 2018-07-24
+
+} {
+    # if startdir is not $::acs::rootdir/packages, then somebody checked in the wrong thing by accident
+    set startdir $::acs::rootdir/packages
+
+    aa_log "Checks starting from $startdir"
+
+    # get tcl files from installed packages
+    set files [list]
+    apm_get_installed_versions -array installed_versions
+    foreach {package_key version} [array get installed_versions] {
+        lappend files {*}[lmap f [apm_get_package_files \
+                                      -package_key $package_key \
+                                      -file_types {content_page include_page}] {
+            # Ignore non .tcl files
+            if {[ad_file extension $f] ne ".tcl"} continue
+            # Ignore docs
+            if { "$package_key" eq "acs-core-docs" } continue
+            set f $startdir/$package_key/$f
+        }]
+    }
+
+    #inspect every Tcl file in the directory tree starting with $startdir
+    set count 0
+    set good 0
+    foreach file $files {
+        set f [open $file "r"]
+        incr count
+        set contract_found_p false
+        ns_log Notice "Looking for contracts in file $file"
+        while {[gets $f line] >= 0 && !$contract_found_p} {
+            # '::xowiki::Package initialize -ad_doc' idioms are not
+            # that easy to identify, as nothing prevents from writing
+            # them on multiple lines or using different flags... This
+            # simple pattern matching is based on occurrences as found
+            # in upstream code.
+            set patterns [list "::xowiki::Package initialize -ad_doc" "ad_page_contract" "ad_include_contract"]
+            if {[regexp [join $patterns |] $line]} {
+                # Found contract!
+                incr good
+                set contract_found_p true
+            }
+        }
+        close $f
+
+        # Check results on $file
+        if { !$contract_found_p } {
+            aa_log_result fail "$file: no 'ad_page_contract', 'ad_include_contract', or '::xowiki::Package initialize -ad_doc' found"
+        }
+    }
+    aa_log "$good of $count tcl files checked have 'ad_page_contract', 'ad_include_contract' or ::xowiki::Package initialize -ad_doc"
+}
 
 # Local variables:
 #    mode: tcl

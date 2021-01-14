@@ -1,6 +1,6 @@
 ad_page_contract {
     Will redirect you to the server containing the documentation if it can be found
-    @cvs-id $Id: tcl-proc-view.tcl,v 1.10.2.6 2017/02/06 12:44:41 gustafn Exp $
+    @cvs-id $Id: tcl-proc-view.tcl,v 1.11 2017/08/07 23:47:46 gustafn Exp $
 } {
     tcl_proc:token,notnull
 } -properties {

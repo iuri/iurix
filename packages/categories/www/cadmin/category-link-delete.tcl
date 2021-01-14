@@ -3,12 +3,12 @@ ad_page_contract {
     Ask for confirmation to delete category links
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: category-link-delete.tcl,v 1.9.2.4 2020/05/03 17:39:48 gustafn Exp $
 } {
     link_id:naturalnum,multiple
     category_id:naturalnum,notnull
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -29,15 +29,26 @@ set allowed_link_ids [list]
 set page_title "Delete links with category \"$tree_name :: $category_name\""
 
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar \
     [list [export_vars -no_empty -base category-links-view {category_id tree_id locale object_id  ctx_id}] "Links to $category_name"] \
     "Delete Links"
 
 multirow create category_links linked_category_id linked_tree_id direction
 
-db_foreach check_category_links "" {
+db_foreach check_category_links [subst {
+    select c.category_id as linked_category_id, c.tree_id as linked_tree_id,
+           (case when l.from_category_id = :category_id then 'f' else 'r' end) as direction,
+           acs_permission.permission_p(c.tree_id,:user_id,'category_tree_write') as write_p,
+           l.link_id
+    from category_links l, categories c
+    where l.link_id in ([ns_dbquotelist $link_id])
+    and ((l.from_category_id = :category_id
+	  and l.to_category_id = c.category_id)
+	 or (l.from_category_id = c.category_id
+	     and l.to_category_id = :category_id))
+}] {
     if {$write_p == "t"} {
 	multirow append category_links $linked_category_id $linked_tree_id $direction
 	lappend allowed_link_ids $link_id

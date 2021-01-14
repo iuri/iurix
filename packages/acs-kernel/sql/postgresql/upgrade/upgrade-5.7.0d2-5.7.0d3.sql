@@ -3,12 +3,12 @@
 -- 
 -- @author Victor Guerra (vguerra@gmail.com)
 -- @creation-date 2010-11-15
--- @cvs-id $Id: upgrade-5.7.0d2-5.7.0d3.sql,v 1.2 2010/11/24 18:58:45 victorg Exp $
+-- @cvs-id $Id: upgrade-5.7.0d2-5.7.0d3.sql,v 1.3 2018/03/27 12:22:17 hectorr Exp $
 --
 
--- Avoiding the usage of the coalesce function 
+-- Avoiding the usage of the coalesce function
 -- on the site_nodes columns in the where clause
--- because this leads to usage of a sequencial scan, 
+-- because this leads to usage of a sequential scan,
 -- instead we enforce the usage of an index scan
 -- by issolating the case on which we need to compare null values
 -- and using the equal operator.

@@ -1,8 +1,8 @@
 ad_page_contract {
-  Show an xotcl class or object
-  
+  Show an XOTcl class or object
+
   @author Gustaf Neumann
-  @cvs-id $Id: show-class-graph.tcl,v 1.11.2.1 2017/03/27 10:37:42 gustafn Exp $
+  @cvs-id $Id: show-class-graph.tcl,v 1.12.2.3 2020/08/26 18:50:43 gustafn Exp $
 } -query {
   {classes}
   {documented_only:boolean 1}
@@ -17,10 +17,10 @@ set dot_code [::xo::dotcode -dpi $dpi \
                   $classes]
 set dot ""
 catch {set dot [::util::which dot]}
-# final ressort for cases, where ::util::which is not available
+# final resort for cases, where ::util::which is not available
 if {$dot eq "" && [file executable /usr/bin/dot]} {set dot /usr/bin/dot}
 if {$dot eq ""} {ns_return 404 plain/text "dot not found"; ad_script_abort}
- 
+
 set tmpnam [ad_tmpnam]
 set tmpfile $tmpnam.$format
 set f [open $tmpnam.$format w]; puts $f $dot_code; close $f

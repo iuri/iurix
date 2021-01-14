@@ -4,13 +4,13 @@
 
 
 <listfilters name="packages" style="inline-filters"></listfilters>
-<if @packages:rowcount@ eq 0>
+<if @packages:rowcount;literal@ eq 0>
   <if @upgrade_p;literal@ true>
     <p> No packages on your system need upgrading. </p>
   </if>
   <else>
     <if @repository_url@ nil>
-      <p> There are no un-installed applications in your file system meeting the filter criteria.</p>
+      <p> There are no un-installed applications in your filesystem meeting the filter criteria.</p>
     </if>
     <else>
       <p> There are no un-installed applications in the OpenACS repository meeting the filter criteria. </p>

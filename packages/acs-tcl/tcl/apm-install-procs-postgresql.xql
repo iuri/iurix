@@ -169,26 +169,6 @@
       </querytext>
 </fullquery>
 
- <fullquery name="apm_dependency_provided_p.apm_dependency_check">      
-      <querytext>
-      
-	select apm_package_version__version_name_greater(service_version, :dependency_version) as version_p
-	from apm_package_dependencies d, apm_package_types a, apm_package_versions v
-	where d.dependency_type = 'provides'
-	and d.version_id = v.version_id
-	and d.service_uri = :dependency_uri
-	and v.installed_p = 't'
-	and a.package_key = v.package_key
-    
-      </querytext>
-</fullquery>
-
- <fullquery name="apm_dependency_provided_p.version_greater_p">      
-      <querytext>
-        select apm_package_version__version_name_greater(:provided_version, :dependency_version)
-      </querytext>
-</fullquery>
-
 <fullquery name="apm_copy_param_to_descendents.param_exists">      
   <querytext>
     select apm__parameter_p(:descendent_package_key, :parameter_name);
@@ -215,17 +195,6 @@
                                    :scope, :datatype, :default_value, :section_name,
                                    :min_n_values, :max_n_values)
   </querytext>
-</fullquery>
-
-<fullquery name="apm_package_upgrade_p.apm_package_upgrade_p">      
-      <querytext>
-      
-	select apm_package_version__version_name_greater(:version_name, version_name) as upgrade_p
-	from apm_package_versions
-	where package_key = :package_key
-	and version_id = apm_package__highest_version (:package_key)
-    
-      </querytext>
 </fullquery>
 
 <fullquery name="apm_version_enable.apm_package_version_enable">      

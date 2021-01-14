@@ -1,7 +1,7 @@
 ad_page_contract {
     Display information about one procedure.
-    
-    @cvs-id $Id: proc-view.tcl,v 1.10.2.8 2016/08/02 10:14:41 gustafn Exp $
+
+    @cvs-id $Id: proc-view.tcl,v 1.16.2.5 2020/10/28 15:39:18 hectorr Exp $
 } {
     proc:nohtml,trim
     source_p:boolean,optional,trim
@@ -41,6 +41,19 @@ if { ![info exists source_p] || $source_p eq ""} {
     if {$source_p eq ""} {set source_p 0}
 }
 
+#
+# The check for "Class " is based on a regexp, since this is more
+# robust than e.g. llength and friends in case of hacking attacks,
+# which can lead to errors with invalid list structures.
+#
+# The following check is probably here not at the right place, since
+# the proc value should be directly usable here. So "Class " should
+# probably not be part of the link.
+#
+if {[regexp {^Class (.*)$} $proc . reminder]} {
+    set proc $reminder
+}
+
 if {[string match ::* $proc]} {
     set absolute_proc $proc
     set relative_proc [string range $proc 2 end]
@@ -58,13 +71,13 @@ if {$documented_call} {
 }
 
 if { !$documented_call } {
-    if {[info procs $absolute_proc] eq $absolute_proc} { 
+    if {[info procs $absolute_proc] eq $absolute_proc} {
 
         template::head::add_style -style {pre.code {
-            background: #fefefa; 
-            border-color: #aaaaaa; 
+            background: #fefefa;
+            border-color: #aaaaaa;
             border-style: solid;
-            border-width: 1px; 
+            border-width: 1px;
         }}
         set error_msg [subst {
             <p>This procedure is defined in the server but not
@@ -76,18 +89,18 @@ proc $proc {[info args $proc]} {
 }
 </pre></p>
         }]
-    } elseif {[info commands $absolute_proc] eq $absolute_proc} {
+    } elseif {[namespace which $absolute_proc] eq $absolute_proc} {
 
         #
         # In case the cmd is an object, redirect to the object browser
         #
-        if {[info commands ::nsf::is] ne "" && [nsf::is object $absolute_proc]} {
+        if {[namespace which ::nsf::is] ne "" && [nsf::is object $absolute_proc]} {
             ad_returnredirect [export_vars -base /xotcl/show-object {{object $absolute_proc}}]
             ad_script_abort
         }
 
         #
-        # Try NaviSever API documentation
+        # Try NaviServer API documentation
         #
         set url [apidoc::get_doc_url \
              -cmd $relative_proc \
@@ -127,7 +140,7 @@ proc $proc {[info args $proc]} {
             </p>
         }]
 
-    } else { 
+    } else {
         set error_msg "<p>The procedure <b>$proc</b> is not defined in the server.</p>"
     }
 } else {
@@ -138,8 +151,8 @@ proc $proc {[info args $proc]} {
         set documentation [api_proc_documentation -script $proc_index]
     }
 }
-set procViewToggleURL [export_vars -base proc-view [list proc [list source_p [expr {!$source_p}]] version_id]]
-set setDefaultURL [export_vars -base set-default [list source_p return_url]]
+set procViewToggleURL [export_vars -base proc-view -no_empty {proc {source_p "[expr {!$source_p}]"} version_id}]
+set setDefaultURL     [export_vars -base set-default {source_p return_url}]
 
 #
 # Local variables:

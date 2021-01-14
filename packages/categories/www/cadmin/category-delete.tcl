@@ -3,11 +3,11 @@ ad_page_contract {
     Deletes a category
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: category-delete.tcl,v 1.14.2.2 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
     category_id:naturalnum,multiple
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -39,8 +39,8 @@ set cancel_url [export_vars -no_empty -base tree-view { tree_id locale object_id
 set page_title "Delete categories"
 
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar "Delete categories"
 
 template::list::create \
@@ -50,13 +50,13 @@ template::list::create \
 	category_name {
 	    label "Name"
 	    display_template {
-		<if @categories.objects_p@ true><a href="@categories.view_url@">@categories.category_name@</a></if>
+		<if @categories.objects_p;literal@ true><a href="@categories.view_url@">@categories.category_name@</a></if>
 		<else>@categories.category_name@</else>
 	    }
 	}
 	objects_p {
 	    display_template {
-		<if @categories.objects_p@ true>(Still mapped to objects)</if>
+		<if @categories.objects_p;literal@ true>(Still mapped to objects)</if>
 	    }
 	}
     }

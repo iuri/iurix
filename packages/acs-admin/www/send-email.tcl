@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Hiro Iwashima <iwashima@mit.edu>
     @creation-date 23 Aug 2000
-    @cvs-id $Id: send-email.tcl,v 1.6.2.4 2016/05/20 19:52:59 gustafn Exp $
+    @cvs-id $Id: send-email.tcl,v 1.8 2018/01/09 13:21:00 gustafn Exp $
 } {
     email
     email_from
@@ -23,9 +23,18 @@ ad_page_contract {
     return_url:onevalue
 }
 
-if {[catch {acs_mail_lite::send -send_immediately -to_addr $email -from_addr $email_from -subject $subject -body $message} errmsg]} {
-    ad_return_error $error_subject "<p>$error_message</p>
-    <div><code>[ns_quotehtml $errmsg]</code></div>"
+ad_try {
+
+    acs_mail_lite::send \
+        -send_immediately \
+        -to_addr $email \
+        -from_addr $email_from \
+        -subject $subject \
+        -body $message
+
+} on error {errorMsg} {
+    ad_return_error $error_subject "<p>[ns_quotehtml $error_message]</p>
+          <div><code>[ns_quotehtml $errorMsg]</code></div>"
     ad_script_abort
 }
 

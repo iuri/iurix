@@ -5,7 +5,7 @@
 -- Authors:      Michael Pih (pihman@arsdigita.com)
 --               Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: content-type.sql,v 1.57.2.4 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: content-type.sql,v 1.62.2.1 2019/08/10 18:09:52 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -694,13 +694,13 @@ END;
 $$ LANGUAGE plpgsql stable;
 
 -- FIXME: need to look at this in more detail.  This probably can't be made 
--- to work reliably in postgresql.  Currently we are using a rule to insert 
+-- to work reliably in PostgreSQL.  Currently we are using a rule to insert 
 -- into the input view when a new content revision is added.  Pg locks the 
 -- underlying table when the rule is dropped, so the dropping and recreating
--- of the new content revisons seems like it would be reliable, but the 
+-- of the new content revisions seems like it would be reliable, but the 
 -- possibility of a race condition exists for either the initial creation
 -- of dropping of a type.  I'm not sure if the possibility of a race condition
--- acually exists in practice.  The thing to do here might be to just create 
+-- actually exists in practice.  The thing to do here might be to just create 
 -- a function that dynamically builds the insert strings and does the 
 -- each time an insert is done on the content_type view.  Trade-off being
 -- that the inserts would be slower due to the use of dynamic code in pl/psql.
@@ -711,13 +711,12 @@ $$ LANGUAGE plpgsql stable;
 -- Create or replace a trigger on insert for simplifying addition of
 -- revisions for any content type
 
-select define_function_args('content_type__refresh_trigger','content_type');
-
-
 
 --
 -- procedure content_type__refresh_trigger/1
 --
+select define_function_args('content_type__refresh_trigger','content_type');
+
 CREATE OR REPLACE FUNCTION content_type__refresh_trigger(
    refresh_trigger__content_type varchar
 ) RETURNS integer AS $$
@@ -808,13 +807,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-select define_function_args('content_type__refresh_view','content_type');
 
 
 
 --
 -- procedure content_type__refresh_view/1
 --
+select define_function_args('content_type__refresh_view','content_type');
+
 CREATE OR REPLACE FUNCTION content_type__refresh_view(
    refresh_view__content_type varchar
 ) RETURNS integer AS $$

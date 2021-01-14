@@ -25,7 +25,7 @@ ad_page_contract {
     return_url:localurl
 } -validate {
     referrer_error {
-        if { $session_property(referrer) ne [get_referrer] } {
+        if { $session_property(referrer) ne [util::get_referrer] } {
             ad_complain "Expected referrer does not match actual referrer"
         }
     }
@@ -33,6 +33,7 @@ ad_page_contract {
 
 ad_set_client_property $session_property(package) $session_property(key) $session_property(value)
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

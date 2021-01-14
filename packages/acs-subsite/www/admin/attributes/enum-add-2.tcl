@@ -1,12 +1,10 @@
-# /packages/mbryzek-subsite/www/admin/attribute-add.tcl
-
 ad_page_contract {
 
     Adds attributes
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Nov  7 12:14:42 2000
-    @cvs-id $Id: enum-add-2.tcl,v 1.4.2.5 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: enum-add-2.tcl,v 1.6.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     attribute_id:naturalnum,notnull
@@ -19,28 +17,28 @@ set max_sort_order [db_string select_max_sort_order {}]
 
 db_transaction {
     foreach ideal_sort_order [array names attribute_enum_values] {
-	set sort_order [expr {$ideal_sort_order + $max_sort_order}]
-	set pretty_name $attribute_enum_values($ideal_sort_order)
-	# delete if the value is empty. Update otherwise
-	if { $pretty_name eq "" } {
-	    db_dml delete_enum_value {
-		delete from acs_enum_values 
-		 where attribute_id = :attribute_id 
-		   and sort_order = :sort_order
-	    }
-	} else {
-	    db_dml update_enum_value {
-		update acs_enum_values v
-		   set v.pretty_name = :pretty_name
-		 where v.attribute_id = :attribute_id
-		   and v.sort_order = :sort_order
-	    }
-	    if { [db_resultrows] == 0 } {
-		# No update - insert the row. Set the enum_value to
-		# the pretty_name
-		db_dml insert_enum_value {}
-	    }
-	}
+        set sort_order [expr {$ideal_sort_order + $max_sort_order}]
+        set pretty_name $attribute_enum_values($ideal_sort_order)
+        # delete if the value is empty. Update otherwise
+        if { $pretty_name eq "" } {
+            db_dml delete_enum_value {
+                delete from acs_enum_values
+                 where attribute_id = :attribute_id
+                   and sort_order = :sort_order
+            }
+        } else {
+            db_dml update_enum_value {
+                update acs_enum_values v
+                   set v.pretty_name = :pretty_name
+                 where v.attribute_id = :attribute_id
+                   and v.sort_order = :sort_order
+            }
+            if { [db_resultrows] == 0 } {
+                # No update - insert the row. Set the enum_value to
+                # the pretty_name
+                db_dml insert_enum_value {}
+            }
+        }
     }
 }
 
@@ -54,6 +52,7 @@ if {$operation eq "Add more values"} {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

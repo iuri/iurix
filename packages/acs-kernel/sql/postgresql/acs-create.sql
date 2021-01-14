@@ -3,7 +3,7 @@
 --
 -- @author rhs@mit.edu
 -- @creation-date 2000-08-22
--- @cvs-id $Id: acs-create.sql,v 1.38.4.1 2016/08/31 18:57:41 gustafn Exp $
+-- @cvs-id $Id: acs-create.sql,v 1.39 2017/08/07 23:47:56 gustafn Exp $
 --
 
 create table acs_magic_objects (

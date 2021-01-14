@@ -1,17 +1,15 @@
-# 
-
 ad_library {
-    
+
     APM Callback procs
-    
+
     @author Victor Guerra (vguerra@wu-wien.ac.at)
     @creation-date 2008-12-16
-    @cvs-id $Id: apm-callback-procs.tcl,v 1.1.10.2 2015/09/29 10:21:24 gustafn Exp $
+    @cvs-id $Id: apm-callback-procs.tcl,v 1.2.2.2 2020/08/20 13:35:36 hectorr Exp $
 }
 
 namespace eval ref-timezones::apm {}
 
-ad_proc -public ref-timezones::apm::after_upgrade {
+ad_proc -private ref_timezones::apm::after_upgrade {
     {-from_version_name:required}
     {-to_version_name:required}
 } {
@@ -31,7 +29,6 @@ ad_proc -public ref-timezones::apm::after_upgrade {
                 set entries [db_string _ "select count(*) from timezones"]
                 ns_log Notice "$entries time zones loaded"
             }
-            
         }
 }
 

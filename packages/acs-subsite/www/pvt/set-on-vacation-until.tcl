@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author
     @creation-date
-    @cvs-id $Id: set-on-vacation-until.tcl,v 1.4.2.2 2016/11/27 12:19:35 gustafn Exp $
+    @cvs-id $Id: set-on-vacation-until.tcl,v 1.6 2018/01/21 00:35:29 gustafn Exp $
 } {
 } -properties {
     site_link:onevalue
@@ -17,7 +17,7 @@ ad_page_contract {
 
 if {[catch { ns_dbformvalue [ns_getform] on_vacation_until date on_vacation_until } errmsg]} {
     ad_return_error "Invalid date" "AOLserver didn't like the date that you entered."
-    return
+    ad_script_abort
 }
 
 set user_id [ad_conn user_id]

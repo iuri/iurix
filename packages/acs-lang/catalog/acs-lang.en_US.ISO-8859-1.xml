@@ -3,6 +3,7 @@
 
   <msg key="Actions">Actions</msg>
   <msg key="Administration_of_Localization">Administration of Localization</msg>
+  <msg key="all_locales">all locales</msg>
   <msg key="all_packages">all packages</msg>
   <msg key="Are_you_sure_you_want_to_export_all_I18N_messages_to_catalog_files">Are you sure you want to export all I18N messages to catalog files?</msg>
   <msg key="Are_you_sure_you_want_to_import_all_I18N_messages_from_catalog_files">Are you sure you want to import all I18N messages from catalog files?</msg>
@@ -18,9 +19,11 @@
   <msg key="Current_system_locale_is">Current system locale is  &lt;strong&gt;%system_locale%: %system_locale_label%&lt;/strong&gt;</msg>
   <msg key="Current_system_timezone_is">Current system timezone is &lt;strong&gt;%timezone%&lt;/strong&gt;</msg>
   <msg key="Default_Locale_For_Language">Default Locale for Language</msg>
+  <msg key="Deleted">Deleted</msg>
   <msg key="Delete_this_locale">Delete this locale</msg>
   <msg key="Disable_this_locale">Disable this locale</msg>
   <msg key="Edit_definition_of_locale">Edit definition of locale</msg>
+  <msg key="Edit_history">Edit history</msg>
   <msg key="Edit_localized_messages_for">Edit localized messages for %locales.locale_label%</msg>
   <msg key="Edit_this_message">Edit this message</msg>
   <msg key="Enable_this_locale">Enable this locale</msg>
@@ -49,6 +52,8 @@
   <msg key="localization-abday">{Sun} {Mon} {Tue} {Wed} {Thu} {Fri} {Sat}</msg>
   <msg key="localization-abmon">{Jan} {Feb} {Mar} {Apr} {May} {Jun} {Jul} {Aug} {Sep} {Oct} {Nov} {Dec}</msg>
   <msg key="localization-am_str">AM</msg>
+  <msg key="localization-byte">byte</msg>
+  <msg key="localization-bytes">bytes</msg>
   <msg key="localization-currency_symbol">$</msg>
   <msg key="localization-d_fmt">%m/%d/%y</msg>
   <msg key="localization-d_t_fmt">%a %B %d, %Y %r %Z</msg>

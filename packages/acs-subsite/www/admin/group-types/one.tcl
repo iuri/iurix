@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Nov  8 18:02:15 2000
-    @cvs-id $Id: one.tcl,v 1.7.2.5 2016/06/13 11:02:34 gustafn Exp $
+    @cvs-id $Id: one.tcl,v 1.9.2.1 2020/01/07 16:54:23 antoniop Exp $
 
 } {
     group_type:notnull
@@ -30,8 +30,10 @@ set group_type_enc [ad_urlencode $group_type]
 set package_id [ad_conn package_id]
 
 if { ![db_0or1row select_pretty_name {}] } {
-    ad_return_error "Group type doesn't exist" "Group type \"$group_type\" doesn't exist"
-    return
+    ad_return_error \
+        "Group type doesn't exist" \
+        "Group type \"$group_type\" doesn't exist"
+    ad_script_abort
 }
 
 set doc(title) [_ acs-subsite.Details_for__group_type_pretty_name]
@@ -45,7 +47,29 @@ acs_object_type::get -object_type $group_type -array type_info
 db_multirow groups groups_select {}
 
 # Select out all the attributes for groups of this type
-db_multirow -extend {one_attribute_url} attributes attributes_select {} {
+db_multirow -extend {one_attribute_url} attributes attributes_select {
+    with recursive group_hierarchy as (
+       select object_type, pretty_name, 1 as type_level
+       from acs_object_types
+       where object_type = 'group'
+
+       union all
+
+       select t.object_type, t.pretty_name, h.type_level + 1 as type_level
+       from acs_object_types t,
+            group_hierarchy h
+       where t.supertype = h.object_type
+    )
+    select a.attribute_id,
+           a.pretty_name,
+           a.ancestor_type,
+           t.pretty_name as ancestor_pretty_name
+      from acs_object_type_attributes a,
+           group_hierarchy t
+     where a.object_type = :group_type
+       and t.object_type = a.ancestor_type
+    order by type_level
+} {
     set one_attribute_url [export_vars -base "../attributes/one" {attribute_id return_url}]
 }
 

@@ -8,7 +8,7 @@
     <singleton-p>t</singleton-p>
     <auto-mount>ds</auto-mount>
 
-    <version name="5.9.1" url="http://openacs.org/repository/download/apm/acs-developer-support-5.9.1.apm">
+    <version name="5.10.0d1" url="http://openacs.org/repository/download/apm/acs-developer-support-5.10.0d1.apm">
         <owner url="mailto:lars@pinds.com">Lars Pind</owner>
         <summary>Profiling for requests including database timing information.</summary>
         <release-date>2017-08-06</release-date>
@@ -18,10 +18,9 @@
         </description>
         <maturity>3</maturity>
 
-        <provides url="acs-developer-support" version="5.9.1"/>
+        <provides url="acs-developer-support" version="5.10.0d1"/>
 	<requires url="acs-tcl" version="5.9.1"/>
 	<requires url="acs-kernel" version="5.9.1"/>
-        
         <requires url="acs-templating" version="5.9.1"/>
 
         <callbacks>
@@ -36,7 +35,7 @@
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="EnabledOnStartupP"  default="0" description="Remember information about connections, for developers' benefit?" section_name="developer-support"/>
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="PackageWatchList"  description="A space separated list of keys for packages that you are developing on and that will have full watches (automatic reloading of tcl libraries and xql files) activated on every server startup.
 " section_name="developer-support"/>
-            <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="PageFragmentCacheP"  default="0" description="Should page fragments generated be cached for searching and validation.  This is potentially very expensive and should be used with caution given it's performance implications." section_name="developer-support"/>
+            <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="PageFragmentCacheP"  default="0" description="Should page fragments generated be cached for searching and validation.  This is potentially very expensive and should be used with caution given its performance implications." section_name="developer-support"/>
             <parameter datatype="number"  min_n_values="1"  max_n_values="1"  name="ShowCommentsInlineP"  default="0" description="Controls whether comments are shown inline in the ds_link." section_name="developer-support"/>
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="UserSwitchingEnabledP"  default="0" description="Will present a widget on every page that allows you to switch user" section_name="developer-support"/>
         </parameters>

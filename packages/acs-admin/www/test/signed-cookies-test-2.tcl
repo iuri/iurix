@@ -5,7 +5,7 @@ ad_page_contract {
     regression tests for the secure_tokens ns_cache.a
 
     @author Richard Li (richardl@arsdigita.com)
-    @cvs-id $Id: signed-cookies-test-2.tcl,v 1.3.2.1 2015/09/10 08:21:08 gustafn Exp $
+    @cvs-id $Id: signed-cookies-test-2.tcl,v 1.4.2.1 2019/12/16 17:14:37 antoniop Exp $
     @creation-date 19 October 2000
 
 } 
@@ -35,7 +35,7 @@ set list_of_names [ns_cache names secret_tokens]
 
 set list_length [llength $list_of_names]
 
-ReturnHeaders
+util_return_headers
 
 ns_write "
 [ad_header "signed cookies tests"]

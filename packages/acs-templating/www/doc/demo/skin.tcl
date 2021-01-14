@@ -1,5 +1,5 @@
 ad_page_contract {
-  @cvs-id $Id: skin.tcl,v 1.2.28.1 2015/09/10 08:22:12 gustafn Exp $
+  @cvs-id $Id: skin.tcl,v 1.4 2017/10/01 12:16:05 gustafn Exp $
 } {
   skin
 } -properties {
@@ -18,7 +18,7 @@ db_multirow users users_query $query
 
 # Choose a skin
 
-switch $skin {
+switch -- $skin {
   plain { set file skin-plain }
   fancy { set file skin-fancy }
   default { set file /packages/acs-templating/www/doc/demo/skin-plain }

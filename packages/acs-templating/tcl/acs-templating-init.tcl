@@ -3,7 +3,7 @@
 
 # Copyright (C) 1999-2000 ArsDigita Corporation
 # Author: Karl Goldstein (karlg@arsdigita.com)
-# $Id: acs-templating-init.tcl,v 1.5.2.1 2015/09/10 08:22:05 gustafn Exp $
+# $Id: acs-templating-init.tcl,v 1.6 2017/08/07 23:48:01 gustafn Exp $
 
 # This is free software distributed under the terms of the GNU Public
 # License.  Full text of the license is available from the GNU Project:

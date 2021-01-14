@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Jeff Davis <davis@xarg.net>
     @creation-date 2005-03-05
-    @cvs-id $Id: permissions.tcl,v 1.3.2.2 2017/08/02 07:36:06 gustafn Exp $
+    @cvs-id $Id: permissions.tcl,v 1.4 2017/08/07 23:48:11 gustafn Exp $
 } {
     {object_id:naturalnum,notnull}
 }

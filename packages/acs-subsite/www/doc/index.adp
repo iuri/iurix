@@ -13,7 +13,7 @@ requirements</a></td><td>Overview of the requirements that motivated the design 
 subsites.</td>
 </tr><tr>
 <td colspan="2"><a href="/doc/subsites-design">Design</a></td><td>Overview of the API provided by ACS subsites including the
-package manger, site nodes, and request processor hooks.</td>
+package manager, site nodes, and request processor hooks.</td>
 </tr><tr>
 <td colspan="2"><a href="group-admin-pages-requirements">Group
 admin pages requirements</a></td><td>Overview of the requirements for web-based group administration
@@ -33,6 +33,6 @@ package</td>
 <address><a href="mailto:mbryzek\@arsdigita.com">Michael
 Bryzek</a></address>
 <br>
-<font size="-1">$&zwnj;Id: index.html,v 1.3.2.3 2016/11/19 09:10:54
-gustafn Exp $</font>
+<font size="-1">$&zwnj;Id: index.html,v 1.4 2017/08/07 23:47:59 gustafn
+Exp $</font>
 <!-- Created: 1/11/2001 -->

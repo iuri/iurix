@@ -1,5 +1,3 @@
-# /packages/acs-subsite/www/admin/relations/add.tcl
-
 ad_page_contract {
     Add the user to the subsite application group.
 
@@ -7,7 +5,7 @@ ad_page_contract {
     @author Randy O'Meara <omeara@got.net>
 
     @creation-date 2000-2-28
-    @cvs-id $Id: user-join.tcl,v 1.14.2.6 2017/06/30 17:10:08 gustafn Exp $
+    @cvs-id $Id: user-join.tcl,v 1.16.2.3 2020/11/23 14:55:52 antoniop Exp $
 } {
     {group_id:naturalnum,notnull {[application_group::group_id_from_package_id]}}
     {rel_type:notnull "membership_rel"}
@@ -25,7 +23,17 @@ ad_page_contract {
     }
 }
 
-set user_id [auth::require_login]
+# Don't lose the return url when somebody tries to join a subsite
+# before login.
+if {$return_url eq ""} {
+    set user_id [auth::require_login]
+} else {
+    set user_id [auth::get_user_id]
+    if {$user_id == 0} {
+        ad_returnredirect [export_vars -base [ad_get_login_url] {return_url}]
+        ad_script_abort
+    }
+}
 
 group::get -group_id $group_id -array group_info
 
@@ -111,16 +119,16 @@ if { [form size join] > 0 } {
 if { $not_hidden == 0 || [template::form is_valid join] } {
 
     db_transaction {
-        
+
         #----------------------------------------------------------------------
         # Join all required segments
         #----------------------------------------------------------------------
 
         for { set rownum 1 } { $rownum <= $num_required_segments } { incr rownum } {
             set required_seg [template::multirow get required_segments $rownum]
-            
+
             if { ![group::member_p -group_id $required_segments(group_id)] } {
-                switch $required_segments(join_policy) {
+                switch -- $required_segments(join_policy) {
                     "needs approval" {
                         set member_state "needs approval"
                     }
@@ -144,7 +152,7 @@ if { $not_hidden == 0 || [template::form is_valid join] } {
                                 $user_id]
             }
         }
-        
+
         #----------------------------------------------------------------------
         # Join the actual group
         #----------------------------------------------------------------------
@@ -175,8 +183,8 @@ if { $not_hidden == 0 || [template::form is_valid join] } {
         ad_return_error [_ acs-subsite.Error_joining] [_ acs-subsite.Error_joining_details]
         ad_script_abort
     }
-    
-    switch $member_state {
+
+    switch -- $member_state {
         "approved" { set message "[_ acs-subsite.You_joined_group]." }
         "needs approval" { set message "[_ acs-subsite.Request_join_submitted]." }
     }

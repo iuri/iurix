@@ -3,28 +3,14 @@
 
   @creation-date 2007-06-22
   @author Gustaf Neumann
-  @cvs-id $Id: form-field-procs.tcl,v 1.248.2.55 2017/07/04 23:29:27 gustafn Exp $
+  @cvs-id $Id: form-field-procs.tcl,v 1.284.2.137 2021/01/07 16:43:10 gustafn Exp $
 }
 
 namespace eval ::xowiki::formfield {
 
-  # FormFields are objects, which can be outputted as well in ad_forms
-  # or asHTML included in wiki pages. FormFields support
-  #
-  #  - validation
-  #  - help_text
-  #  - error messages
-  #  - internationalized pretty_values
-  #
-  # and inherit properties of the original datatypes via slots
-  # (e.g. for boolean entries). FormFields can be subclassed
-  # to ensure tailorability and high reuse.
-  #
-  # todo: at some later time, this could go into xotcl-core
-
   ###########################################################
   #
-  # ::xowiki::FormField (Base Class)
+  # ::xowiki::formfield::FormField (Base Class)
   #
   ###########################################################
   Class create FormField -superclass ::xo::tdom::Object -parameter {
@@ -34,8 +20,9 @@ namespace eval ::xowiki::formfield {
     {inline false}
     {mode edit}
     {disabled}
+    {disabled_as_div}
     {show_raw_value}
-    {CSSclass}
+
     {style}
     {type text}
     {label}
@@ -49,6 +36,14 @@ namespace eval ::xowiki::formfield {
     {validator ""}
     {validate_via_ajax}
 
+    {CSSclass}
+    {form_item_wrapper_CSSclass}
+    {form_widget_CSSclass}
+    {form_button_CSSclass}
+    {form_button_wrapper_CSSclass}
+    {form_help_text_CSSclass}
+    {td_CSSclass}
+
     {autocomplete}
     {autofocus}
     {formnovalidate}
@@ -61,11 +56,44 @@ namespace eval ::xowiki::formfield {
     default
     object
     slot
+
     answer
     correct_when
     feedback_answer_correct
     feedback_answer_incorrect
+    grading
+    in_position
+    test_item_in_position
+    test_item_minutes
+    test_item_points
+  } -ad_doc {
+    Base FormField class.
+
+    FormFields are objects, which can be outputted as well in ad_forms
+    or asHTML included in wiki pages. FormFields support:
+     - validation
+     - help_text
+     - error messages
+     - internationalized pretty_values
+
+    and inherit properties of the original datatypes via slots
+    (e.g. for boolean entries). FormFields can be subclassed
+    to ensure tailor-ability and high reuse.
+
+    todo: at some later time, this could go into xotcl-core.
+
+    @param language_specific this parameter decides that the value
+                             collected by this formfield should be
+                             transparently stored as a message
+                             key. The translation language is that of
+                             the current package, determined by
+                             'use_connection_locale' package parameter,
+                             connection locale and system settings.
   }
+  #
+  # TODO: "in_position" is just for a short transitional phase here
+  # (live-updates), and should be removed ASAP.
+  #
   FormField set abstract 1
 
   FormField proc fc_encode {string} {
@@ -74,9 +102,6 @@ namespace eval ::xowiki::formfield {
   FormField proc fc_decode {string} {
     return [string map [list __COMMA__ ,] $string]
   }
-  #FormField proc fc_decode_colon {string} {
-  #  return [string map [list __COLON__ :] $string]
-  #}
 
   FormField proc get_from_name {object name} {
     #
@@ -88,33 +113,37 @@ namespace eval ::xowiki::formfield {
     foreach f [::xowiki::formfield::FormField info instances -closure] {
       if {[$f name] eq $name} {
         if {![$f exists object]} {
-          my msg "strange, $f [$f name] was created without object but fits name"
+          #ad_log warning "strange, $f [$f name] was created without object but fits name"
           return $f
         } elseif {$object eq [$f object]} {
           return $f
         }
       }
     }
-    #my msg not-found-$object-$name
+    #:msg not-found-$object-$name
     return ""
   }
 
 
   #FormField instproc destroy {} {
-  #  my log "=== FormField DESTROY ====="
+  #  :log "=== FormField DESTROY ====="
   #  next
   #}
 
   FormField instproc init {} {
-    if {![my exists label]} {my label [string totitle [my name]]}
-    if {![my exists id]} {my id [my name]}
-    my set html(id) [my id]
-    #if {[my exists default]} {my set value [my default]}
-    my config_from_spec [my spec]
+    if {![info exists :label]} {
+      set :label [string totitle ${:name}]
+    }
+    if {![info exists :id]} {
+      set :id ${:name}
+    }
+    set :html(id) ${:id}
+    #if {[info exists :default]} {set :value [:default]}
+    :config_from_spec ${:spec}
   }
 
   #
-  # Basic initialze method, doing nothing; should be subclassed by the
+  # Basic initialize method, doing nothing; should be subclassed by the
   # application classes
   FormField instproc initialize {} {next}
 
@@ -124,45 +153,49 @@ namespace eval ::xowiki::formfield {
   }
 
   FormField instproc validation_check {validator_method value} {
-    return [my uplevel [list my $validator_method $value]]
+    return [:uplevel [list :$validator_method $value]]
   }
 
   FormField instproc validate {obj} {
-    my instvar name required
-
     # use the 'value' method to deal e.g. with compound fields
-    set value [my value]
-    #my msg "[my info class] value=$value req=$required // [my set value] //"
+    set value [:value]
+    #:msg "[:info class] value=$value req=${:required} // ${:value} //"
 
-    if {$required && $value eq "" && ![my istype ::xowiki::formfield::hidden]} {
-      my instvar label
-      return [_ acs-templating.Element_is_required]
+    if {${:required}
+        && $value eq ""
+        && ![:istype ::xowiki::formfield::hidden]
+      } {
+      return [_ acs-templating.Element_is_required [list label ${:label}]]
     }
     #
-    #my msg "++ [my name] [my info class] validator=[my validator] ([llength [my validator]]) value=$value"
-    foreach validator [my validator] {
+    #:log "++ ${:name} [:info class] validator=[:validator] ([llength [:validator]]) value=$value"
+    foreach validator [:validator] {
       set errorMsg ""
       #
       # The validator might set the variable errorMsg in this scope.
       #
       set success 1
       set validator_method check=$validator
-      set proc_info [my procsearch $validator_method]
-      #my msg "++ [my name]: field-level validator exists '$validator_method' ? [expr {$proc_info ne {}}]"
+      set proc_info [:procsearch $validator_method]
+      #:log "++ ${:name}: field-level validator exists '$validator_method' ? [expr {$proc_info ne {}}]"
       if {$proc_info ne ""} {
-        # we have a slot checker, call it
-        #my msg "++ call-field level validator $validator_method '$value'"
-        set success [my validation_check $validator_method $value]
+        #
+        # We have a slot checker, call it.
+        #
+        #:msg "++ call-field level validator $validator_method '$value'"
+        set success [:validation_check $validator_method $value]
       }
       if {$success == 1} {
-        # the previous check was ok, check now for a validator on the
-        # object level
+        #
+        # The previous check was ok, check now for a validator on the
+        # object level.
+        #
         set validator_method validate=$validator
         set proc_info [$obj procsearch $validator_method]
-        #my msg "++ [my name]: page-level validator exists ? [expr {$proc_info ne {}}]"
+        #:log "++ ${:name}: page-level validator exists ? [expr {$proc_info ne {}}]"
         if {$proc_info ne ""} {
           set success [$obj $validator_method $value]
-          #my msg "++ call page-level validator $validator_method '$value' returns $success"
+          #:msg "++ call page-level validator $validator_method '$value' returns $success"
         }
       }
       if {$success == 0} {
@@ -171,11 +204,14 @@ namespace eval ::xowiki::formfield {
         # a message key based on the class and the name of the validator.
         #
         set cl [namespace tail [lindex $proc_info 0]]
-        #my msg "__langPkg?[info exists __langPkg]"
-        if {![info exists __langPkg]} {set __langPkg "xowiki"}
-        #ns_log notice "calling $__langPkg.$cl-validate_$validator with [list value $value errorMsg $errorMsg] on level [info level] -- [lsort [info vars]]"
-        return [_ $__langPkg.$cl-validate_$validator [list value $value errorMsg $errorMsg]]
-        #return [::lang::message::lookup "" xowiki.$cl-validate_$validator %errorMsg% [list value $value errorMsg $errorMsg] 1]
+        #:msg "__langPkg?[info exists __langPkg]"
+        if {![info exists __langPkg]} {
+          set __langPkg "xowiki"
+        }
+        #:log "calling $__langPkg.$cl-validate_$validator with [list value $value errorMsg $errorMsg] on level [info level] -- [lsort [info vars]]"
+        set msg [_ $__langPkg.$cl-validate_$validator [list value $value errorMsg $errorMsg]]
+        #:log "++ ${:name}: ======> RETURN VALIDATION FAILED <$msg>"
+        return $msg
       }
     }
     return ""
@@ -186,26 +222,26 @@ namespace eval ::xowiki::formfield {
     # such that searchDefaults will pick up the new defaults, when a form field
     # is reclassed.
 
-    if {[my exists per_object_behavior]} {
+    if {[info exists :per_object_behavior]} {
       # remove per-object mixin from the "behavior"
-      my mixin delete [my set per_object_behavior]
-      my unset per_object_behavior
+      :mixin delete ${:per_object_behavior}
+      :unset per_object_behavior
     }
 
-    #my msg "reset along [my info precedence]"
-    foreach c [my info precedence] {
+    #:msg "reset along [:info precedence]"
+    foreach c [:info precedence] {
       if {$c eq "::xowiki::formfield::FormField"} break
       foreach s [$c info slots] {
         if {![$s exists default]} continue
         set var [$s name]
         set key processed($var)
         if {[info exists $key]} continue
-        my set $var [$s default]
+        set :$var [$s default]
         set $key 1
       }
     }
-    if {[my exists disabled]} {
-      my set_disabled 0
+    if {[info exists :disabled]} {
+      :set_disabled 0
     }
   }
 
@@ -222,7 +258,7 @@ namespace eval ::xowiki::formfield {
                          -package_id $package_id]
       }
     } else {
-      set success 0
+      set success [$object evaluate_form_field_condition $cond]
     }
     return $success
   }
@@ -230,11 +266,11 @@ namespace eval ::xowiki::formfield {
   FormField set cond_regexp {^([^=?]+)[?]([^:]*)[:](.*)$}
 
   FormField proc get_single_spec {-package_id -object string} {
-    if {[regexp [my set cond_regexp] $string _ condition true_spec false_spec]} {
-      if {[my interprete_condition -package_id $package_id -object $object $condition]} {
-        return [my get_single_spec -package_id $package_id -object $object $true_spec]
+    if {[regexp ${:cond_regexp} $string _ condition true_spec false_spec]} {
+      if {[:interprete_condition -package_id $package_id -object $object $condition]} {
+        return [:get_single_spec -package_id $package_id -object $object $true_spec]
       } else {
-        return [my get_single_spec -package_id $package_id -object $object $false_spec]
+        return [:get_single_spec -package_id $package_id -object $object $false_spec]
       }
     }
     return $string
@@ -242,14 +278,14 @@ namespace eval ::xowiki::formfield {
 
   FormField instproc remove_omit {} {
     set m ::xowiki::formfield::omit
-    if {[my ismixin $m]} {my mixin delete $m}
+    if {[:ismixin $m]} {:mixin delete $m}
   }
   FormField instproc set_disabled {disable} {
-    #my msg "[my name] set disabled $disable"
+    #:msg "${:name} set disabled $disable"
     if {$disable} {
-      my set disabled true
+      set :disabled true
     } else {
-      my unset -nocomplain disabled
+      :unset -nocomplain disabled
     }
   }
 
@@ -259,21 +295,20 @@ namespace eval ::xowiki::formfield {
     # Specify the behavior of a form field via
     # per object mixins
     #
-    set obj [my object]
-    set pkgctx [[$obj package_id] context]
+    set pkgctx [[${:object} package_id] context]
     if {[$pkgctx exists embedded_context]} {
       set ctx [$pkgctx set embedded_context]
       set classname ${ctx}::$mixin
-      #my msg ctx=$ctx-viewer=$mixin,found=[my isclass $classname]
+      #:msg ctx=$ctx-viewer=$mixin,found=[:isclass $classname]
       # TODO: search different places for the mixin. Special namespace?
-      if {[my isclass $classname]} {
-        if {[my exists per_object_behavior]} {
-          my mixin delete [my set per_object_behavior]
+      if {[:isclass $classname]} {
+        if {[info exists :per_object_behavior]} {
+          :mixin delete ${:per_object_behavior}
         }
-        my mixin add $classname
-        my set per_object_behavior $classname
+        :mixin add $classname
+        set :per_object_behavior $classname
       } else {
-        my msg "Could not find mixin '$mixin'"
+        :msg "Could not find mixin '$mixin'"
       }
     }
   }
@@ -281,64 +316,63 @@ namespace eval ::xowiki::formfield {
   FormField instproc interprete_single_spec {s} {
     if {$s eq ""} return
 
-    set object [my object]
-    set package_id [$object package_id]
-    set s [::xowiki::formfield::FormField get_single_spec -object $object -package_id $package_id $s]
+    set package_id [${:object} package_id]
+    set s [::xowiki::formfield::FormField get_single_spec -object ${:object} -package_id $package_id $s]
 
     switch -glob -- $s {
-      optional    {my set required false}
-      required    {my set required true; my remove_omit}
-      omit        {my mixin add ::xowiki::formfield::omit}
-      noomit      {my remove_omit}
-      disabled    {my set_disabled true}
-      readonly    {my readonly true}
-      enabled     {my set_disabled false}
-      label=*     {my label     [lindex [split $s =] 1]}
-      help_text=* {my help_text [lindex [split $s =] 1]}
+      optional    {set :required false}
+      required    {set :required true; :remove_omit}
+      omit        {:mixin add ::xowiki::formfield::omit}
+      noomit      {:remove_omit}
+      disabled    {:set_disabled true}
+      readonly    {:readonly true}
+      enabled     {:set_disabled false}
+      label=*     {:label     [lindex [split $s =] 1]}
+      help_text=* {:help_text [lindex [split $s =] 1]}
       *=*         {
         set p [string first = $s]
         set attribute [string range $s 0 $p-1]
         set value [string range $s $p+1 end]
-        set definition_class [lindex [my procsearch $attribute] 0]
-        set method [my info methods $attribute]
+        set definition_class [lindex [:procsearch $attribute] 0]
+        set method [:info methods $attribute]
         if {[string match "::xotcl::*" $definition_class] || $method eq ""} {
-          error [_ xowiki.error-form_constraint-unknown_attribute [list class [my info class] name [my name] entry $attribute]]
+          error [_ xowiki.error-form_constraint-unknown_attribute [list class [:info class] name ${:name} entry $attribute]]
         }
-        if {[catch {
+        ad_try {
           #
           # We want to allow a programmer to use e.g. options=[xowiki::locales]
           #
           # Note: do not allow users to use [] via forms, since they might
           # execute arbitrary commands. The validator for the form fields
-          # makes sure, that the input specs are free from square brackets.
+          # makes sure that the input specs are free from square brackets.
           #
           if {[string match {\[*\]} $value]} {
             set value [subst $value]
           }
-          my $attribute $value
-        } errMsg]} {
+          :$attribute $value
+        } on error {errMsg} {
           error "Error during setting attribute '$attribute' to value '$value': $errMsg"
         }
       }
       default {
         # Check, if the spec value $s is a class.
-        set old_class [my info class]
-        # Don't allow to use namespaced values, since we would run
+        set old_class [:info class]
+        # Don't allow one to use namespaced values, since we would run
         # into a recursive loop for richtext::wym (could be altered there as well).
-        if {[my isclass ::xowiki::formfield::$s] && ![string match "*:*" $s]} {
-          my class ::xowiki::formfield::$s
-          my remove_omit
-          if {$old_class ne [my info class]} {
-            #my msg "[my name]: reset class from $old_class to [my info class]"
-            my reset_parameter
-            my set __state reset
-            #my log "INITIALIZE [my name] due to reclassing old $old_class to new [my info class]"
-            my initialize
+        if {[:isclass ::xowiki::formfield::$s] && ![string match "*:*" $s]} {
+          :class ::xowiki::formfield::$s
+          :remove_omit
+          if {$old_class ne [:info class]} {
+            #:msg "${:name}: reset class from $old_class to [:info class]"
+            :reset_parameter
+            set :__state reset
+            #:log "INITIALIZE ${:name} due to reclassing old $old_class to new [:info class]"
+            :initialize
           }
         } else {
           if {$s ne ""} {
             error [_ xowiki.error-form_constraint-unknown_spec_entry \
-                       [list name [my name] entry $s x "Unknown spec entry for entry '$s'"]]
+                       [list name ${:name} entry $s x "Unknown spec entry for entry '$s'"]]
           }
         }
       }
@@ -346,81 +380,79 @@ namespace eval ::xowiki::formfield {
   }
 
   FormField instproc config_from_spec {spec} {
-    #my log "config_from_spec [my name] spec <$spec> [my info class] [[my info class] exists abstract]"
-    my instvar type
-    if {[[my info class] exists abstract]} {
-      # had earlier here: [my info class] eq [self class]
+    #:log "config_from_spec ${:name} spec <$spec> [:info class] [[:info class] exists abstract]"
+    if {[[:info class] exists abstract]} {
+      # had earlier here: [:info class] eq [self class]
       # Check, whether the actual class is a concrete class (mapped to
-      # concrete field type) or an abstact class.  Since
+      # concrete field type) or an abstract class.  Since
       # config_from_spec can be called multiple times, we want to do
       # the reclassing only once.
-      if {[my isclass ::xowiki::formfield::$type]} {
-        my class ::xowiki::formfield::$type
+      if {[:isclass ::xowiki::formfield::${:type}]} {
+        :class ::xowiki::formfield::${:type}
       } else {
-        my class ::xowiki::formfield::text
+        :class ::xowiki::formfield::text
       }
       # set missing instance vars with defaults
-      my set_instance_vars_defaults
+      :set_instance_vars_defaults
     }
     regsub -all {,\s+} $spec , spec
     foreach s [split $spec ,] {
-      my interprete_single_spec [FormField fc_decode $s]
+      :interprete_single_spec [FormField fc_decode $s]
     }
 
-    #my msg "[my name]: after specs"
-    my set __state after_specs
-    #my log "INITIALIZE [my name] due to config_from_spec"
-    my initialize
+    #:msg "${:name}: after specs"
+    set :__state after_specs
+    #:log "INITIALIZE ${:name} due to config_from_spec"
+    :initialize
 
     #
     # It is possible, that a default value of a form field is changed through a spec.
     # Since only the configuration might set values, checking value for "" seems safe here.
     #
-    if {[my value] eq "" && [my exists default] && [my default] ne ""} {
-      #my msg "+++ reset value to [my default]"
-      my value [my default]
+    if {[:value] eq "" && [info exists :default] && ${:default} ne ""} {
+      #:msg "+++ reset value to [:default]"
+      :value ${:default}
     }
 
     if {[lang::util::translator_mode_p]} {
-      my mixin add "::xo::TRN-Mode"
+      :mixin add "::xo::TRN-Mode"
     }
 
   }
 
   FormField instproc asWidgetSpec {} {
-    my instvar widget_type options label help_text format html display_html
-    set spec $widget_type
-    if {[my exists spell]} {append spec ",[expr {[my spell] ? {} : {no}}]spell"}
+    set spec ${:widget_type}
+    if {[info exists :spell]} {append spec ",[expr {${:spell} ? {} : {no}}]spell"}
 
-    if {![my required]} {append spec ",optional"}
-    if {[my exists editor]} {append spec " {options {editor [my set editor]}} "}
-    append spec " {label " [list $label] "} "
+    if {!${:required}} {append spec ",optional"}
+    if {[info exists :editor]} {append spec " {options {editor ${:editor}}} "}
+    append spec " {label " [list ${:label}] "} "
 
-    if {[string match *bootstrap* [subsite::get_theme]]} {
-      my array set html {class "form-control"}
+    if {[string match "*bootstrap*" [subsite::get_theme]]} {
+      array set :html {class "form-control"}
     }
 
-    if {[my exists html]} {
+    if {[info exists :html]} {
       append spec " {html {"
-      foreach {key value} [array get html] {
+      foreach {key value} [array get :html] {
         append spec $key " " [list $value] " "
       }
       append spec "}} "
     }
 
-    if {[my exists options]} {
-      append spec " {options " [list $options] "} "
+    if {[info exists :options]} {
+      append spec " {options " [list ${:options}] "} "
     }
-    if {[my exists format]} {
-      append spec " {format " [list $format] "} "
+    if {[info exists :format]} {
+      append spec " {format " [list ${:format}] "} "
     }
 
-    if {$help_text ne ""} {
-      if {[string match "#*#" $help_text]} {
-        set internationalized [my localize $help_text]
+    if {${:help_text} ne ""} {
+      if {[string match "#*#" ${:help_text}]} {
+        set internationalized [:localize ${:help_text}]
         append spec " {help_text {$internationalized}}"
       } else {
-        append spec " {help_text {$help_text}}"
+        append spec " {help_text {${:help_text}}}"
       }
     }
     return $spec
@@ -429,23 +461,27 @@ namespace eval ::xowiki::formfield {
   FormField instproc render {} {
     # In case, we use an asHTML of a FormField, we use this
     # render definition
-    if {[my inline]} {
+    if {${:inline}} {
       # with label, error message, help text
-      my render_form_widget
+      :render_form_widget
     } else {
       # without label, error message, help text
-      my render_item
+      :render_item
     }
-    my set __rendered 1
+    set :__rendered 1
   }
 
   FormField instproc render_form_widget {} {
     # This method provides the form-widget wrapper
-    set CSSclass [my form_widget_CSSclass]
-    if {[my error_msg] ne ""} {append CSSclass " form-widget-error"}
+    set CSSclass [expr {[info exists :form_widget_CSSclass] ? ${:form_widget_CSSclass} : ""}]
+    if {${:error_msg} ne ""} {
+      append CSSclass " form-widget-error"
+    }
     set atts [list class $CSSclass]
-    if {[my inline]} {lappend atts style "display: inline;"}
-    ::html::div $atts { my render_input }
+    if {${:inline}} {
+      lappend atts style "display: inline;"
+    }
+    ::html::div $atts { :render_input }
   }
 
   FormField instproc booleanAttributes {args} {
@@ -455,8 +491,8 @@ namespace eval ::xowiki::formfield {
     #
     set pairs ""
     foreach att $args {
-      if {[my exists $att] && [my set $att]} {
-        my set __#$att $att
+      if {[info exists :$att] && [set :$att]} {
+        set :__#$att $att
         lappend pairs [list __#$att $att]
       }
     }
@@ -470,105 +506,120 @@ namespace eval ::xowiki::formfield {
     #
     foreach att $atts {
       lassign $att var value
-      if {[my exists $var]} {my unset $var}
+      if {[info exists :$var]} {:unset $var}
     }
+  }
+
+  FormField instproc is_disabled {} {
+    return [expr {[info exists :disabled] && [string is true -strict ${:disabled}]}]
+  }
+
+  FormField instproc handle_transmit_always {value} {
+    #
+    # Disabled fields are not returned by the browsers. For some
+    # fields, we require to be sent. Therefore, we include in these
+    # cases the value in an additional hidden field. Maybe we should
+    # change in the future the "name" of the disabled entry to keep
+    # some hypothetical html-checker quiet.
+    #
+    if {[info exists :disabled] && [info exists :transmit_field_always]} {
+      ::html::div {
+        ::html::input [list type hidden name ${:name} value $value] {}
+      }
+    }
+  }
+  FormField instproc escape_message_keys {value} {
+    #
+    # Can be overloaded, when e.g. no escaping of message keys or
+    # other representations of message keys are desired.
+    #
+    return [xo::escape_message_keys $value]
   }
 
   FormField instproc render_input {} {
     #
     # This is the most general widget content renderer.
     # If no special renderer is defined, we fall back to this one,
-    # which is in most cases  a simple input fied of type string.
+    # which is in most cases  a simple input field of type string.
     #
-    set value [my value]
-    if {[my mode] ne "edit"} {
-      html::t -disableOutputEscaping [my pretty_value $value]
+    set value [:value]
+    if {${:mode} ne "edit"} {
+      html::t -disableOutputEscaping [:pretty_value $value]
       return
     }
-    if {[my exists validate_via_ajax] && [my validator] ne ""} {
+    if {[info exists :validate_via_ajax] && [:validator] ne ""} {
       set ajaxhelper 1
       ::xowiki::Includelet require_YUI_JS -ajaxhelper 0 "yahoo/yahoo-min.js"
       ::xowiki::Includelet require_YUI_JS -ajaxhelper 0 "dom/dom-min.js"
       ::xowiki::Includelet require_YUI_JS -ajaxhelper 0 "event/event-min.js"
       ::xowiki::Includelet require_YUI_JS -ajaxhelper 0 "connection/connection-min.js"
       ::xo::Page requireJS  "/resources/xowiki/yui-form-field-validate.js"
-      set package_url [[[my object] package_id] package_url]
-      ::xo::Page requireJS  "YAHOO.xo_form_field_validate.add('[my id]','$package_url');"
+      set package_url [[${:object} package_id] package_url]
+      ::xo::Page requireJS  "YAHOO.xo_form_field_validate.add('${:id}','$package_url');"
     }
 
-    set booleanAtts [my booleanAttributes required readonly disabled multiple \
+    set booleanAtts [:booleanAttributes required readonly disabled multiple \
                          formnovalidate autofocus]
     #
     # We do not want i18n substitutions in the input fields. So, save
     # away the original value and pass the escaped value to the tDOM
     # renderer.
     #
-    set old_value [my set value]
-    my set value [xo::escape_message_keys $old_value]
-    ::html::input [my get_attributes type size maxlength id name value \
+    set old_value ${:value}
+    set :value [:escape_message_keys $old_value]
+    ::html::input [:get_attributes type size maxlength id name value \
                        autocomplete pattern placeholder {CSSclass class} {*}$booleanAtts] {}
     #
     # Reset values to original content
     #
-    my resetBooleanAttributes $booleanAtts
-    my set value $old_value
+    :resetBooleanAttributes $booleanAtts
+    set :value $old_value
 
-    #
-    # Disabled fieds are not returned by the browsers. For some
-    # fields, we require to be sent. therefore we include in these
-    # cases the value in an additional hidden field. Maybe we should
-    # change in the future the "name" of the disabled entry to keep
-    # some hypothetical html-checker quiet.
-    #
-    if {[my exists disabled] && [my exists transmit_field_always]} {
-      ::html::div {
-        ::html::input [list type hidden name [my name] value $value] {}
-      }
-    }
-    my set __rendered 1
+    :handle_transmit_always $value
+
+    set :__rendered 1
   }
 
   FormField instproc render_item {} {
-    ::html::div -class [my form_item_wrapper_CSSclass] {
-      if {[my error_msg] ne ""} {
+    ::html::div [:get_attributes {form_item_wrapper_CSSclass class}] {
+      if {[:error_msg] ne ""} {
         set CSSclass form-label-error
       } else {
         set CSSclass form-label
       }
       ::html::div -class $CSSclass {
-        ::html::label -for [my id] {
-          ::html::t [my label]
+        ::html::label -for ${:id} {
+          ::html::t ${:label}
         }
-        if {[my required] && [my mode] eq "edit"} {
+        if {${:required} && ${:mode} eq "edit"} {
           ::html::div -class form-required-mark {
             ::html::t " (#acs-templating.required#)"
           }
         }
       }
-      my render_form_widget
-      my render_help_text
-      my render_error_msg
+      :render_form_widget
+      :render_help_text
+      :render_error_msg
       html::t \n
     }
   }
 
   FormField instproc render_error_msg {} {
-    if {[my error_msg] ne "" && ![my exists error_reported]} {
+    if {[:error_msg] ne "" && ![info exists :error_reported]} {
       ::html::div -class form-error {
-        my instvar label
-        ::html::t [::xo::localize [my error_msg]]
-        my render_localizer
-        my set error_reported 1
+        set label ${:label} ;# needed for error_msg; TODO: we should provide a substitution_list similar to "_"
+        ::html::t [::xo::localize [:error_msg]]
+        :render_localizer
+        set :error_reported 1
       }
     }
   }
 
   FormField instproc render_help_text {} {
-    set text [my help_text]
+    set text ${:help_text}
     if {$text ne ""} {
-      html::div -class [my form_help_text_CSSclass] {
-        html::img -src "/shared/images/info.gif" -alt {[i]} -title {Help text} \
-            -width "12" -height 9 -style "margin-right: 5px" {}
+      html::div -class [:form_help_text_CSSclass] {
+        html::span -class "info-sign" { }
         html::t $text
       }
     }
@@ -583,9 +634,34 @@ namespace eval ::xowiki::formfield {
     # We localize in pretty_value the message keys in the
     # language of the item (not the connection item).
     if {[regexp "^#(.*)#$" $v _ key]} {
-      return [lang::message::lookup [my locale] $key]
+      return [lang::message::lookup ${:locale} $key]
     }
     return $v
+  }
+
+  FormField ad_instproc dict_to_fc {
+    -name
+    -type:required
+    dict
+  } {
+
+    Convert the provided dict into form_constraint syntax (comma
+    separated). The other direction would be more complex, since the
+    fcs are interpreted from left to right, overwriting potentially
+    previous values. The fc-interpretation creates already the form
+    fields, produces intended errors, when certain attributes are not
+    allowed, etc.
+
+    @param name optional form-field name
+    @param type required type of the form-field
+    @param dict dict to be converted.
+  } {
+    set result [expr {[info exists name] ? "$name:" : ""}]
+    set list $type
+    foreach {key value} $dict {
+      lappend list $key=[::xowiki::formfield::FormField fc_encode $value]
+    }
+    return $result[join $list ,]
   }
 
   FormField instproc value_if_nothing_is_returned_from_form {default} {
@@ -593,113 +669,522 @@ namespace eval ::xowiki::formfield {
   }
 
   FormField instproc pretty_value {v} {
-    #my log "mapping $v"
+    #:log "mapping $v"
     return [string map [list & "&amp;" < "&lt;" > "&gt;" \" "&quot;" ' "&#39;" @ "&#64;"] $v]
   }
 
   FormField instproc has_instance_variable {var value} {
-    if {[my exists $var] && [my set $var] eq $value} {return 1}
+    if {[info exists :$var] && [set :$var] eq $value} {return 1}
     return 0
   }
+
   FormField instproc convert_to_internal {} {
-    # to be overloaded
+    # To be overloaded.
   }
+
   FormField instproc convert_to_external {value} {
-    # to be overloaded
+    # To be overloaded.
     return $value
   }
 
+  FormField instproc process_correct_when_modifier {} {
+    #
+    # Return a dict containing "words", "value" and "modifier",
+    # skipping and processing optional parameters (just "-nocase" for
+    # now). When "-nocase" is used, "value" and "words" are translated
+    # to lowercase such that the result comparison is not case
+    # sensitive.
+    #
+    set value [string trim [regsub -all {[ ]+} ${:value} " "]]
+    set firstword [lindex ${:correct_when} 1]
+    if {$firstword eq "-nocase" || [string match "*lower*" $firstword]} {
+      set value [string tolower $value]
+      set words [string tolower [lrange ${:correct_when} 2 end]]
+      set modifier nocase
+    } else {
+      set words [lrange ${:correct_when} 1 end]
+      set modifier ""
+    }
+    return [list words $words value $value modifier $modifier]
+  }
+
   FormField instproc answer_check=eq {} {
-    my instvar value
-    set arg1 [lindex [my correct_when] 1]
-    return [expr {$value eq $arg1}]
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [expr {$value eq [lindex $words 0]}]
+    }
   }
   FormField instproc answer_check=gt {} {
-    my instvar value
-    set arg1 [lindex [my correct_when] 1]
-    return [expr {$value > $arg1}]
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [expr {$value > [lindex $words 0]}]
+    }
   }
   FormField instproc answer_check=ge {} {
-    my instvar value
-    set arg1 [lindex [my correct_when] 1]
-    return [expr {$value >= $arg1}]
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [expr {$value >= [lindex $words 0]}]
+    }
   }
   FormField instproc answer_check=lt {} {
-    my instvar value
-    set arg1 [lindex [my correct_when] 1]
-    return [expr {$value < $arg1}]
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [expr {$value < [lindex $words 0]}]
+    }
   }
   FormField instproc answer_check=le {} {
-    my instvar value
-    set arg1 [lindex [my correct_when] 1]
-    return [expr {$value <= $arg1}]
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [expr {$value <= [lindex $words 0]}]
+    }
   }
   FormField instproc answer_check=btwn {} {
-    my instvar value
-    set arg1 [lindex [my correct_when] 1]
-    set arg2 [lindex [my correct_when] 2]
-    return [expr {$value >= $arg1 && $value <= $arg2}]
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [expr {$value >= [lindex $words 0] && $value >= [lindex $words 1]}]
+    }
   }
   FormField instproc answer_check=in {} {
-    my instvar value
-    set values [lrange [my correct_when] 1 end]
-    return [expr {$value in $values}]
+    #
+    # Correct, when answer is in the given set.
+    #
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [expr {$value in $words}]
+    }
   }
   FormField instproc answer_check=match {} {
-    return [string match [lindex [my correct_when] 1] [my value]]
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [string match [lindex $words 0] $value]
+    }
+  }
+  FormField instproc answer_check=contains {} {
+    #
+    # Correct, when answer contains any of the provided words.
+    #
+    set d [:process_correct_when_modifier]
+    foreach word [dict get $d words] {
+      if {[string match *$word* [dict get $d value]]} {
+        return 1
+      }
+    }
+    return 0
   }
   FormField instproc answer_check=answer_words {} {
-    set value [regsub -all { +} [my value] " "]
-    if {[string match "*lower*" [lindex [my correct_when] 1]]} {
-      set value [string tolower $value]
+    #
+    # Correct, when the answer is equal to the provided (sequence of)
+    # words, but white-space is ignored. When the first word is
+    # "*lower*" then the provided answer of the student is converted
+    # to lowercase before the comparison is performed; as a
+    # consequence the comparison is not case sensitive. Note that the
+    # answer_words have to be provided in lowercase as well.
+    #
+    set d [:process_correct_when_modifier]
+    dict with d {
+      return [expr {$value eq $words}]
     }
-    return [expr {$value eq [my answer]}]
   }
 
   FormField instproc answer_is_correct {} {
-    #my msg "[my name] ([my info class]): value=[my value], answer=[expr {[my exists answer]?[my set answer]:{NONE}}]"
-    if {[my exists correct_when]} {
-      set op [lindex [my correct_when] 0]
-      if {[my procsearch answer_check=$op] ne ""} {
-        set r [my answer_check=$op]
-        if {$r == 0} {return -1} {return 1}
+    #
+    # Return correctness of the answer based on the instance variables
+    # ":correct_when" and ":answer". Possible results are
+    #
+    #  -  1: correct
+    #  - -1: incorrect
+    #  -  0: can't say (or report back, that no evaluation should be
+    #        provided for this field)
+    #
+    #  This method is free from side-effects (no instance variables are updated).
+    #
+    #:log "CORRECT? ${:name} ([:info class]): value=${:value}, answer=[expr {[info exists :answer]?${:answer}:{NONE}}]"
+    if {[info exists :correct_when]} {
+      set op [lindex ${:correct_when} 0]
+      if {[:procsearch answer_check=$op] ne ""} {
+        set r [:answer_check=$op]
+        if {$r == 0} {
+          return -1
+        } {
+          return 1
+        }
+      } elseif { $op eq ""} {
+        return 0
       } else {
         error "invalid operator '$op'"
       }
-    } elseif {![my exists answer]} {
+    } elseif {![info exists :answer]} {
       return 0
-    } elseif {[my value] ne [my answer]} {
-      #my msg "v='[my value]' NE a='[my answer]'"
+    } elseif {${:value} ne ${:answer}} {
+      #:msg "v='${:value}' NE a='[:answer]'"
+      #:log "... answer_is_correct value comparison '${:value}' NE a='${:answer}'"
       return -1
     } else {
+      #:log "... answer_is_correct value comparison OK"
       return 1
     }
   }
 
-  FormField instproc set_is_repeat_template {is_template} {
-    # my msg "[my name] set is_repeat_template $is_template"
-    if {$is_template} {
-      my set is_repeat_template true
+  FormField instproc set_feedback {feedback_mode} {
+    #
+    # Set instance variables based on correctness of an answer.
+    #
+    #   - :form_widget_CSSclass
+    #   - :evaluated_answer_result
+    #   - :value (highlights potentially partial results, e.g. "contains")
+    #   - :help_text
+    #
+    set correct [:answer_is_correct]
+    #:log "${:name} [:info class]: correct? $correct"
+    switch -- $correct {
+      0  { set result "unknown" }
+      -1 { set result "incorrect"}
+      1  { set result "correct"  }
+    }
+    :form_widget_CSSclass $result
+    set :evaluated_answer_result $result
+
+    if {$correct == 0} {
+      return ${:evaluated_answer_result}
+    }
+
+    set feedback ""
+    if {[info exists :feedback_answer_$result]} {
+      set feedback [set :feedback_answer_$result]
     } else {
-      my unset -nocomplain is_repeat_template
+      set feedback [_ xowf.answer_$result]
+    }
+    if {$feedback_mode > 1} {
+      #:log "=== ${:name} == $feedback_mode=[info exists :correct_when] correction?[info exists :correction] ============"
+      if {[info exists :correct_when]} {
+        append feedback " ${:correct_when}"
+      } elseif {[info exists :correction]} {
+        append feedback " ${:correction}"
+        if {[info exists :correction_data]} {
+          #append feedback " ${:correction_data}"
+          if {[info exists :grading]} {
+            if {${:grading} in  {"" "exact"}} {
+              set score [expr {${:evaluated_answer_result} eq "correct" ? 100.0 : 0.0}]
+              dict set :correction_data scores ${:grading} $score
+            }
+            if {[dict exists ${:correction_data} scores ${:grading}] } {
+              #
+              # We end up here for
+              #   - MC (xowiki::formfield::checkbox) and
+              #   - SC (xowiki::formfield::radio)
+              #   - Reorder (::xowiki::formfield::reorder_box)
+              #
+              set grading_score [dict get ${:correction_data} scores ${:grading}]
+              if {$grading_score < 0} {
+                set grading_score 0.0
+              }
+              #:log "=== ${:name} grading '${:grading}' => $grading_score"
+              if {[info exists :test_item_points]} {
+                set points [format %.2f [expr {${:test_item_points} * $grading_score / 100.0}]]
+                dict set :correction_data points $points
+                #append feedback " correct: $grading_score "
+                append feedback " points: $points of [format %.2f ${:test_item_points}]"
+              } else {
+                append feedback " grading_score $grading_score"
+              }
+              #${:object} set_property -new 1 grading_score $grading_score
+              set :grading_score $grading_score
+              #ns_log notice "SET GRADING score $grading_score for [self]"
+            } else {
+              ns_log notice "=== ${:name} == no scores for grading '${:grading}': ${:correction_data}"
+            }
+          } else {
+            set :grading_score ""
+            ns_log notice "=== ${:name} == no grading available"
+          }
+        } else {
+          ns_log notice "=== ${:name} NO correction_data available"
+        }
+      } else {
+        ns_log notice "=== ${:name} NO correct_when and no :correction"
+      }
+      #
+      # When the widget class supports "disabled_as_div", we
+      # can try to highlight matches from :correct_when.
+      #
+      if {[info exists :disabled_as_div] && [info exists :correct_when]} {
+        #
+        # When render_as_div might or might not require output
+        # escaping. When we have a markup produced form match
+        # highlighting, the code sets :value_with_markup for
+        # rendering. Otherwise, the plain :value is used.
+        #
+        set :value [ns_quotehtml ${:value}]
+        if {[lindex ${:correct_when} 0] eq "contains"} {
+          #
+          # Mark matches in the div element.
+          #
+          set d [:process_correct_when_modifier]
+          set nocase [expr {[dict get $d modifier] eq "nocase" ? "-nocase" : ""}]
+          set annotated_value ${:value}
+          foreach word [dict get $d words] {
+            #
+            # We need here probably more escapes, or we should be more
+            # restrictive on allowed content in the "contains" clause.
+            #
+            set word [string map {* \\*} $word]
+            regsub -all {*}$nocase [ns_quotehtml $word] \
+                $annotated_value \
+                {<span class='match'>&</span>} \
+                annotated_value
+          }
+          if {$annotated_value ne ${:value}} {
+            set :value_with_markup $annotated_value
+          }
+        }
+      }
+    }
+    #:log "==== ${:name} setting feedback $feedback"
+    set :help_text $feedback
+    return ${:evaluated_answer_result}
+  }
+
+  FormField instproc make_correct {} {
+    #
+    # Set the form_field to a correct value, currently based on
+    # :correct_when.  We could use here :answer when available.
+    # Modified instance variables
+    #
+    # - :help_text is cleared to avoid stray per-user-feedback,
+    #    We could as well provide teacher-level feedback here.
+    # - :form_widget_CSSclass is altered to "correct" or "unknown".
+    #
+    #ns_log notice "FormField make_correct ${:name}: [info exists :answer] [info exists :correct_when]"
+
+    set :form_widget_CSSclass unknown
+    if {[info exists :correct_when]} {
+      #
+      # Try to get a correct value from the correct_when spec
+      #
+      set predicate [lindex ${:correct_when} 0]
+      set args [lrange ${:correct_when} 1 end]
+      switch $predicate {
+        "match"    {set correct $args}
+        "eq"       {set correct $args}
+        "gt"       {set correct "> $args"}
+        "ge"       {set correct ">= $args"}
+        "lt"       {set correct "< $args"}
+        "le"       {set correct "<= $args"}
+        "contains" {set correct "... [join $args { ... }] ..."}
+        "answer_words" {set correct "... [join $args { ... }] ..."}
+        "in"       {set correct "... [join args { OR }] ..."}
+        "btwn"     {set correct "[lindex $args 0] <= X <= [lindex $args 1]"}
+
+      }
+      if {[info exists correct]} {
+        :value $correct
+        set :form_widget_CSSclass correct
+        #ns_log notice "FormField make_correct ${:name}: value '${:value}'"
+      } else {
+        ns_log notice "FormField make_correct ${:name}: not handled: correct_when '${:correct_when}' "
+      }
+    } else {
+      ns_log notice "FormField make_correct ${:name}: not handled: answer? [info exists :answer]"
+    }
+    set :help_text "" ;# we could provide a teacher-level feedback here.
+  }
+
+  FormField instproc add_statistics {{-options ""}} {
+    dict incr :result_statistics count
+    if {[info exists :evaluated_answer_result] && ${:evaluated_answer_result} eq "correct"} {
+      dict incr :result_statistics correct
+      #ns_log notice "??? add_statistics ${:name}: ${:result_statistics}"
+    }
+    dict incr :answer_statistics ${:value}
+  }
+
+  FormField instproc word_statistics {flavor} {
+    #
+    # Word statistics based on :value. It is assumed here, that the
+    # value is basically a string with whitespace.
+    #
+    regsub -all {\s} ${:value} " " value
+    foreach w [split $value " "] {
+      dict incr :word_statistics [string tolower $w]
+    }
+    set :word_statistics_option $flavor
+  }
+
+  FormField instproc render_answer_statistics {} {
+    #ns_log notice ":answer_statistics: ${:answer_statistics}"
+    ::html::ul {
+      foreach {answer freq} [lsort -decreasing -integer -stride 2 -index 1 ${:answer_statistics}] {
+        html::li { html::t "$freq: $answer" }
+      }
+    }
+  }
+
+  FormField instproc render_word_statistics {} {
+    #ns_log notice ":render_word_statistics: ${:word_statistics_option}"
+    if {${:word_statistics_option} eq "word_cloud"} {
+      # stopword list based on lucene, added a few more terms
+      set stopWords {
+        a about an and are as at be but by do does for from how if in into is it no not of on or
+        such that the their then there these they this to vs was what when where who will with
+      }
+      set jsWords {}
+      foreach {word freq} [lsort -decreasing -integer -stride 2 -index 1 ${:word_statistics}] {
+        if {$word in $stopWords} continue
+        lappend jsWords [subst {{text: "$word", weight: $freq}}]
+      }
+      set tsp [clock clicks -microseconds]
+      set height [expr {(12*[llength $jsWords]/10)  + 250}]
+      # set js [subst {
+      #   var jqcloud_$tsp = \[
+      #   [join $jsWords ",\n"]
+      #   \];
+      #   \$('#jqcloud_$tsp').jQCloud(jqcloud_$tsp, {autoResize: true, width: 500, steps: 5, height: $height});
+      # }]
+      set js [subst {
+        var jqcloud_$tsp = \[
+        [join $jsWords ",\n"]
+        \];
+        \$('#jqcloud_$tsp').jQCloud(jqcloud_$tsp, {autoResize: true, width: 500, height: $height});
+      }]
+      template::add_script -order 20 -src https://cdn.jsdelivr.net/npm/jqcloud2@2.0.3/dist/jqcloud.min.js
+      template::head::add_css -href https://cdn.jsdelivr.net/npm/jqcloud2@2.0.3/dist/jqcloud.min.css
+      security::csp::require script-src https://cdn.jsdelivr.net
+      security::csp::require style-src  https://cdn.jsdelivr.net
+
+      template::add_body_script -script $js
+      ::html::div -class "jq-cloud" -id jqcloud_$tsp  {}
+    } else {
+      ::html::ul {
+        foreach {word freq} [lsort -decreasing -integer -stride 2 -index 1 ${:word_statistics}] {
+          html::li { html::t "$freq: $word" }
+          lappend jsWords [subst {{text: "$word", weight: $freq}}]
+        }
+      }
+    }
+  }
+
+  FormField instproc render_collapsed {-id:required {-label ""} -inner_method} {
+    template::add_script -src urn:ad:js:bootstrap3
+    set num [clock clicks -microseconds]
+    ::html::button -type button -class "btn btn-xs" -data-toggle "collapse" -data-target "#$id" {
+      ::html::span -class "glyphicon glyphicon-chevron-down" {::html::t $label}
+    }
+    ::html::div -id "$id" -class "collapse" {
+      :$inner_method
+    }
+  }
+
+  FormField instproc render_modal {-id:required {-label ""} -inner_method} {
+    ::html::button -type button -class "btn btn-xs" -data-toggle "modal" -data-target "#$id" {
+      ::html::span -class "glyphicon glyphicon-chevron-down" {::html::t $label}
+    }
+    ::html::div -id "$id" -class "modal fade" -tabindex -1 -role dialog aria-hidden "true" {
+      ::html::div -class "modal-dialog" -role document {
+        ::html::div -class "modal-content" {
+          ::html::div -class "modal-header" {
+            ::html::h5 -class "modal-title" { ::html::t $label }
+            ::html::button -type "button" -class "close" -data-dismiss "modal" -aria-label "Close" {
+              ::html::span -aria-hidden "true" { ::html::t -disableOutputEscaping "&times;" }
+            }
+            ::html::div -class "modal-body" {
+              #::html::t ...
+              :$inner_method
+            }
+            ::html::div -class "modal-footer" {
+              ::html::button -type "button" -class "btn btn-secondary" -data-dismiss "modal" {
+                ::html::t Close
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  FormField instproc render_result_statistics {} {
+    #
+    # In case, there are result_statistics, use a "progress bar" to
+    # visualize correct answers.
+    #
+    # Currently, this is bootstrap3 only.
+    #
+    if {[info exists :result_statistics] && [dict exists ${:result_statistics} count]} {
+      set result_count [dict get ${:result_statistics} count]
+      #ns_log notice "??? render_result_statistics: ${:name}: ${:result_statistics}"
+      if {$result_count > 0} {
+        ::html::div -class "progress" {
+          set correctCount [expr {[dict exists ${:result_statistics} correct] ? [dict get ${:result_statistics} correct] : 0}]
+          set percentage [format %2.0f [expr {$correctCount * 100.0 / $result_count}]]
+          ::html::div -class "progress-bar progress-bar-success" -role "progressbar" \
+              -aria-valuenow $percentage -aria-valuemin "0" -aria-valuemax "100" -style "width:$percentage%" {
+                ::html::t "$percentage %"
+              }
+        }
+      }
+    }
+    if {[info exists :answer_statistics]} {
+      :render_collapsed \
+          -id answers-[clock clicks -microseconds] \
+          -label "#xowiki.answers#" \
+          -inner_method render_answer_statistics
+    }
+    if {[info exists :word_statistics]} {
+      ns_log notice ":word_statistics: ${:word_statistics}"
+      if {${:word_statistics_option} eq "word_cloud"} {
+        :render_modal \
+            -id words-[clock clicks -microseconds] \
+            -label "#xowiki.words#" \
+            -inner_method render_word_statistics
+      } else {
+        #
+        # The following is not used for the word cloud, since the
+        # placement of the words in the word cloud does not work in
+        # collapsed mode.
+        #
+        :render_collapsed \
+            -id words-[clock clicks -microseconds] \
+            -label "#xowiki.words#" \
+            -inner_method render_word_statistics
+      }
+    }
+  }
+
+  FormField instproc render_disabled_as_div {CSSclass} {
+    set attributes [:get_attributes id]
+    lappend attributes class $CSSclass
+    ::html::div $attributes {
+      if {[info exists :value_with_markup]} {
+        ::html::t -disableOutputEscaping ${:value_with_markup}
+      } else {
+        ::html::t [:value]
+      }
+    }
+  }
+
+  FormField instproc set_is_repeat_template {is_template} {
+    # :msg "${:name} set is_repeat_template $is_template"
+    if {$is_template} {
+      set :is_repeat_template true
+    } else {
+      unset :is_repeat_template
     }
   }
 
   FormField instproc field_value {v} {
-    if {[my exists show_raw_value]} {
+    if {[info exists :show_raw_value]} {
       return $v
     } else {
-      return [my pretty_value $v]
+      return [:pretty_value $v]
     }
   }
 
   FormField instproc pretty_image {-parent_id:required {-revision_id ""} entry_name} {
     if {$entry_name eq "" || ${:value} eq ""} return
 
-    array set "" [${:object} item_ref -default_lang [${:object} lang] -parent_id $parent_id $entry_name]
+    set item_ref [${:object} item_ref -default_lang [${:object} lang] -parent_id $parent_id $entry_name]
 
-    set label [my label] ;# the label is used for alt and title
-    if {$label eq $(stripped_name)} {
+    set label ${:label} ;# the label is used for alt and title
+    if {$label eq [dict get $item_ref stripped_name]} {
       #
       # The label is apparently the default. For Photo.form instances,
       # this is always "image". In such cases, use the title of the
@@ -708,11 +1193,14 @@ namespace eval ::xowiki::formfield {
       set label [${:object} title]
     }
     set l [::xowiki::Link create new -destroy_on_cleanup \
-               -page ${:object} -type "image" -lang $(prefix) \
-               [list -stripped_name $(stripped_name)] [list -label $label] \
-               -parent_id $(parent_id) -item_id $(item_id)]
+               -page ${:object} -type "image" \
+               -lang [dict get $item_ref prefix] \
+               -stripped_name [dict get $item_ref stripped_name] \
+               -label $label \
+               -parent_id [dict get $item_ref parent_id] \
+               -item_id [dict get $item_ref item_id]]
 
-    if {[my istype file]} {
+    if {[:istype file]} {
       if {$revision_id ne ""} {
         $l revision_id $revision_id
       }
@@ -723,14 +1211,15 @@ namespace eval ::xowiki::formfield {
       float width height
       padding padding-right padding-left padding-top padding-bottom
       margin margin-left margin-right margin-top margin-bottom
-      border border-width position top botton left right
+      border border-width position top bottom left right
       geometry
     } {
-      if {[my exists $option]} {$l set $option [my set $option]}
+      if {[info exists :$option]} {$l set $option [set :$option]}
     }
     set html [$l render]
     return $html
   }
+
 
   ###########################################################
   #
@@ -744,18 +1233,372 @@ namespace eval ::xowiki::formfield {
     ::xotcl::Class instproc extend_slot_default
   }
   Class instproc extend_slot_default {name value} {
-    # Search for the slot. If the slot exists, extend it's default
+    # Search for the slot. If the slot exists, extend its default
     # value with the new value
-    foreach c [my info heritage] {
-      if {[info commands ${c}::slot::$name] ne ""} {
-        set value [concat $value [${c}::slot::$name default]]
+    foreach c [:info heritage] {
+      if {[nsf::is object ${c}::slot::$name]} {
+        set value [list $value {*}[${c}::slot::$name default]]
         break
       }
     }
     # create a mirroring slot with the maybe extended default
-    my slots [list Attribute create $name -default $value]
+    :slots [list Attribute create $name -default $value]
   }
 
+
+  ###########################################################
+  #
+  # ::xowiki::formfield::CompoundField
+  #
+  ###########################################################
+
+  Class create CompoundField -superclass FormField -parameter {
+    {components ""}
+    {CSSclass compound-field}
+  } -extend_slot_default validator compound
+
+  CompoundField instproc check=compound {value} {
+    #:msg "check compound in ${:components}"
+    foreach c ${:components} {
+      set error [$c validate [self]]
+      if {$error ne ""} {
+        set msg "[$c label]: $error"
+        :uplevel [list set errorMsg $msg]
+        #util_user_message -message "Error in compound field [$c name]: $error"
+        return 0
+      }
+    }
+    return 1
+  }
+
+  CompoundField instproc set_disabled {disable} {
+    #:msg "${:name} set disabled $disable"
+    if {$disable} {
+      set :disabled true
+    } else {
+      :unset -nocomplain disabled
+    }
+    foreach c ${:components} {
+      $c set_disabled $disable
+    }
+  }
+
+  CompoundField instproc set_is_repeat_template {is_template} {
+    # :msg "${:name} set is_repeat_template $is_template"
+    if {$is_template} {
+      set :is_repeat_template true
+    } else {
+      :unset -nocomplain is_repeat_template
+    }
+    foreach c ${:components} {
+      $c set_is_repeat_template $is_template
+    }
+  }
+
+  CompoundField instproc same_value {v1 v2} {
+    if {$v1 eq $v2} {return 1}
+    foreach {n1 value1} $v1 {n2 value2} $v2  {
+      set f [set :component_index($n1)]
+      if {![$f same_value $value1 $value2]} { return 0 }
+    }
+    return 1
+  }
+
+  CompoundField instproc value {value:optional} {
+    if {[info exists value]} {
+      #:msg "${:name}: setting compound value => '$value'"
+      :set_compound_value $value
+    }
+    return [:get_compound_value]
+  }
+
+  CompoundField instproc object args {
+    set l [llength $args]
+    switch $l {
+      0 {
+        #
+        # Called without args, return the current value
+        #
+        return ${:object}
+      }
+      1 {
+        #
+        # Called with a single value, set object for all components
+        #
+        foreach c ${:components} {
+          $c object [lindex $args 0]
+        }
+
+        set :object [lindex $args 0]
+      }
+      default {
+        error "wrong number of arguments"
+      }
+    }
+  }
+
+  CompoundField instproc validate {obj} {
+    # Delegate validate to the components. If a validation of a
+    # component fails, report the error message back.
+    foreach c ${:components} {
+      set result [$c validate $obj]
+      #ns_log notice "CompoundField validate on [$c name] returns '$result' [info exists errorMsg]"
+      if {$result ne ""} {
+        return $result
+      }
+    }
+    return ""
+  }
+
+  CompoundField instproc set_compound_value {value} {
+    if {![string is list $value] || ([llength $value] % 2) == 1} {
+      # this branch could be taken, when the field was retyped
+      ns_log notice "CompoundField: value '$value' is not avalid dict"
+      return
+    }
+    # set the value parts for each components
+    foreach c ${:components} {
+      # Set only those parts, for which attribute values pairs are
+      # given.  Components might have their own default values, which
+      # we do not want to overwrite ...
+      set cname [$c name]
+      if {[dict exists $value $cname]} {
+        $c value [dict get $value $cname]
+      }
+    }
+  }
+
+  CompoundField instproc get_compound_value {} {
+    #
+    # Set the internal representation based on the components values.
+    #
+    set cc [[${:object} package_id] context]
+
+    set value [list]
+    foreach c ${:components} {
+      lappend value [$c name] [$c value]
+    }
+    #:log "${:name}: get_compound_value returns value=$value"
+    return $value
+  }
+
+  CompoundField instproc specs_unmodified {spec_list} {
+    expr {${:__state} eq "after_specs"
+          && [info exists :structure] && ${:structure} eq $spec_list
+        }
+  }
+
+  CompoundField instproc create_components {spec_list} {
+    #:log "create_components $spec_list"
+
+    #
+    # Omit after specs for compound fields to avoid multiple
+    # recreations.
+    #
+    if {[:specs_unmodified $spec_list]} {
+      return
+    }
+
+    #
+    # Build a component structure based on a list of specs
+    # of the form {name spec}.
+    #
+    set :structure $spec_list
+    set :components [list]
+    foreach entry $spec_list {
+      #:log "create_components creates $entry"
+      lassign $entry name spec
+      #
+      # create for each component a form field
+      #
+      set c [::xowiki::formfield::FormField create [self]::$name \
+                 -name ${:name}.$name -id ${:id}.$name \
+                 -locale [:locale] -object ${:object} \
+                 -spec $spec]
+      set :component_index(${:name}.$name) $c
+      $c set parent_field [self]
+      lappend :components $c
+    }
+  }
+
+  CompoundField instproc add_component {entry} {
+    #
+    # Add a single component dynamically to the list of already
+    # existing components and return the component as result.
+    #
+    lappend :structure $entry
+    lassign $entry name spec
+    set c [::xowiki::formfield::FormField create [self]::$name \
+               -name ${:name}.$name -id ${:id}.$name \
+               -locale [:locale] -object ${:object} \
+               -spec $spec]
+    set :component_index(${:name}.$name) $c
+    lappend :components $c
+    return $c
+  }
+
+  CompoundField instproc get_component {component_name} {
+    set key component_index(${:name}.$component_name)
+    if {[info exists :$key]} {
+      return [set :$key]
+    }
+    error "no component named $component_name of compound field ${:name}"
+  }
+
+  CompoundField instproc named_sub_components {} {
+    # Iterate along the argument list to check components of a deeply
+    # nested structure.
+    set component_names [array names :component_index]
+    foreach c ${:components} {
+      lappend component_names {*}[$c array names component_index]
+    }
+    return $component_names
+  }
+
+  CompoundField instproc exists_named_sub_component args {
+    # Iterate along the argument list to check components of a deeply
+    # nested structure. For example,
+    #
+    #    :check_named_sub_component a b
+    #
+    # returns 0 or one depending whether there exists a component "a"
+    # with a subcomponent "b".
+    set component_name ${:name}
+    set sub [self]
+    foreach e $args {
+      append component_name .$e
+      if {![$sub exists component_index($component_name)]} {
+        return 0
+      }
+      set sub [$sub set component_index($component_name)]
+    }
+    return 1
+  }
+
+  CompoundField instproc get_named_sub_component args {
+    # Iterate along the argument list to get components of a deeply
+    # nested structure. For example,
+    #
+    #    :get_named_sub_component a b
+    #
+    # returns the object of the subcomponent "b" of component "a"
+    set component_name ${:name}
+    set sub [self]
+    foreach e $args {
+      append component_name .$e
+      #:msg "check $sub set component_index($component_name)"
+      set sub [$sub set component_index($component_name)]
+    }
+    return $sub
+  }
+
+  CompoundField ad_instproc get_named_sub_component_value {
+    {-from_repeat:switch}
+    {-default ""}
+    args
+  } {
+
+    Return the value of a named subcomponent. When the named
+    subcomponent is a repeated item, and the value of the 0th element
+    of the repeat (the template element) is omitted from the returned
+    value.
+
+    @param from_repeat skip template element from repeated values
+    @param default default value, when component is not found
+    @param args space separated path of elements names in a potentially
+           nested component structure (similar to dict)
+    @result value of the component
+  } {
+    if {[:exists_named_sub_component {*}$args]} {
+      set result [[:get_named_sub_component {*}$args] value]
+      if {$from_repeat} {
+        if {[lindex [split [lindex $result 0] .] end] eq "0"} {
+          set result [lrange $result 2 end]
+        }
+      }
+    } else {
+      set result $default
+    }
+    return $result
+  }
+
+  CompoundField instproc generate_fieldnames {{-prefix "v-"} n} {
+    set names [list]
+    for {set i 1} {$i <= $n} {incr i} {lappend names $prefix$i}
+    return $names
+  }
+
+  CompoundField instproc leaf_components {} {
+    set leaf_components {}
+    foreach c ${:components} {
+      if {[self class] in [[$c info class] info heritage]} {
+        lappend leaf_components {*}[$c leaf_components]
+      } else {
+        lappend leaf_components $c
+      }
+    }
+    return $leaf_components
+  }
+
+  CompoundField instproc render_input {} {
+    #
+    # Render content within in a fieldset, but with labels etc.
+    #
+    html::fieldset [:get_attributes id {CSSclass class}] {
+      foreach c ${:components} { $c render }
+    }
+  }
+
+  CompoundField instproc pretty_value {v} {
+    #
+    # Typically, subtypes of CompoundFields should define their own
+    # "pretty_value". This is a simple renderer that provides a
+    # default behavior.
+    #
+    set ff [dict create {*}$v]
+    set html "<ul class='CompoundField'>\n"
+    foreach c [lsort ${:components}] {
+      set componentName [$c set name]
+      if {[dict exists $ff $componentName]} {
+        set componentLabel [string range $componentName [string length ${:name}]+1 end]
+        append html "<li><span class='name'>$componentLabel:</span> " \
+            "[$c pretty_value [dict get $ff $componentName]]</li>\n"
+      }
+    }
+    append html "</ul>\n"
+    return $html
+  }
+
+  CompoundField instproc has_instance_variable {var value} {
+    set r [next]
+    if {$r} {return 1}
+    foreach c ${:components} {
+      set r [$c has_instance_variable $var $value]
+      if {$r} {return 1}
+    }
+    return 0
+  }
+
+  CompoundField instproc convert_to_internal {} {
+    foreach c ${:components} {
+      $c convert_to_internal
+    }
+    # Finally, update the compound value entry with the compound
+    # internal representation; actually we could drop the instance
+    # atts of the components from the "instance_attributes" ...
+    ${:object} set_property -new 1 ${:name} [:get_compound_value]
+  }
+
+  CompoundField instproc make_correct {} {
+    foreach c ${:components} {
+      $c make_correct
+    }
+  }
+  CompoundField instproc add_statistics {{-options ""}} {
+    foreach c ${:components} {
+      $c add_statistics -options $options
+    }
+  }
 
   ###########################################################
   #
@@ -765,17 +1608,17 @@ namespace eval ::xowiki::formfield {
 
   Class create submit_button -superclass FormField
   submit_button  instproc initialize {} {
-    my set type submit
-    my set value [::xo::localize [_ xowiki.Form-submit_button]]
+    set :type submit
+    set :value [::xo::localize [_ xowiki.Form-submit_button]]
   }
   submit_button instproc render_input {} {
     # don't disable submit buttons
-    if {[my type] eq "submit"} {my unset -nocomplain disabled}
-    ::html::button [my get_attributes name type {form_button_CSSclass class} title disabled] {
-      ::html::t [my set value]
+    if {[:type] eq "submit"} {:unset -nocomplain disabled}
+    ::html::button [:get_attributes name type {form_button_CSSclass class} title disabled] {
+      ::html::t ${:value}
     }
-    #::html::input [my get_attributes name type {form_button_CSSclass class} value title disabled] {}
-    my render_localizer
+    #::html::input [:get_attributes name type {form_button_CSSclass class} value title disabled] {}
+    :render_localizer
   }
 
   ###########################################################
@@ -795,32 +1638,32 @@ namespace eval ::xowiki::formfield {
         link_label
       }
   file instproc check=virus {value} {
-    # In case of an upgrade script, the (uploaded) tmp file might not exist
-    if {[my viruscheck]
-        && [my exists tmpfile]
+    # In case of an upgrade script, the (uploaded) temporary file might not exist
+    if {[:viruscheck]
+        && [info exists :tmpfile]
         && $value ne ""
-        && [file exists [my set tmpfile]]
-        && [::xowiki::virus check [my set tmpfile]]
+        && [::file exists ${:tmpfile}]
+        && [::xowiki::virus check ${:tmpfile}]
       } {
       #util_user_message -message "uploaded file contains a virus; upload rejected"
       return 0
     }
     return 1
   }
-  file instproc tmpfile {value}      {my set [self proc] $value}
-  file instproc content-type {value} {my set [self proc] $value}
+  file instproc tmpfile {value}      {:set [self proc] $value}
+  file instproc content-type {value} {:set [self proc] $value}
   file instproc initialize {} {
-    my type file
-    my set booleanHTMLAttributes {multiple}
-    my set widget_type file(file)
+    :type file
+    set :booleanHTMLAttributes {multiple}
+    set :widget_type file(file)
     next
   }
   file instproc entry_info {} {
-    if {[my multiple]} {
+    if {${:multiple}} {
       if {[info exists :tmpfile]} {
         set list ${:tmpfile}
       } else {
-        set list [my get_from_value ${:value} name]
+        set list [:get_from_value ${:value} name]
       }
       set objName {}
       for {set i 0} {$i < [llength $list]} {incr i} {
@@ -829,13 +1672,13 @@ namespace eval ::xowiki::formfield {
     } else {
       set objName file:${:name}
     }
-    #my log ENTRY_INFO=[list name $objName parent_id [${:object} item_id]]
-    return [list name $objName parent_id [[my object] item_id]]
+    #:log ENTRY_INFO=[list name $objName parent_id [${:object} item_id]]
+    return [list name $objName parent_id [${:object} item_id]]
   }
 
   file instproc get_from_value {value attribute {raw ""}} {
     #
-    # The value of of a form entry might be:
+    # The value of a form entry might be:
     # - an atomic list element
     # - a list with attribute value pairs
     #
@@ -844,29 +1687,28 @@ namespace eval ::xowiki::formfield {
     # default value.
     #
     set valueLength [llength $value]
-    if {$valueLength > 1 && $valueLength %2 == 0} {
-      array set "" $value
-      if {[info exists ($attribute)]} {
-        return $($attribute)
+    if {$valueLength > 1 && $valueLength % 2 == 0} {
+      if {[dict exists $value $attribute]} {
+        return [dict get $value $attribute]
       }
     }
     return [lindex $raw 0]
   }
 
   file instproc no_value_provided {} {
-    expr {[my set value] eq ""}
+    expr {${:value} eq ""}
   }
 
   file instproc get_old_value {} {
-    return [[my object] form_parameter __old_value_[my name] ""]
+    return [${:object} form_parameter __old_value_${:name} ""]
   }
 
   file instproc value {args} {
     if {[llength $args] == 0} {
-      if {[my no_value_provided]} {
-        return [my get_old_value]
+      if {[:no_value_provided]} {
+        return [:get_old_value]
       }
-      return [my set value]
+      return ${:value}
     }
     return [next]
   }
@@ -883,7 +1725,9 @@ namespace eval ::xowiki::formfield {
   } {
 
     set content_type_registered [::xo::dc get_value check_content_type {
-      select exists(select 1 from cr_mime_types where mime_type = :content_type)
+      select case when exists
+      (select 1 from cr_mime_types where mime_type = :content_type) then 1 else 0 end
+      from dual
     }]
     #
     # If the provided mime type is not registered, or unknown, try
@@ -898,16 +1742,16 @@ namespace eval ::xowiki::formfield {
       # one. We could check, whether this mime type is registered. If
       # not, we could add it on the fly or we could map it to the
       # registered unknown type (maybe via package parameter of
-      # acs-content-repository + a new api call).
+      # acs-content-repository + a new API call).
       #
     }
 
-    set file_object [$package_id get_page_from_name -name $object_name -parent_id $parent_id]
+    set file_object [::$package_id get_page_from_name -name $object_name -parent_id $parent_id]
     if {$file_object ne ""} {
       #
       # File entry exists already, create a new revision
       #
-      #my msg "new revision (value $file_name)"
+      #:msg "new revision (value $file_name)"
       $file_object set import_file $tmpfile
       $file_object set mime_type $content_type
       $file_object set title $file_name
@@ -917,8 +1761,8 @@ namespace eval ::xowiki::formfield {
       #
       # Create a new file
       #
-      #my msg "new file"
-      set package_id [[my object] package_id]
+      #:msg "new file"
+      set package_id [${:object} package_id]
       set file_object [::xowiki::File new -destroy_on_cleanup \
                            -title $file_name \
                            -name $object_name \
@@ -932,9 +1776,9 @@ namespace eval ::xowiki::formfield {
       # When produduction_mode is set, make sure, the new file object
       # is not in a published state.
       #
-      if {[$package_id get_parameter production_mode 0]} {
-          $file_object publish_status "production"
-      }      
+      if {[::$package_id get_parameter production_mode 0]} {
+        $file_object publish_status "production"
+      }
       $file_object save_new {*}$save_flag
     }
     return $file_object
@@ -942,19 +1786,18 @@ namespace eval ::xowiki::formfield {
 
 
   file instproc convert_to_internal {} {
-    my instvar value
 
-    if {[my no_value_provided]} {
-      [my object] set_property -new 1 [my name] [my get_old_value]
+    if {[:no_value_provided] || ![info exists :content-type]} {
+      ${:object} set_property -new 1 ${:name} [:get_old_value]
       return
     }
-    #my log "[my name]: got value '$value'"
-    #[my object] set_property -new 1 [my name] $value
+    #:log "${:name}: got value '${:value}'"
+    #${:object} set_property -new 1 ${:name} ${:value}
 
-    set package_id [[my object] package_id]
-    array set entry_info [my entry_info]
+    set package_id [${:object} package_id]
+    set entry_info [:entry_info]
 
-    if {[my searchable]} {
+    if {[:searchable]} {
       set publish_date_cmd {;}
       set save_flag ""
     } else {
@@ -968,24 +1811,31 @@ namespace eval ::xowiki::formfield {
     #
     if {[llength ${:content-type}] == 1} {
       set :tmpfile [list ${:tmpfile}]
-      set value [list $value]
+      set :value [list ${:value}]
     }
 
     set revision_ids {}
     set newValue ""
     foreach content_type ${:content-type} \
-        object_name $entry_info(name) \
-        tmpfile [my set tmpfile] \
-        fn $value {
+        object_name [dict get $entry_info name] \
+        tmpfile ${:tmpfile} \
+        fn ${:value} {
 
+          # Sanitize the filename
           regsub -all {\\+} $fn {/} fn  ;# fix IE upload path
-          set v [::file tail $fn]
+          set fn [ad_file tail $fn]
+          # Flip the two flags in the command below in case we want to
+          # become stricter. For now we just make sure the filename
+          # does not contain funky characters.
+          set fn [ad_sanitize_filename \
+                      -collapse_spaces=false \
+                      -tolower=false $fn]
 
-          set file_object [my store_file \
+          set file_object [:store_file \
                                -file_name $fn \
                                -content_type $content_type \
                                -package_id $package_id \
-                               -parent_id $entry_info(parent_id) \
+                               -parent_id [dict get $entry_info parent_id] \
                                -object_name $object_name \
                                -tmpfile $tmpfile \
                                -publish_date_cmd $publish_date_cmd \
@@ -1000,34 +1850,39 @@ namespace eval ::xowiki::formfield {
     # the revision_id. TODO: clear revision_id on export.
     #
     set newValue [list name $newValue revision_id $revision_ids]
-    [my object] set_property -new 1 [my name] $newValue
-    my set value $newValue
+    ${:object} set_property -new 1 ${:name} $newValue
+    set :value $newValue
   }
 
   file instproc label_or_value {v} {
-    if {[my exists link_label]} {
-      return [my localize [my link_label]]
+    if {[info exists :link_label]} {
+      return [:localize [:link_label]]
     }
     return $v
   }
 
   file instproc pretty_value {v} {
     if {$v ne ""} {
-      my instvar object
-      array set "" [my entry_info]
+      set entry_info [:entry_info]
 
       set result ""
-      foreach object_name $(name) fn [my get_from_value $v name] {
+      foreach object_name [dict get $entry_info name] fn [:get_from_value $v name] {
 
-        array set "" [$object item_ref -default_lang [[my object] lang] -parent_id $(parent_id) $object_name]
+        set item_info [${:object} item_ref \
+                           -default_lang [${:object} lang] \
+                           -parent_id [dict get $entry_info parent_id] \
+                           $object_name]
 
-        #my log "name <$object_name> pretty value name '$(stripped_name)'"
+        #:log "name <$object_name> pretty value name '[dict get $item_info stripped_name]'"
 
         set l [::xowiki::Link new -destroy_on_cleanup \
-                   -page $object -type "file" -lang $(prefix) \
-                   [list -stripped_name $(stripped_name)] [list -label $fn] \
-                   [list -extra_query_parameter [list [list filename $fn]]] \
-                   -parent_id $(parent_id) -item_id $(item_id)]
+                   -page ${:object} -type "file" \
+                   -lang [dict get $item_info prefix] \
+                   -stripped_name [dict get $item_info stripped_name] \
+                   -label $fn \
+                   -extra_query_parameter [list [list filename $fn]] \
+                   -parent_id [dict get $item_info parent_id] \
+                   -item_id [dict get $item_info item_id]]
         append result [$l render]
       }
       return $result
@@ -1036,37 +1891,37 @@ namespace eval ::xowiki::formfield {
 
   file instproc render_input {} {
 
-    my instvar value
-    set package_id [[my object] package_id]
-
-    array set entry_info [my entry_info]
-    set fns [my get_from_value $value name $value]
+    set package_id [${:object} package_id]
+    set entry_info [:entry_info]
+    set fns [:get_from_value ${:value} name ${:value}]
 
     #
     # The HTML5 handling of "required" would force us to upload in
     # every form the file again. To implement the sticky option, we
     # set temporarily the "required" attribute to false
     #
-    if {[my required]} {
+    if {${:required}} {
       set reset_required 1
-      my set required false
+      set :required false
     }
     next
 
     ::html::t " "
-    set id __old_value_[my name]
+    set id __old_value_${:name}
     ::html::div {
-      ::html::input -type hidden -name $id -id $id -value $value
+      ::html::input -type hidden -name $id -id $id -value ${:value}
     }
     ::html::div -class file-control -id __a$id {
       foreach \
-          object_name $entry_info(name) \
-          revision_id [my get_from_value $value revision_id ""] \
+          object_name [dict get $entry_info name] \
+          revision_id [:get_from_value ${:value} revision_id ""] \
           fn $fns {
-            #my msg "[my name]: [list my get_from_value <$value> name] => '$fn'"
-            set href [$package_id pretty_link -download 1 -parent_id $entry_info(parent_id) $object_name]
+            #:msg "${:name}: [list :get_from_value <${:value}> name] => '$fn'"
+            set href [::$package_id pretty_link -download 1 \
+                          -parent_id [dict get $entry_info parent_id] \
+                          $object_name]
 
-            if {![my istype image]} {
+            if {![:istype image]} {
               append href ?filename=[ns_urlencode $fn]
               if {$revision_id ne ""  && [string is integer $revision_id]} {
                 append href &revision_id=$revision_id
@@ -1074,10 +1929,10 @@ namespace eval ::xowiki::formfield {
             }
 
             if {[info exists reset_required]} {
-              my set required true
+              set :required true
             }
             ::html::div {
-              ::html::a -href $href {::html::t [my label_or_value $fn] }
+              ::html::a -href $href {::html::t [:label_or_value $fn] }
             }
           }
       #
@@ -1086,8 +1941,8 @@ namespace eval ::xowiki::formfield {
       # - the formfield is not disabled, and
       # - the form-field is not sticky (default)
       #
-      set disabled [expr {[my exists disabled] && [my disabled] != "false"}]
-      if {$value ne "" && !$disabled && ![my sticky] } {
+      set disabled [:is_disabled]
+      if {${:value} ne "" && !$disabled && ![:sticky] } {
         ::html::input -type button -value [_ xowiki.clear] -id $id-control
         template::add_event_listener \
             -id $id-control \
@@ -1109,21 +1964,24 @@ namespace eval ::xowiki::formfield {
   }
   import_archive instproc initialize {} {
     next
-    if {[my help_text] eq ""} {my help_text "#xowiki.formfield-import_archive-help_text#"}
+    if {${:help_text} eq ""} {
+      set :help_text "#xowiki.formfield-import_archive-help_text#"
+    }
   }
   import_archive instproc pretty_value {v} {
-    my instvar object
-    set package_id [$object package_id]
-    set parent_id  [$object parent_id]
+    set package_id [${:object} package_id]
+    set parent_id  [${:object} parent_id]
     if {$v eq ""} {return ""}
-    array set "" [my entry_info]
-    set fn [my get_from_value $v name $v]
+    set entry_info [:entry_info]
+    set fn [:get_from_value $v name $v]
     #
     # Get the file object of the imported file to obtain is full name and path
     #
-    set file_id [$package_id lookup -parent_id [$object item_id] -name $(name)]
+    set file_id [::$package_id lookup \
+                     -parent_id [${:object} item_id] \
+                     -name      [dict get $entry_info name]]
     ::xo::db::CrClass get_instance_from_db -item_id $file_id
-    set full_file_name [$file_id full_file_name]
+    set full_file_name [::$file_id full_file_name]
     #
     # Call the archiver to unpack and handle the archive
     #
@@ -1135,9 +1993,12 @@ namespace eval ::xowiki::formfield {
       # successful. Note that setting "cleanup" without thought might
       # lead to maybe unexpected deletions of the form-page
       #
-      if {[my cleanup]} {
-        set return_url [$package_id query_parameter "return_url" [$parent_id pretty_link]]
-        $package_id returnredirect [$object pretty_link -query [export_vars {m delete} return_url]]
+      if {[:cleanup]} {
+        set return_url [::$package_id query_parameter \
+                            "return_url:localurl" \
+                            [::$parent_id pretty_link]]
+        ::$package_id returnredirect [${:object} pretty_link \
+                                          -query [export_vars {m delete} return_url]]
       }
     }
   }
@@ -1153,14 +2014,14 @@ namespace eval ::xowiki::formfield {
     float width height
     padding padding-right padding-left padding-top padding-bottom
     margin margin-left margin-right margin-top margin-bottom
-    border border-width position top botton left right
+    border border-width position top bottom left right
   }
   image instproc pretty_value {v} {
     set html ""
-    array set "" [my entry_info]
-    foreach object_name $(name) revision_id [my get_from_value $v revision_id] {
-      append html [my pretty_image \
-                       -parent_id $(parent_id) \
+    set entry_info [:entry_info]
+    foreach object_name [dict get $entry_info name] revision_id [:get_from_value $v revision_id] {
+      append html [:pretty_image \
+                       -parent_id [dict get $entry_info parent_id] \
                        -revision_id $revision_id \
                        $object_name]
     }
@@ -1178,36 +2039,36 @@ namespace eval ::xowiki::formfield {
     {max_age:integer}
   } -extend_slot_default validator signature
   hidden instproc initialize {} {
-    my type hidden
-    my set widget_type text(hidden)
+    :type hidden
+    set :widget_type text(hidden)
     # remove mixins in case of retyping
-    my mixin ""
-    if {[my exists size]} {my unset size}
+    :mixin ""
+    if {[info exists :size]} {:unset size}
   }
   hidden instproc render_item {} {
     # don't render the labels
-    if {[my exists sign] && [my sign]} {
+    if {[info exists :sign] && ${:sign}} {
       set token_id [sec_get_random_cached_token_id]
       set secret [ns_config "ns/server/[ns_info server]/acs" parametersecret ""]
-      if {[my exists max_age]} {
-        set max_age [my max_age]
+      if {[info exists :max_age]} {
+        set max_age [:max_age]
       } else {
         set max_age ""
       }
-      set value [my value]
+      set value [:value]
       set sig [ad_sign -max_age $max_age -secret $secret -token_id $token_id $value]
       ::html::div {
-        ::html::input -name [my name] -value $value -type hidden
-        ::html::input -name __[my name]:sig -value $sig -type hidden
+        ::html::input -name ${:name} -value $value -type hidden
+        ::html::input -name __${:name}:sig -value $sig -type hidden
       }
     } else {
-      my render_form_widget
+      :render_form_widget
     }
   }
   hidden instproc check=signature {value} {
     set v 1
-    if {[my exists sign] && [my sign]} {
-      set sig [::xo::cc form_parameter __[my name]:sig]
+    if {[info exists :sign] && ${:sign}} {
+      set sig [::xo::cc form_parameter __${:name}:sig]
       set secret  [ns_config "ns/server/[ns_info server]/acs" parametersecret ""]
       set v [ad_verify_signature -secret $secret $value $sig]
       ns_log notice "==== we have sig <$sig> val $v"
@@ -1227,7 +2088,7 @@ namespace eval ::xowiki::formfield {
   Class create omit -superclass FormField
   omit instproc render_item {} {
     # don't render the labels
-    #my render_form_widget
+    #:render_form_widget
   }
   omit instproc render_help_text {} {
   }
@@ -1240,12 +2101,12 @@ namespace eval ::xowiki::formfield {
 
   Class create inform -superclass FormField
   inform instproc initialize {} {
-    my type hidden
-    my set widget_type text(inform)
+    :type hidden
+    set :widget_type text(inform)
   }
   inform instproc render_input {} {
-    ::html::t [my value]
-    ::html::input [my get_attributes type id name value disabled autocomplete {CSSclass class}] {}
+    ::html::t [:value]
+    ::html::input [:get_attributes type id name value disabled autocomplete {CSSclass class}] {}
   }
   inform instproc render_help_text {} {
   }
@@ -1261,9 +2122,156 @@ namespace eval ::xowiki::formfield {
     maxlength
   }
   text instproc initialize {} {
-    my type text
-    my set widget_type text
-    foreach p [list size maxlength] {if {[my exists $p]} {my set html($p) [my $p]}}
+    :type text
+    set :widget_type text
+    foreach p [list size maxlength] {if {[info exists :$p]} {set :html($p) [:$p]}}
+  }
+  text instproc render_input {} {
+    if {[:is_disabled] && [info exists :disabled_as_div]} {
+      :render_disabled_as_div text
+    } else {
+      next
+    }
+  }
+  text instproc add_statistics {{-options ""}} {
+    next
+    if {[dict exists $options word_statistics]} {
+      :word_statistics [dict get $options word_statistics]
+    }
+  }
+
+  ###########################################################
+  #
+  # ::xowiki::formfield::localized_text
+  #
+  ###########################################################
+
+  Class create localized_text -superclass text -ad_doc {
+
+    This class can be used to provide an interface for specifying
+    internationalized text strings saved in message keys via input
+    from a form. When editing the content provided via the input field
+    is saved together with an item-specific message keys in the
+    message key tables via lang::util::convert_to_i18n.
+
+    This formfield class is especially useful for xowiki items which
+    have no language-prefix (e.g. folders or links). In other cases it
+    is probably still a better idea to create same named pages with
+    different language prefixes.
+
+    @see ::lang::util::convert_to_i18n
+  }
+
+
+  localized_text instproc escape_message_keys {value} {
+    #
+    # Do NOT escape message keys (i.e. let them be rendered localized)
+    #
+    return $value
+  }
+
+  localized_text instproc build_message_key_name {-object_id:integer value} {
+    #
+    # Construct a per-item message key for this formfield
+    #
+    return xowiki-$object_id-formfield-${:name}
+  }
+
+  localized_text instproc convert_to_internal {} {
+    set value [:value]
+    #
+    # When the provided values does not look like a message key, then
+    # create a new one on the fly.
+    #
+    #:log "localized_text sees <$value>"
+    if {![regexp [lang::util::message_key_regexp] $value]} {
+      set object_id  [${:object} item_id]
+      set package_id [${:object} package_id]
+      #
+      # Try to get the desired locale first from a form parameter with
+      # a name suffix "__locale" or get the locale as specified by the user.
+      #
+      set locale [::$package_id form_parameter \
+                      "${:name}__locale" \
+                      [::$package_id default_locale]]
+      #
+      # Save the value in the message keys with the resulting locale
+      #
+      set value [lang::util::convert_to_i18n \
+                     -locale $locale \
+                     -object_id $object_id \
+                     -message_key [:build_message_key_name -object_id $object_id ${:name}] \
+                     -text $value]
+      ${:object} set_property -new 1 ${:name} $value
+    }
+  }
+
+  localized_text instproc render_input {} {
+    #
+    # Rely on the superclass to do the right rendering of the main
+    # content widget.
+    #
+    next
+
+    #
+    # Add a small selector for specifying the locale for the provided
+    # message string.
+    #
+    set value [[${:object} package_id] default_locale]
+    set :localizer_class locale-selector
+    set :localizer_id ${:id}__locale
+    set :localizer_name ${:name}__locale
+    set atts [:get_attributes disabled {localizer_class class} {localizer_id id} {localizer_name name}]
+
+    ::html::select $atts {
+      foreach o [xowiki::locales] {
+        lassign $o label rep
+        set atts [list value $rep]
+        if {$rep in $value} {
+          lappend atts selected selected
+        }
+        ::html::option $atts {::html::t $label}
+      }
+    }
+  }
+
+  localized_text instproc pretty_value {v} {
+    #
+    # Convert message keys to text so that e.g. wikicmds are
+    # afterwards evaluated.
+    #
+
+    set locale [[${:object} package_id] default_locale]
+    return [lang::util::localize $v $locale]
+  }
+
+  ###########################################################
+  #
+  # ::xowiki::formfield::correct_when
+  #
+  ###########################################################
+
+  Class create correct_when -superclass text \
+      -extend_slot_default validator valid_predicate
+
+  correct_when instproc check=valid_predicate {value} {
+    set predicate [lindex $value 0]
+    if {$predicate ne ""} {
+      set valid [expr {[:info methods answer_check=$predicate] ne ""}]
+      if {!$valid} {
+        :uplevel [list set errorMsg "invalid predicate $predicate"]
+      }
+    } else {
+      set valid 1
+    }
+    return $valid
+  }
+
+  correct_when instproc initialize {} {
+    next
+    if {${:help_text} eq ""} {
+      set :help_text "#xowiki.formfield-correct_when-help_text#"
+    }
   }
 
   ###########################################################
@@ -1275,7 +2283,7 @@ namespace eval ::xowiki::formfield {
   Class create color -superclass text
   color instproc initialize {} {
     next
-    my type color
+    :type color
   }
 
   ###########################################################
@@ -1287,7 +2295,7 @@ namespace eval ::xowiki::formfield {
   Class create datetime -superclass text
   datetime instproc initialize {} {
     next
-    my type datetime
+    :type datetime
   }
 
   ###########################################################
@@ -1300,7 +2308,7 @@ namespace eval ::xowiki::formfield {
   Class create h5date -superclass text
   h5date instproc initialize {} {
     next
-    my type date
+    :type date
   }
 
   ###########################################################
@@ -1313,7 +2321,7 @@ namespace eval ::xowiki::formfield {
   Class create h5time -superclass text
   h5time instproc initialize {} {
     next
-    my type time
+    :type time
   }
 
 
@@ -1326,7 +2334,7 @@ namespace eval ::xowiki::formfield {
   Class create datetime-local -superclass text
   datetime-local instproc initialize {} {
     next
-    my type datetime-local
+    :type datetime-local
   }
 
   ###########################################################
@@ -1338,7 +2346,7 @@ namespace eval ::xowiki::formfield {
   Class create time -superclass text
   time instproc initialize {} {
     next
-    my type time
+    :type time
   }
 
   ###########################################################
@@ -1350,7 +2358,7 @@ namespace eval ::xowiki::formfield {
   Class create week -superclass text
   week instproc initialize {} {
     next
-    my type datetime
+    :type datetime
   }
 
   ###########################################################
@@ -1362,7 +2370,7 @@ namespace eval ::xowiki::formfield {
   Class create email -superclass text
   email instproc initialize {} {
     next
-    my type email
+    :type email
   }
 
   ###########################################################
@@ -1374,7 +2382,7 @@ namespace eval ::xowiki::formfield {
   Class create search -superclass text
   search instproc initialize {} {
     next
-    my type search
+    :type search
   }
   ###########################################################
   #
@@ -1385,7 +2393,7 @@ namespace eval ::xowiki::formfield {
   Class create tel -superclass text
   tel instproc initialize {} {
     next
-    my type tel
+    :type tel
   }
 
   ###########################################################
@@ -1396,14 +2404,18 @@ namespace eval ::xowiki::formfield {
 
   Class create number -superclass FormField -parameter {
     min max step value
+    {td_CSSclass right}
   }
   number instproc initialize {} {
-    my type number
-    my set widget_type text
+    :type number
+    set :widget_type text
   }
   number instproc render_input {} {
-    ::html::input [my get_attributes type id name value disabled {CSSclass class} min max step value \
-                       autofocus autocomplete formnovalidate multiple pattern placeholder readonly required] {}
+    set boolean_atts [:booleanAttributes required readonly disabled \
+                          formnovalidate autofocus]
+    ::html::input [:get_attributes type id name value {CSSclass class} \
+                       min max step autocomplete placeholder {*}$boolean_atts] {}
+    :resetBooleanAttributes $boolean_atts
   }
 
   ###########################################################
@@ -1416,14 +2428,13 @@ namespace eval ::xowiki::formfield {
     min max step value
   }
   range instproc initialize {} {
-    my type range
-    my set widget_type text
+    :type range
+    set :widget_type text
   }
   range instproc render_input {} {
-    ::html::input [my get_attributes type id name value disabled {CSSclass class} min max step value \
+    ::html::input [:get_attributes type id name value disabled {CSSclass class} min max step value \
                        autofocus autocomplete formnovalidate multiple pattern placeholder readonly required] {}
   }
-
 
   ###########################################################
   #
@@ -1434,8 +2445,8 @@ namespace eval ::xowiki::formfield {
   Class create password -superclass text
   password instproc initialize {} {
     next
-    my set widget_type password
-    my type password
+    set :widget_type password
+    :type password
   }
   ###########################################################
   #
@@ -1448,42 +2459,47 @@ namespace eval ::xowiki::formfield {
   } -extend_slot_default validator numeric
   numeric instproc initialize {} {
     next
-    my set widget_type numeric
-    # check, if we we have an integer format
-    my set is_integer [regexp {%[0-9.]*d} [my format]]
+    set :widget_type numeric
+    # check, if we have an integer format
+    set :is_integer [regexp {%[0-9.]*d} ${:format}]
   }
   numeric instproc convert_to_external value {
-    if {$value ne ""} {
-      if { [catch "lc_numeric $value [my format] [my locale]" result] } {
-        util_user_message -message "[my label]: $result (locale=[my locale])"
-        #my msg [list lc_numeric $value [my format] [my locale]]
-        set converted_value $value
-        if {[catch {scan $value [my format] converted_value}]} {
-          return $value
-        } else {
-          return $converted_value
-        }
+    if {$value eq ""} {
+      set result ""
+    } else {
+      ad_try {
+        return [lc_numeric $value ${:format} [:locale]]
+      } on error errorMsg {
+        util_user_message -message "${:label}: $errorMsg (locale=[:locale])"
       }
-      return $result
+      #
+      # try again
+      #
+      set converted_value $value
+      ad_try {
+        scan $value ${:format} result
+      } on error {errMsg} {
+        set result $value
+      }
     }
-    return $value
+    return $result
   }
   numeric instproc convert_to_internal {} {
-    if {[my value] ne ""} {
-      set value [lc_parse_number [my value] [my locale] [my set is_integer]]
-      [my object] set_property -new 1 [my name] [expr {$value}]
+    if {[:value] ne ""} {
+      set value [lc_parse_number [:value] [:locale] ${:is_integer}]
+      ${:object} set_property -new 1 ${:name} [expr {$value}]
       return
     }
   }
   numeric instproc check=numeric {value} {
-    return [expr {[catch {lc_parse_number $value [my locale] [my set is_integer]}] == 0}]
+    return [expr {[catch {lc_parse_number $value [:locale] ${:is_integer}}] == 0}]
   }
   numeric instproc pretty_value value {
-    return [my convert_to_external $value]
+    return [:convert_to_external $value]
   }
   numeric instproc answer_check=eq {} {
     # use numeric equality
-    return [expr {[my value] == [lindex [my correct_when] 1]}]
+    return [expr {[:value] == [lindex ${:correct_when} 1]}]
   }
 
   ###########################################################
@@ -1497,7 +2513,7 @@ namespace eval ::xowiki::formfield {
   }
   user_id instproc initialize {} {
     next
-    my set is_party_id 1
+    set :is_party_id 1
   }
   user_id instproc pretty_value {v} {
     return [::xo::get_user_name $v]
@@ -1512,34 +2528,34 @@ namespace eval ::xowiki::formfield {
   Class create author -superclass user_id -parameter {
     {photo_size 54}
     {with_photo true}
+    {with_gravatar true}
     {with_user_link false}
     {label #xowiki.formfield-author#}
   }
   author instproc pretty_value {v} {
     if {$v ne ""} {
-      my instvar object
       acs_user::get -user_id $v -array user
-      if {[my with_photo]} {
+      if {${:with_photo}} {
         set portrait_id [acs_user::get_portrait_id -user_id $v]
-        if {$portrait_id == 0} {
-          set md5 [ns_md5 $user(email)]
-          set src http://www.gravatar.com/avatar/$md5?size=[my photo_size]&d=mm
+        if {$portrait_id == 0 && ${:with_gravatar}} {
+          set src [::xowiki::includelet::gravatar url \
+                       -email $user(email) -size ${:photo_size}]
         } else {
           set src "/shared/portrait-bits.tcl?user_id=$v"
         }
-        set photo "<img width='[my photo_size]' class='photo' src='[ns_quotehtml $src]'>"
+        set photo "<img width='[:photo_size]' class='photo' src='[ns_quotehtml $src]'>"
         set photo_class "photo"
       } else {
         set photo ""
         set photo_class ""
       }
       set date_field [::xowiki::FormPage get_table_form_fields \
-                          -base_item $object \
+                          -base_item ${:object} \
                           -field_names _last_modified \
                           -form_constraints ""]
-      set date [$date_field pretty_value [$object property _last_modified]]
+      set date [$date_field pretty_value [${:object} property _last_modified]]
 
-      if {[my with_user_link]} {
+      if {[:with_user_link]} {
         set user_link_begin "<a href='[ns_quotehtml /shared/community-member?user_id=$v]'>"
         set user_link_end "</a>"
       } else {
@@ -1589,12 +2605,12 @@ namespace eval ::xowiki::formfield {
   }
   url instproc initialize {} {
     next
-    my type url
+    :type url
   }
   url instproc pretty_value {v} {
     if {$v ne ""} {
-      if {[my exists link_label]} {
-        set link_label [my localize [my link_label]]
+      if {[info exists :link_label]} {
+        set link_label [:localize [:link_label]]
       } else {
         set link_label $v
       }
@@ -1617,7 +2633,7 @@ namespace eval ::xowiki::formfield {
       return ""
     }
     if {$v ne ""} {
-      set link_label [my localize [my link_label]]
+      set link_label [:localize [:link_label]]
       regsub -all & $v "&amp;" v
       return " <span class='more'>\[ <a href='[ns_quotehtml $v]'>$link_label</a> \]</span>"
     }
@@ -1633,27 +2649,97 @@ namespace eval ::xowiki::formfield {
     {rows 2}
     {cols 80}
     {spell false}
+    {autosave:boolean false}
+    {paste:boolean true}
   }
   textarea instproc initialize {} {
-    my set widget_type text(textarea)
-    my set booleanHTMLAttributes {required readonly disabled formnovalidate}
-    foreach p [list rows cols style] {if {[my exists $p]} {my set html($p) [my $p]}}
-    if {![my istype ::xowiki::formfield::richtext] && [my exists editor]} {
+    set :widget_type text(textarea)
+    set :booleanHTMLAttributes {required readonly disabled formnovalidate}
+    foreach p [list rows cols style] {
+      if {[info exists :$p]} {set :html($p) [:$p]}
+    }
+    if {![:istype ::xowiki::formfield::richtext] && [info exists :editor]} {
       # downgrading
-      #my msg "downgrading [my info class]"
-      foreach m [my info mixin] {if {[$m exists editor_mixin]} {my mixin delete $m}}
-      foreach v {editor options} {if {[my exists $v]} {my unset $v}}
+      #:msg "downgrading [:info class]"
+      foreach m [:info mixin] {if {[$m exists editor_mixin]} {:mixin delete $m}}
+      foreach v {editor options} {if {[info exists :$v]} {:unset $v}}
+    }
+    if {${:autosave}} {
+      ::xo::Page requireJS  "/resources/xowiki/autosave-text.js"
     }
     next
   }
 
   textarea instproc render_input {} {
-    set booleanAtts [my booleanAttributes {*}[my set booleanHTMLAttributes]]
-    ::html::textarea [my get_attributes id name cols rows style wrap placeholder data-repeat-template-id {CSSclass class} \
-                          {*}$booleanAtts] {
-                            ::html::t [my value]
-                          }
-    my resetBooleanAttributes $booleanAtts
+    if {[:is_disabled] && [info exists :disabled_as_div]} {
+      :render_disabled_as_div textarea
+    } else {
+      set booleanAtts [:booleanAttributes {*}${:booleanHTMLAttributes}]
+      if {${:autosave}} {
+        ::html::div -class "autosave" {
+          ::html::div -id ${:id}-status \
+              -class "nochange" \
+              -data-saved #xowiki.autosave_saved# \
+              -data-rejected #xowiki.autosave_rejected# \
+              -data-pending #xowiki.autosave_pending# {
+                ::html::t "" ;#"no change"
+              }
+          ::html::textarea [:get_attributes id name cols rows style wrap placeholder \
+                                data-repeat-template-id {CSSclass class} \
+                                {*}$booleanAtts] {
+                                  ::html::t [:value]
+                                }
+        }
+        template::add_event_listener \
+            -id ${:id} \
+            -event keyup \
+            -preventdefault=false \
+            -script "autosave_handler('${:id}');"
+
+      } else {
+        ::html::textarea [:get_attributes id name cols rows style wrap placeholder \
+                              data-repeat-template-id {CSSclass class} \
+                              {*}$booleanAtts] {
+                                ::html::t [:value]
+                              }
+      }
+      #
+      # For emergency situations, one might allow swa always pasting
+      # if {!${:paste} && ![acs_user::site_wide_admin_p -user_id [::xo::cc user_id]]} { ... }
+      #
+      if {!${:paste}} {
+        #
+        # When "paste" is deactivated, the cut&paste and drag&drop
+        # handlers are deactivated for this field. "copy" is
+        # deactivated for the full page, since otherwise, one could
+        # cut the field with the surrounding text.
+        #
+        foreach event_type {paste drag drop} {
+          template::add_event_listener -id ${:id} -event $event_type \
+              -preventdefault=true -script ""
+        }
+        template::add_script -section body -script {
+          window.addEventListener('copy', function (event) {event.preventDefault();}, false);
+        }
+      }
+
+      :resetBooleanAttributes $booleanAtts
+    }
+    :render_result_statistics
+  }
+
+  textarea instproc set_feedback {feedback_mode} {
+    set :correction [next]
+    return ${:correction}
+  }
+
+  textarea instproc add_statistics {{-options ""}} {
+    #:log "add_statistics $options"
+    next
+    if {[dict exists $options word_statistics]} {
+      #:log "add_statistics call :word_statistics"
+      :word_statistics [dict get $options word_statistics]
+    }
   }
 
   ###########################################################
@@ -1667,13 +2753,13 @@ namespace eval ::xowiki::formfield {
     {cols 80}
   }
   code_listing instproc pretty_value {v} {
-    [my object] do_substitutions 0
+    ${:object} do_substitutions 0
     if {[info commands ::apidoc::tclcode_to_html] ne ""} {
-      set html [::apidoc::tclcode_to_html [my value]]
+      set html [::apidoc::tclcode_to_html [:value]]
       regsub -all "\n?\r</FONT></EM>" $html </FONT></EM> html
       return "<pre class='code'>$html</pre>"
     } else {
-      return "<pre class='code'>[string map [list & {&amp;} < {&lt;} > {&gt;}]  [my value]]</pre>"
+      return "<pre class='code'>[string map [list & {&amp;} < {&lt;} > {&gt;}]  [:value]]</pre>"
     }
   }
 
@@ -1699,71 +2785,71 @@ namespace eval ::xowiki::formfield {
     #
     # TODO: this should be made a slot setting
     #
-    #my msg "setting editor for [my name], args=$args,[llength $args]"
-    if {[llength $args] == 0} {return [my set editor]}
+    #:msg "setting editor for ${:name}, args=$args,[llength $args]"
+    if {[llength $args] == 0} {return ${:editor}}
     set editor [lindex $args 0]
-    if {[my exists editor] && $editor eq [my set editor] && [my exists __initialized]} return
+    if {[info exists :editor] && $editor eq ${:editor} && [info exists :__initialized]} return
 
     set editor_class [self class]::$editor
-    if {$editor ne "" && ![my hasclass $editor_class]} {
-      if {![my isclass $editor_class]} {
+    if {$editor ne "" && ![:hasclass $editor_class]} {
+      if {![:isclass $editor_class]} {
         set editors [list]
         foreach c [::xowiki::formfield::richtext info subclass] {
           if {![$c exists editor_mixin]} continue
           lappend editors [namespace tail $c]
         }
         error [_ xowiki.error-form_constraint-unknown_editor \
-                   [list name [my name] editor [my editor] editors $editors]]
+                   [list name ${:name} editor [:editor] editors $editors]]
       }
-      foreach m [my info mixin] {if {[$m exists editor_mixin]} {my mixin delete $m}}
-      my mixin add $editor_class
-      #my msg "MIXIN $editor: [my info precedence]"
-      my reset_parameter
-      my set __initialized 1
+      foreach m [:info mixin] {if {[$m exists editor_mixin]} {:mixin delete $m}}
+      :mixin add $editor_class
+      #:msg "MIXIN $editor: [:info precedence]"
+      :reset_parameter
+      set :__initialized 1
     }
-    my set editor $editor
+    set :editor $editor
   }
 
   richtext instproc initialize {} {
-    #my display_field false
-    switch -- [my set displayMode] {
+    #set :display_field false
+    switch -- ${:displayMode} {
       inplace -
       inline -
       standard {}
-      default {error "value '[my set displayMode]' invalid: valid entries for displayMode are inplace, inline or standard (default)"}
+      default {error "value '${:displayMode}' invalid: valid entries for displayMode are inplace, inline or standard (default)"}
     }
     #
     # Don't set HTML5 attribute "required", since this does not match
     # well with Richtext Editors (at least ckeditor4 has problems,
     # other probably as well).
     #
-    my set booleanHTMLAttributes {readonly disabled formnovalidate}
+    set :booleanHTMLAttributes {readonly disabled formnovalidate}
     next
-    #ns_log notice "==== [my name] EDITOR specified? [my exists editor]"
-    if {![my exists editor]} {
-      my set editor [parameter::get_global_value -package_key xowiki \
-                         -parameter PreferredRichtextEditor -default ckeditor4]
-      #my msg "setting default of [my name] to [my set editor]"
+    #ns_log notice "==== ${:name} EDITOR specified? [info exists :editor]"
+    if {![info exists :editor]} {
+      set :editor [parameter::get_global_value -package_key xowiki \
+                       -parameter PreferredRichtextEditor -default ckeditor4]
+      #:msg "setting default of ${:name} to ${:editor}"
     }
-    if {![my exists __initialized]} {
+    if {![info exists :__initialized]} {
       #
       # Mixin the editor based on the attribute 'editor' if necessary
       # and call initialize again in this case...
       #
-      #ns_log notice "==== initializing EDITOR: [my set editor]"
-      my editor [my set editor]
-      my initialize
+      #ns_log notice "==== initializing EDITOR: ${:editor}"
+      :editor ${:editor}
+      :initialize
     }
   }
 
   richtext instproc render_richtext_as_div {} {
-    #my msg "[my get_attributes id style {CSSclass class}]"
-    ::html::div [my get_attributes id style {CSSclass class}] {
-      if {[my wiki]} {
-        [my object] references clear
-        ::html::t -disableOutputEscaping [[my object] substitute_markup [my value]]
+    #:msg "[:get_attributes id style {CSSclass class}]"
+    ::html::div [:get_attributes id style {CSSclass class}] {
+      if {[:wiki]} {
+        ${:object} references clear
+        ::html::t -disableOutputEscaping [${:object} substitute_markup [:value]]
       } else {
-        ::html::t -disableOutputEscaping [my value]
+        ::html::t -disableOutputEscaping [:value]
       }
     }
     ::html::div
@@ -1780,18 +2866,33 @@ namespace eval ::xowiki::formfield {
       set msg [ad_html_security_check $value]
     }
     if {$msg ne ""} {
-      my uplevel [list set errorMsg $msg]
+      :uplevel [list set errorMsg $msg]
       return 0
     }
     return 1
   }
   richtext instproc pretty_value {v} {
     # for richtext, perform minimal output escaping
-    if {[my wiki]} {
-      return [[my object] substitute_markup $v]
+    if {[:wiki]} {
+      return [${:object} substitute_markup $v]
     } else {
       return [string map [list @ "&#64;"] $v]
     }
+  }
+
+  ###########################################################
+  #
+  # ::xowiki::formfield::localized_richtext
+  #
+  ###########################################################
+
+  Class create localized_richtext -superclass {localized_text richtext} -ad_doc {
+
+    This class can be used to provide an interface for specifying
+    internationalized text strings saved in message keys via input
+    from a form. Very similar to localized_text
+
+    @see ::xowiki::formfield::localized_text
   }
 
   ###########################################################
@@ -1817,7 +2918,7 @@ namespace eval ::xowiki::formfield {
     {customConfig "../ck_config.js"}
     {callback "/* callback code */"}
     {destroy_callback "/* callback code */"}
-    {extraPlugins ""}
+    {extraPlugins "xowikiimage"}
     {templatesFiles ""}
     {templates ""}
     {contentsCss /resources/xowiki/ck_contents.css}
@@ -1826,20 +2927,20 @@ namespace eval ::xowiki::formfield {
   richtext::ckeditor set editor_mixin 1
   richtext::ckeditor ad_instproc -deprecated initialize {} {
   } {
-    switch -- [my set displayMode] {
-      inplace { my append help_text " #xowiki.ckeip_help#" }
+    switch -- ${:displayMode} {
+      inplace { append :help_text " #xowiki.ckeip_help#" }
       inline { error "inline is not supported for ckeditor v3"}
     }
     next
-    my set widget_type richtext
+    set :widget_type richtext
     # Mangle the id to make it compatible with jquery; most probably
     # not optimal and just a temporary solution
-    regsub -all {[.:]} [my id] "" id
-    my id $id
+    regsub -all {[.:]} ${:id} "" id
+    :id $id
   }
 
   richtext::ckeditor instproc js_image_helper {} {
-    set path [[my object] pretty_link]
+    set path [${:object} pretty_link]
     append js \
         [subst -novariables {
           function xowiki_image_callback(editor) {
@@ -1869,7 +2970,6 @@ namespace eval ::xowiki::formfield {
           }
 
           function calc_wiki_image_links_to_image_tags(path, data) {
-            // path = path.replace(/:/ig,"%3a");
             var regex_wikilink = new RegExp('(\\[\\[.SELF./image:)(.*?)(\\]\\])', 'g');
             data = data.replace(regex_wikilink,'<img src="'+path+'/file:$2?m=download"  alt=".SELF./image:$2" type="wikilink"  />');
             return data
@@ -1891,68 +2991,68 @@ namespace eval ::xowiki::formfield {
   }
 
   richtext::ckeditor instproc render_input {} {
-    set disabled [expr {[my exists disabled] && [my disabled] != "false"}]
-    if {![my istype ::xowiki::formfield::richtext] || $disabled } {
-      my render_richtext_as_div
+    set disabled [:is_disabled]
+    if {![:istype ::xowiki::formfield::richtext] || $disabled } {
+      :render_richtext_as_div
     } else {
-      ::xo::Page requireJS "/resources/xowiki/jquery/jquery.min.js"
+      ::xo::Page requireJS urn:ad:js:jquery
       ::xo::Page requireJS "/resources/xowiki/ckeditor/ckeditor_source.js"
       #::xo::Page requireJS "/resources/xowiki/ckeditor/ckeditor.js"
       ::xo::Page requireJS "/resources/xowiki/ckeditor/adapters/jquery.js"
-      ::xo::Page requireJS "/resources/xowiki/jquery-ui-1.8.17.custom.min.js"
-      ::xo::Page requireCSS "/resources/xowiki/jquery-ui-1.8.17.custom.css"
+      ::xo::Page requireJS urn:ad:js:jquery-ui
+      ::xo::Page requireCSS urn:ad:css:jquery-ui
 
       # In contrary to the doc, ckeditor names instances after the id,
       # not the name.
-      set id [my id]
-      set name [my name]
-      set package_id [[my object] package_id]
-      #my extraPlugins {timestamp xowikiimage}
+      set id ${:id}
+      set name ${:name}
+      set package_id [${:object} package_id]
+      #set :extraPlugins {timestamp xowikiimage}
 
-      if {"xowikiimage" in [my extraPlugins]} {
-        my js_image_helper
+      if {"xowikiimage" in [:extraPlugins]} {
+        :js_image_helper
         set ready_callback {xowiki_image_callback(e.editor);}
       } else {
         set ready_callback "/*none*/;"
       }
 
       set options [subst {
-        toolbar : '[my toolbar]',
-        uiColor: '[my uiColor]',
-        language: '[lang::conn::language]',
-        skin: '[my skin]',
-        startupMode: '[my mode]',
-        parent_id: '[[my object] item_id]',
-        package_url: '[$package_id package_url]',
-        extraPlugins: '[join [my extraPlugins] ,]',
-        contentsCss: '[my contentsCss]',
-        imageSelectorDialog: '[my imageSelectorDialog]',
+        toolbar : '[:toolbar]',
+        uiColor: '[:uiColor]',
+        language: '[::xo::cc lang]',
+        skin: '[:skin]',
+        startupMode: '${:mode}',
+        parent_id: '[${:object} item_id]',
+        package_url: '[::$package_id package_url]',
+        extraPlugins: '[join [:extraPlugins] ,]',
+        contentsCss: '[:contentsCss]',
+        imageSelectorDialog: '[:imageSelectorDialog]',
         ready_callback: '$ready_callback',
-        customConfig: '[my customConfig]'
+        customConfig: '[:customConfig]'
       }]
-      if {[my templatesFiles] ne ""} {
-        append options "  , templates_files: \['[join [my pathNames [my templatesFiles]] ',' ]' \]\n"
+      if {[:templatesFiles] ne ""} {
+        append options "  , templates_files: \['[join [:pathNames [:templatesFiles]] ',' ]' \]\n"
       }
-      if {[my templates] ne ""} {
-        append options "  , templates: '[my templates]'\n"
+      if {[:templates] ne ""} {
+        append options "  , templates: '[:templates]'\n"
       }
 
-      #set parent [[[my object] package_id] get_page_from_item_or_revision_id [[my object] parent_id]];# ???
+      #set parent [[${:object} package_id] get_page_from_item_or_revision_id [${:object} parent_id]];# ???
 
-      if {[my set displayMode] eq "inplace"} {
-        if {[my value] eq ""} {
-          my value "&nbsp;"
+      if {${:displayMode} eq "inplace"} {
+        if {[:value] eq ""} {
+          :value "&nbsp;"
         }
-        my render_richtext_as_div
-        if {[my inline]} {
+        :render_richtext_as_div
+        if {${:inline}} {
           set wrapper_class ""
         } else {
           set wrapper_class "form-item-wrapper"
-          my callback {$(this.element.$).closest('.form-widget').css('clear','both').css('display', 'block');}
-          my destroy_callback {$(this).closest('.form-widget').css('clear','none');}
+          :callback {$(this.element.$).closest('.form-widget').css('clear','both').css('display', 'block');}
+          :destroy_callback {$(this).closest('.form-widget').css('clear','none');}
         }
-        set callback [my callback]
-        set destroy_callback [my destroy_callback]
+        set callback [:callback]
+        set destroy_callback [:destroy_callback]
 
         ::xo::Page requireJS "/resources/xowiki/ckeip.js"
         ::xo::Page requireJS [subst -nocommands {
@@ -1968,7 +3068,7 @@ namespace eval ::xowiki::formfield {
           });
         }]
       } else {
-        set callback [my callback]
+        set callback [:callback]
         ::xo::Page requireJS [subst -nocommands {
           \$(document).ready(function() {
             \$( '#$id' ).ckeditor(function() { $callback }, {
@@ -2007,6 +3107,7 @@ namespace eval ::xowiki::formfield {
     {submit_callback ""}
     {extraPlugins "xowikiimage"}
     {extraAllowedContent {*(*)}}
+    {ck_package standard-all}
     {templatesFiles ""}
     {templates ""}
     {contentsCss /resources/xowiki/ck_contents.css}
@@ -2016,19 +3117,19 @@ namespace eval ::xowiki::formfield {
   richtext::ckeditor4 set editor_mixin 1
   richtext::ckeditor4 instproc initialize {} {
 
-    switch -- [my set displayMode] {
-      inplace { my append help_text " #xowiki.ckeip_help#" }
+    switch -- ${:displayMode} {
+      inplace { append :help_text " #xowiki.ckeip_help#" }
     }
     next
-    my set widget_type richtext
+    set :widget_type richtext
     # Mangle the id to make it compatible with jquery; most probably
     # not optimal and just a temporary solution
-    regsub -all {[.:-]} [my id] "" id
-    my id $id
+    regsub -all {[.:-]} ${:id} "" id
+    :id $id
   }
 
   richtext::ckeditor4 instproc js_image_helper {} {
-    set path [[my object] pretty_link]
+    set path [${:object} pretty_link]
     append js \
         [subst -novariables {
           function xowiki_image_callback(editor) {
@@ -2069,7 +3170,6 @@ namespace eval ::xowiki::formfield {
 
           function calc_wiki_image_links_to_image_tags(path, text) {
             // console.log('path = <' + path + '>');
-            //path = path.replace(/:/ig,"%3a");
             var regex_wikilink = new RegExp('(\\[\\[.SELF./image:)(.*?)(\\]\\])', 'g');
             text = text.replace(regex_wikilink,'<img src="'+path+'/file:$2?m=download"  alt=".SELF./image:$2" type="wikilink"  />');
             return text;
@@ -2091,47 +3191,68 @@ namespace eval ::xowiki::formfield {
   }
 
   richtext::ckeditor4 instproc render_input {} {
-    set disabled [expr {[my exists disabled] && [my disabled] != "false"}]
-    set is_repeat_template [expr {[my exists is_repeat_template] && [my set is_repeat_template] == "true"}]
-    # my msg "[my id] [my name] - $is_repeat_template"
+    set disabled [:is_disabled]
+    set is_repeat_template [expr {[info exists :is_repeat_template] && ${:is_repeat_template} == "true"}]
+    # :msg "${:id} ${:name} - $is_repeat_template"
 
     if {$is_repeat_template} {
-      my set data-repeat-template-id [my id]
+      set :data-repeat-template-id ${:id}
     }
 
     # if value is empty, we need something to be clickable for display mode inplace
-    if {[my value] eq "" && ${:displayMode} eq "inplace"} {
-      my value "&nbsp;"
+    if {[:value] eq "" && ${:displayMode} eq "inplace"} {
+      :value "&nbsp;"
     }
 
-    if {![my istype ::xowiki::formfield::richtext] || ($disabled && !$is_repeat_template)} {
-      my render_richtext_as_div
+    if {![:istype ::xowiki::formfield::richtext] || ($disabled && !$is_repeat_template)} {
+      :render_richtext_as_div
     } else {
 
-      security::csp::require script-src 'unsafe-eval'
-      security::csp::require -force script-src 'unsafe-inline'
+      template::head::add_javascript -src urn:ad:js:jquery
+      try {
+        #
+        # Try to use the ckeditor from the richtext-ckeditor4
+        # installation.
+        #
+        # There seems to be something broken on 4.9.2 version on the
+        # CDN. If we do not use standard-all, then we see an error
+        # about a missing
+        # ".../4.9.2/full/plugins/iframedialog/plugin.js". There
+        # exists a "iframe" and a "iframedialog" plugin for ckeditor4,
+        # the latter is not included in the standard builds (only in
+        # "-all").
+        #
+        ::richtext::ckeditor4::add_editor \
+            -order 90 \
+            -ck_package ${:ck_package} \
+            -adapters "jquery.js"
 
-      security::csp::require script-src cdn.ckeditor.com
-      security::csp::require style-src cdn.ckeditor.com
-      security::csp::require img-src cdn.ckeditor.com
+      } trap {TCL LOOKUP COMMAND} {errorMsg} {
+        #
+        # If for whatever reason, richtext-ckeditor4 is not available,
+        # bail out and tell the user to install.
+        #
 
-      ::xo::Page requireJS "/resources/xowiki/jquery/jquery.min.js"
-      #::xo::Page requireJS "/resources/xowiki/ckeditor4/ckeditor.js"
-      #::xo::Page requireJS "/resources/xowiki/ckeditor4/adapters/jquery.js"
-      ::xo::Page requireJS "//cdn.ckeditor.com/4.5.11/standard-all/ckeditor.js"
-      ::xo::Page requireJS "//cdn.ckeditor.com/4.5.11/standard-all/adapters/jquery.js"
-
-      # In contrary to the doc, ckeditor4 names instances after the id,
-      # not the name.
-      set id [my id]
-      set name [my name]
-      set package_id [[my object] package_id]
-      if {${:displayMode} eq "inline"} {
-        my lappend extraPlugins sourcedialog
+        error "Please install the package: richtext-ckeditor4"
       }
 
-      if {"xowikiimage" in [my extraPlugins]} {
-        my js_image_helper
+      #
+      # In contrary to the documentation, ckeditor4 names instances
+      # after the id, not the name.
+      #
+      set id ${:id}
+      set name ${:name}
+      set package_id [${:object} package_id]
+
+      # Earlier versions required the plugin "sourcedialog" in
+      # "inline" mode. Not sure why. This plugin was removed from
+      # CKEditor.
+      #if {${:displayMode} eq "inline"} {
+      #  lappend :extraPlugins sourcedialog
+      #}
+
+      if {"xowikiimage" in ${:extraPlugins}} {
+        :js_image_helper
         set ready_callback "xowiki_image_callback(CKEDITOR.instances\['$id'\]);"
         set ready_callback2 {xowiki_image_callback(e.editor);}
       } else {
@@ -2140,50 +3261,72 @@ namespace eval ::xowiki::formfield {
         set submit_callback "/*none*/;"
       }
 
+      #
+      # Append dimensions (when available) in JSON notation.
+      #
+      set dimensions {}
+      if {[info exists :height]} {
+        lappend dimensions [subst {"height": "${:height}"}]
+      }
+      if {[info exists :width]} {
+        lappend dimensions [subst {"width": "${:width}"}]
+      }
+      if {[llength $dimensions] > 0} {
+        set dimensions [join $dimensions ,],
+      }
+
       set options [subst {
-        [my set additionalConfigOptions]
-        toolbar : '[my toolbar]',
-        uiColor: '[my uiColor]',
-        language: '[lang::conn::language]',
-        skin: '[my skin]',
-        startupMode: '[my mode]',
-        parent_id: '[[my object] item_id]',
-        package_url: '[$package_id package_url]',
-        extraPlugins: '[join [my extraPlugins] ,]',
-        extraAllowedContent: '[my extraAllowedContent]',
-        contentsCss: '[my contentsCss]',
-        imageSelectorDialog: '[my imageSelectorDialog]?parent_id=[[my object] item_id]',
+        $dimensions
+        ${:additionalConfigOptions}
+        toolbar : '${:toolbar}',
+        uiColor: '${:uiColor}',
+        language: '[::xo::cc lang]',
+        skin: '${:skin}',
+        startupMode: '${:mode}',
+        disableNativeSpellChecker: false,
+        parent_id: '[${:object} item_id]',
+        package_url: '[::$package_id package_url]',
+        extraPlugins: '[join ${:extraPlugins} ,]',
+        extraAllowedContent: '${:extraAllowedContent}',
+        contentsCss: '${:contentsCss}',
+        imageSelectorDialog: '[:imageSelectorDialog]?parent_id=[${:object} item_id]',
         ready_callback: '$ready_callback2',
-        customConfig: '[my customConfig]',
+        customConfig: '${:customConfig}',
         textarea_id: id
       }]
-      if {[my allowedContent] ne ""} {
-        append options "  , allowedContent: '[my allowedContent]'\n"
+      if {${:allowedContent} ne ""} {
+        #
+        # Syntax rules:
+        # https://ckeditor.com/docs/ckeditor4/latest/guide/dev_allowed_content_rules.html#string-format
+        #
+        if {${:allowedContent} in {true false}} {
+          append options "  , allowedContent: ${:allowedContent}\n"
+        } else {
+          append options "  , allowedContent: '${:allowedContent}'\n"
+        }
       }
-      if {[my templatesFiles] ne ""} {
-        append options "  , templates_files: \['[join [my pathNames [my templatesFiles]] ',' ]' \]\n"
+      if {${:templatesFiles} ne ""} {
+        append options "  , templates_files: \['[join [:pathNames ${:templatesFiles}] ',' ]' \]\n"
       }
-      if {[my templates] ne ""} {
-        append options "  , templates: '[my templates]'\n"
+      if {${:templates} ne ""} {
+        append options "  , templates: '${:templates}'\n"
       }
 
-      #set parent [[[my object] package_id] get_page_from_item_or_revision_id [[my object] parent_id]];# ???
+      #set parent [[${:object} package_id] get_page_from_item_or_revision_id [${:object} parent_id]];# ???
 
       if {${:displayMode} eq "inplace"} {
-        set callback [my callback]
-        set destroy_callback [my destroy_callback]
 
-        my lappend CSSclass ckeip
+        lappend :CSSclass ckeip
         ::xo::Page requireJS "/resources/xowiki/ckeip.js"
 
         ::xo::Page requireJS [subst -nocommands {
           function load_$id (id) {
             // must use id provided as argument
-            \$('#' + id).ckeip(function() { $callback }, {
+            \$('#' + id).ckeip(function() { ${:callback}}, {
               name: '$name',
               ckeditor_config: {
                 $options,
-                destroy_callback: function() { $destroy_callback }
+                destroy_callback: function() { ${:destroy_callback} }
               }
             });
           }
@@ -2203,20 +3346,20 @@ namespace eval ::xowiki::formfield {
             } );
           }]
         }
-        my render_richtext_as_div
+        :render_richtext_as_div
       } elseif {${:displayMode} eq "inline"} {
-        if {"xowikiimage" in [my extraPlugins]} {
+        if {"xowikiimage" in ${:extraPlugins}} {
           set ready_callback "xowiki_image_callback(CKEDITOR.instances\['$id'\]);"
           set submit_callback "calc_image_tags_to_wiki_image_links_inline('$id');"
         }
 
-        set submit_callback "$submit_callback [my submit_callback]"
+        set submit_callback "$submit_callback ${:submit_callback}"
         ::xo::Page requireJS [subst {
           function load_$id (id) {
             CKEDITOR.inline(id, {
               on: {
                 instanceReady: function(e) {
-                  \$(e.editor.element.\$).attr('title', '[my set label]');
+                  \$(e.editor.element.\$).attr('title', '${:label}');
                   \$(e.editor.element.\$.form).submit(function(e) {
                     $submit_callback
                   });
@@ -2244,11 +3387,10 @@ namespace eval ::xowiki::formfield {
         }
         next
       } else {
-        set callback [my callback]
         ::xo::Page requireJS [subst -nocommands {
           function load_$id (id) {
             // must use id provided as argument
-            \$('#' + id).ckeditor(function() { $callback }, {$options});
+            \$('#' + id).ckeditor(function() { ${:callback} }, {$options});
           }
         }]
         if {!$is_repeat_template} {
@@ -2282,24 +3424,23 @@ namespace eval ::xowiki::formfield {
   richtext::wym set editor_mixin 1
   richtext::wym instproc initialize {} {
     next
-    my set widget_type richtext
+    set :widget_type richtext
   }
   richtext::wym instproc render_input {} {
-    set disabled [expr {[my exists disabled] && [my disabled] != "false"}]
-    if {![my istype ::xowiki::formfield::richtext] || $disabled } {
-      my render_richtext_as_div
+    set disabled [:is_disabled]
+    if {![:istype ::xowiki::formfield::richtext] || $disabled } {
+      :render_richtext_as_div
     } else {
       ::xo::Page requireCSS "/resources/xowiki/wymeditor/skins/default/screen.css"
-      ::xo::Page requireJS "/resources/xowiki/jquery/jquery.min.js"
+      ::xo::Page requireJS urn:ad:js:jquery
       ::xo::Page requireJS  "/resources/xowiki/wymeditor/jquery.wymeditor.pack.js"
       set postinit ""
       foreach plugin {hovertools resizable fullscreen embed} {
-        if {$plugin in [my plugins]} {
+        if {$plugin in [:plugins]} {
           switch -- $plugin {
             embed {}
             resizable {
-              ::xo::Page requireJS  "/resources/xowiki/jquery/jquery.ui.js"
-              ::xo::Page requireJS  "/resources/xowiki/jquery/jquery.ui.resizable.js"
+              ::xo::Page requireJS  urn:ad:js:jquery-ui
               append postinit "wym.${plugin}();\n"
             }
             default {append postinit "wym.${plugin}();\n"}
@@ -2307,17 +3448,17 @@ namespace eval ::xowiki::formfield {
           ::xo::Page requireJS  "/resources/xowiki/wymeditor/plugins/$plugin/jquery.wymeditor.$plugin.js"
         }
       }
-      regsub -all {[.:]} [my id] {\\\\&} JID
+      regsub -all {[.:]} ${:id} {\\\\&} JID
 
       # possible skins are per in the distribution: "default", "sliver", "minimal" and "twopanels"
-      set config [list "skin: '[my skin]'"]
+      set config [list "skin: '[:skin]'"]
 
-      #my msg "wym, h [my exists height] || w [my exists width]"
-      if {[my exists height] || [my exists width]} {
+      #:msg "wym, h [info exists :height] || w [info exists :width]"
+      if {[info exists :height] || [info exists :width]} {
         set height_cmd ""
         set width_cmd ""
-        if {[my exists height]} {set height_cmd "jQuery(wym._box).find(wym._options.iframeSelector).css('height','[my height]');"}
-        if {[my exists width]}  {set width_cmd "wym_box.css('width', '[my width]');"}
+        if {[info exists :height]} {set height_cmd "jQuery(wym._box).find(wym._options.iframeSelector).css('height','[:height]');"}
+        if {[info exists :width]}  {set width_cmd "wym_box.css('width', '[:width]');"}
         set postInit [subst -nocommand -nobackslash {
           postInit: function(wym) {
             wym_box = jQuery(".wym_box");
@@ -2356,7 +3497,7 @@ namespace eval ::xowiki::formfield {
   }
   richtext::xinha set editor_mixin 1
   richtext::xinha instproc initialize {} {
-    switch -- [my set displayMode] {
+    switch -- ${:displayMode} {
       inplace {
         ::xo::Page requireJS  "/resources/xowiki/xinha-inplace.js"
         if {![info exists ::__xinha_inplace_init_done]} {
@@ -2368,23 +3509,23 @@ namespace eval ::xowiki::formfield {
     }
 
     next
-    my set widget_type richtext
-    if {![my exists plugins]} {
-      my plugins \
+    set :widget_type richtext
+    if {![info exists :plugins]} {
+      :plugins \
           [parameter::get -parameter "XowikiXinhaDefaultPlugins" \
                -default [::xo::parameter get_from_package_key \
                              -package_key "acs-templating" -parameter "XinhaDefaultPlugins"]]
     }
-    my set options [my get_attributes editor plugins width height folder_id script_dir javascript wiki_p]
+    set :options [:get_attributes editor plugins width height folder_id script_dir javascript wiki_p]
     # for the time being, we can't set the defaults via parameter,
     # but only manually, since the editor is used as a mixin, the parameter
     # would have precedence over the defaults of subclasses
-    if {![my exists slim]} {my set slim false}
-    if {![my exists style]} {my set style "width: 100%;"}
-    if {![my exists height]} {my set height 350px}
-    if {![my exists wiki_p]} {my set wiki_p 1}
-    if {[my set slim]} {
-      my lappend options javascript {
+    if {![info exists :slim]} {set :slim false}
+    if {![info exists :style]} {set :style "width: 100%;"}
+    if {![info exists :height]} {set :height 350px}
+    if {![info exists :wiki_p]} {set :wiki_p 1}
+    if {${:slim}} {
+      lappend :options javascript {
         xinha_config.toolbar  = [['popupeditor', 'formatblock', 'bold','italic','createlink','insertimage'],
                                  ['separator','insertorderedlist','insertunorderedlist','outdent','indent'],
                                  ['separator','killword','removeformat','htmlmode']
@@ -2394,9 +3535,9 @@ namespace eval ::xowiki::formfield {
   }
 
   richtext::xinha instproc render_input {} {
-    set disabled [expr {[my exists disabled] && [my disabled] != "false"}]
-    if {![my istype ::xowiki::formfield::richtext] || $disabled} {
-      my render_richtext_as_div
+    set disabled [:is_disabled]
+    if {![:istype ::xowiki::formfield::richtext] || $disabled} {
+      :render_richtext_as_div
     } else {
       #
       # required CSP directives for Xinha
@@ -2408,10 +3549,10 @@ namespace eval ::xowiki::formfield {
       # the blank master
       set ::acs_blank_master(xinha) 1
       set quoted [list]
-      foreach e [my plugins] {lappend quoted '$e'}
+      foreach e [:plugins] {lappend quoted '$e'}
       set ::acs_blank_master(xinha.plugins) [join $quoted ", "]
 
-      array set o [my set options]
+      array set o ${:options}
       set xinha_options ""
       foreach e {width height folder_id fs_package_id file_types attach_parent_id wiki_p package_id} {
         if {[info exists o($e)]} {
@@ -2423,31 +3564,186 @@ namespace eval ::xowiki::formfield {
         append xinha_options $o(javascript) \n
       }
       set ::acs_blank_master(xinha.options) $xinha_options
-      lappend ::acs_blank_master__htmlareas [my id]
+      lappend ::acs_blank_master__htmlareas ${:id}
 
       if {${:displayMode} eq "inplace"} {
-        ::html::div [my get_attributes id name {CSSclass class} disabled] {
+        ::html::div [:get_attributes id name {CSSclass class} disabled] {
           set href \#
-          ::html::a -style "float: right;" -class edit-item-button -href $href -id [my id]-edit {
-            ::html::t  -disableOutputEscaping &nbsp;
+          ::html::a -style "float: right;" -class edit-item-button -href $href -id ${:id}-edit {
+            ::html::t -disableOutputEscaping &nbsp;
           }
           template::add_event_listener \
-              -id [my id]-edit \
-              -script [subst {xinha.inplace.openEditor('[my id]');}]
+              -id ${:id}-edit \
+              -script [subst {xinha.inplace.openEditor('${:id}');}]
 
-          ::html::div -id "[my id]__CONTENT__" {
-            ::html::t -disableOutputEscaping  [my value]
+          ::html::div -id "${:id}__CONTENT__" {
+            ::html::t -disableOutputEscaping  [:value]
           }
         }
-        my set hiddenid [my id]__HIDDEN__
-        my set type hidden
-        ::html::input [my get_attributes {hiddenid id} name type value] {}
+        set :hiddenid ${:id}__HIDDEN__
+        set :type hidden
+        ::html::input [:get_attributes {hiddenid id} name type value] {}
       } else {
-        #::html::div [my get_attributes id name cols rows style {CSSclass class} disabled] {}
+        #::html::div [:get_attributes id name cols rows style {CSSclass class} disabled] {}
         next
       }
     }
   }
+
+  ###########################################################
+  #
+  # ::xowiki::formfield::ShuffleField
+  #
+  ###########################################################
+
+  # abstract superclass for select and radio
+  Class create ShuffleField -superclass FormField -parameter {
+    {options ""}
+    {render_hints ""}
+    {show_max ""}
+    {shuffle_kind:wordchar none}
+  } -ad_doc {
+
+    An abstract class for shuffling options and answers.  The options
+    can be used a content of checkboxes, radioboxes and the like. This
+    is particular useful when creating quizzes.
+
+    @param shuffle_kind none|peruser|always
+  }
+  ShuffleField set abstract 1
+
+  ShuffleField instproc randomized_indices {length} {
+    #
+    # Produce a list of random indices.
+    #
+    # In case, the shuffle_kind is not "always", we assume a shuffling
+    # produced by every call. When a seed is provided (e.g. a user_id)
+    # then the shuffling is stable for this seed.
+    #
+    if {${:shuffle_kind} ne "always"} {
+      #
+      # It is possible to keep different seeds in the instance
+      # attributes of the object to support a different randomization
+      # not only by user but also per position. This requires either
+      # an instance variable "test_item_in_position" in the form field or an
+      # instance_attribute "position" in the object, where the former
+      # has a higher precedence (important for combined forms).
+      #
+      if {![:exists test_item_in_position]} {
+        set :test_item_in_position [${:object} property position]
+      }
+      set seeds [${:object} property seeds]
+      set seed [expr {$seeds ne "" && ${:test_item_in_position} ne ""
+                      ? [lindex $seeds ${:test_item_in_position}]
+                      : [xo::cc user_id]}]
+      set shuffled [::xowiki::randomized_indices -seed $seed $length]
+      #ns_log notice "${:name} randomized_indices for seed $seed (user_id [xo::cc user_id])" \
+          "(${:test_item_in_position} - $seeds): $shuffled" \
+          "(inp [:exists test_item_in_position])"
+    } else {
+      set shuffled [::xowiki::randomized_indices $length]
+    }
+    return $shuffled
+  }
+
+  ShuffleField instproc valid_subselection {shuffled} {
+    if {${:show_max} < [llength $shuffled]} {
+      #
+      # Take first n shuffled elements as subselection
+      #
+      set range [expr {${:show_max} - 1}]
+      set subselection [lrange $shuffled 0 $range]
+
+      if {${:multiple}} {
+        #
+        # Multiple choice: Accept every subselection as valid for the
+        # time being.
+        #
+      } elseif {[info exists :answer_value]} {
+        #
+        # Single choice: make sure that the correct element is
+        # included in subselection.
+        #
+        set must_contain [expr {${:answer_value} - 1}]
+        if {$must_contain ni $subselection} {
+          #ns_log notice "--- have to fix subselection does not contain $must_contain"
+          set dropIndex [expr {int($range * rand())}]
+          set subselection [lreplace $subselection $dropIndex $dropIndex $must_contain]
+          #ns_log notice "--- fixed subselection dropIndex $dropIndex -> $subselection"
+        }
+      }
+      set shuffled $subselection
+    }
+    return $shuffled
+  }
+
+  ShuffleField instproc shuffle_options {} {
+    #
+    # Reorder :options and :answers when :shuffle is activated.
+    #
+    set length [llength ${:options}]
+    if {$length > 0} {
+      #
+      # There is something to shuffle.
+      #
+      #
+      # Produce a list of random indices.
+      #
+      set shuffled [:randomized_indices $length]
+
+      #
+      # Use the random indices for reordering the :options and
+      # :answers.
+      #
+      if {[info exists :show_max] && ${:show_max} ne ""} {
+        set shuffled [:valid_subselection $shuffled]
+        #ns_log notice "SHUFFLE ${:name} <$shuffled> answer_value ${:answer_value} MAX <${:show_max}>"
+      }
+      set option2 {}; set answer2 {}; set answer_value2 {}
+      if {[llength ${:render_hints}] > 0} {
+        set render_hints2 {}
+      }
+      if {[info exists :descriptions] && [llength ${:descriptions}] > 0} {
+        set descriptions2 {}
+      }
+      foreach i $shuffled {
+        lappend option2 [lindex ${:options} $i]
+        lappend answer2 [lindex ${:answer} $i]
+        if {${:multiple} && [info exists :answer_value]} {
+          lappend answer_value2 [lindex ${:answer_value} $i]
+        }
+        if {[info exists render_hints2]} {
+          lappend render_hints2 [lindex ${:render_hints} $i]
+        }
+        if {[info exists descriptions2]} {
+          lappend descriptions2 [lindex ${:descriptions} $i]
+        }
+      }
+      #ns_log notice "SHUFFLE ${:name} o2=$option2 answer2=$answer2"
+      set :options $option2
+      set :answer $answer2
+      if {${:multiple}} {
+        set :answer_value $answer_value2
+      }
+      if {[info exists render_hints2]} {
+        set :render_hints $render_hints2
+      }
+      if {[info exists descriptions2]} {
+        set :descriptions $descriptions2
+      }
+    }
+  }
+
+  ShuffleField instproc initialize {} {
+    next
+    #
+    # Shuffle options when needed
+    #
+    if {${:shuffle_kind} ne "none"} {
+      :shuffle_options
+    }
+  }
+
 
   ###########################################################
   #
@@ -2456,54 +3752,202 @@ namespace eval ::xowiki::formfield {
   ###########################################################
 
   # abstract superclass for select and radio
-  Class create enumeration -superclass FormField -parameter {
-    {options ""}
+  Class create enumeration -superclass ShuffleField -parameter {
     {category_tree}
+    {descriptions ""}
   }
   enumeration set abstract 1
+
   enumeration instproc initialize {} {
-    if {[my exists category_tree]} {
-      my config_from_category_tree [my category_tree]
+    if {[info exists :category_tree]} {
+      :config_from_category_tree ${:category_tree}
+    }
+    if {[info exists :answer]} {
+      set count 1
+      set :answer_value {}
+      foreach a ${:answer} {
+        if {$a} {
+          lappend :answer_value $count
+        }
+        incr count
+      }
+      #ns_log notice "???? answer ${:answer} -> ${:answer_value}"
     }
     next
+
+    #
     # For required enumerations, the implicit default value is the
     # first entry of the options. This is as well the value, which is
     # returned from the browser in such cases.
-    if {[my required] && [my set value] eq ""} {
-      my set value [lindex [my set options] 0 1]
+    #
+    if {${:required} && ${:value} eq ""} {
+      set :value [lindex ${:options} 0 1]
     }
   }
   enumeration abstract instproc render_input {}
 
-  enumeration instproc get_labels {values} {
-    if {[my multiple]} {
-      set labels [list]
-      foreach v $values {lappend labels [list [my get_entry_label $v] $v]}
-      return $labels
+  enumeration instproc value_if_nothing_is_returned_from_form {default} {
+
+    # Here we have to distinguish between two cases:
+    # - edit mode: somebody has removed a mark from a check button;
+    #   this means: clear the field
+    # - view mode: the fields were deactivated (made insensitive);
+    #   this means: keep the old value -> return default
+
+    if {[info exists :disabled]} {
+      return $default
     } else {
-      return [list [list [my get_entry_label $values] $values]]
+      return ""
     }
   }
 
-  enumeration instproc pretty_value {v} {
-    if {[my exists category_label($v)]} {
-      return [my set category_label($v)]
+  enumeration instproc get_labels {values} {
+    if {${:multiple}} {
+      set labels [list]
+      foreach v $values {
+        lappend labels [list [:get_entry_label $v] $v]
+      }
+      return $labels
+    } else {
+      return [list [list [:get_entry_label $values] $values]]
     }
-    if {[my exists multiple] && [my set multiple]} {
-      foreach o [my set options] {
+  }
+
+  enumeration instproc answer_is_correct {} {
+    #:log "enumeration CORRECT? ${:name} (value=[:value], answer=[expr {[info exists :answer]?${:answer}:{NONE}}]"
+    if {![info exists :answer]} {
+      return 0
+    } else {
+      set value [:value]
+      #:log "enumeration ${:name} CORRECT? answers [llength ${:answer}] options [llength ${:options}]"
+      set :correction {}
+      set r 0; set f 0; set rk 0; set fk 0; set W 0; set O 0; set R 0
+      foreach o ${:options} a ${:answer} {
+        lassign $o label v
+        #:log "enumeration ${:name} CORRECT? <$a> <$v in $value> -> [expr {$v in $value}]"
+        #
+        # A correct answer might be:
+        # - a mark on a correct entry
+        # - no mark on a wrong entry
+        #
+        if {$a} {
+          incr r
+          set correctly_answered [expr {$v in $value}]
+        } else {
+          set correctly_answered [expr {$v ni $value}]
+          incr f
+          #:log "enumeration ${:name} CORRECT? <$a> <$v ni $value> -> [expr {$v ni $value}]"
+        }
+        lappend :correction $correctly_answered
+        if {$correctly_answered} {
+          incr R
+        } else {
+          incr W
+        }
+
+        if {$v in $value} {
+          #
+          # Marked entries: mark can be correct or wrong.
+          #
+          if {$a} {
+            incr rk
+          } else {
+            incr fk
+          }
+        }
+        #
+        # Now calculate the scores of different scoring schemes.
+        #
+        if {$r > 0} {
+          #
+          # Certain correction schemes devide by $r. We cannot use
+          # these schemes in such cases.
+          #
+          if {$f == 0} {
+            #
+            # No penalty for marking a wrong solution, when there is
+            # no wrong solution.
+            #
+            set wi1 [expr {max((100.0/$r) * $rk,0)}]
+            set wi2 [expr {max((100.0/$r) * $rk, 0)}]
+          } else {
+            set wi1 [expr {max((100.0/$r) * $rk - (100.0/$f) * $fk, 0)}]
+            if {$f == 1} {
+              #
+              # Special rule when there is just one wrong solution.
+              #
+              set wi2 [expr {max((100.0/$r) * $rk - min(50.0, (100.0/$f)) * $fk, 0)}]
+            } else {
+              set wi2 $wi1
+            }
+          }
+          set etk  [expr {100.0 * (($r*1.0+$f) /$r) * ($rk - $fk) / ($R + $W) }]
+        } else {
+          set wi1 0.0
+          set wi2 0.0
+          set etk 0.0
+        }
+
+        set s1   [expr {100.0 * $R / ($R + $W) }]
+        set s2   [expr {100.0 * ($R - $W/2.0) / ($R + $W) }]
+
+        set ggw0 [expr {100.0 * ($R - $W) / ($R + $W) }]
+        set ggw  [expr {100.0 * ($R - $W*0.5) / ($R + $W) }]
+
+        set scores [list wi1 $wi1 wi2 $wi2 s1 $s1 s2 $s2 etk $etk ggw0 $ggw0 ggw $ggw]
+        set :correction_data [list \
+                                  item [list r $r f $f] \
+                                  marks [list rk $rk fk $fk] \
+                                  answers [list R $R W $W] \
+                                  scores $scores]
+      }
+      #:log "enumeration CHECKED CORRECT? ${:correction_data}"
+      return [expr {0 ni ${:correction} ? 1 : -1}]
+    }
+  }
+
+  enumeration instproc make_correct {} {
+    set :value ${:answer_value}
+    #ns_log notice "???? make_correct sets value ${:answer_value}"
+  }
+
+  enumeration instproc add_statistics {{-options ""}} {
+    #ns_log notice "???? add_statistics"
+    #
+    # Add generic statistics
+    #
+    next
+    #
+    # Enumeration specific statistics
+    #
+    foreach v ${:value} {
+      dict incr :result_statistics $v
+    }
+    #ns_log notice "${:name} ### answer ${:answer} value ${:value} correction ${:correction} "
+    #ns_log notice [:serialize]
+  }
+
+
+  enumeration instproc pretty_value {v} {
+    if {[info exists :category_label($v)]} {
+      return [set :category_label($v)]
+    }
+    if {[info exists :multiple] && ${:multiple}} {
+      foreach o ${:options} {
         lassign $o label value
-        set labels($value) [my localize $label]
+        set labels($value) [:localize $label]
       }
       set values [list]
       foreach i $v {lappend values $labels($i)}
       return [join $values {, }]
     } else {
-      foreach o [my set options] {
+      foreach o ${:options} {
         lassign $o label value
-        if {$value eq $v} {return [my localize $label]}
+        if {$value eq $v} {return [:localize $label]}
       }
     }
   }
+
   enumeration instproc config_from_category_tree {tree_name} {
     # Get the options of a select or radio from the specified
     # category tree.
@@ -2513,10 +3957,11 @@ namespace eval ::xowiki::formfield {
     #
     # The usage of the label does not seem to be very useful.
     #
-    #set tree_id [category_tree::get_id $tree_name [my locale]]
+    #set tree_id [category_tree::get_id $tree_name [:locale]]
 
-    set package_id [[my object] package_id]
-    set tree_ids [::xowiki::Category get_mapped_trees -object_id $package_id -locale [my locale] \
+    set package_id [${:object} package_id]
+    set tree_ids [::xowiki::Category get_mapped_trees \
+                      -object_id $package_id -locale ${:locale} \
                       -names $tree_name -output tree_id]
 
     # In case there are multiple trees with the same name,
@@ -2525,7 +3970,7 @@ namespace eval ::xowiki::formfield {
     set tree_id [lindex $tree_ids 0]
 
     if {$tree_id eq ""} {
-      my msg "cannot lookup mapped category tree name '$tree_name'"
+      :msg "cannot lookup mapped category tree name '$tree_name'"
       return
     }
     set subtree_id ""
@@ -2535,19 +3980,90 @@ namespace eval ::xowiki::formfield {
                           -subtree_id $subtree_id -tree_id $tree_id] {
       lassign $category category_id category_name deprecated_p level
       set category_name [ns_quotehtml [lang::util::localize $category_name]]
-      my set category_label($category_id) $category_name
+      set :category_label($category_id) $category_name
       if { $level>1 } {
         set category_name "[string repeat {.} [expr {2*$level-4}]]..$category_name"
       }
       lappend options [list $category_name $category_id]
     }
-    my options $options
-    my set is_category_field 1
-    # my msg label_could_be=$tree_name,existing=[my label]
-    # if {![my exists label]} {
-    #    my label $tree_name
+    set :options $options
+    if {[info exists :default] && ${:default} ne ""} {
+      #
+      # When a default is provided, and the default is a valid
+      # name. Note that the "symbolic" default has to be provided
+      # exactly like the label, and it might not be unique.
+      #
+      set optdict [concat {*}$options]
+      if {[dict exists $optdict ${:default}]} {
+        set :default [dict get $optdict ${:default}]
+      }
+    }
+    set :is_category_field 1
+    # :msg label_could_be=$tree_name,existing=${:label}
+    # if {![info exists :label]} {
+    #    :label $tree_name
     # }
   }
+
+  enumeration instproc render_result_statistics {rep} {
+    #
+    # In case, there are result_statistics, use a "progress bar" to
+    # visualize correct answers.
+    #
+    if {[info exists :result_statistics] && [dict exists ${:result_statistics} count]} {
+      set result_count [dict get ${:result_statistics} count]
+
+      if {$result_count > 0} {
+        ::html::div -class "progress" {
+          set correctCount [expr {[dict exists ${:result_statistics} $rep] ? [dict get ${:result_statistics} $rep] : 0}]
+          set percentage [format %2.0f [expr {$correctCount * 100.0 / $result_count}]]
+          ::html::div -class "progress-bar progress-bar-success" -role "progressbar" \
+              -aria-valuenow $percentage -aria-valuemin "0" -aria-valuemax "100" -style "width:$percentage%" {
+                ::html::t "$percentage %"
+              }
+        }
+      }
+    }
+  }
+
+  enumeration instproc render_label_classes {} {
+    #
+    # Determine the values of the CSS classes for correct/incorrect
+    # rendering. In statistics mode (when :result_statistics exists),
+    # use the correct value of the alternative. Otherwise, use
+    # the :correction of the actual value in the form field.
+    #
+    if {[info exists :result_statistics]} {
+      set values ${:answer}
+      #ns_log notice "==== radio answer $answer aw ${:answer_value} results ${:result_statistics}"
+    } else {
+      set values [expr {[info exists :correction] ? ${:correction} : ""}]
+    }
+    return [lmap v $values {dict get {"" "" 1 correct 0 incorrect t correct f incorrect} $v}]
+  }
+
+  enumeration instproc render_label_text {label CSSclass description} {
+    #
+    # Render a label text (typically of a checkbox or radio input)
+    # either as richtext or as plain label.
+    #
+    if {${:richtext}} {
+      ::html::div -class richtext-label {
+        ::html::t -disableOutputEscaping $label
+        if {[info exists :evaluated_answer_result]
+            && "incorrect" in $CSSclass
+            && $description ne ""
+          } {
+          html::div -class "help-block description" {
+            html::t $description
+          }
+        }
+      }
+    } else {
+      ::html::t " $label "
+    }
+  }
+
 
   ###########################################################
   #
@@ -2557,37 +4073,40 @@ namespace eval ::xowiki::formfield {
 
   Class create radio -superclass enumeration -parameter {
     {horizontal false}
+    {richtext:boolean false}
     {forced_name}
   }
   radio instproc initialize {} {
-    my set widget_type text(radio)
+    set :widget_type text(radio)
+    set :multiple false
     next
   }
   radio instproc render_input {} {
-    set value [my value]
-    foreach o [my options] {
+    set value [:value]
+
+    set base_atts [:get_attributes disabled]
+    lappend base_atts \
+        type radio \
+        name [expr {[info exists :forced_name] ? ${:forced_name} : ${:name}}]
+
+    foreach o ${:options} label_class [:render_label_classes] description ${:descriptions} {
       lassign $o label rep
-      set atts [my get_attributes disabled]
-      if {[my exists forced_name]} {
-        set name [my forced_name]
-      } {
-        set name [my name]
-      }
-      set id [my id]:$rep
-      lappend atts id $id name $name type radio value $rep
+      set id ${:id}:$rep
+      set atts [list {*}$base_atts id $id value $rep]
       if {$value eq $rep} {
         lappend atts checked checked
       }
-      set label_class ""
-      if {[my horizontal]} {set label_class "radio-inline"}
+      if {1 || ${:horizontal}} {lappend label_class radio-inline}
       ::html::label -for $id -class $label_class {
         ::html::input $atts {}
-        ::html::t " $label "
+        :render_label_text $label $label_class $description
       }
-      if {![my horizontal]} {
+      :render_result_statistics $rep
+      if {!${:horizontal}} {
         html::br
       }
     }
+    :handle_transmit_always $value
   }
 
   ###########################################################
@@ -2597,50 +4116,228 @@ namespace eval ::xowiki::formfield {
   ###########################################################
 
   Class create checkbox -superclass enumeration -parameter {
-    {horizontal false}
+    {horizontal:boolean false}
+    {richtext:boolean false}
   }
   checkbox instproc initialize {} {
-    my set multiple true
-    my set widget_type text(checkbox)
+    set :multiple true
+    set :widget_type text(checkbox)
     next
   }
-
-
-  checkbox instproc value_if_nothing_is_returned_from_form {default} {
-    # Here we have to distinguish between two cases to:
-    # - edit mode: somebody has removed a mark from a check button;
-    #   this means: clear the field
-    # - view mode: the fields were deactivted (made insensitive);
-    #   this means: keep the old value
-
-    #my msg "[my name] disabled=[my exists disabled]"
-    if {[my exists disabled]} {return $default} else {return ""}
+  checkbox instproc td_pretty_value {v} {
+    return $v
   }
-  checkbox instproc render_input {} {
-    # identical to radio, except "checkbox" type and "in" expression for value;
-    # maybe we can push this up to enumeration....
-    set value [my value]
-    foreach o [my options] {
-      lassign $o label rep
-      set id [my id]:$rep
-      set atts [my get_attributes disabled]
-      lappend atts id $id name [my name] type checkbox value $rep
-      if {$rep in $value} {lappend atts checked checked}
 
-      set label_class ""
-      if {[my horizontal]} {set label_class "checkbox-inline"}
+  checkbox instproc render_input {} {
+    set value [:value]
+
+    set base_atts [:get_attributes disabled]
+    lappend base_atts \
+        type checkbox \
+        name ${:name}
+
+    foreach o ${:options} label_class [:render_label_classes] description ${:descriptions} {
+      lassign $o label rep
+      set id ${:id}:$rep
+      set atts [list {*}$base_atts id $id value $rep]
+      if {$rep in $value} {
+        lappend atts checked checked
+      }
+      if {1 || ${:horizontal}} {lappend label_class checkbox-inline}
       ::html::label -for $id -class $label_class {
         ::html::input $atts {}
-        ::html::t " $label "
+        :render_label_text $label $label_class $description
       }
-      if {![my horizontal]} {
+      :render_result_statistics $rep
+
+      if {!${:horizontal}} {
         html::br
       }
-      
-      #::html::input $atts {}
-      #::html::label -for $id {html::t "$label  "}
-      #if {![my horizontal]} {html::br}
     }
+    :handle_transmit_always $value
+  }
+
+  ###########################################################
+  #
+  # ::xowiki::formfield::text_fields
+  #
+  ###########################################################
+
+  Class create text_fields -superclass {CompoundField ShuffleField} -parameter {
+    {descriptions ""}
+    {paste:boolean true}
+  } -ad_doc {
+
+    Provide multiple text and short text entries. This field is a
+    compound field which create for every text field a sub
+    component. When the components are rendered, the items can be
+    shuffled.
+
+  }
+
+  text_fields instproc initialize {} {
+    # The value of ":multiple" has to be true for shuffling.
+    set :multiple true
+    next
+
+    #
+    # Properties for all fields
+    #
+    dict set fc_dict disabled [:is_disabled]
+    dict set fc_dict disabled_as_div [info exists :disabled_as_div]
+    dict set fc_dict label ""
+
+    set fields {}
+    set answers [expr {[info exists :answer] ? ${:answer} : ""}]
+
+    foreach option ${:options} a $answers render_hints_dict ${:render_hints} {
+      #
+      # Properties for a single fields
+      #
+      set field_fc_dict $fc_dict
+
+      if {[dict exists $render_hints_dict words]} {
+        dict set field_fc_dict placeholder #xowiki.[dict get $render_hints_dict words]#
+      }
+      dict set field_fc_dict correct_when $a
+
+      lassign $option text rep
+      set render_hints [dict get $render_hints_dict words]
+      switch $render_hints {
+        "multiple_lines" {
+          set type textarea
+          dict set field_fc_dict rows [dict get $render_hints_dict lines]
+          dict set field_fc_dict autosave true
+          if {!${:paste}} {
+            dict set field_fc_dict paste false
+          }
+        }
+        "file_upload" {
+          set type file
+        }
+        default {
+          set type text
+        }
+      }
+      lappend fields [list $rep [:dict_to_fc -type $type $field_fc_dict]]
+    }
+
+    #:log "TEXT text_fields fields\n[join $fields \n]>"
+    :create_components $fields
+  }
+
+  text_fields instproc set_feedback {feedback_mode} {
+    next
+    #
+    # Mark result as (fully) correct, when all sub-questions are
+    # (fully) correct.
+    #
+    set :evaluated_answer_result [expr {"0" in ${:correction} ? "incorrect" : "correct"}]
+    return ${:evaluated_answer_result}
+  }
+
+  text_fields instproc answer_is_correct {} {
+    #:log "text_fields  CORRECT? ${:name}"
+
+    set feedback_mode [expr {[${:object} exists __feedback_mode] ? [${:object} set __feedback_mode] : 0}]
+    set results {}
+    set :correction {}
+    foreach c [lsort ${:components}] {
+      set correct [$c set_feedback $feedback_mode]
+      lappend results $correct
+      lappend :correction [expr {$correct eq "correct"}]
+    }
+    set feedback "Subquestions correct ${:correction}"
+
+    set nr_correct [llength [lmap c ${:correction} { if {!$c} continue; set _ 1}]]
+    set :grading_score [format %.2f [expr {$nr_correct*100.0/[llength ${:correction}]}]]
+
+    if {[info exists :test_item_points]} {
+      set points [format %.2f [expr {${:test_item_points} * ${:grading_score} / 100.0}]]
+      dict set :correction_data points $points
+      append feedback " points: $points of [format %.2f ${:test_item_points}]"
+    }
+    append :grading_score *
+
+    #:log "text_fields CORRECT? ${:name} results $results :correction ${:correction} -> ${:grading_score}"
+
+    dict set :correction_data scores [list "" ${:grading_score}]
+    set :help_text $feedback
+
+    #
+    # Return "0" to avoid double feedback via the info text per
+    # subquestion and on the top-level.
+    #
+    return 0
+  }
+
+  text_fields instproc get_text_entry {componentName} {
+    set wantedRep [lindex [split $componentName .] end]
+    foreach option ${:options} {
+      lassign $option text rep
+      if {$rep eq $wantedRep} {
+        return $text
+      }
+    }
+    return ""
+  }
+
+  text_fields instproc render_input {} {
+    #
+    # Render content within in a fieldset, but with labels etc.
+    #
+    html::ul [:get_attributes id {CSSclass class}] {
+      #
+      # Descriptions are currently handled outside of the
+      # component. It might be possible to handle these on the
+      # subcomponent level, but for now we want to keep the changes as
+      # local as possible.
+      #
+      foreach c ${:components} description ${:descriptions} {
+        if {$c eq ""} {
+          ns_log bug "text_fields ${:name}: no component for description $description"
+          continue
+        }
+        html::li {
+          html::t -disableOutputEscaping [:get_text_entry [$c name]]
+          $c render
+          #
+          # Display descriptions only for the "incorrect" cases.
+          #
+          if {[info exists :evaluated_answer_result]
+              && ${:evaluated_answer_result} eq "incorrect"
+              && $description ne ""
+            } {
+            html::div -class "help-block description" {
+              html::t $description
+            }
+          }
+          $c render_result_statistics
+        }
+      }
+    }
+  }
+
+  text_fields instproc td_pretty_value {v} {
+    set result ""
+    foreach {key value} $v {
+      set componentLabel [string range $key [string length ${:name}]+1 end]
+      append result $componentLabel: " " $value \n
+    }
+    return $result
+  }
+
+  text_fields instproc pretty_value {v} {
+    set result ""
+    set ff [dict create {*}$v]
+    foreach c [lsort ${:components}] {
+      set componentName [$c set name]
+      if {[dict exists $ff $componentName]} {
+        set componentLabel [string range $componentName [string length ${:name}]+1 end]
+        append result $componentLabel: " " [$c pretty_value [dict get $ff $componentName]] \n
+      }
+    }
+    return $result
   }
 
 
@@ -2655,30 +4352,32 @@ namespace eval ::xowiki::formfield {
   }
 
   select instproc initialize {} {
-    my set widget_type text(select)
+    set :widget_type text(select)
     next
-    if {![my exists options]} {my options [list]}
+    if {![info exists :options]} {set :options [list]}
   }
 
   select instproc render_input {} {
-    set atts [my get_attributes id name disabled {CSSclass class}]
-    if {[my multiple]} {lappend atts multiple [my multiple]}
-    set options [my options]
-    if {![my required]} {
-      set options [linsert $options 0 [list "--" ""]]
+    set value [:value]
+    set atts [:get_attributes id name disabled {CSSclass class}]
+    if {${:multiple}} {lappend atts multiple ${:multiple}}
+    if {!${:required}} {
+      set :options [linsert ${:options} 0 [list "--" ""]]
     }
     ::html::select $atts {
-      foreach o $options {
+      foreach o ${:options} {
         lassign $o label rep
-        set atts [my get_attributes disabled]
+        set atts [:get_attributes disabled]
         lappend atts value $rep
-        #my msg "lsearch {[my value]} $rep ==> [lsearch [my value] $rep]"
-        if {$rep in [my value]} {
+        #:msg "lsearch {$value} $rep ==> [lsearch $value $rep]"
+        if {$rep in $value} {
           lappend atts selected selected
         }
         ::html::option $atts {::html::t $label}
         ::html::t \n
-      }}
+      }
+    }
+    :handle_transmit_always $value
   }
 
 
@@ -2688,69 +4387,248 @@ namespace eval ::xowiki::formfield {
   #
   ###########################################################
   Class create candidate_box_select -superclass select -parameter {
-    {as_box false}
-    {dnd true}
+    {as_box:boolean false}
+    {keep_order:boolean false}
+    {dnd:boolean true}
+  }  -ad_doc {
+    Class for selecing a subset from a list of candidates.
+    @param as_box makes something like in info box in wikipedie (right flushed)
+    @param keep_order when set, the user provided urder is preserved, otherwise
+           the order form the candidates is used.
+    @param dnd allow drag and drop
   }
   candidate_box_select set abstract 1
 
+  candidate_box_select instproc add_drag_handler {
+    -id:required
+    -event:required
+  } {
+    template::add_event_listener \
+        -id $id \
+        -event $event \
+        -preventdefault=false \
+        -script "selection_area_${event}_handler(event);"
+  }
+
   candidate_box_select instproc render_input {} {
-    #my msg "mul=[my multiple]"
+    #:msg "mul ${:multiple} dnd ${:dnd}"
     # makes only sense currently for multiple selects
-    if {[my multiple] && [my dnd]} {
-      if {([my exists disabled] && [my disabled])} {
-        html::t -disableOutputEscaping [my pretty_value [my value]]
+
+    if {${:multiple} && ${:dnd}} {
+
+      if {[:is_disabled]} {
+        html::t -disableOutputEscaping [:pretty_value [:value]]
       } else {
 
-        # utilities.js aggregates "yahoo, dom, event, connection, animation, dragdrop"
-        set ajaxhelper 0
-        ::xowiki::Includelet require_YUI_JS -ajaxhelper $ajaxhelper "utilities/utilities.js"
-        ::xowiki::Includelet require_YUI_JS -ajaxhelper $ajaxhelper "selector/selector-min.js"
-        ::xo::Page requireJS  "/resources/xowiki/yui-selection-area.js"
+        ::xo::Page requireJS  "/resources/xowiki/selection-area.js"
+        set count 0
+        set selected {}
+        set candidates {}
 
-        set js ""
-        foreach o [my options] {
+        foreach o ${:options} {
           lassign $o label rep
-          set js_label [::xowiki::Includelet js_encode $label]
-          set js_rep   [::xowiki::Includelet js_encode $rep]
-          append js "YAHOO.xo_sel_area.DDApp.values\['$js_label'\] = '$js_rep';\n"
-          append js "YAHOO.xo_sel_area.DDApp.dict\['$js_rep'\] = '$js_label';\n"
+          if {$rep in ${:value}} {
+            lappend selected $rep
+          } else {
+            lappend candidates $rep
+          }
+          dict set labels $rep label $label
+          #dict set labels $rep label $rep
+          dict set labels $rep serial [incr count]
+        }
+        if {${:keep_order}} {
+          set selected ${:value}
         }
 
-        ::html::div -class workarea {
-          ::html::h3 { ::html::t "#xowiki.Selection#"}
-          set values ""
-          foreach v [my value] {
-            append values $v \n
-            set __values($v) 1
+        html::div -class candidate-selection -id ${:id} {
+          #
+          # Internal representation
+          #
+          ::html::textarea -id ${:id}.text -name ${:name} {
+            ::html::t [join ${:value} \n]
           }
-          my CSSclass selection
-          my set cols 30
-          set atts [my get_attributes id name disabled {CSSclass class}]
 
-          # TODO what todo with DISABLED?
-          ::html::textarea [my get_attributes id name cols rows style {CSSclass class} disabled] {
-            ::html::t $values
+          #
+          # Selections
+          #
+          ::html::div -class workarea {
+            ::html::h3 { ::html::t "#xowiki.Selection#"}
+            # TODO what todo with DISABLED?
+            ::html::ul -class "region selected" \
+                -id ${:id}.selected {
+                  foreach v $selected {
+                    set id ${:id}.selected.[dict get $labels $v serial]
+                    ::html::li -class "selection list-group-item" \
+                        -draggable true -id $id -data-value $v {
+                          ::html::t [dict get $labels $v label]
+                        }
+                    :add_drag_handler -id $id -event dragstart
+                  }
+                }
+            :add_drag_handler -id ${:id}.selected -event drop
+            :add_drag_handler -id ${:id}.selected -event dragover
           }
-        }
-        ::html::div -class workarea {
-          ::html::h3 { ::html::t "#xowiki.Candidates#"}
-          ::html::ul -id [my id]_candidates -class region {
-            #my msg [my options]
-            foreach o [my options] {
-              lassign $o label rep
-              # Don't show current values under candidates
-              if {[info exists __values($rep)]} continue
-              ::html::li -class candidates {::html::t $rep}
+          #
+          # Candidates
+          #
+          ::html::div -class workarea {
+            ::html::h3 { ::html::t "#xowiki.Candidates#"}
+            ::html::ul -id ${:id}.candidates -class region {
+              foreach v $candidates {
+                set id ${:id}.[dict get $labels $v serial]
+                ::html::li \
+                    -class "candidates list-group-item" \
+                    -draggable true -id $id -data-value $v {
+                      ::html::t [dict get $labels $v label]
+                    }
+                :add_drag_handler -id $id -event dragstart
+              }
             }
+            :add_drag_handler -id ${:id}.candidates -event drop
+            :add_drag_handler -id ${:id}.candidates -event dragover
           }
         }
         ::html::div -class visual-clear {
-          ;# maybe some comment
+          ;# this space is left intentionally blank
         }
-        ::html::script -nonce [security::csp::nonce] { html::t $js }
       }
     } else {
       next
+    }
+  }
+
+  ###########################################################
+  #
+  # ::xowiki::formfield::reorder_box
+  #
+  # The reorder_box form field can be used for ordering tasks (e.g. in
+  # e-assessments) where elements are provided in a given or random
+  # order and the user has to bring these to some correct order).
+  #
+  ###########################################################
+  Class create reorder_box -superclass select -parameter {
+    {shuffle:boolean true}
+  }
+
+  reorder_box instproc answer_is_correct {} {
+    #
+    # This method returns 0 (undecided), -1 (incorrect) or 1 (correct)
+    # and sets as well the instance variable :correction with the
+    # per-item correctness settings for correct/incorrect.
+    #
+    #:log "reorder_box CORRECT? ${:name} (value=[:value])"
+
+    if {![info exists :answer]} {
+      set result 0
+    } else {
+      set value [:value]
+      if {[llength $value] != [llength ${:answer}]} {
+        error "list length of value <$value> and answer <${:answer}> must be equal"
+      }
+      set result 1
+      set :correction {}
+
+      foreach v $value a ${:answer} {
+        set ok [expr {$v eq $a}]
+        lappend :correction $ok
+        if {!$ok} {
+          set result -1
+        }
+      }
+      dict set :correction_data scores [expr {$result == 1 ? {"" 1.0} : {"" 0.0} }]
+
+      #:log "reorder_box CORRECT? answers [llength ${:answer}] options [llength ${:options}] -> $result"
+    }
+    return $result
+  }
+
+
+  reorder_box instproc render_input {} {
+
+    if {${:value} eq ""} {
+      #
+      # When we have no value, provide a start value.
+      #
+      if {${:shuffle}} {
+        #
+        # When :shuffle is set, provide a randomized start value.
+        #
+        set :value [::xowiki::randomized_indices -seed [xo::cc user_id] [llength ${:options}]]
+        #ns_log notice "=== reorder_box value '${:value}' shuffle ${:shuffle} value ${:value}"
+      } else {
+        #
+        # Otherwise, take the internal representations as :value
+        #
+        set :value [lmap o ${:options} {lindex $o 1}]
+      }
+    }
+    #
+    # Make sure that value is feasible and bail out, if not.
+    #
+    set c -1; set indices [lmap o ${:options} {incr c}]
+    if {[lsort -integer ${:value}] ne $indices} {
+      error "internal representation of options ${:options} must be subsequent integers starting with 0"
+    }
+
+    #
+    # Provide an HTML ID for ".sortable" compatible with jquery
+    #
+    regsub -all {[.]} "${:id}.sortable" - jqID
+    set textAreaID ${:id}.text
+
+    if {![:is_disabled]} {
+      #
+      # If not disabled, let people move around the elements.
+      #
+      ::xo::Page requireCSS urn:ad:css:jquery-ui
+      ::xo::Page requireJS urn:ad:js:jquery-ui
+
+      template::add_body_script -script  [subst {
+        \$("#$jqID").sortable();
+        \$("#$jqID").on( "sortupdate", function( event, ui ) {
+          var ul       = event.target;
+          var textarea = document.getElementById('$textAreaID');
+          var items    = ul.getElementsByTagName('LI');
+          var internalRep = "";
+          for (var j = 0; j < items.length; j++) {
+            internalRep += items\[j\].dataset.value + "\\n";
+          }
+          textarea.value = internalRep;
+        } );
+      }]
+    }
+
+    #
+    # Make sure, we have :correction initialized, since the rendering
+    # code below needs it.
+    #
+    if {![info exists :correction]} {
+      set :correction {}
+    }
+
+    html::div -class reorder_box -id ${:id} {
+      #
+      # The input field of the internal representation.
+      #
+      ::html::textarea -id $textAreaID -name ${:name} {
+        ::html::t [join ${:value} \n]
+      }
+
+      #
+      # The box for reordering items.
+      #
+      ::html::div -class workarea {
+        ::html::ul -class "list-group" \
+            -id $jqID {
+              foreach v ${:value} c ${:correction} {
+                set cl "list-group-item"
+                lappend cl [expr {$c eq "1" ? "correct" : $c eq "0" ? "incorrect" : ""} ]
+                ::html::li -class $cl -data-value $v {
+                  ::html::t [lindex ${:options} $v 0]
+                }
+              }
+            }
+      }
     }
   }
 
@@ -2767,8 +4645,8 @@ namespace eval ::xowiki::formfield {
   abstract_page set abstract 1
 
   abstract_page instproc initialize {} {
-    my set package_id [[my object] package_id]
-    #my compute_options
+    set :package_id [${:object} package_id]
+    #:compute_options
     next
   }
 
@@ -2783,47 +4661,57 @@ namespace eval ::xowiki::formfield {
   }
 
   abstract_page instproc get_entry_label {value} {
-    set item_id [[my set package_id] lookup -parent_id [[my object] parent_id] -name $value]
-    if {$item_id} {
-      return [::xo::cc cache [list my fetch_entry_label [my entry_label] $item_id]]
+    foreach o ${:options} {
+      lassign $o label rep
+      if {$value eq $rep} {
+        return $label
+      }
     }
     return ""
   }
 
+
   abstract_page instproc pretty_value {v} {
-    my instvar package_id
-    set object [my object]
-    set parent_id [$object parent_id]
-    my set options [my get_labels $v]
-    if {[my multiple]} {
-      foreach o [my set options] {
+    set parent_id [${:object} parent_id]
+    set package ::${:package_id}
+    set :options [:get_labels $v]
+    if {${:multiple}} {
+      set default_lang [$package default_language]
+      set root_folder [$package folder_id]
+      set package_root [$package package_url]
+      foreach o ${:options} {
         lassign $o label value
-        set href [$package_id pretty_link -parent_id $parent_id $value]
-        set labels($value) "<a href='[ns_quotehtml $href]'>$label</a>"
+        #
+        # "value" is an item_ref. Resolve it (assuming this works) and
+        # prepend the package root URL)
+        #
+        set item_info [$package item_ref -default_lang $default_lang -parent_id $root_folder $value]
+        set href $package_root[dict get $item_info link]
+        set labels($value) "<a href='[ns_quotehtml $href]'>[ns_quotehtml $label]</a>"
       }
       set hrefs [list]
       foreach i $v {
         if {![info exists labels($i)]} {
-          #my msg "can't determine label for value '$i' (values=$v, l=[array names labels])"
+          #:msg "can't determine label for value '$i' (values=$v, l=[array names labels])"
           set labels($i) $i
         }
-        set href [$package_id pretty_link -parent_id $parent_id $i]
+        set href [$package pretty_link -parent_id $parent_id $i]
         lappend hrefs "<a href='[ns_quotehtml $href]'>$labels($i)</a>"
       }
-      if {[my multiple_style] eq "list"} {
+      if {[:multiple_style] eq "list"} {
         return "<ul><li>[join $hrefs {</li><li>}]</li></ul>\n"
       } else {
         return [join $hrefs {, }]
       }
     } else {
-      foreach o [my set options] {
+      foreach o ${:options} {
         lassign $o label value
-        #my log "comparing '$value' with '$v'"
+        #:log "comparing '$value' with '$v'"
         if {$value eq $v} {
-          if {[my as_box]} {
-            return [$object include [list $value -decoration rightbox]]
+          if {${:as_box}} {
+            return [${:object} include [list $value -decoration rightbox]]
           }
-          set href [$package_id pretty_link -parent_id $parent_id $value]
+          set href [$package pretty_link -parent_id $parent_id $value]
           return "<a href='[ns_quotehtml $href]'>$label</a>"
         }
       }
@@ -2831,7 +4719,7 @@ namespace eval ::xowiki::formfield {
   }
 
   abstract_page instproc render_input {} {
-    my compute_options
+    :compute_options
     next
   }
 
@@ -2847,79 +4735,110 @@ namespace eval ::xowiki::formfield {
   }
 
   form_page instproc initialize {} {
-    my instvar form_object_item_ids package_id object
-    if {![my exists form]} { return }
+    if {![info exists :form]} { return }
     next
-    set form_name [my form]
-    set package_id [$object package_id]
-    set form_objs [::xowiki::Weblog instantiate_forms \
-                       -parent_id [$object parent_id] \
-                       -default_lang [$object lang] \
-                       -forms $form_name -package_id $package_id]
+    set form_name [:form]
+    set form_objs [::${:package_id} instantiate_forms \
+                       -parent_id [${:object} parent_id] \
+                       -default_lang [${:object} lang] \
+                       -forms $form_name]
+    :log "form_page $form_name resolved into '$form_objs'"
 
-    #set form_obj [[my object] resolve_included_page_name $form_name]
-    if {$form_objs eq ""} {error "Cannot lookup Form '$form_name'"}
-
-    set form_object_item_ids [list]
-    foreach form_obj $form_objs {lappend form_object_item_ids [$form_obj item_id]}
+    if {$form_objs eq ""} {
+      error "Cannot lookup Form '$form_name'"
+    }
+    set :form_object_item_ids [list]
+    foreach form_obj $form_objs {
+      lappend :form_object_item_ids [$form_obj item_id]
+    }
   }
+
   form_page instproc compute_options {} {
-    my instvar form_object_item_ids where package_id entry_label
-    #my msg "[my name] compute_options [my exists form]"
-    if {![my exists form]} {
+    #:msg "${:name} compute_options [info exists :form]"
+    if {![info exists :form]} {
       return
     }
 
-    array set wc {tcl true h "" vars "" sql ""}
-    if {[info exists where]} {
-      array set wc [::xowiki::FormPage filter_expression $where &&]
-      #my msg "where '$where' => wc=[array get wc]"
+    set wc {tcl true h "" vars "" sql ""}
+    if {[info exists :where]} {
+      set wc [dict merge $wc [::xowiki::FormPage filter_expression ${:where} &&]]
+      #:msg "where '${:where}' => wc=$wc"
     }
 
     set from_package_ids {}
-    set package_path [::$package_id package_path]
+    set package_path [::${:package_id} package_path]
     if {[llength $package_path] > 0} {
       foreach p $package_path {
         lappend from_package_ids [$p id]
       }
     }
-    lappend from_package_ids $package_id
+    lappend from_package_ids ${:package_id}
     set items [::xowiki::FormPage get_form_entries \
-                   -base_item_ids $form_object_item_ids \
+                   -base_item_ids ${:form_object_item_ids} \
                    -form_fields [list] \
                    -publish_status ready \
-                   -h_where [array get wc] \
-                   -package_id $package_id \
+                   -h_where $wc \
+                   -package_id ${:package_id} \
                    -from_package_ids $from_package_ids]
 
-    set options [list]
+    set :options [list]
     foreach i [$items children] {
       #
-      # If the form_page has a different package_id, prepend the
-      # package_url to the name. TODO: We assume here, that the form_pages
-      # have no special parent_id.
+      # Compute the item_ref of the page. The item_ref has the
+      # advantage over an href that it is easier relocatable via clipboard.
       #
-      set object_package_id [$i package_id]
-      if {$package_id != $object_package_id} {
-        set package_prefix /[$object_package_id package_url]
-      } else {
-        set package_prefix ""
-      }
-
-      lappend options [list [$i property $entry_label] $package_prefix[$i name]]
+      set package_id [$i package_id]
+      set folder_path [$package_id folder_path -parent_id [$i parent_id]]
+      set item_ref $folder_path[$i name]
+      #ns_log notice "instance_select name [$i name] pl [$i pretty_link] PATH <$folder_path>"
+      lappend :options [list [$i property ${:entry_label}] $item_ref]
     }
-    my options $options
   }
 
-  form_page instproc pretty_value {v} {
-    my options [my get_labels $v]
-    if {![my exists form_object_item_ids]} {
-      error "No forms specified for form_field '[my name]'"
+  form_page instproc pretty_value {values} {
+    if {![info exists :form_object_item_ids]} {
+      error "No forms specified for form_field '${:name}'"
     }
-    my set package_id [[lindex [my set form_object_item_ids] 0] package_id]
+    #set :package_id [[lindex ${:form_object_item_ids} 0] package_id]
     next
   }
 
+  form_page instproc convert_to_internal {} {
+    #
+    # The "value" consists of multiple lines, where every line is a
+    # separate item_ref as returned by "compute_options". Add these as
+    # extra references to the associated object each time the page is
+    # updated.
+    #
+    if {${:value} ne ""} {
+      set references {}
+      #:log "---- form_page.convert_to_internal <${:value}>"
+      set package_id [${:object} package_id]
+      set parent_id [${:object} parent_id]
+      ::xo::db::CrClass get_instance_from_db -item_id $parent_id
+      set parent_id [$parent_id parent_id]
+
+      foreach name [split ${:value} \n] {
+        set item_info [::$package_id item_ref -normalize_name false \
+                           -use_package_path 1 \
+                           -default_lang [${:object} lang] \
+                           -parent_id $parent_id \
+                           $name]
+        set item_id [dict get $item_info item_id]
+        #:log "---- $name -> item_id $item_id"
+        if {$item_id ne 0} {
+          lappend references [list $item_id wf_form]
+        }
+      }
+      if {[llength $references] > 0} {
+        #:msg "updating references refs=$references"
+        #
+        # In case, there are already __extra_references, append it.
+        #
+        ${:object} lappend __extra_references {*}$references
+      }
+    }
+  }
 
   ###########################################################
   #
@@ -2934,31 +4853,28 @@ namespace eval ::xowiki::formfield {
   }
 
   page instproc compute_options {} {
-    my instvar type with_subtypes glob
-
     set extra_where_clause ""
-    if {[my exists glob]} {
-      append extra_where_clause [::xowiki::Includelet glob_clause $glob]
+    if {[info exists :glob]} {
+      append extra_where_clause [::xowiki::Includelet glob_clause ${:glob}]
     }
 
-    set package_id [[my object] package_id]
-    set options [list]
+    set package_id [${:object} package_id]
+    set :options [list]
     ::xo::dc foreach instance_select \
-        [$type instance_select_query \
-             -folder_id [$package_id folder_id] \
-             -with_subtypes $with_subtypes \
+        [${:type} instance_select_query \
+             -folder_id [::$package_id folder_id] \
+             -with_subtypes ${:with_subtypes} \
              -select_attributes [list title] \
              -from_clause ", xowiki_page p" \
              -where_clause "p.page_id = bt.revision_id $extra_where_clause" \
              -orderby ci.name \
             ] {
-              lappend options [list [set [my entry_label]] $name]
+              lappend :options [list [set ${:entry_label}] $name]
             }
-    my options $options
   }
 
   page instproc pretty_value {v} {
-    my set package_id [[my object] package_id]
+    set :package_id [${:object} package_id]
     next
   }
 
@@ -2971,10 +4887,10 @@ namespace eval ::xowiki::formfield {
 
   Class create security_policy -superclass select
   security_policy instproc initialize {} {
+    set :options {}
     foreach p [lsort [::xowiki::Policy info instances]] {
-      lappend options [list $p $p]
+      lappend :options [list $p $p]
     }
-    my options $options
     next
   }
 
@@ -2986,7 +4902,7 @@ namespace eval ::xowiki::formfield {
 
   Class create DD -superclass select
   DD instproc initialize {} {
-    my options {
+    set :options {
       {01  1} {02  2} {03  3} {04  4} {05  5} {06  6} {07  7} {08  8} {09  9} {10 10}
       {11 11} {12 12} {13 13} {14 14} {15 15} {16 16} {17 17} {18 18} {19 19} {20 20}
       {21 21} {22 22} {23 23} {24 24} {25 25} {26 26} {27 27} {28 28} {29 29} {30 30}
@@ -3003,7 +4919,7 @@ namespace eval ::xowiki::formfield {
 
   Class create HH24 -superclass select
   HH24 instproc initialize {} {
-    my options {
+    set :options {
       {00  0} {01  1} {02  2} {03  3} {04  4} {05  5} {06  6} {07  7} {08  8} {09  9}
       {10 10} {11 11} {12 12} {13 13} {14 14} {15 15} {16 16} {17 17} {18 18} {19 19}
       {20 20} {21 21} {22 22} {23 23}
@@ -3019,16 +4935,18 @@ namespace eval ::xowiki::formfield {
 
   Class create MI -superclass select
   MI instproc value args {
-    if {[llength $args] == 0} {return [my set value]} else {
+    if {[llength $args] == 0} {return ${:value}} else {
       set v [lindex $args 0]
-      if {$v eq ""} {return [my set value ""]} else {
+      if {$v eq ""} {
+        set :value ""
+      } else {
         # round to 5 minutes
-        my set value [lindex [my options] [expr {($v + 2) / 5}] 1]
+        set :value [lindex ${:options} [expr {($v + 2) / 5}] 1]
       }
     }
   }
   MI instproc initialize {} {
-    my options {
+    set :options {
       {00  0} {05  5} {10 10} {15 15} {20 20} {25 25}
       {30 30} {35 35} {40 40} {45 45} {50 50} {55 55}
     }
@@ -3043,7 +4961,7 @@ namespace eval ::xowiki::formfield {
 
   Class create MM -superclass select
   MM instproc initialize {} {
-    my options {
+    set :options {
       {01  1} {02  2} {03 3} {04 4} {05 5} {06 6} {07 7} {08 8} {09 9} {10 10}
       {11 11} {12 12}
     }
@@ -3057,14 +4975,14 @@ namespace eval ::xowiki::formfield {
 
   Class create mon -superclass select
   mon instproc initialize {} {
-    set values [lang::message::lookup [my locale] acs-lang.localization-abmon]
+    set values [lang::message::lookup [:locale] acs-lang.localization-abmon]
     if {[lang::util::translator_mode_p]} {set values [::xo::localize $values]}
     set last 0
+    set :options {}
     foreach m {1 2 3 4 5 6 7 8 9 10 11 12} {
-      lappend options [list [lindex $values $last] $m]
+      lappend :options [list [lindex $values $last] $m]
       set last $m
     }
-    my options $options
     next
   }
   ###########################################################
@@ -3075,14 +4993,14 @@ namespace eval ::xowiki::formfield {
 
   Class create month -superclass select
   month instproc initialize {} {
-    set values [lang::message::lookup [my locale] acs-lang.localization-mon]
+    set values [lang::message::lookup [:locale] acs-lang.localization-mon]
     if {[lang::util::translator_mode_p]} {set values [::xo::localize $values]}
     set last 0
+    set :options {}
     foreach m {1 2 3 4 5 6 7 8 9 10 11 12} {
-      lappend options [list [lindex $values $last] $m]
+      lappend :options [list [lindex $values $last] $m]
       set last $m
     }
-    my options $options
     next
   }
 
@@ -3114,7 +5032,9 @@ namespace eval ::xowiki::formfield {
 
   youtube_url instproc initialize {} {
     next
-    if {[my help_text] eq ""} {my help_text "#xowiki.formfield-youtube_url-help_text#"}
+    if {${:help_text} eq ""} {
+      set :help_text "#xowiki.formfield-youtube_url-help_text#"
+    }
   }
   youtube_url instproc pretty_value {v} {
     if {$v eq ""} {
@@ -3143,11 +5063,13 @@ namespace eval ::xowiki::formfield {
         {float left} width height
         padding {padding-right 10px} padding-left padding-top padding-bottom
         margin margin-left margin-right margin-top margin-bottom
-        border border-width position top botton left right
+        border border-width position top bottom left right
       }
   image_url instproc initialize {} {
     next
-    if {[my help_text] eq ""} {my help_text "#xowiki.formfield-image_url-help_text#"}
+    if {${:help_text} eq ""} {
+      set :help_text "#xowiki.formfield-image_url-help_text#"
+    }
   }
   image_url instproc entry_name {value} {
     set value [string map [list %2e .] $value]
@@ -3158,15 +5080,15 @@ namespace eval ::xowiki::formfield {
   }
   image_url instproc check=image_check {value} {
     if {$value eq ""} {return 1}
-    set entry_name [my entry_name $value]
+    set entry_name [:entry_name $value]
     if {$entry_name eq ""} {
-      my log "--img '$value' does not appear to be an image"
+      :log "--img '$value' does not appear to be an image"
       # no image?
       return 0
     }
-    set folder_id [[my object] set parent_id]
+    set folder_id [${:object} set parent_id]
     if {[::xo::db::CrClass lookup -name $entry_name -parent_id $folder_id]} {
-      my log "--img entry named $entry_name exists already"
+      :log "--img entry named $entry_name exists already"
       # file exists already
       return 1
     }
@@ -3175,23 +5097,25 @@ namespace eval ::xowiki::formfield {
       fconfigure $f translation binary
       set img [read $f]
       close $f
-    } elseif {[catch {
-      set request [util::http::get -url $value]
-      set img [expr {[dict exists $request page] ? [dict get $request page] : ""}]
-    } errorMsg]} {
-      # cannot transfer image
-      my log "--img cannot tranfer image '$value' ($errorMsg)"
-      return 0
+    } else {
+      ad_try {
+        set request [util::http::get -url $value]
+        set img [expr {[dict exists $request page] ? [dict get $request page] : ""}]
+      } on error {errorMsg} {
+        # cannot transfer image
+        :log "--img cannot obtain image '$value' ($errorMsg)"
+        return 0
+      }
     }
-    #my msg "guess mime_type of $entry_name = [::xowiki::guesstype $entry_name]"
+    #:msg "guess mime_type of $entry_name = [::xowiki::guesstype $entry_name]"
     set import_file [ad_tmpnam]
-    ::xowiki::write_file $import_file $img
+    ::xo::write_file $import_file $img
     set file_object [::xowiki::File new -destroy_on_cleanup \
                          -title $entry_name \
                          -name $entry_name \
                          -parent_id $folder_id \
                          -mime_type [::xowiki::guesstype $entry_name] \
-                         -package_id [[my object] package_id] \
+                         -package_id [${:object} package_id] \
                          -creation_user [::xo::cc user_id] \
                         ]
     $file_object set import_file $import_file
@@ -3199,8 +5123,8 @@ namespace eval ::xowiki::formfield {
     return 1
   }
   image_url instproc pretty_value {v} {
-    set entry_name [my entry_name $v]
-    return [my pretty_image -parent_id [[my object] parent_id] $entry_name]
+    set entry_name [:entry_name $v]
+    return [:pretty_image -parent_id [${:object} parent_id] $entry_name]
   }
 
 
@@ -3219,8 +5143,8 @@ namespace eval ::xowiki::formfield {
   include instproc pretty_value {v} {
     if {$v eq ""} { return $v }
 
-    my instvar object
-    set item_id  [$object get_property_from_link_page item_id]
+    set item_id [${:object} get_property_from_link_page item_id 0]
+    :log "##### include in ${:object} '[${:object} name]': get_property_from_link_page ${:object} item_id => <$item_id> (resolve_local ${:resolve_local})"
     if {$item_id == 0} {
       # Here, we could call "::xowiki::Link render" to offer the user means
       # to create the entry like with [[..]], if he has sufficient permissions...;
@@ -3228,27 +5152,27 @@ namespace eval ::xowiki::formfield {
       # resolved
       return "Cannot resolve symbolic link '$v'"
     }
-    set link_type [$object get_property_from_link_page link_type]
-    $object references resolved [list $item_id $link_type]
+    set link_type [${:object} get_property_from_link_page link_type]
+    ${:object} references resolved [list $item_id $link_type]
+    set item ::$item_id
 
-    set resolve_local [my resolve_local]
-    if {$resolve_local} {
+    if {${:resolve_local}} {
       #
-      # resetting esp. the item-id is dangerous.
-      # Therefore we reset it immediately after the rendering
+      # Resetting esp. the item_id is dangerous.
+      # Therefore, we reset it immediately after the rendering.
       #
-      #my log "set __RESOLVE_LOCAL"
-      $item_id set __RESOLVE_LOCAL 1
-      $item_id set_resolve_context \
-          -package_id [$object package_id] -parent_id [$object parent_id] \
-          -item_id [$object item_id]
+      #:log "#### RESOLVE LOCAL: setting for $item [$item name] set_resolve_context -parent_id [${:object} parent_id] -item_id [${:object} item_id]"
+      $item set __RESOLVE_LOCAL 1
+      $item set_resolve_context \
+          -package_id [${:object} package_id] -parent_id [${:object} parent_id] \
+          -item_id [${:object} item_id]
 
-      set html [$item_id render]
+      set html [$item render -update_references never]
 
-      $item_id unset __RESOLVE_LOCAL
-      $item_id reset_resolve_context
+      $item unset __RESOLVE_LOCAL
+      $item reset_resolve_context
     } else {
-      set html [$item_id render]
+      set html [$item render]
     }
     return $html
   }
@@ -3263,271 +5187,7 @@ namespace eval ::xowiki::formfield {
   redirect instproc pretty_value {v} {
     #ad_returnredirect -allow_complete_url $v
     #ad_script_abort
-    return [[[my object] package_id] returnredirect $v]
-  }
-
-  ###########################################################
-  #
-  # ::xowiki::formfield::CompoundField
-  #
-  ###########################################################
-
-  Class create CompoundField -superclass FormField -parameter {
-    {components ""}
-    {CSSclass compound-field}
-  } -extend_slot_default validator compound
-
-  CompoundField instproc check=compound {value} {
-    #my msg "check compound in [my components]"
-    foreach c [my components] {
-      set error [$c validate [self]]
-      if {$error ne ""} {
-        set msg "[$c label]: $error"
-        my uplevel [list set errorMsg $msg]
-        #util_user_message -message "Error in compound field [$c name]: $error"
-        return 0
-      }
-    }
-    return 1
-  }
-
-  CompoundField instproc set_disabled {disable} {
-    #my msg "[my name] set disabled $disable"
-    if {$disable} {
-      my set disabled true
-    } else {
-      my unset -nocomplain disabled
-    }
-    foreach c [my components] {
-      $c set_disabled $disable
-    }
-  }
-
-  CompoundField instproc set_is_repeat_template {is_template} {
-    # my msg "[my name] set is_repeat_template $is_template"
-    if {$is_template} {
-      my set is_repeat_template true
-    } else {
-      my unset -nocomplain is_repeat_template
-    }
-    foreach c [my components] {
-      $c set_is_repeat_template $is_template
-    }
-  }
-
-  CompoundField instproc same_value {v1 v2} {
-    if {$v1 eq $v2} {return 1}
-    foreach {n1 value1} $v1 {n2 value2} $v2  {
-      set f [my set component_index($n1)]
-      if {![$f same_value $value1 $value2]} { return 0 }
-    }
-    return 1
-  }
-
-  CompoundField instproc value {args} {
-    if {[llength $args] == 0} {
-      set v [my get_compound_value]
-      #my msg "[my name]: reading compound value => '$v'"
-      return $v
-    } else {
-      #my msg "[my name]: setting compound value => '[lindex $args 0]'"
-      my set_compound_value [lindex $args 0]
-    }
-  }
-
-  CompoundField instproc validate {obj} {
-    # Delegate validate to the components. If a validation of a
-    # component fails, report the error message back.
-    foreach c [my components] {
-      set result [$c validate $obj]
-      if {$result ne ""} {
-        return $result
-      }
-    }
-    return ""
-  }
-
-  CompoundField instproc set_compound_value {value} {
-    if {[catch {array set {} $value} errorMsg]} {
-      # this branch could be taken, when the field was retyped
-      ns_log notice "CompoundField: error during setting compound value with $value: $errorMsg"
-    }
-    # set the value parts for each components
-    foreach c [my components] {
-      # Set only those parts, for which attribute values pairs are
-      # given.  Components might have their own default values, which
-      # we do not want to overwrite ...
-      if {[info exists ([$c name])]} {
-        $c value $([$c name])
-      }
-    }
-  }
-
-  CompoundField instproc get_compound_value {} {
-    # Set the internal representation based on the components values.
-    set value [list]
-    foreach c [my components] {
-      #my msg "$c [$c info class] lappending [list [$c name] [$c value]]"
-      lappend value [$c name] [$c value]
-    }
-    #my msg "[my name]: get_compound_value returns value=$value"
-    return $value
-  }
-
-  CompoundField instproc specs_unmodified {spec_list} {
-    expr {[my set __state] eq "after_specs"
-          && [my exists structure] && [my set structure] eq $spec_list
-        }
-  }
-
-  CompoundField instproc create_components {spec_list} {
-    #
-    # Omit after specs for compund fields to avoid multiple
-    # recreations.
-    #
-    if {[my specs_unmodified $spec_list]} return
-
-    #
-    # Build a component structure based on a list of specs
-    # of the form {name spec}.
-    #
-    my set structure $spec_list
-    my set components [list]
-    foreach entry $spec_list {
-      lassign $entry name spec
-      #
-      # create for each component a form field
-      #
-      set c [::xowiki::formfield::FormField create [self]::$name \
-                 -name [my name].$name -id [my id].$name \
-                 -locale [my locale] -object [my object] \
-                 -spec $spec]
-      my set component_index([my name].$name) $c
-      my lappend components $c
-    }
-  }
-
-  CompoundField instproc add_component {entry} {
-    #
-    # Add a single component dynamically to the list of already
-    # existing components and return the component as result.
-    #
-    my lappend structure $entry
-    lassign $entry name spec
-    set c [::xowiki::formfield::FormField create [self]::$name \
-               -name [my name].$name -id [my id].$name \
-               -locale [my locale] -object [my object] \
-               -spec $spec]
-    my set component_index([my name].$name) $c
-    my lappend components $c
-    return $c
-  }
-
-  CompoundField instproc get_component {component_name} {
-    set key component_index([my name].$component_name)
-    if {[my exists $key]} {
-      return [my set $key]
-    }
-    error "no component named $component_name of compound field [my name]"
-  }
-
-  CompoundField instproc exists_named_sub_component args {
-    # Iterate along the argument list to check components of a deeply
-    # nested structure. For example,
-    #
-    #    my check_named_sub_component a b
-    #
-    # returns 0 or one depending whether there exists a component "a"
-    # with a subcomponent "b".
-    set component_name [my name]
-    set sub [self]
-    foreach e $args {
-      append component_name .$e
-      if {![$sub exists component_index($component_name)]} {
-        return 0
-      }
-      set sub [$sub set component_index($component_name)]
-    }
-    return 1
-  }
-
-  CompoundField instproc get_named_sub_component args {
-    # Iterate along the argument list to get components of a deeply
-    # nested structure. For example,
-    #
-    #    my get_named_sub_component a b
-    #
-    # returns the object of the subcomponent "b" of component "a"
-    set component_name [my name]
-    set sub [self]
-    foreach e $args {
-      append component_name .$e
-      #my msg "check $sub set component_index($component_name)"
-      set sub [$sub set component_index($component_name)]
-    }
-    return $sub
-  }
-
-  CompoundField instproc get_named_sub_component_value {{-default ""} args} {
-    if {[my exists_named_sub_component {*}$args]} {
-      return [[my get_named_sub_component {*}$args] value]
-    } else {
-      return $default
-    }
-  }
-
-  CompoundField instproc generate_fieldnames {{-prefix "v-"} n} {
-    set names [list]
-    for {set i 1} {$i <= $n} {incr i} {lappend names $prefix$i}
-    return $names
-  }
-
-  CompoundField instproc render_input {} {
-    #
-    # Render content within in a fieldset, but with labels etc.
-    #
-    html::fieldset [my get_attributes id {CSSclass class}] {
-      foreach c [my components] { $c render }
-    }
-  }
-
-  CompoundField instproc pretty_value {v} {
-    #
-    # Typically, subtypes of CompoundFields should define their own
-    # "pretty_value". This is a simple renderer that provides a
-    # default behavior.
-    #
-    set ff [dict create {*}$v]
-    set html "<ul class='CompoundField'>\n"
-    foreach c [my components] {
-      set componentName [$c set name]
-      if {[dict exists $ff $componentName]} {
-        append html "<li><span class='name'>$componentName:</span> " \
-            "[$c pretty_value [dict get $ff $componentName]]</li>\n"
-      }
-    }
-    append html "</ul>\n"
-    return $html
-  }
-
-  CompoundField instproc has_instance_variable {var value} {
-    set r [next]
-    if {$r} {return 1}
-    foreach c [my components] {
-      set r [$c has_instance_variable $var $value]
-      if {$r} {return 1}
-    }
-    return 0
-  }
-
-  CompoundField instproc convert_to_internal {} {
-    foreach c [my components] {
-      $c convert_to_internal
-    }
-    # Finally, update the compound value entry with the compound
-    # internal representation; actually we could drop the instance
-    # atts of the components from the "instance_attributes" ...
-    [my object] set_property -new 1 [my name] [my get_compound_value]
+    return [[${:object} package_id] returnredirect $v]
   }
 
   ###########################################################
@@ -3537,22 +5197,25 @@ namespace eval ::xowiki::formfield {
   ###########################################################
 
   Class create label -superclass FormField -parameter {
-    {disableOutputEscaping false}
+    {disableOutputEscaping:boolean false}
+  }
+  label instproc pretty_value {v} {
+    return [expr {${:disableOutputEscaping} ? $v : [next]}]
   }
   label instproc render_item {} {
     # sanity check; required and label do not fit well together
-    if {[my required]} {my required false}
+    if {${:required}} {set :required false}
     next
   }
   label instproc render_input {} {
-    if {[my disableOutputEscaping]} {
-      ::html::t -disableOutputEscaping [my value]
+    if {${:disableOutputEscaping}} {
+      ::html::t -disableOutputEscaping [:value]
     } else {
-      ::html::t [my value]
+      ::html::t [:value]
     }
     # Include labels as hidden fields to avoid surprises when
     # switching field types to labels.
-    my set type hidden
+    set :type hidden
     next
   }
 
@@ -3571,23 +5234,21 @@ namespace eval ::xowiki::formfield {
     #
     # for now, we allow just FormPages as child_pages
     #
-    if {![my exists form]} { return }
-    my instvar object
-    my set form_objs [::xowiki::Weblog instantiate_forms \
-                          -parent_id [$object parent_id] \
-                          -default_lang [$object lang] \
-                          -forms [my form] \
-                          -package_id [$object package_id]]
+    if {![info exists :form]} { return }
+    set :package_id [${:object} package_id]
+    set :form_objs [::${:package_id} instantiate_forms \
+                        -parent_id [${:object} parent_id] \
+                        -default_lang [${:object} lang] \
+                        -forms [:form]]
   }
   child_pages instproc pretty_value {v} {
-    if {[my exists form_objs]} {
-      my instvar object
+    if {[info exists :form_objs]} {
       set count 0
-      foreach form [my set form_objs] {
+      foreach form ${:form_objs} {
         incr count [$form count_usages \
-                        -package_id [$object package_id] \
-                        -parent_id [$object item_id] \
-                        -publish_status [my publish_status]]
+                        -package_id ${:package_id} \
+                        -parent_id [${:object} item_id] \
+                        -publish_status ${:publish_status}]
       }
       return $count
     } else {
@@ -3610,11 +5271,11 @@ namespace eval ::xowiki::formfield {
   # "yesterday", "next week", .... use _ for blanks
 
   date instproc initialize {} {
-    #my msg "DATE has value [my value]//d=[my default] format=[my format] disabled?[my exists disabled]"
-    my set widget_type date
-    my set format [string map [list _ " "] [my format]]
-    my array set defaults {year 2000 month 01 day 01 hour 00 min 00 sec 00}
-    my array set format_map {
+    #:msg "DATE has value [:value]//d=[:default] format=${:format} disabled?[info exists :disabled]"
+    set :widget_type date
+    set :format [string map [list _ " "] ${:format}]
+    array set :defaults {year 2000 month 01 day 01 hour 00 min 00 sec 00}
+    array set :format_map {
       SS    {SS    %S 1}
       MI    {MI    %M 1}
       HH24  {HH24  %H 1}
@@ -3624,69 +5285,69 @@ namespace eval ::xowiki::formfield {
       MONTH {month %m 1}
       YYYY  {YYYY  %Y 0}
     }
-    #my msg "[my name] initialize date, format=[my format] components=[my components]"
-    foreach c [my components] {$c destroy}
-    my components [list]
+    #:msg "${:name} initialize date, format=${:format} components=${:components}"
+    foreach c ${:components} {$c destroy}
+    :components [list]
 
-    foreach element [split [my format]] {
-      if {![my exists format_map($element)]} {
+    foreach element [split ${:format}] {
+      if {![info exists :format_map($element)]} {
         #
         # We add undefined formats as literal texts in the edit form
         #
         set name $element
         set c [::xowiki::formfield::label create [self]::$name \
-                   -name [my name].$name -id [my id].$name \
-                   -locale [my locale] -object [my object] \
+                   -name ${:name}.$name -id ${:id}.$name \
+                   -locale [:locale] -object ${:object} \
                    -value $element]
         $c set_disabled 1; # this is a dummy field, never query for its value
-        if {$c ni [my components]} {my lappend components $c}
+        if {$c ni ${:components}} {lappend :components $c}
         continue
       }
-      lassign [my set format_map($element)] class code trim_zeros
+      lassign [set :format_map($element)] class code trim_zeros
       #
       # create for each component a form field
       #
       set name $class
       set c [::xowiki::formfield::$class create [self]::$name \
-                 -name [my name].$name -id [my id].$name \
-                 -locale [my locale] -object [my object]]
-      #my msg "creating [my name].$name"
-      $c set_disabled [my exists disabled]
+                 -name ${:name}.$name -id ${:id}.$name \
+                 -locale [:locale] -object ${:object}]
+      #:msg "creating ${:name}.$name"
+      $c set_disabled [info exists :disabled]
       $c set code $code
       $c set trim_zeros $trim_zeros
-      if {$c ni [my components]} {my lappend components $c}
+      if {$c ni ${:components}} {lappend :components $c}
     }
   }
 
   date instproc set_compound_value {value} {
-    #my msg "[my name] original value '[my value]' // passed='$value' disa?[my exists disabled]"
+    #:msg "${:name} original value '[:value]' // passed='$value' disa?[info exists :disabled]"
     # if {$value eq ""} {return}
     if { $value eq {} } {
       # We need to reset component values so that
       # instances of this class can be used as flyweight
       # objects. Otherwise, we get side-effects when
       # we render the input widget.
-      foreach c [my components] {
+      foreach c ${:components} {
         $c value ""
       }
       return
     }
     set value [::xo::db::tcl_date $value tz]
-    #my msg "transformed value '$value'"
+    #:msg "transformed value '$value'"
     if {$value ne ""} {
       set ticks [clock scan [string map [list _ " "] $value]]
     } else {
       set ticks ""
     }
-    my set defaults(year)  [clock format $ticks -format %Y]
-    my set defaults(month) [clock format $ticks -format %m]
-    my set defaults(day)   [clock format $ticks -format %e]
-    my set defaults(hour)  [clock format $ticks -format %H]
-    my set defaults(min)   [clock format $ticks -format %M]
-    #my set defaults(sec)   [clock format $ticks -format %S]
+    set :defaults(year)  [clock format $ticks -format %Y]
+    set :defaults(month) [clock format $ticks -format %m]
+    set :defaults(day)   [clock format $ticks -format %e]
+    set :defaults(hour)  [clock format $ticks -format %H]
+    set :defaults(min)   [clock format $ticks -format %M]
+    #set :defaults(sec)   [clock format $ticks -format %S]
 
     # set the value parts for each components
-    foreach c [my components] {
+    foreach c ${:components} {
       if {[$c istype ::xowiki::formfield::label]} continue
       if {$ticks ne ""} {
         set value_part [clock format $ticks -format [$c set code]]
@@ -3697,7 +5358,7 @@ namespace eval ::xowiki::formfield {
       } else {
         set value_part ""
       }
-      #my msg "ticks=$ticks $c value $value_part"
+      #:msg "ticks=$ticks $c value $value_part"
       $c value $value_part
     }
   }
@@ -3706,14 +5367,14 @@ namespace eval ::xowiki::formfield {
     # Set the internal representation of the date based on the components values.
     # Internally, the ansi date format is used.
     set year ""; set month ""; set day ""; set hour ""; set min ""; set sec ""
-    if {[my isobject [self]::YYYY]}  {set year  [[self]::YYYY  value]}
-    if {[my isobject [self]::month]} {set month [[self]::month value]}
-    if {[my isobject [self]::mon]}   {set month [[self]::mon   value]}
-    if {[my isobject [self]::MM]}    {set month [[self]::MM    value]}
-    if {[my isobject [self]::DD]}    {set day   [[self]::DD    value]}
-    if {[my isobject [self]::HH24]}  {set hour  [[self]::HH24  value]}
-    if {[my isobject [self]::MI]}    {set min   [[self]::MI    value]}
-    if {[my isobject [self]::SS]}    {set sec   [[self]::SS    value]}
+    if {[nsf::is object [self]::YYYY]}  {set year  [[self]::YYYY  value]}
+    if {[nsf::is object [self]::month]} {set month [[self]::month value]}
+    if {[nsf::is object [self]::mon]}   {set month [[self]::mon   value]}
+    if {[nsf::is object [self]::MM]}    {set month [[self]::MM    value]}
+    if {[nsf::is object [self]::DD]}    {set day   [[self]::DD    value]}
+    if {[nsf::is object [self]::HH24]}  {set hour  [[self]::HH24  value]}
+    if {[nsf::is object [self]::MI]}    {set min   [[self]::MI    value]}
+    if {[nsf::is object [self]::SS]}    {set sec   [[self]::SS    value]}
     if {"$year$month$day$hour$min$sec" eq ""} {
       return ""
     }
@@ -3722,14 +5383,14 @@ namespace eval ::xowiki::formfield {
     if {![string is integer $year]} {set year 0}
 
     foreach v [list year month day hour min sec] {
-      if {[set $v] eq ""} {set $v [my set defaults($v)]}
+      if {[set $v] eq ""} {set $v [set :defaults($v)]}
     }
-    #my msg "$year-$month-$day ${hour}:${min}:${sec}"
+    #:msg "$year-$month-$day ${hour}:${min}:${sec}"
     if {[catch {set ticks [clock scan "$year-$month-$day ${hour}:${min}:${sec}"]}]} {
       set ticks 0 ;# we assume that the validator flags these values
     }
     # TODO: TZ???
-    #my msg "DATE [my name] get_compound_value returns [clock format $ticks -format {%Y-%m-%d %T}]"
+    #:msg "DATE ${:name} get_compound_value returns [clock format $ticks -format {%Y-%m-%d %T}]"
     return [clock format $ticks -format "%Y-%m-%d %T"]
   }
 
@@ -3739,18 +5400,17 @@ namespace eval ::xowiki::formfield {
   }
 
   date instproc pretty_value {v} {
-    my instvar display_format
     #
     # Internally, we use the ansi date format. For displaying the date,
     # use the specified display format and present the time localized.
     #
     # Drop of the value after the "." we assume to have a date in the local zone
     regexp {^([^.]+)[.]} $v _ v
-    #return [clock format [clock scan $v] -format [string map [list _ " "] [my display_format]]]
-    if {$display_format eq "pretty-age"} {
-      return [::xowiki::utility pretty_age -timestamp [clock scan $v] -locale [my locale]]
+    #return [clock format [clock scan $v] -format [string map [list _ " "] ${:display_format}]]
+    if {${:display_format} eq "pretty-age"} {
+      return [::xowiki::utility pretty_age -timestamp [clock scan $v] -locale [:locale]]
     } else {
-      return [lc_time_fmt $v [string map [list _ " "] [my display_format]] [my locale]]
+      return [lc_time_fmt $v [string map [list _ " "] ${:display_format}] [:locale]]
     }
   }
 
@@ -3758,9 +5418,9 @@ namespace eval ::xowiki::formfield {
     #
     # render the content inline within a fieldset, without labels etc.
     #
-    my set style "margin: 0px; padding: 0px;"
-    html::fieldset [my get_attributes id style] {
-      foreach c [my components] { $c render_input }
+    set :style "margin: 0px; padding: 0px;"
+    html::fieldset [:get_attributes id style] {
+      foreach c ${:components} { $c render_input }
     }
   }
 
@@ -3775,13 +5435,40 @@ namespace eval ::xowiki::formfield {
     {default t}
   }
   boolean instproc value_if_nothing_is_returned_from_form {default} {
-    if {[my exists disabled]} {return $default} else {return f}
+    if {[info exists :disabled]} {
+      return $default
+    } else {
+      return f
+    }
   }
   boolean instproc initialize {} {
     # should be with cvs head message catalogs:
-    my options "{#acs-kernel.common_Yes# t} {#acs-kernel.common_No# f}"
+    set :options "{#acs-kernel.common_Yes# t} {#acs-kernel.common_No# f}"
     next
   }
+
+  ###########################################################
+  #
+  # ::xowiki::boolean-checkox
+  #
+  ###########################################################
+
+  Class create boolean_checkbox -superclass checkbox -parameter {
+    {default t}
+  }
+  boolean_checkbox instproc value_if_nothing_is_returned_from_form {default} {
+    if {[info exists :disabled]} {
+      return $default
+    } else {
+      return f
+    }
+  }
+  boolean_checkbox instproc initialize {} {
+    # should be with cvs head message catalogs:
+    set :options "{{} t}"
+    next
+  }
+
 
   ###########################################################
   #
@@ -3796,23 +5483,21 @@ namespace eval ::xowiki::formfield {
     {CSSclass img_boolean}
   }
   boolean_image instproc initialize {} {
-    my type hidden
-    my set widget_type boolean(hidden)
+    :type hidden
+    set :widget_type boolean(hidden)
   }
   boolean_image instproc render_input {} {
-    my instvar t_img_url f_img_url CSSclass
-    set title [expr {[my exists __render_help_text_as_title_attr] ? [my set help_text] : ""}]
-    set id [my id]
+    set title [expr {[info exists :__render_help_text_as_title_attr] ? ${:help_text} : ""}]
     ::html::img \
         -title $title \
-        -class $CSSclass \
-        -src [expr {[my value] ? $t_img_url : $f_img_url}] \
-        -id $id-image
+        -class ${:CSSclass} \
+        -src [expr {[:value] ? ${:t_img_url} : ${:f_img_url}}] \
+        -id ${:id}-image
     template::add_event_listener \
-        -id $id-image \
-        -script [subst {toggle_img_boolean(this,'$t_img_url','$f_img_url');}]
+        -id ${:id}-image \
+        -script [subst {toggle_img_boolean(this,'${:t_img_url}','${:f_img_url}');}]
 
-    ::html::input -type hidden -name [my name] -value [my value]
+    ::html::input -type hidden -name ${:name} -value [:value]
 
     ::xo::Page requireJS {
       function toggle_img_boolean (element,t_img_url,f_img_url) {
@@ -3837,12 +5522,10 @@ namespace eval ::xowiki::formfield {
 
   Class create scale -superclass radio -parameter {{n 5} {horizontal true}}
   scale instproc initialize {} {
-    my instvar n
-    set options [list]
-    for {set i 1} {$i <= $n} {incr i} {
-      lappend options [list $i $i]
+    set :options [list]
+    for {set i 1} {$i <= ${:n}} {incr i} {
+      lappend :options [list $i $i]
     }
-    my options $options
     next
   }
 
@@ -3859,7 +5542,7 @@ namespace eval ::xowiki::formfield {
 
   form instproc check=form {value} {
     set form $value
-    #my msg form=$form
+    #:msg form=$form
     dom parse -simple -html $form doc
     $doc documentElement root
     set rootNodeName ""
@@ -3876,7 +5559,10 @@ namespace eval ::xowiki::formfield {
   Class create form_constraints -superclass textarea -parameter {
     {rows 5}
   } -extend_slot_default validator form_constraints
-  # the form_constraints checker is defined already on the ::xowiki::Page level
+  #
+  # The form_constraints checker is defined on the
+  # ::xowiki::Page level as validate=form_constraints
+  #
 
 
   ###########################################################
@@ -3890,24 +5576,52 @@ namespace eval ::xowiki::formfield {
   #
   ###########################################################
 
-  Class create event -superclass CompoundField -parameter {
-    {multiday false}
+  Class create CalendarField -superclass CompoundField -parameter {
+    {multiday:boolean false}
     {calendar}
     {time_label #xowiki.event-time#}
   }
+  CalendarField set abstract 1
+
+  CalendarField instproc update_calendar {-cal_item_id -calendar_id -start -end -name -description} {
+    #
+    # If we have already a valid cal_item_id (checked previously)
+    # update the entry. Otherwise create a new calendar item and
+    # update the instance variables.
+    #
+    if {$cal_item_id ne ""} {
+      #:log "===== [list calendar::item::edit -start_date $start -end_date $end -cal_item_id $cal_item_id ...]"
+      calendar::item::edit -cal_item_id $cal_item_id -start_date $start \
+          -end_date $end -name $name -description $description
+    } else {
+      #:log "===== [list calendar::item::new -start_date $start -end_date $end -calendar_id $calendar_id ...]"
+      set cal_item_id [calendar::item::new -start_date $start -end_date $end \
+                           -name $name -description $description -calendar_id $calendar_id]
+      [:get_component cal_item_id] value $cal_item_id
+      #
+      # The following line is required when used in transaction to
+      # update the instance attributes
+      #
+      ${:object} set_property [namespace tail [:info class]] [:get_compound_value]
+    }
+  }
+
+
+  Class create event -superclass CalendarField -parameter {
+  }
 
   event instproc initialize {} {
-    #my log "event initialize [my exists __initialized], multi=[my multiday] state=[my set __state]"
-    if {[my set __state] ne "after_specs"} return
-    my set widget_type event
-    if {[my multiday]} {
+    #:log "event initialize [info exists :__initialized], multi=${:multiday} state=${:__state}"
+    if {${:__state} ne "after_specs"} return
+    set :widget_type event
+    if {${:multiday}} {
       set dtend_format DD_MONTH_YYYY_#xowiki.event-hour_prefix#_HH24_MI
       set dtend_display_format %Q_%X
     } else {
       set dtend_format HH24_MI
       set dtend_display_format %X
     }
-    my create_components [subst {
+    :create_components [subst {
       {title {text,label=#xowiki.event-title_of_event#}}
       {summary {richtext,height=150px,label=#xowiki.event-summary_of_event#}}
       {dtstart {date,required,format=DD_MONTH_YYYY_#xowiki.event-hourprefix#_HH24_MI,
@@ -3916,34 +5630,36 @@ namespace eval ::xowiki::formfield {
       {location text,label=#xowiki.event-location#}
       {cal_item_id hidden}
     }]
-    my set __initialized 1
+    set :__initialized 1
   }
 
   event instproc get_compound_value {} {
-    if {![my exists __initialized]} {
+    if {![info exists :__initialized]} {
       return ""
     }
-    set dtstart  [my get_component dtstart]
-    set dtend    [my get_component dtend]
-    if {![my multiday]} {
+    set dtstart  [:get_component dtstart]
+    set dtend    [:get_component dtend]
+
+    if {!${:multiday}} {
       # If the event is not a multi-day-event, the end_day is not
       # given by the dtend widget, but is taken from dtstart.
       set end_day  [lindex [$dtstart value] 0]
       set end_time [lindex [$dtend value] 1]
       $dtend value "$end_day $end_time"
-      #my msg "[$dtend name] set to '$end_day $end_time' ==> $dtend, [$dtend value]"
+      #:msg "[$dtend name] set to '$end_day $end_time' ==> $dtend, [$dtend value]"
     }
     next
   }
 
+
   event instproc pretty_value {v} {
-    #array set {} [my value]
-    set dtstart [my get_component dtstart]
+    #array set {} [:value]
+    set dtstart [:get_component dtstart]
     set dtstart_val [$dtstart value]
     set dtstart_iso [::xo::ical clock_to_iso [clock scan $dtstart_val]]
     set dtstart_pretty [$dtstart pretty_value $dtstart_val]
 
-    set dtend [my get_component dtend]
+    set dtend [:get_component dtend]
     set dtend_val [$dtend value]
     set dtend_txt ""
     if {$dtend_val ne ""} {
@@ -3951,24 +5667,24 @@ namespace eval ::xowiki::formfield {
       set dtend_txt " - <time class='dt-end' title='$dtend_iso'>[$dtend pretty_value $dtend_val]</time>"
     }
 
-    set time_label [my time_label]
+    set time_label [:time_label]
     if {[regexp {^#([a-zA-Z0-9_:-]+\.[a-zA-Z0-9_:-]+)#$} $time_label _ msg_key]} {
-      set time_label [lang::message::lookup [my locale] $msg_key]
+      set time_label [lang::message::lookup [:locale] $msg_key]
     }
 
-    set title_val   [[my get_component title] value]
+    set title_val   [[:get_component title] value]
     if {$title_val eq ""} {
-      set title_val [[my object] property _title]
+      set title_val [${:object} property _title]
     }
-    set summary_val [[my get_component summary] value]
+    set summary_val [[:get_component summary] value]
 
-    set location [my get_component location]
+    set location [:get_component location]
     set location_val [$location value]
     set location_txt ""
     if {$location_val ne ""} {
       set location_label [$location label]
       if {[regexp {^#(.+)#$} $location_label _ msg_key]} {
-        set location_label [lang::message::lookup [my locale] $msg_key]
+        set location_label [lang::message::lookup [:locale] $msg_key]
       }
       set location_txt "<tr><td>$location_label:</td><td><span class='p-location'>$location_val</span></td></tr>"
     }
@@ -3986,7 +5702,7 @@ namespace eval ::xowiki::formfield {
   }
 
   event instproc convert_to_internal {} {
-    if {[my exists calendar]} {
+    if {[info exists :calendar]} {
       #
       # Check, if the calendar package is available
       #
@@ -3998,25 +5714,25 @@ namespace eval ::xowiki::formfield {
       # Check, if the calendar_id can be determined
       #
       set calendar_id ""
-      if {[string is integer -strict [my calendar]]} {
-        set calendar_id [my calendar]
+      if {[string is integer -strict ${:calendar}]} {
+        set calendar_id ${:calendar}
         if {[calendar::name $calendar_id] eq ""} {
           set calendar_id ""
         }
       }
       if {$calendar_id eq ""} {
-        error "calendar '[my calendar] has no valid calendar_id"
+        error "calendar '${:calendar} has no valid calendar_id"
       }
 
       #
       # Get the values for the calendar item
       #
-      set dtstart_val [[my get_component dtstart] value]
-      set dtend_val   [[my get_component dtend]   value]
-      set title_val   [[my get_component title]   value]
-      set title_val   [[my get_component title]   value]
-      set summary_val [[my get_component summary] value]
-      set cal_item_id [[my get_component cal_item_id] value]
+      set dtstart_val [[:get_component dtstart] value]
+      set dtend_val   [[:get_component dtend]   value]
+      set title_val   [[:get_component title]   value]
+      set title_val   [[:get_component title]   value]
+      set summary_val [[:get_component summary] value]
+      set cal_item_id [[:get_component cal_item_id] value]
 
       #
       # Check, if the cal_item_id is valid. If not, ignore it
@@ -4037,7 +5753,7 @@ namespace eval ::xowiki::formfield {
       #
       # update values via transaction queue
       #
-      set queue ::__xowiki__transaction_queue([[my object] item_id])
+      set queue ::__xowiki__transaction_queue([${:object} item_id])
       lappend $queue [list [self] update_calendar -cal_item_id $cal_item_id -calendar_id $calendar_id \
                           -start $dtstart_val -end $dtend_val -name $title_val -description $summary_val]
     }
@@ -4045,33 +5761,77 @@ namespace eval ::xowiki::formfield {
     next
   }
 
-  event instproc update_calendar {-cal_item_id -calendar_id -start -end -name -description} {
-    #
-    # If we have already a valid cal_item_id (checked previously)
-    # update the entry. Otherwise create a new calender item and
-    # update the instance variables.
-    #
-    if {$cal_item_id ne ""} {
-      #my log "===== [list calendar::item::edit -start_date $start -end_date $end -cal_item_id $cal_item_id ...]"
-      calendar::item::edit -cal_item_id $cal_item_id -start_date $start \
-          -end_date $end -name $name -description $description
-    } else {
-      #my log "===== [list calendar::item::new -start_date $start -end_date $end -calendar_id $calendar_id ...]"
-      set cal_item_id [calendar::item::new -start_date $start -end_date $end \
-                           -name $name -description $description -calendar_id $calendar_id]
-      [my get_component cal_item_id] value $cal_item_id
-      #
-      # The following line is required when used in transaction to
-      # update the instance attributes
-      #
-      [my object] set_property event [my get_compound_value]
-    }
+
+  ###########################################################
+  #
+  # ::xowiki::formfield::time_span
+  #
+  # This formfield is a simplified version of the "event".  It uses
+  # the HTML5 widget rather than the classical OpenACS multifield
+  # interface.
+
+  # Currently, it does not do calendar integration, but if would be
+  # straightforward to add it here as well.
+  #
+  ###########################################################
+
+  Class create time_span -superclass CalendarField -parameter {
   }
 
+  time_span instproc initialize {} {
+    #:log "time_span initialize [info exists :__initialized], multi=${:multiday} state=${:__state}"
+    if {${:__state} ne "after_specs"} return
+    set :widget_type time_span
+    if {${:multiday}} {
+      set dtend_format DD_MONTH_YYYY_#xowiki.event-hour_prefix#_HH24_MI
+      set dtend_display_format %Q_%X
+    } else {
+      set dtend_format HH24_MI
+      set dtend_display_format %X
+    }
+    :create_components [subst {
+      {dtstart {datetime-local,form_item_wrapper_CSSclass=form-inline,label=#xowiki.From#}}
+      {dtend   {h5time,form_item_wrapper_CSSclass=form-inline,label=#xowiki.to#}}
+      {cal_item_id hidden}
+    }]
+    set :__initialized 1
+  }
+
+  # time_span instproc get_compound_value {} {
+  #   if {![info exists :__initialized]} {
+  #     return ""
+  #   }
+  #   next
+  # }
+  #
+  #
+  # time_span instproc pretty_value {v} {
+  #
+  #   next
+  # }
+  #
+  # time_span instproc convert_to_internal {} {
+  #
+  #    # could handle calendar entries similar to
+  #    # "event.convert_to_internal", which should be refactored in
+  #    # this case.
+  #
+  # }
 
 }
 
 namespace eval ::xowiki::formfield {
+
+  # Class create mycompound -superclass CompoundField
+  #
+  # mycompound instproc initialize {} {
+  #   if {${:__state} ne "after_specs"} return
+  #   :create_components  [subst {
+  #     {start_on_publish {checkbox,default=t,options={YES t}}}
+  #     {whatever   {text}}
+  #   }]
+  #   set :__initialized 1
+  # }
 
   ###########################################################
   #
@@ -4083,14 +5843,15 @@ namespace eval ::xowiki::formfield {
     {subclass_of ::xotcl::Object}
   }
   class instproc initialize {} {
-    my set options ""
-    set baseclass [my subclass_of]
-    foreach cl [lsort [concat $baseclass [$baseclass info subclass -closure]]] {
-      my lappend options [list $cl $cl]
+    set :options ""
+    foreach cl [lsort [list ${:subclass_of} {*}[${:subclass_of} info subclass -closure]]] {
+      lappend :options [list $cl $cl]
     }
     next
   }
 }
+
+
 
 ::xo::library source_dependent
 

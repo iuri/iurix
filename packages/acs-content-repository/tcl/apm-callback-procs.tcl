@@ -6,14 +6,14 @@ ad_library {
 
     @creation-date July 2009
     @author  Emmanuelle Raffenne (eraffenne@gmail.com)
-    @cvs-id $Id: apm-callback-procs.tcl,v 1.2.8.1 2015/09/10 08:21:16 gustafn Exp $
+    @cvs-id $Id: apm-callback-procs.tcl,v 1.3.2.1 2020/08/25 08:00:27 antoniop Exp $
 
 }
 
 namespace eval content {}
 namespace eval content::apm {}
 
-ad_proc -public content::apm::after_upgrade {
+ad_proc -private content::apm::after_upgrade {
     {-from_version_name:required}
     {-to_version_name:required}
 } {
@@ -22,8 +22,8 @@ ad_proc -public content::apm::after_upgrade {
     apm_upgrade_logic \
         -from_version_name $from_version_name \
         -to_version_name $to_version_name \
-        -spec {  
-            5.5.1d1 5.5.1d2 {    
+        -spec {
+            5.5.1d1 5.5.1d2 {
                 set mimetype_list [list \
                                        {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" "xlsx" "Microsoft Office Excel"} \
                                        {"application/vnd.openxmlformats-officedocument.spreadsheetml.template" "xltx" "Microsoft Office Excel Template"} \

@@ -60,7 +60,7 @@
 	      used on a site. The system should not make any
 	      assumptions about how pages should look or function.
 	      Designers should be able to change the default
-	      presentation of any module using a single metholodogy
+	      presentation of any module using a single methodology
 	      with minimal exposure to code.
 	    </p>
 
@@ -168,7 +168,7 @@
 	  <li>
 	    The mechanism for dynamically generating pages combines
 	    data and layout.  It also allows coposition of modular
-	    pages from reusable widges and skins.  It is not limited
+	    pages from reusable widgets and skins.  It is not limited
 	    to HTML.
 	  <li>
 	    The <code>&lt;master&gt;</code> tag specifies a master
@@ -314,9 +314,9 @@
     serving a templated page involves.
     <ol>
       <li>
-	The request processor gets a url and maps it to a
+	The request processor gets a URL and maps it to a
         <code>.adp</code> or <code>.tcl</code> file.  As both invoke
-        the same handler, it doesn't matter that adp take precendence.
+        the same handler, it doesn't matter that adp take precedence.
       <li>
 	If a <code>.tcl</code> file is present,
 	its <a href="/api-doc/proc-view?proc=ad_page_contract"
@@ -398,7 +398,7 @@
       the trouble of reading and parsing the file the next time.  The
       template system remembers the modification times of the adp and
       Tcl sources, and re-processes any requested file if the cached
-      version is no longer current.  Consequently, this cacheing is
+      version is no longer current.  Consequently, this caching is
       transparent in normal use.
     </p>
     <p>
@@ -416,16 +416,16 @@
       <code>template</code> to <code>never</code> or
       <code>always</code>.  The former suppresses checking mtime and
       may improve performance on a production server, where the
-      content pages don't change.  The latter is only inteded for testing.
+      content pages don't change.  The latter is only intended for testing.
     </p>
 
     <h3>VII. Data Model Discussion</h3>
     <p>
-      This packages doesn't need a data model.
+      This package doesn't need a data model.
     </p>
     <p>
       It comes with its own database interfaces, one for using ns_ora,
-      the Oracle driver from ArsDigita, and one for ns_db, the builtin
+      the Oracle driver from ArsDigita, and one for ns_db, the built-in
       database interface of the AOL server.  If you are programming
       under the ACS, you should use neither of these, but rather the
       <code>db_*</code> interface, in particular <code>db_multirow</code>.
@@ -433,12 +433,12 @@
 
     <h3>VIII. User Interface</h3>
     <p>
-      This packages doesn't have a user interface.  It is the
+      This package doesn't have a user interface.  It is the
       <em>substrate</em> of all user interfaces, be it user or admin pages.
     </p>
 
     <h3>IX.  Configuration/Parameters</h3>
-    
+
     There are two parameters.
     <pre>
       [ns/server/yourservername/acs/template]
@@ -496,9 +496,8 @@
       <tr>
 	<td>0.1</td>
 	<td>
-	  Brought into the form suggested by <a
-	  href="http://dev.arsdigita.com/ad-sepg/process/design-template"
-	  >Finkler, McLoghlin and Wu</a>
+	  Brought into the form suggested by
+	  Finkler, McLoghlin and Wu (http://dev.arsdigita.com/ad-sepg/process/design-template)
 	</td>
 	<td>18 Jul 2000</td>
 	<td>Christian Brechb&uuml;hler</td>
@@ -520,6 +519,6 @@
     <hr>
     <address><a href="mailto:christian@arsdigita.com">Christian Brechbuehler</a></address>
 <!-- Created: Mon Aug 14 11:53:07 EDT 2000 -->
-Last modified: $Id: design.html,v 1.4.2.3 2017/04/22 18:30:26 gustafn Exp $
+Last modified: $Id: design.html,v 1.10.2.2 2019/08/15 10:18:49 gustafn Exp $
   </body>
 </html>

@@ -1,8 +1,8 @@
 ad_page_contract {
     shows User A what User B has contributed to the community
-    
-    @param user_id defaults to currently logged in user if there is one
-    @cvs-id $Id: community-member.tcl,v 1.21.2.6 2017/04/26 18:46:07 gustafn Exp $
+
+    @param user_id defaults to currently logged-in user if there is one
+    @cvs-id $Id: community-member.tcl,v 1.25.2.3 2019/11/22 16:33:34 gustafn Exp $
 } {
     {user_id:naturalnum ""}
 } -properties {
@@ -27,12 +27,12 @@ ad_page_contract {
     valid_user_id {
         set verified_user_id [ad_conn user_id]
         set untrusted_user_id [ad_conn untrusted_user_id]
-        
+
         if {$user_id eq ""} {
             if {$verified_user_id != 0} {
                 set user_id $verified_user_id
             } else {
-                # Don't know what to do! 
+                # Don't know what to do!
                 auth::require_login
                 return
             }
@@ -49,7 +49,7 @@ ad_page_contract {
 }
 
 #
-# See if this page has been overrided by a parameter in kernel
+# See if this page has been overridden by a parameter in kernel
 #
 set community_member_url [parameter::get \
                               -package_id [ad_acs_kernel_id] \
@@ -70,10 +70,13 @@ set admin_user_url [acs_community_member_admin_url -user_id $user_id]
 set email_image "<p><b>\#acs-subsite.E_mail\#:</b>&nbsp;[email_image::get_user_email -user_id $user_id]</p>"
 
 #
-# "url" is obtained from the sql query above, together with
+# "url" is obtained from the SQL query above, together with
 # "first_names" etc.
 #
-if { $url ne "" && ![string match -nocase "http://*" $url] } {
+if { $url ne ""
+     && ![string match -nocase "http://*" $url]
+     && ![string match -nocase "https://*" $url]
+ } {
     set url "http://$url"
 }
 
@@ -82,7 +85,7 @@ set bio [ad_text_to_html -- [person::get_bio -person_id $user_id]]
 # Do we show the portrait?
 set inline_portrait_state "none"
 set portrait_url [export_vars -base portrait {user_id}]
-set portrait_image_url [export_vars -base portrait-bits {user_id}]
+set portrait_image_url [export_vars -base portrait-bits {user_id {size x150}}]
 
 if {[db_0or1row portrait_info {
     select i.width, i.height, cr.title, cr.description, cr.publish_date
@@ -95,11 +98,16 @@ if {[db_0or1row portrait_info {
 }]} {
     # We have a portrait. Let's see if we can show it inline
 
-    if { $width ne "" && $width < 400 } {
-	# let's show it inline
-	set inline_portrait_state "inline"
+    if { 1 || $width ne "" && $width < 400 } {
+        #
+        # Deactivated branch: since we can provide scaling, why not
+        # use it.  The maintenance of the image width in i.width
+        # (above) does not seem to work reliable.
+        #
+        # let's show it inline
+        set inline_portrait_state "inline"
     } else {
-	set inline_portrait_state "link"
+        set inline_portrait_state "link"
     }
 }
 
@@ -108,7 +116,7 @@ if { [ad_conn user_id] > 0 } {
     set show_email_p 1
 } else {
     set show_email_p 0
-    # guy doesn't want his email address shown, but we can still put out 
+    # guy doesn't want his email address shown, but we can still put out
     # the home page
 }
 

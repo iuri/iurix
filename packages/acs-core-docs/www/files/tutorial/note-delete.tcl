@@ -2,7 +2,7 @@ ad_page_contract {
     This deletes a note
 
     @author Your Name (you@example.com)
-    @cvs-id $Id: note-delete.tcl,v 1.3.2.1 2015/09/10 08:21:20 gustafn Exp $
+    @cvs-id $Id: note-delete.tcl,v 1.5 2018/01/19 21:23:51 gustafn Exp $
  
     @param item_id The item_id of the note to delete
 } {
@@ -15,7 +15,7 @@ mfp::note::delete -item_id $item_id
 
 ad_returnredirect "."
 # stop running this code, since we're redirecting
-abort
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

@@ -3,7 +3,7 @@ ad_library {
 
     @author Peter Marklund
     @creation-date 31 March 2004
-    @cvs-id $Id: tclwebtest-procs.tcl,v 1.8.2.4 2017/04/21 15:43:47 gustafn Exp $
+    @cvs-id $Id: tclwebtest-procs.tcl,v 1.15.2.1 2019/10/22 07:59:19 gustafn Exp $
 }
 
 namespace eval twt {}
@@ -16,7 +16,7 @@ namespace eval twt::user {}
 #########################
 
 ad_proc twt::do_request { page_url } {
-    Takes a a url and invokes tclwebtest::do_request. Will retry
+    Takes a URL and invokes tclwebtest::do_request. Will retry
     the request a number of times if it fails because of a socket
     connect problem.
 } {
@@ -82,7 +82,7 @@ ad_proc twt::server_url {} {
 
     regexp {(:[0-9]*)?$} [util_current_location] match port
 
-    if { ([info exists port] && $port ne "") } {
+    if { [info exists port] && $port ne "" } {
         return "http://${ip_address}${port}"
     } else {
         return "http://$ip_address"
@@ -95,49 +95,20 @@ ad_proc twt::server_url {} {
 #
 #########################
 
-ad_proc twt::user::create { 
+ad_proc twt::user::create {
     {-user_id {}}
     {-admin:boolean}
  } {
     Create a test user with random email and password for testing
 
-     @param admin Provide this switch to make the user site-wide admin
-    
+    @param admin Provide this switch to make the user site-wide admin
+
     @return The user_info array list returned by auth::create_user. Contains
             the additional keys email and password.
 
     @author Peter Marklund
-} {
-    set username "__test_user_[ad_generate_random_string]"
-    set email "${username}@test.test"
-    set password [ad_generate_random_string]
-
-    array set user_info [auth::create_user \
-                                     -user_id $user_id \
-                                     -username $username \
-                                     -email $email \
-                                     -first_names [ad_generate_random_string] \
-                                     -last_name [ad_generate_random_string] \
-                                     -password $password \
-                                     -secret_question [ad_generate_random_string] \
-                                     -secret_answer [ad_generate_random_string]]
-
-    if { $user_info(creation_status) ne "ok" } {
-        # Could not create user
-        error "Could not create test user with username=$username user_info=[array get user_info]"
-    }
-
-    set user_info(password) $password
-    set user_info(email) $email
-
-    aa_log "Created user with email=\"$email\" and password=\"$password\""
-
-    if { $admin_p } {
-        aa_log "Making user site-wide admin"
-        permission::grant -object_id [acs_magic_object "security_context_root"] -party_id $user_info(user_id) -privilege "admin"
-    }
-
-    return [array get user_info]
+ } {
+     return [acs::test::user::create -user_id $user_id -admin=$admin_p]
 }
 
 ad_proc twt::user::delete {
@@ -145,9 +116,7 @@ ad_proc twt::user::delete {
 } {
     Remove a test user.
 } {
-    acs_user::delete \
-        -user_id $user_id \
-        -permanent
+    ::acs::test::user_delete -user_id $user_id
 }
 
 ad_proc twt::user::login { email password {username ""}}  {
@@ -157,7 +126,7 @@ ad_proc twt::user::login { email password {username ""}}  {
     @param password Password of user to log in.
 } {
     if {$username eq ""} {
-	set username $email
+        set username $email
     }
     aa_log "twt::login email $email password $password username $username"
     tclwebtest::cookies clear
@@ -167,20 +136,20 @@ ad_proc twt::user::login { email password {username ""}}  {
 
     # Login the user
     tclwebtest::form find ~n login
-    
+
     set local_authority_id [auth::authority::local]
     set local_authority_pretty_name [auth::authority::get_element -authority_id $local_authority_id -element pretty_name]
     if {![catch {tclwebtest::field find ~n authority_id} errmsg]} {
-	tclwebtest::field select $local_authority_pretty_name
-	aa_log "twt::login selecting authority_id $local_authority_id"
+        tclwebtest::field select $local_authority_pretty_name
+        aa_log "twt::login selecting authority_id $local_authority_id"
     }
     if {[catch {tclwebtest::field find ~n email} errmsg]} {
-	tclwebtest::field find ~n username
-	tclwebtest::field fill $username
-	aa_log "twt::login using username instead of email"
+        tclwebtest::field find ~n username
+        tclwebtest::field fill $username
+        aa_log "twt::login using username instead of email"
     } else {
-	aa_log "twt::login using email instead of username"
-	tclwebtest::field fill "$email"
+        aa_log "twt::login using email instead of username"
+        tclwebtest::field fill "$email"
     }
     tclwebtest::field find ~n password
     tclwebtest::field fill $password
@@ -196,7 +165,7 @@ ad_proc twt::user::login { email password {username ""}}  {
             error "Failed to login user with email=\"$email\" and password=\"$password\". No user with such email in database."
         } else {
             ns_log Error "Failed to log in user with email=\"$email\" and password=\"$password\" even though email exists (password may be incorrect). response_body=[tclwebtest::response body]"
-            error "Failed to log in user with email=\"$email\" and password=\"$password\" even though email exists (password may be incorrect). User should be able to request $home_uri without redirection, however response url=$response_url"
+            error "Failed to log in user with email=\"$email\" and password=\"$password\" even though email exists (password may be incorrect). User should be able to request $home_uri without redirection (response url=$response_url)"
 
         }
     }

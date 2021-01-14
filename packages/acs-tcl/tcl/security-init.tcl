@@ -6,7 +6,7 @@ ad_library {
     @creation-date 16 Feb 2000
     @author Jon Salz (jsalz@arsdigita.com)
     @author Richard Li (richardl@arsdigita.com)
-    @cvs-id $Id: security-init.tcl,v 1.5.10.4 2017/08/01 08:50:23 gustafn Exp $
+    @cvs-id $Id: security-init.tcl,v 1.6.2.1 2019/11/16 15:45:55 gustafn Exp $
 
 }
 
@@ -17,13 +17,13 @@ ad_schedule_proc -thread f [parameter::get -parameter SessionSweepInterval -defa
 set secret_tokens_exists [db_string secret_tokens_exists {select decode(count(*),0,0,1) from secret_tokens}]
 
 if { $secret_tokens_exists == 0 } {
-    populate_secret_tokens_db
+    sec_populate_secret_tokens_db
 }
 
 ns_log Notice "security-init.tcl: Creating secret_tokens ns_cache..."
 ns_cache create secret_tokens -size 65536
 ns_log Notice "security-init.tcl: Populating secret_tokens ns_cache..."
-populate_secret_tokens_cache
+sec_populate_secret_tokens_cache
 
 # These procedures are dynamically defined so that parameter::get
 # does not need to be called directly in the RP. 

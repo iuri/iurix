@@ -1,18 +1,19 @@
 ad_library {
-    
-    Compatibily procs in case we're not running a version of AOLServer that supports charsets.
-    
+
+    Compatibility procs in case we're not running a version of AOLServer that supports charsets.
+
     @author Rob Mayoff [mayoff@arsdigita.com]
     @author Nada Amin [namin@arsdigita.com]
     @creation-date June 28, 2000
-    @cvs-id $Id: 10-charset-compat-procs.tcl,v 1.2.2.1 2015/09/10 08:21:55 gustafn Exp $
+    @cvs-id $Id: 10-charset-compat-procs.tcl,v 1.4.2.2 2020/10/28 15:39:19 hectorr Exp $
 }
 
-set compat_procs [list ns_startcontent ns_encodingfortype]
-
-foreach one_proc $compat_procs {
-    if {[llength [info commands $one_proc]] == 0} {
-	proc $one_proc {args} { }
+#
+# Define dummy stubs in case the required commands are not available.
+#
+foreach one_proc {ns_startcontent ns_encodingfortype} {
+    if {[namespace which $one_proc] eq ""} {
+        proc $one_proc {args} { }
     }
 }
 

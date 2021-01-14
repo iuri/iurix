@@ -1,5 +1,3 @@
-# packages/acs-core-ui/www/admin/site-nodes/package-new.tcl
-
 ad_page_contract {
     Create a new package and mount it in the site map. If new_node_p is false then
     the package will be mounted at node_id. If new_node_p is true then a new node with
@@ -7,7 +5,7 @@ ad_page_contract {
 
     @author rhs@mit.edu
     @creation-date 2000-09-13
-    @cvs-id $Id: package-new.tcl,v 1.15.2.3 2016/01/02 20:57:57 gustafn Exp $
+    @cvs-id $Id: package-new.tcl,v 1.18.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     {new_package_id:naturalnum ""}
@@ -15,7 +13,7 @@ ad_page_contract {
     {new_node_p:boolean f}
     {node_name:trim ""}
     {instance_name ""}
-    package_key:notnull
+    package_key:token,notnull
     {expand:integer,multiple ""}
     root_id:naturalnum,optional
 }
@@ -56,20 +54,21 @@ db_transaction {
                                                          -package_key $package_key \
                                                          -node_id $node_id \
                                                          -package_name $instance_name \
-			                                 -context_id $context_id ]
+                                                         -context_id $context_id ]
     }
 
 } on_error {
     if {![db_string package_new_doubleclick_ck {} -default 0]} {
-	ad_return_complaint 1 "Error Creating Package: The following error was generated
-		when attempting to create the package
-	<blockquote><pre>
-		[ns_quotehtml $errmsg]
-	</pre></blockquote>"
+        ad_return_complaint 1 "Error Creating Package: The following error was generated
+                when attempting to create the package
+        <blockquote><pre>
+                [ns_quotehtml $errmsg]
+        </pre></blockquote>"
     }
 }
 
 ad_returnredirect [export_vars -base . {expand:multiple root_id}]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

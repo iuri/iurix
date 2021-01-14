@@ -21,9 +21,9 @@ as
     node_id             in site_nodes.node_id%TYPE
   );
 
-  -- Return the node_id of a url. If the url begins with '/' then the
+  -- Return the node_id of a URL. If the url begins with '/' then the
   -- parent_id must be null. This will raise the no_data_found
-  -- exception if there is no mathing node in the site_nodes table.
+  -- exception if there is no matching node in the site_nodes table.
   -- This will match directories even if no trailing slash is included
   -- in the url.
 
@@ -374,7 +374,7 @@ where rc_all_constraints.group_id(+) = group_rel_type_combos.group_id
 --
 --           What are all the segments in the system that a party has to 
 --           be in if the party were to be on side :rel_side of a relation
---           in segement :rel_segment?  
+--           in segment :rel_segment?  
 --
 --           We want not only the direct required_segments (which we could
 --           get from the rel_constraints table directly), but also the 
@@ -420,11 +420,11 @@ where rc.rel_segment in (
 --                          tell you which segment -- you can get that info
 --                          from rel_constraints table or other views.
 --
--- Another Note: not all segemnts in rel_segemnts are returned by this view.
+-- Another Note: not all segments in rel_segments are returned by this view.
 -- This view only returns segments S that have at least one rel_constraints row
 -- where rel_segment = S.  Segments that have no constraints defined on them
 -- can be said to have dependency_level=0, hence the outer join and nvl in the
--- example query above (see "Answer:").  I could have embeded that logic into
+-- example query above (see "Answer:").  I could have embedded that logic into
 -- this view, but that would unnecessarily degrade performance.
 --
 create or replace view rc_segment_dependency_levels as

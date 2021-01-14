@@ -1,28 +1,57 @@
-# 
+#
 
 ad_library {
-    
+
     Test date procs
-    
+
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2005-10-13
-    @arch-tag: b5d458b6-bd22-4b87-8c4e-6a8c23fcca9e
-    @cvs-id $Id: date-procs.tcl,v 1.2.14.1 2015/09/10 08:22:08 gustafn Exp $
+    @cvs-id $Id: date-procs.tcl,v 1.5.2.1 2019/04/25 09:21:16 gustafn Exp $
 }
 
 
-aa_register_case sql_date {
+aa_register_case \
+    -procs {
+        template::util::date::get_property
+        template::util::date::now
+    } \
+    sql_date {
     test sql date transform
 } {
     aa_run_with_teardown \
         -test_code {
             set date [template::util::date::now]
             set sql_date [template::util::date::get_property sql_date $date]
-            if {[string equal [db_type] "oracle"] && [string match "8.*" [db_version]]} {
+            if { [db_type] eq "oracle" && [string match "8.*" [db_version]] } {
                 aa_true "to_date for Oracle 8i" [string match "to_date*"]
             } else {
                 aa_true "to_timestamp for Oracle 9i and PostgreSQL" [string match "to_timestamp*" $sql_date]
             }
+        }
+}
+
+aa_register_case \
+    -procs {
+        template::util::date::now_min_interval
+    } \
+    date_minute_interval {
+        test minute interval
+    } {
+    aa_run_with_teardown \
+        -test_code {
+            
+            set clock [clock scan "2019-04-25 16:19:00"]
+            set date [template::util::date::now_min_interval -clock $clock]
+            aa_equals "interval up from 19" $date {2019 4 25 16 20 0 {DD MONTH YYYY}}
+            
+            set clock [clock scan "2019-04-25 16:20:00"]
+            set date [template::util::date::now_min_interval -clock $clock]
+            aa_equals "interval same " $date {2019 4 25 16 20 0 {DD MONTH YYYY}}
+
+            set clock [clock scan "2019-04-25 16:21:00"]
+            set date [template::util::date::now_min_interval -clock $clock]
+            aa_equals "interval up from 21 " $date {2019 4 25 16 25 0 {DD MONTH YYYY}}
+
         }
 }
 # Local variables:

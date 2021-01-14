@@ -3,7 +3,7 @@ ad_page_contract {
     Displays matched synonyms for search string
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: search-result.tcl,v 1.6 2018/06/29 17:27:18 hectorr Exp $
 } {
     query_id:naturalnum,notnull
 } -properties {
@@ -35,7 +35,7 @@ template::list::create \
 	synonym_name {
 	    label "Search Result"
 	    display_template {
-		@search_result.synonym_name@<if @search_result.synonym_p@ eq t> (@search_result.category_name@)</if>
+		@search_result.synonym_name@<if @search_result.synonym_p;literal@ true> (@search_result.category_name@)</if>
 	    }
 	}
     }

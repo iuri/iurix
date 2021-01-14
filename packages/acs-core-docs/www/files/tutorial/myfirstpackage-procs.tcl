@@ -14,15 +14,15 @@ aa_register_case \
             -test_code  {
                 set name [ad_generate_random_string]
                 set new_id [mfp::note::add -title $name]
-                aa_true "Note add succeeded" ([info exists new_id] && $new_id ne "")
+                aa_true "Note add succeeded" {$new_id ne ""}
                 
                 mfp::note::get -item_id $new_id -array note_array
-                aa_true "Note contains correct title" [string equal $note_array(title) $name]
+                aa_equals "Note contains correct title" $note_array(title) $name
                 
                 mfp::note::delete -item_id $new_id
                 
                 set get_again [catch {mfp::note::get -item_id $new_id -array note_array}]
-                aa_false "After deleting a note, retrieving it fails" [expr {$get_again == 0}]
+                aa_false "After deleting a note, retrieving it fails" {$get_again == 0}
             }
     }
 
@@ -39,15 +39,15 @@ aa_register_case \
                 set name {-Bad [BAD] \077 { $Bad}} 
                 append name [ad_generate_random_string]
                 set new_id [mfp::note::add -title $name]
-                aa_true "Note add succeeded" ([info exists new_id] && $new_id ne "")
+                aa_true "Note add succeeded" {$new_id ne ""}
                 
                 mfp::note::get -item_id $new_id -array note_array
-                aa_true "Note contains correct title" [string equal $note_array(title) $name]
+                aa_equals "Note contains correct title" $note_array(title) $name
                 aa_log "Title is $name"
                 mfp::note::delete -item_id $new_id
                 
                 set get_again [catch {mfp::note::get -item_id $new_id -array note_array}]
-                aa_false "After deleting a note, retrieving it fails" [expr {$get_again == 0}]
+                aa_false "After deleting a note, retrieving it fails" {$get_again == 0}
             }
     }
 
@@ -121,12 +121,12 @@ aa_register_case \
             # 3) screen-scrape for the ID
             # all options are problematic.  We'll do #1 in this example:
 
-            set note_id [db_string get_note_id_from_name " 
+            set note_id [db_string get_note_id_from_name {
                 select item_id 
                   from cr_items 
                  where name = :note_title  
                    and content_type = 'mfp_note'
-            " -default 0]
+            } -default 0]
 
             aa_log "Deleting note with id $note_id"
 

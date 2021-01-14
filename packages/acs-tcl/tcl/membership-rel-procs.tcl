@@ -3,7 +3,7 @@ ad_library {
 
     @author yon (yon@openforce.net)
     @creation-date 2002-03-15
-    @cvs-id $Id: membership-rel-procs.tcl,v 1.8.12.4 2017/04/27 07:56:43 gustafn Exp $
+    @cvs-id $Id: membership-rel-procs.tcl,v 1.11.2.2 2020/07/21 14:02:08 gustafn Exp $
 }
 
 namespace eval membership_rel {
@@ -15,7 +15,7 @@ namespace eval membership_rel {
         Change the state of a membership relation
     } {
         db_transaction {
-            
+
             # We need the id of the user that we are changing state for
             set rel_user_id [get_user_id -rel_id $rel_id]
 
@@ -31,14 +31,14 @@ namespace eval membership_rel {
                 "approved" { db_exec_plsql approve {} }
                 "banned" { db_exec_plsql ban {} }
                 "rejected" { db_exec_plsql reject {} }
-                "deleted" { 
-                    db_exec_plsql delete {} 
-                    
+                "deleted" {
+                    db_exec_plsql delete {}
+
                     # Add user to public group - see bug 1468
                     group::add_member \
                         -no_perm_check \
                         -group_id [acs_magic_object the_public] \
-                        -user_id $rel_user_id                    
+                        -user_id $rel_user_id
                 }
                 "needs approval" { db_exec_plsql unapprove {} }
                 "merged" { db_exec_plsql merge {} }
@@ -46,14 +46,14 @@ namespace eval membership_rel {
 
             # Record who changed the state
             # This will trigger an update of the acs_objects.modified_date column.
-            # We use this in the ApprovalExpiration feature to make sure that a user isn't 
+            # We use this in the ApprovalExpiration feature to make sure that a user isn't
             # bumped back to needs_approval right after an administrator has approved them,
-            # even if the user doesn't log in in the meantime.
+            # even if the user doesn't log in the meantime.
 
-            if { [ad_conn isconnected] } {
+            if { [ns_conn isconnected] } {
                 set user_id [ad_conn user_id]
             } else {
-                set user_id [db_null]
+                set user_id ""
             }
             db_dml update_modifying_user {}
         }
@@ -108,11 +108,11 @@ namespace eval membership_rel {
     } {
         Return the user_id of a rel_id
     } {
-        db_1row select_rel_id { 
+        db_1row select_rel_id {
             select u.user_id, r.object_id_one as group_id
             from   acs_rels r,
             users u
-            where  r.rel_id = :rel_id 
+            where  r.rel_id = :rel_id
             and    u.user_id = r.object_id_two
         }
         return [list user_id $user_id group_id $group_id]
@@ -125,7 +125,7 @@ namespace eval membership_rel {
     } {
         return [dict get [get -rel_id $rel_id] user_id]
     }
-    
+
     ad_proc -public get_group_id {
         {-rel_id:required}
     } {

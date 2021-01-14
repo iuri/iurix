@@ -3,10 +3,10 @@ ad_page_contract {
     Lets user select a category to map a subtree.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-map.tcl,v 1.12.2.1 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,notnull
     ctx_id:naturalnum,optional
 } -properties {

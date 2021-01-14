@@ -1,4 +1,4 @@
-<!-- $Id: index.adp,v 1.4.2.1 2016/01/02 14:35:36 gustafn Exp $ -->
+<!-- $Id: index.adp,v 1.5 2017/08/07 23:47:55 gustafn Exp $ -->
 
 <master>
 <property name="doc(title)">ACS DateTime Examples</property>

@@ -3,11 +3,11 @@ ad_page_contract {
 
     @author Timo Hentschel (timo@timohentschel.de)
     @author Lars Pind (lars@collaboraid.biz)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-order-update.tcl,v 1.14.2.1 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
     sort_key:array
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 }
@@ -42,17 +42,16 @@ db_transaction {
     }
 
     while {[llength $stack] > 0} {
-        set next [lindex $stack 0]
+        set stack [lassign $stack next]
         set act_category [lindex $next 1]
-        set stack [lrange $stack 1 end]
         if {[lindex $next 2]>0} {
             ## the children of this parent are done, so this category is also done
             lappend done_list [list $act_category [lindex $next 2] $count]
         } elseif {[info exists child($act_category)]} {
             ## put category and all children back on stack
-            set next [lreplace $next 2 2 $count]
+            lset next 2 $count
             set stack [linsert $stack 0 $next]
-            set stack [concat [lsort -integer -index 0 $child($act_category)] $stack]
+            set stack [linsert $stack 0 {*}[lsort -integer -index 0 $child($act_category)]]
         } else {
             ## this category has no children, so it is done
             lappend done_list [list $act_category $count [expr {$count + 1}]]
@@ -79,6 +78,7 @@ if {$count != $last_ind} {
 }
 
 ad_returnredirect [export_vars -no_empty -base tree-view {tree_id locale object_id ctx_id}]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

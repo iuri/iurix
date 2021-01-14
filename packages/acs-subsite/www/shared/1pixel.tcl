@@ -5,14 +5,14 @@ ad_page_contract {
 
     @author Jon Salz <jsalz@mit.edu>
     @creation-date 28 Nov 1999
-    @cvs-id $Id: 1pixel.tcl,v 1.6.2.3 2017/03/27 10:49:05 gustafn Exp $
+    @cvs-id $Id: 1pixel.tcl,v 1.7.2.1 2019/12/16 17:14:38 antoniop Exp $
 } {
     r:integer
     g:integer
     b:integer
 }
 
-ReturnHeaders "image/gif"
+util_return_headers "image/gif"
 
 if { [catch {
     set file [open [acs_package_root_dir "acs-subsite"]/www/shared/1pixel.header]

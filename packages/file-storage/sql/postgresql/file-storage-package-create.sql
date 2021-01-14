@@ -3,7 +3,7 @@
 --
 -- @author Kevin Scaldeferri (kevin@arsdigita.com)
 -- @creation-date 6 Nov 2000
--- @cvs-id $Id: file-storage-package-create.sql,v 1.28.2.2 2017/04/21 17:14:16 antoniop Exp $
+-- @cvs-id $Id: file-storage-package-create.sql,v 1.30.2.1 2019/08/09 20:25:08 gustafn Exp $
 --
 
 
@@ -245,7 +245,7 @@ BEGIN
              new_file__creation_ip,     -- creation_ip
              new_file__indb_p,          -- storage_type
              null,                      -- item_id
-             new_file__package_id       -- pacakge_id
+             new_file__package_id       -- package_id
         );
 
 END;
@@ -437,7 +437,7 @@ select define_function_args('file_storage__move_file','file_id,target_folder_id,
 -- procedure file_storage__move_file/4
 --
     --
-    -- Move a file (ans all its versions) to a different folder.
+    -- Move a file (and all its versions) to a different folder.
     -- Wrapper for content_item__move
     -- 
 

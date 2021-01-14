@@ -104,7 +104,7 @@ template::list::create \
         }
     }
 
-set now [clock_to_ansi [clock seconds]]
+set now [lc_clock_to_ansi [clock seconds]]
 
 set restrict {}
 
@@ -117,7 +117,7 @@ if {$category ne ""} {
 }
 
 if {$packages ne ""} {
-    append restrict "\nand o.package_id in ([join $packages ,])"
+    append restrict "\nand o.package_id in ([ns_dbquotelist $packages])"
 }
 
 # JCDXXX: TODO: need to get the dimension to display, need to find the right CoP, permissions

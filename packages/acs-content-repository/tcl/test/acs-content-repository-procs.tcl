@@ -3,10 +3,18 @@ ad_library {
 
     @author Joel Aufrecht
     @creation-date 2 Nov 2003
-    @cvs-id $Id: acs-content-repository-procs.tcl,v 1.4.2.1 2015/09/10 08:21:19 gustafn Exp $
+    @cvs-id $Id: acs-content-repository-procs.tcl,v 1.9 2018/07/20 09:00:33 gustafn Exp $
 }
 
-aa_register_case -cats {smoke api} acs_content_repository_trivial_smoke_test {
+aa_register_case \
+    -cats {smoke api db} \
+    -procs {
+        ad_generate_random_string
+        content::keyword::delete
+        content::keyword::get_children
+        content::keyword::new
+    } \
+    acs_content_repository_trivial_smoke_test {
     Minimal smoke test.
 } {    
 
@@ -17,15 +25,15 @@ aa_register_case -cats {smoke api} acs_content_repository_trivial_smoke_test {
             set name [ad_generate_random_string]
             set name_2 [ad_generate_random_string]
 
-            # there is no function in the api to directly retrieve a key
+            # there is no function in the API to directly retrieve a key
             # so instead we have to create a child of another and then
             # retrieve the parent's child
 
             set new_keyword_id [content::keyword::new -heading $name]
-            aa_true "created a new content_keyword" [expr {[info exists new_keyword_id] && $new_keyword_id ne ""}]
+            aa_true "created a new content_keyword" {[info exists new_keyword_id] && $new_keyword_id ne ""}
 
             set new_keyword_id_2 [content::keyword::new -heading $name_2 -parent_id $new_keyword_id]
-            aa_true "created a child content_keyword" [expr {[info exists new_keyword_id_2] && $new_keyword_id_2 ne ""}]
+            aa_true "created a child content_keyword" {[info exists new_keyword_id_2] && $new_keyword_id_2 ne ""}
 
             set children [content::keyword::get_children -parent_id $new_keyword_id ]
             aa_true "child is returned" [string match "*$new_keyword_id_2*" $children]

@@ -1,18 +1,18 @@
 ad_library {
 
-    Functions that APM uses to interact with the file system and I/O.
+    Functions that APM uses to interact with the filesystem and I/O.
 
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date Fri Oct  6 21:46:05 2000
-    @cvs-id $Id: apm-file-procs.tcl,v 1.36.2.14 2017/07/25 07:49:01 gustafn Exp $
-} 
+    @cvs-id $Id: apm-file-procs.tcl,v 1.45.2.4 2020/10/28 15:39:19 hectorr Exp $
+}
 
 
 ad_proc -private apm_mkdir {path} {
 
     Creates the directory specified by path and returns it.
 
-} { 
+} {
     if { [catch {
         file mkdir $path
     }] } {
@@ -21,33 +21,33 @@ ad_proc -private apm_mkdir {path} {
             file delete -force -- $path
             file mkdir $path
         } errmsg]} {
-            error "Error creationg directory $path: $errmsg"
+            error "Error creating directory $path: $errmsg"
         }
     }
     return $path
 }
 
 ad_proc -public apm_workspace_dir {} {
-    
+
     Return the path to the apm-workspace, creating the directory if necessary.
-    
+
 } {
-    set path [file join $::acs::rootdir apm-workspace]
-    if { [file isdirectory $path] } {
+    set path [ad_file join $::acs::rootdir apm-workspace]
+    if { [ad_file isdirectory $path] } {
         return $path
     } else {
         return [apm_mkdir $path]
     }
-} 
+}
 
 ad_proc -public apm_workspace_install_dir {} {
-    
+
     Return the path to the installation directory of the apm-workspace, creating
     the directory if necessary.
 } {
     set base_path [apm_workspace_dir]
     set install_path "$base_path/install"
-    if { [file isdirectory $install_path] } {
+    if { [ad_file isdirectory $install_path] } {
         return $install_path
     } else {
         return [apm_mkdir $install_path]
@@ -89,26 +89,16 @@ ad_proc -public apm_file_type_keys {} {
 
     @see apm_file_type_names
     @see apm_pretty_name_for_file_type
-    
+
     @author Peter Marklund
 } {
     array set file_type_names [apm_file_type_names]
     return [array names file_type_names]
 }
 
-
-ad_proc -public apm_db_type_keys {} {
-
-    Returns a list of valid database type keys.
-
-} {
-    return [util_memoize [list db_list db_type_keys {select db_type_key from apm_package_db_types}]]
-}
-
-
-ad_proc -public apm_package_info_file_path { 
+ad_proc -public apm_package_info_file_path {
     {-path ""}
-    package_key 
+    package_key
 } {
 
     Returns the path to a .info file in a package directory, or throws an
@@ -121,7 +111,7 @@ ad_proc -public apm_package_info_file_path {
     } else {
         set path $path/$package_key
     }
-    if { [file exists $path/$package_key.info] } {
+    if { [ad_file exists $path/$package_key.info] } {
         return $path/$package_key.info
     }
     error "The directory $path does not contain a package specification file ($package_key.info)."
@@ -139,15 +129,15 @@ ad_proc -private apm_extract_tarball { version_id dir } {
     set apm_file [ad_tmpnam]
 
     db_blob_get_file distribution_tar_ball_select {
-        select content 
-        from cr_revisions 
+        select content
+        from cr_revisions
         where revision_id = (select content_item.get_latest_revision(item_id)
-                             from apm_package_versions 
+                             from apm_package_versions
                              where version_id = :version_id)
     } $apm_file
 
     file mkdir $dir
-    # avoid chdir 
+    # avoid chdir
     #ns_log notice "exec sh -c 'cd $dir ; [apm_gzip_cmd] -d -q -c $apm_file | [apm_tar_cmd] xf - 2>/dev/null'"
     exec [apm_gzip_cmd] -d -q -c -S .apm $apm_file | [apm_tar_cmd] -xf - -C $dir 2> [apm_dev_null]
 
@@ -156,15 +146,15 @@ ad_proc -private apm_extract_tarball { version_id dir } {
 
 
 ad_proc -private apm_generate_tarball { version_id } {
-    
+
     Generates a tarball for a version, placing it in the content repository.
     DCW - 2001-05-03, change to use the content repository for tarball storage.
-    
+
 } {
     set package_key [apm_package_key_from_version_id $version_id]
     set files [apm_get_package_files -all -package_key $package_key]
     set tmpfile [ad_tmpnam]
-    
+
     db_1row package_key_select {}
 
     # Generate a command like:
@@ -182,11 +172,11 @@ ad_proc -private apm_generate_tarball { version_id } {
         lappend cmd -C "$::acs::rootdir/packages"
         lappend cmd "$package_key/$file"
     }
-    
+
     lappend cmd "|" [apm_gzip_cmd] -c ">" $tmpfile
     {*}$cmd
 
-    # At this point, the APM tarball is sitting in $tmpfile. Save it in 
+    # At this point, the APM tarball is sitting in $tmpfile. Save it in
     # the database.
 
     set creation_ip [ad_conn peeraddr]
@@ -199,7 +189,7 @@ ad_proc -private apm_generate_tarball { version_id } {
     db_1row item_exists_p {}
 
     if {!$item_id} {
-        # content item hasen't been created yet - create one.        
+        # content item hasen't been created yet - create one.
         set item_id [content::item::new \
                          -name          $name \
                          -title         $title \
@@ -208,12 +198,12 @@ ad_proc -private apm_generate_tarball { version_id } {
                          -creation_user $user_id \
                          -creation_ip   $creation_ip \
                          -is_live       true]
-        
+
         db_dml set_item_id {}
     }
 
     set revision_id [content::item::get_live_revision -item_id $item_id]
-    
+
     # No live revision for this item. Possible if somebody already
     # generated the archive, then deleted or modified the revision
     # manually or by other means. We create a new live revision.
@@ -237,12 +227,12 @@ ad_proc -private apm_generate_tarball { version_id } {
 
 ad_proc -private apm_files_load {
     {-force_reload:boolean 0}
-    {-callback apm_dummy_callback} 
+    {-callback apm_dummy_callback}
     files
 } {
 
     Load the set of files into the currently running Tcl interpreter.
-    @param -force_reload Indicates if the file should be loaded even if it \
+    @param force_reload Indicates if the file should be loaded even if it \
         is already loaded in the interpreter.
 } {
     # This will be the first time loading for each of these files (since if a
@@ -270,7 +260,7 @@ ad_proc -private apm_files_load {
                 apm_callback_and_log $callback "Loaded packages/$package_key/$path."
                 unset apm_current_package_key
             } else {
-                apm_callback_and_log $callback "Unable to load packages/$package_key/$path - file is marked as contained in a package but is not present in the filesystem"        
+                apm_callback_and_log $callback "Unable to load packages/$package_key/$path - file is marked as contained in a package but is not present in the filesystem"
             }
         }
     }
@@ -312,10 +302,10 @@ ad_proc -public apm_file_watch_cancel {
 ad_proc -public apm_file_watchable_p { path } {
     Given the path of a file determine if it is
     appropriate to be watched for reload. The file should
-    be db compatible with the system and be of right 
+    be db compatible with the system and be of right
     type (for example contain Tcl procs or xql queries).
 
-    @param The path of the file relative to server root
+    @param path The path of the file relative to server root
 
     @return 1 If file is watchable and 0 otherwise. The proc will throw an error if the
     file doesn't exist or if the given path cannot be parsed as a path relative
@@ -325,7 +315,7 @@ ad_proc -public apm_file_watchable_p { path } {
     @see apm_guess_db_type
 
     @author Peter Marklund
-} {        
+} {
     # The apm_guess procs need package_key and a path relative to package root
     # so parse those out of the given path
     if { [regexp {^packages/([^/]+)/(.*)$} $path match package_key package_rel_path] } {
@@ -361,7 +351,7 @@ ad_proc -private apm_watch_all_files { package_key } {
     @see apm_get_watchable_files
 
     @author Peter Marklund
-} {        
+} {
     foreach rel_path [apm_get_watchable_files $package_key] {
         apm_file_watch $rel_path
     }
@@ -401,16 +391,8 @@ ad_proc -private apm_get_watchable_files { package_key } {
     }
 
     return $watchable_files
-} 
-
-ad_proc -public -deprecated pkg_home {package_key} {
-
-    @return A server-root relative path to the directory for a package.  Usually /packages/package-key
-    @see acs_package_root_dir
-
-} {
-    return "/packages/$package_key"
 }
+
 
 ad_proc -private apm_system_paths {} {
 
@@ -425,10 +407,10 @@ ad_proc -private apm_system_paths {} {
     }
 }
 
-ad_proc -private apm_gzip_cmd {} {
+ad_proc -public apm_gzip_cmd {} {
 
-    @return A valid pointer to gzip, 0 otherwise.
-    
+    @return A valid command name for gzip.
+
 } {
     return gzip
 }
@@ -436,8 +418,8 @@ ad_proc -private apm_gzip_cmd {} {
 
 ad_proc -private apm_tar_cmd {} {
 
-    @return A valid pointer to tar, 0 otherwise.
-    
+    @return A valid command name for tar.
+
 } {
     return tar
 }
@@ -446,7 +428,7 @@ ad_proc -private apm_tar_cmd {} {
 ad_proc -private apm_dev_null {} {
 
     @return null device
-    
+
 } {
     if {$::tcl_platform(platform) ne "windows"} {
         return /dev/null
@@ -464,20 +446,20 @@ ad_proc -private apm_transfer_file {
     # reliably under windows, for unknown reasons the downloaded file is
     # truncated.
     #
-    # Therefore, we check first for the NaviServer built in ns_http, then 
+    # Therefore, we check first for the NaviServer built in ns_http, then
     # if the optional xotcl-core components are available...
     #
-    
+
     # 5 minutes
     set timeout 300
-    
+
     set httpImpls [util::http::available -url $url -spool]
     if {$httpImpls ne ""} {
         ns_log notice "we can use the http::util:: interface using the $httpImpls implementation"
         set result [util::http::get -url $url -timeout $timeout -spool]
         file rename [dict get $result file] $output_file_name
-    } elseif {[info commands ::ns_http] ne "" && [apm_version_names_compare [ns_info patchlevel] "4.99.5"] == 1} {
-        # 
+    } elseif {[namespace which ::ns_http] ne "" && [apm_version_names_compare [ns_info patchlevel] "4.99.5"] == 1} {
+        #
         # ... use ns_http when we have a version with the "-file" flag ...
         #
         foreach i {1 2 3} {
@@ -485,15 +467,15 @@ ad_proc -private apm_transfer_file {
             set h [ns_http queue -timeout $timeout:0 $url]
             set replyHeaders [ns_set create]
             ns_http wait -file F -headers $replyHeaders -spoolsize 1 $h
-            if {[file exists $output_file_name]} {file delete -- $output_file_name}
+            if {[ad_file exists $output_file_name]} {file delete -- $output_file_name}
             file rename -- $F $output_file_name
             set location [ns_set iget $replyHeaders location]
             if {$location eq ""} break
             ns_log notice "Transfer $url redirected to $location ..."
             set url $location
         }
-    } elseif {[info commands ::xo::HttpRequest] ne ""} {
-        # 
+    } elseif {[namespace which ::xo::HttpRequest] ne ""} {
+        #
         # ... use xo::HttpRequest...
         #
         ns_log notice "Transfer $url to $output_file_name based on ::xo::HttpRequest"
@@ -538,15 +520,15 @@ ad_proc -private apm_load_apm_file {
     {-url {}}
     {file_path {}}
 } {
-    
+
     Uncompresses and loads an APM file into the filesystem.
 
     @param url If specified, will download the APM file first.
 
-    @return If successful, a path to the .info file of the package uncompressed 
+    @return If successful, a path to the .info file of the package uncompressed
     into the apm-workspace directory
 
-} {    
+} {
     # First download the apm file if a URL is provided
     if { $url ne "" } {
         set file_path [ad_tmpnam].apm
@@ -556,11 +538,11 @@ ad_proc -private apm_load_apm_file {
             The following error was returned: <blockquote><pre>[ns_quotehtml $errmsg]
             </pre></blockquote>"
             return
-        }    
+        }
 
-        if {![file exists $file_path]} {
+        if {![ad_file exists $file_path]} {
             apm_callback_and_log $callback  "
-            The file cannot be found.  Your URL or your file name is incorrect.  Please verify that the file name
+            The file cannot be found.  Your URL or your filename is incorrect.  Please verify that the filename
             is correct and try again."
             ns_log Error "Error loading APM file form url $url: The file cannot be found."
             return
@@ -571,7 +553,7 @@ ad_proc -private apm_load_apm_file {
     if { [catch {
         set files [split [string trim \
                               [exec [apm_gzip_cmd] -d -q -c -S .apm $file_path | [apm_tar_cmd] tf - 2> [apm_dev_null]]] "\n"]
-        apm_callback_and_log $callback  "<li>Done. Archive is [format %.1f [expr { [file size $file_path] / 1024.0 }]]KB, with [llength $files] files.<li>"
+        apm_callback_and_log $callback  "<li>Done. Archive is [format %.1f [expr { [ad_file size $file_path] / 1024.0 }]]KB, with [llength $files] files.<li>"
     } errmsg] } {
         apm_callback_and_log $callback "The follow error occurred during the uncompression process:
     <blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote><br>
@@ -579,7 +561,7 @@ ad_proc -private apm_load_apm_file {
                 ns_log Error "Error loading APM file form url $url: $errmsg\n$::errorInfo"
         return
     }
-    
+
     if { [llength $files] == 0 } {
         apm_callback_and_log $callback  "The archive does not contain any files.\n"
         ns_log Error "Error loading APM file form url $url: The archive does not contain any files."
@@ -593,14 +575,14 @@ ad_proc -private apm_load_apm_file {
         set components [split $file "/"]
 
         if {[lindex $components 0] ne $package_key  } {
-            apm_callback_and_log $callback  "All files in the archive must be contained in the same directory 
-        (corresponding to the package's key). This is not the case, so the archive is not 
+            apm_callback_and_log $callback  "All files in the archive must be contained in the same directory
+        (corresponding to the package's key). This is not the case, so the archive is not
         a valid APM file.\n"
             ns_log Error "Error loading APM file form url $url: Invalid APM file. All files in the archive must be contained in the same directory corresponding to the package's key."
             return
         }
-        
-        if { [llength $components] == 2 && [file extension $file] eq ".info" } {
+
+        if { [llength $components] == 2 && [ad_file extension $file] eq ".info" } {
             if { [info exists info_file] } {
                 apm_callback_and_log $callback  "The archive contains more than one <tt>package/*/*.info</tt> file, so it is not a valid APM file.</ul>\n"
                 ns_log Error "Error loading APM file form url $url: Invalid APM file. More than one package .info file."
@@ -611,7 +593,7 @@ ad_proc -private apm_load_apm_file {
         }
     }
     if { ![info exists info_file] || [regexp {[^a-zA-Z0-9\-\./_]} $info_file] } {
-        apm_callback_and_log $callback  "The archive does not contain a <tt>*/*.info</tt> file, so it is not 
+        apm_callback_and_log $callback  "The archive does not contain a <tt>*/*.info</tt> file, so it is not
         a valid APM file.</ul>\n"
         ns_log Error "Error loading APM file form url $url: Invalid APM file. No package .info file."
         return
@@ -623,13 +605,13 @@ ad_proc -private apm_load_apm_file {
     exec [apm_gzip_cmd] -d -q -c -S .apm $file_path | [apm_tar_cmd] -xf - -C $tmpdir $info_file 2> [apm_dev_null]
 
     #exec sh -c "cd $tmpdir ; [apm_gzip_cmd] -d -q -c -S .apm $file_path | [apm_tar_cmd] xf - $info_file" 2> [apm_dev_null]
-    
+
     if { [catch {
-        array set package [apm_read_package_info_file [file join $tmpdir $info_file]]
+        array set package [apm_read_package_info_file [ad_file join $tmpdir $info_file]]
     } errmsg]} {
         file delete -force -- $tmpdir
-        apm_callback_and_log $callback  "The archive contains an unparseable package specification file: 
-    <code>$info_file</code>.  The following error was produced while trying to 
+        apm_callback_and_log $callback  "The archive contains an unparsable package specification file:
+    <code>$info_file</code>.  The following error was produced while trying to
     parse it: <blockquote><pre>[ns_quotehtml $errmsg]</pre></blockquote>.
     <p>
     The package cannot be installed.
@@ -643,16 +625,16 @@ ad_proc -private apm_load_apm_file {
     set version_name $package(name)
     ns_log Debug "APM: Preparing to load $pretty_name $version_name"
     # Determine if this package version is already installed.
-    if {[apm_package_version_installed_p $package_key $version_name]} {    
+    if {[apm_package_version_installed_p $package_key $version_name]} {
         apm_callback_and_log $callback  "<li>$pretty_name $version_name is already installed in your system."
         ns_log Error "Error loading APM file form url $url: Package $pretty_name $version_name is already installed"
     } else {
-        
+
         set install_path [apm_workspace_install_dir]
-        if { ![file isdirectory $install_path] } {
+        if { ![ad_file isdirectory $install_path] } {
             file mkdir $install_path
         }
-        
+
         apm_callback_and_log $callback  "<li>Extracting files into the filesystem."
         apm_callback_and_log $callback  "<li>$pretty_name $version_name ready for installation."
 
@@ -662,6 +644,24 @@ ad_proc -private apm_load_apm_file {
         return "${install_path}/${package_key}/${package_key}.info"
     }
 }
+
+
+#
+### Deprecated procs
+#
+
+# apisano 2018-05-14: current code won't use this proc and is also not
+# clear why we should get from the database something we have in a
+# proc already. Commented code was the original one
+ad_proc -deprecated -public apm_db_type_keys {} {
+
+    Returns a list of valid database type keys.
+
+} {
+    return [lmap dbtype $::acs::known_database_types {lindex $dbtype 0}]
+    # return [util_memoize [list db_list db_type_keys {select db_type_key from apm_package_db_types}]]
+}
+
 
 #
 # Local variables:

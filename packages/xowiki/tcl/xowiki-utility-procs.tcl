@@ -4,7 +4,7 @@
 
   @creation-date 2006-08-08
   @author Gustaf Neumann
-  @cvs-id $Id: xowiki-utility-procs.tcl,v 1.37.2.17 2017/06/30 18:15:53 gustafn Exp $
+  @cvs-id $Id: xowiki-utility-procs.tcl,v 1.57.2.17 2020/12/08 15:55:23 gustafn Exp $
 }
 
 namespace eval ::xowiki {
@@ -25,7 +25,7 @@ namespace eval ::xowiki {
     return [ad_get_client_property xowiki clipboard]
   }
   clipboard proc is_empty {} {
-    expr {[my size] < 1}
+    expr {[:size] < 1}
   }
   clipboard proc size {} {
     set clipboard [ad_get_client_property xowiki clipboard]
@@ -37,21 +37,59 @@ namespace eval ::xowiki {
   #
   ::xotcl::Object create tidy
   tidy proc clean {text} {
-    if {[[::xo::cc package_id] get_parameter tidy 0] 
-        && [info commands ::util::which] ne ""} { 
+    if {[[::xo::cc package_id] get_parameter tidy 0]
+        && [info commands ::util::which] ne ""} {
       set tidycmd [::util::which tidy]
       if {$tidycmd ne ""} {
         set in_file [ad_tmpnam]
-        ::xowiki::write_file $in_file $text
+        ::xo::write_file $in_file $text
         catch {exec $tidycmd -q -w 0 -ashtml < $in_file 2> /dev/null} output
         file delete -- $in_file
-        #my msg o=$output
+        #:msg o=$output
         regexp <body>\n(.*)\n</body> $output _ text
-        #my msg o=$text
+        #:msg o=$text
         return $text
       }
     }
     return $text
+  }
+
+  ad_proc randomized_indices {-seed length} {
+    #
+    # Produce a list of "length" random numbers between 0 and
+    # length-1.
+    #
+    # Measure quality of randomization:
+    #
+    #  time {lappend _ [xowiki::randomized_indices -seed [clock microseconds] 3]} 1000
+    #  foreach t $_ {
+    #    lassign $t a b c; dict incr stats "a $a"; dict incr stats "b $b"; dict incr stats "c $c"
+    #  }
+    #  set stats
+  } {
+    # In case, the seed is specified, set the seed to this value to
+    # achieve e.g. a stable bat random order for a user.
+    #
+    if {[info exists seed]} {
+      expr {srand($seed)}
+    }
+    #
+    # Produce shuffled indices between 0 and length-1.
+    #
+    set indices {}
+    for {set i 0} {$i < $length} {incr i} {
+      lappend indices $i
+    }
+    set shuffled {}
+    incr length
+    for {} {$length > 1} {incr length -1} {
+      set r [expr {rand()}]
+      set i [expr {int(($length-1) * $r)}]
+      #ns_log notice "[list expr int([expr ($length-1)] * $r)] -> [expr {($length-1) * $r}] -> $i"
+      lappend shuffled [lindex $indices $i]
+      set indices [lreplace $indices $i $i]
+    }
+    return $shuffled
   }
 
   #
@@ -60,15 +98,15 @@ namespace eval ::xowiki {
   #
   # Install clamav daemon with
   #    FC21:   yum install clamav-scanner
-  #  Ununtu:   apt-get install clamav-daemon
-  # 
+  #  Ubuntu:   apt-get install clamav-daemon
+  #
   ::xotcl::Object create virus
   virus proc check {fns} {
     if {[[::xo::cc package_id] get_parameter clamav 1]
-        && [info commands ::util::which] ne ""} { 
+        && [info commands ::util::which] ne ""} {
       set clamscanCmd [::util::which clamdscan]
       foreach fn $fns {
-        if {$clamscanCmd ne "" && [file readable $fn]} {
+        if {$clamscanCmd ne "" && [ad_file readable $fn]} {
           if {[catch {exec $clamscanCmd $fn 2>@1} result]} {
             ns_log warning "[self] virus found:\n$result"
             return 1
@@ -81,6 +119,20 @@ namespace eval ::xowiki {
 }
 
 namespace eval ::xowiki::hstore {
+  #
+  # Some example hstore queries (over all revisions)
+  #
+  #    select hkey from xowiki_page_instance where hkey is not null;
+  #    select hkey from xowiki_page_instance where defined(hkey, 'team_email');
+  #    select hkey from xowiki_page_instance where exist(hkey, 'team_email');
+  #    select hkey from xowiki_page_instance where  'team_email=>neumann@wu-wien.ac.at' <@ hkey;
+  #    select (each(hkey)).key, (each(hkey)).value from xowiki_page_instance;
+  #    select page_instance_id, (each(hkey)).key, (each(hkey)).value from xowiki_page_instance
+  #        where 'assignee=>539,priority=>1' <@ hkey;
+  #    select key, count(*) from (select (each(hkey)).key from xowiki_page_instance) as stat
+  #        group by key order by count desc, key;
+  #
+
   #
   # Helper functions for hstore
   #
@@ -96,16 +148,63 @@ namespace eval ::xowiki::hstore {
   ad_proc dict_as_hkey {dict} {
     @return dict value in form of a hstore key.
   } {
+    set max_value_size [parameter::get_global_value \
+                            -package_key xowiki \
+                            -parameter hstore_max_value_size \
+                            -default 0]
     set keys {}
     foreach {key value} $dict {
       set v [double_quote $value]
-      if {$v eq ""} continue
+      if {$v eq ""
+          || ($max_value_size > 0 && [string length $v] >= $max_value_size)
+        } {
+        continue
+      }
       lappend keys [double_quote $key]=>$v
     }
     return [join $keys ,]
   }
 
-  ad_proc ::xowiki::hstore::update_form_instance_item_index {
+  ad_proc -private ::xowiki::hstore::update_hstore {package_id} {
+    update all instance attributes in hstore
+  } {
+    if {![::xo::dc has_hstore] && [::$package_id get_parameter use_hstore 0] } {
+      return 0
+    }
+    #
+    # This proc can be used from ds/shell as follows
+    #
+    #    ::xo::Package initialize -url /xowiki
+    #    ::xowiki::hstore::update_hstore $package_id
+    #
+    # Check the result
+    #
+    #    select hkey from xowiki_page_instance where hkey is not null;
+    #
+    ::xowf::Package initialize -package_id $package_id
+    #
+    # We get all revisions, so use the lower level interface
+    #
+    set items [::xowiki::FormPage instantiate_objects \
+                   -sql [subst {
+                     select * from xowiki_form_pagei bt,cr_items i \
+                         where bt.object_package_id = [ns_dbquotevalue $package_id] \
+                         and bt.item_id = i.item_id
+                   }] \
+                   -object_class ::xowiki::FormPage]
+    set count 0
+    foreach i [$items children] {
+      #$i msg "working on [$i set xowiki_form_page_id]"
+      $i save_in_hstore
+      incr count
+    }
+    $items msg "fetched $count objects from parent_id [::$package_id folder_id]"
+    return 1
+  }
+
+
+
+  ad_proc -private ::xowiki::hstore::update_form_instance_item_index {
     {-package_id}
     {-object_class ::xowiki::FormPage}
     {-initialize false}
@@ -123,14 +222,14 @@ namespace eval ::xowiki::hstore {
     #
     set t0 [clock clicks -milliseconds]
     ns_log notice "start to work on -package_id $package_id"
-    
+
     ::xo::Package initialize -package_id $package_id -init_url false -user_id 0
 
     set t1 [clock clicks -milliseconds]
     ns_log notice "$package_id: ::xo::Package initialize took [expr {$t1-$t0}]ms"
     set t0 $t1
 
-    if {![::xo::dc has_hstore] && [$package_id get_parameter use_hstore 0] } {
+    if {![::xo::dc has_hstore] && [::$package_id get_parameter use_hstore 0] } {
       return 0
     }
 
@@ -150,9 +249,9 @@ namespace eval ::xowiki::hstore {
 
       set hkey [::xowiki::hstore::dict_as_hkey [$p hstore_attributes]]
       set item_id [$p item_id]
-      
+
       set t0 [clock clicks -milliseconds]
-      
+
       xo::dc dml update_hstore "update xowiki_form_instance_item_index \
                 set hkey = '$hkey' \
                 where item_id = :item_id"
@@ -160,10 +259,10 @@ namespace eval ::xowiki::hstore {
       set t1 [clock clicks -milliseconds]
       ns_log notice "$package_id $count: update took [expr {$t1-$t0}]ms"
       set t0 $t1
-      
-      incr count 
+
+      incr count
     }
-    
+
     $items log "updated $count objects from package $package_id"
     return $count
   }
@@ -172,12 +271,12 @@ namespace eval ::xowiki::hstore {
     #::xo::db::select_driver DB
     foreach package_id [lsort [::xowiki::Package instances -closure true]] {
       ::xo::Package initialize -package_id $package_id -init_url false -user_id 0
-      if {[$package_id get_parameter use_hstore 0] == 0} {
+      if {[::$package_id get_parameter use_hstore 0] == 0} {
         continue
       }
-      if {[catch {
+      ad_try {
         xowiki::hstore::update_form_instance_item_index -package_id $package_id
-      } errorMsg]} {
+      } on error {errorMsg} {
         ns_log Warning "initializing package $package_id lead to error: $errorMsg"
       }
       db_release_unused_handles
@@ -185,7 +284,7 @@ namespace eval ::xowiki::hstore {
   }
 }
 
-  
+
 namespace eval ::xowiki {
   #
   # Functions used by upgrade procs.
@@ -208,7 +307,7 @@ namespace eval ::xowiki {
     $parameter_obj destroy
   }
 
-  ad_proc fix_all_package_ids {} {
+  ad_proc -private fix_all_package_ids {} {
     Earlier versions of OpenACS did not have the package_id set correctly
     in acs_objects; this proc updates the package_ids of all items
     and revisions in acs_objects
@@ -220,20 +319,20 @@ namespace eval ::xowiki {
       set folder_id [::xo::dc list get_folder_id "select f.folder_id from cr_items c, cr_folders f \
                 where c.name = 'xowiki: :package_id' and c.item_id = f.folder_id"]
       if {$folder_id ne ""} {
-        ::xo::dc dml update_package_id {update acs_objects set package_id = :package_id 
-          where object_id in 
+        ::xo::dc dml update_package_id {update acs_objects set package_id = :package_id
+          where object_id in
           (select item_id as object_id from cr_items where parent_id = :folder_id)
           and package_id is NULL}
-        ::xo::dc dml update_package_id {update acs_objects set package_id = :package_id 
-          where object_id in 
-          (select r.revision_id as object_id from cr_revisions r, cr_items i where 
+        ::xo::dc dml update_package_id {update acs_objects set package_id = :package_id
+          where object_id in
+          (select r.revision_id as object_id from cr_revisions r, cr_items i where
            i.item_id = r.item_id and i.parent_id = :folder_id)
           and package_id is NULL}
       }
     }
   }
 
-  ad_proc update_views {} {
+  ad_proc -private update_views {} {
     update all automatic views of xowiki
   } {
     foreach object_type [::xowiki::Page object_types] {
@@ -256,34 +355,34 @@ namespace eval ::xowiki {
             and ci.publish_status <> 'production'"
   }
 
-  ad_proc add_ltree_order_column {} {
+  ad_proc -private add_ltree_order_column {} {
     Add page_order of type ltree, when ltree is configured (otherwise string)
   } {
-    # catch sql statement to allow multiple runs
+    # catch SQL statement to allow multiple runs
     catch {::xo::db::sql::content_type create_attribute \
                -content_type ::xowiki::Page \
                -attribute_name page_order \
                -datatype text \
                -pretty_name Order \
                -column_spec [::xo::dc map_datatype ltree]}
-    
+
     ::xo::db::require index -table xowiki_page -col page_order \
         -using [expr {[::xo::dc has_ltree] ? "gist" : ""}]
     ::xowiki::update_views
     return 1
   }
 
-  ad_proc cr_thin_out {
-    {-doit false} 
-    {-delete_orphans false} 
-    {-delete_sequences false} 
-    {-edit_interval 300} 
-    {-older_than "1 month ago"} 
+  ad_proc -private cr_thin_out {
+    {-doit:boolean false}
+    {-delete_orphans:boolean false}
+    {-delete_sequences:boolean false}
+    {-edit_interval 300}
+    {-older_than "1 month ago"}
     -package_id
     -item_id
   } {
-    Delete supposedly uninportant items and revision from the content repository.
-    
+    Delete supposedly unimportant items and revision from the content repository.
+
     @param doit if not true, then just write delete operation to the logfile
     @param delete_orphans if true, delete orphaned items
     @param delete_sequences if true, delete revisions from edit sequences lower than edit_interval
@@ -311,8 +410,8 @@ namespace eval ::xowiki {
       #
       set sql "
          select i.name, o.package_id, i.item_id, r.revision_id, o.last_modified
-         from acs_objects o, xowiki_page p, cr_revisions r, cr_items i 
-         where p.page_id = r.revision_id and r.item_id = i.item_id and o.object_id = r.revision_id 
+         from acs_objects o, xowiki_page p, cr_revisions r, cr_items i
+         where p.page_id = r.revision_id and r.item_id = i.item_id and o.object_id = r.revision_id
          and i.publish_status = 'production' and i.name = r.revision_id::varchar
          $extra_clause
       "
@@ -324,7 +423,7 @@ namespace eval ::xowiki {
         ::xotcl::Object log "...will delete $name doit=$doit $last_modified"
         if {$doit} {
           ::xowiki::Package require $package_id
-          $package_id delete -item_id $item_id -name $name
+          ::$package_id delete -item_id $item_id -name $name
         }
       }
     }
@@ -336,9 +435,9 @@ namespace eval ::xowiki {
       #
       set sql "
         select i.name, i.item_id, r.revision_id,  o.last_modified, o.creation_user, o.package_id
-        from acs_objects o, xowiki_page p, cr_revisions r, cr_items i 
+        from acs_objects o, xowiki_page p, cr_revisions r, cr_items i
         where p.page_id = r.revision_id and r.item_id = i.item_id
-        and o.object_id = r.revision_id  
+        and o.object_id = r.revision_id
         $extra_clause
         order by item_id, revision_id asc
       "
@@ -346,10 +445,10 @@ namespace eval ::xowiki {
       set last_time 0
       set last_user ""
       set last_revision ""
-      
+
       foreach tuple [::xo::dc list_of_lists get_revisions $sql] {
         #::xotcl::Object msg "tuple = $tuple"
-        lassign $tuple name item_id revision_id last_modified user package_id 
+        lassign $tuple name item_id revision_id last_modified user package_id
         set time [clock scan [::xo::db::tcl_date $last_modified tz_var]]
         if {$time > $older_than} continue
         #::xotcl::Object msg "compare time $time with $older_than => [expr {$time < $older_than}]"
@@ -360,7 +459,7 @@ namespace eval ::xowiki {
             ::xotcl::Object log "...will delete $name revision=$last_revision, doit=$doit $last_modified"
             if {$doit} {
               ::xowiki::Package require $package_id
-              $package_id delete_revision -revision_id $last_revision -item_id $item_id
+              ::$package_id delete_revision -revision_id $last_revision -item_id $item_id
             }
           }
         }
@@ -374,67 +473,40 @@ namespace eval ::xowiki {
 
   proc unmounted_instances {} {
     return [::xo::dc list unmounted_instances {
-      select package_id from apm_packages p where not exists 
-      (select 1 from site_nodes where object_id = p.package_id) 
+      select package_id from apm_packages p where not exists
+      (select 1 from site_nodes where object_id = p.package_id)
       and p.package_key = 'xowiki'
     }]
   }
 
   proc form_upgrade {} {
     ::xo::dc dml from_upgrade {
-      update xowiki_form f set form = xowiki_formi.data from xowiki_formi 
+      update xowiki_form f set form = xowiki_formi.data from xowiki_formi
       where f.xowiki_form_id = xowiki_formi.revision_id
     }
   }
 
   proc read_file {fn} {
-    set F [open $fn]
-    fconfigure $F -translation binary
-    set content [read $F]
-    close $F
-    return $content
+    ns_log warning "::xowiki::write_file deprecated. Use ::xo::write_file instead"
+    return [::xo::read_file $fn]
   }
+
   proc write_file {fn content} {
-    set F [::open $fn w]
-    ::fconfigure $F -translation binary -encoding binary
-    ::puts -nonewline $F $content
-    ::close $F
+    ns_log warning "::xowiki::write_file deprecated. Use ::xo::write_file instead"
+    return [::xo::write_file $fn $content]
   }
-  
+
   nsf::proc ::xowiki::get_raw_request_body {-as_string:switch -as_file:switch} {
-    if {$as_string eq $as_file} {
-      error "either -as_string or -as_file must be specified"
-    }
-    set contentfile [ns_conn contentfile]
-    if {$as_file} {
-      #
-      # If the file was not spooled, obtained it via [ns_conn content]
-      # as write it to a file.
-      #
-      if {$contentfile eq ""} {
-        set contentfile [ad_tmpnam]
-        write_file $contentfile [ns_conn content -binary]
-      }
-      set result $contentfile
-    } else {
-      #
-      # Return the result as a string
-      #
-      if {$contentfile eq ""} {
-        set result [ns_conn content -binary]
-      } else {
-        set result [read_file $contentfile]
-      }
-    }
-    return $result
+    ns_log warning "::xowiki::get_raw_request_body deprecated. Use ::xo::get_raw_request_body instead"
+    return [::xo::get_raw_request_body -as_string $as_string_p -as_file $as_file_p]
   }
 
   proc ::xowiki::page_order_uses_ltree {} {
     if {[::xo::dc has_ltree]} {
-      ns_cache eval xotcl_object_cache ::xowiki::page_order_uses_ltree {
+      ::xo::xotcl_package_cache eval ::xowiki::page_order_uses_ltree {
         return [::xo::dc get_value check_po_ltree {
-          select count(*) from pg_attribute a, pg_type t, pg_class c 
-          where attname = 'page_order' and a.atttypid = t.oid and c.oid = a.attrelid 
+          select count(*) from pg_attribute a, pg_type t, pg_class c
+          where attname = 'page_order' and a.atttypid = t.oid and c.oid = a.attrelid
           and relname = 'xowiki_page'}]
       }
     } else {
@@ -445,8 +517,8 @@ namespace eval ::xowiki {
 
   proc ::xowiki::transform_root_folder {package_id} {
     ::xo::Package initialize -package_id $package_id
-    set item_id [$package_id folder_id]
-    
+    set item_id [::$package_id folder_id]
+
     if {$item_id == 0} {
       #
       # In case we have to deal with very old installations, these
@@ -459,8 +531,8 @@ namespace eval ::xowiki {
         select item_id from cr_items where name = :name and parent_id = -100
       }]
     }
-    ::xo::clusterwide ns_cache flush xotcl_object_type_cache $item_id
-    set form_id [::xowiki::Weblog instantiate_forms -forms en:folder.form -package_id $package_id]
+    xo::xotcl_object_type_cache flush -partition_key $item_id $item_id
+    set form_id [::$package_id instantiate_forms -forms en:folder.form]
 
     if {[::xo::dc 0or1row check {
       select 1 from cr_items where content_type = '::xowiki::FormPage' and item_id = :item_id
@@ -469,27 +541,32 @@ namespace eval ::xowiki {
       set f [FormPage get_instance_from_db -item_id $item_id]
       if {[$f page_template] != $form_id} {
         ns_log notice "... must change form_id from [$f page_template] to $form_id"
-        ::xo::dc dml chg0 "update xowiki_page_instance set page_template = $form_id where page_instance_id = [$f revision_id]"
+        set revision_id [$f revision_id]
+        ::xo::dc dml chg0 {
+          update xowiki_page_instance set page_template = :form_id
+          where page_instance_id = :revision_id
+        }
       }
       return
     }
     set revision_id [::xo::db::sql::content_revision new \
-                         -title [$package_id instance_name] -text "" \
+                         -title [::$package_id instance_name] -text "" \
                          -item_id $item_id -package_id $package_id]
-    ::xo::dc dml chg1 "insert into xowiki_page (page_id) values ($revision_id)"
-    ::xo::dc dml chg2 "insert into xowiki_page_instance (page_instance_id, page_template) values ($revision_id, $form_id)"
-    ::xo::dc dml chg3 "insert into xowiki_form_page (xowiki_form_page_id) values ($revision_id)"
-    
+    ::xo::dc dml chg1 "insert into xowiki_page (page_id) values (:revision_id)"
+    ::xo::dc dml chg2 "insert into xowiki_page_instance (page_instance_id, page_template) values (:revision_id, :form_id)"
+    ::xo::dc dml chg3 "insert into xowiki_form_page (xowiki_form_page_id) values (:revision_id)"
+
     ::xo::dc dml chg4 "update acs_objects set object_type = 'content_item' where object_id = :item_id"
     ::xo::dc dml chg5 "update acs_objects set object_type = '::xowiki::FormPage' where object_id = :revision_id"
     ::xo::dc dml chg6 "update cr_items set content_type = '::xowiki::FormPage',  publish_status = 'ready', live_revision = :revision_id, latest_revision = :revision_id where item_id = :item_id"
 
-    ::xo::clusterwide ns_cache flush xotcl_object_cache ::$package_id
-    ::xo::clusterwide ns_cache flush xotcl_object_cache ::$item_id
-    ::xo::clusterwide ns_cache flush xotcl_object_cache ::$revision_id
-    ::xo::clusterwide ns_cache flush xotcl_object_type_cache root-folder-$package_id
-    ::xo::clusterwide ns_cache flush xotcl_object_type_cache $item_id
-    ::xo::clusterwide ns_cache flush xotcl_object_type_cache $revision_id
+    ::xo::xotcl_object_cache flush $package_id
+    ::xo::xotcl_object_cache flush $item_id
+    ::xo::xotcl_object_cache flush $revision_id
+    ::xo::xotcl_object_type_cache flush
+    ::xo::xotcl_package_cache flush root-folder-$package_id
+    ::xo::xotcl_object_type_cache flush -partition_key $item_id $item_id
+    ::xo::xotcl_object_type_cache flush -partition_key $revision_id $revision_id
   }
 
   proc ::xowiki::refresh_id_column_fk_constraints {} {
@@ -514,8 +591,8 @@ namespace eval ::xowiki {
   } {
     ns_log notice "got package_id=$package_id, object_id=$object_id, type=$type"
     ::xowiki::Package initialize -package_id $package_id
-    if {[::xotcl::Object isobject ::$package_id]} {
-      return [$package_id package_url]
+    if {[nsf::is object ::$package_id]} {
+      return [::$package_id package_url]
     } else {
       return ""
     }
@@ -528,7 +605,7 @@ namespace eval ::xowiki {
 #
 
 ::xo::Module create ::xowiki::utility -eval {
-  my set age \
+  set :age \
       [list \
            [expr {3600*24*365}] year years \
            [expr {3600*24*30}]  month months \
@@ -538,10 +615,10 @@ namespace eval ::xowiki {
            [expr {60}]          minute minutes \
            [expr {1}]           second seconds \
           ]
-  
-  my proc pretty_age {
-                      -timestamp:required 
-                      -timestamp_base 
+
+  :proc pretty_age {
+                      -timestamp:required
+                      -timestamp_base
                       {-locale ""}
                       {-levels 1}
                     } {
@@ -551,7 +628,7 @@ namespace eval ::xowiki {
     # the rough date in a user friendly fashion.
     #
     #todo: caching?
-    
+
     #     outlook categories:
     #     Unknown
     #     Older
@@ -570,14 +647,14 @@ namespace eval ::xowiki {
     #     Later This Month
     #     Next Month
     #     Beyond Next Month
-    
+
     #     Another possibility: not ago, but "Today 10:00", "Yesterday 10:00", within a
     #     week: "Thursday 10:00", older than about 30 days "13 May 2005" and
-    #     if anything else (ie. > 7 and < 30 days) it shows date and time "13-Oct 2005 10:00".
-    
+    #     if anything else (i.e. > 7 and < 30 days) it shows date and time "13-Oct 2005 10:00".
+
     if {![info exists timestamp_base]} {set timestamp_base [clock seconds]}
     set age_seconds [expr {$timestamp_base - $timestamp}]
-    
+
     if {$age_seconds < 0} {
       set msg_key xowiki.future_interval
       set age_seconds [expr {0 - $age_seconds}]
@@ -587,8 +664,7 @@ namespace eval ::xowiki {
 
     set pos 0
     set msg ""
-    my instvar age
-    foreach {interval unit unit_plural} $age {
+    foreach {interval unit unit_plural} ${:age} {
       set base [expr {int($age_seconds / $interval)}]
 
       if {$base > 0} {
@@ -598,9 +674,9 @@ namespace eval ::xowiki {
         # $pos < 5: do not report details under a minute
         if {$pos < 5 && $levels > 1} {
           set remaining_age [expr {$age_seconds-$base*$interval}]
-          set interval    [lindex $age [expr {($pos+1)*3}]]
-          set unit        [lindex $age [expr {($pos+1)*3+1}]]
-          set unit_plural [lindex $age [expr {($pos+1)*3+2}]]
+          set interval    [lindex ${:age} [expr {($pos+1)*3}]]
+          set unit        [lindex ${:age} [expr {($pos+1)*3+1}]]
+          set unit_plural [lindex ${:age} [expr {($pos+1)*3+2}]]
           set base [expr {int($remaining_age / $interval)}]
           if {$base > 0} {
             set label [expr {$base == 1 ? $unit : $unit_plural}]
@@ -628,7 +704,7 @@ namespace eval ::xowiki {
 
 ::xo::Module create ::xowiki::utility -eval {
 
-  my proc incr_page_order {p} {
+  :proc incr_page_order {p} {
     lassign [list "" $p] prefix suffix
     regexp {^(.*[.])([^.]+)$} $p _ prefix suffix
     if {[string is integer -strict $suffix]} {
@@ -652,22 +728,24 @@ namespace eval ::xowiki {
     }
     return $prefix$suffix
   }
-  
-  my proc page_order_compute_new_names {start page_orders} {
+
+  :proc page_order_compute_new_names {start page_orders} {
     lappend pairs [lindex $page_orders 0] $start
     foreach p [lrange $page_orders 1 end] {
-      lappend pairs $p [set start [my incr_page_order $start]]
+      lappend pairs $p [set start [:incr_page_order $start]]
     }
     return $pairs
   }
 
-  my proc get_page_order_items {-parent_id {-publish_status "production"} page_orders} {
+  :proc get_page_order_items {-parent_id:integer {-publish_status "production"} page_orders} {
     set likes [list]
     foreach page_order $page_orders {
       if {[::xowiki::page_order_uses_ltree]} {
-        lappend likes "p.page_order <@ '$page_order'" 
+        lappend likes "p.page_order <@ [ns_dbquotevalue $page_order]"
       } else {
-        lappend likes "p.page_order = '$page_order'" "p.page_order like '$page_order.%'"
+        lappend likes \
+            "p.page_order = [ns_dbquotevalue $page_order]" \
+            "p.page_order like [ns_dbquotevalue $page_order.%]"
       }
     }
     set sql "select p.page_order, p.page_id, cr.item_id, ci.name
@@ -677,22 +755,22 @@ namespace eval ::xowiki {
             [::xowiki::Includelet publish_status_clause $publish_status] \
             and ci.parent_id = $parent_id \
             and ([join $likes { or }])"
-    #my log $sql
+    #:log $sql
     set pages [::xo::dc list_of_lists get_pages_with_page_order $sql]
     return $pages
   }
-  
+
   ::xowiki::utility proc page_order_renames {
-     -parent_id 
-     {-publish_status "production"} 
-     -start 
-     -from 
+     -parent_id
+     {-publish_status "production"}
+     -start
+     -from
      -to
    } {
-    set pages [my get_page_order_items -parent_id $parent_id -publish_status $publish_status $to]
-    #my log "pages=$pages"
+    set pages [:get_page_order_items -parent_id $parent_id -publish_status $publish_status $to]
+    #:log "pages=$pages"
     array set npo [::xowiki::utility page_order_compute_new_names $start $to]
-    #my log npo=[array get npo]=>to='$to'
+    #:log npo=[array get npo]=>to='$to'
     set renames [list]
     foreach tuple $pages {
       lassign $tuple old_page_order page_id item_id name
@@ -702,17 +780,17 @@ namespace eval ::xowiki {
         #
         if {$npo($old_page_order) eq $old_page_order} {
           # Nothing to do
-          #my log "--cpo name $old_page_order not changed"
+          #:log "--cpo name $old_page_order not changed"
         } else {
-          #my log "--cpo name $old_page_order changed to '$npo($old_page_order)'"
+          #:log "--cpo name $old_page_order changed to '$npo($old_page_order)'"
           lappend renames $page_id $item_id $name $old_page_order $npo($old_page_order)
         }
       } else {
-        # 
+        #
         # We have no translation in the list. This must be an item
         # from a subtree of changed page_orders.
         #
-        #my log "--cpo no translation for $old_page_order, check prefix"
+        #:log "--cpo no translation for $old_page_order, check prefix"
         foreach new_name [array names npo] {
           if {[string match $new_name.* $old_page_order]} {
             #
@@ -721,7 +799,7 @@ namespace eval ::xowiki {
             if {$npo($new_name) ne $new_name} {
               set l [string length $new_name]
               set new_page_order "$npo($new_name)[string range $old_page_order $l end]"
-              my log "--cpo tree name $old_page_order changed to '$new_page_order'"
+              :log "--cpo tree name $old_page_order changed to '$new_page_order'"
               lappend renames $page_id $item_id $name $old_page_order $new_page_order
             }
             break
@@ -732,6 +810,15 @@ namespace eval ::xowiki {
     return $renames
   }
 
+  ::xowiki::utility ad_proc formCSSclass {form_name} {
+    Obtain CSS class name for a form from its name
+  } {
+    set CSSname $form_name
+    regexp {^..:(.*)$} $CSSname _ CSSname
+    regsub {[.].*$} $CSSname "" CSSname
+    return "Form-$CSSname"
+  }
+
   ::xowiki::utility ad_proc change_page_order {
     -from:required
     -to:required
@@ -740,21 +827,30 @@ namespace eval ::xowiki {
     -package_id:required
     {-publish_status "ready|live|expired"}
   } {
-    
-    Change Page Order for pages by renumbering and filling
-    gaps. Parameter clean is just for inserts.
-    
+
+    Update page_order attributes for pages by renumbering and filling
+    gaps.
+
+    @param from list of page_orders before a move/insert operation
+    @param to   list of page_orders after a move/insert operation
+    @param clean list of page_orders for insert operations, to update
+                 the hierarchy from where items were moved to the new hierarchy.
+
   } {
 
     #set from {1.2 1.3 1.4}; set to {1.3 1.4 1.2}; set clean {...}
     #set from {1.2 1.3 1.4}; set to {1.3 1.4 2.1 1.2}; set clean {2.1}
     #set from {1 2}; set to {1 1.2 2}; set clean {1.2 1.3 1.4}
 
-    if {$from eq "" || $to eq "" || [llength $to]-[llength $from] >1 || [llength $to]-[llength $from]<0} {
+    if {$from eq ""
+        || $to eq ""
+        || [llength $to]-[llength $from] > 1
+        || [llength $to]-[llength $from] < 0
+      } {
       ad_log warning "unreasonable request to change page_order from='$from', to='$to'"
       return
     }
-    
+
     #ns_log notice "--cpo from=$from, to=$to, clean=$clean"
     set gap_renames [list]
     #
@@ -776,14 +872,20 @@ namespace eval ::xowiki {
           break
         }
       }
-      if {![info exists inserted]} {error "invalid 'to' list (no inserted element detected)"}
-      # 
-      # compute the remaining list
+      if {![info exists inserted]} {
+        error "invalid 'to' list (no inserted element detected)"
+      }
+      #
+      # Compute the remaining list.
       #
       set remaining [list]
-      foreach e $clean {if {$e ne $inserted} {lappend remaining $e}}
+      foreach e $clean {
+        if {$e ne $inserted} {
+          lappend remaining $e
+        }
+      }
       #
-      # compute rename rename commands for it
+      # Compute rename commands for it.
       #
       set gap_renames [::xowiki::utility page_order_renames -parent_id $folder_id \
                            -publish_status $publish_status \
@@ -793,7 +895,7 @@ namespace eval ::xowiki {
       }
     }
     #
-    # Compute the rename commands for the drop target
+    # Compute the rename commands for the drop target.
     #
     set drop_renames [::xowiki::utility page_order_renames -parent_id $folder_id \
                           -publish_status $publish_status \
@@ -804,7 +906,7 @@ namespace eval ::xowiki {
     }
 
     #
-    # Perform the actual renames
+    # Perform the actual renames.
     #
     set temp_obj [::xowiki::Page new -name dummy -volatile]
     set slot [$temp_obj find_slot page_order]
@@ -813,13 +915,14 @@ namespace eval ::xowiki {
         #ns_log notice "--cpo UPDATE $page_id new_page_order $new_page_order"
         $temp_obj item_id $item_id
         $temp_obj update_attribute_from_slot -revision_id $page_id $slot $new_page_order
-        ::xo::clusterwide ns_cache flush xotcl_object_cache ::$item_id
-        ::xo::clusterwide ns_cache flush xotcl_object_cache ::$page_id
+        ::xo::xotcl_object_cache flush $item_id
+        ::xo::xotcl_object_cache flush $page_id
       }
     }
     #
-    # Flush the page fragement caches (page fragments based on page_order might be sufficient)
-    $package_id flush_page_fragment_cache -scope agg
+    # Flush the page fragment caches (page fragments based on
+    # page_order might be sufficient).
+    ::$package_id flush_page_fragment_cache -scope agg
   }
 
   #
@@ -837,7 +940,7 @@ namespace eval ::xowiki {
   # RFC-compliant handling of "+" in the "path" segment of the url,
   # namely no interpretation.
   #
-  # Here an example, consider an url path "a + b".  The AOLserver
+  # Here an example, consider a URL path "a + b".  The AOLserver
   # ns_encode yields "a+%2b+b", the AOLserver ns_decode maps it back
   # to "a + b", everything is fine. However, the NaviServer C-level
   # decode in [ns_conn url] converts "a+%2b+b" to "a+++b", which is
@@ -854,7 +957,7 @@ namespace eval ::xowiki {
   # -gustaf neumann (nov 2010)
 
   if {[ns_info name] eq "NaviServer"} {
-    my proc urlencode {string} {ns_urlencode $string}
+    :proc urlencode {string} {ns_urlencode $string}
   } else {
     set ue_map [list]
     for {set i 0} {$i < 256} {incr i} {
@@ -864,13 +967,13 @@ namespace eval ::xowiki {
         lappend ue_map $c $x
       }
     }
-    my proc urlencode {string} {string map [my set ue_map] $string}
+    :proc urlencode {string} {string map ${:ue_map} $string}
   }
 
 
-  my ad_proc user_is_active {{-asHTML:boolean false} uid} {
+  :ad_proc user_is_active {{-asHTML:boolean false} uid} {
   } {
-    if {[info commands ::throttle] ne "" && 
+    if {[info commands ::throttle] ne "" &&
         [::throttle info methods user_is_active] ne ""} {
       set active [throttle user_is_active $uid]
       if {$asHTML} {

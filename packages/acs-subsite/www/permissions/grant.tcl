@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author rhs@mit.edu
     @creation-date 2000-08-20
-    @cvs-id $Id: grant.tcl,v 1.16.2.5 2016/08/29 11:44:56 gustafn Exp $
+    @cvs-id $Id: grant.tcl,v 1.21 2018/05/09 15:33:28 hectorr Exp $
 } {
     object_id:naturalnum,notnull
     privileges:multiple,optional
@@ -163,7 +163,7 @@ if { [form is_valid grant] } {
         }
     }
     
-    if {([info exists return_url] && $return_url ne "")} {
+    if {$return_url ne ""} {
         ad_returnredirect $return_url
     } else {
         ad_returnredirect [export_vars -base one {object_id application_url}]

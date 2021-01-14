@@ -17,10 +17,10 @@ ad_library {
     f  = a function <br>
     x  = an element <br>
     xs = a list of elements
-    
+
     @author Mark Dettinger (mdettinger@arsdigita.com)
     @creation-date March 29, 2000
-    @cvs-id $Id: ad-functional-procs.tcl,v 1.8.2.2 2017/04/21 14:22:45 gustafn Exp $
+    @cvs-id $Id: ad-functional-procs.tcl,v 1.10.2.3 2020/09/24 13:34:19 hectorr Exp $
 
     This was part of ACS 3
     Added to OpenACS by bdolicki on 11 Feb 2004
@@ -31,9 +31,9 @@ ad_library {
 namespace eval ::f {
 
 # This library was completely rewritten on July 18, 2000.
-# The design is now much cleaner. Constructed functions 
+# The design is now much cleaner. Constructed functions
 # are no longer represented by strings, but by real
-# (callable) function objects. The auxiliary functions 
+# (callable) function objects. The auxiliary functions
 # eval_unary and eval_binary are gone.
 
 # Special thanks go to Sarah Arnold and Carsten Clasohm for extensive
@@ -45,10 +45,10 @@ namespace eval ::f {
 # Lambda
 # --------------------------------------------------------------------------------
 
-ad_proc -public lambda {args body} {
+ad_proc -public -deprecated lambda {args body} {
     The lambda function - one of the foundations of functional programming -
     defines an anonymous proc and returns it. This is useful if you quickly
-    need an auxiliary function for a small task. 
+    need an auxiliary function for a small task.
     <h4>Examples</h4>
     <ul>
     <li><code>
@@ -64,6 +64,12 @@ ad_proc -public lambda {args body} {
     Although lambda defines a proc and therefore consumes memory, executing
     the same lambda expression twice will just re-define this proc.
     Thus, there is no memory leak, if you have a lambda inside a loop.
+
+    DEPRECATED: As of tcl8.5, Tcl has native support for 'lambda' provided by
+                means of 'apply' per TIP 194. Tcllib provides a 'lambda' package
+                with procs that make use of it.
+
+    @see tcllib lambda package
 } {
     proc $args.$body $args $body
     return $args.$body
@@ -86,8 +92,8 @@ ad_proc -public bind {f args} {
 } {
     set i 0
     foreach arg $args {
-	append code "set [lindex [info args $f] $i] {$arg}\n"
-	incr i
+        append code "set [lindex [info args $f] $i] {$arg}\n"
+        incr i
     }
     append code [info body $f]
     set proc_args [info args $f]
@@ -100,12 +106,12 @@ ad_proc -public bind2nd {f arg} "binds arg to the 2nd argument of f" {
     append code [info body $f]
     set proc_args [info args $f]
     set num_proc_args [llength $proc_args]
-    lambda [cons [head $proc_args] [lrange $proc_args 2 $num_proc_args]] $code    
+    lambda [cons [head $proc_args] [lrange $proc_args 2 $num_proc_args]] $code
 }
 
 # --------------------------------------------------------------------------------
 # We now define several binary operators as procs, so we can pass them
-# as arguments to other functions. 
+# as arguments to other functions.
 # --------------------------------------------------------------------------------
 
 proc +  {a b} {expr {$a +  $b}}
@@ -117,7 +123,7 @@ proc || {a b} {expr {$a || $b}}
 proc >  {a b} {expr {$a >  $b}}
 proc <  {a b} {expr {$a <  $b}}
 
-# Example: 
+# Example:
 # + 5 6 = 11
 
 # --------------------------------------------------------------------------------
@@ -159,7 +165,7 @@ ad_proc -public fold {f e xs} {
     <ul>
     <li>
     <code>
-    fold + 0 [list 1 2 3 4] = 10 
+    fold + 0 [list 1 2 3 4] = 10
     </code><li><code>
     fold * 1 [list 1 2 3 4] = 24
     </code>
@@ -167,7 +173,7 @@ ad_proc -public fold {f e xs} {
 } {
     set result $e
     foreach x $xs {
-	set result [$f $result $x]
+        set result [$f $result $x]
     }
     return $result
 }
@@ -189,9 +195,9 @@ ad_proc -public fold1 {f xs} {
     </ul>
 } {
     if { [null_p $xs] } {
-	error "ERROR: fold1 is undefined for empty lists."
-    } else { 
-	fold $f [head $xs] [tail $xs]
+        error "ERROR: fold1 is undefined for empty lists."
+    } else {
+        fold $f [head $xs] [tail $xs]
     }
 }
 
@@ -203,9 +209,9 @@ ad_proc -public scanl {f e xs} "takes a binary function f, a start element e and
                          and returns {e (f e x1) (f (f e x1) x2) ...}" {
     set current_element $e
     set result [list $e]
-    foreach x $xs {    
-	set current_element [$f $current_element $x] 
-	lappend result $current_element
+    foreach x $xs {
+        set current_element [$f $current_element $x]
+        lappend result $current_element
     }
     return $result
 }
@@ -217,9 +223,9 @@ ad_proc -public scanl {f e xs} "takes a binary function f, a start element e and
 ad_proc -public scanl1 {f xs} "takes a binary function f and a list {x1 x2 x3 ...}
                        and returns {x1 (f x1 x2) (f (f x1 x2) x3) ...}" {
     if { [null_p $xs] } {
-	error "ERROR: scanl1 is undefined for empty lists."
-    } else { 
-	scanl $f [head $xs] [tail $xs]
+        error "ERROR: scanl1 is undefined for empty lists."
+    } else {
+        scanl $f [head $xs] [tail $xs]
     }
 }
 
@@ -251,11 +257,11 @@ ad_proc -public qsort {xs {value id}} "sorts a sequence with the quicksort algor
     set big_elmts {}
     set small_elmts {}
     foreach x [tail $xs] {
-	if { [$value $x] > [$value $pivot] } {
-	    lappend big_elmts $x
-	} else {
-	    lappend small_elmts $x
-	}
+        if { [$value $x] > [$value $pivot] } {
+            lappend big_elmts $x
+        } else {
+            lappend small_elmts $x
+        }
     }
     concat [qsort $small_elmts $value] [list $pivot] [qsort $big_elmts $value]
 }
@@ -299,7 +305,7 @@ ad_proc -public uncurry {f tuple} {
 # ----------
 # Using "map" and "uncurry", convert the tuple list
 # {{3 1} {4 1} {5 9} {2 6}} into {1 1 5 2} (each tuple is replaced
-# by the minimum of its two components). 
+# by the minimum of its two components).
 
 ad_proc -public fst {xs} "returns the first element of a list" {
     lindex $xs 0
@@ -308,7 +314,7 @@ ad_proc -public fst {xs} "returns the first element of a list" {
 ad_proc -public snd {xs} "returns the second element of a list" {
     lindex $xs 1
 }
- 
+
 ad_proc -public thd {xs} "returns the third element of a list" {
     lindex $xs 2
 }
@@ -319,7 +325,7 @@ ad_proc -public thd {xs} "returns the third element of a list" {
 # set last_names  [map snd $people]
 # set emails      [map thd $people]
 
-ad_proc -public flip {f a b} "takes a binary function f and two arguments a and b
+ad_proc -public flip {f a b} "takes a binary function 'f' and two arguments 'a' and 'b'
                        and returns f b a (arguments are flipped)" {
     $f $b $a
 }
@@ -358,7 +364,7 @@ ad_proc -public abs {x} "returns the absolute value of x" {
 }
 
 ad_proc -public gcd {x y} "returns the greatest common divisor of x and y" {
-    gcd' [abs $x] [abs $y] 
+    gcd' [abs $x] [abs $y]
 }
 
 proc gcd' {x y} {
@@ -465,7 +471,7 @@ ad_proc -public products {xs} "returns the list of partial products of the list 
 ad_proc -public head {xs} "first element of a list" {
     lindex $xs 0
 }
- 
+
 ad_proc -public last {xs} "last element of a list" {
     lindex $xs [expr {[llength $xs]-1}]
 }
@@ -496,9 +502,9 @@ ad_proc -public filter {pred xs} {
 } {
     set result {}
     foreach x $xs {
-	if { [$pred $x] } {
-	    lappend result $x
-	}
+        if { [$pred $x] } {
+            lappend result $x
+        }
     }
     return $result
 }
@@ -506,9 +512,9 @@ ad_proc -public filter {pred xs} {
 ad_proc -public copy {n x} "returns list of n copies of x" {
     set result {}
     for {set i 0} {$i<$n} {incr i} {
-	lappend result $x
+        lappend result $x
     }
-    return $result    
+    return $result
 }
 
 # Example:
@@ -517,16 +523,16 @@ ad_proc -public copy {n x} "returns list of n copies of x" {
 ad_proc -public cycle {n xs} "returns concatenated list of n copies of xs" {
     set result {}
     for {set i 0} {$i<$n} {incr i} {
-	set result [concat $result $xs]
+        lappend result {*}$xs
     }
-    return $result    
+    return $result
 }
 
 # Example:
 # cycle 4 {1 2 3} = {1 2 3 1 2 3 1 2 3 1 2 3}
 
 ad_proc -public cons {x xs} "inserts x at the front of the list xs" {
-    concat [list $x] $xs 
+    concat [list $x] $xs
 }
 
 ad_proc -public reverse {xs} "reverses the list xs" {
@@ -544,9 +550,9 @@ ad_proc -public not_elem_p {x xs} "checks if x is not contained in s" {
 ad_proc -public nub {xs} "removes duplicates from xs" {
     set result {}
     foreach x $xs {
-	if { [not_elem_p $x $result] } {
-	    lappend result $x
-	}
+        if { [not_elem_p $x $result] } {
+            lappend result $x
+        }
     }
     return $result
 }
@@ -558,7 +564,7 @@ ad_proc -public null_p {xs} "checks if xs is the empty list" {
 ad_proc -public enum_from_to {lo hi} "generates {lo lo+1 ... hi-1 hi}" {
     set result {}
     for {set i $lo} {$i<=$hi} {incr i} {
-	lappend result $i
+        lappend result $i
     }
     return $result
 }
@@ -569,7 +575,7 @@ ad_proc -public enum_from_to {lo hi} "generates {lo lo+1 ... hi-1 hi}" {
 
 ad_proc -public zip {args} "takes two lists {x1 x2 x3 ...} and {y1 y2 y3 ...} and
                      returns a list of tuples {x1 y1} {x2 y2} {x3 y3} ...
-                     Works analogously with 3 or more lists." {				 
+                     Works analogously with 3 or more lists." {
     transpose $args
 }
 
@@ -585,9 +591,9 @@ ad_proc -public zip_with {f xs ys} "takes two lists {x1 x2 x3 ...} and {y1 y2 y3
                              returns the list {(f x1 y1) (f x2 y2) (f x3 y3) ...}" {
     set result {}
     foreach x $xs y $ys {
-	if { !([null_p $x] || [null_p $y]) } {
-	    lappend result [$f $x $y]
-	}
+        if { !([null_p $x] || [null_p $y]) } {
+            lappend result [$f $x $y]
+        }
     }
     return $result
 }
@@ -603,17 +609,17 @@ ad_proc -public transpose {lists} "tranposes a matrix (a list of lists)" {
     set num_lists [llength $lists]
     if {!$num_lists} { return "" }
     for {set i 0} {$i<$num_lists} {incr i} {
-	set l($i) [lindex $lists $i]
+        set l($i) [lindex $lists $i]
     }
     set result {}
     while {1} {
-	set element {}
-	for {set i 0} {$i<$num_lists} {incr i} {
-	    if {[null_p $l($i)]} { return $result }
-	    lappend element [head $l($i)]
-	    set l($i) [tail $l($i)]
-	}
-	lappend result $element
+        set element {}
+        for {set i 0} {$i<$num_lists} {incr i} {
+            if {[null_p $l($i)]} { return $result }
+            lappend element [head $l($i)]
+            set l($i) [tail $l($i)]
+        }
+        lappend result $element
     }
 
     # Note: This function takes about n*n seconds
@@ -637,8 +643,8 @@ ad_proc -public iterate {n f x} {
 } {
     set result {}
     for {set i 0} {$i<$n} {incr i} {
-	lappend result $x
-	set x [$f $x]
+        lappend result $x
+        set x [$f $x]
     }
     return $result
 }
@@ -648,9 +654,9 @@ ad_proc -public unzip {xs} "unzip takes a list of tuples {x1 y1} {x2 y2} {x3 y3}
     set left {}
     set right {}
     foreach x $xs {
-	# assertion: x is a tuple
-	lappend left [lindex $x 0]
-	lappend right [lindex $x 1]
+        # assertion: x is a tuple
+        lappend left [lindex $x 0]
+        lappend right [lindex $x 1]
     }
     return [list $left $right]
 }
@@ -681,19 +687,19 @@ ad_proc -public split_at {n xs} "splits a list using take and drop" {
 
 ad_proc -public take_while {p xs} "returns the longest initial segment of xs whose
                             elements satisfy p" {
-    set index 0    
+    set index 0
     foreach x $xs {
-	if { ![$p $x] } { break }
-	incr index
+        if { ![$p $x] } { break }
+        incr index
     }
     take $index $xs
 }
 
 ad_proc -public drop_while {p xs} "returns the remaining portion of the list" {
-    set index 0    
+    set index 0
     foreach x $xs {
-	if { ![$p $x] } { break }
-	incr index
+        if { ![$p $x] } { break }
+        incr index
     }
     drop $index $xs
 }
@@ -704,10 +710,10 @@ ad_proc -public span {p xs} "splits a list using take_while and drop_while" {
 
 ad_proc -public take_until {p xs} "returns the list of elements up to and including the
                             first element of xs which satisfies p" {
-    set index 0    
+    set index 0
     foreach x $xs {
-	incr index
-	if { [$p $x] } { break }
+        incr index
+        if { [$p $x] } { break }
     }
     take $index $xs
 }
@@ -735,18 +741,18 @@ ad_proc -public choose {n k} "Here's how to compute 'n choose k' like a real ner
 
 ad_proc -public pascal {size} "prints Pascal's triangle" {
     for {set n 0} {$n<=$size} {incr n} {
-	puts [map [bind choose $n] [enum_from_to 0 $n]]
+        puts [map [bind choose $n] [enum_from_to 0 $n]]
     }
 }
 
 ad_proc -public prime_p {n} {
     @return 1 if n is prime
-} { 
+} {
     if { $n<2 } { return 0 }
     if { $n==2 } { return 1 }
     if { [even_p $n] } { return 0 }
     for {set i 3} {$i*$i<=$n} {incr i 2} {
-	if { $n%$i==0 } { return 0 }
+        if { $n%$i==0 } { return 0 }
     }
     return 1
 }
@@ -758,9 +764,9 @@ proc multiplication_table {x} {
     # This is an extreme example for test purposes only.
     # This way of programming is not recommended. Kids: do not try this at home.
     flip join \n [map [bind compose [bind flip join ""] [bind map [bind compose \
-	    [lambda {s} {format %4d $s}] product]]] \
-	    [map transpose [transpose [list [map [bind copy $x] [enum_from_to 1 $x]] \
-	    [copy $x [enum_from_to 1 $x]]]]]]
+        [lambda {s} {format %4d $s}] product]]] \
+        [map transpose [transpose [list [map [bind copy $x] [enum_from_to 1 $x]] \
+        [copy $x [enum_from_to 1 $x]]]]]]
 }
 
 # --------------------------------------------------------------------------------

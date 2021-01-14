@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Dec 12 11:23:12 2000
-    @cvs-id $Id: delete.tcl,v 1.5.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: delete.tcl,v 1.7 2018/06/07 17:41:01 hectorr Exp $
 
 } {
     segment_id:naturalnum,notnull
@@ -16,9 +16,9 @@ ad_page_contract {
     segment_name:onevalue
 } -validate {
     segment_exists_p -requires {segment_id:notnull} {
-	if { ![rel_segments_permission_p -privilege delete $segment_id] } {
-	    ad_complain "The segment either does not exist or you do not have permission to delete it"
-	}
+        if { ![permission::permission_p -object_id $segment_id -privilege "delete"] } {
+            ad_complain "The segment either does not exist or you do not have permission to delete it"
+        }
     }
 }
 

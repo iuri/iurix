@@ -1,5 +1,3 @@
-# /packages/mbryzek-subsite/www/admin/rel-types/mapping-remove.tcl
-
 ad_page_contract {
 
     Removes a mapping for a permissible rel_type between either a
@@ -7,7 +5,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Dec 12 10:45:07 2000
-    @cvs-id $Id: mapping-remove-2.tcl,v 1.5.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: mapping-remove-2.tcl,v 1.7.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     { group_rel_id:naturalnum "" }
@@ -23,17 +21,18 @@ if { $group_rel_id eq "" || $group_type_rel_id eq "" } {
 
 if { $group_rel_id ne "" } {
     db_dml delete_group_rel_mapping {
-	delete from group_rels 
-	 where group_rel_id = :group_rel_id
+        delete from group_rels
+         where group_rel_id = :group_rel_id
     }
 } elseif { $group_rel_id ne "" } {
     db_dml delete_group_type_rel_mapping {
-	delete from group_type_rels 
-	 where group_type_rel_id = :group_type_rel_id
+        delete from group_type_rels
+         where group_type_rel_id = :group_type_rel_id
     }
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

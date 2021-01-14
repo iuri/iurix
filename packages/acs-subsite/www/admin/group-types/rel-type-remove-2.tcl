@@ -1,12 +1,10 @@
-# /packages/mbryzek-subsite/www/admin/group-types/rel-type-remove-2.tcl
-
 ad_page_contract {
 
     Removes the specified relation from the list of allowable ones
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Dec 10 16:45:32 2000
-    @cvs-id $Id: rel-type-remove-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: rel-type-remove-2.tcl,v 1.6.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     group_rel_type_id:naturalnum,notnull
@@ -17,23 +15,24 @@ ad_page_contract {
 if { $return_url eq "" } {
     # Pull out the group_type now as we may delete the row later
     db_1row select_group_type {
-	select g.group_type
-	from group_type_rels g 
-	where g.group_rel_type_id = :group_rel_type_id
+        select g.group_type
+        from group_type_rels g
+        where g.group_rel_type_id = :group_rel_type_id
     }
     set return_url [export_vars -base one {group_type}]
 }
 
 if {$operation eq "Yes, I really want to remove this relationship type"} {
     db_transaction {
-	db_dml remove_relation {
-	    delete from group_type_rels where group_rel_type_id = :group_rel_type_id
-	}
+        db_dml remove_relation {
+            delete from group_type_rels where group_rel_type_id = :group_rel_type_id
+        }
     }
 }
 
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

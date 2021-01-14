@@ -8,7 +8,8 @@ var data_repeat = new Array();
  * this function just invisible items visible.
  */
 xowiki.repeat.addItem = function(e, json) {
-    var data = eval("(" + json + ')');
+    //var data = eval("(" + json + ')');
+    var data = JSON.parse(json);
     var items = $(e.parentNode).children(".repeatable:hidden");
     var currentItem = '';
     // the loop starts with 1 because items[0] is the template
@@ -33,7 +34,7 @@ xowiki.repeat.addItem = function(e, json) {
                     $(ck_editors[k]).attr('contenteditable','true');
                 }
             }
-            // IPAD HACK ENDE
+            // IPAD HACK END
             */
             break;
         }
@@ -66,7 +67,7 @@ xowiki.repeat.addItem = function(e, json) {
  */
 xowiki.repeat.newItem = function(e, json) {
 
-    var data = eval("(" + json + ')');
+    var data = JSON.parse(json);
     var item = e;
 
     var stats =  this.itemStats(item);
@@ -122,7 +123,7 @@ xowiki.repeat.newItem = function(e, json) {
     item.parentNode.style.display = 'block';
 
     // ckeditor releoding
-    // we are selecting all ckeditor intances which are at the same level and below of the current item
+    // we are selecting all ckeditor instances which are at the same level and below of the current item
     // so we can be sure that in case of a compound field all editors are reloaded correctly
     // .xowiki-ckeditor --> normaler ckeditor
     // .xowiki-ckeditor.ckeip --> inplace editor
@@ -255,10 +256,11 @@ xowiki.repeat.renameItem = function(top, e, from, to) {
         var data_repeat_attribute = e.getAttribute('data-repeat');
         if (data_repeat_attribute !== null) {
             //
-            // Replace the ID in the name compontent inside the json
+            // Replace the ID in the name component inside the json
             // structure.
             //
-            var data = eval("(" + data_repeat_attribute + ')');
+            var data = JSON.parse(data_repeat_attribute);
+
             var compareLength = from.length;
             if (data.name.substring(0,compareLength) == from) {
                 var new_name = to + data.name.substring(compareLength,data.name.length);
@@ -282,7 +284,8 @@ xowiki.repeat.renameItem = function(top, e, from, to) {
  * the fields.
  */
 xowiki.repeat.delItem = function(e, json) {
-    var data = eval("(" + json + ')');
+
+    var data = JSON.parse(json);
     var item = e.parentNode;
     var stats =  this.itemStats(item);
     //console.info(item);
@@ -351,7 +354,7 @@ xowiki.repeat.delItem = function(e, json) {
             // we have to reload because the ckeditor will not work after moving
             // additionally we have to set the content of the ckeditor in the textarea
             if (typeof CKEDITOR != "undefined") {
-                // we are selecting all ckeditor intances which are at the same level and below of the current item
+                // we are selecting all ckeditor instances which are at the same level and below of the current item
                 for (var l in CKEDITOR.instances) {
                     // console.log('instance name: ' + CKEDITOR.instances[l].name);
                     var searchString = item.parentNode.id + k;
@@ -384,10 +387,10 @@ xowiki.repeat.delItem = function(e, json) {
         }
     };
 
-    // make sure add item link is visible
+    // Make sure add item link is visible
     $(item.parentNode).children(".repeat-add-link").show();
 
-    // delet the node until we are reaching the minimum
+    // Delete the node until we are reaching the minimum
     if (stats['visible'] > data['min']) {
         // delete the last node
         divs[last].parentNode.removeChild(divs[last]);
@@ -407,7 +410,7 @@ xowiki.repeat.delItem = function(e, json) {
     this.renameIds(divs[last],templateid,newid);
 
     // ckeditor releoding
-    // we are selecting all ckeditor intances which are at the same level and below of the current item
+    // we are selecting all ckeditor instances which are at the same level and below of the current item
     // so we can be sure that in case of a compound field all editors are reloaded correctly
     // .xowiki-ckeditor --> normaler ckeditor
     // .xowiki-ckeditor.ckeip --> inplace editor
@@ -446,7 +449,7 @@ xowiki.repeat.delItem = function(e, json) {
     */
 
     // ckeditor releoding
-    // we are selecting all ckeditor intances which are at the same level and below of the current item
+    // we are selecting all ckeditor instances which are at the same level and below of the current item
     // so we can be sure that in case of a compound field all editors are reloaded correctly
     // .xowiki-ckeditor --> normaler ckeditor
     // .xowiki-ckeditor.ckeip --> inplace editor

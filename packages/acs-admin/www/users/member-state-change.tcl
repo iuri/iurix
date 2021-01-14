@@ -4,13 +4,14 @@ ad_page_contract {
 
     @author Hiro Iwashima <iwashima@mit.edu>
     @creation-date 23 Aug 2000
-    @cvs-id $Id: member-state-change.tcl,v 1.17.2.9 2017/05/22 06:38:08 gustafn Exp $
+    @cvs-id $Id: member-state-change.tcl,v 1.23.2.6 2020/07/03 07:43:20 gustafn Exp $
 
 } {
     user_id:naturalnum,notnull
     {member_state:trim}
     {email_verified_p:boolean ""}
     {return_url:localurl ""}
+    {pass_through:boolean false}
 } -validate {
     valid_member_state -requires member_state {
         if {$member_state ni {approved banned deleted merged "needs approval" rejected}} {
@@ -24,17 +25,26 @@ ad_page_contract {
     return_url:onevalue
 }
 
-if {![db_0or1row get_states {}]} {
+if {![db_0or1row get_states {
+    select member_state as member_state_old,
+           email_verified_p as email_verified_p_old
+    from cc_users where user_id = :user_id
+}]} {
     # The user is not in there
     ad_return_complaint 1 "Invalid User: the user is not in the system"
     return
 }
 
+set user_info [acs_user::get -user_id $user_id]
+set name   [dict get $user_info name]
+set email  [dict get $user_info email]
+set rel_id [dict get $user_info rel_id]
+
 #
 # This page is used for state changes in the member_state, and as well
 # on email confirm require and approve operations.
 #
-switch $email_verified_p {
+switch -- $email_verified_p {
     "t" {
         set user_name     $name
         set url           [ad_url]
@@ -56,35 +66,43 @@ switch $email_verified_p {
         set email_message [group::get_member_state_pretty -component account_mail \
                                -member_state $member_state \
                                -site_name [ad_system_name] \
-                               -url [ad_url]]
+                               -url [ad_conn subsite_url]]
     }
 }
 
-if {[catch {
+ad_try {
     acs_user::change_state -user_id $user_id -state $member_state
 
-    switch $email_verified_p {
-        "t" {
-            db_exec_plsql approve_email {}
-        }
-        "f" {
-            db_exec_plsql unapprove_email {}
-        }
+    if {$email_verified_p ne ""} {
+        acs_user::update \
+            -user_id $user_id \
+            -email_verified_p $email_verified_p
     }
-} errmsg]} {
+
+} on error {errorMsg} {
     ad_return_error "Database Update Failed" "Database update failed with the following error:
-    <pre>$errmsg</pre>"
+    <pre>[ns_quotehtml $errorMsg]</pre>"
+    ad_script_abort
 }
 
 callback acs_admin::member_state_change -member_state $member_state -user_id $user_id
 
 set admin_user_id [ad_conn user_id]
-set email_from [db_string admin_email {select email from parties where party_id = :admin_user_id}]
+set email_from [acs_user::get_element -user_id $admin_user_id -element email]
 set subject $action
 set message $email_message
 
 if {$return_url eq ""} {
-    set return_url [export_vars -base /acs-admin/users/one {user_id}]
+    set return_url [acs_community_member_admin_url -user_id $user_id]
+}
+
+if {$pass_through || $member_state_old eq $member_state} {
+    #
+    # No need to ask the admin to send a state notification mail to
+    # the user.
+    #
+    ad_returnredirect $return_url
+    ad_script_abort
 }
 
 set context [list [list "./" "Users"] "$action"]

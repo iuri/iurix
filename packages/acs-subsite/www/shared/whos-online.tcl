@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Peter Marklund
 
-    @cvs-id $Id: whos-online.tcl,v 1.11.8.1 2015/09/10 08:21:53 gustafn Exp $
+    @cvs-id $Id: whos-online.tcl,v 1.14 2018/05/09 15:33:28 hectorr Exp $
 } -properties {
     title:onevalue
     context:onevalue

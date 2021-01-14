@@ -1,6 +1,6 @@
 ad_page_contract {
     Allows users to change their priv_email field in the users table
-    
+
     @author Miguel Marin (miguelmarin@viaro.net) Viaro Networks (www.viaro.net)
 } {
     {user_id:naturalnum ""}
@@ -20,20 +20,23 @@ if {$user_id eq ""} {
 
 ad_form -name private-email -export return_url -form {
     {level:integer(select)
-	{label "\#acs-subsite.Change_my_email_P\#:"}
-	{options {
+        {label "\#acs-subsite.Change_my_email_P\#:"}
+        {options {
             {"[_ acs-subsite.email_as_text]" 4}
-            {"[_ acs-subsite.email_as_image]" 3} 
+            {"[_ acs-subsite.email_as_image]" 3}
             {"[_ acs-subsite.email_as_a_form]" 2}
             {"[_ acs-subsite.email_dont_show]" 1}
         }}
     }
 } -on_request {
     set level [email_image::get_priv_email -user_id $user_id]
+
 } -on_submit {
     email_image::update_private_p -user_id $user_id -level $level
+
 } -after_submit {
     ad_returnredirect $return_url
+    ad_script_abort
 }
 # Local variables:
 #    mode: tcl

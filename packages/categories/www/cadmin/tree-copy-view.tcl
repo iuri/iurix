@@ -3,11 +3,11 @@ ad_page_contract {
     Displays a simple view of the source category tree for copy.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-copy-view.tcl,v 1.7.2.2 2019/12/20 21:18:10 gustafn Exp $
 } {
     source_tree_id:naturalnum,notnull
     target_tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -31,8 +31,8 @@ set tree_name [category_tree::get_name $tree_id $locale]
 set page_title [_ categories.Tree_view_title]
 
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar [list \
 			 [export_vars -no_empty -base tree-copy { {tree_id $target_tree_id} locale object_id ctx_id }] \
 			 [_ categories.Action_copy_tree]] \

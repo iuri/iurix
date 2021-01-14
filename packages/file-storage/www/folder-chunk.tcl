@@ -1,11 +1,25 @@
-# file-storage/www/folder-chunk.tcl
-
-ad_page_contract {
+ad_include_contract {
     @author yon (yon@openforce.net)
     @creation-date Feb 22, 2002
-    @cvs-id $Id: folder-chunk.tcl,v 1.49.2.10 2017/06/08 16:42:26 antoniop Exp $
-} -query {
-    {orderby:token,optional}
+    @cvs-id $Id: folder-chunk.tcl,v 1.61.2.10 2020/12/07 12:41:20 gustafn Exp $
+} {
+    orderby:token,optional
+    {folder_id:integer ""}
+    {allow_bulk_actions:boolean true}
+    {category_id:integer ""}
+    {n_past_days:integer 99999}
+    {fs_url:localurl "[ad_conn package_url]"}
+    {return_url ""}
+    {format "table"}
+    {root_folder_id:integer ""}
+} -validate {
+    folder_id_exists {
+        if { $folder_id eq "" } {
+            ad_complain
+        }
+    }
+} -errors {
+    folder_id_exists [_ file-storage.lt_bad_folder_id_folder_]
 } -properties {
     folder_name:onevalue
     contents:multirow
@@ -13,16 +27,6 @@ ad_page_contract {
     page_num
 }
 
-if {![info exists folder_id] || $folder_id eq ""} {
-    ad_return_complaint 1 [_ file-storage.lt_bad_folder_id_folder_]
-    ad_script_abort
-}
-if {![info exists allow_bulk_actions] || $allow_bulk_actions eq ""} {
-    set allow_bulk_actions "0"
-}
-if { ![info exists category_id] || $category_id eq "" } {
-    set category_id ""
-}
 set viewing_user_id [ad_conn user_id]
 
 permission::require_permission -party_id $viewing_user_id -object_id $folder_id -privilege "read"
@@ -38,32 +42,22 @@ if {!$delete_p} {
     set delete_p [permission::permission_p -party_id $viewing_user_id -object_id $folder_id -privilege "delete"]
 }
 
-if {![info exists n_past_days] || $n_past_days eq ""} {
-    set n_past_days 99999
-}
-
-if {![info exists fs_url] || $fs_url eq ""} {
-    set fs_url [ad_conn package_url]
-}
-
 set folder_name [lang::util::localize [fs::get_object_name -object_id  $folder_id]]
 
 set content_size_total 0
-
-if {![info exists format] || $format eq ""} {
-    set format table
-}
 
 #AG: We're an include file, and we may be included from outside file-storage.
 #So we need to query for the package_id rather than getting it from ad_conn.
 set package_and_root [fs::get_folder_package_and_root $folder_id]
 set package_id [lindex $package_and_root 0]
-if {(![info exists root_folder_id] || $root_folder_id eq "")} {
+if { $root_folder_id eq "" } {
     set root_folder_id [lindex $package_and_root 1]
 }
 
 if { $root_folder_id ne $folder_id } {
-    set folder_path "[db_exec_plsql get_folder_path {}]/"
+    set folder_path [content::item::get_path \
+                         -item_id $folder_id \
+                         -root_folder_id $root_folder_id]/
 } else {
     set folder_path ""
 }
@@ -92,6 +86,12 @@ if {$write_p} {
 }
 
 set expose_rss_p [parameter::get -parameter ExposeRssP -package_id $package_id -default 0]
+
+# Disable RSS exposure if the RSS generation is disabled
+if {![parameter::get_global_value -package_key rss-support -parameter RssGenActiveP -default 1]} {
+    set expose_rss_p 0
+}
+
 set like_filesystem_p [parameter::get -parameter BehaveLikeFilesystemP -package_id $package_id -default 1]
 
 set target_window_name [parameter::get -parameter DownloadTargetWindowName -package_id $package_id -default ""]
@@ -101,11 +101,11 @@ if {$target_window_name eq ""} {
     set target_attr "target=\"$target_window_name\""
 }
 
-if {$delete_p} {
+if {$delete_p && $root_folder_id ne $folder_id} {
     lappend actions \
-	"#file-storage.Delete_this_folder#" \
-	[export_vars -base "${fs_url}folder-delete" {folder_id}] \
-	"#file-storage.Delete_this_folder#"
+        "#file-storage.Delete_this_folder#" \
+        [export_vars -base "${fs_url}folder-delete" {folder_id}] \
+        "#file-storage.Delete_this_folder#"
 }
 if {$admin_p} {
     if { $root_folder_id ne $folder_id } {
@@ -116,8 +116,8 @@ if {$admin_p} {
     }
     lappend actions \
         "#file-storage.lt_Modify_permissions_on_1#" \
-	[export_vars -base "${fs_url}permissions" -override {{object_id $folder_id}} {{return_url "[ad_conn url]"}}] \
-	"#file-storage.lt_Modify_permissions_on_1#"
+        [export_vars -base "${fs_url}permissions" -override {{object_id $folder_id}} {{return_url "[ad_conn url]"}}] \
+        "#file-storage.lt_Modify_permissions_on_1#"
     if { $expose_rss_p } {
         lappend actions "Configure RSS" [export_vars -base "${fs_url}admin/rss-subscrs" {folder_id}] "Configure RSS"
     }
@@ -126,69 +126,71 @@ set categories_p [parameter::get -parameter CategoriesP -package_id $package_id 
 if { $categories_p } {
     if { [permission::permission_p -party_id $viewing_user_id -object_id $package_id -privilege "admin"] } {
         lappend actions \
-	    [_ categories.cadmin] \
-	    [export_vars -base "/categories/cadmin/object-map" -url {{object_id $package_id}}] \
-	    [_ categories.cadmin]
+            [_ categories.cadmin] \
+            [export_vars -base "/categories/cadmin/object-map" -url {{object_id $package_id}}] \
+            [_ categories.cadmin]
     }
     set category_links [fs::category_links -object_id $folder_id -folder_id $folder_id -selected_category_id $category_id -fs_url $fs_url]
 }
 
 #set n_past_filter_values [list [list "Yesterday" 1] [list [_ file-storage.last_week] 7] [list [_ file-storage.last_month] 30]]
-set elements [list \
-                  type \
-                  [list label [_ file-storage.Type] \
-                             display_template {<img src="@contents.icon@"  style="border: 0;" alt="@contents.alt_icon@" width="16" height="16">@contents.pretty_type@} \
-                             orderby_desc {sort_key_desc,fs_objects.pretty_type desc} \
-                             orderby_asc {fs_objects.sort_key, fs_objects.pretty_type asc}] \
-                  name \
-                  [list label [_ file-storage.Name] \
-                       display_template {<a @target_attr@ href="@contents.file_url@" title="\#file-storage.view_contents\#"><if @contents.title@ nil>@contents.name@</a></if><else>@contents.title@</a><br><if @contents.name@ ne @contents.title@>@contents.name@</if></else>} \
-                       orderby_desc {fs_objects.name desc} \
-                       orderby_asc {fs_objects.name asc}] \
-                  short_name \
-                  [list label [_ file-storage.Name] \
-                       hide_p 1 \
-                       display_template {<a href="@contents.download_url@" title="\#file-storage.Download\#">@contents.title@</a>} \
-                       orderby_desc {fs_objects.name desc} \
-                       orderby_asc {fs_objects.name asc}] \
-                  content_size_pretty \
-                  [list label [_ file-storage.Size] \
-                       display_template {@contents.content_size_pretty;noquote@} \
-                       orderby_desc {content_size desc} \
-                       orderby_asc {content_size asc}] \
-                  last_modified_pretty \
-                  [list label [_ file-storage.Last_Modified] \
-                       orderby_desc {last_modified_ansi desc} \
-                       orderby_asc {last_modified_ansi asc}] \
-                  properties_link \
-                  [list label "" \
-                       link_url_col properties_url \
-                       link_html { title "[_ file-storage.properties]" }] \
-                  new_version_link \
-                  [list label "" \
-                       link_url_col new_version_url \
-                       link_html { title "[_ file-storage.Upload_a_new_version]" }] \
-                  download_link \
-                  [list label "" \
-                       link_url_col download_url \
-                       link_html { title "[_ file-storage.Download]" }] \
-                 ]
-
+set elements {
+    type {
+        label #file-storage.Type#
+        display_template {<img src="@contents.icon@"  style="border: 0;" alt="@contents.alt_icon@" width="16" height="16">@contents.pretty_type@}
+    }
+    name {
+        label #file-storage.Name#
+        display_template {
+            <a @target_attr@ href="@contents.file_url@" title="#file-storage.view_contents#">
+            <if @contents.title@ nil>
+               @contents.name@</a>
+            </if>
+            <else>
+               @contents.title@</a><br>
+               <if @contents.name@ ne @contents.title@>
+                  @contents.name@
+               </if>
+            </else>
+        }
+    }
+    content_size_pretty {
+        label #file-storage.Size#
+        display_template {@contents.content_size_pretty;noquote@}
+    }
+    last_modified_pretty {
+        label #file-storage.Last_Modified#
+    }
+    properties_link {
+        label ""
+        link_url_col properties_url
+        link_html { title "#file-storage.properties#" }
+    }
+    new_version_link {
+        label ""
+        link_url_col new_version_url
+        link_html { title "#file-storage.Upload_a_new_version#" }
+    }
+    download_link {
+        label ""
+        link_url_col download_url
+        link_html { title "#file-storage.Download#" }
+    }
+}
 
 if { $categories_p } {
-    lappend elements categories [list label [_ file-storage.Categories] display_col "categories;noquote"]
+    lappend elements \
+        categories [list label [_ file-storage.Categories] display_col "categories;noquote"]
 }
-lappend elements views [list label "Views" ]
-
-
 
 if {[apm_package_installed_p views]} {
-    concat $elements [list views [list label "Views"]]
+    lappend elements views [list label "Views"]
 }
 
-if {![info exists return_url] || $return_url eq ""} {
+if { $return_url eq "" } {
     set return_url [export_vars -base "index" {folder_id}]
 }
+
 set vars_to_export [list return_url]
 
 
@@ -196,13 +198,14 @@ set bulk_actions {}
 if {$allow_bulk_actions} {
     set user_id [ad_conn user_id]
     set bulk_delete_p [db_string some_deletables {
-        select exists (select 1 from fs_objects
-                       where parent_id = :folder_id
-                       and acs_permission__permission_p(object_id, :viewing_user_id, 'delete'))
+        select case when exists (select 1 from fs_objects
+                                 where parent_id = :folder_id
+                                 and acs_permission.permission_p(object_id, :viewing_user_id, 'delete')) then 1 else 0 end
+        from dual
     }]
     set bulk_copy_p [permission::permission_p -object_id $folder_id -privilege write]
 
-    
+
     # add button only when available folders for move exist.  We
     # lazily check for deletion, as a proper check of a suitable
     # destination for moving would be too much effort
@@ -218,7 +221,7 @@ if {$allow_bulk_actions} {
             [_ file-storage.Copy] ${fs_url}copy [_ file-storage.lt_Copy_Checked_Items_to]
     }
 
-    if {$bulk_delete_p} {        
+    if {$bulk_delete_p} {
         lappend bulk_actions \
             [_ file-storage.Delete] ${fs_url}delete [_ file-storage.Delete_Checked_Items]
     }
@@ -233,10 +236,13 @@ if {$allow_bulk_actions} {
 }
 
 
-if {$format eq "list"} { 
+if {$format eq "list"} {
     set actions {}
-} 
+}
 
+# template::list creates a lot of variables in the global templating
+# namespace and therefore needs to be named uniquely in order to
+# include multiple instances of this script in the same page.
 template::list::create \
     -name contents_${folder_id} \
     -multirow contents \
@@ -254,7 +260,7 @@ template::list::create \
             label List
             layout list
             template {
-                <listelement name="short_name"> - <listelement name="last_modified_pretty">  
+                <listelement name="short_name"> - <listelement name="last_modified_pretty">
             }
         }
     } \
@@ -263,41 +269,81 @@ template::list::create \
         folder_id {hide_p 1}
         page_num
     } \
-    -elements $elements
+    -elements $elements \
+    -orderby {
+        default_value "name,asc"
+        type {
+            orderby_desc {fs_objects.sort_key desc, fs_objects.pretty_type desc}
+            orderby_asc {fs_objects.sort_key asc, fs_objects.pretty_type asc}
+        }
+        name {
+            orderby_desc {fs_objects.sort_key desc, fs_objects.name desc}
+            orderby_asc {fs_objects.sort_key asc, fs_objects.name asc}
+        }
+        content_size_pretty {
+            orderby_desc {content_size desc}
+            orderby_asc {content_size asc}
+        }
+        last_modified_pretty {
+            orderby_desc {last_modified_ansi desc}
+            orderby_asc {last_modified_ansi asc}
+        }
+    }
 
-set orderby [template::list::orderby_clause -orderby -name contents_${folder_id}]
+set orderby [template::list::orderby_clause -name contents_${folder_id} -orderby]
 
-if {$orderby eq ""} {
-    set orderby " order by fs_objects.sort_key, fs_objects.name asc"
-}
+set categories_limitation [expr {$categories_p && $category_id ne "" ?
+                                 [db_map categories_limitation] : ""}]
 
-if { $categories_p && ([info exists category_id] && $category_id ne "") } {
-    set categories_limitation [db_map categories_limitation]
-} else {
-    set categories_limitation {}
-}
+db_multirow -extend {
+    label
+    alt_icon
+    icon
+    last_modified_pretty
+    content_size_pretty
+    properties_link
+    properties_url
+    download_link
+    download_url
+    new_version_link
+    new_version_url
+    views
+    categories
+} contents select_folder_contents [subst {
+            select fs_objects.object_id,
+                   fs_objects.mime_type,
+                   fs_objects.name,
+                   fs_objects.live_revision,
+                   fs_objects.type,
+                   fs_objects.pretty_type,
+                   to_char(fs_objects.last_modified, 'YYYY-MM-DD HH24:MI:SS') as last_modified_ansi,
+                   fs_objects.content_size,
+                   fs_objects.url,
+                   fs_objects.sort_key,
+                   -fs_objects.sort_key as sort_key_desc,
+                   fs_objects.file_upload_name,
+                   fs_objects.title,
+                   case
+                     when :folder_path is null
+                     then fs_objects.file_upload_name
+                     else :folder_path || fs_objects.file_upload_name
+                   end as file_url,
+                   fs_objects.last_modified >= (current_timestamp - cast('$n_past_days days' as interval)) as new_p
+            from fs_objects
+            where fs_objects.parent_id = :folder_id
+            and   acs_permission.permission_p(fs_objects.object_id, :viewing_user_id, 'read')
 
-db_multirow \
-    -extend {label alt_icon icon last_modified_pretty content_size_pretty 
-	properties_link properties_url download_link download_url 
-	new_version_link new_version_url views categories
-    } contents select_folder_contents {} {
+            $categories_limitation
+            $orderby
+}] {
     set last_modified_ansi [lc_time_system_to_conn $last_modified_ansi]
-    
     set last_modified_pretty [lc_time_fmt $last_modified_ansi "%x %X"]
+
     if {$type eq "folder"} {
-        set content_size_pretty [lc_numeric $content_size]
-        append content_size_pretty "&nbsp;[_ file-storage.items]"
+        set content_size_pretty "[lc_numeric $content_size]&nbsp;[_ file-storage.items]"
         set pretty_type "#file-storage.Folder#"
     } else {
-        if { $content_size eq "" } {
-            set content_size_pretty ""
-        } elseif {$content_size < 1024} {
-            set content_size_pretty "[lc_numeric $content_size]&nbsp;[_ file-storage.bytes]"
-        } else {
-            set content_size_pretty "[lc_numeric [expr {$content_size / 1024 }]]&nbsp;[_ file-storage.kb]"
-        }
-
+        set content_size_pretty [lc_content_size_pretty -size $content_size]
     }
 
     if { $content_size ne "" } {
@@ -306,7 +352,7 @@ db_multirow \
 
     set views ""
     if {[apm_package_installed_p views]} {
-        array set views_arr [views::get -object_id $object_id] 
+        array set views_arr [views::get -object_id $object_id]
         if {$views_arr(views_count) ne ""} {
             set views " $views_arr(views_count) / $views_arr(unique_views)"
         }
@@ -338,27 +384,33 @@ db_multirow \
             set file_url ${url}
             set download_url {}
             set download_link {}
-            
         }
         symlink {
-            # save the original object_id to set it later back (see below)
-            set original_object_id $object_id
             set properties_link [_ file-storage.properties]
             set target_object_id [content::symlink::resolve -item_id $object_id]
-            db_1row file_info {select * from fs_objects where object_id = :target_object_id}
-            # because of the side effect that SQL sets Tcl variables, set object_id back to the original value
-            set object_id $original_object_id
+            db_1row file_info {
+                select live_revision,
+                       type,
+                       content_size,
+                       name,
+                       file_upload_name,
+                       title,
+                       mime_type,
+                       last_modified,
+                       url,
+                       parent_id,
+                       key,
+                       sort_key,
+                       pretty_type
+                 from fs_objects
+                where object_id = :target_object_id
+            }
             if {$type eq "folder"} {
                 set content_size_pretty [lc_numeric $content_size]
                 append content_size_pretty "&nbsp;[_ file-storage.items]"
                 set pretty_type "#file-storage.Folder#"
             } else {
-                if {$content_size < 1024} {
-                    set content_size_pretty "[lc_numeric $content_size]&nbsp;[_ file-storage.bytes]"
-                } else {
-                    set content_size_pretty "[lc_numeric [expr {$content_size / 1024 }]]&nbsp;[_ file-storage.kb]"
-                }
-                
+                set content_size_pretty [lc_content_size_pretty -size $content_size]
             }
             set properties_url [export_vars -base ${fs_url}file {{file_id $object_id}}]
             set new_version_link [_ acs-kernel.common_New]
@@ -371,7 +423,7 @@ db_multirow \
                 set file_url $download_url
             } else {
                 set download_url [export_vars -base ${fs_url}download/[ad_urlencode_path $name] {{file_id $target_object_id}}]
-		set file_url ${fs_url}view/${file_url}
+                set file_url ${fs_url}view/${file_url}
             }
         }
         default {
@@ -386,14 +438,13 @@ db_multirow \
             set alt_icon "#file-storage.file#"
             set download_link [_ file-storage.Download]
             if {$like_filesystem_p} {
-                set download_url /file/$object_id/[ad_urlencode_path $title][file extension $name]
+                set download_url /file/$object_id/[ad_urlencode_path $title][ad_file extension $name]
                 set file_url [export_vars -base ${fs_url}download/[ad_urlencode_path $title] {{file_id $object_id}}]
             } else {
                 set download_url /file/$object_id/[ad_urlencode_path $name]
-		set file_url ${fs_url}view/${folder_path}[ad_urlencode_path $name]
+                set file_url ${fs_url}view/[ad_urlencode_folder_path $folder_path][ad_urlencode_path $name]
             }
         }
-
     }
     if { $categories_p } {
         if { $type eq "folder" } {
@@ -402,17 +453,13 @@ db_multirow \
             set cat_folder_id $folder_id
         }
         set categories [fs::category_links \
-			    -object_id $object_id \
-			    -folder_id $cat_folder_id \
-			    -selected_category_id $category_id \
-			    -fs_url $fs_url \
-			    -joinwith "<br>"]
+                -object_id $object_id \
+                -folder_id $cat_folder_id \
+                -selected_category_id $category_id \
+                -fs_url $fs_url \
+                -joinwith "<br>"]
     }
 
-}
-
-if { $expose_rss_p } {
-    db_multirow feeds select_subscrs {}
 }
 
 if {$format eq "list"} {
@@ -426,7 +473,6 @@ if { $expose_rss_p } {
 if {$content_size_total > 0} {
     set compressed_url [export_vars -base ${fs_url}download-zip -url {{object_id $folder_id}}]
 }
-ad_return_template
 
 # Local variables:
 #    mode: tcl

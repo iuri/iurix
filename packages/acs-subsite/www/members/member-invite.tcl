@@ -1,9 +1,9 @@
 ad_page_contract {
     Invite new member.
-    
+
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-06-02
-    @cvs-id $Id: member-invite.tcl,v 1.10.6.2 2015/09/10 08:21:48 gustafn Exp $
+    @cvs-id $Id: member-invite.tcl,v 1.16 2018/06/14 15:18:49 antoniop Exp $
 }
 
 subsite::assert_user_may_add_member
@@ -27,7 +27,19 @@ ad_form -name user_search -cancel_url . -form {
         {result_datatype integer}
         {label {Search for user}}
         {help_text {Type part of the name or email of the user you would like to add}}
-        {search_query {[db_map user_search]}}
+        {search_query {
+            select first_names || ' ' || last_name || ' (' || email || ')' as name, user_id
+              from cc_users u
+             where upper(coalesce(first_names || ' ', '') ||
+                   coalesce(last_name || ' ', '') ||
+                   email || ' ' ||
+                   coalesce(screen_name, '')) like upper('%'||:value||'%')
+               and not exists (select 1 from acs_rels
+                                where object_id_one = $group_id
+                                  and object_id_two = u.user_id
+                                  and rel_type = 'membership_rel')
+            order  by name            
+        }}
     }
 }
 
@@ -42,8 +54,8 @@ if { $admin_p } {
 }
 
 ad_form -extend -name user_search -on_submit {
-    set create_p [group::permission_p -privilege create $group_id]
-    
+    set create_p [permission::permission_p -object_id $group_id -privilege "create"]
+
     if { $group_info(join_policy) eq "closed" && !$create_p} {
         ad_return_forbidden "Cannot invite members" "I'm sorry, but you're not allowed to invite members to this group"
         ad_script_abort
@@ -55,12 +67,12 @@ ad_form -extend -name user_search -on_submit {
     }
 
     if { ![group::member_p -user_id $user_id -group_id $group_id] } {
-        with_catch errmsg {
+        ad_try {
             group::add_member \
                 -group_id $group_id \
                 -user_id $user_id \
                 -rel_type $rel_type
-        } {
+        } on error {errmsg} {
             form set_error user_search user_id "Error adding user to community: $errmsg"
             ns_log Error "Error adding user $user_id to community group $group_id: $errmsg\n$::errorInfo"
             break

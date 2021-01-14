@@ -5,7 +5,7 @@ ad_library {
     @author arjun (arjun@openforce.net)
     @author yon (yon@openforce.net)
     @creation-date 2002-07-10
-    @cvs-id $Id: site-node-apm-integration-procs.tcl,v 1.12.12.1 2015/09/10 08:21:59 gustafn Exp $
+    @cvs-id $Id: site-node-apm-integration-procs.tcl,v 1.14.2.1 2020/07/21 14:02:09 gustafn Exp $
 
 }
 
@@ -38,11 +38,12 @@ namespace eval site_node_apm_integration {
         {-package_id ""}
         {-package_key:required}
     } {
-        get the package_id of package_key that is mounted directly under
-        package_id. returns empty string if not found.
+        Get the package_id of package_key that is mounted directly under
+        package_id.
+        @return empty string if not found.
     } {
         if {$package_id eq ""} {
-            if {[ad_conn isconnected]} { 
+            if {[ns_conn isconnected]} { 
                 set package_id [ad_conn package_id]
             } else { 
                 error "Not in a connection and no package_id provided"

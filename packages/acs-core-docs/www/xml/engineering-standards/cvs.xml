@@ -9,7 +9,7 @@
     CVS Guidelines
   </title>
 <authorblurb>
-    <para><phrase role="cvstag">($Id: cvs.xml,v 1.6.14.6 2017/06/17 08:29:28 gustafn Exp $)</phrase></para>
+    <para><phrase role="cvstag">($Id: cvs.xml,v 1.9 2018/09/30 15:53:28 gustafn Exp $)</phrase></para>
    <para>
       By Joel Aufrecht with input from Jeff Davis, Branimir Dolicki, and Jade Rubick.
     </para>
@@ -691,7 +691,7 @@ cvs tag -b <replaceable>oacs-5-1</replaceable></programlisting>
       <listitem>
         <para>
           Consider any upgradability ramifications of your change.
-          Avoid changing the contract and behaviour of Tcl procedures. If you
+          Avoid changing the contract and behavior of Tcl procedures. If you
           want to build a new and clean API consider deprecating the old proc
           and making it invoke the new one.
         </para>
@@ -804,7 +804,7 @@ cvs tag -b <replaceable>oacs-5-1</replaceable></programlisting>
         </listitem>
         <listitem>
           <para>
-            <ulink url="http://openacs.org/forums/message-view?message_id=178551">merging 2 file heirarchies with cvs</ulink>
+            <ulink url="http://openacs.org/forums/message-view?message_id=178551">merging 2 file hierarchies with cvs</ulink>
           </para>
         </listitem>
       </itemizedlist>

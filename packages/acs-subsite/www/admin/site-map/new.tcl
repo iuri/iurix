@@ -2,7 +2,7 @@ ad_page_contract {
 
     @author Rafael Schloming (rhs@mit.edu)
     @creation-date 2000-09-09
-    @cvs-id $Id: new.tcl,v 1.7.2.2 2015/09/18 07:27:48 gustafn Exp $
+    @cvs-id $Id: new.tcl,v 1.12.2.1 2020/07/03 07:43:20 gustafn Exp $
 
 } {
     parent_id:naturalnum,notnull
@@ -22,7 +22,7 @@ ad_page_contract {
         }
     }
     node_type_ck -requires node_type:notnull {
-        switch $node_type {
+        switch -- $node_type {
             folder {
                 set directory_p t
                 set pattern_p t
@@ -37,7 +37,7 @@ ad_page_contract {
         }
     }
 } -errors {
-    name_root_ck {Folder or file names cannot contain '/'}
+    name_root_ck {Folder or filenames cannot contain '/'}
     name_duplicate_ck {The URL mapping you are creating is already in use.  Please delete the other one or change your URL.}
     node_type_ck {The node type you specified is invalid}
 }
@@ -59,13 +59,15 @@ db_transaction {
         <blockquote><pre>
                 [ns_quotehtml $errmsg]
         </pre></blockquote>"
+    ad_script_abort
 }
 
-if {[lsearch $expand $parent_id] == -1} {
+if {$parent_id ni $expand} {
     lappend expand $parent_id
 }
 
 ad_returnredirect [export_vars -base . {expand:multiple root_id}]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

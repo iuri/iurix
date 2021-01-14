@@ -2,7 +2,7 @@ ad_page_contract {
     Let's the user change his/her password.  Asks
     for old password, new password, and confirmation.
     
-    @cvs-id $Id: password-update.tcl,v 1.23.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: password-update.tcl,v 1.27.2.1 2019/03/01 15:05:19 antoniop Exp $
 } {
     {user_id:naturalnum,notnull {[ad_conn untrusted_user_id]}}
     {return_url:localurl ""}
@@ -22,10 +22,10 @@ if { $old_password ne "" } {
     # If old_password is set, this is a user who has had his password recovered,
     # so they won't be authenticated yet.
 } else {
-    set level [ad_decode [security::RestrictLoginToSSLP] 1 "secure" "ok"]
+    set level [expr {[security::RestrictLoginToSSLP] ? "secure" : "ok"}]
 
     # If the user is changing passwords for another user, they need to be account ok
-    set account_status [ad_decode $user_id [ad_conn untrusted_user_id] "closed" "ok"]
+    set account_status [expr {$user_id == [ad_conn untrusted_user_id] ? "closed" : "ok"}]
 
     auth::require_login \
         -level $level \
@@ -34,7 +34,10 @@ if { $old_password ne "" } {
 
 
 if { ![auth::password::can_change_p -user_id $user_id] } {
-    ad_return_error "Not supported" "Changing password is not supported."
+    ad_return_error \
+        "Not supported" \
+        "Changing password is not supported."
+    ad_script_abort
 }
 
 set admin_p [permission::permission_p -object_id $user_id -privilege admin]
@@ -60,7 +63,7 @@ ad_form -name update -edit_buttons [list [list [_ acs-kernel.common_update] "ok"
         {message:text(hidden),optional}
     }
 
-if { ([info exists old_password] && $old_password ne "") } {
+if { $old_password ne "" } {
     set focus "update.password_1"
 } else {
     ad_form -extend -name update -form {
@@ -89,7 +92,7 @@ ad_form -extend -name update -form {
     }
 } -on_submit {
     
-    if { ([info exists old_password] && $old_password ne "") } {
+    if { $old_password ne "" } {
         set password_old $old_password
     }
     
@@ -98,16 +101,19 @@ ad_form -extend -name update -form {
                           -old_password $password_old \
                           -new_password $password_1]
     
-    switch $result(password_status) {
+    switch -- $result(password_status) {
         ok {
             # Continue
         }
         old_password_bad {
-            if { (![info exists old_password] || $old_password eq "") } {
+            if { $old_password eq "" } {
                 form set_error update password_old $result(password_message)
             } else {
                 # This hack causes the form to reload as if submitted, but with the old password showing
-                ad_returnredirect [export_vars -base [ad_conn url] -entire_form -exclude { old_password } -override { { password_old $old_password } }]
+                ad_returnredirect [export_vars \
+                                       -base [ad_conn url] \
+                                       -entire_form -exclude { old_password } \
+                                       -override { { password_old $old_password } }]
                 ad_script_abort
             }
             break
@@ -119,7 +125,7 @@ ad_form -extend -name update -form {
     }
     
     # If old_password was supplied, handle authentication and log the user in
-    if { ([info exists old_password] && $old_password ne "") } {
+    if { $old_password ne "" } {
         
         # We use full-scale auth::authenticate here, in order to be sure we also get account-status checked
         # Hm. What if there's a problem with timing, so the password update doesn't take effect immediately?
@@ -130,7 +136,7 @@ ad_form -extend -name update -form {
                 -password $password_1]
         
         # Handle authentication problems
-        switch $auth_info(auth_status) {
+        switch -- $auth_info(auth_status) {
             ok {
                 # Continue below
             }
@@ -141,13 +147,13 @@ ad_form -extend -name update -form {
             }
         }
         
-        if { ([info exists auth_info(account_url)] && $auth_info(account_url) ne "") } {
+        if { [info exists auth_info(account_url)] && $auth_info(account_url) ne "" } {
             ad_returnredirect $auth_info(account_url)
             ad_script_abort
         }
 
         # Handle account status
-        switch $auth_info(account_status) {
+        switch -- $auth_info(account_status) {
             ok {
                 # Continue below
             }

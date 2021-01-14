@@ -5,11 +5,10 @@ ad_page_contract {
     @author Michael Bryzek (mbryzek@arsdigita.com)
 
     @creation-date August 15, 2000
-    @cvs-id $Id: index.tcl,v 1.19.6.4 2018/09/14 11:56:34 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.22 2018/09/15 09:46:20 gustafn Exp $
 } {
 } -properties {
     context:onevalue
-    subsite_name:onevalue
     acs_admin_url:onevalue
     instance_name:onevalue
     acs_automated_testing_url:onevalue
@@ -36,7 +35,6 @@ set suppress_port [parameter::get -parameter SuppressHttpPort \
                        -default 0]
 set main_site_location [util::configured_location -suppress_port=$suppress_port]
 set full_acs_admin_url $main_site_location$acs_admin_url
-
 
 set convert_subsite_p [expr { [llength [apm::get_package_descendent_options [ad_conn package_key]]] > 0 }]
 

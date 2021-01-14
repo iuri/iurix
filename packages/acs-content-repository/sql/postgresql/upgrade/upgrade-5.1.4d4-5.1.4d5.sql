@@ -3,8 +3,7 @@
 -- 
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2005-01-05
--- @arch-tag: 5be8fd4b-0259-4ded-905a-37cb95b7fa9f
--- @cvs-id $Id: upgrade-5.1.4d4-5.1.4d5.sql,v 1.3 2005/02/24 13:32:58 jeffd Exp $
+-- @cvs-id $Id: upgrade-5.1.4d4-5.1.4d5.sql,v 1.5 2018/08/15 16:48:01 gustafn Exp $
 --
 
 -- procedure delete
@@ -60,7 +59,7 @@ begin
 
   select parent_id into v_parent_id from cr_items 
     where item_id = delete__folder_id;
-  raise notice ''deleteing folder %'',delete__folder_id;
+  raise notice ''deleting folder %'',delete__folder_id;
   PERFORM content_item__delete(delete__folder_id);
 
   -- check if any folders are left in the parent

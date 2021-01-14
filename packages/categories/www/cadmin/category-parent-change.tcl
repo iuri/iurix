@@ -1,13 +1,13 @@
 ad_page_contract {
-    
+
     Changes the parent category of a category.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: category-parent-change.tcl,v 1.8.2.3 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
     category_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -23,8 +23,8 @@ permission::require_permission -object_id $tree_id -privilege category_tree_writ
 set category_name [category::get_name $category_id $locale]
 set page_title "Change parent category of \"$category_name\""
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar "Change parent"
 
 

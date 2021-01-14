@@ -8,8 +8,8 @@ ad_page_contract {
     This page is based on "search.tcl", so in theory it should
     reusable but that has not been tested.  See "search.tcl" for
     details.
-    
-    @cvs-id $Id: complex-search.tcl,v 1.15.2.4 2017/04/23 19:54:00 gustafn Exp $
+
+    @cvs-id $Id: complex-search.tcl,v 1.21 2018/07/27 08:54:02 antoniop Exp $
 
     @param email search string (optional)
     @param last_name_starts_with search string (optional)
@@ -34,7 +34,7 @@ ad_page_contract {
     {last_name_starts_with ""}
     {first_names ""}
     keyword:optional
-    target
+    {target ""}
     {passthrough ""}
     {limit_to_users_in_group_id:integer ""}
     {only_authorized_p:boolean 1}
@@ -66,7 +66,7 @@ set exception_text ""
 
 set context [list [list "index" "Users"] "Complex search"]
 
-if { ![info exists target] || $target eq "" } {
+if { $target eq "" } {
     incr exception_count
     append exception_text "<li>Target was not specified. This shouldn't have
 happened, please contact the
@@ -103,11 +103,8 @@ set rowcount 0
 
 if {$limit_to_users_in_group_id ne "" 
     && ![regexp {[^-0-9]} $limit_to_users_in_group_id] } {
-    set group_name [db_string user_group_name_from_id {
-        select group_name
-        from groups
-        where group_id = :limit_to_users_in_group_id
-    }]
+    
+    set group_name [db_string user_group_name_from_id {}]
     incr rowcount
     set criteria:[set rowcount](data) \
         "Is a member of '$group_name'"
@@ -126,7 +123,7 @@ if { $email ne "" } {
     set criteria:[set rowcount](data) "Email contains '$email'"
 }
 
-if { ([info exists ip] && $ip ne "") } {
+if { $ip ne "" } {
     lappend where_clause "creation_ip = :ip"
     incr rowcount
     set criteria:[set rowcount](data) "Creation IP is $ip"
@@ -249,9 +246,6 @@ db_foreach user_search_admin $query {
 set user_search:rowcount $rowcount
 
 set export_authorize [export_ns_set_vars {url} {only_authorized_p}]
-
-
-ad_return_template
 
 # Local variables:
 #    mode: tcl

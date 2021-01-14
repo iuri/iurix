@@ -5,7 +5,7 @@
 -- @author jowell@jsabino.com
 -- @creation-date 2001-06-26
 --
--- $Id: acs-events-test.sql,v 1.5 2013/03/30 13:00:30 gustafn Exp $
+-- $Id: acs-events-test.sql,v 1.6 2018/03/25 20:56:30 hectorr Exp $
 
 -- Note: These tests use the semi-ported utPLSQL regression package
 \i utest-create.sql
@@ -16,7 +16,7 @@ BEGIN
 	raise notice 'Setting up acs-events-test...';
 
 	-- create copies of the tables
-	-- No need for excute here?
+	-- No need for execute here?
 	create table ut_acs_events as
 		  select * from acs_events;
 	create table ut_acs_event_party_map as

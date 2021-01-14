@@ -1,5 +1,5 @@
 ad_page_contract {
-    @cvs-id $Id: bind.tcl,v 1.3.2.2 2016/06/01 09:40:19 gustafn Exp $
+    @cvs-id $Id: bind.tcl,v 1.4 2017/08/07 23:48:02 gustafn Exp $
 } {
     user_id:naturalnum,notnull
 } -properties {

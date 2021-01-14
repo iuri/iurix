@@ -5,7 +5,7 @@
 -- @author smeeks@arsdigita.com
 -- @creation-date 2000-11-16
 --
--- $Id: timespan-create.sql,v 1.6.4.1 2017/04/21 15:50:24 gustafn Exp $
+-- $Id: timespan-create.sql,v 1.9 2018/04/18 09:09:12 hectorr Exp $
 
 create sequence timespan_sequence start  1;
 -- create view timespan_seq as select nextval('timespan_sequence') as nextval from dual;
@@ -153,7 +153,7 @@ BEGIN
 
         -- JS: I hate deeply nested if-else-ifs!!! 
 
-        -- Null for start_date or end_date means dont change.
+        -- Null for start_date or end_date means don't change.
         if edit__start_date is not null and edit__end_date is not null then
             update time_intervals
             set    start_date  = edit__start_date,
@@ -556,7 +556,7 @@ $$ LANGUAGE plpgsql;
 --
     --
     -- Creates a new copy of a time interval.
-    -- JS: Overloaded versaion of above, no offset
+    -- JS: Overloaded version of above, no offset
     --
     -- @param interval_id   Interval to copy
     --

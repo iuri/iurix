@@ -5,7 +5,7 @@ ad_library {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date April 2002
-    @cvs-id $Id: site-node-object-map-procs.tcl,v 1.4.12.1 2015/09/10 08:21:59 gustafn Exp $
+    @cvs-id $Id: site-node-object-map-procs.tcl,v 1.5.2.1 2020/01/03 11:18:37 antoniop Exp $
 }
 
 namespace eval site_node_object_map {}
@@ -16,7 +16,16 @@ ad_proc -public site_node_object_map::new {
 } {
     map object object_id to site_node node_id in table site_node_object_mappings
 } {
-    db_exec_plsql set_node_mapping {}
+    db_transaction {
+        site_node_object_map::del -object_id $object_id
+        db_dml set_node_mapping {
+            insert
+            into site_node_object_mappings
+            (object_id, node_id)
+            values
+            (:object_id, :node_id)
+        }
+    }
 }
 
 ad_proc -public site_node_object_map::del {
@@ -24,7 +33,11 @@ ad_proc -public site_node_object_map::del {
 } {
     unmap object object_id from site_node node_id in table site_node_object_mappings
 } {
-    db_exec_plsql unset_node_mapping {}
+    db_dml unset_node_mapping {
+        delete
+        from site_node_object_mappings
+        where object_id = :object_id
+    }
 }
 
 ad_proc -public site_node_object_map::get_node_id {

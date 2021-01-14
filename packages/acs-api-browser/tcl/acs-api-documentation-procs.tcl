@@ -5,7 +5,7 @@ ad_library {
     @author Jon Salz (jsalz@mit.edu)
     @author Lars Pind (lars@arsdigita.com)
     @creation-date 21 Jun 2000
-    @cvs-id $Id: acs-api-documentation-procs.tcl,v 1.30.2.29 2017/06/30 17:21:47 gustafn Exp $
+    @cvs-id $Id: acs-api-documentation-procs.tcl,v 1.72.2.24 2020/10/28 15:39:18 hectorr Exp $
 
 }
 
@@ -15,7 +15,7 @@ namespace eval ::apidoc {
         #
         # NaviServer at sourceforge
         #
-        set ns_api_host  "http://naviserver.sourceforge.net/"
+        set ns_api_host  "https://naviserver.sourceforge.io/"
         set ns_api_index [list "n/naviserver/files/" "n/"]
         set ns_api_root  [list \
                               ${ns_api_host}[lindex $ns_api_index 0] \
@@ -33,7 +33,7 @@ namespace eval ::apidoc {
         set ns_api_html_index $ns_api_root
     }
 
-    set tcl_api_html_index "http://www.tcl.tk/man/tcl$::tcl_version/TclCmd/contents.htm"
+    set tcl_api_html_index "https://www.tcl-lang.org/man/tcl$::tcl_version/TclCmd/contents.htm"
 
     # set style {
     #     .code .comment  {color: #006600; font-weight: normal; font-style: italic;}
@@ -54,27 +54,28 @@ namespace eval ::apidoc {
         .code .object   {color: #000066; font-weight: bold;   font-style: normal;}
         .code .helper   {color: #aaaacc; font-weight: bold;   font-style: normal;}
         pre.code        {
-            background: #fefefa; 
-            border-color: #aaaaaa; 
+            background: #fefefa;
+            border-color: #aaaaaa;
             border-style: solid;
-            border-width: 1px; 
+            border-width: 1px;
             /*width: 900px; overflow: auto;*/
         }
         pre.code a      {text-decoration: none;}
+        pre.code code   { white-space:pre-wrap; }
     }
 
     set KEYWORDS {
 
-        after append apply array bgerror binary break catch cd chan
-        clock close concat continue default dict encoding eof error
-        eval exec expr fblocked fconfigure fcopy file fileevent flush
+        after append apply array bgerror binary break case catch cd chan
+        clock close concat continue coroutine default dict encoding eof error
+        eval exec exit expr fblocked fconfigure fcopy file fileevent flush
         for foreach format gets glob global if incr info interp join
-        lappend lassign lindex linsert list llength load lrange
-        lreplace lreverse lsearch lset lsort namespace open package
+        lappend lassign lindex linsert list llength lmap load lrange
+        lrepeat lreplace lreverse lsearch lset lsort namespace open package
         pid proc puts pwd read refchan regexp regsub rename return
-        scan seek set socket source split string subst switch tell
-        time trace unload unset update uplevel upvar variable vwait
-        while
+        scan seek set socket source split string subst switch tailcall tell
+        throw time tm trace transchan try unknown unload unset update uplevel
+        upvar variable vwait while yield yieldto zlib
 
     }
 
@@ -100,7 +101,7 @@ ad_proc -public api_read_script_documentation {
     set has_contract_p 0
 
     if { ![file exists "$::acs::rootdir/$path"] } {
-        return -code error "File $path does not exist"
+        error "File $path does not exist"
     }
 
     set file [open "$::acs::rootdir/$path" "r"]
@@ -117,28 +118,33 @@ ad_proc -public api_read_script_documentation {
 
     if { !$has_contract_p } {
         return [list]
-    } 
+    }
 
     doc_set_page_documentation_mode 1
     #ns_log notice "Sourcing $::acs::rootdir/$path in documentation mode"
-    set errno [catch { source "$::acs::rootdir/$path" } error]
-    doc_set_page_documentation_mode 0
-    
-    #
-    # In documentation mode, we expect ad_page_contract (and counterparts)
-    # to break out of sourcing with an error to avoid side-effects of sourcing
-    #
-    if { $errno == 1} {
+    ad_try {
+        #
+        # Sourcing in documentation mode fills "doc_elements"
+        #
+        source "$::acs::rootdir/$path"
+    } on error {errorMsg} {
+        #
+        # This is a strange construct: in case, the ::$errorInfo
+        # starts with ad_page_contract, we get the documentation
+        # elements from the $errorMsg
+        #
         if {[regexp {^ad_page_contract documentation} $::errorInfo] } {
-            array set doc_elements $error
+            array set doc_elements $errorMsg
+        } else {
+            ns_log notice "api_read_script_documentation: got unexpected result while sourcing $::acs::rootdir/$path $errorMsg"
+            return -code error $errorMsg
         }
-        if { [array exists doc_elements] } {
-            return [array get doc_elements]
-        }
-        return [list]
+    } finally {
+        doc_set_page_documentation_mode 0
     }
 
-    return -code $errno -errorcode $::errorCode -errorinfo $::errorInfo $error
+    return [array get doc_elements]
+
 }
 
 ad_proc -public api_script_documentation {
@@ -175,8 +181,10 @@ ad_proc -public api_script_documentation {
         return $out
     }
 
-    if { [catch { array set doc_elements [api_read_script_documentation $path] } error] } {
-        append out "<blockquote><p><i>Unable to read $path: [ns_quotehtml $error]</i></blockquote>\n"
+    ad_try {
+        array set doc_elements [api_read_script_documentation $path]
+    } on error {errorMsg} {
+        append out "<blockquote><p><i>Unable to read $path: [ns_quotehtml $errorMsg]</i></blockquote>\n"
         return $out
     }
 
@@ -189,7 +197,7 @@ ad_proc -public api_script_documentation {
             }
         }
     }
-    
+
     append out "<blockquote>"
     if { [info exists doc_elements(main)] } {
         append out <p>[lindex $doc_elements(main) 0]
@@ -210,8 +218,8 @@ ad_proc -public api_script_documentation {
     #         set notes [list]
     #         if { [info exists as_default_value($arg_name)] } {
     #             lappend notes "defaults to <code>\"$as_default_value($arg_name)\"</code>"
-    #         } 
-    #          set notes [concat $notes $as_flags($arg_name)]
+    #         }
+    #          lappend notes {*}$as_flags($arg_name)
     #         foreach filter $as_filters($arg_name) {
     #             set filter_proc [ad_page_contract_filter_proc $filter]
     #             lappend notes "<a href=\"[api_proc_url $filter_proc]\">$filter</a>"
@@ -255,7 +263,7 @@ ad_proc -public api_library_documentation {
     }
 
     set out "<h3>[ns_quotehtml [file tail $path]]</h3>"
-    
+
     if { [nsv_exists api_library_doc $path] } {
         array set doc_elements [nsv_get api_library_doc $path]
         append out "<blockquote><p>\n"
@@ -267,7 +275,7 @@ ad_proc -public api_library_documentation {
             append out "<dt><b>Created:</b>\n<dd>[lindex $doc_elements(creation-date) 0]\n"
         }
         if { [info exists doc_elements(author)] } {
-            append out "<dt><b>Author[ad_decode [llength $doc_elements(author)] 1 "" "s"]:</b>\n"
+            append out "<dt><b>Author[expr {[llength $doc_elements(author)] > 1 ? "s" : ""}]:</b>\n"
             foreach author $doc_elements(author) {
                 append out "<dd>[::apidoc::format_author $author]\n"
             }
@@ -285,10 +293,18 @@ ad_proc -public api_library_documentation {
     return $out
 }
 
-ad_proc -public api_type_documentation {
+ad_proc -deprecated -public api_type_documentation {
     type
 } {
-    @return html fragment of the api docs.
+    Deprecated: this was part of a feature which used to react to the
+    'type' property set in ad_page_contract's documentation and
+    generate an extra link in /api-doc/package-view, but currently no
+    upstream script seems to specify this value and no code seems to
+    create necessary 'doc_type_doc' nsv
+
+    @see /packages/acs-api-browser/www/type-view.tcl
+
+    @return HTML fragment of the API docs.
 } {
     array set doc_elements [nsv_get doc_type_doc $type]
     append out "<h3>$type</h3>\n"
@@ -345,7 +361,7 @@ ad_proc -public api_type_documentation {
 }
 
 ad_proc -public api_proc_documentation {
-    {-format text/html}
+    -format
     -script:boolean
     -source:boolean
     -xql:boolean
@@ -357,26 +373,43 @@ ad_proc -public api_proc_documentation {
 
     Generates formatted documentation for a procedure.
 
-    @param format the type of documentation to generate. Currently, only
-    <code>text/html</code> and <code>text/plain</code> are supported.
-    @param script include information about what script this proc lives in?
-    @param xql include the source code for the related xql files?
-    @param source include the source code for the script?
+    @param format    the type of documentation to generate. This
+                     parameter is deprecated and has no effect.
+    @param script    include information about what script this proc lives in?
+    @param xql       include the source code for the related xql files?
+    @param source    include the source code for the script?
     @param proc_name the name of the procedure for which to generate documentation.
-    @param label the label printed for the proc in the header line
+    @param label     the label printed for the proc in the header line
     @param first_line_tag tag for the markup of the first line
-    @return the formatted documentation string.
-    @error if the procedure is not defined.       
+    @return          the formatted documentation string.
+    @error           if the procedure is not defined.
 } {
-    if { $format ne "text/html" && $format ne "text/plain" } {
-        return -code error "Only text/html and text/plain documentation are currently supported"
+    #
+    # Sanitize input
+    #
+    if {[string match *::::* $proc_name]} {
+        ad_log warning "api_proc_documentation: received invalid proc_name <$proc_name>, try to sanitize"
+        regsub -all {::::} $proc_name :: proc_name
+    }
+    if {[info exists format]} {
+        ad_log warning "-format flag is deprecated and has no effect"
+    }
+    array set doc_elements {
+        flags ""
+        default_values ""
+        switches ""
+        positionals ""
+        varargs_p 0
+        script ""
+        deprecated_p 0
+        main ""
     }
     array set doc_elements [nsv_get api_proc_doc $proc_name]
     array set flags $doc_elements(flags)
     array set default_values $doc_elements(default_values)
 
     if {![info exists label]} {
-        if {[llength $proc_name] > 1 && [info commands ::xo::api] ne ""} {
+        if {[llength $proc_name] > 1 && [namespace which ::xo::api] ne ""} {
             set label [::xo::api method_label $proc_name]
         } else {
             set label $proc_name
@@ -403,9 +436,9 @@ ad_proc -public api_proc_documentation {
         set end_tag "</h3>"
     }
     append out $first_line_tag$pretty_name$end_tag
-    
+
     if {[regexp {^(.*) (inst)?proc (.*)$} $proc_name match cl prefix method]
-        && [info commands ::xo::api] ne ""
+        && [namespace which ::xo::api] ne ""
     } {
         set xotclArgs 1
         set scope ""
@@ -417,7 +450,7 @@ ad_proc -public api_proc_documentation {
         }
     } else {
         set xotclArgs 0
-        if {[info commands ::xo::api] ne "" && [::xo::api isclass "" [lindex $proc_name 1]]} {
+        if {[namespace which ::xo::api] ne "" && [::xo::api isclass "" [lindex $proc_name 1]]} {
             set name [lindex $proc_name 1]
             set pretty_proc_name "[$name info class] [::xo::api object_link {} $name]"
         } else {
@@ -450,7 +483,7 @@ ad_proc -public api_proc_documentation {
             }
         }
     }
-    
+
     set counter 0
     foreach positional $doc_elements(positionals) {
         if { [info exists default_values($positional)] } {
@@ -466,11 +499,11 @@ ad_proc -public api_proc_documentation {
 
     set intro_out ""
     if { $script_p } {
-        append intro_out [subst {<p>Defined in 
+        append intro_out [subst {<p>Defined in
             <a href="/api-doc/procs-file-view?path=[ns_urlencode $doc_elements(script)]">$doc_elements(script)</a>
             <p>}]
     }
-    
+
     if { $doc_elements(deprecated_p) } {
         append intro_out "<b><i>Deprecated."
         if { $doc_elements(warn_p) } {
@@ -484,107 +517,116 @@ ad_proc -public api_proc_documentation {
         append intro_out "<p>[lindex $doc_elements(main) 0]\n<p>\n"
     }
 
-    #
-    # Make first a quick check, and if it fails, double check details
-    #
-    set haveBlocks [expr {[llength $doc_elements(switches)] > 0
-                          || [llength $doc_elements(positionals)] > 0}]
-    if {$haveBlocks == 0} {
-        foreach e {param option return error author creation-date change-log cvs-id see} {
-            if {[info exists doc_elements($e)] && $doc_elements($e) ne ""} {
-                set haveBlocks 1
-                break
+    set blocks_out "<dl>\n"
+
+    if { [info exists doc_elements(param)] } {
+        foreach param $doc_elements(param) {
+            if { [regexp {^([^ \t\n]+)[ \t\n]+(.*)$} $param "" name value] } {
+                set params($name) $value
             }
         }
     }
-  
-    if {$haveBlocks} {
-        set blocks_out "<dl>\n"
 
-        if { [info exists doc_elements(param)] } {
-            foreach param $doc_elements(param) {
-                if { [regexp {^([^ \t\n]+)[ \t\n]+(.*)$} $param "" name value] } {
-                    set params($name) $value
-                }
+    if { [llength $doc_elements(switches)] > 0 } {
+        append blocks_out "<dt><b>Switches:</b></dt><dd><dl>\n"
+        foreach switch $doc_elements(switches) {
+            append blocks_out "<dt><b>-$switch</b>"
+            if {"boolean" in $flags($switch)} {
+                append blocks_out " (boolean)"
+            }
+
+            if { [info exists default_values($switch)]
+                 && $default_values($switch) ne ""
+             } {
+                append blocks_out " (defaults to <code>\"[ns_quotehtml $default_values($switch)]\"</code>)"
+            }
+
+            if {"required" in $flags($switch)} {
+                append blocks_out " (required)"
+            } else {
+                append blocks_out " (optional)"
+            }
+            append blocks_out "</dt>"
+            if { [info exists params($switch)] } {
+                append blocks_out "<dd>$params($switch)</dd>"
             }
         }
-    
-        if { [llength $doc_elements(switches)] > 0 } {
-            append blocks_out "<dt><b>Switches:</b></dt><dd><dl>\n"
-            foreach switch $doc_elements(switches) {
-                append blocks_out "<dt><b>-$switch</b>"
-                if {"boolean" in $flags($switch)} {
-                    append blocks_out " (boolean)"
-                } 
-                
-                if { [info exists default_values($switch)]
-                     && $default_values($switch) ne "" 
-                 } {
-                    append blocks_out " (defaults to <code>\"[ns_quotehtml $default_values($switch)]\"</code>)"
-                } 
-                
-                if {"required" in $flags($switch)} {
-                    append blocks_out " (required)"
-                } else {
+        append blocks_out "</dl></dd>\n"
+    }
+
+    if { [llength $doc_elements(positionals)] > 0 } {
+        append blocks_out "<dt><b>Parameters:</b></dt><dd>\n"
+        foreach positional $doc_elements(positionals) {
+            append blocks_out "<b>$positional</b>"
+            if { [info exists default_values($positional)] } {
+                if { $default_values($positional) eq "" } {
                     append blocks_out " (optional)"
-                }
-                append blocks_out "</dt>"
-                if { [info exists params($switch)] } {
-                    append blocks_out "<dd>$params($switch)</dd>"
+                } else {
+                    append blocks_out " (defaults to <code>\"$default_values($positional)\"</code>)"
                 }
             }
-            append blocks_out "</dl></dd>\n"
-        }
-        
-        if { [llength $doc_elements(positionals)] > 0 } {
-            append blocks_out "<dt><b>Parameters:</b></dt><dd>\n"
-            foreach positional $doc_elements(positionals) {
-                append blocks_out "<b>$positional</b>"
-                if { [info exists default_values($positional)] } {
-                    if { $default_values($positional) eq "" } {
-                        append blocks_out " (optional)"
-                    } else {
-                        append blocks_out " (defaults to <code>\"$default_values($positional)\"</code>)"
-                    }
-                }
-                if { [info exists params($positional)] } {
-                    append blocks_out " - $params($positional)"
-                }
-                append blocks_out "<br>\n"
+            if { [info exists params($positional)] } {
+                append blocks_out " - $params($positional)"
             }
-            append blocks_out "</dd>\n"
+            append blocks_out "<br>\n"
         }
-        
-
-        # @option is used in  template:: and cms:: (and maybe should be used in some other 
-        # things like ad_form which have internal arg parsers.  although an option 
-        # and a switch are the same thing, just one is parsed in the proc itself rather than 
-        # by ad_proc.
-
-        if { [info exists doc_elements(option)] } {
-            append blocks_out "<b>Options:</b><dl>"
-            foreach param $doc_elements(option) {
-                if { [regexp {^([^ \t]+)[ \t](.+)$} $param "" name value] } {
-                    append blocks_out "<dt><b>-$name</b></dt><dd>$value<br></dd>"
-                }
-            }
-            append blocks_out "</dl>"
-        }
-        
-
-        if { [info exists doc_elements(return)] } {
-            append blocks_out "<dt><b>Returns:</b></dt><dd>[join $doc_elements(return) "<br>"]</dd>\n"
-        }
-    
-        if { [info exists doc_elements(error)] } {
-            append blocks_out "<dt><b>Error:</b></dt><dd>[join $doc_elements(error) "<br>"]</dd>\n"
-        }
-
-        append blocks_out [::apidoc::format_common_elements doc_elements]
-        append blocks_out "</dl>\n"
-    } else {
-        set blocks_out ""
+        append blocks_out "</dd>\n"
     }
+
+
+    # @option is used in  template:: and cms:: (and maybe should be used in some other
+    # things like ad_form which have internal arg parsers.  although an option
+    # and a switch are the same thing, just one is parsed in the proc itself rather than
+    # by ad_proc.
+
+    if { [info exists doc_elements(option)] } {
+        append blocks_out "<b>Options:</b><dl>"
+        foreach param $doc_elements(option) {
+            if { [regexp {^([^ \t]+)[ \t](.+)$} $param "" name value] } {
+                append blocks_out "<dt><b>-$name</b></dt><dd>$value<br></dd>"
+            }
+        }
+        append blocks_out "</dl>"
+    }
+
+
+    if { [info exists doc_elements(return)] } {
+        append blocks_out "<dt><b>Returns:</b></dt><dd>[join $doc_elements(return) "<br>"]</dd>\n"
+    }
+
+    if { [info exists doc_elements(error)] } {
+        append blocks_out "<dt><b>Error:</b></dt><dd>[join $doc_elements(error) "<br>"]</dd>\n"
+    }
+
+    append blocks_out [::apidoc::format_common_elements doc_elements]
+    set css {
+        /*svg g a:link {text-decoration: none;}*/
+        div.inner svg {width: 100%; margin: 0 auto;}
+        svg g polygon {fill: transparent;}
+        svg g g ellipse {fill: #eeeef4;}
+        svg g g polygon {fill: #f4f4e4;}
+    }
+
+    set callgraph [util::inline_svg_from_dot -css $css \
+                       [api_call_graph_snippet -proc_name $proc_name -maxnodes 5]]
+    if {$callgraph ne ""} {
+        append blocks_out "<p><dt><b>Partial Call Graph (max 5 caller/called nodes):</b></dt><dd>$callgraph</dd>\n"
+    }
+
+    append blocks_out "<p><dt><b>Testcases:</b></dt><dd>\n"
+
+    if {[info exists doc_elements(testcase)]} {
+        set cases {}
+        foreach testcase_pair $doc_elements(testcase) {
+            set url [api_test_case_url $testcase_pair]
+            lappend cases [subst {<a href="[ns_quotehtml $url]">[ns_quotehtml [lindex $testcase_pair 0]]</a>}]
+        }
+        append blocks_out [join $cases {, }]
+    } else {
+        append blocks_out "No testcase defined."
+    }
+    append blocks_out "</dd>\n</dl>\n"
+
 
     if { $source_p } {
         if {[parameter::get_from_package_key \
@@ -653,10 +695,10 @@ ad_proc -public api_proc_documentation {
         } else {
             lappend missing Oracle
         }
-        if {[llength $missing] > 0} { 
+        if {[llength $missing] > 0} {
             set xql_out [subst {<dt><b>XQL Not present:</b></dt><dd>[join $missing ", "]</dd>}]
         }
-        append xql_out $there  
+        append xql_out $there
     } else {
         set xql_out ""
     }
@@ -666,46 +708,69 @@ ad_proc -public api_proc_documentation {
         append out <blockquote>$out_sections</blockquote>
     }
     # No "see also" yet.
-    
+
     return $out
 }
 
-ad_proc api_proc_pretty_name { 
+ad_proc api_proc_pretty_name {
     -link:boolean
     -include_debug_controls:boolean
+    -hints_only:boolean
     {-proc_type ""}
     -label
-    proc 
+    proc
 } {
-    Return a pretty version of a proc name
+    @return a pretty version of a proc name
     @param label the label printed for the proc in the header line
     @param link provide a link to the documentation pages
 } {
-    if {![info exists label]} {
-        set label $proc
+    if {$hints_only_p} {
+        set out ""
+        set debug_html ""
+    } else {
+        if {![info exists label]} {
+            set label $proc
+        }
+        if { $link_p } {
+            append out [subst {<a href="[ns_quotehtml [api_proc_url $proc]]">$label</a>}]
+        } else {
+            append out $label
+        }
+        set debug_html [expr {$include_debug_controls_p
+			&& [namespace which ::xo::api] ne ""
+			  ? [::xo::api debug_widget $proc] : ""}]
     }
-    if { $link_p } {
-        append out [subst {<a href="[ns_quotehtml [api_proc_url $proc]]">$label</a>}]
-    } else {    
-        append out $label
+    if {[nsv_exists api_proc_doc $proc]} {
+        set doc_elements [nsv_get api_proc_doc $proc]
+    } else {
+        set doc_elements ""
     }
-    set doc_elements [nsv_get api_proc_doc $proc]
-    set debug_html [expr {$include_debug_controls_p && [info commands ::xo::api] ne ""
-                          ? [::xo::api debug_widget $proc] : ""}]
     set hints {}
-    if {$proc_type ne ""} {lappend hints $proc_type}
-    if {[dict exists $doc_elements protection]} {lappend hints [dict get $doc_elements protection]}
-    if {[dict get $doc_elements deprecated_p]} {lappend hints deprecated}
+    if {$proc_type ne ""} {
+        lappend hints $proc_type
+    }
+    if {[dict exists $doc_elements protection]} {
+        lappend hints [dict get $doc_elements protection]
+    }
+    if {[dict exists $doc_elements deprecated_p]
+        && [dict get $doc_elements deprecated_p]
+    } {
+        lappend hints deprecated
+    }
     if {[llength $hints] > 0} {
-        append out " ([join $hints {, }])"
+        if {$out ne ""} {
+            append out " "
+        }
+        append out "([join $hints {, }])"
     }
     append out $debug_html
     return $out
 }
 
+
 ad_proc -public api_apropos_functions { string } {
-    Returns the functions in the system that contain string in their name 
-    and have been defined using ad_proc.
+    @return the functions in the system that contain string in their name
+            and have been defined using ad_proc.
 } {
     set matches [list]
     foreach function [nsv_array names api_proc_doc] {
@@ -717,9 +782,329 @@ ad_proc -public api_apropos_functions { string } {
     return $matches
 }
 
-ad_proc -public api_describe_function { 
+ad_proc -public api_add_to_proc_doc {
+    -proc_name:required
+    -property:required
+    -value:required
+} {
+    Add a certain value to a property in the proc doc of the specified proc.
+
+    @author Gustaf Neumann
+    @param proc_name name is fully qualified name without leading colons proc procs,
+        XOTcl methods are a triple with the fully qualified class name,
+        then proc|instproc and then the method name.
+    @param property name of property such as "testcase"
+    @param value    value of the property
+
+} {
+    if {[nsv_exists api_proc_doc $proc_name]} {
+        set d [nsv_get api_proc_doc $proc_name]
+        #
+        # Make sure, not adding value multiple times (e.g. on
+        # reloads).  Probably clearing on redefinition would be an
+        # option, but then we have to make sure that the test cases
+        # are reloaded as well.
+        #
+        if {[dict exists $d $property]} {
+            set must_update [expr {$value ni [dict get $d $property]}]
+        } else {
+            set must_update 1
+        }
+        if {$must_update} {
+            dict lappend d $property $value
+            nsv_set api_proc_doc $proc_name $d
+            #ns_log notice "adding property $property with value $value to proc_doc of $proc_name"
+        }
+    } else {
+        nsv_set api_proc_doc $proc_name [list $property $value]
+        ns_log warning "api_add_to_proc_doc: no proc_doc available for $proc_name"
+    }
+}
+
+ad_proc -private api_called_proc_names {
+    {-body}
+    -proc_name:required
+} {
+
+    Return list of procs called by the specified procname handle.
+
+    @author Gustaf Neumann
+    @param proc_name name is fully qualified name without leading colons proc procs,
+    XOTcl methods are a triple with the fully qualified class name,
+    then proc|instproc and then the method name.
+
+} {
+    if {[info exists body]} {
+        #
+        # Get the calling information directly from the body, when
+        # e.g. the information is not in the procdoc nsv. This is
+        # e.g. necessary, when getting calling info from *-init.tcl
+        # files.
+        #
+        set body [apidoc::tclcode_to_html $body]
+    } else {
+        #
+        # Get calling info from prettified proc body
+        #
+        try {
+            ::apidoc::tcl_to_html $proc_name
+        } on ok {result} {
+            set body $result
+            #ns_log notice "api_called_proc_names <$proc_name> got body <$body>"
+
+        } on error {errorMsg} {
+            ns_log warning "api_called_proc_names: cannot obtain body of '$proc_name' via ::apidoc::tcl_to_html: $errorMsg"
+            return ""
+        }
+    }
+
+    dom parse -html <p>$body</p> doc
+    $doc documentElement root
+    set called {}
+
+    foreach a [$root selectNodes //a] {
+        set href [$a getAttribute href]
+        #
+        # When the href points to a proc, record this as calling info
+        #
+        if {[regexp {/api-doc/proc-view[?]proc=(.*)&} $href . called_proc]} {
+            set called_proc [string trimleft [ns_urldecode $called_proc] :]
+            lappend called $called_proc
+        }
+    }
+    #ns_log notice "api_called_proc_names: <$proc_name> calls $called"
+    return [lsort -unique $called]
+}
+
+ad_proc -private api_add_calling_info_to_procdoc {{proc_name "*"}} {
+
+    Add the calling information (what are the functions called by this
+    proc_name) to the collected proc_doc information.
+
+    @author Gustaf Neumann
+} {
+    if {$proc_name eq "*"} {
+        set proc_names [nsv_array names api_proc_doc]
+    } else {
+        set proc_names [list $proc_name]
+    }
+
+    #
+    # Get calling information from init files
+    #
+    set init_files packages/acs-bootstrap-installer/bootstrap.tcl
+    foreach package_key [apm_enabled_packages] {
+        foreach file [apm_get_package_files -package_key $package_key -file_types {tcl_init content_page include_page}] {
+            if {[file extension $file] eq ".tcl"} {
+                lappend init_files packages/$package_key/$file
+            }
+        }
+    }
+
+    foreach init_file $init_files {
+        set file_contents [template::util::read_file $::acs::rootdir/$init_file]
+        foreach called [api_called_proc_names -proc_name $init_file -body $file_contents] {
+            api_add_to_proc_doc \
+                -proc_name $called \
+                -property calledby \
+                -value $init_file
+        }
+    }
+
+    #
+    # Get calling information from procs
+    #
+    foreach proc_name $proc_names {
+        if {[regexp {^_([^_]+)__(.*)$} $proc_name . package_key testcase_id]} {
+            #
+            # Turn this test-case cross-check just on, when needed for debugging.
+            #
+            if {0} {
+                set calls {}
+                foreach call [api_called_proc_names -proc_name $proc_name] {
+                    #
+                    # Ignore aa_* calls (the testing infrastructure is
+                    # explicitly tested).
+                    #
+                    if {[string match "aa_*" $call]} continue
+
+                    #
+                    # Check, if these cases are already covered.
+                    #
+                    set covered 0
+                    if {[nsv_exists api_proc_doc $call]} {
+                        set called_proc_doc [nsv_get api_proc_doc $call]
+                        #ns_log notice "procdoc for $call has testcase [dict exists $called_proc_doc testcase]"
+                        if {[dict exists $called_proc_doc testcase]} {
+                            set testcase_pair [list $testcase_id $package_key]
+                            ns_log notice "$call is covered by cases [dict get $called_proc_doc testcase]\
+                                - new case included [expr {$testcase_pair in [dict get $called_proc_doc testcase]}]"
+                            set covered [expr {$testcase_pair in [dict get $called_proc_doc testcase]}]
+                        }
+                    }
+
+                    #
+                    # Only list remaining calls to suggestions.
+                    #
+                    if {!$covered} {
+                        lappend calls $call
+                    }
+                }
+                if {[llength $calls] > 0} {
+                    ns_log notice "potential test_cases $package_key $testcase_id $package_key: $calls"
+                }
+            }
+        } else {
+            foreach called [api_called_proc_names -proc_name $proc_name] {
+
+                api_add_to_proc_doc \
+                    -proc_name $called \
+                    -property calledby \
+                    -value $proc_name
+            }
+        }
+    }
+}
+
+
+ad_proc -private api_call_graph_snippet {
+    -proc_name:required
+    {-dpi 72}
+    {-format svg}
+    {-maxnodes 5}
+    {-textpointsize 12.0}
+} {
+    Return a source code for dot showing a local call graph snippet,
+    showing direct callers and directly called functions
+
+    @author Gustaf Neumann
+} {
+
+    set dot_code ""
+
+    #
+    # Include calls from test cases
+    #
+    set doc [nsv_get api_proc_doc $proc_name]
+    if {[dict exists $doc testcase]} {
+        set nodes ""
+        set edges ""
+        foreach testcase_pair [lrange [lsort [dict get $doc testcase]] 0 $maxnodes-1] {
+            lassign $testcase_pair testcase_id package_key
+            set testcase_node test_$testcase_id
+            set url [api_test_case_url $testcase_pair]
+            set props ""
+            append props \
+                [subst {URL="$url", margin=".2,0", shape=none, tooltip="Testcase $testcase_id of package $package_key", }] \
+                [subst {label=<<FONT POINT-SIZE="$textpointsize">$testcase_id<BR/><I>(test $package_key)</I></FONT>>}]
+            append nodes [subst -nocommands {"$testcase_node" [$props];\n}]
+            append edges [subst {"$testcase_node" -> "$proc_name";}] \n
+        }
+        append dot_code \
+            "subgraph \{\nrank=\"source\";" \
+            $nodes \
+            "\}\n" \
+            $edges
+    }
+
+    #
+    # Include calls from calledby information. Might come from a file
+    # (e.g. a *-init.tcl file) or from a proc.
+    #
+    set callers {}
+    if {[dict exists $doc calledby]} {
+        set edges ""
+        set nodes ""
+
+        #
+        # Filter from the list the recursive calls, since these mess
+        # up the graph layout.
+        #
+        set caller_procs {}
+        foreach c [dict get $doc calledby] {
+            if { $c ne $proc_name } {
+                lappend caller_procs $c
+            }
+        }
+
+        foreach caller [lrange [lsort $caller_procs] 0 $maxnodes-1] {
+            #
+            # When the "caller" starts with "packages/", we assume,
+            # this is a file.
+            #
+            if {[regexp {^(packages/[^/]+/)(.*)} $caller . line1 line2]} {
+                set url [export_vars -base /api-doc/content-page-view {{path $caller} {source_p 1}}]
+                set props ""
+                append props \
+                    [subst {URL="$url", margin=".2,0" shape=rectangle, tooltip="Script calling $proc_name", }] \
+                    [subst {label=<<FONT POINT-SIZE="$textpointsize">${line1}<BR/>${line2}</FONT>>}]
+            } else {
+                lappend callers $caller
+                set url [api_proc_doc_url -proc_name $caller]
+                set hints [api_proc_pretty_name -hints_only $caller]
+                if {$hints ne ""} {
+                    set hints "<BR/><I>$hints</I>"
+                }
+                set props ""
+                append props \
+                    [subst {URL="$url", margin=".2,0" tooltip="Function calling $proc_name", }] \
+                    [subst {label=<<FONT POINT-SIZE="$textpointsize">${caller}$hints</FONT>>}]
+            }
+            append nodes [subst -nocommands {"$caller" [$props];\n}]
+            append edges [subst {"$caller" -> "$proc_name";}] \n
+        }
+        append dot_code \
+            "subgraph \{\nrank=\"same\";" \
+            $nodes \
+            "\}\n" \
+            $edges
+    }
+
+    #
+    # Include information, what other procs this proc calls.  Filter
+    # from this list false positives of the call graph
+    # analysis. Exclude es well recursive calls, since these mess up
+    # the graph layout.
+    #
+    set called_procs {}
+    foreach c [api_called_proc_names -proc_name $proc_name] {
+        if {[namespace which $c] eq $c
+            && $c ni $callers
+            && $c ne $proc_name
+        } {
+            lappend called_procs $c
+        }
+    }
+
+    set edges ""
+    set nodes ""
+    foreach called [lrange $called_procs 0 $maxnodes-1] {
+        set url [api_proc_doc_url -proc_name $called]
+        set hints [api_proc_pretty_name -hints_only $called]
+        if {$hints ne ""} {
+            set hints "<BR/><I>$hints</I>"
+        }
+        set props ""
+        append props \
+            [subst {URL="$url", margin=".2,0", tooltip="Function called by $proc_name", }] \
+            [subst {label=<<FONT POINT-SIZE="$textpointsize">${called}$hints</FONT>>}]
+        append nodes [subst -nocommands {"$called" [$props];\n}]
+        append edges [subst {"$proc_name" -> "$called";}] \n
+    }
+    if {$nodes ne ""} {
+        append dot_code \
+            "subgraph \{\nrank=\"same\";" \
+            $nodes \
+            "\}\n" \
+            $edges
+    }
+    #ns_log notice \n$dot_code
+    append result "digraph \{api = $dpi;" $dot_code "\}"
+}
+
+ad_proc -public api_describe_function {
     { -format text/plain }
-    proc 
+    proc
 } {
     Describes the functions in the system that contain string and that
     have been defined using ad_proc.  The description includes the
@@ -736,7 +1121,7 @@ ad_proc -public api_describe_function {
                 default {
                     lappend matches [api_proc_documentation -script $function]
                 }
-            }                    
+            }
         }
     }
     switch $format {
@@ -752,26 +1137,37 @@ ad_proc -public api_describe_function {
 
 
 ad_proc -public api_get_body {proc_name} {
-    This function returns the body of a Tcl proc or an xotcl method.
+    This function returns the body of a Tcl proc or an XOTcl method.
     @param proc_name the name spec of the proc
-    @return body of the specified prox
+    @return body of the specified proc
 } {
-    if {[info commands ::xo::api] ne ""
+    #
+    # In case the proc_name contains magic chars, these have to be
+    # escaped for Tcl commands expecting a pattern (e.g. "info procs")
+    #
+    regsub -all {([?*])} $proc_name {\\\1} proc_name_pattern
+
+    if {[namespace which ::xo::api] ne ""
         && [regexp {^(.*) (inst)?proc (.*)$} $proc_name match obj prefix method]} {
-        if {[regexp {^(.*) (.*)$} $obj match thread obj]} {
-            return [::xo::api get_method_source $thread $obj $prefix $method]
+        if {[regexp {^(.*) (.*)$} $obj match scope obj]} {
+            if {[::xo::api scope_eval $scope ::nsf::is object $obj]} {
+                return [::xo::api get_method_source $scope $obj $prefix $method]
+            }
         } else {
-            return [::xo::api get_method_source "" $obj $prefix $method]
+            if {[::nsf::is object $obj]} {
+                return [::xo::api get_method_source "" $obj $prefix $method]
+            }
         }
-    } elseif {[info commands ::xo::api] ne ""
+        return ""
+    } elseif {[namespace which ::xo::api] ne ""
               && [regexp {^([^ ]+) (Class|Object) (.*)$} $proc_name . thread kind obj]} {
         return [::xo::api get_object_source $thread $obj]
-    } elseif {[info commands ::xo::api] ne ""
+    } elseif {[namespace which ::xo::api] ne ""
               && [regexp {(Class|Object) (.*)$} $proc_name . kind obj]} {
         return [::xo::api get_object_source "" $obj]
-    } elseif {[info procs $proc_name] ne ""} {
+    } elseif {[info procs $proc_name_pattern] ne ""} {
         return [info body $proc_name]
-    } elseif {[info procs ::nsf::procs::$proc_name] ne ""} {
+    } elseif {[info procs ::nsf::procs::$proc_name_pattern] ne ""} {
         return [::nx::Object info method body ::nsf::procs::$proc_name]
     } else {
         return "No such Tcl-proc '$proc_name'"
@@ -806,7 +1202,7 @@ namespace eval ::apidoc {
         into a link that will give the user more info about that
         resource
 
-        @param see a string expected to comtain the resource to format
+        @param see a string expected to contain the resource to format
         @return the html string representing the resource
     } {
         #regsub -all {proc *} $see {} see
@@ -815,15 +1211,20 @@ namespace eval ::apidoc {
             set href [export_vars -base /api-doc/proc-view {{proc $see}}]
             return [subst {<a href="[ns_quotehtml $href]">$see</a>}]
         }
+        set see [string trimleft $see :]
+        if {[nsv_exists api_proc_doc $see]} {
+            set href [export_vars -base /api-doc/proc-view {{proc $see}}]
+            return [subst {<a href="[ns_quotehtml $href]">$see</a>}]
+        }
         if {[string match "/doc/*" $see]
-            || [util_url_valid_p $see]} { 
+            || [util_url_valid_p $see]} {
             return [subst {<a href="[ns_quotehtml $see]">$see</a>}]
         }
         if {[file exists "$::acs::rootdir${see}"]} {
             set href [export_vars -base content-page-view {{source_p 1} {path $see}}]
             return [subst {<a href="[ns_quotehtml $href]">$see</a>}]
         }
-        return ${see}
+        return $see
     }
 
     ad_proc -public format_author { author_string } {
@@ -831,11 +1232,16 @@ namespace eval ::apidoc {
         Extracts information about the author and formats it into an
         HTML string.
 
-        @param author_string author information to format
+        @param author_string author information to format. 3 kind of
+               formats are expected: email (a mailto link to the email
+               is generated), whitespace-separated couple "<name> (<email>)" (a
+               mailto link for email and the name are generated) and
+               free-form (the same input string is returned).
+
         @return the formatted result
     } {
-        if { [regexp {^[^ \n\r\t]+$} $author_string] 
-             && [string first "@" $author_string] >= 0 
+        if { [regexp {^[^ \n\r\t]+$} $author_string]
+             && [string first "@" $author_string] >= 0
              && [string first ":" $author_string] < 0 } {
             return [subst {<a href="mailto:$author_string">$author_string</a>}]
         } elseif { [regexp {^([^\(\)]+)\s+\((.+)\)$} [string trim $author_string] {} name email] } {
@@ -856,14 +1262,14 @@ namespace eval ::apidoc {
 
     ad_proc -private format_changelog_change { change } {
         Formats the change log line: turns email addresses in parenthesis into links.
-    } { 
+    } {
         regsub {\(([^ \n\r\t]+@[^ \n\r\t]+\.[^ \n\r\t]+)\)} $change {(<a href="mailto:\1">\1</a>)} change
         return $change
     }
 
     ad_proc -private format_author_list { authors } {
 
-        Generates an HTML-formatted list of authors 
+        Generates an HTML-formatted list of authors
         (including <code>&lt;dt&gt;</code> and
          <code>&lt;dd&gt;</code> tags).
 
@@ -874,7 +1280,7 @@ namespace eval ::apidoc {
         if { [llength $authors] == 0 } {
             return ""
         }
-        append out "<dt><b>Author[ad_decode [llength $authors] 1 "" "s"]:</b>\n"
+        append out "<dt><b>Author[expr {[llength $authors] > 1 ? "s" : ""}]:</b>\n"
         foreach author $authors {
             append out "<dd>[format_author $author]</dd>\n"
         }
@@ -905,21 +1311,21 @@ namespace eval ::apidoc {
         return $out
     }
 
-    ad_proc -private format_see_list { sees } { 
+    ad_proc -private format_see_list { sees } {
         Generate an HTML list of referenced procs and pages.
-    } { 
+    } {
         append out "<br><strong>See Also:</strong>\n<ul>"
-        foreach see $sees { 
+        foreach see $sees {
             append out "<li>[format_see $see]\n"
         }
         append out "</ul>\n"
-        
+
         return $out
     }
 
     ad_proc -private first_sentence { string } {
 
-        Returns the first sentence of a string.
+        @return the first sentence of a string.
 
     } {
         if { [regexp {^(.+?\.)\s} $string "" sentence] } {
@@ -932,12 +1338,12 @@ namespace eval ::apidoc {
         version_id
         { public_p "" }
     } {
-        
+
         Gets or sets the user's public/private preferences for a given
         package.
 
         @param version_id the version of the package
-        @param public_p if empty, return the user's preferred setting or the default (1) 
+        @param public_p if empty, return the user's preferred setting or the default (1)
         if no preference found. If not empty, set the user's preference to public_p
         @return public_p
 
@@ -992,13 +1398,13 @@ namespace eval ::apidoc {
     }
 
     ad_proc -private ad_keywords_score {keywords string_to_search} {
-        returns number of keywords found in string to search.  
-        No additional score for repeats
+        @return Number of keywords found in string to search.
+        No additional score for repeats.
     } {
         # turn keywords into space-separated things
-        # replace one or more commads with a space
+        # replace one or more commands with a space
         regsub -all {,+} $keywords " " keywords
-        
+
         set score 0
         foreach word $keywords {
             # turns out that "" is never found in a search, so we
@@ -1012,7 +1418,7 @@ namespace eval ::apidoc {
 
     ad_proc -private is_object {scope proc_name} {
         Checks, whether the specified argument is an xotcl object.
-        Does not cause problems when xocl is not loaded.
+        Does not cause problems when xotcl is not loaded.
         @return boolean value
     } {
         set result 0
@@ -1041,7 +1447,7 @@ namespace eval ::apidoc {
 
     } {
 
-        if {[info commands ::xo::api] ne ""} {
+        if {[namespace which ::xo::api] ne ""} {
             set scope [::xo::api scope_from_proc_index $proc_name]
         } else {
             set scope ""
@@ -1053,11 +1459,11 @@ namespace eval ::apidoc {
         return [tclcode_to_html -scope $scope -proc_namespace $proc_namespace [api_get_body $proc_name]]
     }
 
-
-    # Returns length of a variable name
-    proc length_var {data} {
+    ad_proc -private length_var {data} {
+        @return Length of a variable name.
+    } {
         if {[regexp -indices {^\$\{[^\}]+\}} $data found]} {
-            return [lindex $found 1]           
+            return [lindex $found 1]
         } elseif {[regexp -indices {^\$[A-Za-z0-9_:]+(\([\$A-Za-z0-9_\-/]+\))?} $data found]} {
             return [lindex $found 1]
         }
@@ -1065,29 +1471,32 @@ namespace eval ::apidoc {
     }
 
 
-    # Returns length of a command name
-    proc length_proc {data} {
-        if {[regexp -indices {^(::)?[A-Za-z][:A-Za-z0-9_@]+} $data found]} {
+    ad_proc -private length_proc {data} {
+        @return Length of a command name.
+    } {
+        if {[regexp -indices {^(::)?[A-Za-z0-9][:\.\-A-Za-z0-9_@]+} $data found]} {
             return [lindex $found 1]
         }
         return 0
     }
 
-    # Returns length of subexpression, from open to close quote inclusive
-    proc length_string {data} {
+    ad_proc -private length_string {data} {
+        @eturn length of subexpression, from open to close quote inclusive.
+    } {
         regexp -indices {[^\\]\"} $data match
         return [expr {[lindex $match 1]+1}]
     }
 
-    # Returns length of subexpression, from open to close brace inclusive
-    # Doesn't deal with unescaped braces in substrings
-    proc length_braces {data} {
+    ad_proc -private length_braces {data} {
+        @return length of subexpression, from open to close brace inclusive.
+         Doesn't deal with unescaped braces in substrings.
+    } {
         set i 1
         for {set count 1} {1} {incr i} {
             if {[string index $data $i] eq "\\"} {
                 incr i
             } elseif {[string index $data $i] eq "\{"} {
-                incr count            
+                incr count
             } elseif {[string index $data $i] eq "\}"} {
                 incr count -1
             }
@@ -1096,14 +1505,16 @@ namespace eval ::apidoc {
         return [expr {$i+1}]
     }
 
-    # Returns number of spaces until next subexpression
-    proc length_spaces {data} {
+    ad_proc -private length_spaces {data} {
+        @return Number of spaces until next subexpression.
+    } {
         regexp -indices {\s+} $data match
         return [expr {[lindex $match 1]+1}]
     }
 
-    # Returns length of a generic subexpression
-    proc length_exp {data} {
+    ad_proc -private length_exp {data} {
+        @return length of a generic subexpression.
+    } {
         if {[string index $data 0] eq "\""} {
             return [length_string $data]
         } elseif {[string index $data 0] eq "\{"} {
@@ -1117,8 +1528,10 @@ namespace eval ::apidoc {
         return 0
     }
 
-    # Calculate how much text we should ignore
-    proc length_regexp {data} {
+    ad_proc -private length_regexp {data} {
+        Calculate how much text we should ignore.
+        @return length in characters.
+    } {
         set i 0
         set found_regexp 0
         set curchar [string index $data $i]
@@ -1137,10 +1550,19 @@ namespace eval ::apidoc {
     }
 
     ad_proc -private search_on_webindex {-page -host -root -proc} {
-        Search for a matching link in the page and return the absolute link if found
+
+        Search for a matching link in the page and return the absolute
+        link if found. Avoid in-page links (starting with "#")
+
+        @param page HTML page
+        @param host for completing URLs starting with no "/"
+        @param root for completing URLs starting with a "/"
+        @param proc name of proc as used in link label
+
     } {
         set url ""
-        if { [regexp "<a href= *\['\"\](\[^>\"'\]+)\[\"'\]\[^>\]*>$proc</a>" $page match relative_url] } {
+        if { [regexp "<a href= *\['\"\](\[^#\]\[^>\"'\]+)\[\"'\]\[^>\]*>$proc</a>" \
+                  $page match relative_url] } {
             if {[string match "/*" $relative_url]} {
                 set url $host$relative_url
             } else {
@@ -1191,12 +1613,12 @@ namespace eval ::apidoc {
         various colors and creating hyperlinks to other proc definitions.<BR>
         The inspiration for this proc was the tcl2html script created by Jeff Hobbs.
 
-        @param script script to be formated in HTML
+        @param script script to be formatted in HTML
 
     } {
 
         set namespace_provided_p [expr {$proc_namespace ne ""}]
-        
+
         set script [string trimright $script]
         template::head::add_style -style $::apidoc::style
 
@@ -1204,7 +1626,7 @@ namespace eval ::apidoc {
         # to api-doc pages.  Perhaps we should hyperlink them to the Tcl man pages?
         # else and elseif are be treated as special cases later
 
-        if {[info commands ::xo::api] ne ""} {
+        if {[namespace which ::xo::api] ne ""} {
             set XOTCL_KEYWORDS [list self my next]
             # Only command names are highlighted, otherwise we could add XOTcl method
             # names by [lsort -unique [concat [list self my next] ..
@@ -1279,7 +1701,7 @@ namespace eval ::apidoc {
 
                 "\{" -
                 ";" {
-                    if {!$in_quotes} {
+                    if {!$in_quotes && !$in_comment} {
                         set proc_ok 1
                     }
                     append html $char
@@ -1304,9 +1726,9 @@ namespace eval ::apidoc {
                 }
 
                 " " {
-                    append html " "
+                    append html "&nbsp;"
                 }
-                
+
                 default {
                     if {$proc_ok} {
                         set proc_ok 0
@@ -1329,16 +1751,16 @@ namespace eval ::apidoc {
                                     # ad_proc (ad_proc ?-options ...?
                                     # name args) before that?
                                     #
-                                    # Note, that this handles just
+                                    # Note that this handles just
                                     # single line ad-proc signatures,
                                     # not multi-line argument lists.
-                                    
+
                                     set start [string range $line 0 end-1]
                                     set elements 3
                                     for {set idx 1} {[string index [lindex $start $idx] 0] eq "-"} {incr idx} {
                                         incr elements
                                     }
-                                    
+
                                     if {[llength $start] == $elements} {
                                         #
                                         # Read next lines until brace is balanced.
@@ -1350,7 +1772,7 @@ namespace eval ::apidoc {
                                             incr comment_end
                                         }
                                         if {$comment_end < $l} {
-                                            ns_log notice "AD_PROC CAND COMM [string range $data $comment_start $comment_end]"
+                                            #ns_log notice "AD_PROC CAND COMM [string range $data $comment_start $comment_end]"
                                             set url ""
                                             append html \
                                                 "<a href='/api-doc/proc-view?proc=ad_proc' title='ad_proc'>" \
@@ -1358,7 +1780,7 @@ namespace eval ::apidoc {
                                                 [string range $data $i+7 $comment_start] \
                                                 "<span class='comment'>" \
                                                 [string range $data $comment_start+1 $comment_end-1] \
-                                                "</span>\}" 
+                                                "</span>\}"
                                             set i $comment_end
                                             continue
                                         }
@@ -1366,13 +1788,13 @@ namespace eval ::apidoc {
                                 }
                             }
                         }
-                        if {$proc_name eq "*" || $proc_name eq "@"} {
+                        if {$proc_name in {* @ ?}} {
                             append html $proc_name
                         } elseif {$proc_name in $::apidoc::KEYWORDS ||
-                            ([regexp {^::(.*)} $proc_name match had_colons] 
+                            ([regexp {^::(.*)} $proc_name match had_colons]
                              && $had_colons in $::apidoc::KEYWORDS)} {
 
-                            set url "/api-doc/proc-view?proc=$proc_name"
+                            set url "/api-doc/proc-view?proc=[string trimleft $proc_name :]"
                             append html "<a href='[ns_quotehtml $url]' title='Tcl command'>" \
                                 [pretty_token keyword $proc_name] </a>
 
@@ -1389,9 +1811,10 @@ namespace eval ::apidoc {
                         } elseif {[string match "*__arg_parser" $proc_name]} {
                             append html [pretty_token helper $proc_name]
 
-                        } elseif {$proc_namespace ne "" 
-                                  && [info commands ::${proc_namespace}::${proc_name}] ne ""}  {
-                            
+                        } elseif {$proc_namespace ne "" && [
+                            namespace which ::${proc_namespace}::${proc_name}]
+                                ne ""}  {
+
                             if {[is_object $scope ${proc_namespace}::${proc_name}]} {
                                 set url [::xo::api object_url \
                                              -show_source 1 -show_methods 2 \
@@ -1403,10 +1826,11 @@ namespace eval ::apidoc {
                                 append html "<a href='[ns_quotehtml $url]' title='API command'>" \
                                     [pretty_token proc $proc_name] </a>
                             }
-                        } elseif {[info commands ::$proc_name] ne ""} {
-                            set absolute_name [expr {[string match "::*" $proc_name]
-                                                     ? $proc_name
-                                                     : "::${proc_name}"}]
+                        } elseif {[namespace which ::$proc_name] ne ""} {
+                            set absolute_name [expr {
+                                [string match "::*" $proc_name]
+                                     ? $proc_name : "::${proc_name}"
+                            }]
                             if {[is_object $scope $absolute_name]} {
                                 set url [::xo::api object_url \
                                              -show_source 1 -show_methods 2 \
@@ -1448,7 +1872,7 @@ namespace eval ::apidoc {
                             if {[regexp {^(\s*\[\s*list)} $reminder _ list]} {
                                 # util_memoize + list
                                 append html " \[" [pretty_token keyword list]
-                                incr i [string length $list] 
+                                incr i [string length $list]
                                 set proc_ok 1
                             } else {
                                 # util_memoize without list
@@ -1467,42 +1891,52 @@ namespace eval ::apidoc {
         return [string range $html 1 end]
     }
 
-    ad_proc -private xql_links_list { path } {
-        
-        Returns list of xql files related to Tcl script file
+    ad_proc -private xql_links_list { {-include_compiled 0} path } {
+
+        @return list of xql files related to Tcl script file
         @param path path and filename from $::acs::rootdir
-        
+
     } {
-        
+
         set linkList [list]
-        set filename $::acs::rootdir/$path
-        set path_dirname [file dirname $path]
-        set file_dirname [file dirname $filename]
-        set file_rootname [file rootname [file tail $filename]]
-        regsub {(-oracle|-postgresql)$} $file_rootname {} file_rootname
-        set files \
-            [lsort -decreasing \
-                 [glob -nocomplain \
-                      -directory $file_dirname \
-                      "${file_rootname}{,-}{,oracle,postgresql}.{adp,tcl,xql}" ]]
-        
-        foreach file $files {
-            lappend linkList [list \
-                                  filename $file \
-                                  link "content-page-view?source_p=1&path=[ns_urlencode $path_dirname/[file tail $file]]" \
-                                 ]
-            
+        set paths $path
+        set root_path [file rootname $path]
+        set themed_path [template::themed_template $root_path]
+        if {$themed_path ne $root_path} {
+            lappend paths $themed_path
+        }
+        foreach path $paths {
+            set filename $::acs::rootdir/$path
+            set path_dirname [file dirname $path]
+            set file_dirname [file dirname $filename]
+            set file_rootname [file rootname [file tail $filename]]
+            regsub {(-oracle|-postgresql)$} $file_rootname {} file_rootname
+
+            lappend files {*}[glob -nocomplain \
+                                 -directory $file_dirname \
+                                 "${file_rootname}{,-}{,oracle,postgresql}.{adp,tcl,xql}" ]
+        }
+
+        foreach file [lsort -decreasing $files] {
+            set path [ns_urlencode $path_dirname/[file tail $file]]
+            set link [export_vars -base content-page-view {{source_p 1} path}]
+            set display_file [string range $file [string length $::acs::rootdir]+1 end]
+            lappend linkList [list filename $display_file link $link]
+            if {$include_compiled && [file extension $file] eq ".adp"} {
+                set link [export_vars -base content-page-view {{source_p 1} {compiled_p 1} path}]
+                lappend linkList [list filename "$display_file (compiled)" link $link]
+            }
         }
 
         return $linkList
     }
 
     ad_proc -private sanitize_path { {-prefix packages} path } {
-        
+
         Return a sanitized path. Cleans path from directory traversal
         attacks and checks, if someone tries to access content outside
         of the specified prefix.
-        
+
         @return sanitized path
     } {
         set path [ns_normalizepath $path]
@@ -1532,7 +1966,7 @@ namespace eval ::apidoc {
 #
 
 ad_proc api_proc_url { proc } {
-    Returns the URL of the page that documents the given proc.
+    @return the URL of the page that documents the given proc.
 
     @author Lars Pind (lars@pinds.com)
     @creation-date 14 July 2000
@@ -1540,14 +1974,46 @@ ad_proc api_proc_url { proc } {
     return "/api-doc/proc-view?proc=[ns_urlencode $proc]&source_p=1"
 }
 
-ad_proc api_proc_link { proc } {
-    Returns a full HTML link to the documentation for the proc.
+ad_proc -private api_proc_doc_url {-proc_name -source_p -version_id} {
+    Return the procdic url from procname and optionally from source_p and version_id
+} {
+    if {[string range $proc_name 0 0] eq " " && [lindex $proc_name 0] in {Object Class}} {
+        set object [lindex $proc_name end]
+        set url [export_vars -base /xotcl/show-object {
+            object {show_source 1} {show_methods 1}
+        }]
+    } else {
+        set url [export_vars -base /api-doc/proc-view -no_empty {
+            {proc $proc_name} source_p version_id
+        }]
+    }
+    return $url
+}
+
+ad_proc -deprecated api_proc_link { proc } {
+    @return full HTML link to the documentation for the proc.
+
+    Deprecated as it is broken because api_proc_url accepts (now?)
+    different arguments
+
+    @see api_proc_url
 
     @author Lars Pind (lars@pinds.com)
     @creation-date 14 July 2000
 } {
-    return "<a href=\"[ns_quotehtml [api_proc_url $proc]]\">$proc</a>"
+    return "<a href=\"[ns_quotehtml [api_proc_url -proc_name $proc -source_p 1]]\">$proc</a>"
 }
+
+ad_proc -private api_test_case_url {testcase_pair} {
+    Return the testcase url from testcase_pair, consisting of
+    testcase_id and package_key.
+} {
+    lassign $testcase_pair testcase_id package_key
+    return [export_vars -base /test/admin/testcase {
+        testcase_id package_key {showsource 1}
+    }]
+}
+
 
 
 #

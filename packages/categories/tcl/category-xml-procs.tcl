@@ -3,7 +3,7 @@ ad_library {
 
     @author Tom Ayles (tom@beatniq.net)
     @creation-date 2003-12-02
-    @cvs-id $Id: category-xml-procs.tcl,v 1.3.6.2 2016/11/27 12:19:35 gustafn Exp $
+    @cvs-id $Id: category-xml-procs.tcl,v 1.6.2.1 2019/11/15 08:24:10 gustafn Exp $
 }
 
 namespace eval ::category_tree::xml {}
@@ -18,7 +18,7 @@ ad_proc -public ::category_tree::xml::import_from_file {
         error {Cannot open file for reading}
     }
 
-    return [import -site_wide=$site_wide_p [::tDOM::xmlReadFile $file]]
+    return [import -site_wide=$site_wide_p [::tdom::xmlReadFile $file]]
 }
 
 ad_proc -public ::category_tree::xml::import {
@@ -53,14 +53,14 @@ ad_proc -public ::category_tree::xml::import {
                 set description {}
             }
             if {$tree_id} {
-                # tree initialised, add translation
+                # tree initialized, add translation
                 category_tree::update \
                     -tree_id $tree_id \
                     -name $name \
                     -description $description \
                     -locale $locale
             } else {
-                # initialise tree
+                # initialize tree
                 set tree_id [category_tree::add \
                                  -site_wide_p $site_wide_p \
                                  -name $name \

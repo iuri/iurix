@@ -23,7 +23,7 @@ ad_page_contract {
 
     @author bdolicki@redhat.com
     @creation-date 2000-06-20
-    @cvs-id $Id: rename.tcl,v 1.3.2.1 2015/09/10 08:21:48 gustafn Exp $
+    @cvs-id $Id: rename.tcl,v 1.5 2018/01/19 14:09:48 gustafn Exp $
 } {
   node_id:naturalnum,notnull
   instance_name:notnull
@@ -43,6 +43,7 @@ apm_package_rename \
 
 
 ad_returnredirect [export_vars -base "." { expand:multiple root_id }]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

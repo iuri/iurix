@@ -1,8 +1,8 @@
 # -*- tcl-*-
-# $Id: ical.page,v 1.7 2012/09/13 16:05:37 victorg Exp $
-::xowiki::Object new -title "News" -text {
+# $Id: ical.page,v 1.8.2.1 2020/08/04 15:21:50 gustafn Exp $
+::xowiki::Object new -title "Ical" -text {
   #
-  # A sample News object.
+  # A sample Ical object.
   #
   my initialize -parameter {
     {-page_size:integer 100}
@@ -19,20 +19,24 @@
   # news entry. This is executed in the context of every displayed page.
   #
   Class create IcalEntryRenderer -instproc render {} {
-    array set {} [my instance_attributes]
-    array set event $(event)
-    #my msg [my instance_attributes]
-    set dtstart  [::xo::ical clock_to_utc [clock scan $event(event.dtstart)]]
-    set dtend    [::xo::ical clock_to_utc [clock scan $event(event.dtend)]]
-    set body     "SUMMARY:[::xo::ical text_to_ical -remove_tags true $event(event.summary)]"
-    foreach f {location} {
-      set key event(event.$f)
-      if {[info exists $key] && [set $key] ne ""} {
-        append body \n[string toupper $f]:[::xo::ical text_to_ical -remove_tags true [set $key]]
+      array set {} [my instance_attributes]
+      if {![info exists (event)]} {
+	  ns_log warning "ical renderer: no event found page ${:name}"
+	  return ""
       }
-    }
+      array set event $(event)
+      #my msg [my instance_attributes]
+      set dtstart  [::xo::ical clock_to_utc [clock scan $event(event.dtstart)]]
+      set dtend    [::xo::ical clock_to_utc [clock scan $event(event.dtend)]]
+      set body     "SUMMARY:[::xo::ical text_to_ical -remove_tags true $event(event.summary)]"
+      foreach f {location} {
+	  set key event(event.$f)
+	  if {[info exists $key] && [set $key] ne ""} {
+	      append body \n[string toupper $f]:[::xo::ical text_to_ical -remove_tags true [set $key]]
+	  }
+      }
 
-    return [subst {BEGIN:VEVENT
+      return [subst {BEGIN:VEVENT
 DTSTART:$dtstart
 DTEND:$dtend
 $body
@@ -55,7 +59,7 @@ VERSION:2.0
   my proc content {} {
     my get_parameters
     #
-    # this is not a HTML page, decativate master and provide content-type
+    # this is not an HTML page, decativate master and provide content-type
     # 
     ::xo::cc set_parameter master 0
     ::xo::cc set_parameter content-type text/plain

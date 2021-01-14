@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 01 April 2002
-    @cvs-id $Id: url-goto.tcl,v 1.7.2.1 2015/09/12 11:06:20 gustafn Exp $
+    @cvs-id $Id: url-goto.tcl,v 1.9 2018/01/19 14:18:32 gustafn Exp $
 } {
     url_id:naturalnum,notnull
 } 
@@ -16,6 +16,8 @@ set url [db_string select_url {} -default {}]
 
 if {$url ne ""} {
     ad_returnredirect $url
+    ad_script_abort
+
 } else {
     return -code error [_ file-storage.no_such_URL]
 }

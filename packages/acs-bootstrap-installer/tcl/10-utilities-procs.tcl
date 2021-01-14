@@ -4,7 +4,7 @@ ad_library {
 
     @creation-date 4 Apr 2001
     @author Don Baccus (dhogaza@pacifier.com
-    @cvs-id $Id: 10-utilities-procs.tcl,v 1.9.4.2 2017/07/24 11:09:53 gustafn Exp $
+    @cvs-id $Id: 10-utilities-procs.tcl,v 1.12 2018/05/09 15:33:28 hectorr Exp $
 }
 
 ad_proc -public ad_find_all_files {

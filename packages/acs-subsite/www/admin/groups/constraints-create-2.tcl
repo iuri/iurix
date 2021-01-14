@@ -1,13 +1,11 @@
-# /packages/mbryzek-subsite/www/admin/groups/constraints-create-2.tcl
-
 ad_page_contract {
 
     Optionally directs the user to create a relational segment (based
     on the value of operation)
-    
+
     @author mbryzek@arsdigita.com
     @creation-date Thu Jan  4 11:02:15 2001
-    @cvs-id $Id: constraints-create-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: constraints-create-2.tcl,v 1.6.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     group_id:notnull,naturalnum
@@ -20,16 +18,19 @@ set operation [string trim [string tolower $operation]]
 
 if {$operation eq "yes"} {
     if { $return_url eq "" } {
-	# Setup return_url to send up back to the group admin page
-	# when we're all done
-	set return_url [export_vars -base [ad_conn package_url]/admin/groups/one group_id]
+        # Setup return_url to send up back to the group admin page
+        # when we're all done
+        set return_url [export_vars -base [ad_conn package_url]/admin/groups/one group_id]
     }
     ad_returnredirect [export_vars -base ../rel-segments/new {group_id rel_type return_url}]
+    ad_script_abort
+
 } else {
     if { $return_url eq "" } {
-	set return_url [export_vars -base one group_id]
+        set return_url [export_vars -base one group_id]
     }
     ad_returnredirect $return_url
+    ad_script_abort
 }
 
 

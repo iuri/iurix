@@ -32,7 +32,7 @@ should only have to learn a single system that serves as a UI
 substrate for all the functionally specific modules used on a site.
 The system should not make any assumptions about how pages should
 look or function. Designers should be able to change the default
-presentation of any module using a single metholodogy with minimal
+presentation of any module using a single methodology with minimal
 exposure to code.</p></li><li><p>
 <strong>Separation of code (Tcl, Java and SQL) and layout
 (HTML).</strong> Programmers should be able to specify the data
@@ -87,7 +87,7 @@ should be used to specify what makes the dynamic part of the page.
 There&#39;s also an API for creating forms and for creating and
 manipulating multirow data sources.</li><li>The mechanism for dynamically generating pages combines data
 and layout. It also allows coposition of modular pages from
-reusable widges and skins. It is not limited to HTML.</li><li>The <code>&lt;master&gt;</code> tag specifies a master
+reusable widgets and skins. It is not limited to HTML.</li><li>The <code>&lt;master&gt;</code> tag specifies a master
 template. Its <code>src</code> attribute defaults to the site-wide
 master template.</li>
 </ul>
@@ -187,9 +187,9 @@ specifying the latter two.</p>
 In a simple case, the following is the sequence of steps that
 serving a templated page involves.
 <ol>
-<li>The request processor gets a url and maps it to a
+<li>The request processor gets a URL and maps it to a
 <code>.adp</code> or <code>.tcl</code> file. As both invoke the
-same handler, it doesn&#39;t matter that adp take precendence.</li><li>If a <code>.tcl</code> file is present, its <a href="/api-doc/proc-view?proc=ad_page_contract"><code>ad_page_contract</code></a>
+same handler, it doesn&#39;t matter that adp take precedence.</li><li>If a <code>.tcl</code> file is present, its <a href="/api-doc/proc-view?proc=ad_page_contract"><code>ad_page_contract</code></a>
 in the <code>-properties</code> block indicates a set of data
 sources that will be made available to the template.</li><li>The rest of the Tcl script executes, defining these data
 sources. It may change the name of the page being served by calling
@@ -251,7 +251,7 @@ and thus cached for future use. Tcl pages are also cached in a
 proc; this saves the trouble of reading and parsing the file the
 next time. The template system remembers the modification times of
 the adp and Tcl sources, and re-processes any requested file if the
-cached version is no longer current. Consequently, this cacheing is
+cached version is no longer current. Consequently, this caching is
 transparent in normal use.</p>
 <p>To emphasize that "normal" use essentially always
 applies, here&#39;s a scenario for abnormal use: Save version
@@ -265,17 +265,17 @@ parameter <code>RefreshCache</code> in section
 <code>template</code> to <code>never</code> or <code>always</code>.
 The former suppresses checking mtime and may improve performance on
 a production server, where the content pages don&#39;t change. The
-latter is only inteded for testing.</p>
+latter is only intended for testing.</p>
 <h3>VII. Data Model Discussion</h3>
-<p>This packages doesn&#39;t need a data model.</p>
+<p>This package doesn&#39;t need a data model.</p>
 <p>It comes with its own database interfaces, one for using ns_ora,
-the Oracle driver from ArsDigita, and one for ns_db, the builtin
+the Oracle driver from ArsDigita, and one for ns_db, the built-in
 database interface of the AOL server. If you are programming under
 the ACS, you should use neither of these, but rather the
 <code>db_*</code> interface, in particular
 <code>db_multirow</code>.</p>
 <h3>VIII. User Interface</h3>
-<p>This packages doesn&#39;t have a user interface. It is the
+<p>This package doesn&#39;t have a user interface. It is the
 <em>substrate</em> of all user interfaces, be it user or admin
 pages.</p>
 <h3>IX. Configuration/Parameters</h3>
@@ -287,8 +287,7 @@ There are two parameters.
       DefaultMaster=/www/default-master
       ; anything other than "never" or "always" means normal operation
       RefreshCache=as necessary
-    
-</pre>
+    </pre>
 <h3>X. Future Improvements/Areas of Likely Change</h3>
 <p>Passing datasources by reference is new. The acs-templating
 syntax <code>&amp;formal="actual"</code> is different
@@ -304,11 +303,11 @@ complement sequential nested
 <li>System creator: <a href="mailto:karl\@arsdigita.com">Karl
 Goldstein</a>
 </li><li>System owners: <a href="mailto:karl\@arsdigita.com">Karl
-Goldstein</a> and <a href="mailto:christian\@arsdigita.com">Christian
-Brechbühler</a>
+Goldstein</a> and <a href="mailto:christian\@arsdigita.com">Christian Brechbühler</a>
 </li><li>Documentation authors: <a href="mailto:karl\@arsdigita.com">Karl
 Goldstein</a>, <a href="mailto:christian\@arsdigita.com">Christian
-Brechbühler</a>, and <a href="mailto:bquinn\@arsdigita.com">Bryan Quinn</a>
+Brechbühler</a>, and <a href="mailto:bquinn\@arsdigita.com">Bryan
+Quinn</a>
 </li>
 </ul>
 <h3>XII. Revision History</h3>
@@ -316,9 +315,8 @@ Brechbühler</a>, and <a href="mailto:bquinn\@arsdigita.com">Bryan Quinn</a>
 <tr bgcolor="#E0E0E0">
 <th width="10%">Document Revision #</th><th width="50%">Action Taken, Notes</th><th>When?</th><th>By Whom?</th>
 </tr><tr>
-<td>0.1</td><td>Brought into the form suggested by <a href="http://dev.arsdigita.com/ad-sepg/process/design-template">Finkler,
-McLoghlin and Wu</a>
-</td><td>18 Jul 2000</td><td>Christian Brechbühler</td>
+<td>0.1</td><td>Brought into the form suggested by Finkler, McLoghlin and Wu
+(http://dev.arsdigita.com/ad-sepg/process/design-template)</td><td>18 Jul 2000</td><td>Christian Brechbühler</td>
 </tr><tr>
 <td>0.2</td><td>Adapted to acs-templating as distributed with ACS/Tcl 4.01</td><td>22 Nov 2000</td><td>Christian Brechbühler</td>
 </tr>
@@ -327,5 +325,5 @@ McLoghlin and Wu</a>
 <address><a href="mailto:christian\@arsdigita.com">Christian
 Brechbuehler</a></address>
 <!-- Created: Mon Aug 14 11:53:07 EDT 2000 -->
-Last modified: $&zwnj;Id: design.html,v 1.4.2.3 2017/04/22 18:30:26
-gustafn Exp $
+Last modified: $&zwnj;Id: design.html,v 1.9 2018/04/11 20:52:01 hectorr
+Exp $

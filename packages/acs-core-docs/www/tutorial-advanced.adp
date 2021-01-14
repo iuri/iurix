@@ -3,15 +3,13 @@
 <property name="doc(title)">Chapter 10. Advanced Topics</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="tutorial-debug" leftLabel="Prev"
-		    title="
-Part III. For OpenACS Package
-Developers"
-		    rightLink="tutorial-specs" rightLabel="Next">
-		<div class="chapter">
+			leftLink="tutorial-debug" leftLabel="Prev"
+			title="Part III. For OpenACS
+Package Developers"
+			rightLink="tutorial-specs" rightLabel="Next">
+		    <div class="chapter">
 <div class="titlepage"><div><div><h2 class="title">
-<a name="tutorial-advanced" id="tutorial-advanced"></a>Chapter 10. Advanced
-Topics</h2></div></div></div><div class="toc">
+<a name="tutorial-advanced" id="tutorial-advanced"></a>Chapter 10. Advanced Topics</h2></div></div></div><div class="toc">
 <p><strong>Table of Contents</strong></p><dl class="toc">
 <dt><span class="sect1"><a href="tutorial-specs">Write the
 Requirements and Design Specs</a></span></dt><dt><span class="sect1"><a href="tutorial-cvs">Add the new
@@ -30,19 +28,17 @@ in parameters for your package</a></span></dt><dt><span class="sect1"><a href="t
 scripts</a></span></dt><dt><span class="sect1"><a href="tutorial-second-database">Connect to a second
 database</a></span></dt><dt><span class="sect1"><a href="tutorial-future-topics">Future Topics</a></span></dt>
 </dl>
-</div><div class="authorblurb">
-<p>by <a class="ulink" href="mailto:joel\@aufrecht.org" target="_top">Joel Aufrecht</a>
-</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><p>This tutorial covers topics which are not essential to creating
+</div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">by <a class="ulink" href="mailto:joel\@aufrecht.org" target="_top">Joel
+Aufrecht</a>
+</span></p><span style="color: red">&lt;/authorblurb&gt;</span><p>This tutorial covers topics which are not essential to creating
 a minimal working package. Each section can be used independently
 of all of the others; all sections assume that you&#39;ve completed
 the basic tutorial.</p>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="tutorial-debug" leftLabel="Prev" leftTitle="Debugging and Automated Testing"
-		    rightLink="tutorial-specs" rightLabel="Next" rightTitle="Write the Requirements and Design
+			leftLink="tutorial-debug" leftLabel="Prev" leftTitle="Debugging and Automated Testing"
+			rightLink="tutorial-specs" rightLabel="Next" rightTitle="Write the Requirements and Design
 Specs"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="acs-package-dev" upLabel="Up"> 
-		
+			homeLink="index" homeLabel="Home" 
+			upLink="acs-package-dev" upLabel="Up"> 
+		    

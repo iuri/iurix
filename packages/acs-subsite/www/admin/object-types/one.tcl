@@ -1,12 +1,10 @@
-# /packages/mbryzek-subsite/www/admin/index.tcl
-
 ad_page_contract {
 
     View an OpenACS Object Type
 
     @author Yonantan Feldman (yon@arsdigita.com)
     @creation-date August 13, 2000
-    @cvs-id $Id: one.tcl,v 1.11.2.1 2015/09/10 08:21:43 gustafn Exp $
+    @cvs-id $Id: one.tcl,v 1.13.2.2 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     object_type:notnull
@@ -20,7 +18,7 @@ if { ![db_0or1row object_type {}] } {
 set page_title "Details for type $pretty_name"
 set context [list [list index "Object Type Index"] "Details for type $pretty_name"]
 
-set page "[acs_object_type_hierarchy -object_type $object_type]"
+set page [acs_object_type_hierarchy -object_type $object_type]
 
 append page [subst {
 <p>
@@ -28,13 +26,13 @@ append page [subst {
 <ul>
   <li>Pretty Name: [lang::util::localize $pretty_name]</li>
   <li>Pretty Plural: [lang::util::localize $pretty_plural]</li>
-  <li>Abstract: [ad_decode $abstract_p "f" "False" "True"]</li>
-  <li>Dynamic: [ad_decode $dynamic_p "f" "False" "True"]</li>
-  [ad_decode $table_name "" "" "<li>Table Name: $table_name</li>"]
-  [ad_decode $id_column "" "" "<li>Primary Key: $id_column</li>"]
-  [ad_decode $name_method "" "" "<li>Name Method: $name_method</li>"]
-  [ad_decode $type_extension_table "" "" "<li>Helper Table: $type_extension_table</li>"]
-  [ad_decode $package_name "" "" "<li>Package Name: $package_name</li>"]
+  <li>Abstract: [expr {$abstract_p ? "True" : "False"}]</li>
+  <li>Dynamic: [expr {$dynamic_p ? "True" : "False"}]</li>
+  [expr {$table_name eq "" ? "" : "<li>Table Name: $table_name</li>"}]
+  [expr {$id_column eq "" ? "" : "<li>Primary Key: $id_column</li>"}]
+  [expr {$name_method eq "" ? "" : "<li>Name Method: $name_method</li>"}]
+  [expr {$type_extension_table eq "" ? "" : "<li>Helper Table: $type_extension_table</li>"}]
+  [expr {$package_name eq "" ? "" : "<li>Package Name: $package_name</li>"}]
 </ul>
 }]
 
@@ -53,7 +51,7 @@ set body [subst {
       <th>Table Name</th>
       <th>Column Name</th>
     </tr>
-}]    
+}]
 
 db_foreach attribute {
     select attribute_name,
@@ -89,14 +87,14 @@ append body "
     </table>"
 
     if { $i > 0 } {
-	append page "
+        append page "
 <p>
 <b>Attributes</b>:
 $body
 "
     }
 
-if { ([info exists table_name] && $table_name ne "") } {
+if { $table_name ne "" } {
 
     set body [db_string table_comment {} -default ""]
 
@@ -111,8 +109,8 @@ if { ([info exists table_name] && $table_name ne "") } {
 
     set i 0
     db_foreach attribute_comment {} {
-	incr i
-	append body "
+        incr i
+        append body "
      <tr>
       <td>[string tolower $column_name]</td>
       <td>[string tolower $data_type]</td>
@@ -124,7 +122,7 @@ if { ([info exists table_name] && $table_name ne "") } {
     </table>"
 
     if { $i > 0 } {
-	append page [subst {<p><b>Table Attributes</b>:<p>$body\n}]
+        append page [subst {<p><b>Table Attributes</b>:<p>$body\n}]
     }
 }
 
@@ -133,8 +131,8 @@ set body ""
 db_foreach package_index {} {
     incr i
     append body [subst {
-	<pre class="code">[ns_quotehtml $text]</pre>
-	<p>
+        <pre class="code">[ns_quotehtml $text]</pre>
+        <p>
     }]
 }
 

@@ -2,8 +2,7 @@ ad_library {
 
     Automated functions for acs-admin
 
-    @cvs-id $Id: apm-admin-init.tcl,v 1.3.2.2 2016/01/02 13:50:15 gustafn Exp $
-
+    @cvs-id $Id: apm-admin-init.tcl,v 1.5.2.1 2020/10/28 15:39:18 hectorr Exp $
 }
 
 # Only run this if this is openacs.org
@@ -22,7 +21,7 @@ if {0} {
         #
         ns_register_filter trace GET /repository/* repository-download
         
-        if {[info commands ::xo::db::require] ne ""} {
+        if {[namespace which ::xo::db::require] ne ""} {
             ::xo::db::require table apm_package_downloads {
                 time     timestamp
                 ip       text
@@ -59,10 +58,6 @@ if {0} {
     }
 
 }
-
-
-
-
 
 # Local variables:
 #    mode: tcl

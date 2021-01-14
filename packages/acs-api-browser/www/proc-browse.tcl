@@ -1,15 +1,15 @@
 # acs-api-browser/www/proc-browse.tcl
 ad_page_contract {
-    returns a list of all the procedures present 
+    returns a list of all the procedures present
     in server memory
 
     @author Todd Nightingale
     @creation-date 2000-7-14
-    @cvs-id $Id: proc-browse.tcl,v 1.5.2.2 2015/12/30 12:54:34 gustafn Exp $
+    @cvs-id $Id: proc-browse.tcl,v 1.10.2.1 2020/02/03 23:09:50 gustafn Exp $
 
 } {
-    { type "Public" }
-    { sort_by "file"} 
+    { type:word "Public" }
+    { orderby:token "file"}
 } -properties {
     title:onevalue
     context:onevalue
@@ -19,15 +19,15 @@ ad_page_contract {
 
 set dimensional {
     {type "Type" "Public" {
-	{All "All" ""}
-	{Public "Public" ""}
-	{Private "Private" ""}
-	{Deprecated "Deprecated" ""}
-}   }   
-    {sort_by "Sorted By" "file" {
+        {All "All" ""}
+        {Public "Public" ""}
+        {Private "Private" ""}
+        {Deprecated "Deprecated" ""}}
+    }
+    {orderby "Sorted By" "file" {
         {file "File" ""}
-        {name "Name" ""}
-}   }   
+        {name "Name" ""}}
+    }
 }
 
 set title "$type Procedures"
@@ -39,18 +39,18 @@ foreach proc [nsv_array names api_proc_doc] {
     array set doc_elements [nsv_get api_proc_doc $proc]
 
     if { $type eq "All"} {
-	lappend matches [list $proc $doc_elements(script)] 
+        lappend matches [list $proc $doc_elements(script)]
     } elseif {$type eq "Deprecated" && $doc_elements(deprecated_p)} {
-	lappend matches [list $proc $doc_elements(script)] 
+        lappend matches [list $proc $doc_elements(script)]
     } elseif {$type eq "Private" && $doc_elements(protection) eq "private" } {
-	lappend matches [list $proc $doc_elements(script)] 
+        lappend matches [list $proc $doc_elements(script)]
     } elseif {$type eq "Public" && $doc_elements(protection) eq "public" } {
-	lappend matches [list $proc $doc_elements(script)] 
-    } 
+        lappend matches [list $proc $doc_elements(script)]
+    }
 }
 
-if {$sort_by eq "file"} {
-    set matches [lsort -command ::apidoc::ad_sort_by_second_string_proc $matches]    
+if {$orderby eq "file"} {
+    set matches [lsort -command ::apidoc::ad_sort_by_second_string_proc $matches]
 } else {
     set matches [lsort -command ::apidoc::ad_sort_by_first_string_proc $matches]
 }
@@ -58,8 +58,7 @@ if {$sort_by eq "file"} {
 multirow create proc_list file proc url
 
 foreach sublist $matches {
-    set proc [lindex $sublist 0]
-    set file [lindex $sublist 1]
+    lassign $sublist proc file
     set url [api_proc_url $proc]
     multirow append proc_list $file $proc $url
 }

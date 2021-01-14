@@ -2,10 +2,10 @@ ad_page_contract {
 
     @author Timo Hentschel (timo@timohentschel.de)
     @creation-date 2005-06-05
-    @cvs-id $Id: trees-code.tcl,v 1.3.2.1 2015/09/10 08:30:23 gustafn Exp $
+    @cvs-id $Id: trees-code.tcl,v 1.4.2.1 2019/12/20 21:18:10 gustafn Exp $
 
 } {
-    {locale ""}
+    {locale:word ""}
     tree_id:naturalnum,multiple
 }
 

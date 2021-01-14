@@ -17,7 +17,7 @@ ad_page_contract {
     If it can't find one, it prompts to make new one.
 
     @author Arjun Sanyal (arjun@openforce.net)
-    @cvs-id $Id: new-root-folder-map.tcl,v 1.6.14.2 2017/02/01 16:04:17 gustafn Exp $
+    @cvs-id $Id: new-root-folder-map.tcl,v 1.7.2.1 2019/03/10 22:09:31 gustafn Exp $
 
 } -query {
     {package_id:naturalnum,notnull,notnull}
@@ -31,7 +31,7 @@ set root_folder_id [db_string has_fs_root_folder_p_select \
      -default 0 ]
 
 if {$root_folder_id == 0} {
-    # look for a fs root folder candidate, by looking for an file-storage
+    # look for a fs root folder candidate, by looking for a file-storage
     # sibling of our parent (uncle? or aunt? node). Should generalize sibling 
     # stuff, search by parent etc.
     set parent_id [site_node::get_parent \

@@ -3,9 +3,9 @@
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Aug 11, 2006
-  @cvs-id $Id: export.tcl,v 1.22.2.1 2015/09/10 08:10:41 gustafn Exp $
+  @cvs-id $Id: export.tcl,v 1.24.2.4 2020/10/07 10:09:42 gustafn Exp $
 
-  @param object_type 
+  @param object_type
 } -parameter {
   {-object_type ::xowiki::Page}
   {-objects ""}
@@ -18,22 +18,18 @@ set folder_id [::$package_id folder_id]
 #
 if {$objects eq ""} {
   set sql [$object_type instance_select_query -folder_id $folder_id -with_subtypes true]
-  xo::dc foreach instance_select $sql { set items($item_id) 1 }
+  xo::dc foreach instance_select $sql {
+    set items($item_id) 1
+  }
 } else {
-  foreach o $objects {
-    $package_id get_lang_and_name -default_lang [::xo::cc lang] -path $o lang stripped_name
-    set parent_id [$package_id get_parent_and_name -lang $lang \
-		       -path $stripped_name -parent_id $folder_id \
-		       parent local_name]
-    #ns_log notice "lookup of $o in $folder_id returns [::xo::db::CrClass lookup -name $o -parent_id $parent_id]"
-    if {[set item_id [::xo::db::CrClass lookup -name $local_name -parent_id $parent_id]] != 0} {
-      set items($item_id) 1 
-    }
+  ns_log notice "OBJECTS <$objects>"
+  foreach item_id [$package_id get_ids_for_bulk_actions $objects] {
+    set items($item_id) 1
   }
 }
 
 #
-# The exporter exports the specified objects together with implicitely
+# The exporter exports the specified objects together with implicitly
 # needed objects.
 #
 ::xowiki::exporter export [array names items]

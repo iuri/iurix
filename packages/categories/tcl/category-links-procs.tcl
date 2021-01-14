@@ -4,7 +4,7 @@ ad_library {
     @author Timo Hentschel (timo@timohentschel.de)
 
     @creation-date 04 February 2004
-    @cvs-id $Id: category-links-procs.tcl,v 1.2.8.1 2015/09/10 08:30:18 gustafn Exp $
+    @cvs-id $Id: category-links-procs.tcl,v 1.3 2017/08/07 23:48:05 gustafn Exp $
 }
 
 namespace eval category_link {}

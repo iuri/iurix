@@ -2,7 +2,7 @@ ad_page_contract {
     Views dependency information about a version.
     @author Jon Salz [jsalz@arsdigita.com]
     @creation-date 17 April 2000
-    @cvs-id $Id: version-dependencies.tcl,v 1.9.2.1 2015/09/10 08:21:03 gustafn Exp $
+    @cvs-id $Id: version-dependencies.tcl,v 1.11.2.2 2019/03/13 09:54:16 antoniop Exp $
 } {
     {version_id:naturalnum,notnull}
 }
@@ -31,27 +31,27 @@ foreach dependency_type { provide require extend embed } {
     }]
     db_foreach apm_all_dependencies {} {
 	append body "<li>[string totitle $dependency_type_prep] service $service_uri, version $service_version "
-	
+
         if { $dependency_type ne "provide" } {
 	    set href [export_vars -base version-dependency-remove {package_key dependency_id version_id dependency_type}]
             append body [subst {(<a href="[ns_quotehtml $href]">remove</a>)}]
         }
-	
+
 	# If this package provides a service, show a list of all packages that require it,
 	# or vice versa. If this package provides a service, show other packages requiring
 	# a *lower* version of the service; if it requires one, show packages providing
 	# a *higher* version.
 
-	set sign [ad_decode $dependency_type "provide" "<=" ">="]
+	set sign [expr {$dependency_type eq "provide" ? "<=" : ">="}]
 
 	set counter 0
-        set other_dependency_in [ad_decode $dependency_type "provide" "'requires','extends','embeds'" "'provides'"]
+        set other_dependency_in [expr {$dependency_type eq "provide" ? "'requires','extends','embeds'" : "'provides'"}]
 	db_foreach apm_specific_version_dependencies {} {
             incr counter
 	    if { $counter == 1 } {
 		append body "<ul>\n"
 	    }
-            switch $dep_type {
+            switch -- $dep_type {
                 provides { set dep_d provided }
                 requires { set dep_d required }
                 extends { set dep_d extended }
@@ -59,7 +59,7 @@ foreach dependency_type { provide require extend embed } {
             }
 	    set href [export_vars -base version-view {{version_id $dep_version_id}}]
 	    append body [subst {
-		<li>[string totitle $dep_d] by <a href="[ns_quotehtml $href]">$dep_pretty_name, 
+		<li>[string totitle $dep_d] by <a href="[ns_quotehtml $href]">$dep_pretty_name,
 		version $dep_version_name</a>
 	    }]
 	}

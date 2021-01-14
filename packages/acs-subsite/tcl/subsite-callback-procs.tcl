@@ -1,5 +1,3 @@
-# /packages/acs-subsite/tcl/group-callback-procs.tcl
-
 ad_library {
 
     Procs to support a simple callback mechanism that allows other
@@ -8,24 +6,48 @@ ad_library {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Feb 21 17:10:24 2001
-    @cvs-id $Id: subsite-callback-procs.tcl,v 1.7.2.3 2017/04/22 18:28:25 gustafn Exp $
+    @cvs-id $Id: subsite-callback-procs.tcl,v 1.10.2.2 2019/12/17 12:00:23 antoniop Exp $
 
 }
 
-ad_proc -public subsite_callback {
-    { -object_type "" }
-    event_type
-    object_id
-} {
-    Executes any registered callbacks for this object. 
+ad_proc -deprecated subsite_callback args {
+    Executes any registered callbacks for this object.
     <p>
     <b>Example:</b>
     <pre>
     # Execute any callbacks registered for this object type or one of
-    # it's parent object types
+    # its parent object types
     subsite_callback -object_type $object_type $object_id
     </pre>
-    
+
+
+    @author Michael Bryzek (mbryzek@arsdigita.com)
+    @creation-date 12/2000
+
+    @param object_type The object's type. We look this up in the db if
+    not specified
+
+    DEPRECATED: does not comply with OpenACS naming convention
+
+    @see subsite::callback
+} {
+    return [subsite::callback {*}$args]
+}
+
+ad_proc -public subsite::callback {
+    { -object_type "" }
+    event_type
+    object_id
+} {
+    Executes any registered callbacks for this object.
+    <p>
+    <b>Example:</b>
+    <pre>
+    # Execute any callbacks registered for this object type or one of
+    # its parent object types
+    subsite::callback -object_type $object_type $object_id
+    </pre>
+
 
     @author Michael Bryzek (mbryzek@arsdigita.com)
     @creation-date 12/2000
@@ -33,36 +55,41 @@ ad_proc -public subsite_callback {
     @param object_type The object's type. We look this up in the db if
     not specified
 } {
-
-    if { $object_type eq "" } {
-	db_1row select_object_type {
-	    select object_type
-	      from acs_objects 
-	     where object_id = :object_id
-	}
-    }
-
-    # Check to see if we have any callbacks registered for this object
-    # type or one of it's parent object types. Put the callbacks into
-    # a list as each callback may itself require a database
-    # handle. Note that we need the distinct in case two callbacks are
-    # registered for an object and it's parent object type.
-
-    set callback_list [db_list_of_lists select_callbacks {}]
-
     set node_id [ad_conn node_id]
     set package_id [ad_conn package_id]
 
-    foreach row $callback_list {
-	lassign $row callback type
+    # Check to see if we have any callbacks registered for this object
+    # type or one of its parent object types. Put the callbacks into
+    # a list as each callback may itself require a database
+    # handle. Note that we need the distinct in case two callbacks are
+    # registered for an object and its parent object type.
+    db_foreach get_callbacks {
+        with recursive object_hierarchy as (
+            select object_type, supertype
+              from acs_object_types
+             where object_type = coalesce(:object_type, (select object_type
+                                                         from acs_objects
+                                                         where object_id = :object_id))
 
-	switch -- $type {
-	    tcl { 
-		# Execute the Tcl procedure
-		$callback -object_id $object_id -node_id $node_id -package_id $package_id
-	    }
-	    default { error "Callbacks of type $type not supported" }
-	}
+            union all
+
+            select t.object_type, t.supertype
+            from acs_object_types t,
+                 object_hierarchy s
+            where t.object_type = s.supertype
+        )
+        select distinct callback, callback_type as type
+          from subsite_callbacks
+        where event_type = :event_type
+          and object_type in (select object_type from object_hierarchy)
+    } {
+        switch -- $type {
+            tcl {
+                # Execute the Tcl procedure
+                $callback -object_id $object_id -node_id $node_id -package_id $package_id
+            }
+            default { error "Callbacks of type $type not supported" }
+        }
     }
 }
 
@@ -99,10 +126,10 @@ ad_proc -public -callback subsite::url {
     -object_id:required
     {-type ""}
 } {
-    Callback for creating a URL for an object_id. THis is usually called in /o.vuh, but
+    Callback for creating a URL for an object_id. This is usually called in /o.vuh, but
     you could think of scenarios where using this hook makes sense as well.
 
-    The type let's you define what kind of URL you are looking for (e.g. admin/edit/display)
+    The type lets you define what kind of URL you are looking for (e.g. admin/edit/display)
 } -
 
 # Local variables:

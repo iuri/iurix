@@ -4,10 +4,18 @@ ad_library {
 
   @author Simon Carstensen
   @creation-date 2003-09-10
-  @cvs-id $Id: acs-service-contract-procs.tcl,v 1.1.24.1 2015/09/10 08:21:33 gustafn Exp $
+  @cvs-id $Id: acs-service-contract-procs.tcl,v 1.3 2018/07/22 11:04:43 gustafn Exp $
 }
 
-aa_register_case acs_sc_impl_new_from_spec {
+aa_register_case \
+    -procs {
+        acs_sc::contract::new_from_spec
+        acs_sc::impl::get
+        acs_sc::impl::new_from_spec
+        auth::local::authentication::Authenticate
+        auth::local::authentication::GetParameters
+    } \
+    acs_sc_impl_new_from_spec {
     Test the acs_sc::impl::new_from_spec proc.
 } {
     aa_run_with_teardown \
@@ -68,7 +76,7 @@ aa_register_case acs_sc_impl_new_from_spec {
 
             acs_sc::impl::get -impl_id $impl_id -array impl
 
-            aa_equals "pretty_name dit not get inserted correctly" $impl(impl_pretty_name) "Foo Driver"
+            aa_equals "pretty_name did not get inserted correctly" $impl(impl_pretty_name) "Foo Driver"
         }
 }
 

@@ -4,7 +4,7 @@ ad_page_contract {
   Properties allowed
   doc(title) HTML title
   head code to be entered into head of document
-  body 
+  body
   focus HTML id of form element to focus
   skip_link href of link to skip to. Should be of format #skip_link
   main_content_p if true wrap in the main content divs (if false, provide your own
@@ -13,7 +13,7 @@ ad_page_contract {
   @author Lee Denison (lee@xarg.co.uk)
   @author Don Baccus (dhogaza@pacifier.com)
 
-  $Id: plain-master.tcl,v 1.5.2.1 2015/09/12 19:00:43 gustafn Exp $
+  $Id: plain-master.tcl,v 1.9 2018/06/27 16:11:45 hectorr Exp $
 }
 
 if { ![info exists main_content_p] } {
@@ -53,7 +53,7 @@ if { [template::multirow exists navigation] } {
     }
 }
 
-# 
+#
 # User information and top level navigation links
 #
 set user_id [ad_conn user_id]
@@ -96,7 +96,7 @@ if { $untrusted_user_id == 0 } {
 #
 util_get_user_messages -multirow user_messages
 
-# 
+#
 # Set acs-lang urls
 #
 set acs_lang_url [apm_package_url_from_key "acs-lang"]
@@ -153,7 +153,7 @@ set separator [parameter::get -package_id $subsite_id -parameter ContextBarSepar
 
 #
 # Curriculum specific bar
-#   TODO: remove this and add a more systematic / package independent way 
+#   TODO: remove this and add a more systematic / package independent way
 #   TODO  of getting this content here
 #
 set curriculum_bar_p [expr {
@@ -163,22 +163,6 @@ set curriculum_bar_p [expr {
 if {![info exists skip_link]} {
     set skip_link "#content-wrapper"
 }
-
-template::head::add_meta -http_equiv "charset" -name "charset" -content "utf-8"
-template::head::add_meta -name "viewport" -content "width=device-width, initial-scale=1.0"
-template::head::add_meta -name "description" -content "IURIX - Register & Login page"
-template::head::add_meta -name "author" -content "Iuri Sampaio <iuri@iurix.com>"
-template::head::add_meta -name "keywords" -content "Tecnologia, Social corporativo, Arte e Cultura,)"
-
-
-template::head::add_script -async -src "https://www.googletagmanager.com/gtag/js?id=UA-144184532-1"
-template::head::add_javascript -script {
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments)};
-    gtag('js', new Date());
-    gtag('config', 'UA-144184532-1');
-} -order 1
-
 
 # Local variables:
 #    mode: tcl

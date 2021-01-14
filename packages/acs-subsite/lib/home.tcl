@@ -2,7 +2,7 @@
 
 ad_page_contract {
     user's workspace page
-    @cvs-id $Id: home.tcl,v 1.3.8.3 2015/09/17 11:29:52 gustafn Exp $
+    @cvs-id $Id: home.tcl,v 1.6 2018/08/12 12:12:13 gustafn Exp $
 } -properties {
     system_name:onevalue
     context:onevalue
@@ -23,7 +23,7 @@ ad_page_contract {
 set login_url [ad_get_login_url]
 set user_id [auth::require_login -account_status closed]
 
-acs_user::get -array user -include_bio -user_id $user_id
+acs_user::get -array user -user_id $user_id
 
 set account_status [ad_conn account_status]
 set subsite_url [ad_conn vhost_subsite_url]
@@ -47,10 +47,15 @@ set system_name [ad_system_name]
 set portrait_upload_url [export_vars -base "../user/portrait/upload" { { return_url [ad_return_url] } }]
 
 if {[parameter::get -parameter SolicitPortraitP -default 0]} {
-    # we have portraits for some users 
-    if {![db_0or1row get_portrait_info {}]} {
+    # we have portraits for some users
+    set portrait_id [acs_user::get_portrait_id -user_id $user_id]
+    if {$portrait_id == 0} {
 	set portrait_state "upload"
     } else {
+        content::item::get -item_id $portrait_id -array_name portrait
+        set publish_date         $portrait(publish_date)
+        set portrait_title       $portrait(title)
+        set portrait_description $portrait(description)
         if { $portrait_title eq "" } {
             set portrait_title "[_ acs-subsite.no_portrait_title_message]"
         }

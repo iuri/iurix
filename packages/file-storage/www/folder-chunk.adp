@@ -1,10 +1,10 @@
 <if @categories_p;literal@ true>
-  <if @category_links@>
+  <if @category_links@ ne "">
     <p>#file-storage.Categories#: @category_links;noquote@</p>
   </if>
 </if>
 
-<listtemplate name="contents_@folder_id@"></listtemplate>
+<listtemplate name="contents_@folder_id;literal@"></listtemplate>
 
 <if @content_size_total@ gt 0>
   <p>
@@ -16,10 +16,12 @@
   </p>
 </if>
 
-<if @feeds:rowcount@ not nil and @feeds:rowcount@ gt 0>
-  <ul>
-    <multiple name="feeds">
-      <li><a href="rss/@feeds.subscr_id@/rss.xml"><img src="/resources/acs-subsite/xml.gif" width="36" height="14" alt="RSS feed" style="border: 0; padding: 0px 5px;">@feeds.short_name@</a></li>
-    </multiple>
-  </ul>
+<if @expose_rss_p;literal@ true>
+  <if @feeds:rowcount@ not nil and @feeds:rowcount@ gt 0>
+    <ul>
+      <multiple name="feeds">
+        <li><a href="rss/@feeds.subscr_id@/rss.xml"><img src="/resources/acs-subsite/xml.gif" width="36" height="14" alt="RSS feed" style="border: 0; padding: 0px 5px;">@feeds.short_name@</a></li>
+      </multiple>
+    </ul>
+  </if>
 </if>

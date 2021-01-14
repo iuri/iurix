@@ -5,7 +5,7 @@ ad_library {
     @author Timo Hentschel (timo@timohentschel.de)
 
     @creation-date 8 January 2004
-    @cvs-id $Id: category-synonyms-procs.tcl,v 1.3.6.1 2015/09/10 08:30:18 gustafn Exp $
+    @cvs-id $Id: category-synonyms-procs.tcl,v 1.4 2017/08/07 23:48:05 gustafn Exp $
 }
 
 

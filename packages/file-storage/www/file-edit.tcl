@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Kevin Scaldeferri (kevin@arsdigita.com)
     @creation-date 5 Dec 2000
-    @cvs-id $Id: file-edit.tcl,v 1.11.2.2 2016/01/02 20:13:30 gustafn Exp $
+    @cvs-id $Id: file-edit.tcl,v 1.13 2018/01/19 12:03:41 gustafn Exp $
 } {
     file_id:naturalnum,notnull
 } -validate {
@@ -75,6 +75,7 @@ ad_form -extend -form {
     }
 } -after_submit {
     ad_returnredirect "file?file_id=$file_id"
+    ad_script_abort
 }
 
 ad_return_template

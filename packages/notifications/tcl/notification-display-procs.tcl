@@ -7,7 +7,7 @@ ad_library {
 
     @creation-date 2002-05-24
     @author Ben Adida <ben@openforce.biz>
-    @cvs-id $Id: notification-display-procs.tcl,v 1.20.2.3 2015/09/19 16:05:31 gustafn Exp $
+    @cvs-id $Id: notification-display-procs.tcl,v 1.21 2017/08/07 23:48:13 gustafn Exp $
 
 }
 

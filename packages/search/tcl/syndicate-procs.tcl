@@ -2,7 +2,7 @@ ad_library {
     Syndication callback and support routines.
 
     @author Jeff Davis (davis@xarg.net)
-    @cvs-id $Id: syndicate-procs.tcl,v 1.3.10.1 2015/09/12 19:00:45 gustafn Exp $
+    @cvs-id $Id: syndicate-procs.tcl,v 1.4 2017/08/07 23:48:29 gustafn Exp $
 }
 
 ad_proc -public -callback search::action -impl syndicate {} {

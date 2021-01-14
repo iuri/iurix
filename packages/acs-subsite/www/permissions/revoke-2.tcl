@@ -4,7 +4,7 @@ ad_page_contract {
 
   @author rhs@mit.edu
   @creation-date 2000-08-20
-  @cvs-id $Id: revoke-2.tcl,v 1.7.2.1 2015/09/10 08:21:50 gustafn Exp $
+  @cvs-id $Id: revoke-2.tcl,v 1.10 2018/04/23 21:32:46 hectorr Exp $
 } {
   object_id:naturalnum,notnull
   revoke_list:multiple
@@ -16,15 +16,15 @@ permission::require_permission -object_id $object_id -privilege admin
 
 if {$operation eq "Yes"} {
     db_transaction {
-	foreach item $revoke_list {
-	    set party_id [lindex $item 0]
-	    set privilege [lindex $item 1]
+        foreach item $revoke_list {
+            lassign $item party_id privilege
             permission::revoke -party_id $party_id -object_id $object_id -privilege $privilege
-	}
+        }
     }
 }
 
 ad_returnredirect [export_vars -base one {object_id application_url}]
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

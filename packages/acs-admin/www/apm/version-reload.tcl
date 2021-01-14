@@ -4,7 +4,7 @@ ad_page_contract {
     @param version_id The package to be processed.
     @author Jon Salz [jsalz@arsdigita.com]
     @creation-date 9 May 2000
-    @cvs-id $Id: version-reload.tcl,v 1.11.2.3 2016/05/20 19:52:59 gustafn Exp $
+    @cvs-id $Id: version-reload.tcl,v 1.16.2.1 2019/03/13 09:18:08 antoniop Exp $
 } {
     {version_id:naturalnum,notnull}
     {return_url:localurl "index"}
@@ -19,21 +19,50 @@ set context [list \
                  [list [export_vars -base version-view { version_id }] "$pretty_name $version_name"] \
                  $title]
 
-# files in $files.
-apm_mark_version_for_reload $version_id files
+#
+# Mark files in this package for reloading and return the list.
+#
+set files [apm_mark_version_for_reload $version_id]
 
 set files_to_watch [list]
 
 if { [llength $files] == 0 } {
     append body "There are no changed files to reload in this package.<p>"
 } else {
-    append body "Marked the following file[ad_decode [llength $files] 1 "" "s"] for reloading:<ul id='files'>\n"
+    append body "Marked the following file[expr {[llength $files] == 1 ? "" : "s"}] for reloading:<ul id='files'>\n"
 
-    # Source all of the marked files using the current interpreter, accumulating
-    # errors into apm_package_load_errors
+    #
+    # Source all of the marked files using the current interpreter,
+    # accumulating errors in the provided variable
+    #
     array set errors [list]
-    catch { apm_load_any_changed_libraries errors }
+    ad_try {
+        apm_load_any_changed_libraries -version_files $files errors
 
+    } on error {errorMsg} {
+        ns_log notice "version-reload: apm_load_any_changed_libraries lead to $errorMsg"
+        set errHTML "<p>Error during apm_load_any_changed_libraries:</p><pre>[ns_quotehtml $errorMsg]</pre>"
+
+    } on ok {r} {
+        set errHTML ""
+    }
+
+    ns_log notice "version-reload: apm_load_any_changed_libraries reports [array size errors] errors"
+    
+    if {[array size errors] > 0 || $errHTML ne ""} {
+        #
+        # When something went wrong during loading, we might have
+        # messed up already the blueprint for the current
+        # interpreter. So make sure, this interpreter is not used
+        # anymore.
+        #
+        if {[ns_info name] eq "NaviServer"} {
+            ns_ictl markfordelete
+        } else {
+            ns_markfordelete
+        }
+    }
+    
     if {[info exists errors($package_key)]} {
         array set package_errors $errors($package_key)
     } else {
@@ -80,6 +109,7 @@ if { [llength $files] == 0 } {
         </p>
     "
     }
+    append body $errHTML
 }
 
 
@@ -100,10 +130,6 @@ append body [subst {
     <li><a href="$return_url">Return</a></li>
     </ul>
 }]
-
-# template::head::add_javascript -src "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
-
-ad_return_template
 
 #
 # Local variables:

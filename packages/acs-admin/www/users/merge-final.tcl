@@ -3,7 +3,7 @@ ad_page_contract {
 
     TODO: Support to merge more than two accounts at the same time
 
-    @cvs-id $Id: merge-final.tcl,v 1.6.2.2 2016/01/02 21:14:10 gustafn Exp $
+    @cvs-id $Id: merge-final.tcl,v 1.9 2018/04/25 08:49:03 gustafn Exp $
 } {
     to_user_id:naturalnum,notnull
     from_user_id:naturalnum,notnull
@@ -31,6 +31,7 @@ set context [list [list "./" "Merge"] "Merge"]
 
 if { !$merge_p } {
     ad_returnredirect "/acs-admin/users"
+    ad_script_abort
 } else {
     set final_results [callback merge::MergePackageUser \
                            -from_user_id $from_user_id \
@@ -58,16 +59,17 @@ if { !$merge_p } {
 		      -operation MergeUser \
 		      -call_args $parameters]
 
-    # TODO: Add to the SC implementations of the SC
-    # an output to improve the  msg's of the the final 
-    # status of auth_authentication merge.
-    # It could be a list as we did with callbacks implementations.
+    # TODO: Add to the SC implementations of the SC an output to
+    # improve the messages of the final status of auth_authentication
+    # merge.  It could be a list as we did with callbacks
+    # implementations.
+    #
     #     foreach item $user_res {
-    # 	append results "<li>[lindex $item 0]<ul>"
-    # 	for { set idx 1 } { $idx < [llength $item] } {incr idx} {
-    # 	    append results "<li>[lindex $item $idx]</li>"
-    # 	}
-    # 	append results "</ul></li></ul>"
+    # 	     append results "<li>[lindex $item 0]<ul>"
+    # 	     for { set idx 1 } { $idx < [llength $item] } {incr idx} {
+    # 	        append results "<li>[lindex $item $idx]</li>"
+    # 	     }
+    # 	     append results "</ul></li></ul>"
     #     }
     #     append results "</ul>"
 

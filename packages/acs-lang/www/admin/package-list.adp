@@ -8,7 +8,7 @@
 
 <include src="/packages/acs-lang/lib/conflict-link" locale="@current_locale;literal@" >
 
-<if @locale_enabled_p@ and @site_wide_admin_p@>
+<if @locale_enabled_p;literal@ true and @site_wide_admin_p;literal@ true>
   <ul class="action-links">
     <li><a href="@import_all_url@" title="#acs-lang.Import_all_messages__title#">#acs-lang.Import_all_messages_for_this_locale#</a></li>
     <li> <a href="@export_all_url@" title="#acs-lang.Export_all_messages__title#">#acs-lang.Export_all_messages_for_this_locale#</a></li>
@@ -25,6 +25,7 @@
           <th>#acs-lang.Package#</th>
           <th>#acs-lang.Translated#</th>
           <th>#acs-lang.Untranslated#</th>
+          <th>#acs-lang.Deleted#</th>
           <th>#acs-lang.Total#</th>
         </tr>
         <multiple name="packages">
@@ -43,6 +44,11 @@
             <td align="right">
               <if @packages.num_untranslated_pretty@ ne 0>
                 <a href="@packages.view_untranslated_url@" title="View all untranslated messages in package">@packages.num_untranslated_pretty@</a>
+              </if>
+            </td>
+            <td align="right">
+              <if @packages.num_deleted_pretty@ ne 0>
+                <a href="@packages.view_deleted_url@" title="View all deleted messages in package">@packages.num_deleted_pretty@</a>
               </if>
             </td>
             <td align="right">

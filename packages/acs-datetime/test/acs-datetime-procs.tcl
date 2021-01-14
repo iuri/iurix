@@ -3,7 +3,7 @@ ad_library {
 
     @author Simon Carstensen
     @creation-date 16 Nov 2003
-    @cvs-id $Id: acs-datetime-procs.tcl,v 1.1.20.1 2015/09/10 08:21:22 gustafn Exp $
+    @cvs-id $Id: acs-datetime-procs.tcl,v 1.2 2017/08/07 23:47:55 gustafn Exp $
 }
 
 aa_register_case dt_valid_time_p {

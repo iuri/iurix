@@ -7,7 +7,7 @@
 --
 -- @author rhs@mit.edu
 --
--- @cvs-id $Id: acs-relationships-create.sql,v 1.32.4.3 2016/08/31 18:57:41 gustafn Exp $
+-- @cvs-id $Id: acs-relationships-create.sql,v 1.34 2018/11/01 08:38:00 gustafn Exp $
 --
 
 ----------------------------------------------------------------
@@ -75,7 +75,7 @@ comment on table acs_rel_types is $$
    'person', 'employee', 0, null,
    'company', 'employer', 0, null)
  </pre></blockquote>
- defines an "employment" relationship type that can be expressed in
+ defines an "employment" relationship type that can be expressed
  in natural language as:
  <blockquote>
  A person may be the employee of zero or more companies, and a company

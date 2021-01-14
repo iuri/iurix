@@ -2,7 +2,7 @@ ad_page_contract {
     Adds a parameter to a version.
     @author Todd Nightingale [tnight@arsdigita.com]
     @creation-date 17 April 2000
-    @cvs-id $Id: parameter-edit.tcl,v 1.7.2.2 2015/09/18 07:39:03 gustafn Exp $
+    @cvs-id $Id: parameter-edit.tcl,v 1.8 2017/08/07 23:47:45 gustafn Exp $
 } {
     parameter_id:notnull,naturalnum
     version_id:notnull,naturalnum

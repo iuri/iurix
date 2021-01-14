@@ -1,13 +1,10 @@
-# 
-
 ad_library {
     
     Procedures for content types
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
-    @arch-tag: 4a8a3652-fd5d-49aa-86fc-fade683f06ce
-    @cvs-id $Id: content-type-procs.tcl,v 1.13.2.1 2015/09/10 08:21:17 gustafn Exp $
+    @cvs-id $Id: content-type-procs.tcl,v 1.17.2.1 2019/04/12 21:19:13 gustafn Exp $
 }
 
 namespace eval ::content::type {}
@@ -52,7 +49,7 @@ ad_proc -public content::type::delete {
     @param content_type
     @param drop_children_p
     @param drop_table_p
-    @param drop_objets_p Drop the objects of this content type along with all entries in cr_items and cr_revisions. Will not be done by default.
+    @param drop_objects_p Drop the objects of this content type along with all entries in cr_items and cr_revisions. Will not be done by default.
 } {
     if {$drop_objects_p == "f"} {
 	return [package_exec_plsql -var_list [list \
@@ -377,7 +374,7 @@ ad_proc -public content::type::content_type_p {
     -content_type:required
     -mime_type:required
 } {
-    Checks if the mime_type is of the content_type, e.g if application/pdf is of content_type "image" (which it should not...)
+    Checks if the mime_type is of the content_type, e.g. if application/pdf is of content_type "image" (which it should not...)
 
     Cached
 
@@ -387,11 +384,11 @@ ad_proc -public content::type::content_type_p {
     return [util_memoize [list content::type::content_type_p_not_cached -mime_type $mime_type -content_type $content_type]]
 }
 
-ad_proc -public content::type::content_type_p_not_cached {
+ad_proc -private content::type::content_type_p_not_cached {
     -content_type:required
     -mime_type:required
 } {
-    Checks if the mime_type is of the content_type, e.g if application/pdf is of content_type "image" (which it should not...)
+    Checks if the mime_type is of the content_type, e.g. if application/pdf is of content_type "image" (which it should not...)
     @param content_type content type to check against
     @param mime_type mime type to check for
 } {

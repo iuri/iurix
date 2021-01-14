@@ -1,5 +1,5 @@
 ad_page_contract {
-    @cvs-id $Id: testcase.tcl,v 1.13.2.5 2016/12/05 11:33:15 michaela Exp $
+    @cvs-id $Id: testcase.tcl,v 1.22.2.3 2019/09/02 14:41:34 hectorr Exp $
 } {
     testcase_id:word,notnull
     package_key:token
@@ -21,6 +21,8 @@ ad_page_contract {
 set title "Test case $testcase_id"
 set context [list $title]
 
+template::head::add_css -href /resources/acs-automated-testing/tests.css
+
 if {$quiet} {
     set filter { and result = 'fail'}
 } else {
@@ -36,7 +38,17 @@ db_multirow tests_quiet summary {
 }
 
 
-db_multirow tests acs-automated-testing.testcase_query {}
+db_multirow tests acs-automated-testing.testcase_query {
+    if {![string match "*<a href=*>" $notes]} {
+        #
+        # Allow only "<a href=" links unescaped in log entries, such
+        # that entries like ... a < b ... continue to work, but detail
+        # links can be used (we should probably add an additional field +
+        # interface to the data model)
+        #
+        set notes [ns_quotenhtml $notes]
+    }
+}
 
 if {![db_0or1row acs-automated-testing.get_testcase_fails_count {
     select fails
@@ -47,17 +59,23 @@ if {![db_0or1row acs-automated-testing.get_testcase_fails_count {
 }
 
 set testcase_bodys {}
+set testcase_bugs ""
+set testcase_procs ""
+set testcase_cats ""
+set testcase_inits ""
+
 foreach testcase [nsv_get aa_test cases] {
-    if {$testcase_id eq [lindex $testcase 0] && $package_key eq [lindex $testcase 3]} {
-        set testcase_desc     [lindex $testcase 1]
-        set testcase_file     [lindex $testcase 2]
-        set testcase_cats     [join [lindex $testcase 4] ", "]
-        set testcase_inits    [join [lindex $testcase 5] ", "]
-        set testcase_on_error [lindex $testcase 6]
-        set testcase_bodys    [lindex $testcase 7]
-        set testcase_error_level [lindex $testcase 8]
-        set testcase_bugs     [lindex $testcase 9]
-        set testcase_procs    [lindex $testcase 10]
+    if {$testcase_id eq [lindex $testcase 0]
+        && $package_key eq [lindex $testcase 3]
+    } {
+        lassign $testcase . testcase_desc testcase_file . \
+            testcase_cats testcase_inits \
+            testcase_on_error testcase_bodys testcase_error_level \
+            testcase_bugs testcase_procs testcase_urls
+
+        set testcase_cats  [join [lsort $testcase_cats] ", "]
+        set testcase_inits [join [lsort $testcase_inits] ", "]
+        break
     }
 }
 
@@ -75,13 +93,21 @@ foreach p $testcase_procs {
 }
 set proc_blurb [join $proc_list ", "]
 
+set url_list [list]
+foreach url $testcase_urls {
+    set path packages/$package_key/www/$url.tcl
+    set href [export_vars -base "/api-doc/content-page-view" { path {source_p 1} }]
+    lappend url_list [subst {<a href="[ns_quotehtml $href]">$url</a>}]
+}
+set url_blurb [join $url_list ", "]
+
 
 template::multirow create bodys body_number body
 if {[llength $testcase_bodys] == 0} {
     set testcase_desc ""
     set testcase_file ""
 } else {
-    set body_count 0
+    set body_count 1
 
     #
     # Work out the URL for this directory (stripping off the file element).
@@ -97,7 +123,9 @@ if {[llength $testcase_bodys] == 0} {
         #
         regsub -all {aa_call_component\s+(["]?)([^\s]*)(["]?)} $body \
             "aa_call_component <a href='$url\\&component_id=\\2'>\\1\\2\\3</a>" body
-        template::multirow append bodys $body_count $body
+        template::multirow append bodys \
+            $body_count \
+            [::apidoc::tclcode_to_html -scope "" -proc_namespace "" $body]
         incr body_count
     }
 }
@@ -107,32 +135,18 @@ set resource_file_url [export_vars -base init-file-resource {
     {absolute_file_path $testcase_file}
 }]
 
-set rerun_url [export_vars -base rerun {testcase_id package_key quiet {return_url [ad_return_url]}}]
+set rerun_url [export_vars -base rerun {
+    testcase_id package_key quiet {return_url [ad_return_url]}
+}]
 
 if {$return_url eq ""} {
-  set return_url [export_vars -base . { { view_by testcase } quiet { by_package_key $package_key } }]
+    set return_url [export_vars -base . {
+        { view_by testcase } quiet { by_package_key $package_key }
+    }]
 }
 
 set quiet_url "[export_vars -base testcase -entire_form -exclude {quiet}]&quiet=1"
 set verbose_url "[export_vars -base testcase -entire_form -exclude {quiet}]&quiet=0"
-template::head::add_style \
-    -style "
-.description h2 { 1.5em; }
-.fail {
-      font-weight: bold;
-      color: red;
-}
-.ok {
-      font-weight: bold;
-      color: green;
-}
-dt {
-      font-weight: bold
-}
-th {
-      background: #c0c0c0;
-}
-"
 
 ad_return_template
 

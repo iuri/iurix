@@ -1,8 +1,7 @@
-
-<property name="context">{/doc/acs-mail-lite {ACS Mail Services Lite}} {User Documentation for ACS Mail Lite}</property>
-<property name="doc(title)">User Documentation for ACS Mail Lite</property>
 <master>
-<h1>User Documentation for ACS Mail Lite</h1>
+<property name="doc(title)">@title;noquote@</property>
+<property name="context">@context;noquote@</property>
+<h1>@title@</h1>
 
 Acs Mail Lite handles sending of email via sendmail or smtp and
 includes a bounce management system for invalid email accounts.
@@ -47,10 +46,10 @@ refusing emails. This value can be changed with the parameter
 his email account gets disabled from receiving any more mails from
 the system by setting the email_bouncing_p flag to t. This value
 can be changed with the parameter "MaxBounceCount".</li><li>To notify users that they will not receive any more mails and
-to tell them how to reenable the email account in the system again,
-a notification email gets sent every 7 days (configurable) up to 4
-times (configurable) that contains a link to reenable the email
-account.</li>
+to tell them how to re-enable the email account in the system
+again, a notification email gets sent every 7 days (configurable)
+up to 4 times (configurable) that contains a link to re-enable the
+email account.</li>
 </ul>
 
 To use this system here is a quick guide how to do it with postfix.
@@ -66,7 +65,7 @@ database</li>
 </ul>
 
 In case of multiple services on one system, create a bounce email
-for each of them (e.g. changeing "bounce" to
+for each of them (e.g. changing "bounce" to
 "bounce_service1") and create a new user that runs the
 aolserver process for each of them. You do not want to have
 service1 deal with bounces for service2.

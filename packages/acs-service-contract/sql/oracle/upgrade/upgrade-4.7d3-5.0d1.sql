@@ -1,4 +1,4 @@
--- $Id: upgrade-4.7d3-5.0d1.sql,v 1.1.24.1 2017/04/21 16:21:48 gustafn Exp $
+-- $Id: upgrade-4.7d3-5.0d1.sql,v 1.2 2017/08/07 23:47:57 gustafn Exp $
 
 
 create or replace package acs_sc_msg_type

@@ -7,7 +7,7 @@
 --
 -- @author jon@jongriffin.com, dhogaza@pacifier.com
 -- @creation-date 2001-09-02
--- @cvs-id $Id: ref-timezones-create.sql,v 1.12.4.1 2017/04/22 12:07:20 gustafn Exp $
+-- @cvs-id $Id: ref-timezones-create.sql,v 1.13 2017/08/07 23:48:14 gustafn Exp $
 
 -- DRB: PostgreSQL has its own ideas about timezones and input/output conversions.
 -- It natively supports a subset of the Unix timezone database, and external

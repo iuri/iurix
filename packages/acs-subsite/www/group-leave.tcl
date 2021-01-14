@@ -1,9 +1,9 @@
 ad_page_contract {
     Leave the group
-    
+
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-08-07
-    @cvs-id $Id: group-leave.tcl,v 1.3.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: group-leave.tcl,v 1.7 2018/07/17 11:10:49 hectorr Exp $
 } {
     {group_id:naturalnum,notnull {[application_group::group_id_from_package_id]}}
     return_url:localurl,optional
@@ -22,19 +22,20 @@ if { $member_p } {
                     -object_id_two $user_id]
 
     db_transaction {
-	relation_remove $rel_id
+        relation_remove $rel_id
     } on_error {
-	ad_return_error "Error creating the relation" "We got the following error while trying to remove the relation: <pre>$errmsg</pre>"
-	ad_script_abort
+        ad_return_error "Error creating the relation" "We got the following error while trying to remove the relation: <pre>$errmsg</pre>"
+        ad_script_abort
     }
 
 }
 
-if { (![info exists return_url] || $return_url eq "") } {
+if { ![info exists return_url] || $return_url eq "" } {
     set return_url "../"
 }
 
 ad_returnredirect -message "You have left the group \"$group_info(group_name)\"." $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

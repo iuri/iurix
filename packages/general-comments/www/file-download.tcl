@@ -8,7 +8,7 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: file-download.tcl,v 1.4.2.1 2015/09/12 11:06:35 gustafn Exp $
+    @cvs-id $Id: file-download.tcl,v 1.6 2018/01/20 22:56:50 gustafn Exp $
 } {
     item_id:naturalnum,notnull
 }
@@ -17,6 +17,7 @@ ad_page_contract {
 permission::require_permission -object_id $item_id -privilege read
 
 cr_write_content -item_id $item_id
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

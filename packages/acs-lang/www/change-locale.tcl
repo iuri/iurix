@@ -3,6 +3,12 @@ ad_page_contract {
 } {
     user_locale
     return_url:localurl
+} -validate {
+    valid_user_locale -requires user_locale {
+        if {$user_locale ni [lang::system::get_locales]} {
+            ad_complain "invalid user_locale"
+        }
+    }
 }
 
 if { [catch {lang::user::set_locale $user_locale} errmsg] } {
@@ -11,6 +17,7 @@ if { [catch {lang::user::set_locale $user_locale} errmsg] } {
 } else {
     ad_returnredirect $return_url
 }
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

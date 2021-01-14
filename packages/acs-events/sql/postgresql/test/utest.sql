@@ -5,7 +5,7 @@
 -- @author jowell@jsabino.com
 -- @creation-date 2001-06-26
 --
--- $Id: utest.sql,v 1.4 2013/03/30 13:00:30 gustafn Exp $
+-- $Id: utest.sql,v 1.5 2018/04/02 17:40:15 gustafn Exp $
 
 
 
@@ -40,7 +40,7 @@ BEGIN
 		'1',
 		'0',
 		'f',
-		'f' -- we dont want to raise an exception here
+		'f' -- we don't want to raise an exception here
 		);
 
 

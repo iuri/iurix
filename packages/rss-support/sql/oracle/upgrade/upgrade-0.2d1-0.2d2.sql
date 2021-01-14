@@ -1,9 +1,9 @@
 --
 -- Upgrade script
 --
--- Change service contract operation names to use lowercase like the PosgreSQL version.
+-- Change service contract operation names to use lowercase like the PostgreSQL version.
 --
--- $Id: upgrade-0.2d1-0.2d2.sql,v 1.2 2003/05/17 11:19:24 jeffd Exp $
+-- $Id: upgrade-0.2d1-0.2d2.sql,v 1.3 2018/04/04 08:11:26 hectorr Exp $
 --
 
 update acs_sc_operations

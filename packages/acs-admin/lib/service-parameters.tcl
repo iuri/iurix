@@ -1,21 +1,35 @@
-#
-# Service parameters list
-#
+ad_include_contract {
 
-if { ![acs_user::site_wide_admin_p] } {
-    ad_return_forbidden \
-        "Permission Denied" \
-        "<blockquote>You don't have permission to view this page.</blockquote>"
-    ad_script_abort
+    Service parameters list
+
+} {
+} -validate {
+    swa_p {
+        if { ![acs_user::site_wide_admin_p] } {
+            ad_return_forbidden
+        }
+    }
 }
 
 set user_id [ad_conn user_id]
 set swadmin_p 0
-db_multirow -extend { url admin_url param_url sitewide_admin_url} packages services_select {} {
+db_multirow -extend { url admin_url param_url sitewide_admin_url} packages services_select {
+    select package_id,
+           ap.package_key,
+           pretty_name as instance_name,
+           (select count(*) from apm_parameters
+             where package_key = ap.package_key) as parameter_count
+    from apm_packages ap,
+         apm_package_types
+    where ap.package_key = apm_package_types.package_key
+    and package_type = 'apm_service'
+    and ap.package_key <> 'acs-subsite'
+    order by instance_name
+} {
     set root_dir [acs_package_root_dir $package_key]
     set sitewide_admin_url ""
     if { [file exists $root_dir/www/] } {
-        set url [apm_package_url_from_key $package_key]
+        set url [apm_package_url_from_id $package_id]
         if { $url ne "" && [file exists $root_dir/www/admin/] } {
             set admin_url "${url}admin/"
         }
@@ -66,7 +80,7 @@ template::list::create \
             link_url_col sitewide_admin_url
             link_html { title "\#acs-admin.Service_administration\#" }
             display_template {<if @packages.sitewide_admin_url@ not nil>\#acs-admin.Administration\#</if>}
-            hide_p {[ad_decode $swadmin_p 1 0 1]}
+            hide_p {[string is false $swadmin_p]}
             html {align left}
         }
         parameters {

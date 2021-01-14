@@ -6,7 +6,7 @@
 <h1>ACS Service Contract Documentation</h1>
 <h2>  Why</h2>
 <p>    To facilitate greater code reuse, application integration, 
-    and package extensibility within the OpenACS.</p><p>    To do this acs-service-contract defines an api for the creation
+    and package extensibility within the OpenACS.</p><p>    To do this acs-service-contract defines an API for the creation
     of interfaces and discovery of interface implementations.</p><h2>  Background</h2>
 <p>    Most component systems are based on the use of interfaces. Interfaces
     allow components to create contracts which define their functional
@@ -22,7 +22,7 @@
     calls on an interface implementation. The dispatch means
     is only available through tcl. </p><p>    Interface Discovery is available programmatically as well as via
     documentation through ad_proc.</p><p>    The Service Contract interface specification was inspired by
-    WDSL, the interface specfication for web services.</p><h2>  Hitchiker's Guide to Service Contract Definitions</h2>
+    WDSL, the interface specification for web services.</p><h2>  Hitchiker's Guide to Service Contract Definitions</h2>
 <ul>
 <li>contract - analogous to interface, contracts serve as logical 
                   containers for operations.</li>
@@ -57,7 +57,7 @@
 <ul>
 <li>(sql)::
                  acs_sc_msg_type__new (name, spec):<p>           defines a type based on spec. Spec should
-           be a string (possibly emtpy) that defines the
+           be a string (possibly empty) that defines the
            names and types that compose this type.
            example <code>ObjectDisplay.Name.InputType</code> as name
            <code>object_id:integer</code> as spec.</p></li>
@@ -85,7 +85,7 @@
 <ul>
 <li>(tcl) acs_sc_binding_exists_p (contract, impl): 
                 returns boolean whether a binding exists between
-                a given contract name and implmentation.</li>
+                a given contract name and implementation.</li>
 </ul>
 <h3>     Dispatching    </h3>
 <ul>
@@ -94,7 +94,7 @@
 </ul>
 <h2>  Examples</h2>
 <p>    Included in the service contract package are examples for oracle
-    and postgresql of a trivial contract.</p><p>    Also the search contract functions as a non-trivial core contract
+    and PostgreSQL of a trivial contract.</p><p>    Also the search contract functions as a non-trivial core contract
     used by openacs4.</p><h2>  Further Reading</h2>
 <p>     Abstract Factory Pattern - GOF </p><p>     Component Systems -
 Clemens Syzperski</p><p>     WSDL Spec</p>

@@ -6,10 +6,10 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Fri Feb  9 20:27:26 2001
-    @cvs-id $Id: auto-mount.tcl,v 1.5.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: auto-mount.tcl,v 1.8 2018/02/02 00:05:53 gustafn Exp $
 
 } {
-    package_key:notnull
+    package_key:token,notnull
     node_id:naturalnum,notnull
     {return_url:localurl ""}
 }
@@ -21,6 +21,7 @@ if {$return_url eq ""} {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

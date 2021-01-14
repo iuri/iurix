@@ -3,8 +3,7 @@
 -- 
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2004-07-18
--- @arch-tag: e3c4c07f-a3cc-480f-a06f-7ffd30e5606f
--- @cvs-id $Id: upgrade-5.1.2d1-5.1.2d2.sql,v 1.2.18.1 2017/04/21 14:53:07 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.1.2d1-5.1.2d2.sql,v 1.4 2018/08/15 16:48:01 gustafn Exp $
 --
 
 

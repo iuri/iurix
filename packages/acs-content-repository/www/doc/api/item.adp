@@ -11,10 +11,10 @@ content_item</p>
 <li><a href="#overview">Overview</a></li><li><a href="#related">Related Objects</a></li><li><a href="#api">API</a></li>
 </ul>
 <p> </p>
-<h3><a name="overview">Overview</a></h3>
+<a name="overview" id="overview"><h3>Overview</h3></a>
 <p>Content items store the overview of the content published on a
 website. The actual content is stored in content revisions. It is
-implemented this way so that there can be mulitple versions of the
+implemented this way so that there can be multiple versions of the
 actual content while the main idea remains constant. For example:
 If there is a review for the movie "Terminator," there
 will exist a content item by the name "terminator" with
@@ -22,11 +22,10 @@ all the right parameters (supertype, parent, etc), there will also
 exist at least one content revision pointing to this item with the
 actual review content.</p>
 <p> </p>
-<h3><a name="related">Related Objects</a></h3>
-
-See also: content_revision, content_folder
+<a name="related" id="related"><h3>Related Objects</h3></a>
+ See also: content_revision, content_folder
 <p> </p>
-<h3><a name="api">API</a></h3>
+<a name="api" id="api"><h3>API</h3></a>
 <ul>
 <li>
 <font size="+1">Function:</font> content_item.get_content_type
@@ -346,7 +345,7 @@ item has n relations, min_n &lt; n &lt; max_n 3) any
 <tr>
 <th align="left">Author:</th><td align="left">Michael Pih</td>
 </tr><tr>
-<th align="left">Returns:</th><td align="left">'t' if the item is publishable in it&#39;s
+<th align="left">Returns:</th><td align="left">'t' if the item is publishable in its
 present state, Otherwise, returns 'f'</td>
 </tr><tr><th align="left" colspan="2">Parameters:</th></tr><tr><td></td></tr><tr><td align="left" colspan="2"><blockquote><table border="0" cellpadding="0" cellspacing="1"><tr>
 <th align="right" valign="top">item_id The:</th><td>  </td><td>item ID of the potential parent</td>
@@ -448,11 +447,11 @@ item&#39;s name</td>
 </tr><tr>
 <th align="right" valign="top">nls_language:</th><td>  </td><td>The language for the item, used for Intermedia search</td>
 </tr><tr>
-<th align="right" valign="top">text:</th><td>  </td><td>The text content of the new revision, 4000 charcters maximum.
+<th align="right" valign="top">text:</th><td>  </td><td>The text content of the new revision, 4000 characters maximum.
 Cannot be specified simultaneously with the <kbd>data</kbd>
 parameter</td>
 </tr><tr>
-<th align="right" valign="top">data:</th><td>  </td><td>The blob content of the new revison. Cannot be specified
+<th align="right" valign="top">data:</th><td>  </td><td>The blob content of the new revision. Cannot be specified
 simultaneously with the <kbd>text</kbd> parameter</td>
 </tr><tr>
 <th align="right" valign="top">relation_tag:</th><td>  </td><td>If a parent-child relationship is registered for these content
@@ -742,5 +741,5 @@ procedure write_to_file (
 </ul>
 <p> </p>
 
-Last Modified: $&zwnj;Id: item.html,v 1.3.18.3 2017/04/21 14:53:08
-gustafn Exp $
+Last Modified: $&zwnj;Id: item.html,v 1.6 2018/04/11 21:35:06 hectorr Exp
+$

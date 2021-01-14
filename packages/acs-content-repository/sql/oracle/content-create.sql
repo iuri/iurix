@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: content-create.sql,v 1.30.2.1 2017/03/03 08:41:40 gustafn Exp $
+-- $Id: content-create.sql,v 1.31.2.1 2019/08/14 07:34:34 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -490,7 +490,7 @@ comment on table cr_folder_type_map is '
   A one-to-many mapping table of content folders to content types. 
   Basically, this table restricts the content types a folder may contain.
   Future releases will add numeric and tagged constraints similar to
-  thos available for content types.  
+  those available for content types.  
 ';
 
 -- RI Indexes 

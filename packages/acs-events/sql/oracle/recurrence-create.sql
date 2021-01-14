@@ -2,7 +2,7 @@
 --
 -- Support for temporal recurrences
 --
--- $Id: recurrence-create.sql,v 1.3 2003/09/30 12:10:02 mohanp Exp $
+-- $Id: recurrence-create.sql,v 1.4 2018/03/25 20:56:30 hectorr Exp $
 
 -- These columns describe how an event recurs.  The are modeled on the Palm DateBook.
 -- The interval_type 'custom' indicates that the PL/SQL function referenced in
@@ -83,7 +83,7 @@ create table recurrences (
 create index recurrences_interval_type_idx on recurrences(interval_type);
 
 comment on table recurrences is '
-    Desribes how an event recurs.
+    Describes how an event recurs.
 ';
 
 comment on column recurrences.interval_type is '

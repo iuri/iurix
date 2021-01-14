@@ -1,12 +1,10 @@
-# /packages/acs-subsite/www/admin/groups/one.tcl
-
 ad_page_contract {
     Change default join policy for a group type.
 
     @author Oumi Mehrotra (oumi@arsdigita.com)
 
     @creation-date 2001-02-23
-    @cvs-id $Id: change-join-policy-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: change-join-policy-2.tcl,v 1.7.2.1 2019/05/16 09:54:29 gustafn Exp $
 } {
     group_type:notnull
     default_join_policy:notnull
@@ -20,27 +18,32 @@ if { ![db_0or1row select_pretty_name {
      where t.object_type = :group_type
        and t.object_type = gt.group_type(+)
 }] } {
-    ad_return_error "Group type doesn't exist" "Group type \"$group_type\" doesn't exist"
-    return
+    ad_return_error \
+        "Group type doesn't exist" \
+        "Group type \"$group_type\" doesn't exist"
+    ad_script_abort
 }
 
 if {$dynamic_p != "t" } {
-    ad_return_error "Cannot administer group type" "Group type \"$group_type\" can only be administered by programmers"
+    ad_return_error \
+        "Cannot administer group type" \
+        "Group type \"$group_type\" can only be administered by programmers"
+    ad_script_abort
 }
 
 
 if {!$group_type_exists_p} {
     db_dml set_default_join_policy {
-	insert into group_types
-	(group_type, default_join_policy)
-	values
-	(:group_type, :default_join_policy)
+        insert into group_types
+        (group_type, default_join_policy)
+        values
+        (:group_type, :default_join_policy)
     }
 } else {
     db_dml update_join_policy {
-	update group_types
-	set default_join_policy = :default_join_policy
-	where group_type = :group_type
+        update group_types
+        set default_join_policy = :default_join_policy
+        where group_type = :group_type
     }
 }
 
@@ -49,6 +52,7 @@ if {$return_url eq ""} {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

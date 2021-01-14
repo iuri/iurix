@@ -3,17 +3,15 @@
 <property name="doc(title)">Permissions Design</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="permissions-requirements" leftLabel="Prev"
-		    title="
-Chapter 15. Kernel Documentation"
-		    rightLink="groups-requirements" rightLabel="Next">
-		<div class="sect1">
+			leftLink="permissions-requirements" leftLabel="Prev"
+			title="Chapter 15. Kernel
+Documentation"
+			rightLink="groups-requirements" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="permissions-design" id="permissions-design"></a>Permissions Design</h2></div></div></div><div class="authorblurb">
-<p>By John Prevost and <a class="ulink" href="http://planitia.org" target="_top">Rafael H. Schloming</a>
-</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><div class="sect2">
+<a name="permissions-design" id="permissions-design"></a>Permissions Design</h2></div></div></div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">By John Prevost and <a class="ulink" href="http://planitia.org" target="_top">Rafael H.
+Schloming</a>
+</span></p><span style="color: red">&lt;/authorblurb&gt;</span><div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="permissions-design-essentials" id="permissions-design-essentials"></a>Essentials</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc;">
 <li class="listitem"><p>Tcl in <code class="computeroutput">packages/acs-kernel</code>
@@ -275,8 +273,8 @@ Notes</strong></span></td><td><span class="strong"><strong>When?</strong></span>
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="permissions-requirements" leftLabel="Prev" leftTitle="Permissions Requirements"
-		    rightLink="groups-requirements" rightLabel="Next" rightTitle="Groups Requirements"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="kernel-doc" upLabel="Up"> 
-		
+			leftLink="permissions-requirements" leftLabel="Prev" leftTitle="Permissions Requirements"
+			rightLink="groups-requirements" rightLabel="Next" rightTitle="Groups Requirements"
+			homeLink="index" homeLabel="Home" 
+			upLink="kernel-doc" upLabel="Up"> 
+		    

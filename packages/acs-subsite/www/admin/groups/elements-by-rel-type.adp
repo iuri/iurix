@@ -1,6 +1,6 @@
 <ol>
 
-<if @rels:rowcount@ eq 0>
+<if @rels:rowcount;literal@ eq 0>
   <li>There are no allowable relationship types for this group</li>
 </if>
 
@@ -32,11 +32,11 @@
         <li>#acs-subsite.Administration#
           <ul>
             <if @create_p@ true and @rels.rel_type_valid_p@ true>
-              <li><a href="@relations_add_url@">Add @rels.role_pretty_name@</a> </li>
+              <li><a href="@rels.relations_add_url@">Add @rels.role_pretty_name@</a> </li>
             </if>
             <li>Relational segment: 
               <if @rels.segment_id@ nil>
-                <em>#acs-subsite.none#</em> (<a href="../rel-segments/new?group_id=@group_id@&amp;rel_type=@rels.rel_type@&amp;return_url=@return_url_enc@">create segment</a>)
+                <em>#acs-subsite.none#</em> (<a href="@rels.create_rel_segment_url@">create segment</a>)
               </if>
               <else>
                 <a href="../rel-segments/one?segment_id=@rels.segment_id@">@rels.segment_name@</a>

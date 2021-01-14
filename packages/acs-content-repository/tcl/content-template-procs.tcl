@@ -1,13 +1,10 @@
-# 
-
 ad_library {
     
-    Procudures for content template
+    Procedures for content template
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2004-06-09
-    @arch-tag: a2fad1c8-17eb-412c-a62e-9704d346b27b
-    @cvs-id $Id: content-template-procs.tcl,v 1.8.2.1 2015/09/10 08:21:17 gustafn Exp $
+    @cvs-id $Id: content-template-procs.tcl,v 1.12 2018/08/15 16:24:28 gustafn Exp $
 }
 
 namespace eval ::content::template {}
@@ -18,7 +15,7 @@ ad_proc -public content::template::new {
     {-parent_id ""}
     {-is_live ""}
     {-template_id ""}
-    -creation_date
+    {-creation_date ""}
     {-creation_user ""}
     {-creation_ip ""}
     {-package_id ""}
@@ -44,7 +41,7 @@ ad_proc -public content::template::new {
         [list creation_ip $creation_ip ] \
         [list package_id $package_id ] \
     ]
-    if {([info exists creation_date] && $creation_date ne "")} {
+    if {$creation_date ne ""} {
         lappend arg_list [list creation_date $creation_date ]
     }
     return [package_exec_plsql -var_list  $arg_list content_template new]

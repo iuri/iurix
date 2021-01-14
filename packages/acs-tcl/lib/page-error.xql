@@ -3,20 +3,10 @@
 <!--  -->
 <!-- @author Victor Guerra (guerra@galileo.edu) -->
 <!-- @creation-date 2005-02-06 -->
-<!-- @arch-tag: d0117c72-fd55-4faa-b2cb-89ec5ce0c0ef -->
-<!-- @cvs-id $Id: page-error.xql,v 1.1.18.1 2016/01/02 01:20:50 gustafn Exp $ -->
+<!-- @cvs-id $Id: page-error.xql,v 1.4 2018/08/15 17:00:24 gustafn Exp $ -->
 
 <queryset>
-  <fullquery name="get_user_info">
-    <querytext>
-      
-      select p.first_names||' '||p.last_name as user_name, pa.email as user_email 
-      from persons p, parties pa
-      where pa.party_id = p.person_id
-      and p.person_id = :user_id
-      
-    </querytext>
-  </fullquery>
+
   <fullquery name="search_bug">
     <querytext>
       select bug_id

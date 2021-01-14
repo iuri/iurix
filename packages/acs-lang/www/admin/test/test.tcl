@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author John Lowry (lowry@ardigita.com)
     @creation-date 29 September 2000
-    @cvs-id $Id: test.tcl,v 1.3.12.3 2017/04/22 18:21:46 gustafn Exp $
+    @cvs-id $Id: test.tcl,v 1.5.2.1 2019/10/11 15:39:15 gustafn Exp $
 } { }
 
 set title "Test lang package"
@@ -53,7 +53,7 @@ set tz_sql "SELECT tz as timezone
 db_multirow tz_results lang_tz_get_data $tz_sql
 
 # Test 4 checks that we can convert from local time to UTC
-db_1row lang_system_time_select "SELECT to_char(sysdate, 'YYYY-MM-DD HH24:MI:SS') AS system_time FROM dual"
+db_1row lang_system_time_select {}
 
 set paris_time [lc_time_utc_to_local $system_time "Europe/Paris"]
 set local_time [lc_time_local_to_utc $paris_time "Europe/Paris"]
@@ -68,10 +68,6 @@ set us_number [lc_numeric 123456.789 {} en_US]
 set fr_number [lc_numeric 123456.789 {} fr_FR]
 set us_parse [lc_parse_number 123,456.789 en_US]
 set fr_parse [lc_parse_number "123 456,789" fr_FR]
-set us_currency [lc_monetary_currency -label_p 1 -style local 123.4 USD en_US]
-set fr_currency [lc_monetary_currency -label_p 1 -style local 123.4 USD fr_FR]
-set us_label [lc_monetary_currency -label_p 1 -style local 1234 FRF en_US]
-set fr_label [lc_monetary_currency -label_p 1 -style local 1234 FRF fr_FR]
 set us_time [lc_time_fmt $system_time "%c" en_US]
 set fr_time [lc_time_fmt $system_time "%c" fr_FR]
 

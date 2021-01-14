@@ -1,17 +1,17 @@
 ad_page_contract {
-    
+
     Asks whether users will be allowed to assign multiple
     categories of this subtree to objects and if users
     have to categorize an object in this subtree.
 
-    Then assings this subtree to the passed object (usually a package_id).
+    Then assigns this subtree to the passed object (usually a package_id).
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-map-2.tcl,v 1.12.2.1 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
     {category_id:naturalnum,optional ""}
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,notnull
     {edit_p:boolean 0}
     ctx_id:naturalnum,optional
@@ -42,39 +42,39 @@ if {$category_id eq ""} {
 
 ad_form -name tree_map_form -action tree-map-2 -export { tree_id category_id locale object_id edit_p ctx_id} -form {
     {widget:text(radio) {label "#categories.Widget#"} {options {
-      {"#categories.Widget_select#" select}
-      {"#categories.Widget_multiselect#" multiselect}
-      {"#categories.Widget_radio#" radio}
-      {"#categories.Widget_checkbox#" checkbox}
+        {"#categories.Widget_select#" select}
+        {"#categories.Widget_multiselect#" multiselect}
+        {"#categories.Widget_radio#" radio}
+        {"#categories.Widget_checkbox#" checkbox}
     }}}
     {require_category_p:text(radio) {label "#categories.Widget_required_category#"} {options {{"#acs-admin.Yes#" t} {"#acs-admin.No#" f}}}}
 } -on_request {
     if {$edit_p} {
-	db_1row get_mapping_parameters ""
-	if { $widget eq "" } {
-	    # this is pre-widget selection and we default to the same
-	    # look and feel as before
-	    if { $assign_single_p } {
-		set widget "select"
-	    } else {
-		set widget "multiselect"
-	    }
-	}
+        db_1row get_mapping_parameters ""
+        if { $widget eq "" } {
+            # this is pre-widget selection and we default to the same
+            # look and feel as before
+            if { $assign_single_p } {
+                set widget "select"
+            } else {
+                set widget "multiselect"
+            }
+        }
     } else {
-	# we default to the default before widgets could be selected
-	set widget multiselect
-	set require_category_p f
+    # we default to the default before widgets could be selected
+        set widget multiselect
+        set require_category_p f
     }
 } -on_submit {
     if { $widget eq "select" || $widget eq "radio" } {
-	set assign_single_p t
+        set assign_single_p t
     } else {
-	set assign_single_p f
+        set assign_single_p f
     }
     if {$edit_p} {
-	category_tree::edit_mapping -tree_id $tree_id -object_id $object_id -assign_single_p $assign_single_p -require_category_p $require_category_p -widget $widget
+        category_tree::edit_mapping -tree_id $tree_id -object_id $object_id -assign_single_p $assign_single_p -require_category_p $require_category_p -widget $widget
     } else {
-	category_tree::map -tree_id $tree_id -subtree_category_id $category_id -object_id $object_id -assign_single_p $assign_single_p -require_category_p $require_category_p -widget $widget
+        category_tree::map -tree_id $tree_id -subtree_category_id $category_id -object_id $object_id -assign_single_p $assign_single_p -require_category_p $require_category_p -widget $widget
     }
 } -after_submit {
     ad_returnredirect [export_vars -no_empty -base object-map {locale object_id ctx_id}]

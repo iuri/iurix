@@ -3,17 +3,15 @@
 <property name="doc(title)">Object Model Design</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="object-system-requirements" leftLabel="Prev"
-		    title="
-Chapter 15. Kernel Documentation"
-		    rightLink="permissions-requirements" rightLabel="Next">
-		<div class="sect1">
+			leftLink="object-system-requirements" leftLabel="Prev"
+			title="Chapter 15. Kernel
+Documentation"
+			rightLink="permissions-requirements" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="object-system-design" id="object-system-design"></a>Object Model
-Design</h2></div></div></div><div class="authorblurb">
-<p>By Pete Su, Michael Yoon, Richard Li, Rafael Schloming</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><div class="sect2">
+Design</h2></div></div></div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">By Pete Su, Michael Yoon, Richard Li,
+Rafael Schloming</span></p><span style="color: red">&lt;/authorblurb&gt;</span><div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="object-system-design-essentials" id="object-system-design-essentials"></a>Essentials</h3></div></div></div><div class="sect3">
 <div class="titlepage"><div><div><h4 class="title">
@@ -72,8 +70,7 @@ of one object type (e.g. users) to instances of another object type
 (e.g. groups).</p>
 </li>
 </ul></div><p>The next section will explore these facilities in the context of
-the the particular programming idioms that we wish to
-generalize.</p><p><span class="strong"><strong>Related Links</strong></span></p><p>This design document should be read along with the design
+the particular programming idioms that we wish to generalize.</p><p><span class="strong"><strong>Related Links</strong></span></p><p>This design document should be read along with the design
 documents for <a class="link" href="groups-design" title="Groups Design">the new groups system</a>, <a class="link" href="subsites-design" title="Subsites Design Document">subsites</a> and <a class="link" href="permissions-design" title="Permissions Design">the
 permissions system</a>
 </p>
@@ -179,7 +176,7 @@ the form "can user X perform action Y on object Z", the
 OpenACS security model will defer to an object&#39;s context if
 there is no information about user X&#39;s permission to perform
 action Y on object Z.</p><p>The context system forms the basis for the rest of the OpenACS
-access control system, which is described in in two separate
+access control system, which is described in two separate
 documents: one for the <a class="link" href="permissions-design" title="Permissions Design">permissions
 system</a> and another for the <a class="link" href="groups-design" title="Groups Design">party groups</a> system.
 The context system is also used to implement <a class="link" href="subsites-design" title="Subsites Design Document">subsites</a>.</p>
@@ -998,8 +995,8 @@ Notes</strong></span></td><td><span class="strong"><strong>When?</strong></span>
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="object-system-requirements" leftLabel="Prev" leftTitle="Object Model Requirements"
-		    rightLink="permissions-requirements" rightLabel="Next" rightTitle="Permissions Requirements"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="kernel-doc" upLabel="Up"> 
-		
+			leftLink="object-system-requirements" leftLabel="Prev" leftTitle="Object Model Requirements"
+			rightLink="permissions-requirements" rightLabel="Next" rightTitle="Permissions Requirements"
+			homeLink="index" homeLabel="Home" 
+			upLink="kernel-doc" upLabel="Up"> 
+		    

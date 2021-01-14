@@ -8,7 +8,7 @@ nsv_array set proc_source_file [list]
 
 
 #
-# Safetybelt for ::acs::useNsfProc for upgrade phase to oacs-5-9
+# Safety belt for ::acs::useNsfProc for upgrade phase to oacs-5-9
 #
 if {![info exists ::acs::useNsfProc]} {
     ns_log notice "use fallback value for ::acs::useNsfProc"
@@ -19,14 +19,6 @@ if {![info exists ::acs::useNaviServer]} {
     set ::acs::useNaviServer [expr {[ns_info name] eq "NaviServer"}]
 }
 
-proc number_p { str } {
-    return [regexp {^[-+]?[0-9]*(.[0-9]+)?$} $str]
-
-    # Note that this will return true for empty string!
-    #
-    # TODO: Why not use Tcl's "string is double" ? 
-}
-
 proc empty_string_p { query_string } {
     return [string equal $query_string ""]
 }
@@ -35,14 +27,14 @@ proc acs_root_dir {} {
     return $::acs::rootdir
 }
 
-proc acs_package_root_dir { package } {
-    return [file join $::acs::rootdir packages $package]
+proc acs_package_root_dir { package_key } {
+    return [file join $::acs::rootdir packages $package_key]
 }
 
 proc ad_make_relative_path { path } {
     set root_length [string length $::acs::rootdir]
     if { $::acs::rootdir eq [string range $path 0 $root_length-1] } {
-	return [string range $path $root_length+1 [string length $path]]
+        return [string range $path $root_length+1 [string length $path]]
     }
     error "$path is not under the path root ($::acs::rootdir)"
 }
@@ -53,12 +45,12 @@ proc ad_get_tcl_call_stack { { level -2 }} {
     # keep the previous state of ::errorInfo
     #
     set errorInfo $::errorInfo
-    
+
     for { set x [expr {[info level] + $level}] } { $x > 0 } { incr x -1 } {
         set info [info level $x]
         regsub -all \n $info {\\n} info
         #
-        # In case, we have an nsf frame, add information about the
+        # In case, we have an NSF frame, add information about the
         # current object and the current class to the debug output.
         #
         if {![catch {uplevel #$x ::nsf::current} obj]
@@ -100,12 +92,12 @@ proc ad_parse_documentation_string { doc_string elements_var } {
     set buffer ""
 
     foreach line $lines {
-	
-	# lars@pinds.com, 8 July, 2000
-	# We don't do a string trim anymore, because it breaks the formatting of 
-	# code examples in the documentation, something that we want to encourage.
 
-	# set line [string trim $line]
+        # lars@pinds.com, 8 July, 2000
+        # We don't do a string trim anymore, because it breaks the formatting of
+        # code examples in the documentation, something that we want to encourage.
+
+        # set line [string trim $line]
 
         if { [regexp {^[ \t]*@([-a-zA-Z_]+)(.*)$} $line "" element remainder] } {
             lappend elements($current_element) [string trim $buffer]
@@ -121,7 +113,16 @@ proc ad_parse_documentation_string { doc_string elements_var } {
 }
 
 proc ad_proc_valid_switch_p {str} {
-  return [expr {[string index $str 0] eq "-" && ![number_p $str]}]
+    #
+    # Check if this looks like a switch:
+    #   - first character is '-'
+    #   - next character is not a Tcl number
+    #   - next string is a printable character
+    #
+    return [expr {[string index $str 0] eq "-"
+              && ![string is double -strict $str]
+              && [regexp {^-[[:graph:]]+$} $str]
+    }]
 }
 
 proc ad_proc args {
@@ -157,7 +158,7 @@ proc ad_proc args {
             -deprecated { set deprecated_p 1 }
             -warn { set warn_p 1 }
             -debug { set debug_p 1 }
-            -callback { 
+            -callback {
                 incr i
                 set callback [lindex $args $i]
                 if { [ad_proc_valid_switch_p $callback] } {
@@ -175,6 +176,14 @@ proc ad_proc args {
                 return -code error "Invalid switch [lindex $args $i] passed to ad_proc"
             }
         }
+    }
+
+    # Callback hooks and callback implementations are treated as
+    # private: rationale is they never get called by other packages
+    # directly.
+    if {$callback ne ""} {
+        set public_p 0
+        set private_p 1
     }
 
     if { $public_p && $private_p } {
@@ -195,7 +204,7 @@ proc ad_proc args {
     }
 
     if { $deprecated_p } {
-	set warn_p 1
+        set warn_p 1
     }
 
     if { $impl ne "" && $callback eq "" } {
@@ -215,10 +224,10 @@ proc ad_proc args {
     set n_args_remaining [expr { [llength $args] - $i }]
 
     if {$callback eq ""} {
-	#
+        #
         # We are creating an ordinary proc so the proc name is an
         # argument
-	#
+        #
         if { $n_args_remaining < 3 || $n_args_remaining > 4} {
             return -code error "Wrong number of arguments passed to ad_proc"
         }
@@ -227,21 +236,21 @@ proc ad_proc args {
         set proc_name [lindex $args $i]
     } else {
         if {$impl ne "" } {
-	    #
+            #
             # We are creating a callback implementation
-	    #
+            #
             if {$n_args_remaining != 3} {
                 return -code error "ad_proc callback implementation must have: arguments (can be empty) docs code_body"
             }
         }
         if {$impl eq ""} {
-	    #
-	    # We are creating a contract for a callback
-	    #
+            #
+            # We are creating a contract for a callback
+            #
             if {!( $n_args_remaining == 3 || $n_args_remaining == 2 ) } {
                 return -code error "ad_proc callback contract must have: arguments docs \[empty_code_body\]"
             } elseif {$n_args_remaining == 3
-                      && [lindex $args end] ne "" 
+                      && [lindex $args end] ne ""
                       && [lindex $args end] ne "-" } {
                 return -code error "ad_proc callback contract must have an empty code_body"
             }
@@ -258,7 +267,7 @@ proc ad_proc args {
 
         # pretend to the rest of the proc that we were passed the proc name
         incr n_args_remaining
-        set args [concat [list $proc_name] $args]
+        set args [linsert $args 0 $proc_name]
     }
 
     # (SDW - OpenACS). If proc_name is being defined inside a namespace, we
@@ -268,9 +277,9 @@ proc ad_proc args {
     # if we were called from inside a namespace eval.
 
     #
-    # RBM: 2003-01-26: 
-    # With the help of Michael Cleverly, fixed the namespace code so procs 
-    # declared like ::foo::bar would work, by only trimming the first :: 
+    # RBM: 2003-01-26:
+    # With the help of Michael Cleverly, fixed the namespace code so procs
+    # declared like ::foo::bar would work, by only trimming the first ::
     # Also moved the uplevel'd call to namespace current to the if statement,
     # to avoid it being called unnecessarily.
     #
@@ -305,11 +314,25 @@ proc ad_proc args {
         # No doc string provided.
         #ns_log notice "missing doc string for ad_proc $proc_name ([info script])"
         array set doc_elements [list]
-	set doc_elements(main) ""
+        set doc_elements(main) ""
     } else {
         # Doc string was provided.
         ad_parse_documentation_string [lindex $args end-1] doc_elements
     }
+
+    #
+    # Preserve pre-existing values, e.g. from testcases, which might
+    # be loaded in a different order.
+    #
+    if {[nsv_exists api_proc_doc $proc_name]} {
+        set old_doc_elements [nsv_get api_proc_doc $proc_name]
+        #array set doc_elements $old_doc_elements
+        if {[dict exist $old_doc_elements testcase]} {
+            #ns_log notice "PRESERVE TESTCASES: $proc_name"
+            set doc_elements(testcase) [dict get $old_doc_elements testcase]
+        }
+    }
+
     set code_block [lindex $args end]
 
     if {$callback ne "" && $impl ne "" } {
@@ -332,15 +355,18 @@ proc ad_proc args {
     set n_positionals_with_defaults 0
     array set default_values [list]
     array set flags [list]
+    set seen_arg_checkers_p 0
     set varargs_p 0
     set switch_code ""
-
+    
+    #
     # If the first element contains 0 or more than 2 elements, then it must
     # be an old-style ad_proc. Mangle effective_arg_list accordingly.
+    #
     if { [llength $arg_list] > 0 } {
         set first_arg [lindex $arg_list 0]
         if { [llength $first_arg] == 0 || [llength $first_arg] > 2 } {
-	    ns_log Warning "Convert old (deprecated) style proc: $proc_name"
+            ns_log Warning "Convert old (deprecated) style proc: $proc_name"
             set new_arg_list [list]
             foreach { switch default_value } $first_arg {
                 lappend new_arg_list [list $switch $default_value]
@@ -361,8 +387,7 @@ proc ad_proc args {
     foreach arg $effective_arg_list {
         if { [llength $arg] == 2 } {
             set default_p 1
-            set default_value [lindex $arg 1]
-            set arg [lindex $arg 0]
+            lassign $arg arg default_value
         } else {
             if { [llength $arg] != 1 } {
                 return -code error "Invalid element \"$arg\" in argument list"
@@ -377,7 +402,20 @@ proc ad_proc args {
             foreach flag [split [lindex $arg_split 1] ","] {
                 set flag [string trim $flag]
                 if { $flag ne "required" && $flag ne "boolean" } {
-                    return -code error "Invalid flag \"$flag\""
+                    #
+                    # In earlier versions, we used to raise an error here
+                    #
+                    #    return -code error "Invalid flag \"$flag\""
+                    #
+                    # However, since XOTcl 2 (and nsf::proc) support
+                    # arg checkers since many years, and since XOTcl
+                    # is a required component of OpenACS, we can allow
+                    # these as well safely. However, in order to avoid
+                    # surprises during upgrades, we should avoid the
+                    # checker usage in acs-core, until OpenACS 5.10 is
+                    # released.
+                    #
+                    set seen_arg_checkers_p 1
                 }
                 lappend arg_flags $flag
             }
@@ -396,27 +434,27 @@ proc ad_proc args {
 
             if {"boolean" in $arg_flags} {
                 set default_values(${arg}_p) 0
-		append switch_code "            -$arg - -$arg=1 - -$arg=t - -$arg=true {
-                ::uplevel ::set ${arg}_p 1
-            }
-            -$arg=0 - -$arg=f - -$arg=false {
-                ::uplevel ::set ${arg}_p 0
-            }
-"
+                append switch_code "            -$arg - -$arg=1 - -$arg=t - -$arg=true {
+                        ::uplevel ::set ${arg}_p 1
+                    }
+                    -$arg=0 - -$arg=f - -$arg=false {
+                        ::uplevel ::set ${arg}_p 0
+                    }
+                "
             } else {
-		append switch_code "            -$arg {
-                if { \$i >= \[llength \$args\] - 1 } {
-                    ::return -code error \"No argument to switch -$arg\"
-                }
-                ::upvar ${arg} val ; ::set val \[::lindex \$args \[::incr i\]\]\n"
-		append switch_code "            }\n"
+                append switch_code "            -$arg {
+                    if { \$i >= \[llength \$args\] - 1 } {
+                        ::return -code error \"No argument to switch -$arg\"
+                    }
+                    ::upvar ${arg} val ; ::set val \[::lindex \$args \[::incr i\]\]\n"
+                append switch_code "            }\n"
             }
 
             if {"required" in $arg_flags} {
                 append check_code "    ::if { !\[::uplevel ::info exists $arg\] } {
-        ::return -code error \"Required switch -$arg not provided\"
-    }
-"
+                    ::return -code error \"Required switch -$arg not provided\"
+                    }
+                "
             }
         } else {
             set switch_p 0
@@ -440,22 +478,44 @@ proc ad_proc args {
         }
     }
 
-    set protection 
     foreach element { protection deprecated_p warn_p varargs_p arg_list switches positionals } {
         set doc_elements($element) [set $element]
     }
     foreach element { default_values flags } {
         set doc_elements($element) [array get $element]
     }
-    
+
     set script [info script]
     set root_length [string length $::acs::rootdir]
     if { $::acs::rootdir eq [string range $script 0 $root_length-1] } {
         set script [string range $script $root_length+1 end]
     }
-    
+
     set doc_elements(script) $script
-    if { ![nsv_exists api_proc_doc $proc_name] } {
+    #
+    # As acs-automated-testing/tcl/aa-test-procs.tcl is loaded on startup before
+    # acs-bootstrap-installer/tcl/00-proc-procs.tcl, it is possible that the
+    # testcase element of the api_proc_doc nsv has been already populated,
+    # therefore creating the key for that proc on the nsv.
+    #
+    # Previously, some procs where not included in the api_proc_doc_scripts nsv
+    # because of that, as the nsv lappend was skipped if the key existed.
+    #
+    # For example:
+    # - file_storage::twt::delete_file
+    # - file_storage::twt::create_url_in_folder
+    # - file_storage::twt::create_url
+    # - ...
+    #
+    # We avoid this by checking as well if the testcase element is the only one
+    # for that particular proc in the nsv.
+    #
+    if { ![nsv_exists api_proc_doc $proc_name]
+         || (
+             [dict exists [nsv_get api_proc_doc $proc_name] testcase]
+             && [dict size [nsv_get api_proc_doc $proc_name]] eq "1"
+             )
+    } {
         nsv_lappend api_proc_doc_scripts $script $proc_name
     }
 
@@ -463,8 +523,8 @@ proc ad_proc args {
 
     # Backward compatibility: set proc_doc and proc_source_file
     nsv_set proc_doc $proc_name [lindex $doc_elements(main) 0]
-    if { [nsv_exists proc_source_file $proc_name] 
-	 && [nsv_get proc_source_file $proc_name] ne [info script]  
+    if { [nsv_exists proc_source_file $proc_name]
+      && [nsv_get proc_source_file $proc_name] ne [info script]
      } {
         ns_log Warning "Multiple definition of $proc_name in [nsv_get proc_source_file $proc_name] and [info script]"
     }
@@ -476,8 +536,8 @@ proc ad_proc args {
         } else {
             # we are creating a callback so create an empty body
             set code_block {
-		# this is a callback contract which only invokes its arg parser for input validation
-	    }
+            # this is a callback contract which only invokes its arg parser for input validation
+            }
         }
     }
 
@@ -488,7 +548,7 @@ proc ad_proc args {
 
     if { $callback ne "" && $impl ne "" } {
 
-        if { [info commands "::callback::${callback}::contract__arg_parser"] eq "" } {
+        if { [namespace which ::callback::${callback}::contract__arg_parser] eq "" } {
             # We create a dummy arg parser for the contract in case
             # the contract hasn't been defined yet.  We need this
             # because the implementation doesn't tell us what the
@@ -501,98 +561,98 @@ proc ad_proc args {
 
         if {$::acs::useNsfProc} {
             uplevel [::list proc $proc_name_as_passed args \
-			 "    ::callback::${callback}::contract__arg_parser {*}\$args\n${log_code}$code_block"]
+                 "    ::callback::${callback}::contract__arg_parser {*}\$args\n${log_code}$code_block"]
         } else {
             uplevel [::list proc $proc_name_as_passed args \
-			 "    ::callback::${callback}::contract__arg_parser\n${log_code}$code_block"]
+                 "    ::callback::${callback}::contract__arg_parser\n${log_code}$code_block"]
         }
 
-    } elseif { $callback eq "" && [llength $switches] == 0 } {
-	#
-	# Nothing special is used in the argument definition, create a
-	# plain proc
-	#
+    } elseif { $callback eq "" && [llength $switches] == 0 && !$seen_arg_checkers_p} {
+        #
+        # Nothing special is used in the argument definition, create a
+        # plain proc
+        #
         uplevel [::list proc $proc_name_as_passed $arg_list "${log_code}$code_block"]
 
     } else {
-	#
-	# Default case, plain Tcl can't handle these cases
-	#
+        #
+        # Default case, plain Tcl can't handle these cases
+        #
 
         if {$::acs::useNsfProc} {
-	    #
-	    # nsf::proc can handle these cases. Just in case of the
-	    # callback implementations we have to provide an
-	    # arg_parser of the contract, since OpenACS uses always
-	    # the argument definition of the contract to pass
-	    # arguments in the implementation (which can be very
-	    # confusing).
-	    #
-	    if {$callback ne ""} {
-                uplevel [::list ::nsf::proc -ad ::callback::${callback}::contract__arg_parser $arg_list { 
+            #
+            # nsf::proc can handle these cases. Just in case of the
+            # callback implementations we have to provide an
+            # arg_parser of the contract, since OpenACS uses always
+            # the argument definition of the contract to pass
+            # arguments in the implementation (which can be very
+            # confusing).
+            #
+            if {$callback ne ""} {
+                uplevel [::list ::nsf::proc -ad ::callback::${callback}::contract__arg_parser $arg_list {
                     foreach _ [info vars] {
                         uplevel [::list set $_ [set $_]]
                     }
                 }]
             }
-	    #ns_log notice "---- define nsf::proc for [::list proc $proc_name_as_passed $arg_list $code_block]"
-	    uplevel [::list ::nsf::proc -ad $proc_name_as_passed $arg_list ${log_code}$code_block]
-	    return
-	}
+            #ns_log notice "---- define nsf::proc for [::list proc $proc_name_as_passed $arg_list $code_block]"
+            uplevel [::list ::nsf::proc -ad $proc_name_as_passed $arg_list ${log_code}$code_block]
+            return
+        }
 
-	#
-	# There is no nsf::proc available. Define for every remaining
-	# function two procs, one for argument parsing, and one for
-	# the invocation. The latter one is defined with "args" and
-	# calls as first step the argument parser.
-	#
+        #
+        # There is no nsf::proc available. Define for every remaining
+        # function two procs, one for argument parsing, and one for
+        # the invocation. The latter one is defined with "args" and
+        # calls as first step the argument parser.
+        #
         set parser_code "    ::upvar args args\n"
         foreach { name value } [array get default_values] {
             append parser_code "    ::upvar $name val ; ::set val [::list $value]\n"
         }
-        
+
         append parser_code "
-    ::for { ::set i 0 } { \$i < \[::llength \$args\] } { ::incr i } {
-        ::set arg \[::lindex \$args \$i\]
-        ::if { !\[::ad_proc_valid_switch_p \$arg\] } {
-            ::break
-        }
-        ::if { \[::string equal \$arg \"--\"\] } {
-            ::incr i
-            ::break
-        }
-        ::switch -- \$arg {
-$switch_code
-            default { ::return -code error \"Invalid switch: \\\"\$arg\\\"\" }
-        }
-    }
-"
+            ::for { ::set i 0 } { \$i < \[::llength \$args\] } { ::incr i } {
+                ::set arg \[::lindex \$args \$i\]
+                ::if { !\[::ad_proc_valid_switch_p \$arg\] } {
+                    ::break
+                }
+                ::if { \[::string equal \$arg \"--\"\] } {
+                    ::incr i
+                    ::break
+                }
+                ::switch -- \$arg {
+        $switch_code
+                    default { ::return -code error \"Invalid switch: \\\"\$arg\\\"\" }
+                }
+            }
+        "
 
         set n_required_positionals [expr { [llength $positionals] - $n_positionals_with_defaults }]
         append parser_code "
-    ::set n_args_remaining \[::expr { \[::llength \$args\] - \$i }\]
-    ::if { \$n_args_remaining < $n_required_positionals } {
-        ::return -code error \"No value specified for argument \[::lindex { [::lrange $positionals 0 [::expr { $n_required_positionals - 1 }]] } \$n_args_remaining\]\"
-    }
-"
+            ::set n_args_remaining \[::expr { \[::llength \$args\] - \$i }\]
+            ::if { \$n_args_remaining < $n_required_positionals } {
+                ::return -code error \"No value specified for argument \[::lindex { [::lrange $positionals 0 [::expr { $n_required_positionals - 1 }]] } \$n_args_remaining\]\"
+            }
+        "
         for { set i 0 } { $i < $n_required_positionals } { incr i } {
-            append parser_code "    ::upvar [::lindex $positionals $i] val ; ::set val \[::lindex \$args \[::expr { \$i + $i }\]\]\n"
+                append parser_code "    ::upvar [::lindex $positionals $i] val ; ::set val \[::lindex \$args \[::expr { \$i + $i }\]\]\n"
         }
         for {} { $i < [llength $positionals] } { incr i } {
-		append parser_code "    ::if { \$n_args_remaining > $i } {
-        ::upvar [::lindex $positionals $i] val ; ::set val \[::lindex \$args \[::expr { \$i + $i }\]\]
-    }
-"
+            append parser_code "    ::if { \$n_args_remaining > $i } {
+                    ::upvar [::lindex $positionals $i] val ; ::set val \[::lindex \$args \[::expr { \$i + $i }\]\]
+                }
+            "
         }
-    
+
         if { $varargs_p } {
             append parser_code "    ::set args \[::lrange \$args \[::expr { \$i + [::llength $positionals] }\] end\]\n"
         } else {
             append parser_code "    ::if { \$n_args_remaining > [::llength $positionals] } {
-        return -code error \"Too many positional parameters specified\"
-    }
-    ::unset args
-"
+                    return -code error \"Too many positional parameters specified\"
+                }
+                ::unset args
+            "
         }
 
         append parser_code $check_code
@@ -601,12 +661,12 @@ $switch_code
             ns_write "PARSER CODE:\n\n$parser_code\n\n"
         }
 
-	#
-	# old style proc
-	# for a function foo, define "foo $args" and "foo__arg_parser"
-	#
-	#ns_log notice "=== old style proc $proc_name_as_passed"
-	
+        #
+        # old style proc
+        # for a function foo, define "foo $args" and "foo__arg_parser"
+        #
+        #ns_log notice "=== old style proc $proc_name_as_passed"
+
         uplevel [::list proc ${proc_name_as_passed}__arg_parser {} $parser_code]
         uplevel [::list proc $proc_name_as_passed args "    ${proc_name_as_passed}__arg_parser\n${log_code}$code_block"]
     }
@@ -621,56 +681,62 @@ ad_proc -public ad_proc {
     {-impl ""}
     arg_list
     [doc_string]
-    body 
+    body
 } {
     <p>
     Declare a procedure with the following enhancements
     over regular Tcl "<code>proc</code>":
     </p>
-    
+
     <p>
     <ul>
       <li> A procedure can be declared as public, private, deprecated, and warn.</li>
       <li> Procedures can be declared with regular <i>positional</i> parameters (where
            you pass parameters in the order they were declared), or with <i>named</i>
-	   parameters, where the order doesn't matter because parameter names are 
-	   specified explicitely when calling the parameter. Named parameters are 
-	   preferred.</li>
+           parameters, where the order doesn't matter because parameter names are
+           specified explicitly when calling the parameter. Named parameters are
+           preferred.</li>
       <li> If you use named parameters, you can specify which ones are required, optional,
            (including default values), and boolean. See the examples below.</li>
-    <li> There is now a callback facility. See below.</li>
-      <li> The declaration can (and <b>should!</b>) include documentation. This documentation 
-           may contain tags which are parsed for display by the api browser.  Some tags are 
-	   <tt>@param</tt>, <tt>@return</tt>, <tt>@error</tt>, <tt>@see</tt>, <tt>@author</tt>
+      <li> Positional parameters are always required, unless they provide with a default value,
+           making them optional. If the parameter follows another positional parameter with a default
+           value, a default value for it is also required.</li>
+      <li> As well as in the original Tcl "<code>proc</code>", if the last parameter is called
+           "<tt>args</tt>", the proc will accept a variable number of arguments, which will be
+           assigned to the variable "<tt>args</tt>" as elements of a list.</li>
+      <li> There is now a callback facility. See below.</li>
+      <li> The declaration can (and <b>should!</b>) include documentation. This documentation
+           may contain tags which are parsed for display by the API browser.  Some tags are
+           <tt>@param</tt>, <tt>@return</tt>, <tt>@error</tt>, <tt>@see</tt>, <tt>@author</tt>
            (probably this should be better documented).</li>
     </ul>
     </p>
 
     <p>
       When a parameter is declared as <tt>boolean</tt>, it creates a variable <tt>$param_name_p</tt>.
-      For example: <tt>-foo:boolean</tt> will create a variable <tt>$foo_p</tt>. 
-      If the parameter is passed, <tt>$foo_p</tt> will have value 1. Otherwise, 
+      For example: <tt>-foo:boolean</tt> will create a variable <tt>$foo_p</tt>.
+      If the parameter is passed, <tt>$foo_p</tt> will have value 1. Otherwise,
       <tt>$foo_p</tt> will have value 0.
     </p>
     <p>
-      Boolean named parameters can optionally take a boolean value than can 
+      Boolean named parameters can optionally take a boolean value than can
       make your code cleaner. The following example by Michael Cleverly shows why:
       If you had a procedure declared as <tt>ad_proc foobar {-foo:boolean} { ... }</tt>,
       it could be invoked as <tt>foobar -foo</tt>, which could yield some code like
-      the following in your procedure: 
+      the following in your procedure:
     </p>
     <pre>
 if {$flush_p} {
-	some_proc -flush $key
+    some_proc -flush $key
 } else {
-	some_proc $key
+    some_proc $key
 }
     </pre>
 
     <p>
       However, you could invoke the procedure as <tt>foobar -foo=$some_boolean_value</tt>
       (where some_boolean_value can be 0, 1, t, f, true, false),
-      which could make your procedure cleaner because you could write instead: 
+      which could make your procedure cleaner because you could write instead:
       <tt>some_proc -flush=$foo_p $key</tt>.
     </p>
     <p>
@@ -679,9 +745,9 @@ if {$flush_p} {
       your named parameter contains a value of something starting with a "-".
     </p>
     <p>
-    Here's an example with named parameters, and namespaces (notice the preferred way of
-    declaring namespaces and namespaced procedures). Ignore the \ in "\@param",
-    I had to use it so the api-browser wouldn't think the parameter docs were for ad_proc
+    Here's an example with named and positional parameters, and also namespaces (notice the
+    preferred way of declaring namespaces and namespaced procedures). Ignore the \ in "\@param",
+    I had to use it so the API browser wouldn't think the parameter docs were for ad_proc
     itself:
     </p>
 
@@ -690,33 +756,50 @@ if {$flush_p} {
 namespace eval ::foobar {}
 
 ad_proc -public ::foobar::new {
-	{-oacs_user:boolean}
-	{-shazam}
-	{-user_id ""}
+    {-oacs_user:boolean}
+    {-shazam:required}
+    {-foo}
+    {-user_id ""}
+    {pos}
+    {pos_opt ""}
 } {
-	The documentation for this procedure should have a brief description of the 
-	purpose of the procedure (the WHAT), but most importantly, WHY it does what it 
-	does. One can read the code and see what it does (but it's quicker to see a
-	description), but one cannot read the mind of the original programmer to find out 
-	what s/he had in mind.
+    The documentation for this procedure should have a brief description of the
+    purpose of the procedure (the WHAT), but most importantly, WHY it does what it
+    does. One can read the code and see what it does (but it's quicker to see a
+    description), but one cannot read the mind of the original programmer to find out
+    what s/he had in mind.
 
-	\@author Roberto Mello <rmello at fslc.usu.edu>
-	\@creation-date 2002-01-21
-	
-	\@param oacs_user If this user is already an OpenACS user. oacs_user_p will be defined.
-	\@param shazam Magical incantation that calls Captain Marvel. Required parameter.
-	\@param user_id The id for the user to process. Optional with default "" 
-	                (api-browser will show the default automatically)
+    \@author Roberto Mello <rmello at fslc.usu.edu>
+    \@creation-date 2002-01-21
+
+    \@param oacs_user   If this user is already an OpenACS user. oacs_user_p is defined
+                        per default as "false", when specified as "true". The parameter is optional.
+    \@param shazam      Magical incantation that calls Captain Marvel. Required parameter.
+    \@param foo         Parameter, which can be omitted. Check with [info exists ...] if was given.
+    \@param user_id     The id for the user to process. Optional with default "".
+                        (api-browser shows the default).
+    \@param pos         Positional parameter. Required, as it does not provide a default value.
+    \@param pos_opt     Positional parameter. Optional with default "".
+                        (api-browser shows the default).
+    \@return empty list
+
+    \@see ::foobar::related_proc
 } {
-	if { $user_id eq "" } {
-		# Do something if this is not an empty string
-	}
+    if { $user_id eq "" } {
+        # Do something if this is not an empty string
+    }
+    if { [info exists foo] } {
+        # Do something if we got a value for "foo"
+    }
 
-	if { $oacs_user_p } {
-		# Do something if this is an OpenACS user
-	}
+    if { $oacs_user_p } {
+        # Do something if this is an OpenACS user
+    }
+
+    # return empty list anyway...
+    return [list]
 }
-    </pre>
+</pre>
     </p>
     <p>
       (note, most of the info on callbacks here due to leeldn)<p>
@@ -731,15 +814,15 @@ ad_proc -public ::foobar::new {
         <li>then define an implementation with
             <code>ad_proc -callback foo::bar::zip -impl myimpl  { } { } { #code }</code>
         <li>Two ways to call:
-		<ul>
-		  <li>then you can call _all_ implentations (ie. in an event / event handler type arrangement) with
-		    <code>callback foo::bar::zip $arg1 $arg2</code>
-                  <li>or you can call a specific implementation (ie. in a service contract type arrangement) with
-                      <code>callback -impl myimpl foo::bar::zip $arg1 $arg2</code>
-		</ul>
-        <li>in both cases the result is a list of the results of each called implementation (with empty results removed),
-	    so in the case of calling a specific implementation you get a list of one element as the result
-	<li>See <a href="/api-doc/proc-view?proc=callback"><code>callback</code></a> for more info.
+            <ul>
+              <li>then you can call _all_ implementations (i.e. in an event / event handler type arrangement) with
+                <code>callback foo::bar::zip $arg1 $arg2</code>
+                      <li>or you can call a specific implementation (i.e. in a service contract type arrangement) with
+                          <code>callback -impl myimpl foo::bar::zip $arg1 $arg2</code>
+            </ul>
+            <li>in both cases the result is a list of the results of each called implementation (with empty results removed),
+            so in the case of calling a specific implementation you get a list of one element as the result
+        <li>See <a href="/api-doc/proc-view?proc=callback"><code>callback</code></a> for more info.
       </ul>
     </p>
 
@@ -747,16 +830,16 @@ ad_proc -public ::foobar::new {
     @param public specifies that the procedure is part of a public API.
     @param private specifies that the procedure is package-private.
     @param deprecated specifies that the procedure should not be used.
-    @param warn specifies that the procedure should generate a warning 
+    @param warn specifies that the procedure should generate a warning
                 when invoked (requires that -deprecated also be set)
-    @param callback the name of the callback contract being defined or 
+    @param callback the name of the callback contract being defined or
                 implemented
     @param impl the name of the callback implementation for the specified
                 contract
     @param arg_list the list of switches and positional parameters which can be
         provided to the procedure.
     @param [doc_string] documentation for the procedure (optional, but greatly desired).
-    @param body the procedure body.  Documentation may be provided for an arbitrary function 
+    @param body the procedure body.  Documentation may be provided for an arbitrary function
     by passing the body as a "-".
 
 } -
@@ -774,37 +857,37 @@ ad_proc -public ad_arg_parser { allowed_args argv } {
 
 } {
     if {[lindex $allowed_args end] eq "args"} {
-	set varargs_p 1
-	set allowed_args [lrange $allowed_args 0 [llength $allowed_args]-2]
+        set varargs_p 1
+        set allowed_args [lrange $allowed_args 0 [llength $allowed_args]-2]
     } else {
-	set varargs_p 0
+        set varargs_p 0
     }
 
     if { $varargs_p } {
-	upvar args args
-	set args [list]
+        upvar args args
+        set args [list]
     }
 
     set counter 0
     foreach { switch value } $argv {
-	if { [string index $switch 0] ne "-" } {
-	    if { $varargs_p } {
-		set args [lrange $argv $counter end]
-		return
-	    }
-	    return -code error "Expected switch but encountered \"$switch\""
-	}
-	set switch [string range $switch 1 end]
-	if { [lsearch $allowed_args $switch] < 0 } {
-	    return -code error "Invalid switch -$switch (expected one of -[join $allowed_args ", -"])"
-	}
-	upvar $switch switch_var
-	set switch_var $value
-	incr counter 2
+        if { [string index $switch 0] ne "-" } {
+            if { $varargs_p } {
+            set args [lrange $argv $counter end]
+            return
+            }
+            return -code error "Expected switch but encountered \"$switch\""
+        }
+        set switch [string range $switch 1 end]
+        if { [lsearch $allowed_args $switch] < 0 } {
+            return -code error "Invalid switch -$switch (expected one of -[join $allowed_args ", -"])"
+        }
+        upvar $switch switch_var
+        set switch_var $value
+        incr counter 2
     }
     if { [llength $argv] % 2 != 0 } {
-	# The number of arguments has to be even!
-	return -code error "Invalid switch syntax - no argument to final switch \"[lindex $argv end]\""
+        # The number of arguments has to be even!
+        return -code error "Invalid switch syntax - no argument to final switch \"[lindex $argv end]\""
     }
 }
 
@@ -823,15 +906,15 @@ ad_proc -public callback {
     so passing arrays to a callback can be done normally via
     <pre>upvar arrayname $arrayref</pre>
     <p>
-    The return codes returned from the implmentation are treated
+    The return codes returned from the implementation are treated
     as follows:
     <dl>
      <dt>return -code ok or "<b>return</b>"</dt>
-     <dd>With a plain return, a non-empty return value will be lappended to
+     <dd>With a plain return, a nonempty return value will be lappended to
        the list of returns from the callback function</dd>
 
      <dt>return -code error or "<b>error</b>"</dt>
-     <dd>errors will simply propigate (and no value returned) unless -catch
+     <dd>errors will simply propagate (and no value returned) unless -catch
        is specified in which case the callback processing will continue but
        no value will be appended to the return list for the implementation
        which returned an error.
@@ -848,7 +931,7 @@ ad_proc -public callback {
 
      <dt>return -code break</dt>
      <dd>return the current list of returned values including this implementations
-       return value if non-empty</dd>
+       return value if nonempty</dd>
 
      <dt>return -code continue</dt>
      <dd>Continue processing, ignore the return value from this implementation</dd>
@@ -857,7 +940,7 @@ ad_proc -public callback {
 
     @param callback the callback name without leading or trailing ::
 
-    @param impl invoke a specific implemenation rather than all implementations
+    @param impl invoke a specific implementation rather than all implementations
            of the given callback
 
     @param catch if catch specified errors in the callback will be caught, tracebacks
@@ -867,7 +950,7 @@ ad_proc -public callback {
 
     @param args pass the set of arguments on to each callback
 
-    @return list of the returns from each callback that does a normal (non-empty) return
+    @return list of the returns from each callback that does a normal (nonempty) return
 
     @see ad_proc
 } {
@@ -875,10 +958,10 @@ ad_proc -public callback {
         error "callback: no callback name given"
     }
     # see that the contract exists and call the contract for
-    # arg validation -- ::callback::${callback}::contract is an 
+    # arg validation -- ::callback::${callback}::contract is an
     # empty function that only runs the ad_proc generated arg parser.
 
-    if {[info commands ::callback::${callback}::contract] eq ""} {
+    if {[namespace which ::callback::${callback}::contract] eq ""} {
         error "Undefined callback $callback"
     }
     ::callback::${callback}::contract {*}$args
@@ -905,7 +988,7 @@ ad_proc -public callback {
                 return [list $ret]
             }
             3 { # code break -- terminate return current list of results.
-                if { $ret ne "" } { 
+                if { $ret ne "" } {
                     lappend returns $ret
                 }
                 return $returns
@@ -944,25 +1027,35 @@ ad_library {
 
     @creation-date 7 Jun 2000
     @author Jon Salz (jsalz@mit.edu)
-    @cvs-id $Id: 00-proc-procs.tcl,v 1.42.2.8 2017/04/22 18:26:04 gustafn Exp $
+    @cvs-id $Id: 00-proc-procs.tcl,v 1.66.2.13 2020/11/21 17:39:16 gustafn Exp $
 }
 
-ad_proc -public empty_string_p {query_string} {
-    returns 1 if a string is empty; this is better than using == because it won't fail on long strings of numbers
+ad_proc -deprecated -public empty_string_p {query_string} {
+    returns 1 if a string is empty; this is better than using == because it won't fail on long strings of numbers.
+
+    This might have been needed in the old good days, but not anymore.
+
+    @see string equal
 } -
 
-ad_proc -public acs_root_dir {} { 
-    Returns the path root for the OpenACS installation. 
+ad_proc -public acs_root_dir {} {
+    Returns the path root for the OpenACS installation.
 } -
 
-ad_proc -public acs_package_root_dir { package } { 
+ad_proc -public acs_package_root_dir { package_key } {
     Returns the path root for a particular package within the OpenACS installation.
-    For example /web/yourserver/packages/foo, i.e., a full file system path with no ending slash.
+    For example /web/yourserver/packages/foo, i.e., a full filesystem path with no ending slash.
 } -
 
-ad_proc -public ad_make_relative_path { path } { 
-    Returns the relative path corresponding to absolute path $path. 
+ad_proc -public ad_make_relative_path { path } {
+    Returns the relative path corresponding to absolute path $path.
 } -
+
+ad_proc ad_proc_valid_switch_p {str} {
+    Check if the provided argument looks like a switch (i.e. it starts
+    with a dash and is not a number).
+} -
+
 
 # procedures for doing type based dispatch
 ad_proc -public ad_method {
@@ -989,13 +1082,17 @@ ad_proc -public ad_method {
 ad_proc -public ad_call_method {
     method_name
     object_id
-    args 
+    args
 } {
+
     Calls method_name for the type of object_id with object_id as the
     first arg, and the remaining args are the remainder of the args to
-    method_name. Example ad_call_method method1 foo bar baz calls the
-    the method1 associated with the type of foo, with foo bar and baz
-    as the 3 arguments.
+    method_name. Example:
+
+    ad_call_method method1 foo bar baz
+
+    calls the method1 associated with the type of foo, with foo bar
+    and baz as the 3 arguments.
 
     @param method_name method name
     @param object_id the target, it is the first arg to the method
@@ -1007,22 +1104,22 @@ ad_proc -public ad_call_method {
 ad_proc -public ad_dispatch {
     method_name
     type
-    args 
+    args
 } {
-    Calls method_name for the type of object_id with object_id as the
-    first arg, and the remaining args are the remainder of the args to
-    method_name. Example ad_call_method method1 foo bar baz calls the
-    the method1 associated with the type of foo, with foo bar and baz
-    as the 3 arguments.
+    Calls method_name with the type as the first arg, and the remaining args are
+    the remainder of the args to method_name.
+
+    Example: "ad_dispatch method1 foo bar baz" calls the method1 associated with
+             the type foo, with foo bar and baz as the 3 arguments.
 
     @param method_name method name
-    @param object_id the target, it is the first arg to the method
+    @param type associated type
     @param args the remaining arguments
 } {
     return [ad_apply ${method_name}__$type $args]
 }
 
-ad_proc -public ad_assert_arg_value_in_list {
+ad_proc -public -deprecated ad_assert_arg_value_in_list {
     arg_name
     allowed_values_list
 } {
@@ -1031,6 +1128,10 @@ ad_proc -public ad_assert_arg_value_in_list {
 
     @param arg_name The name of the argument to check
     @param allowed_values_list The list of values that are permissible for the argument
+
+    Deprecated: this proc can be replaced via very simple expr or if idioms
+
+    @see native if or expr idioms
 
     @return Returns 1 if the argument has a valid value, throws an informative
                     error otherwise.
@@ -1044,6 +1145,41 @@ ad_proc -public ad_assert_arg_value_in_list {
     }
 
     return 1
+}
+
+ad_proc -public ad_with_deprecated_code_p {} {
+    Check, if we should load deprecated code.
+
+    In order to skip loading of deprecated code, use the following
+    snippet in your config file
+
+    # ns_section ns/server/${server}/acs
+    #     ns_param WithDeprecatedCode 0
+
+} {
+    return [ns_config ns/server/[ns_info server]/acs WithDeprecatedCode 1]
+}
+
+ad_proc ad_file {subcmd arg1 args} {
+    
+    Tcl supports csh-style tilde substitution. If a filename starts
+    with a tilde, then the filename will be interpreted as if the
+    first element is replaced with the location of the home directory
+    for the given user. If the user does not exist, an exception is
+    raised. (e.g. [file dirname ~gustafn.foo]).
+    
+    https://www.tcl-lang.org/man/tcl/TclCmd/filename.htm#M20
+
+    This little proc can be used in cases, where (a) the
+    tilde-substitution is unwanted, and where the "name" argument
+    (usually the first argument after the subcommand) might contain
+    user provided values.
+    
+} {
+    if {[string range $arg1 0 1] eq {~}} {
+        set arg1 ./$arg1
+    }
+    ::file $subcmd $arg1 {*}$args
 }
 
 # Local variables:

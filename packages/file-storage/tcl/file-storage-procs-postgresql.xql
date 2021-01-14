@@ -31,78 +31,9 @@
         </querytext>
     </fullquery>
 
-    <fullquery name="fs::get_folder_objects.select_folder_contents">
-        <querytext>
-
-          select cr_items.item_id as object_id, cr_items.name
-          from   cr_items
-          where  cr_items.parent_id = :folder_id
-          and    acs_permission__permission_p(cr_items.item_id, :user_id, 'read')
-
-        </querytext>
-    </fullquery>
-
-    <fullquery name="fs::get_folder_contents.select_folder_contents">
-        <rdbms><type>postgresql</type><version>8.4</version></rdbms>
-        <querytext>
-
-           select fs_objects.object_id,
-           fs_objects.name,
-           fs_objects.title,
-           fs_objects.live_revision,
-           fs_objects.type,
-           to_char(fs_objects.last_modified, 'YYYY-MM-DD HH24:MI:SS') as last_modified_ansi,
-           fs_objects.content_size,
-           fs_objects.url,
-           fs_objects.key,
-           fs_objects.sort_key,
-           fs_objects.file_upload_name,
-           fs_objects.title,
-           case when fs_objects.last_modified >= (now() - interval '$n_past_days days') then 1 else 0 end as new_p,
-           acs_permission__permission_p(fs_objects.object_id, :user_id, 'admin') as admin_p,
-           acs_permission__permission_p(fs_objects.object_id, :user_id, 'delete') as delete_p,
-           acs_permission__permission_p(fs_objects.object_id, :user_id, 'write') as write_p
-           from fs_objects
-           where fs_objects.parent_id = :folder_id
-           and acs_permission__permission_p(fs_objects.object_id, :user_id, 'read')
-           order by fs_objects.sort_key, fs_objects.name
-
-        </querytext>
-    </fullquery>
-
-
     <fullquery name="fs_get_folder_name.folder_name">
         <querytext>
             select file_storage__get_folder_name(:folder_id);
-        </querytext>
-    </fullquery>
-
-    <fullquery name="children_have_permission_p.child_perms">
-        <querytext>
-            select count(*)
-            from cr_items c1, cr_items c2
-            where c2.item_id = :item_id
-            and c1.tree_sortkey between c2.tree_sortkey and tree_right(c2.tree_sortkey)
-            and not acs_permission__permission_p(c1.item_id, :user_id, :privilege)
-        </querytext>
-    </fullquery>
-
-    <fullquery name="children_have_permission_p.child_items">
-        <querytext>
-            select c1.item_id as child_item_id
-            from cr_items c1, cr_items c2
-            where c2.item_id = :item_id
-            and c1.tree_sortkey between c2.tree_sortkey and tree_right(c2.tree_sortkey)
-            order by c1.tree_sortkey
-        </querytext>
-    </fullquery>
-
-    <fullquery name="children_have_permission_p.revision_perms">
-        <querytext>
-            select count(*)
-            from cr_revisions
-            where item_id = :child_item_id
-            and acs_permission__permission_p(revision_id, :user_id, :privilege) = 'f'
         </querytext>
     </fullquery>
 
@@ -128,27 +59,11 @@
         </querytext>
     </fullquery>
 
-    <fullquery name="fs::do_notifications.get_owner_name">
-        <querytext>
-	  select person__name(o.creation_user) as owner from
-          acs_objects o where o.object_id = :item_id
-        </querytext>
-    </fullquery>
-
-    <fullquery name="fs::do_notifications.path1">
-       <querytext>
-		select site_node__url(node_id) as path1 from site_nodes
-		       where object_id = (select package_id
-						 from fs_root_folders where
-						 fs_root_folders.folder_id = :root_folder)
-       </querytext>
-    </fullquery>
-
     <fullquery name="fs::publish_versioned_object_to_file_system.select_object_content">
         <querytext>
             select lob
             from cr_revisions
-            where revision_id = $live_revision
+            where revision_id = :live_revision
         </querytext>
     </fullquery>
 
@@ -159,13 +74,6 @@
             where revision_id = :live_revision
         </querytext>
     </fullquery>
-
-    <fullquery name="fs::get_item_id.get_item_id">
-      <querytext>
-        select content_item__get_id ( :name, :folder_id, 'f' )
-      </querytext>
-    </fullquery>
-
 
   <fullquery name="fs::add_file.create_item">
     <querytext>
@@ -202,10 +110,7 @@
 
   <fullquery name="fs::delete_folder.delete_folder">
      <querytext>
-        select file_storage__delete_folder (
-                       :folder_id,
-                       :cascade_p
-                       )
+       select content_folder__del(:folder_id, :cascade_p)
      </querytext>
   </fullquery>
   
@@ -223,41 +128,18 @@
 
   <fullquery name="fs::get_folder_package_and_root.select_package_and_root">
     <querytext>
-      select r.package_id,
-             r.folder_id as root_folder_id
-      from fs_root_folders r,
-           (select parent.item_id as folder_id
-            from cr_items parent,
-                 cr_items children
-            where children.item_id = :folder_id
-              and children.tree_sortkey
-                between parent.tree_sortkey
-                and tree_right(parent.tree_sortkey)) t
-      where r.folder_id = t.folder_id
+      With RECURSIVE items AS (
+        select cr.item_id from cr_items cr where cr.item_id = :folder_id
+      UNION ALL
+        select cr.parent_id from cr_items cr, items where items.item_id = cr.item_id
+      )
+      select r.package_id, r.folder_id as root_folder_id
+      from   items i, fs_root_folders r
+      where  r.folder_id = i.item_id
     </querytext>
   </fullquery>
 
   <fullquery name="fs::add_created_version.new_file_revision">
-    <querytext>
-	select content_revision__new (
-	      :title,    	-- title
-              :description,	-- description
-	      now(),		-- publish_date
-	      :mime_type, 	-- mime_type
-	      null,		-- ns_language
-	      :content_body,	-- text
-	      :item_id,		-- item_id
-	      null,
-	      now(),		-- creation_date
-	      :creation_user, 	-- creation_user
-	      :creation_ip,	-- creation_ip
-	      null,	
-	      :package_id	-- package_id
-	)
-    </querytext>
-  </fullquery>
-
-  <fullquery name="fs::add_created_version.new_text_revision">
     <querytext>
 	select content_revision__new (
 	      :title,    	-- title
@@ -324,13 +206,5 @@
       )
     </querytext>
   </fullquery>
-
-    <fullquery name="fs::get_object_prettyname.select_object_prettyname">
-        <querytext>
-            select coalesce(title,name) as prettyname
-            from fs_objects
-            where object_id = :object_id
-        </querytext>
-    </fullquery>
 
 </queryset>

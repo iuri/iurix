@@ -3,17 +3,24 @@ ad_page_contract {
 
     @author philg@mit.edu
     @creation-date 26 Sept 1999
-    @cvs-id $Id: portrait-bits.tcl,v 1.10.2.7 2017/03/27 10:49:05 gustafn Exp $
+    @cvs-id $Id: portrait-bits.tcl,v 1.20.2.1 2020/07/21 14:08:50 gustafn Exp $
 } {
     user_id:naturalnum,notnull
     {size ""}
 }
 
+# Show the portrait only to authenticated users
+auth::require_login
+
+# Default avatar image
+set default_avatar [acs_root_dir]/packages/acs-subsite/www/shared/avatar-x50.png
+set default_avatar_mime image/png
+
 #
 # The size info is a valid geometry as provided for image magicks
 # "convert". We provide here a sample list of valid sizes
 #
-if {$size ne "" && $size ni {x24 x50 x100}} {
+if {$size ne "" && $size ni {x24 x50 x100 x150 x200}} {
     ad_log warning "size '$size' is not supported"
     set size ""
 }
@@ -27,7 +34,7 @@ if { $item_id != 0} {
         if {[content::item::get -item_id $item_id -array_name itemInfo] == 0} {
             if {[content::item::get -item_id $item_id -array_name itemInfo -revision latest] == 0} {
                 ad_log warning "cannot obtain revision info for item_id $item_id user_id $user_id"
-                ns_returnnotfound
+                ns_returnfile 200 $default_avatar_mime $default_avatar
                 ad_script_abort
             }
         }
@@ -37,19 +44,25 @@ if { $item_id != 0} {
         # we provide cached thumbnails, which use in their cache
         # key the revision id.
         #
-            
+
         set folder [acs_root_dir]/portrait-thumbnails
-        if {![file exists $folder]} {
+        if {![ad_file exists $folder]} {
             file mkdir $folder
         }
 
         set filename $folder/$itemInfo(revision_id).$size
-        
-        if {![file exists $filename]} {
-            switch $itemInfo(storage_type) {
+
+        if {![ad_file exists $filename]} {
+            switch -- $itemInfo(storage_type) {
                 "file" {
                     set input_file [content::revision::get_cr_file_path -revision_id $itemInfo(revision_id)]
-                    exec convert $input_file -resize $size $filename
+                    ad_try {
+                        exec convert $input_file -resize $size $filename
+                    } on error {errorMsg} {
+                        ad_log warning "portrait-bits: convert returned error: $errorMsg"
+                        ns_returnfile 200 $default_avatar_mime $default_avatar
+                        ad_script_abort
+                    }
                 }
                 "lob" {
                     set input_file [ad_tmpnam]
@@ -60,8 +73,15 @@ if { $item_id != 0} {
                         from cr_revisions
                         where revision_id = :revision_id
                     } -file $input_file
-                    exec convert $input_file -resize $size $filename
-                    file delete -- $input_file
+                    ad_try {
+                        exec convert $input_file -resize $size $filename
+                    } on error {errorMsg} {
+                        ad_log warning "portrait-bits: convert returned error: $errorMsg"
+                        ns_returnfile 200 $default_avatar_mime $default_avatar
+                        ad_script_abort
+                    } finally {
+                        file delete -- $input_file
+                    }
                 }
                 default {
                     ad_log warning "unsupported storage type for portraits: $itemInfo(storage_type)"
@@ -72,14 +92,26 @@ if { $item_id != 0} {
         # Test again if the file exists, we might have converted the
         # file by the if-clause above.
         #
-        if {[file exists $filename]} {
+        if {[ad_file exists $filename]} {
             ns_setexpires 86400 ;# 1 day
-            ad_returnfile_background 200 $itemInfo(mime_type) $filename
+            #
+            # We had "ad_returnfile_background" before, which is a
+            # dependency on xotcl-core. We can use ns_returnfile here
+            # instead. Since a few years NaviServer delivers files via
+            # "ns_returnfile" in the background, when writer_threads
+            # are enabled (which is the case for default
+            # configurations).
+            #
+            ns_returnfile 200 $itemInfo(mime_type) $filename
+
         } else {
             ad_log warning "cannot show portrait with item_id $item_id for user $user_id "
-            ns_returnnotfound
+            ns_returnfile 200 $default_avatar_mime $default_avatar
         }
     }
+} else {
+    # Return default avatar image
+    ns_returnfile 200 $default_avatar_mime $default_avatar
 }
 
 # Local variables:

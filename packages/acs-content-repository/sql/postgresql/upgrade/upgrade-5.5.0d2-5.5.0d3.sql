@@ -3,7 +3,7 @@
 -- 
 -- @author Victor Guerra (vguerra@wu-wien.ac.at)
 -- @creation-date 2008-10-21
--- @cvs-id $Id: upgrade-5.5.0d2-5.5.0d3.sql,v 1.2 2008/10/24 13:50:14 victorg Exp $
+-- @cvs-id $Id: upgrade-5.5.0d2-5.5.0d3.sql,v 1.2.12.1 2019/08/10 18:09:52 gustafn Exp $
 --
 
 create or replace function content_folder__copy (integer,integer,integer,varchar,varchar)
@@ -67,10 +67,10 @@ begin
   and
     f.folder_id = copy__folder_id;
 
-  -- would be better to check if the copy__name alredy exists in the destination folder.
+  -- would be better to check if the copy__name already exists in the destination folder.
 
   if v_current_folder_id = copy__target_folder_id and (v_name = copy__name or copy__name is null) then
-    raise EXCEPTION ''-20000: content_folder.copy - Destination folder is parent folder and folder alredy exists'';
+    raise EXCEPTION ''-20000: content_folder.copy - Destination folder is parent folder and folder already exists'';
   end if;
 
       -- create the new folder

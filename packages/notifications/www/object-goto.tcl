@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Tracy Adams (teadams@alum.mit.edu)
     @creation-date 22 July 2002
-    @cvs-id $Id: object-goto.tcl,v 1.3.2.1 2015/09/12 11:06:47 gustafn Exp $
+    @cvs-id $Id: object-goto.tcl,v 1.4 2017/08/07 23:48:13 gustafn Exp $
 } {
     object_id:naturalnum,notnull
     type_id:naturalnum,notnull

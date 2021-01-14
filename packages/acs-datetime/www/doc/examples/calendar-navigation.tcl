@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author  ron@arsdigita.com
     @creation-date 2000-12-08
-    @cvs-id  $Id: calendar-navigation.tcl,v 1.4.2.2 2016/05/17 19:23:16 gustafn Exp $
+    @cvs-id  $Id: calendar-navigation.tcl,v 1.5 2017/08/07 23:47:55 gustafn Exp $
 } {
     {view:word ""}
     {date ""}

@@ -347,7 +347,7 @@ drop function inline_0();
 CREATE OR REPLACE FUNCTION inline_1(
 
 ) RETURNS integer AS $$
--- Create a bitfromint4(integer) function if it doesn't exists.
+-- Create a bittoint4(integer) function if it doesn't exists.
 -- This function is no longer present in 7.3 and above
 DECLARE
     v_bittoint4_count integer;
@@ -424,9 +424,9 @@ BEGIN
   end if;
 
   if p_intkey < 128 then
-    return substring(bitfromint4(p_intkey), 25, 8);
+    return substring(p_intkey::bit(32), 25, 8);
   else
-    return substring(bitfromint4(cast (-2^31 + p_intkey as int4)), 1, 32);
+    return substring((cast (-2^31 + p_intkey as int4))::bit(32), 1, 32);
   end if;
 
 END;
@@ -465,9 +465,9 @@ BEGIN
   end if;
 
   if substring(p_tree_key, v_parent_pos, 1) = '1' then
-    return bittoint4(substring(p_tree_key, v_parent_pos + 1, 31));
+    return substring(p_tree_key, v_parent_pos + 1, 31)::bit(31)::integer;
   else
-    return bittoint4(substring(p_tree_key, v_parent_pos, 8));
+    return substring(p_tree_key, v_parent_pos, 8)::bit(8)::integer;
   end if;
 
 END;
@@ -555,9 +555,9 @@ BEGIN
   end loop;
 
   if substring(p_tree_key, v_leaf_pos, 1) = '1' then
-    return bittoint4(substring(p_tree_key, v_leaf_pos + 1, 31));
+    return substring(p_tree_key, v_leaf_pos + 1, 31)::bit(31)::integer;
   else
-    return bittoint4(substring(p_tree_key, v_leaf_pos, 8));
+    return substring(p_tree_key, v_leaf_pos, 8)::bit(8)::integer;
   end if;
 
 END;

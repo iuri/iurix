@@ -3,21 +3,97 @@ ad_library {
 
     @author Joel Aufrecht
     @creation-date 2 Nov 2003
-    @cvs-id $Id: acs-subsite-procs.tcl,v 1.7.2.4 2017/04/21 15:27:49 gustafn Exp $
+    @cvs-id $Id: acs-subsite-procs.tcl,v 1.12.2.17 2020/09/01 17:40:42 antoniop Exp $
 }
 
-aa_register_case acs_subsite_expose_bug_775 {
+aa_register_case \
+    group_localization_leftovers {
+        Checks that no leftover group title localizations can be
+        found belonging to groups that do not exist anymore.
+    } {
+        aa_false "Leftover group localization message keys do not exist in the database" [db_string leftovers_exist {
+            select case when exists (select 1 from lang_message_keys k
+                                     where package_key = 'acs-translations'
+                                     and message_key like 'group_title_%'
+                                     and not exists (select 1 from groups
+                                                     where group_id = cast(split_part(k.message_key, '_', 3) as integer)))
+            then 1 else 0 end
+            from dual
+        }]
+    }
+
+aa_register_case \
+    -procs {
+        group::delete
+        group::new
+        _
+        lang::util::convert_to_i18n
+    } \
+    group_localization {
+        Create a group and check that the automagical localization
+        cleans after itself once it has been deleted.
+    } {
+        set group_name [ad_generate_random_string]
+
+        aa_log "Creating group '$group_name'"
+        set group_id [group::new -group_name $group_name]
+        set package_key acs-translations
+        set message_key "group_title_${group_id}"
+
+        aa_true "Message key was registered correctly" [db_string get_key {
+            select case when exists (select 1 from lang_message_keys
+                                     where package_key = :package_key
+                                     and message_key = :message_key)
+            then 1 else 0 end
+            from dual
+        }]
+
+        aa_equals "Pretty group name was stored correctly" $group_name [_ ${package_key}.$message_key]
+
+        aa_log "Deleting group"
+        group::delete $group_id
+
+        aa_false "Message key was deleted correctly" [db_string get_key {
+            select case when exists (select 1 from lang_message_keys
+                                     where package_key = :package_key
+                                     and message_key = :message_key)
+            then 1 else 0 end
+            from dual
+        }]
+
+        aa_false "Message key has been flushed from all possible caches" {$group_name eq [_ ${package_key}.$message_key]}
+
+        set new_value [ad_generate_random_string]
+        set pretty_name [lang::util::convert_to_i18n \
+                             -message_key $message_key \
+                             -text $new_value]
+
+        aa_equals "One can override the previously existing message key safely" $new_value [_ ${package_key}.$message_key]
+
+        aa_log "Cleaning up"
+        lang::message::unregister $package_key $message_key
+    }
+
+aa_register_case \
+    -bugs {775} \
+    -procs {
+        group::delete
+        group::new
+        permission::grant
+        rel_segment::new
+        relation_add
+    } \
+    acs_subsite_expose_bug_775 {
     Exposes Bug 775.
 
     @author Don Baccus
 } {
-
     aa_run_with_teardown \
         -rollback \
         -test_code {
 
         set group_id [group::new -group_name group_775]
-        set rel_id [rel_segments_new $group_id membership_rel segment_775]
+        set rel_id [rel_segment::new $group_id membership_rel segment_775]
         relation_add membership_rel $group_id 0
         permission::grant -object_id $group_id -party_id 0 -privilege read
 
@@ -27,35 +103,39 @@ aa_register_case acs_subsite_expose_bug_775 {
             aa_true "Delete of group \"group_775\" succeeded." 1
         }
     }
-
 }
 
-aa_register_case acs_subsite_expose_bug_1144 {
+aa_register_case \
+    -bugs {1144} \
+    -procs {
+        acs_user::delete
+        application_group::group_id_from_package_id
+        group::add_member
+    } \
+    acs_subsite_expose_bug_1144 {
     Exposes Bug 1144.
 
     @author Peter Marklund
 } {
-
     aa_run_with_teardown \
         -rollback \
         -test_code {
 
             array set main_node [site_node::get_from_url -url "/"]
             set main_group_id [application_group::group_id_from_package_id \
-                              -package_id $main_node(package_id)]
-            
-            set email "__test@test.test"
-            array set creation_info [auth::create_user \
-                                     -username "__test" \
-                                     -email $email \
-                                     -first_names "__Test first" \
-                                     -last_name "__Test last" \
-                                     -password 1 \
-                                     -password_confirm 1]
-     
+                                   -package_id $main_node(package_id)]
+
+            set user_info [acs::test::user::create]
+            set user_id [dict get $user_info user_id]
+            set email   [string tolower [dict get $user_info email]]
+
+            # Make sure email is verified. The real process of
+            # verifying is tested elsewhere.
+            auth::set_email_verified -user_id $user_id
+
             group::add_member \
                 -group_id $main_group_id \
-                -user_id $creation_info(user_id) \
+                -user_id $user_id \
                 -rel_type admin_rel
 
             set cc_users_count [db_string count_cc_users {
@@ -71,43 +151,54 @@ aa_register_case acs_subsite_expose_bug_1144 {
                 where email = :email
             }]
             aa_equals "New user occurs only once in registered_users" $registered_users_count 1
-            acs_user::delete -user_id $creation_info(user_id)
+            acs_user::delete -user_id $user_id
         }
 }
 
-aa_register_case -cats smoke acs_subsite_trivial_smoke_test {
+aa_register_case \
+    -cats smoke \
+    -procs {subsite::main_site_id} \
+    acs_subsite_trivial_smoke_test {
     Minimal smoke test.
-} {    
-
+} {
     aa_run_with_teardown \
         -rollback \
         -test_code {
             # initialize random values
             set name [ad_generate_random_string]
-
             set main_subsite_id [subsite::main_site_id]
-
-            aa_true "Main subsite exists" [expr {$main_subsite_id ne ""}]
-
+            aa_true "Main subsite exists" {$main_subsite_id ne ""}
         }
 }
 
-aa_register_case -cats smoke acs_subsite_unregistered_visitor {
+aa_register_case \
+    -cats smoke \
+    acs_subsite_unregistered_visitor {
     Test that unregistered visitor is not in any groups
 } {
-
     aa_equals "Unregistered vistior is not in any groups except The Public" \
-        [db_string count_rels "
+        [db_string count_rels {
 	    select count(*)
 	    from group_member_map g, acs_magic_objects a
 	    where g.member_id = 0
 	      and g.group_id <> a.object_id
-	      and a.name = 'the_pubic'" -default 0] 0
+              and a.name = 'the_public'} -default 0] 0
 }
 
 
-aa_register_case -cats smoke acs_subsite_check_composite_group {
-    Build a 3-level hierarchy of composite groups and check memberships. This test case covers the membership and composition rel insertion triggers and composability of basic membership and admin rels.
+aa_register_case \
+    -cats smoke \
+    -procs {
+        group::add_member
+        group::member_p
+        group::admin_p
+        group::new
+        relation_add
+    } acs_subsite_check_composite_group {
+    Build a 3-level hierarchy of composite groups and check
+    memberships. This test case covers the membership and composition
+    rel insertion triggers and composability of basic membership and
+    admin rels.
 
     @author Michael Steigman
 } {
@@ -121,46 +212,21 @@ aa_register_case -cats smoke acs_subsite_check_composite_group {
             set level_2_group [group::new -group_name "Level 2 Group"]
             relation_add composition_rel $level_1_group $level_2_group
 
-            set authority_id [auth::authority::local]
+            set user_info_1 [acs::test::user::create]
+            set user_1_id [dict get $user_info_1 user_id]
 
-            # flush cache from previous call of this test
-            util_memoize_flush [list acs_user::get_by_username_not_cached \
-                                    -authority_id $authority_id \
-                                     -username "__test1"]
-            
-            if {[set user_1_id [acs_user::get_by_username_not_cached \
-                                    -authority_id $authority_id \
-                                    -username "__test1"]] eq ""} {
-                array set user_1 [auth::create_user \
-                                      -username "__test1" \
-                                      -email "__user1@test.test" \
-                                      -first_names "__user1.Test first" \
-                                      -last_name "__user1.Test last" \
-                                      -password 1 \
-                                      -password_confirm 1]
-                set user_1_id $user_1(user_id)
-            }
+            set user_info_2 [acs::test::user::create]
+            set user_2_id [dict get $user_info_2 user_id]
 
-            # flush cache from previous call of this test
-            util_memoize_flush [list acs_user::get_by_username_not_cached \
-                                    -authority_id $authority_id \
-                                     -username "__test2"]            
-
-            if {[set user_2_id [acs_user::get_by_username_not_cached \
-                                    -authority_id $authority_id \
-                                    -username "__test2"]] eq ""} {                
-                array set user_2 [auth::create_user \
-                                      -username "__test2" \
-                                      -email "__user2@test.test" \
-                                      -first_names "__user2.Test first" \
-                                      -last_name "__user2.Test last" \
-                                      -password 1 \
-                                      -password_confirm 1]                    
-                set user_2_id $user_2(user_id)
-            }
-            
             group::add_member -group_id $level_2_group -user_id $user_1_id -rel_type membership_rel
             group::add_member -group_id $level_2_group -user_id $user_1_id -rel_type admin_rel
+
+            # check that user_1 is a direct member of level_2_group via the tcl api
+            aa_true "User 1 is a direct member of Level 2 Group" [group::member_p -user_id $user_1_id -group_id $level_2_group]
+            aa_true "User 1 is an admin of Level 2 Group" [group::admin_p -group_id $level_2_group -user_id $user_1_id]
+
+            # check that user_1 is a indirect member of level_1_group via the tcl api
+            aa_true "User 1 is an indirect member of Level 1 Group" [group::member_p -user_id $user_1_id -group_id $level_1_group -cascade]
 
             # check that user_1 is a member of level_1_group but not admin
             aa_true "User 1 is a member of Level 1 Group" [db_0or1row member_p {
@@ -200,9 +266,132 @@ aa_register_case -cats smoke acs_subsite_check_composite_group {
                 AND member_id = :user_2_id
                 AND rel_type = 'admin_rel'
             }]
-
         }
 }
+
+aa_register_case \
+    -cats smoke \
+    -procs {
+        group_type::new
+        acs_object_type::get
+        group::new
+        group::get_id
+        group::title
+        group::description
+        group::get
+        group_type::delete
+        _
+    } acs_subsite_group_type {
+        Create a new group type, create a new instance of it, check
+        that everything was created according to expectations and
+        cleanup at the end.
+
+        @author Antonio Pisano
+    } {
+        set group_type "aa_test_group_type"
+
+        try {
+            # Make sure the group type does not exist
+            group_type::delete -group_type $group_type
+
+            # Create the group type
+            set pretty_name "Test Group"
+            set pretty_plural "Test Groups"
+            set returned_group_type [group_type::new \
+                                         -group_type $group_type \
+                                         -supertype "group" \
+                                         $pretty_name $pretty_plural]
+            aa_true "Function returns the expected value (the group type)" \
+                {$group_type eq $returned_group_type}
+
+            # Test group type info
+            acs_object_type::get -object_type $group_type -array type
+            aa_true "Group type is an ACS Object created with expected values" \
+                {$pretty_name eq $type(pretty_name) && $pretty_plural eq $type(pretty_plural)}
+
+            # Create a group type instance
+            set group_name "${group_type}_instance_1"
+            set pretty_name "${pretty_name} Instance 1"
+            set group_id [group::new \
+                              -group_name  $group_name \
+                              -pretty_name $pretty_name \
+                              $group_type]
+
+            set api_group_id [group::get_id -group_name $group_name]
+            aa_equals "group::get_id -group_name $group_name returns the same id as that from group::new" \
+                $group_id $api_group_id
+            aa_true "group::get_id -group_name $group_name returns a valid object_id" [db_0or1row check {
+                select 1 from acs_objects where object_id = :api_group_id
+            }]
+
+            # Test group info
+            set group [group::get -group_id $group_id]
+            set expected_group_name  [dict get $group group_name]
+            # Pretty name is stored in an automatically generated message key
+            set expected_pretty_name [_ [string trim [dict get $group title] "#"]]
+            aa_true "Group was created with supplied values: $group_name eq $expected_group_name && $pretty_name eq $expected_pretty_name" \
+                {$group_name eq $expected_group_name && $pretty_name eq $expected_pretty_name}
+
+            aa_equals "group::description returns the expected value" \
+                [group::description -group_id $group_id] \
+                [db_string description {select description from groups where group_id = :group_id}]
+            aa_equals "group::title returns the expected value" \
+                [group::title -group_id $group_id] \
+                [db_string title {select title from acs_objects where object_id = :group_id}]
+
+        } finally {
+            # Cleanup
+            group_type::delete -group_type $group_type
+        }
+    }
+
+aa_register_case \
+    -cats smoke \
+    -urls {
+        /register/email-confirm
+    } \
+    -procs {
+        parameter::get
+        subsite::main_site_id
+        acs_user::get_user_info
+        auth::get_user_secret_token
+        party::get
+        export_vars
+        acs_user::delete
+    } acs_subsite_test_email_confirmation {
+        Calls the mail confirmation page with a new user and checks
+        that result is as expected
+
+        @author Antonio Pisano
+    } {
+        try {
+            # Create dummy user
+            set user [acs::test::user::create]
+            set user_id [dict get $user user_id]
+
+            # Check if email verification status fits instance
+            # configuration
+            if {[parameter::get \
+                     -package_id [subsite::main_site_id] \
+                     -parameter RegistrationRequiresEmailVerificationP -default 0]} {
+                aa_false "Email is NOT verified" [acs_user::get_user_info \
+                                                      -user_id $user_id -element email_verified_p]
+            } else {
+                aa_log "Main subsite does not require email verification"
+            }
+
+            ::acs::test::confirm_email -user_id $user_id
+
+            # Check that email is verified after confirmation
+            aa_true "Email is verified" [acs_user::get_user_info \
+                                             -user_id $user_id -element email_verified_p]
+        } finally {
+            # Delete the user
+            if {[info exists user_id] && [string is integer -strict $user_id]} {
+                acs_user::delete -user_id $user_id -permanent
+            }
+        }
+    }
 
 # Local variables:
 #    mode: tcl

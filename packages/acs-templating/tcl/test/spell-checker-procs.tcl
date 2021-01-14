@@ -3,10 +3,16 @@ ad_library {
 
     @author Ola Hansson (ola@polyxena.net)
     @creation-date 28 September 2003
-    @cvs-id $Id: spell-checker-procs.tcl,v 1.8.2.2 2017/04/21 16:50:30 gustafn Exp $
+    @cvs-id $Id: spell-checker-procs.tcl,v 1.13 2018/07/22 11:37:20 gustafn Exp $
 }
 
-aa_register_case -cats { api } spellcheck__get_element_formtext {
+aa_register_case \
+    -cats { api } \
+    -procs {
+        parameter::get_from_package_key
+        template::util::spellcheck::get_element_formtext
+    } \
+    spellcheck__get_element_formtext {
     Test the spell-check proc that does the actual spell-checking.
 } {    
     
@@ -50,15 +56,12 @@ aa_register_case -cats { api } spellcheck__get_element_formtext {
 	aa_log "Have you installed aspell and aspell-dict-en ?"
 	return
     }
-
-    aa_true "True statement: Text contains no misspelled words" [expr {$error_num == 0}]
+    aa_true "True statement: Text contains no misspelled words" {$error_num == 0}
     
     aa_log "Number of miss-spelled words found in text: $error_num"
-    
-    aa_false "False statement: Text contains misspelled word(s)" [expr {$error_num > 0}]
+    aa_false "False statement: Text contains misspelled word(s)" {$error_num > 0}
     
     aa_equals "Number of misspelled words found in text" $error_num 0
-    
     aa_log "Returned string: $formtext_to_display"
     
     aa_true "The returned string contains a hidden var named 'var_to_spellcheck.merge_text'" \
@@ -67,7 +70,7 @@ aa_register_case -cats { api } spellcheck__get_element_formtext {
     aa_true "The returned string contains no hidden var(s) named 'var_to_spellcheck.error_N', where N is the error number." \
 	![regexp "var_to_spellcheck.error_\[0-9\]*" $formtext_to_display]
 
-    aa_true "just_the_errwords is empty" [expr {$just_the_errwords eq ""}]
+    aa_true "just_the_errwords is empty" {$just_the_errwords eq ""}
     
     #####
     #
@@ -86,23 +89,24 @@ aa_register_case -cats { api } spellcheck__get_element_formtext {
 	return
     }
  
-    aa_true "True statement: Text contains misspelled words" [expr {$error_num > 0}]
+    aa_true "True statement: Text contains misspelled words" {$error_num > 0}
     
     aa_log "Number of misspelled words found in text: $error_num"
-    
-    aa_false "False statement: Text contains no misspelled word(s)" [expr {$error_num == 0}]
+    aa_false "False statement: Text contains no misspelled word(s)" {$error_num == 0}
     
     aa_log "Returned string: $formtext_to_display"
-    
     aa_true "The returned string contains a hidden var named 'var_to_spellcheck.merge_text'" \
 	[regexp "var_to_spellcheck.merge_text" $formtext_to_display]
 
     aa_true "The returned string contains $error_num hidden var(s) named 'var_to_spellcheck.error_N', where N is a number between 0 and [expr {$error_num - 1}]." \
 	[regexp "var_to_spellcheck.error_\[0-9\]*" $formtext_to_display]
 
-    aa_equals "The number of misspelled words matches the number of error placeholders in the merge_text" [regexp -all "var_to_spellcheck.error_\[0-9\]*" $formtext_to_display] [regexp -all "\#\[0-9\]*\#" $formtext_to_display]
+    aa_equals "The number of misspelled words matches the number of error placeholders in the merge_text" \
+        [regexp -all "var_to_spellcheck.error_\[0-9\]*" $formtext_to_display] \
+        [regexp -all "\#\[0-9\]*\#" $formtext_to_display]
 
-    aa_true "just_the_errwords contains the errwords we expected: '[join $errwords ", "]'" [util_sets_equal_p $just_the_errwords $errwords]
+    aa_true "just_the_errwords contains the errwords we expected: '[join $errwords ", "]'" \
+        [util_sets_equal_p $just_the_errwords $errwords]
 
     #####
     #
@@ -122,23 +126,21 @@ aa_register_case -cats { api } spellcheck__get_element_formtext {
 	return
     }
     
-    aa_true "True statement: HTML fragment contains no misspelled words" [expr {$error_num == 0}]
+    aa_true "True statement: HTML fragment contains no misspelled words" {$error_num == 0}
     
     aa_log "Number of miss-spelled words found in HTML fragment: $error_num"
-    
-    aa_false "False statement: HTML fragment contains misspelled word(s)" [expr {$error_num > 0}]
+    aa_false "False statement: HTML fragment contains misspelled word(s)" {$error_num > 0}
     
     aa_equals "Number of misspelled words found in HTML fragment" $error_num 0
     
     aa_log "Returned string: $formtext_to_display"
-    
     aa_true "The returned string contains a hidden var named 'var_to_spellcheck.merge_text'" \
 	[regexp "var_to_spellcheck.merge_text" $formtext_to_display]
 
     aa_true "The returned string contains no hidden var(s) named 'var_to_spellcheck.error_N', where N is the error number." \
 	![regexp "var_to_spellcheck.error_\[0-9\]*" $formtext_to_display]
 
-    aa_true "just_the_errwords is empty" [expr {$just_the_errwords eq ""}]
+    aa_true "just_the_errwords is empty" {$just_the_errwords eq ""}
 
     #####
     #
@@ -158,11 +160,11 @@ aa_register_case -cats { api } spellcheck__get_element_formtext {
 	return
     }
 
-    aa_true "True statement: HTML fragment contains misspelled words" [expr {$error_num > 0}]
+    aa_true "True statement: HTML fragment contains misspelled words" {$error_num > 0}
     
     aa_log "Number of miss-spelled words found in HTML fragment: $error_num"
     
-    aa_false "False statement: HTML fragment contains no misspelled word(s)" [expr {$error_num == 0}]
+    aa_false "False statement: HTML fragment contains no misspelled word(s)" {$error_num == 0}
     
     aa_log "Returned string: $formtext_to_display"
     
@@ -172,41 +174,61 @@ aa_register_case -cats { api } spellcheck__get_element_formtext {
     aa_true "The returned string contains hidden var(s) named 'var_to_spellcheck.error_N', where N is the error number." \
 	[regexp "var_to_spellcheck.error_\[0-9\]*" $formtext_to_display]
 
-    aa_true "just_the_errwords contains the errwords we expected: '[join $errwords ", "]'" [util_sets_equal_p $just_the_errwords $errwords]
+    aa_true "just_the_errwords contains the errwords we expected: '[join $errwords ", "]'" \
+        [util_sets_equal_p $just_the_errwords $errwords]
 
 }
 
 
-aa_register_case -cats { api } spellcheck__spellcheck_properties {
+aa_register_case \
+    -cats { api } \
+    -procs {
+        parameter::get_from_package_key
+        template::util::spellcheck::spellcheck_properties
+    } \
+    spellcheck__spellcheck_properties {
     Test the proc that knows if spell-checking is activated, if it should be performed,
     and which value the pull-down menu should default to.
-} {    
+} {
     array set element {
 	id test_element
-	widget text	
 	mode edit
     }
 
     set command {template::util::spellcheck::spellcheck_properties -element_ref element}
 
     # text
+    set element(widget) text
+    # text widget doesn't support spellcheck
+    set spellcheck_p false
     aa_log "--- Spell-checking enabled on widget \"$element(widget)\"? --- $command"
 
-    array set spellcheck [eval $command]
+    array set spellcheck [{*}$command]
     aa_false "Spell-checking disabled" $spellcheck(render_p)
 
     if { $spellcheck(render_p) } {
 	aa_log "$spellcheck(selected_option) is the default"
     }
-    
+
+    # formwidgets where spellcheck is enabled
+    array set widget_info [string trim [parameter::get_from_package_key \
+                                            -package_key acs-templating \
+                                            -parameter SpellcheckFormWidgets \
+                                            -default ""]]
 
     # textarea
     set element(widget) textarea
+    # spellcheck conf from parameter
+    set spellcheck_p [expr {
+                            [info exists widget_info($element(widget))]
+                            && $widget_info($element(widget))
+                        }]
     aa_log "--- Spell-checking enabled on widget \"$element(widget)\"? --- $command"
 
-    array set spellcheck [eval $command]
-    aa_true "Spell-checking enabled" $spellcheck(render_p)
-    
+    array set spellcheck [{*}$command]
+    aa_true "Spell-checking as configured in acs-templating.SpellcheckFormWidgets parameter" \
+        {!($spellcheck(render_p) ^ $spellcheck_p)}
+
     if { $spellcheck(render_p) } {
 	aa_log "$spellcheck(selected_option) is the default"
     }
@@ -214,15 +236,21 @@ aa_register_case -cats { api } spellcheck__spellcheck_properties {
 
     # richtext
     set element(widget) richtext
+    # spellcheck conf from parameter
+    set spellcheck_p [expr {
+                            [info exists widget_info($element(widget))]
+                            && $widget_info($element(widget))
+                        }]
     aa_log "--- Spell-checking enabled on widget \"$element(widget)\"? --- $command"
 
-    array set spellcheck [eval $command]
-    aa_true "Spell-checking enabled" $spellcheck(render_p)
+    array set spellcheck [{*}$command]
+    aa_true "Spell-checking as configured in acs-templating.SpellcheckFormWidgets parameter" \
+        {!($spellcheck(render_p) ^ $spellcheck_p)}
 
     if { $spellcheck(render_p) } {
 	aa_log "$spellcheck(selected_option) is the default"
     }
-    
+
 }
 
 # Local variables:

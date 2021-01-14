@@ -4,22 +4,21 @@ ad_library {
 
     @author rhs@mit.edu
     @creation-date 2000-08-17
-    @cvs-id $Id: acs-permissions-procs.tcl,v 1.33.2.8 2017/06/28 20:20:27 gustafn Exp $
+    @cvs-id $Id: acs-permissions-procs.tcl,v 1.47.2.5 2020/10/28 15:39:19 hectorr Exp $
 
 }
 
 namespace eval permission {}
-
-# define cache_p to be 0 here.  Note that it is redefined
-# to return the value of the PermissionCacheP kernel parameter
-# on the first call.  also the namespace eval is needed to 
+#
+# Define cache_p to return 0 or 1 depending on the PermissionCacheP
+# kernel parameter on the first call.  The namespace eval is needed to
 # make the redefinition work for ttrace.
-
+#
 ad_proc -private permission::cache_p {} {
     returns 0 or 1 depending if permission_p caching is enabled or disabled.
     by default caching is disabled.
 } {
-    set cache_p [parameter::get -package_id [ad_acs_kernel_id] -parameter PermissionCacheP -default 0]
+    set cache_p [parameter::get -package_id $::acs::kernel_id -parameter PermissionCacheP -default 0]
     namespace eval ::permission [list proc cache_p {} "return $cache_p"]
     return $cache_p
 }
@@ -32,7 +31,7 @@ ad_proc -public permission::grant {
     grant privilege Y to party X on object Z
 } {
     db_exec_plsql grant_permission {}
-    util_memoize_flush [list permission::permission_p_not_cached -party_id $party_id -object_id $object_id -privilege $privilege]
+    permission::cache_flush -party_id $party_id -object_id $object_id -privilege $privilege
     permission::permission_thread_cache_flush
 }
 
@@ -44,7 +43,7 @@ ad_proc -public permission::revoke {
     revoke privilege Y from party X on object Z
 } {
     db_exec_plsql revoke_permission {}
-    util_memoize_flush [list permission::permission_p_not_cached -party_id $party_id -object_id $object_id -privilege $privilege]
+    permission::cache_flush -party_id $party_id -object_id $object_id -privilege $privilege
     permission::permission_thread_cache_flush
 }
 
@@ -56,18 +55,18 @@ ad_proc -public permission::permission_p {
     {-object_id:required}
     {-privilege:required}
 } {
-    does party X have privilege Y on object Z
-    
+    Does the provided party have the reequested privilege on the given object?
+
     @param no_cache force loading from db even if cached (flushes cache as well)
-    
+
     @param no_login Don't bump to registration to refresh authentication, if the user's authentication is expired.
                     This is specifically required in the case where you're calling this from the proc that gets
                     the login page.
-    
+
     @param party_id if null then it is the current user_id
 
     @param object_id The object you want to check permissions on.
-    
+
     @param privilege The privilege you want to check for.
 } {
     if { $party_id eq "" } {
@@ -77,45 +76,56 @@ ad_proc -public permission::permission_p {
     set caching_activated [permission::cache_p]
 
     if { $no_cache_p || !$caching_activated } {
+        #
+        # No caching wanted (either per-call or configured)
+        #
+        if { $no_cache_p } {
+            #
+            # Avoid all caches.
+            #
+            permission::permission_thread_cache_flush
+        }
 
-	if { $no_cache_p } {
-	    permission::permission_thread_cache_flush
-	}
-
-	if {$caching_activated} {
-	    # If there is no caching activated, there is no need to
-	    # flush the memoize cache. Frequent momoize cache flushing
-	    # causes a flood of intra-server talk in a cluster
-	    # configuration (see bug #2398);
-	    # 
-	    util_memoize_flush [list permission::permission_p_not_cached \
-				    -party_id $party_id \
-				    -object_id $object_id \
-				    -privilege $privilege]
-	}
+        if {$caching_activated} {
+            #
+            # Only flush the cache, when caching is activated.
+            # Frequent cache flushing can cause a flood of
+            # intra-server talk in a cluster configuration (see bug
+            # #2398);
+            #
+            permission::cache_flush \
+                -party_id $party_id \
+                -object_id $object_id \
+                -privilege $privilege
+        }
 
         set permission_p [permission::permission_p_not_cached \
-			      -party_id $party_id \
-			      -object_id $object_id \
-			      -privilege $privilege]
-    } else { 
-        set permission_p [util_memoize \
-                              [list permission::permission_p_not_cached \
-				   -party_id $party_id \
-				   -object_id $object_id \
-				   -privilege $privilege] \
-                              [parameter::get -package_id [ad_acs_kernel_id] \
-				   -parameter PermissionCacheTimeout \
-				   -default 300]]
+                              -party_id $party_id \
+                              -object_id $object_id \
+                              -privilege $privilege]
+    } else {
+        #
+        # Permission caching is activated
+        #
+        set permission_p [permission::cache_eval \
+                              -party_id $party_id \
+                              -object_id $object_id \
+                              -privilege $privilege]
     }
 
-    if { 
+    if {
         !$no_login_p
-        && $party_id == 0 
-        && [ad_conn user_id] == 0 
-        && [ad_conn untrusted_user_id] != 0 
-        && ![template::util::is_true $permission_p] 
+        && $party_id == 0
+        && [ad_conn user_id] == 0
+        && [ad_conn untrusted_user_id] != 0
+        && ![template::util::is_true $permission_p]
     } {
+        #
+        # In case, permission was granted above, the party and ad_conn
+        # user_id are 0, and the permission is NOT granted based on
+        # the untrusted_user_id, require login unless this is
+        # deactivated for this call.
+        #
         set untrusted_permission_p [permission_p_not_cached \
                                         -party_id [ad_conn untrusted_user_id] \
                                         -object_id $object_id \
@@ -152,20 +162,18 @@ ad_proc -private permission::permission_p_not_cached {
     }
 
     # We have a per-request cache here
-    set key ::permission__permission_p__cache($party_id,$object_id,$privilege)
-    if { ![info exists $key] } {
-        set $key [db_string select_permission_p {
+    return [acs::per_request_cache eval -key acs-tcl.permission_p__cache($party_id,$object_id,$privilege) {
+        db_string select_permission_p {
             select acs_permission.permission_p(:object_id, :party_id, :privilege)::integer from dual
-        }]
-    }
-    return [set $key]
+        }
+    }]
 }
 
 
 ad_proc -private permission::permission_thread_cache_flush {} {
     Flush thread cache
 } {
-    array unset ::permission__permission_p__cache
+    acs::per_request_cache flush -pattern acs-tcl.permission_p__cache*
 }
 
 ad_proc -public permission::require_permission {
@@ -181,13 +189,13 @@ ad_proc -public permission::require_permission {
 
     if {![permission_p -party_id $party_id -object_id $object_id -privilege $privilege]} {
 
-        if {!${party_id} && ![ad_conn ajax_p]} {
+        if {!$party_id && ![ad_conn ajax_p]} {
             auth::require_login
         } else {
-            ns_log notice "permission::require_permission: $party_id doesn't have $privilege on object $object_id"
+            ns_log notice "permission::require_permission: $party_id doesn't have privilege $privilege on object $object_id"
             ad_return_forbidden \
                 "Permission Denied" \
-                "You don't have permission to $privilege [db_string name {}]."
+                "You don't have permission to $privilege on object $object_id."
         }
 
         ad_script_abort
@@ -205,7 +213,7 @@ ad_proc -public permission::inherit_p {
 ad_proc -public permission::toggle_inherit {
     {-object_id:required}
 } {
-    toggle whether or not this object inherits permissions from it's parent
+    toggle whether or not this object inherits permissions from its parent
 } {
     db_dml toggle_inherit {}
     permission::permission_thread_cache_flush
@@ -235,14 +243,14 @@ ad_proc -public permission::write_permission_p {
     {-creation_user ""}
 } {
     Returns whether a user is allowed to edit an object.
-    The logic is that you must have either write permission, 
+    The logic is that you must have either write permission,
     or you must be the one who created the object.
 
     @param object_id     The object you want to check write permissions for
 
     @param party_id      The party to have or not have write permission.
 
-    @param creation_user Optionally specify creation_user directly as an optimization. 
+    @param creation_user Optionally specify creation_user directly as an optimization.
                          Otherwise a query will be executed.
 
     @return True (1) if user has permission to edit the object, 0 otherwise.
@@ -269,7 +277,7 @@ ad_proc -public permission::require_write_permission {
 } {
     If the user is not allowed to edit this object, returns a permission denied page.
 
-    @param creation_user Optionally specify creation_user directly as an optimization. 
+    @param creation_user Optionally specify creation_user directly as an optimization.
                          Otherwise a query will be executed.
     @param party_id      The party to have or not have write permission.
 
@@ -278,7 +286,7 @@ ad_proc -public permission::require_write_permission {
     if { ![permission::write_permission_p -object_id $object_id -party_id $party_id] } {
         ad_return_forbidden  "Permission Denied"  "You don't have permission to $action this object."
         ad_script_abort
-    } 
+    }
 }
 
 ad_proc -public permission::get_parties_with_permission {
@@ -288,13 +296,82 @@ ad_proc -public permission::get_parties_with_permission {
     Return a list of lists of party_id and acs_object.title,
     having a given privilege on the given object
 
-    @param obect_id 
+    @param object_id
     @param privilege
 
     @see permission::permission_p
 } {
     return [db_list_of_lists get_parties {}]
 }
+
+
+ad_proc -private permission::cache_eval {
+    {-party_id}
+    {-object_id}
+    {-privilege}
+} {
+    Run permission call and cache the result.
+
+    @param party_id
+    @param object_id
+    @param privilege
+
+    @see permission::permission_p
+} {
+    return [acs::permission_cache eval \
+                -partition_key $party_id \
+                -expires [parameter::get -package_id $::acs::kernel_id \
+                              -parameter PermissionCacheTimeout \
+                              -default 300] \
+                $party_id/$object_id/$privilege {
+                    permission::permission_p_not_cached \
+                        -party_id $party_id \
+                        -object_id $object_id \
+                        -privilege $privilege
+                }]
+}
+
+#
+# flush permission cache
+#
+
+ad_proc -public permission::cache_flush {
+    {-party_id}
+    {-object_id}
+    {-privilege}
+} {
+
+    Flush permissions from the cache. Either specify all three
+    parameters or only party_id
+
+    @param party_id
+    @param object_id
+    @param privilege
+
+    @see permission::permission_p
+} {
+    if {[namespace which ::acs::permission_cache] eq ""} {
+        return
+
+    } elseif {[info exists party_id] && [info exists object_id] && [info exists privilege]} {
+        #
+        # All three attributes are provided
+        #
+        ::acs::permission_cache flush -partition_key $party_id $party_id/$object_id/$privilege
+
+    } elseif {[info exists party_id] } {
+        #
+        # At least the party_id is provided
+        #
+        ::acs::permission_cache flush_all -partition_key $party_id
+    } else {
+        #
+        # tell user, what's implemented
+        #
+        error "either specify party_id, object_id and privilege, or only party_id"
+    }
+}
+
 
 
 # Local variables:

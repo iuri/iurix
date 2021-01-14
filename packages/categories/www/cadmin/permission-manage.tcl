@@ -2,11 +2,11 @@ ad_page_contract {
     Let the user toggle the site-wide status of a category tree.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: permission-manage.tcl,v 1.9.2.3 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
     object_id:naturalnum,optional
-    {locale ""}
+    {locale:word ""}
 } -properties {
     page_title:onevalue
     context_bar:onevalue
@@ -22,13 +22,13 @@ array set tree [category_tree::get_data $tree_id $locale]
 set tree_name $tree(tree_name)
 set page_title [_ categories.Permissions_manage_title]
 
-set context_bar [category::context_bar $tree_id $locale [value_if_exists object_id]]
+set context_bar [category::context_bar $tree_id $locale [expr {[info exists object_id] ? $object_id : ""}]]
 lappend context_bar [_ categories.Permissions_manage]
 
 set url_vars [export_vars {tree_id object_id locale}]
 set package_id [ad_conn package_id]
 set admin_p [permission::permission_p -object_id $package_id -privilege category_admin]
-set sw_tree_p [ad_decode $tree(site_wide_p) f 0 1]
+set sw_tree_p [expr {$tree(site_wide_p) ne "f"}]
 
 ad_return_template
 

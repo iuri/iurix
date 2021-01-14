@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author unknown
     @creation-date unknown
-    @cvs-id $Id: show.tcl,v 1.3.2.4 2016/05/28 09:51:22 gustafn Exp $
+    @cvs-id $Id: show.tcl,v 1.4.2.1 2019/03/31 11:17:59 gustafn Exp $
 } {
     file:trim,notnull
 } -validate {
@@ -13,7 +13,7 @@ ad_page_contract {
        }
        set dir [file dirname [ad_conn file]]
        if {![file readable $dir/$file] || [file isdirectory $dir/$file]} {
-           ad_complain "The specified file ist not readable"
+           ad_complain "The specified file is not readable"
        }
    }
 }

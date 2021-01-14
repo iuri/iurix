@@ -3,7 +3,7 @@
 --
 -- @author yon (yon@openforce.net)
 -- @creation-date 2002-04-03
--- @version $Id: file-storage-views-create.sql,v 1.12 2006/08/08 21:26:48 donb Exp $
+-- @version $Id: file-storage-views-create.sql,v 1.12.12.1 2019/03/15 09:36:09 antoniop Exp $
 --
 
 create or replace view fs_urls_full
@@ -83,11 +83,8 @@ as
       end as name,
       cr_items.name as file_upload_name,
       cr_revisions.title,
-        case
-        when cr_items.content_type = 'content_folder'
-        then acs_objects.last_modified
-        else cr_revisions.publish_date
-        end as last_modified,
+      cr_revisions.mime_type,
+      acs_objects.last_modified,
       cr_extlinks.url,
       cr_items.parent_id,
       cr_items.name as key,

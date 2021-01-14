@@ -14,22 +14,39 @@ foreach {parameter default cmd} {
     TclTraceSaveNsReturn   0  {trace add execution ::ns_return  enter {::tcltrace::before-ns_return}}
 } {
     if {[::parameter::get_from_package_key \
-	     -package_key acs-tcl \
-	     -parameter $parameter \
-	     -default $default] ne $default} {
-	append trace \n$cmd 
+             -package_key acs-tcl \
+             -parameter $parameter \
+             -default $default] ne $default} {
+        append trace \n$cmd
     }
 }
 
 #
 # Optionally add more traces here
 #
+# simple traces
+#
 set traced_cmds {}
 #set traced_cmds {::nsv_get}
+#set traced_cmds {::ns_mutex} ;# help to spot creating of unnamed mutexes
 #set traced_cmds {::ns_setcookie ::ns_getcookie ::ns_deletecookie}
+#set traced_cmds {::ns_return ::ns_returnnotfound ::ns_returnfile ::ns_returnmoved}
+#set traced_cmds [lsort [info commands ::ns_return*]]
 foreach cmd $traced_cmds {
     append trace "\ntrace add execution $cmd  enter {::tcltrace::before}"
 }
+set traced_cmds {}
+
+#
+# traces with context
+#
+#set traced_cmds {::ns_return ::ns_returnredirect}
+
+foreach cmd $traced_cmds {
+    append trace "\ntrace add execution $cmd  enter {::tcltrace::before -details}"
+}
+set traced_cmds {}
+
 
 if {$trace ne ""} {
     ns_ictl trace create $trace

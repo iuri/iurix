@@ -12,7 +12,8 @@ One of the <a href="requirements">requirements</a>
  for the
 template system asks for efficiency:
 <blockquote><ul><li>
-<a name="110.0"><strong>110.0 Performance</strong></a><p>The Templating System must not cause any performance problems to
+<a name="110.0" id="110.0"><strong>110.0
+Performance</strong></a><p>The Templating System must not cause any performance problems to
 a site. It must be fast and efficient, and it must not slow down
 page load speed by more than 10% versus a Tcl page with inline
 HTML.</p>
@@ -39,7 +40,7 @@ version on disk is out of date. ADP pages are compiled to TCL, and
 both ADP and Tcl pages are cached as Tcl procs. The parameter
 <code>RefreshCache</code> in section <code>template</code> can be
 set to <code>always</code> or <code>never</code> to affect the
-cacheing strategy; the latter may be useful for a production site.
+caching strategy; the latter may be useful for a production site.
 All timing is carried out for the three settings
 <code>always</code>, <code>normal</code>, and <code>never</code>;
 the associated variable is called <code>check</code>.</p>
@@ -78,8 +79,7 @@ foreach i ( never normal always )
   end
   cut -d" " -f3 $i-1| cut -c2-| tr \? 0            &gt;  $i-2
 end
-        
-</pre>
+        </pre>
 The three resulting files, ending in -2, contain 18000 numbers, for
 2 runs * 200 tries * 3 pages * 15 stages.</li><li>
 <em>Group and sort times</em>. The time one stage of processing
@@ -141,8 +141,7 @@ runs the gnuplot script distrib.gplt:
      (cd $i; gnuplot ../distrib.gplt &gt; $i.gif)
      echo $i done.
    end
-        
-</pre>
+        </pre>
 </li>
 </ul><h3>IV. Results</h3><ul>
 <li>
@@ -165,7 +164,7 @@ results. The total processing time of Tcl-only pages is around
 The difference of 65ms is a large percentage of a total serving
 time of 155ms; when other parts of the system (e.g., the request
 processor) were slower, this wasn&#39;t that noticeable.</p><p>For ACS 3.4, Tcl-only chain-frac-0 pages take 115ms, where the
-templated versisons are much slower, 320ms for chain-frac-1 and 340
+templated versions are much slower, 320ms for chain-frac-1 and 340
 for -2.</p><h3>VI. Further Work</h3><p>Tune templating in ACS 4.0.</p><hr><address><a href="mailto:christian\@arsdigita.com">Christian
 Brechbühler</a></address><!-- Created: Fri Oct  6 15:45:48 EDT 2000 --><!-- hhmts start -->
 Last modified: Tue Oct 17 20:11:49 EDT 2000 <!-- hhmts end -->

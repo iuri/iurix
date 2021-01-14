@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: upgrade-5.9.1b4-5.9.1b5.sql,v 1.1.2.1 2017/04/21 17:14:16 antoniop Exp $
+-- $Id: upgrade-5.9.1b4-5.9.1b5.sql,v 1.2 2017/08/07 23:47:46 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:

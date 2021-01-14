@@ -103,7 +103,7 @@ begin
         copy__creation_ip,
 	copy__name
     );
-  -- call content_extlink.copy if the item is an url
+  -- call content_extlink.copy if the item is a URL
   else if content_extlink__is_extlink(copy__item_id) = ''t'' then
     PERFORM content_extlink__copy(
         copy__item_id,
@@ -523,7 +523,7 @@ begin
 
   select parent_id into v_parent_id from cr_items 
     where item_id = delete__folder_id;
-  raise notice ''deleteing folder %'',delete__folder_id;
+  raise notice ''deleting folder %'',delete__folder_id;
   PERFORM content_item__delete(delete__folder_id);
 
   -- check if any folders are left in the parent

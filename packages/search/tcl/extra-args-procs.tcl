@@ -7,7 +7,7 @@ ad_library {
     
     @author Dave Bauer (dave@thedesignexperience.org)
     @creation-date 2009-03-13
-    @cvs-id $Id: extra-args-procs.tcl,v 1.1.10.1 2015/09/12 19:00:45 gustafn Exp $
+    @cvs-id $Id: extra-args-procs.tcl,v 1.2 2017/08/07 23:48:29 gustafn Exp $
 }
 
 ad_proc -callback search::extra_arg -impl object_type {

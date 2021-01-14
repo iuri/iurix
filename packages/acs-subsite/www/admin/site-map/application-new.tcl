@@ -3,13 +3,20 @@ ad_page_contract {
 
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-05-28
-    @cvs-id $Id: application-new.tcl,v 1.6.2.1 2015/09/10 08:21:47 gustafn Exp $
+    @cvs-id $Id: application-new.tcl,v 1.7.2.1 2020/01/02 17:43:52 antoniop Exp $
 }
 
 set page_title "New Application"
 set context [list [list "." "Site Map"] $page_title]
 
-set packages [db_list_of_lists package_types {}]
+set packages [db_list_of_lists package_types {
+    select pretty_name, package_key
+    from   apm_package_types t
+    where  not exists (select 1 from apm_packages
+                       where package_key = t.package_key) or
+           not t.singleton_p
+    order  by upper(pretty_name)
+}]
 
 ad_form -name application -cancel_url . -form {
     {package_key:text(select)

@@ -4,7 +4,7 @@ ad_page_contract {
 
   @author Peter Marklund
 
-  @cvs-id $Id: init-file-resource.tcl,v 1.1.26.3 2016/05/20 19:52:59 gustafn Exp $
+  @cvs-id $Id: init-file-resource.tcl,v 1.3 2018/01/19 21:23:51 gustafn Exp $
 } {
     absolute_file_path
     return_url:localurl
@@ -14,6 +14,7 @@ ns_log Notice "Sourcing test definition file $absolute_file_path"
 apm_source $absolute_file_path
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

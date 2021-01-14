@@ -1,15 +1,104 @@
-ad_proc content_search__datasource {
+ad_library {
+    Content Repository Search callbacks.
+
+    These callbacks are used to implement "search" package service
+    contracts.
+}
+
+ad_proc -deprecated content_search__datasource {
+    object_id
+} {
+    Provides data source for search interface.  Used to access content items
+    after search.
+
+    DEPRECATED: does not comply with OpenACS naming convention
+
+    @see content_search::datasource
+} {
+    return [content_search::datasource $object_id]
+}
+
+ad_proc -deprecated content_search__url {
+    object_id
+} {
+    Provides a URL for linking to content items which show up in a search
+    result set.
+
+    DEPRECATED: does not comply with OpenACS naming convention
+
+    @see content_search::url
+} {
+    return [content_search::url $object_id]
+}
+
+ad_proc -deprecated image_search__datasource {
+    object_id
+} {
+    Provides data source for search interface.  Used to access content items
+    after search.
+
+    DEPRECATED: does not comply with OpenACS naming convention
+
+    @see image_search::datasource
+} {
+    return [image_search::datasource $object_id]
+}
+
+ad_proc -deprecated image_search__url {
+    object_id
+} {
+    Provides a URL for linking to content items which show up in a search
+    result set.
+
+    DEPRECATED: does not comply with OpenACS naming convention
+
+    @see image_search::url
+} {
+    return [image_search::url $object_id]
+}
+
+ad_proc -deprecated template_search__datasource {
+    object_id
+} {
+    Provides data source for search interface.  Used to access content items
+    after search.
+
+    DEPRECATED: does not comply with OpenACS naming convention
+
+    @see template_search::datasource
+} {
+    return [template_search::datasource $object_id]
+}
+
+ad_proc -deprecated template_search__url {
+    object_id
+} {
+    Provides a URL for linking to content items which show up in a search
+    result set.
+
+    DEPRECATED: does not comply with OpenACS naming convention
+
+    @see template_search::url
+} {
+    return [template_search::url $object_id]
+}
+
+
+namespace eval content_search {}
+
+ad_proc content_search::datasource {
     object_id
 } {
     Provides data source for search interface.  Used to access content items
     after search.
 } {
-    db_0or1row revisions_datasource "
-	select r.revision_id as object_id, 
+    set cr_fs_path [cr_fs_path]
+    db_0or1row revisions_datasource {
+	select r.revision_id as object_id,
 	       r.title,
                case i.storage_type
-                    when 'lob' then r.lob::text
-                    when 'file' then '[cr_fs_path]' || r.content
+                    when 'lob' then cast(r.lob as text)
+                    when 'file' then :cr_fs_path || r.content
                     else r.content
                end as content,
 	       r.mime_type as mime,
@@ -18,41 +107,59 @@ ad_proc content_search__datasource {
 	from cr_revisions r, cr_items i
 	where revision_id = :object_id
         and i.item_id = r.item_id
-    " -column_array datasource
+    } -column_array datasource
 
     return [array get datasource]
 }
 
 
-ad_proc content_search__url {
+ad_proc content_search::url {
     object_id
 } {
-    Provides a url for linking to content items which show up in a search
+    Provides a URL for linking to content items which show up in a search
     result set.
 } {
-
     set package_id [apm_package_id_from_key acs-content-repository]
-    db_1row get_url_stub "
-        select site_node__url(node_id) as root_url,
-               (select content_item__get_path(item_id,content_item__get_root_folder(null)) 
-                  from cr_revisions
-                 where revision_id = :object_id) as url
-          from site_nodes n
-         where n.object_id = :package_id        
-    "
-    
-    return "[ad_url]$root_url$url?revision_id=$object_id"
+    set root_url [lindex [site_node::get_url_from_object_id -object_id $package_id] 0]
+
+    set item_id [db_string get_item_id {
+        select item_id from cr_revisions
+        where revision_id = :object_id}]
+    set root_folder_id [content::item::get_root_folder]
+    set url [content::item::get_path \
+                 -item_id        $item_id \
+                 -root_folder_id $root_folder_id]
+
+    return "[ad_url][string trimright $root_url /]$url?revision_id=$object_id"
 }
 
-ad_proc image_search__datasource {
+ad_proc content_search::search_ids {
+    q
+    { offset 0 }
+    { limit 100 }
+} {
+    Returns the object ids for a specified search.
+} {
+    set package_id [apm_package_id_from_key search]
+    set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
+    array set result [acs_sc::invoke -contract FtsEngineDriver \
+                          -operation search -call_args [list $q $offset $limit] -impl $driver]
+
+    return $result(ids)
+}
+
+
+namespace eval image_search {}
+
+ad_proc image_search::datasource {
     object_id
 } {
     Provides data source for search interface.  Used to access content items
     after search.
 } {
     db_0or1row revisions_datasource {
-	select r.revision_id as object_id, 
-	       r.title as title, 
+	select r.revision_id as object_id,
+	       r.title as title,
 	       r.description as content,
 	       r.mime_type as mime,
 	       '' as keywords,
@@ -65,40 +172,31 @@ ad_proc image_search__datasource {
     return [array get datasource]
 }
 
-
-ad_proc image_search__url {
+ad_proc image_search::url {
     object_id
 } {
-    Provides a url for linking to content items which show up in a search
+    Provides a URL for linking to content items which show up in a search
     result set.
 } {
-
-    set package_id [apm_package_id_from_key acs-content-repository]
-    db_1row get_url_stub "
-        select site_node__url(node_id) as root_url,
-               (select content_item__get_path(item_id,null) 
-                  from cr_revisions
-                 where revision_id = :object_id) as url
-          from site_nodes n
-         where n.object_id = :package_id        
-    "
-    
-    return "[ad_url][string trimright $root_url /]$url?revision_id=$object_id"
+    return [content_search::url $object_id]
 }
 
 
-ad_proc template_search__datasource {
+namespace eval template_search {}
+
+ad_proc template_search::datasource {
     object_id
 } {
     Provides data source for search interface.  Used to access content items
     after search.
 } {
-    db_0or1row revisions_datasource "
-	select r.revision_id as object_id, 
-	       r.title as title, 
+    set cr_fs_path [cr_fs_path]
+    db_0or1row revisions_datasource {
+	select r.revision_id as object_id,
+	       r.title as title,
                case i.storage_type
-                    when 'lob' then r.lob::text
-                    when 'file' then '[cr_fs_path]' || r.content
+                    when 'lob' then cast(r.lob as text)
+                    when 'file' then :cr_fs_path || r.content
                     when 'text' then r.content
                     else r.content
                end as content,
@@ -108,46 +206,18 @@ ad_proc template_search__datasource {
 	from cr_revisions r, cr_items i
 	where revision_id = :object_id
         and i.item_id = r.item_id
-    " -column_array datasource
+    } -column_array datasource
 
     return [array get datasource]
 }
 
-
-ad_proc template_search__url {
+ad_proc template_search::url {
     object_id
 } {
-    Provides a url for linking to content items which show up in a search
+    Provides a URL for linking to content items which show up in a search
     result set.
 } {
-
-    set package_id [apm_package_id_from_key acs-content-repository]
-    db_1row get_url_stub "
-        select site_node__url(node_id) as root_url,
-               (select content_item__get_path(item_id,null) 
-                  from cr_revisions
-                 where revision_id = :object_id) as url
-          from site_nodes n
-         where n.object_id = :package_id        
-    "
-    
-    return "[ad_url][string trimright $root_url /]$url?revision_id=$object_id"
-}
-
-
-ad_proc content_search__search_ids { 
-    q 
-    { offset 0 }
-    { limit 100 }
-} {
-    Returns the object ids for a specified search.    
-} {
-
-    set package_id [apm_package_id_from_key search]
-    set driver [parameter::get -package_id $package_id -parameter FtsEngineDriver]
-    array set result [acs_sc::invoke -contract FtsEngineDriver -operation search -call_args [list $q $offset $limit] -impl $driver]
-
-    return $result(ids)
+    return [content_search::url $object_id]
 }
 
 # Local variables:

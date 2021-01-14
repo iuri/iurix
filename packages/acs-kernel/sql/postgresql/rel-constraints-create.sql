@@ -5,7 +5,7 @@
 --
 -- @author Oumi Mehrotra (oumi@arsdigita.com)
 -- @creation-date 2000-11-22
--- @cvs-id $Id: rel-constraints-create.sql,v 1.18 2011/07/07 10:46:02 gustafn Exp $
+-- @cvs-id $Id: rel-constraints-create.sql,v 1.20.2.1 2019/08/14 07:31:43 gustafn Exp $
 
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- This is free software distributed under the terms of the GNU Public
@@ -450,7 +450,7 @@ select r.rel_type as viol_rel_type, r.rel_id as viol_rel_id,
 --
 --           What are all the segments in the system that a party has to 
 --           be in if the party were to be on side :rel_side of a relation
---           in segement :rel_segment?  
+--           in segment :rel_segment?  
 --
 --           We want not only the direct required_segments (which we could
 --           get from the rel_constraints table directly), but also the 
@@ -629,11 +629,11 @@ execute procedure rel_constraints_del_tr ();
 --                          tell you which segment -- you can get that info
 --                          from rel_constraints table or other views.
 --
--- Another Note: not all segemnts in rel_segemnts are returned by this view.
+-- Another Note: not all segments in rel_segments are returned by this view.
 -- This view only returns segments S that have at least one rel_constraints row
 -- where rel_segment = S.  Segments that have no constraints defined on them
 -- can be said to have dependency_level=0, hence the outer join and nvl in the
--- example query above (see "Answer:").  I could have embeded that logic into
+-- example query above (see "Answer:").  I could have embedded that logic into
 -- this view, but that would unnecessarily degrade performance.
 --
 -- create view rc_segment_dependency_levels as
@@ -702,7 +702,7 @@ group by segment_id;
 -- 
 --   function violation (
 --     --/** Checks to see if there a relational constraint is violated
---     --    by the precense of the specified relation. If not, returns 
+--     --    by the presence of the specified relation. If not, returns 
 --     --    null. If so, returns an appropriate error string.
 --     -- 
 --     --    @author Oumi Mehrotra (oumi@arsdigita.com)

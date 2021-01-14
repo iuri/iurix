@@ -12,22 +12,22 @@
 # Return a header for an installation page, suitable for ns_writing.
 # This procedure engages the installer mutex, as every installer page is a critical section.
 
-ad_proc -private install_input_widget { 
+ad_proc -private install_input_widget {
     {-type ""}
     {-size 40}
     {-extra_attributes ""}
     {-value ""}
-    param_name 
+    param_name
 } {
     Return an HTML input widget for a parameter with an
     indication of whether the param is mandatory.
 } {
-    set type_attribute [ad_decode $type "" "" "type=\"$type\""]
+    set type_attribute [expr {$type eq "" ? "" : "type=\"$type\""}]
 
     if { $value ne "" } {
         append extra_attributes " value=\"[ns_quotehtml $value]\""
     }
-    
+
     set input_widget "<input name=\"$param_name\" size=\"$size\" $type_attribute $extra_attributes>"
 
     if { [install_param_mandatory_p $param_name] } {
@@ -35,7 +35,7 @@ ad_proc -private install_input_widget {
     }
 
     return $input_widget
-} 
+}
 
 ad_proc -private install_param_mandatory_p { param_name } {
     Return 1 if the given parameter with given name is
@@ -108,7 +108,7 @@ ad_proc -private install_page_contract { mandatory_params optional_params } {
             lappend missing_params $mandatory_params_array($param_name)
         }
     } else {
-        # Form is non-empty
+        # Form is nonempty
 
         # Loop over all params
         set all_param_names [concat [array names mandatory_params_array] \
@@ -214,25 +214,27 @@ proc install_next_button { url } {
 proc install_file_serve { path } {
     if {[file isdirectory $path] && [string index [ad_conn url] end] != "/" } {
         ad_returnredirect "[ad_conn url]/"
+        ad_script_abort
     } else {
         ns_log Debug "Installer serving $path"
         ad_try {
             rp_serve_abstract_file $path
-        } notfound val {
-            install_return 404 "Not found" "
-        The file you've requested, doesn't exist. Please check
+        } trap {AD EXCEPTION notfound} {val} {
+            install_return 404 "Not found" "The file you've requested, doesn't exist. Please check
         your URL and try again."
-        } redirect url {
+        } trap {AD EXCEPTION redirect} {url} {
             ad_returnredirect $url
-        } directory dir_index {
+            ad_script_abort
+        } trap {AD EXCEPTION directory} {dir_index} {
             set new_file [file join $path "index.html"]
             if {[file exists $new_file]} {
                 rp_serve_abstract_file $new_file
-            } 
-            set new_file [file join $path "index.adp"]
-            if {[file exists $new_file]} {
-                rp_serve_abstract_file $new_file
-            } 
+            } else {
+                set new_file [file join $path "index.adp"]
+                if {[file exists $new_file]} {
+                    rp_serve_abstract_file $new_file
+                }
+            }
         }
     }
 }
@@ -319,7 +321,7 @@ proc install_admin_widget {} {
 
 }
 
-proc install_back_button_widget {} {    
+proc install_back_button_widget {} {
     return [subst {Please <a id="install-back-button" href="#">try again</a>.
     <script type='text/javascript' nonce='[security::csp::nonce]'>
      var e = document.getElementById('install-back-button');
@@ -333,7 +335,7 @@ proc install_back_button_widget {} {
 proc install_redefine_ad_conn {} {
 
     # Peter Marklund
-    # We need to be able to invoke ad_conn in the installer. However
+    # We need to be able to invoke ad_conn in the installer. However,
     # We cannot use the rp_filter that sets up ad_conn
 
     # JCD: don't redefine ad_conn, just reset it and populate some things
@@ -385,30 +387,6 @@ ad_proc -private install_do_data_model_install {} {
     cd [file join $::acs::rootdir packages acs-kernel sql [db_type]]
     db_source_sql_file -callback apm_ns_write_callback acs-kernel-create.sql
 
-    # DRB: Now initialize the APM's table of known database types.  This is
-    # butt-ugly.  We could have apm-create.sql do this but that would mean
-    # adding a new database type would require editing two places (the very
-    # obvious list in bootstrap.tcl and the less-obvious list in apm-create.sql).
-    # On the other hand, this is ugly because now this code knows about the
-    # apm datamodel as well as the existence of the special acs-kernel module.
-
-    set apm_db_types_exists [db_string db_types_exists "
-        select case when count(*) = 0 then 0 else 1 end from apm_package_db_types"]
-
-    if { !$apm_db_types_exists } {
-        ns_log Notice "Populating apm_package_db_types"
-        foreach known_db_type [db_known_database_types] {
-            set db_type [lindex $known_db_type 0]
-            set db_pretty_name [lindex $known_db_type 2]
-            db_dml insert_apm_db_type {
-                insert into apm_package_db_types
-                (db_type_key, pretty_db_name)
-                values
-                (:db_type, :db_pretty_name)
-            }
-        }
-    }
-
     ns_write "</pre></blockquote>
 
     Done installing the OpenACS kernel data model.<p>
@@ -416,7 +394,7 @@ ad_proc -private install_do_data_model_install {} {
     "
     ns_write "\n<script>window.scrollTo(0,document.body.scrollHeight);</script>\n"
 
-    # Some APM procedures use util_memoize, so initialize the cache 
+    # Some APM procedures use util_memoize, so initialize the cache
     # before starting APM install
     array set errors {}
     apm_source [acs_package_root_dir acs-tcl]/tcl/20-memoize-init.tcl errors
@@ -487,10 +465,10 @@ ad_proc -private install_do_packages_install {} {
     set pkg_list [lindex $dependency_results 1]
 
     if { !$dependencies_satisfied_p } {
-        ns_write "<p><b><i>At least one core package has an unsatisifed dependency.\
+        ns_write "<p><b><i>At least one core package has an unsatisfied dependency.\
               No packages have been installed missing: [lindex $dependency_results 2]. \
               Here's what the APM has computed:</i></b>"
-        
+
         ns_write "\n<ul>"
         set deps ""
         foreach dep $pkg_list {
@@ -499,8 +477,8 @@ ad_proc -private install_do_packages_install {} {
             append deps "[lindex $_pkg 0]: $_msg\n"
         }
         ns_write "\n<script>window.scrollTo(0,document.body.scrollHeight);</script>\n"
-        
-        ns_log Error "At least one core package has an unsatisifed dependency.\
+
+        ns_log Error "At least one core package has an unsatisfied dependency.\
               No packages have been installed missing: [lindex $dependency_results 2]. \
               Here's what the APM has computed:\n$deps"
 

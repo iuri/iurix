@@ -1,31 +1,38 @@
-# packages/acs-tcl/tcl/proxy-procs.tcl                                                                                             
 ad_library {
 
     Proxy procs
 
-    @author <yourname> (<your email>)
+    @author Malte Sussdorff, Gustaf Neumann
     @creation-date 2007-09-17
-    @cvs-id $Id: proxy-procs.tcl,v 1.5.2.4 2016/10/10 08:44:50 gustafn Exp $
 }
 
 #
 # First check if ns_proxy is available
 #
 if {![catch {ns_proxy configure ExecPool -maxruns 0}]} {
-    
+
     namespace eval proxy {}
-    
+
     ad_proc -public proxy::exec {
-        {-call}
+        {-call:required}
         {-cd}
+        {-ignorestderr:boolean}
     } {
         Execute the statement in a proxy instead of normal exec
 
-        @param call Call which is passed to the "exec" command (required)
-        @param cd  change to the given directory before executing the command
+        @param call Call which is passed to the "exec" command
+        @param cd   Change to the given directory before executing the command
+        @param ignorestderr Boolean value to indicate, whether the stderr output
+               of the exec'ed command should be ignored.
     } {
+        set start_time [clock clicks -milliseconds]
         set handle [ns_proxy get ExecPool]
-        with_finally -code {
+        if {[clock clicks -milliseconds] - $start_time > 5} {
+            ns_log warning "ExecPool: getting handle took \
+                [expr {[clock clicks -milliseconds] - $start_time}]ms (potential configuration issue)"
+        }
+
+        ad_try {
             if {[info exists cd]} {
                 #
                 # We were requested to switch to a different
@@ -35,8 +42,9 @@ if {![catch {ns_proxy configure ExecPool -maxruns 0}]} {
                 set pwd [ns_proxy eval $handle pwd]
                 ns_proxy eval $handle [list cd $cd]
             }
-            set return_string [ns_proxy eval $handle [list ::exec {*}$call]]
-        } -finally {
+            set exec_flags [expr {$ignorestderr_p ? "-ignorestderr --" : ""}]
+            set return_string [ns_proxy eval $handle [list ::exec {*}$exec_flags {*}$call]]
+        } finally {
             if {[info exists pwd]} {
                 #
                 # Switch back to the previous directory.
@@ -49,9 +57,16 @@ if {![catch {ns_proxy configure ExecPool -maxruns 0}]} {
     }
 
     # Now rename exec; protect cases, where file is loaded multiple times
-    if {[info commands ::real_exec] eq ""} {rename exec real_exec}
+    if {[namespace which ::real_exec] eq ""} {
+        rename exec real_exec
+    }
 
-    ad_proc exec {args} {This is the wrapped version of exec} {proxy::exec -call $args}
+    ad_proc exec {-ignorestderr:boolean -- args} {
+        This is the wrapped version of exec
+    } {
+        proxy::exec -ignorestderr=$ignorestderr_p -call $args
+    }
+
 }
 
 # Local variables:

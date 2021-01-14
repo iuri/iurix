@@ -3,11 +3,11 @@
 <property name="doc(title)">Detailed Design Documentation Template</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="nxml-mode" leftLabel="Prev"
-		    title="
-Chapter 13. Documentation Standards"
-		    rightLink="requirements-template" rightLabel="Next">
-		<div class="sect1">
+			leftLink="nxml-mode" leftLabel="Prev"
+			title="Chapter 13. Documentation
+Standards"
+			rightLink="requirements-template" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="filename" id="filename"></a>Detailed Design Documentation Template</h2></div></div></div><p>By <a class="ulink" href="mailto:youremail\@example.com" target="_top">You</a>
 </p><div class="sect2">
@@ -194,14 +194,14 @@ document.</em></span></p><div class="informaltable"><table class="informaltable"
 <td>0.1</td><td>Creation</td><td>8/21/2000</td><td>Josh Finkler, Audrey McLoghlin</td>
 </tr>
 </tbody>
-</table></div><div class="cvstag">($&zwnj;Id: design-template.xml,v 1.8.14.1 2016/06/23
-08:32:46 gustafn Exp $)</div>
+</table></div><p><span class="cvstag">($&zwnj;Id: design-template.xml,v 1.9 2017/08/07
+23:47:54 gustafn Exp $)</span></p>
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="nxml-mode" leftLabel="Prev" leftTitle="Using nXML mode in Emacs"
-		    rightLink="requirements-template" rightLabel="Next" rightTitle="System/Application Requirements
+			leftLink="nxml-mode" leftLabel="Prev" leftTitle="Using nXML mode in Emacs"
+			rightLink="requirements-template" rightLabel="Next" rightTitle="System/Application Requirements
 Template"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="doc-standards" upLabel="Up"> 
-		
+			homeLink="index" homeLabel="Home" 
+			upLink="doc-standards" upLabel="Up"> 
+		    

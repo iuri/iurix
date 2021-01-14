@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author Arjun Sanyal (arjun@openforce.net)
     @author Ben Adida (ben@openforce.net)
-    @cvs-id $Id: attach-2.tcl,v 1.4.18.2 2017/02/01 16:04:17 gustafn Exp $
+    @cvs-id $Id: attach-2.tcl,v 1.5 2017/08/07 23:48:04 gustafn Exp $
 
 } -query {
     {object_id:naturalnum,notnull,notnull}

@@ -3,7 +3,7 @@ ad_library {
 # xml.tcl --
 #
 #	This file provides XML services.
-#	These services include a XML document instance and DTD parser,
+#	These services include an XML document instance and DTD parser,
 #	as well as support for generating XML.
 #
 # Copyright (c) 1998,1999 Zveno Pty Ltd
@@ -31,7 +31,7 @@ ad_library {
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-    @cvs-id $Id: xml-2-procs.tcl,v 1.3.2.1 2015/09/10 08:22:02 gustafn Exp $
+    @cvs-id $Id: xml-2-procs.tcl,v 1.5.2.2 2020/10/28 15:39:19 hectorr Exp $
 }
 
 package provide xml 1.9
@@ -102,7 +102,7 @@ namespace eval xml {
 #	-reportempty		whether to provide empty element indication
 #
 # Results:
-#	The state variable is initialised.
+#	The state variable is initialized.
 
 proc xml::parser {args} {
     variable ParserCounter
@@ -114,7 +114,7 @@ proc xml::parser {args} {
 	set name parser[incr ParserCounter]
     }
 
-    if {[info commands [namespace current]::$name] ne {}} {
+    if {[namespace which [namespace current]::$name] ne {}} {
 	return -code error "unable to create parser object \"[namespace current]::$name\" command"
     }
 
@@ -213,7 +213,7 @@ proc xml::ParseCommand_parse {object xml} {
 	set parent {}
     }
 
-    set tokenised [lrange \
+    set tokenized [lrange \
 	    [${parent}::sgml::tokenise $xml \
 	    $tokExpr \
 	    $substExpr \
@@ -221,7 +221,7 @@ proc xml::ParseCommand_parse {object xml} {
 	4 end]
 
     eval ${parent}::sgml::parseEvent \
-	[list $tokenised \
+	[list $tokenized \
 	    -emptyelement [namespace code ParseEmpty] \
 	    -parseattributelistcommand [namespace code ParseAttrs]] \
 	[array get parser -*command] \
@@ -300,7 +300,7 @@ proc xml::ParseAttrs attrs {
 #	object	parser object
 #
 # Results:
-#	Parser data structure initialised
+#	Parser data structure initialized
 
 proc xml::ParseCommand_reset object {
     upvar \#0 [namespace current]::$object parser

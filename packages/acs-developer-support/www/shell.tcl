@@ -1,5 +1,7 @@
 ad_page_contract {
-    @Author Nis Jorgensen
+    Interactive shell for executing commands in OpenACS
+
+    @author Nis Jorgensen
 } {
     {script:optional,allhtml {}}
 } -properties {
@@ -21,7 +23,7 @@ set out {}
 ad_form -name shell -form {
     {
         script:text(textarea),nospell
-        {label {Input tcl_script}}
+        {label {Input Tcl Script}}
         {html {cols 80 rows 10}}
     }
 } -on_submit {
@@ -32,6 +34,18 @@ ad_form -name shell -form {
             set out "ERROR:\n$::errorInfo"
         }
     }
+}
+
+template::head::add_style -style {
+    #script {
+        border:1px solid #999999;
+        width:100%;
+        margin:5px 0;
+        padding:3px;
+        background-color: #f6f6f6;
+        font-family: monospace;
+        font-size: small;
+        color: darkblue;    }
 }
 
 # Local variables:

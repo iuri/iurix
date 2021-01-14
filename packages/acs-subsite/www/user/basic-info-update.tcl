@@ -1,9 +1,9 @@
 ad_page_contract {
-    Displays form for currently logged in user to update his/her personal information
+    Displays form for currently logged-in user to update his/her personal information
 
     @author Unknown
     @creation-date Unknown
-    @cvs-id $Id: basic-info-update.tcl,v 1.16.2.4 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: basic-info-update.tcl,v 1.17.2.1 2019/10/05 13:01:38 gustafn Exp $
 } {
     {return_url:localurl ""}
     {user_id:naturalnum ""}

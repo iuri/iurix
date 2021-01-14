@@ -3,7 +3,7 @@ ad_library {
 
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-05-16
-    @cvs-id $Id: list-procs.tcl,v 1.60.2.17 2017/04/22 18:15:50 gustafn Exp $
+    @cvs-id $Id: list-procs.tcl,v 1.94.2.9 2020/07/03 07:27:29 gustafn Exp $
 }
 
 namespace eval template {}
@@ -54,8 +54,9 @@ ad_proc -public template::list::create {
     {-formats ""}
     {-filter_form 0}
     {-bulk_action_click_function "acs_ListBulkActionClick"}
+    {-aggregation_format ""}
 } {
-    Defines a list to be diplayed in a template. The list works in conjunction with a multirow, which contains the data for the list.
+    Defines a list to be displayed in a template. The list works in conjunction with a multirow, which contains the data for the list.
     The list is output using the &lt;listtemplate&gt; and &lt;listfilters&gt; templating tags, with the help of &lt;listelement&gt; and &lt;listrow&gt;.
 
     <p>
@@ -170,7 +171,7 @@ ad_proc -public template::list::create {
 
     @param  main_class     The main CSS class to be used in the output. The CSS class is constructed by combining the
     main_class and the sub_class with a dash in between. E.g., main_class could be 'list', and
-    sub_class could be 'narrow', in which case the resuling CSS class used would be 'list-narrow'.
+    sub_class could be 'narrow', in which case the resulting CSS class used would be 'list-narrow'.
 
     @param  sub_class      The sub-part of the CSS class to use. See 'main_class' option.
 
@@ -233,7 +234,9 @@ ad_proc -public template::list::create {
     See <a href="/api-doc/proc-view?proc=template::list::format::create">template::list::format::create</a> for details.
 
     @param filter_form     Whether or not we create the form data structure for the listfilters-form tag to dynamically generate a form to specify filter criteria. Default 0 will not generate form. Set to 1 to generate form to use listfilters-form tag.
-    @param bulk_action_click_functon Javascript function name to call when bulk action buttons are clicked.
+    @param bulk_action_click_function JavaScript function name to call when bulk action buttons are clicked.
+
+    @param aggregation_format   An option to format the result (number) of an aggregation operation. Default is empty string (result is not formatted). See the Tcl built-in command <a href="https://www.tcl.tk/man/tcl/TclCmd/format.htm">format</a> for details on the different formatting options.
 
     @see template::list::element::create
     @see template::list::filter::create
@@ -268,9 +271,10 @@ ad_proc -public template::list::create {
         sub_class {}
     }
 
-    # These are defauls for internally maintained properties
+    # These are defaults for internally maintained properties
     array set list_properties {
         aggregates_p 0
+        aggregation_format {}
         bulk_action_export_chunk {}
         display_elements {}
         dynamic_cols_p 0
@@ -299,13 +303,14 @@ ad_proc -public template::list::create {
 
     # Set default for no_data
     set row_pretty_plural [lang::util::localize $row_pretty_plural]
-    set no_data [ad_decode $no_data "" [_ acs-templating.No_row_pretty_plural] $no_data]
+    set no_data [expr {$no_data eq "" ? "[_ acs-templating.No_row_pretty_plural]" : $no_data}]
     # Set ulevel to the level of the page, so we can access it later
     set list_properties(ulevel) "\#[expr {[info level] - $ulevel}]"
 
     # Set properties from the parameters passed
     foreach elm {
         actions
+        aggregation_format
         bulk_action_click_function
         bulk_action_export_vars
         bulk_action_method
@@ -364,7 +369,7 @@ ad_proc -public template::list::create {
         if {[info exists ::__csrf_token]} {
             append label [subst {<input type="hidden" name="__csrf_token" value="$::__csrf_token">}]
         }
-        
+
         # We only ulevel 1 here, because we want the subst to be done in this namespace
         template::list::element::create \
             -list_name $name \
@@ -393,7 +398,7 @@ ad_proc -public template::list::create {
 
     # Handle filters
     foreach { dim_name dim_spec } $filters {
-        if { [lsearch $reserved_filter_names $dim_name] != -1 } {
+        if { $dim_name in $reserved_filter_names } {
             error "The name '$dim_name' is a reserved filter name, list '$name'. Reserved names are [join $reserved_filter_names ", "]."
         }
         template::list::filter::create \
@@ -517,18 +522,16 @@ ad_proc -public template::list::prepare {
     # Split the current ordering info into name and direction
     # name is the string before the comma, order (asc/desc) is what's after
     if { [info exists list_properties(filter,$list_properties(orderby_name))] } {
-        foreach { orderby_name orderby_direction } \
-            [lrange [split $list_properties(filter,$list_properties(orderby_name)) ","] 0 1] {}
+        lassign [lrange [split $list_properties(filter,$list_properties(orderby_name)) ","] 0 1] orderby_name orderby_direction
 
         set list_properties(orderby_selected_name) $orderby_name
-
         if { $orderby_direction eq "" } {
 
-            if {[catch {
+            ad_try {
                 template::list::orderby::get_reference \
                     -list_name $name \
                     -orderby_name $orderby_name
-            } errorMsg]} {
+            } on error {errorMsg} {
                 ad_page_contract_handle_datasource_error $errorMsg
                 ad_script_abort
             }
@@ -543,11 +546,11 @@ ad_proc -public template::list::prepare {
         -name $name \
         -ulevel [expr {$ulevel + 1}]
 
-    # Make groupby information available to templates
-    if { [exists_and_not_null list_properties(filter,groupby)] } {
+    # Make group_by information available to templates
+    if { [info exists list_properties(filter,groupby)] && $list_properties(filter,groupby) ne "" } {
         set list_properties(groupby) $list_properties(filter,groupby)
     }
-    if { [exists_and_not_null list_properties(filter_label,groupby)] } {
+    if { [info exists list_properties(filter_label,groupby)] && $list_properties(filter_label,groupby) ne "" } {
         set list_properties(groupby_label) $list_properties(filter_label,groupby)
     }
 
@@ -555,7 +558,8 @@ ad_proc -public template::list::prepare {
     if { $list_properties(page_size_variable_p) == 1 } {
         set list_properties(page_size) $list_properties(filter,page_size)
         set list_properties(url) [ad_conn url]
-        set list_properties(page_size_export_chunk) [uplevel $list_properties(ulevel) [list export_vars -form -exclude {page_size page} $list_properties(filters_export)]]
+        set list_properties(page_size_export_chunk) \
+            [uplevel $list_properties(ulevel) [list export_vars -form -exclude {page_size page} $list_properties(filters_export)]]
     }
 
     if { $list_properties(page_size) ne "" && $list_properties(page_size) != 0 } {
@@ -573,25 +577,25 @@ ad_proc -public template::list::prepare {
 
         # Use some short variable names to make the expr readable
         set page $list_properties(filter,page)
-        set groupsize $list_properties(page_groupsize)
-        set page_size $list_properties(page_size)
-        set page_group [expr {($page - 1 - (($page - 1) % $groupsize)) / $groupsize + 1}]
-        set first_row [expr {($page_group - 1) * $groupsize * $page_size + 1}]
-        set last_row [expr {$first_row + ($groupsize + 1) * $page_size - 1}]
+        set groupsize   $list_properties(page_groupsize)
+        set page_size   $list_properties(page_size)
+        set page_group  [expr {($page - 1 - (($page - 1) % $groupsize)) / $groupsize + 1}]
+        set first_row   [expr {($page_group - 1) * $groupsize * $page_size + 1}]
+        set last_row    [expr {$first_row + ($groupsize + 1) * $page_size - 1}]
         set page_offset [expr {($page_group - 1) * $groupsize}]
 
-        # Antonio Pisano 2015-11-17: From now on, the original query 
-        # will be tampered with the limit information, so this is our 
+        # Antonio Pisano 2015-11-17: From now on, the original query
+        # will be tampered with the limit information, so this is our
         # last chance to save it and use it to get the full row count in
         # the paginator.
         set list_properties(page_query_original) $list_properties(page_query_substed)
-        
+
         # Now wrap the provided query with the limit information
         set list_properties(page_query_substed) [db_map pagination_query]
 
-        # Generate a paginator name which includes the page group we're in 
+        # Generate a paginator name which includes the page group we're in
         # and all the filter values, so the paginator cahing works properly
-        # Antonio Pisano 2015-11-17: it is important that the paginator_name starts with the list's 
+        # Antonio Pisano 2015-11-17: it is important that the paginator_name starts with the list's
         # name, because we count on this in template::paginator::create to retrieve the count_query
         set paginator_name $list_properties(name)
 
@@ -617,7 +621,7 @@ ad_proc -public template::list::prepare {
         # this was failing if the template::list call contained a
         # page_query with an empty page_query_name
         uplevel $ulevel [list template::paginator create \
-                             --dummy--query--name-- \
+                             templating-paginator-$name \
                              $list_properties(paginator_name) \
                              $list_properties(page_query_substed) \
                              -pagesize $list_properties(page_size) \
@@ -699,7 +703,7 @@ ad_proc -public template::list::filter_from_clauses {
     -name:required
     -comma:boolean
 } {
-    @param  and     Set this flag if you want the result to start with an ',' if the list of from clauses returned is non-empty.
+    @param  comma     Set this flag if you want the result to start with an ',' if the list of from clauses returned is nonempty.
 } {
     # Get an upvar'd reference to list_properties
     get_reference -name $name
@@ -721,7 +725,7 @@ ad_proc -public template::list::filter_select_clauses {
     -name:required
     -comma:boolean
 } {
-    @param  and     Set this flag if you want the result to start with a ',' if the list of select clauses returned is non-empty.
+    @param  comma     Set this flag if you want the result to start with a ',' if the list of select clauses returned is nonempty.
 } {
     # Get an upvar'd reference to list_properties
     get_reference -name $name
@@ -743,7 +747,7 @@ ad_proc -public template::list::from_clauses {
     -name:required
     -comma:boolean
 } {
-    @param  and     Set this flag if you want the result to start with an ',' if the list of from clauses returned is non-empty.
+    @param  comma     Set this flag if you want the result to start with an ',' if the list of from clauses returned is nonempty.
 } {
     # Get an upvar'd reference to list_properties
     get_reference -name $name
@@ -761,8 +765,8 @@ ad_proc -public template::list::from_clauses {
     set i 0
     foreach elm $list_properties(from_clauses) {
 
-        if {([string trim $elm] ne "" && ![string match "left*" [string trim $elm]]) \
-                && ($comma_p || $i > 0)} {
+        if {([string trim $elm] ne "" && ![string match "left*" [string trim $elm]])
+            && ($comma_p || $i > 0)} {
             append results ","
         }
         append result " $elm"
@@ -777,7 +781,7 @@ ad_proc -public template::list::element_select_clauses {
     -name:required
     -comma:boolean
 } {
-    @param  and     Set this flag if you want the result to start with a ',' if the list of select clauses returned is non-empty.
+    @param  comma     Set this flag if you want the result to start with a ',' if the list of select clauses returned is nonempty.
 } {
     # Get an upvar'd reference to list_properties
     get_reference -name $name
@@ -799,7 +803,7 @@ ad_proc -public template::list::filter_where_clauses {
     -name:required
     -and:boolean
 } {
-    @param  and     Set this flag if you want the result to start with an 'and' if the list of where clauses returned is non-empty.
+    @param  and     Set this flag if you want the result to start with an 'and' if the list of where clauses returned is nonempty.
 } {
     # Get an upvar'd reference to list_properties
     get_reference -name $name
@@ -820,7 +824,7 @@ ad_proc -public template::list::element_where_clauses {
     -name:required
     -and:boolean
 } {
-    @param  and     Set this flag if you want the result to start with an 'and' if the list of where clauses returned is non-empty.
+    @param  and     Set this flag if you want the result to start with an 'and' if the list of where clauses returned is nonempty.
 } {
     # Get an upvar'd reference to list_properties
     get_reference -name $name
@@ -841,9 +845,9 @@ ad_proc -public template::list::element_where_clauses {
 ad_proc -public template::list::page_where_clause {
     -name:required
     -and:boolean
-    {-key}
+    {-key ""}
 } {
-    @param  and     Set this flag if you want the result to start with an 'and' if the list of where clauses returned is non-empty.
+    @param  and     Set this flag if you want the result to start with an 'and' if the list of where clauses returned is nonempty.
 
     @param key      Specify the name of the primary key to be used in the query's where clause,
     if different from the list builder's key.
@@ -861,7 +865,7 @@ ad_proc -public template::list::page_where_clause {
         append result "and "
     }
 
-    if { (![info exists key] || $key eq "") } {
+    if { $key eq "" } {
         set key $list_properties(key)
     }
 
@@ -880,7 +884,7 @@ ad_proc -public template::list::write_output {
     # Get an upvar'd reference to list_properties
     get_reference -name $name
 
-    switch $list_properties(output) {
+    switch -- $list_properties(output) {
         csv {
             write_csv -name $name
             ad_script_abort
@@ -899,6 +903,7 @@ ad_proc -public template::list::csv_quote {
 
 ad_proc -public template::list::write_csv {
     -name:required
+    {-delimiter ","}
 } {
     Writes a CSV to the connection
 } {
@@ -923,7 +928,7 @@ ad_proc -public template::list::write_csv {
             lappend __csv_labels [csv_quote $element_properties(label)]
         }
     }
-    append __output "\"[join $__csv_labels "\",\""]\"\n"
+    append __output "\"[join $__csv_labels "\"$delimiter\""]\"\n"
 
     set __rowcount [template::multirow size $list_properties(multirow)]
     set __rownum 0
@@ -943,8 +948,7 @@ ad_proc -public template::list::write_csv {
             incr __rownum
         }
 
-        if {$__groupby eq "" \
-                || $group_lastnum_p} {
+        if {$__groupby eq ""  || $group_lastnum_p} {
             set __cols [list]
 
             foreach __element_name $__csv_cols {
@@ -962,12 +966,13 @@ ad_proc -public template::list::write_csv {
                     lappend __cols [csv_quote [set $__element_name]]
                 }
             }
-            append __output "\"[join $__cols "\",\""]\"\n"
+            append __output "\"[join $__cols "\"$delimiter\""]\"\n"
         }
     }
     set oh [ns_conn outputheaders]
     ns_set put $oh Content-Disposition "attachment; filename=${__list_name}.csv"
     ns_return 200 text/csv $__output
+    ad_script_abort
 }
 
 
@@ -996,7 +1001,7 @@ ad_proc -public template::list::page_get_ids {
         }
         set quoted_ids [list]
         foreach one_id $ids {
-            lappend quoted_ids "'[DoubleApos $one_id]'"
+            lappend quoted_ids [::ns_dbquotevalue $one_id]
         }
         return [join $quoted_ids ","]
     }
@@ -1099,7 +1104,7 @@ ad_proc -public template::list::multirow_cols {
         lappend result "-decreasing"
     }
 
-    set result [concat $result $orderby_properties(multirow_cols)]
+    lappend result {*}$orderby_properties(multirow_cols)
 
     return $result
 }
@@ -1165,11 +1170,11 @@ ad_proc -private template::list::template {
     # Find the list template
     #
 
-    if {$style eq {}} {
+    if {$style eq ""} {
         set style $list_properties(style)
     }
 
-    if {$style eq {}} {
+    if {$style eq ""} {
         set style [parameter::get \
                        -package_id [ad_conn subsite_id] \
                        -parameter DefaultListStyle \
@@ -1234,7 +1239,7 @@ ad_proc -private template::list::prepare_for_rendering {
 
             # display_eval, link_url_eval
             foreach __eval_property { display link_url } {
-                if { [exists_and_not_null element_properties(${__eval_property}_eval)] } {
+                if { [info exists element_properties(${__eval_property}_eval)] && $element_properties(${__eval_property}_eval) ne "" } {
 
                     # Set the display col to the name of the new, dynamic column
                     set element_properties(${__eval_property}_col) "$element_properties(name)___$__eval_property"
@@ -1245,7 +1250,7 @@ ad_proc -private template::list::prepare_for_rendering {
             }
 
             # aggregate
-            if { ([info exists element_properties(aggregate)] && $element_properties(aggregate) ne "") } {
+            if { [info exists element_properties(aggregate)] && $element_properties(aggregate) ne "" } {
                 # Set the aggregate_col to the name of the new, dynamic column
                 set element_properties(aggregate_col) "$element_properties(name)___$element_properties(aggregate)"
                 set element_properties(aggregate_group_col) "$element_properties(name)___$element_properties(aggregate)_group"
@@ -1263,7 +1268,8 @@ ad_proc -private template::list::prepare_for_rendering {
                 set __agg_group_sum($element_properties(name)) 0
             }
         }
-        set __have_groupby [expr { [info exists $__list_properties(groupby)] && [set $__list_properties(groupby)] ne "" }]
+        set __have_groupby [expr { [info exists $__list_properties(groupby)]
+                                   && [set $__list_properties(groupby)] ne "" }]
 
 
         # This keeps track of the value of the group-by column for sub-totals
@@ -1279,19 +1285,22 @@ ad_proc -private template::list::prepare_for_rendering {
 
                 # display_eval, link_url_eval
                 foreach __eval_property { display link_url } {
-                    if { [exists_and_not_null __element_properties(${__eval_property}_eval)] } {
+                    if { [info exists __element_properties(${__eval_property}_eval)] && $__element_properties(${__eval_property}_eval) ne "" } {
                         set $__element_properties(${__eval_property}_col) [subst $__element_properties(${__eval_property}_eval)]
                     }
                 }
 
                 # aggregate
-                if { ([info exists __element_properties(aggregate)] && $__element_properties(aggregate) ne "") } {
+                if { [info exists __element_properties(aggregate)] && $__element_properties(aggregate) ne "" } {
                     # Update totals
                     incr __agg_counter($__element_properties(name))
                     if {$__element_properties(aggregate) eq "sum" } {
                         set __agg_sum($__element_properties(name)) \
                             [expr {$__agg_sum($__element_properties(name)) +
                                    ([set $__element_properties(name)] ne "" ? [set $__element_properties(name)] : 0)} ]
+                        if {$__list_properties(aggregation_format) ne ""} {
+                            set __agg_sum($__element_properties(name)) [format $__list_properties(aggregation_format) $__agg_sum($__element_properties(name))]
+                        }
                     }
 
                     # Check if the value of the groupby column has changed
@@ -1306,9 +1315,12 @@ ad_proc -private template::list::prepare_for_rendering {
                         set __agg_group_sum($__element_properties(name)) \
                             [expr {$__agg_group_sum($__element_properties(name)) +
                                    ([string is double [set $__element_properties(name)]] ? [set $__element_properties(name)] : 0)}]
+                        if {$__list_properties(aggregation_format) ne ""} {
+                            set __agg_group_sum($__element_properties(name)) [format $__list_properties(aggregation_format) $__agg_group_sum($__element_properties(name))]
+                        }
                     }
 
-                    switch $__element_properties(aggregate) {
+                    switch -- $__element_properties(aggregate) {
                         sum {
                             set $__element_properties(aggregate_col) $__agg_sum($__element_properties(name))
                             if { $__have_groupby } {
@@ -1395,7 +1407,7 @@ ad_proc -private template::list::render {
 
         # Set the URLs which the next/prev page/group links should point to
         foreach elm { next_page previous_page next_group previous_group } {
-            if { ([info exists paginator($elm)] && $paginator($elm) ne "") } {
+            if { [info exists paginator($elm)] && $paginator($elm) ne "" } {
                 set paginator(${elm}_url) [get_url \
                                                -name $list_properties(name) \
                                                -override [list [list page $paginator($elm)]]]
@@ -1516,11 +1528,12 @@ ad_proc -private template::list::prepare_elements {
 
             if {$list_properties(orderby_selected_name) eq $element_name} {
                 # We're currently ordering on this column
-                set direction [ad_decode $list_properties(orderby_selected_direction) "asc" "desc" "asc"]
+                set direction [expr {$list_properties(orderby_selected_direction) eq "asc" ? "desc" : "asc"}]
                 set element_properties(orderby_url) [get_url \
                                                          -name $name \
                                                          -override [list [list $list_properties(orderby_name) "${element_name},$direction"]]]
-                set element_properties(orderby_html_title) [_ acs-templating.reverse_sort_order_of_label [list label $element_properties(label)]]
+                set element_properties(orderby_html_title) \
+                    [_ acs-templating.reverse_sort_order_of_label [list label $element_properties(label)]]
                 set element_properties(ordering_p) "t"
                 set element_properties(orderby_direction) $list_properties(orderby_selected_direction)
 
@@ -1533,31 +1546,33 @@ ad_proc -private template::list::prepare_elements {
             }
         }
 
-        # support dynamic coluumns
+        # support dynamic columns
         if {!$element_properties(hide_p)} {
             if {$element_properties(from_clause_eval) ne ""} {
                 set evaluated_from_clause [uplevel $list_properties(ulevel) $element_properties($property)]
-                if {[lsearch $list_properties(from_clauses) $evaluated_from_clause] < 0} {
+                if {$evaluated_from_clause ni $list_properties(from_clauses)} {
                     lappend list_properties(from_clauses) $evaluated_from_clause
                 }
-            } elseif {$element_properties(from_clause) ne "" \
-                          && [lsearch $list_properties(from_clauses) $element_properties(from_clause)] < 0} {
+            } elseif {$element_properties(from_clause) ne ""
+                      && $element_properties(from_clause) ni $list_properties(from_clauses)} {
                 lappend list_properties(from_clauses) $element_properties(from_clause)
             }
             # get the select clause
-            if {$element_properties(select_clause_eval) ne "" \
-                    && [lsearch $list_properties(element_select_clauses) [string trim  [uplevel $list_properties(ulevel) $element_properties(select_clause_eval)]]] < 0} {
-                lappend list_properties(element_select_clauses) [uplevel $list_properties(ulevel) $element_properties(select_clause_eval)]
-            } elseif {$element_properties(select_clause) ne "" \
-                          && [lsearch $list_properties(element_select_clauses) [string trim $element_properties(select_clause)]] < 0} {
+            if {$element_properties(select_clause_eval) ne ""
+                && [lsearch $list_properties(element_select_clauses) [string trim  [uplevel $list_properties(ulevel) $element_properties(select_clause_eval)]]] < 0} {
+                lappend list_properties(element_select_clauses) \
+                    [uplevel $list_properties(ulevel) $element_properties(select_clause_eval)]
+            } elseif {$element_properties(select_clause) ne ""
+                      && [lsearch $list_properties(element_select_clauses) [string trim $element_properties(select_clause)]] < 0} {
                 lappend list_properties(element_select_clauses) $element_properties(select_clause)
             }
             # get the where clause
-            if {$element_properties(where_clause_eval) ne "" \
-                    && [lsearch $list_properties(element_where_clauses) [string trim [uplevel $list_properties(ulevel) $element_properties(where_clause_eval)]]] < 0} {
-                lappend list_properties(element_where_clauses) [uplevel $list_properties(ulevel) $element_properties(where_clause_eval)]
-            } elseif {$element_properties(where_clause) ne "" \
-                          && [lsearch $list_properties(element_where_clauses) [string trim $element_properties(where_clause)]] < 0} {
+            if {$element_properties(where_clause_eval) ne ""
+                && [lsearch $list_properties(element_where_clauses) [string trim [uplevel $list_properties(ulevel) $element_properties(where_clause_eval)]]] < 0} {
+                lappend list_properties(element_where_clauses) \
+                    [uplevel $list_properties(ulevel) $element_properties(where_clause_eval)]
+            } elseif {$element_properties(where_clause) ne ""
+                      && [lsearch $list_properties(element_where_clauses) [string trim $element_properties(where_clause)]] < 0} {
                 lappend list_properties(element_where_clauses) $element_properties(where_clause)
             }
         }
@@ -1592,7 +1607,8 @@ ad_proc -private template::list::prepare_filters {
         upvar $list_properties(ulevel) $filter_properties(name) current_filter_value
 
         # Set to default value if undefined
-        if { (![info exists current_filter_value] || $current_filter_value eq "") && $filter_properties(default_value) ne "" } {
+        if { (![info exists current_filter_value] || $current_filter_value eq "")
+             && $filter_properties(default_value) ne "" } {
             set current_filter_value $filter_properties(default_value)
         }
 
@@ -1636,23 +1652,29 @@ ad_proc -private template::list::prepare_filters {
             if {[lsearch $list_properties(elements) $filter_properties(name)] > -1} {
                 template::list::element::get_reference -list_name $name -element_name $filter_properties(name)
 
-                if {[info exists element_properties(from_clause_eval)] && $element_properties(from_clause_eval) ne "" && [lsearch $list_properties [string trim [uplevel $list_properties(ulevel) $filter_properties($property)]]] < 0} {
-                    lappend list_properties(from_clauses) [uplevel $list_properties(ulevel) $filter_properties($property)]
-                } elseif {[info exists element_properties(from_clause)] && $element_properties(from_clause) ne "" && [lsearch $list_properties(from_clauses) [string trim $element_properties(from_clause)]] < 0} {
+                if {[info exists element_properties(from_clause_eval)]
+                    && $element_properties(from_clause_eval) ne ""
+                    && [lsearch $list_properties [string trim [uplevel $list_properties(ulevel) $filter_properties($property)]]] < 0} {
+                    lappend list_properties(from_clauses) \
+                        [uplevel $list_properties(ulevel) $filter_properties($property)]
+                } elseif {[info exists element_properties(from_clause)]
+                          && $element_properties(from_clause) ne ""
+                          && [lsearch $list_properties(from_clauses) [string trim $element_properties(from_clause)]] < 0} {
                     lappend list_properties(from_clauses) [string trim $filter_properties(from_clause)]
                 }
             }
             # get the select clause
-            if {$filter_properties(select_clause_eval) ne "" \
-                    && [lsearch $list_properties(element_select_clauses) $filter_properties(select_clause_eval)] < 0} {
-                lappend list_properties(filter_select_clauses) [uplevel $list_properties(ulevel) $filter_properties(select_clause_eval)]
-            } elseif {$filter_properties(select_clause) ne "" \
-                          && [lsearch $list_properties(element_select_clauses) $filter_properties(select_clause)] < 0} {
+            if {$filter_properties(select_clause_eval) ne ""
+                && [lsearch $list_properties(element_select_clauses) $filter_properties(select_clause_eval)] < 0} {
+                lappend list_properties(filter_select_clauses) \
+                    [uplevel $list_properties(ulevel) $filter_properties(select_clause_eval)]
+            } elseif {$filter_properties(select_clause) ne ""
+                      && [lsearch $list_properties(element_select_clauses) $filter_properties(select_clause)] < 0} {
                 lappend list_properties(filter_select_clauses) $filter_properties(select_clause)
             }
         }
 
-        # If none were found, we may need to provide an 'other' entry below
+        # If none was found, we may need to provide an 'other' entry below
         set found_selected_p 0
 
         # Now generate selected_p, urls, add_urls
@@ -1667,12 +1689,12 @@ ad_proc -private template::list::prepare_filters {
             if { [string trim $label] eq "" } {
                 set label $filter_properties(null_label)
             }
-            switch $filter_properties(type) {
+            switch -- $filter_properties(type) {
                 singleval {
-                    set selected_p [exists_and_equal current_filter_value $value]
+                    set selected_p [expr {[info exists current_filter_value] && $current_filter_value eq $value}]
                 }
                 multival {
-                    if { (![info exists current_filter_value] || $current_filter_value eq "") } {
+                    if { ![info exists current_filter_value] || $current_filter_value eq "" } {
                         set selected_p 0
                     } else {
                         # Since here we have multiple values
@@ -1694,12 +1716,12 @@ ad_proc -private template::list::prepare_filters {
                     foreach elm $value {
                         foreach { elm_key elm_value } [lrange $elm 0 1] {}
                         if {$elm_key eq $filter_properties(name)} {
-                            set selected_p [exists_and_equal current_filter_value $elm_value]
+                            set selected_p [expr {[info exists current_filter_value] && $current_filter_value eq $elm_value}]
                         }
                     }
                 }
             }
-            # DAVEB Make multivar actually DO someting
+            # DAVEB Make multivar actually DO something
             # set the other vars according to the settings
             if {$selected_p && $filter_properties(type) eq "multivar"} {
                 foreach elm $value {
@@ -1719,7 +1741,7 @@ ad_proc -private template::list::prepare_filters {
             }
 
             # Generate url and add to filter(urls)
-            switch $filter_properties(type) {
+            switch -- $filter_properties(type) {
                 singleval - multival {
                     lappend filter_properties(urls) [get_url \
                                                          -name $name \
@@ -1734,7 +1756,7 @@ ad_proc -private template::list::prepare_filters {
             }
 
             # Generate add_url, and add to filter(add_urls)
-            if { ([info exists filter_properties(add_url_eval)] && $filter_properties(add_url_eval) ne "") } {
+            if { [info exists filter_properties(add_url_eval)] && $filter_properties(add_url_eval) ne "" } {
                 upvar $list_properties(ulevel) __filter_value __filter_value
                 set __filter_value $value
                 lappend filter_properties(add_urls) [uplevel $list_properties(ulevel) subst $filter_properties(add_url_eval)]
@@ -1761,8 +1783,8 @@ ad_proc -private template::list::render_filters {
 } {
     set level [template::adp_level]
 
-    # Provide a reference to the list properties for use by the list template
-    # Get an upvar'd reference to list_properties
+    # Provide a reference to the list properties for use by the list
+    # template Get an upvar'd reference to list_properties
     get_reference -name $name
 
     #
@@ -1791,49 +1813,56 @@ ad_proc -private template::list::render_filters {
         if { ![template::util::is_true $filter_properties(hide_p)] } {
 
             # Loop over 'values' and 'url' simultaneously
-            foreach elm $filter_properties(values) url $filter_properties(urls) selected_p $filter_properties(selected_p) add_url $filter_properties(add_urls) {
+            foreach \
+                elm $filter_properties(values) \
+                url $filter_properties(urls) \
+                selected_p $filter_properties(selected_p) \
+                add_url $filter_properties(add_urls) {
 
+                    # 'label' is the first element, 'value' the
+                    # second.  We do an lrange here, otherwise values
+                    # would be set wrong in case someone accidentally
+                    # supplies a list with too many elements, because
+                    # then the foreach loop would run more than once
+                    foreach { label value count } [lrange $elm 0 2] {}
 
-                # 'label' is the first element, 'value' the second
-                # We do an lrange here, otherwise values would be set wrong
-                # in case someone accidentally supplies a list with too many elements,
-                # because then the foreach loop would run more than once
-                foreach { label value count } [lrange $elm 0 2] {}
+                    if { [string trim $label] eq "" } {
+                        set label $filter_properties(null_label)
+                    }
 
-                if { [string trim $label] eq "" } {
-                    set label $filter_properties(null_label)
+                    if {$filter_properties(type) eq "multival"} {
+                        # We need to ns_urlencode the name to work
+                        set filter_properties_name [ns_urlencode $filter_properties(name)]
+                    } else {
+                        set filter_properties_name $filter_properties(name)
+                    }
+
+                    template::multirow -local append filters \
+                        $filter_properties_name \
+                        $filter_properties(label) \
+                        $filter_properties(clear_url) \
+                        [ad_string_truncate -len 25 -- $label] \
+                        $value \
+                        $url \
+                        $label \
+                        $count \
+                        $add_url \
+                        $selected_p \
+                        $filter_properties(type)
                 }
-
-                if {$filter_properties(type) eq "multival"} {
-                    # We need to ns_urlencode the name to work
-                    set filter_properties_name [ns_urlencode $filter_properties(name)]
-                } else {
-                    set filter_properties_name $filter_properties(name)
-                }
-
-                template::multirow -local append filters \
-                    $filter_properties_name \
-                    $filter_properties(label) \
-                    $filter_properties(clear_url) \
-                    [string_truncate -len 25 -- $label] \
-                    $value \
-                    $url \
-                    $label \
-                    $count \
-                    $add_url \
-                    $selected_p \
-                    $filter_properties(type)
-            }
         }
     }
 
     if {$style eq {}} {
         set style [parameter::get \
-                       -package_id [apm_package_id_from_key "acs-templating"] \
+                       -package_id [ad_conn subsite_id] \
                        -parameter DefaultListFilterStyle \
-                       -default "filters"]
+                       -default [parameter::get \
+                                     -package_id [apm_package_id_from_key "acs-templating"] \
+                                     -parameter DefaultListFilterStyle \
+                                     -default "filters"]]
     }
-    
+
     set file_stub [template::resource_path -type lists -style $style]
 
     # ensure that the style template has been compiled and is up-to-date
@@ -1946,10 +1975,10 @@ ad_proc -public template::list::element::create {
     <li>
     <b>display_template_name</b>: theme-able template. If a
     display_template_name is specified, and a file with this name is
-    available from the ressource directory in the display_templates
-    section, then take its countent as display_template. The resouce
+    available from the resource directory in the display_templates
+    section, then take its countent as display_template. The resource
     directory is taken from the ResourceDir of the theme (parameter of
-    acs-sub-site) or from the "resources" directory in acs-templating.
+                                                          acs-sub-site) or from the "resources" directory in acs-templating.
     The display_template_name acts similar to the query names in
     the database interface: When display_template_name is specified
     and the file is available, it overrules display_template, which
@@ -1958,7 +1987,7 @@ ad_proc -public template::list::element::create {
     <li>
     <b>link_url_col</b>: Name of column in the multirow which contains the URL to which the cell contents should point.
     If either link_url_col or link_url_eval is specified, the cell's contents will be made a link to the specified URL, if that
-    URL is non-empty.
+    URL is nonempty.
     </li>
     <li>
     <b>link_url_eval</b>: A chunk of Tcl code which will be evaluated in the context of a template::multirow foreach looping over the
@@ -2174,7 +2203,7 @@ ad_proc -public template::list::element::set_property {
         -list_name $list_name \
         -element_name $element_name
 
-    switch $property {
+    switch -- $property {
         display_eval - link_url_eval {
             # This is a chunk of Tcl code, which should be executed later, not now
             set element_properties($property) $value
@@ -2192,10 +2221,12 @@ ad_proc -public template::list::element::set_property {
         html {
             # All other vars, do an uplevel subst on the value now
             set element_properties($property) [uplevel $ulevel [list subst $value]]
-            set element_properties(cell_attributes) [template::list::util_html_to_attributes_string $element_properties(html)]
+            set element_properties(cell_attributes) \
+                [template::list::util_html_to_attributes_string $element_properties(html)]
         }
         default {
-            # We require all properties to be initialized to the empty string in the array, otherwise they're illegal.
+            # We require all properties to be initialized to the empty
+            # string in the array, otherwise they're illegal.
             if { ![info exists element_properties($property)] } {
                 error "Unknown element property '$property' for element '$element_name' in list '$list_name'. Allowed properties are [join [array names element_properties] ", "]."
             }
@@ -2242,7 +2273,9 @@ ad_proc -private template::list::element::render {
     set multirow $list_properties(multirow)
 
     # Get the element properties
-    # We ignore if the element doesn't exist, 'cause then we'll just hope it exists in the multirow and display the value directly
+    #
+    # We ignore if the element doesn't exist, 'cause then we'll just
+    # hope it exists in the multirow and display the value directly
     get_reference -create -list_name $list_name -element_name $element_name
 
     if { [info exists element_properties(display_template_name)] && $element_properties(display_template_name) ne "" } {
@@ -2323,7 +2356,7 @@ ad_proc -public template::list::filter::create {
     </li>
     <li>
     <b>type</b>: The type of values this filter sets. Also see 'values' below. Valid options are: 'singleval', meaning that the
-    value is a single value of a query variable with the name of the filter; 'multival', meaning the the value is really a Tcl list of values,
+    value is a single value of a query variable with the name of the filter; 'multival', meaning the value is really a Tcl list of values,
     sent to a :multiple page variable; and 'multivar', meaning that the value is a list of (key value) lists, as in { { var1 value1 } { var2 value 2 } }.
     'multival' is useful when you're filtering on, say, a date range, in which case you'd send two values, namely the start and end date.
     'multivar' is useful when you want the selection of one filter to change the value of another filter, for example when selecting groupby, you also
@@ -2442,7 +2475,7 @@ ad_proc -public template::list::filter::create {
         -ulevel [expr {$ulevel + 1}]
 
     # This is to be used by the export_vars function
-    switch $filter_properties(type) {
+    switch -- $filter_properties(type) {
         singleval - multivar {
             set filter_properties(var_spec) $filter_name
         }
@@ -2500,7 +2533,7 @@ ad_proc -public template::list::filter::set_property {
         -list_name $list_name \
         -filter_name $filter_name
 
-    switch $property {
+    switch -- $property {
         where_clause_eval - add_url_eval {
             # Eval's shouldn't be subst'ed here, will be later
             set filter_properties($property) $value
@@ -2689,7 +2722,7 @@ ad_proc -public template::list::format::create {
     set elementnum 0
 
     foreach { key value } $spec {
-        switch $key {
+        switch -- $key {
             row {
                 # We only care about this for the currently selected format
                 if {$format_name eq $selected_format} {
@@ -2900,7 +2933,10 @@ ad_proc -public template::list::orderby::create {
     }
 
     # Create the 'orderby' filter if it doesn't already exist
-    if { ![template::list::filter::exists_p -list_name $list_name -filter_name $list_properties(orderby_name)] } {
+    if { ![template::list::filter::exists_p \
+               -list_name $list_name \
+               -filter_name $list_properties(orderby_name)]
+     } {
         template::list::filter::create \
             -list_name $list_name \
             -filter_name $list_properties(orderby_name) \
@@ -2912,7 +2948,8 @@ ad_proc -public template::list::orderby::create {
         -list_name $list_name \
         -filter_name $list_properties(orderby_name)
 
-    lappend filter_properties(values) [list $orderby_properties(label) "${orderby_name},$orderby_properties(default_direction)"]
+    lappend filter_properties(values) \
+        [list $orderby_properties(label) "${orderby_name},$orderby_properties(default_direction)"]
 
     # Return an element which can be put into the 'values' property of a filter
     return [list $orderby_properties(label) "${orderby_name},$orderby_properties(default_direction)"]
@@ -2977,7 +3014,7 @@ ad_proc -public template::list::orderby::set_property {
         -list_name $list_name \
         -orderby_name $orderby_name
 
-    switch $property {
+    switch -- $property {
         orderby {
             set value [uplevel $ulevel [list subst $value]]
             set orderby_properties($property) $value
@@ -3001,7 +3038,8 @@ ad_proc -public template::list::orderby::set_property {
             set orderby_properties(orderby_desc) "$value desc"
         }
         default {
-            # We require all properties to be initialized to the empty string in the array, otherwise they're illegal.
+            # We require all properties to be initialized to the empty
+            # string in the array, otherwise they're illegal.
             if { ![info exists orderby_properties($property)] } {
                 error "Unknown orderby property '$property' for column '$orderby_name' in list '$list_name'. Allowed properties are [join [array names orderby_properties] ", "]."
             }
@@ -3033,22 +3071,15 @@ ad_proc -public template::list::orderby::set_properties {
     }
 }
 
-
-
-
-
-
 #####
 #
 # Templating system ADP tags
 #
 #####
 
-
-
-template_tag listtemplate { chunk params } {
+template::tag listtemplate { chunk params } {
     set level [template::adp_level]
-    
+
     set list_name [template::get_attribute listtemplate $params name]
     set style [ns_set iget $params style]
 
@@ -3057,7 +3088,7 @@ template_tag listtemplate { chunk params } {
         "\[template::list::render -name \"$list_name\" -style \"$style\"\]"
 }
 
-template_tag listelement { params } {
+template::tag listelement { params } {
 
     set element_name [template::get_attribute listelement $params name]
 
@@ -3067,14 +3098,14 @@ template_tag listelement { params } {
         "\[template::list::element::render -list_name \${list_properties(name)} -element_name $element_name\]"
 }
 
-template_tag listrow { params } {
+template::tag listrow { params } {
     set level [template::adp_level]
 
     template::adp_append_string \
         "\[template::list::render_row -name \${list_properties(name)}\]"
 }
 
-template_tag listfilters { chunk params } {
+template::tag listfilters { chunk params } {
     set level [template::adp_level]
 
     set list_name [template::get_attribute listfilters $params name]
@@ -3084,9 +3115,9 @@ template_tag listfilters { chunk params } {
         "\[template::list::render_filters -name \"$list_name\" -style \"$style\"\]"
 }
 
-template_tag listfilters-form { chunk params } {
+template::tag listfilters-form { chunk params } {
     set level [template::adp_level]
-    set list_name [template::get_attribute listfilters $params name]
+    set list_name [template::get_attribute listfilters-form $params name]
 
     set style [ns_set iget $params style]
 
@@ -3122,20 +3153,24 @@ ad_proc -private template::list::render_form_filters {
     foreach filter_ref $list_properties(filter_refs) {
         upvar #$level $filter_ref filter_properties
         if { ![template::util::is_true $filter_properties(hide_p)] } {
-            foreach elm $filter_properties(values) url $filter_properties(urls) selected_p $filter_properties(selected_p) add_url $filter_properties(add_urls) {
-                if {![info exists filter_properties(clear_one_url)]} {
-                    set filter_properties(clear_one_url) ""
+            foreach \
+                elm $filter_properties(values) \
+                url $filter_properties(urls) \
+                selected_p $filter_properties(selected_p) \
+                add_url $filter_properties(add_urls) {
+                    if {![info exists filter_properties(clear_one_url)]} {
+                        set filter_properties(clear_one_url) ""
+                    }
+                    if {[string is true $selected_p]} {
+                        template::multirow -local append filters \
+                            $filter_properties(name) \
+                            $filter_properties(label) \
+                            $filter_properties(clear_url) \
+                            $selected_p \
+                            $filter_properties(clear_one_url) \
+                            [expr {[info exists filter_properties(widget)] ? $filter_properties(widget) : ""}]
+                    }
                 }
-                if {[string is true $selected_p]} {
-                    template::multirow -local append filters \
-                        $filter_properties(name) \
-                        $filter_properties(label) \
-                        $filter_properties(clear_url) \
-                        $selected_p \
-                        $filter_properties(clear_one_url) \
-                        [expr {[info exists filter_properties(widget)] ? $filter_properties(widget) : ""}]
-                }
-            }
         }
     }
 
@@ -3143,9 +3178,12 @@ ad_proc -private template::list::render_form_filters {
     ############################################################
     if {$style eq ""} {
         set style [parameter::get \
-                       -package_id [apm_package_id_from_key "acs-templating"] \
+                       -package_id [ad_conn subsite_id] \
                        -parameter DefaultListFilterStyle \
-                       -default "filters"]
+                       -default [parameter::get \
+                                     -package_id [apm_package_id_from_key "acs-templating"] \
+                                     -parameter DefaultListFilterStyle \
+                                     -default "filters"]]        
     }
     set file_stub [template::resource_path -type lists -style $style]
 
@@ -3179,13 +3217,13 @@ ad_proc -private template::list::prepare_filter_form {
     set filter_key_filters [list]
     set filter_exclude_from_key [list orderby groupby format page __list_view]
     if {[llength $filter_exclude_from_key_extra]} {
-        set filter_exclude_from_key [concat $filter_exclude_from_key $filter_exclude_from_key_extra]
+        lappend filter_exclude_from_key {*}$filter_exclude_from_key_extra
     }
     set filter_hidden_filters_url_vars [list]
     # loop through all the filters in this list
     foreach filter_ref $list_properties(filter_refs) {
         upvar #$level $filter_ref filter_properties
-        if {$filter_properties(label) ne "" && [lsearch $filter_exclude_from_key $filter_properties(name)] < 0} {
+        if {$filter_properties(label) ne "" && $filter_properties(name) ni $filter_exclude_from_key} {
             # filters with a label will be added to the form for the user
             # to choose from
             lappend filter_names_options_tmp [list $filter_properties(label) $filter_properties(name)]
@@ -3196,8 +3234,8 @@ ad_proc -private template::list::prepare_filter_form {
         # and group by/order by are preserved when the filter
         # form is used
 
-        # grab the current value of the filter out of the list if
-        # it exists
+        # Grab the current value of the filter out of the list if
+        # it exists.
         upvar $list_properties(ulevel) $filter_properties(name) current_filter_value
         if {[info exists current_filter_value] && $current_filter_value ne ""} {
 
@@ -3209,19 +3247,16 @@ ad_proc -private template::list::prepare_filter_form {
         }
     }
     upvar #[template::adp_level] __list_filter_form_client_property_key list_filter_form_client_property_key
-    # we only get 50 characters
-    # to save our clienty property name, we can encode it into an
-    # ns_sha1 hash to make it fit. we don't extract the data from the
-    # property name so this should work fine
-    #    set list_filter_form_client_property_key [ns_sha1 [list [ad_conn url] $name $filter_key_filters]]
+    # To save the client property name, it is hashed with ns_sha1 hash
+    # to fit it into toe attribute. We don't extract the data from the
+    # property name so this should work fine.
     set list_filter_form_client_property_key [ns_sha1 [list [ad_conn url] $name]]
     upvar \#[template::adp_level] __client_property_filters client_property_filters
     set client_property_filters [ad_get_client_property acs-templating $list_filter_form_client_property_key]
     # take out filters we already applied...
     set i 0
     foreach option_list $filter_names_options_tmp {
-        set option_label [lindex $option_list 0]
-        set option_name [lindex $option_list 1]
+        lassign $option_list option_label option_name
         if {"${name}:filter:${option_name}:properties" ni $client_property_filters} {
             lappend filter_names_options [list $option_label $option_name]
         }
@@ -3248,10 +3283,11 @@ ad_proc -private template::list::prepare_filter_form {
         set __form [ns_getform]
         set clear_one [ns_set get $__form clear_one]
 
-        if {([info exists clear_one] && $clear_one ne "")} {
-            # loop through the saved filters and remove
-            # the filter from the client property if its
-            # specified in clear_one
+        if {$clear_one ne ""} {
+            #
+            # Loop through the saved filters and remove the filter
+            # from the client property if its specified in clear_one.
+            #
             set __old_client_property_filters [ad_get_client_property acs-templating $__list_filter_form_client_property_key]
             set __client_property_filters [list]
 
@@ -3260,19 +3296,24 @@ ad_proc -private template::list::prepare_filter_form {
                     lappend __client_property_filters $__ref $__value
                 }
             }
-            # if we changed the list of filters, save it in the
+            #
+            # If we changed the list of filters, save it in the
             # client property, we read it later on to build the
             # form of selected filters
+            #
             set client_property_filters $__client_property_filters
             ad_set_client_property acs-templating $__list_filter_form_client_property_key $__client_property_filters
-            # now reload the form. excluding var clear_one
+            #
+            # Now reload the form, excluding variable clear_one.
+            #
             set pattern [ns_urlencode "clear_one"]=[ns_urlencode "$clear_one"]
             regsub "${pattern}&?" [ad_return_url] {} url
             ad_returnredirect $url
+            ad_script_abort
         }
     } -on_submit {
 
-        if {([info exists clear_all] && $clear_all ne "")} {
+        if {[info exists clear_all] && $clear_all ne ""} {
             set __client_property_filters {}
             ad_set_client_property acs-templating $__list_filter_form_client_property_key $__client_property_filters
             break
@@ -3316,27 +3357,31 @@ ad_proc -private template::list::prepare_filter_form {
     # otherwise add a regular text box
     foreach {f_ref f_value} $client_property_filters {
         upvar \#[template::adp_level] $f_ref filter_properties
-        if {$filter_properties(label) ne "" \
-                && $filter_properties(hide_p) eq 0 \
-                && [lsearch $filter_exclude_from_key $filter_properties(name)] < 0} {
+        if {$filter_properties(label) ne ""
+            && $filter_properties(hide_p) eq 0
+            && $filter_properties(name) ni $filter_exclude_from_key} {
             incr visible_filters_p
         }
         if {![template::element::exists $filters_form_name $filter_properties(name)]} {
             # extract options
             set options [list]
 
-            foreach elm $filter_properties(values) url $filter_properties(urls) selected_p $filter_properties(selected_p) add_url $filter_properties(add_urls) {
-                # Loop over 'values' and 'url' simultaneously
-                # 'label' is the first element, 'value' the second
-                # We do an lrange here, otherwise values would be set wrong
-                # in case someone accidentally supplies a list with too many elements,
-                # because then the foreach loop would run more than once
-                foreach { label value count } [lrange $elm 0 2] {}
+            foreach \
+                elm $filter_properties(values) \
+                url $filter_properties(urls) \
+                selected_p $filter_properties(selected_p) \
+                add_url $filter_properties(add_urls) {
+                    # Loop over 'values' and 'url' simultaneously
+                    # 'label' is the first element, 'value' the second
+                    # We do an lrange here, otherwise values would be set wrong
+                    # in case someone accidentally supplies a list with too many elements,
+                    # because then the foreach loop would run more than once
+                    foreach { label value count } [lrange $elm 0 2] {}
 
-                if { [string trim $label] eq "" } {
-                    set label $filter_properties(null_label)
-                }
-                lappend  options [list $label $value]
+                    if { [string trim $label] eq "" } {
+                        set label $filter_properties(null_label)
+                    }
+                    lappend  options [list $label $value]
             }
             set clear_url_vars [concat [list [list clear_one $filter_properties(name)]] $filter_hidden_filters_url_vars]
             set filter_properties(clear_one_url) [export_vars -base [ad_conn url] $clear_url_vars]
@@ -3359,7 +3404,7 @@ ad_proc -private template::list::prepare_filter_form {
                 set ad_form_element [list "[lindex $ad_form_element 0],multiple"]
             }
             foreach {var value} [array get form_element] {
-                if {[lsearch {name widget datatype} $var] < 0} {
+                if {$var ni {name widget datatype}} {
                     lappend ad_form_element [list $var $value]
                 }
             }
@@ -3388,11 +3433,14 @@ ad_proc -private template::list::prepare_filter_form {
             set filter_properties(value) [set $filter_properties(name)]
             lappend templist $f_ref $filter_properties(value)
             # hack in elements??
-            if {[lsearch [template::multirow columns $list_properties(multirow)] $filter_properties(name)] > -1} {
+            if {$filter_properties(name) in [template::multirow columns $list_properties(multirow)]} {
                 # FIXME Don't do this where, don't allow filters for
-                # matching elmenet/filter names if element does not exist
+                # matching element/filter names if element does not exist
                 # check if its a dynamic element...(has select_clause)
-                list::element::create -list_name $name -element_name $filter_properties(name) -spec [list label $filter_properties(label)]
+                list::element::create \
+                    -list_name $name \
+                    -element_name $filter_properties(name) \
+                    -spec [list label $filter_properties(label)]
             }
         }
         set __client_property_filters $templist
@@ -3408,8 +3456,7 @@ ad_proc -private template::list::prepare_filter_form {
         # hard to figure out how to conditionally handle this in the
         #
         ad_form -extend -name $filters_form_name -form {
-            {submit:text(hidden),optional
-            }
+            {submit:text(hidden),optional}
         }
     }
 }

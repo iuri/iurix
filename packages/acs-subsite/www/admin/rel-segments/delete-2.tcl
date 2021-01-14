@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Dec 12 11:23:12 2000
-    @cvs-id $Id: delete-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: delete-2.tcl,v 1.7.2.1 2019/12/13 14:17:42 antoniop Exp $
 
 } {
     segment_id:naturalnum,notnull
@@ -14,35 +14,35 @@ ad_page_contract {
     { return_url:localurl "" }
 } -validate {
     segment_exists_p -requires {segment_id:notnull} {
-	if { ![rel_segments_permission_p -privilege delete $segment_id] } {
-	    ad_complain "The segment either does not exist or you do not have permission to delete it"
-	}
+        if { ![permission::permission_p -object_id $segment_id -privilege "delete"] } {
+            ad_complain "The segment either does not exist or you do not have permission to delete it"
+        }
     }
 }
 
 if {$operation eq "Yes, I really want to delete this segment"} {
     if { $return_url eq "" } {
-	# Go back to the group for this segment
-	set group_id [db_string select_group_id {
-	    select s.group_id from rel_segments s where s.segment_id = :segment_id
-	} -default ""]
-	if { $group_id ne "" } {
-	    set return_url [export_vars -base ../groups/one group_id]
-	}
+        # Go back to the group for this segment
+        set group_id [db_string select_group_id {
+            select s.group_id from rel_segments s where s.segment_id = :segment_id
+        } -default ""]
+        if { $group_id ne "" } {
+            set return_url [export_vars -base ../groups/one group_id]
+        }
     }
 
     # Delete all the constraints that require this segment
     db_transaction {
-	rel_segments_delete $segment_id
+        rel_segment::delete $segment_id
     }
-} 
+}
 
 if { $return_url eq "" } {
     set return_url [export_vars -base one {segment_id}]
 }
 
 ad_returnredirect $return_url
-
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

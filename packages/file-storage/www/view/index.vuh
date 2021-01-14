@@ -6,7 +6,7 @@ ad_page_contract {
     
     @author Unknown
     @creation-date Unknown
-    @cvs-id $Id: index.vuh,v 1.9.2.2 2016/06/09 09:13:26 gustafn Exp $
+    @cvs-id $Id: index.vuh,v 1.10.2.1 2019/06/11 18:58:42 gustafn Exp $
 } {    
     { revision_id "" }
 }
@@ -47,6 +47,7 @@ if {[parameter::get -parameter BehaveLikeFilesystemP -default 0] || [catch {set 
 
     if {$file_id == 0} {
         ns_returnnotfound
+        ad_script_abort
     } else {
 
         if {[content::symlink::is_symlink -item_id $file_id]} {

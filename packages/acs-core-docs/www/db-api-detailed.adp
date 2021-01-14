@@ -3,17 +3,15 @@
 <property name="doc(title)">Database Access API</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="apm-design" leftLabel="Prev"
-		    title="
-Chapter 15. Kernel Documentation"
-		    rightLink="i18n-requirements" rightLabel="Next">
-		<div class="sect1">
+			leftLink="apm-design" leftLabel="Prev"
+			title="Chapter 15. Kernel
+Documentation"
+			rightLink="i18n-requirements" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="db-api-detailed" id="db-api-detailed"></a>Database Access API</h2></div></div></div><div class="authorblurb">
-<p>By <a class="ulink" href="mailto:jsalz\@mit.edu" target="_top">Jon Salz</a>. Revised and expanded by Roberto Mello (rmello
-at fslc dot usu dot edu), July 2002.</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc;">
+<a name="db-api-detailed" id="db-api-detailed"></a>Database Access API</h2></div></div></div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">By <a class="ulink" href="mailto:jsalz\@mit.edu" target="_top">Jon Salz</a>. Revised and
+expanded by Roberto Mello (rmello at fslc dot usu dot edu), July
+2002.</span></p><span style="color: red">&lt;/authorblurb&gt;</span><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc;">
 <li class="listitem"><p>Tcl procedures: /packages/acs-kernel/10-database-procs.tcl</p></li><li class="listitem"><p>Tcl initialization: /packages/acs-kernel/database-init.tcl</p></li>
 </ul></div><div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -334,22 +332,6 @@ db_dml foo_create {insert into foo(bar, baz) values(:bar, :baz)}
 # null, because Oracle has coerced the empty string (even for the
 # numeric column "bar") into null in both cases
 
-</pre><p>Since databases other than Oracle do not coerce empty strings
-into <code class="computeroutput">null</code>, this code has
-different semantics depending on the underlying database (i.e., the
-row that gets inserted may not have null as its column values),
-which defeats the purpose of SQL abstraction.</p><p>Therefore, the Database Access API provides a
-database-independent way to represent <code class="computeroutput">null</code> (instead of the Oracle-specific idiom
-of the empty string): <span class="strong"><strong><code class="computeroutput">db_null</code></strong></span>.</p><p>Use it instead of the empty string whenever you want to set a
-column value explicitly to <code class="computeroutput">null</code>, e.g.:</p><pre class="programlisting">
-
-set bar [db_null]
-set baz [db_null]
-
-db_dml foo_create {insert into foo(bar, baz) values(:bar, :baz)}
-#
-# sets the values for both the "bar" and "baz" columns to null
-
 </pre>
 </div><div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
@@ -585,13 +567,13 @@ this instead of <code class="computeroutput">db_dml
     <span class="emphasis"><em>code_block</em></span> [ if_no_rows <span class="emphasis"><em>if_no_rows_block ]</em></span>
 </pre><p>Performs the SQL query <code class="computeroutput">sql</code>,
 saving results in variables of the form <code class="computeroutput">
-<span class="replaceable"><span class="replaceable">var_name</span></span>:1</code>, <code class="computeroutput">
-<span class="replaceable"><span class="replaceable">var_name</span></span>:2</code>, etc, setting
+<em class="replaceable"><code>var_name</code></em>:1</code>, <code class="computeroutput">
+<em class="replaceable"><code>var_name</code></em>:2</code>, etc, setting
 <code class="computeroutput">
-<span class="replaceable"><span class="replaceable">var_name</span></span>:rowcount</code> to the total
-number of rows, and setting <code class="computeroutput">
-<span class="replaceable"><span class="replaceable">var_name</span></span>:columns</code> to a list of
-column names.</p><p>Each row also has a column, rownum, automatically added and set
+<em class="replaceable"><code>var_name</code></em>:rowcount</code> to the
+total number of rows, and setting <code class="computeroutput">
+<em class="replaceable"><code>var_name</code></em>:columns</code> to a list
+of column names.</p><p>Each row also has a column, rownum, automatically added and set
 to the row number, starting with 1. Note that this will override
 any column in the SQL statement named 'rownum', also if
 you&#39;re using the Oracle rownum pseudo-column.</p><p>If the <code class="computeroutput">-local</code> is passed, the
@@ -604,7 +586,7 @@ ns_urlencode or ad_quotehtml, etc. When the Tcl code is executed,
 all the columns from the SQL query will be set as local variables
 in that code. Any changes made to these local variables will be
 copied back into the multirow.</p><p>You may also add additional, computed columns to the multirow,
-using the <code class="computeroutput">-extend { <span class="replaceable"><span class="replaceable">col_1</span></span><span class="replaceable"><span class="replaceable">col_2</span></span> ... }</code> switch. This is
+using the <code class="computeroutput">-extend { <em class="replaceable"><code>col_1</code></em><em class="replaceable"><code>col_2</code></em> ... }</code> switch. This is
 useful for things like constructing a URL for the object retrieved
 by the query.</p><p>If you&#39;re constructing your multirow through multiple
 queries with the same set of columns, but with different rows, you
@@ -622,8 +604,7 @@ db_multirow -extend { user_url } users users_query {
 } {
     set user_url [acs_community_member_url -user_id $user_id]
 }
-    
-</pre>
+    </pre>
 </dd><dt><span class="term"><span class="strong"><strong><code class="computeroutput">
 <a name="kernel.dbapi_db_resultrows" id="kernel.dbapi_db_resultrows"></a>db_resultrows</code></strong></span></span></dt><dd>
 <pre class="programlisting"><span class="strong"><strong>db_resultrows</strong></span></pre><p>Returns the number of rows affected or returned by the previous
@@ -666,15 +647,13 @@ the bootstrap process.</p>
 <a name="kernel.dbapi_db_compatible_rdbms_p" id="kernel.dbapi_db_compatible_rdbms_p"></a>db_compatible_rdbms_p</code></strong></span></span></dt><dd>
 <pre class="programlisting">
 <span class="strong"><strong>db_compatible_rdbms_p</strong></span> db_type
-                
-</pre><p>Returns 1 if the given db_type is compatible with the current
+                </pre><p>Returns 1 if the given db_type is compatible with the current
 RDBMS.</p>
 </dd><dt><span class="term"><span class="strong"><strong><code class="computeroutput">
 <a name="kernel.dbapi_db_package_supports_rdbms_p" id="kernel.dbapi_db_package_supports_rdbms_p"></a>db_package_supports_rdbms_p</code></strong></span></span></dt><dd>
 <pre class="programlisting">
 <span class="strong"><strong>db_package_supports_rdbms_p</strong></span> db_type_list
-                
-</pre><p>Returns 1 if db_type_list contains the current RDMBS type. A
+                </pre><p>Returns 1 if db_type_list contains the current RDMBS type. A
 package intended to run with a given RDBMS must note this in
 it&#39;s package info file regardless of whether or not it actually
 uses the database.</p>
@@ -682,8 +661,7 @@ uses the database.</p>
 <a name="kernel.dbapi_db_legacy_package_p" id="kernel.dbapi_db_legacy_package_p"></a>db_legacy_package_p</code></strong></span></span></dt><dd>
 <pre class="programlisting">
 <span class="strong"><strong>db_legacy_package_p</strong></span> db_type_list
-                
-</pre><p>Returns 1 if the package is a legacy package. We can only tell
+                </pre><p>Returns 1 if the package is a legacy package. We can only tell
 for certain if it explicitly supports Oracle 8.1.6 rather than the
 OpenACS more general oracle.</p>
 </dd><dt><span class="term"><span class="strong"><strong><code class="computeroutput">
@@ -703,14 +681,14 @@ the user.</p><p>The nsv containing the list is initialized by the bootstrap
 script and should never be referenced directly by user code.
 Returns the current rdbms type and version.</p>
 </dd>
-</dl></div><div class="cvstag">($&zwnj;Id: db-api.xml,v 1.11.2.3 2017/04/21 15:07:53
-gustafn Exp $)</div>
+</dl></div><p><span class="cvstag">($&zwnj;Id: db-api.xml,v 1.12 2017/08/07 23:47:55
+gustafn Exp $)</span></p>
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="apm-design" leftLabel="Prev" leftTitle="Package Manager Design"
-		    rightLink="i18n-requirements" rightLabel="Next" rightTitle="OpenACS Internationalization
+			leftLink="apm-design" leftLabel="Prev" leftTitle="Package Manager Design"
+			rightLink="i18n-requirements" rightLabel="Next" rightTitle="OpenACS Internationalization
 Requirements"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="kernel-doc" upLabel="Up"> 
-		
+			homeLink="index" homeLabel="Home" 
+			upLink="kernel-doc" upLabel="Up"> 
+		    

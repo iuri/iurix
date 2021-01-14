@@ -1,6 +1,6 @@
 ad_page_contract {
     Interface for specifying a list of users to sign up as a batch
-    @cvs-id $Id: user-batch-add.tcl,v 1.6.2.2 2016/01/02 21:14:10 gustafn Exp $
+    @cvs-id $Id: user-batch-add.tcl,v 1.8 2018/05/29 08:34:41 antoniop Exp $
 } -properties {
     context:onevalue
     system_name:onevalue
@@ -10,12 +10,10 @@ ad_page_contract {
 }
 
 set admin_user_id [ad_conn user_id]
-set admin_email [db_string unused {
-    select email from parties where party_id = :admin_user_id
-}]
-set administration_name [db_string admin_name {
-    select first_names || ' ' || last_name from persons where person_id = :admin_user_id
-}]
+
+set admin [acs_user::get -user_id $admin_user_id]
+set email               [dict get $admin email]
+set administration_name [dict get $admin name]
 
 set context [list [list "./" "Users"] "Notify added user"]
 set system_name [ad_system_name]

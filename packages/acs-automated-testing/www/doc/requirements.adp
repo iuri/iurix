@@ -3,10 +3,10 @@
 <property name="doc(title)">Requirements</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="usage" leftLabel="Prev"
-		    title=""
-		    rightLink="" rightLabel="">
-		<div class="sect1" lang="en">
+			leftLink="usage" leftLabel="Prev"
+			title=""
+			rightLink="" rightLabel="">
+		    <div class="sect1" lang="en">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="requirements" id="requirements"></a>Requirements</h2></div></div></div><div class="authorblurb">
 <p>by <a href="mailto:joel\@aufrecht.org" target="_top">Joel
@@ -76,7 +76,7 @@ scripts in some format other than tcl procs.)</td>
 <span class="strong">Test scripts can be imported and
 exported</span>. It should be possible to import a test into the
 database from a file, and to export it to a file. These files
-should be sharable by different OpenACS installations. It should be
+should be shareable by different OpenACS installations. It should be
 possible to import/export directly between running OpenACS sites.
 (We should look at what did and didn&#39;t work in acs-lang catalog
 files and work from there.)</td>
@@ -97,7 +97,7 @@ whenever this test fails" and "notify me whenever a test
 in this category fails"</td>
 </tr><tr>
 <td>7</td><td> </td><td>A</td><td>The results of an automated test are optionally written to an
-xml file.</td>
+XML file.</td>
 </tr>
 </tbody>
 </table></div><p>Because the current test package uses in-memory variables
@@ -105,8 +105,7 @@ instead of database objects to track its tests, it is incompatible
 with the standard category package. It uses an internal,
 single-dimension category field. Should this eventually get
 extended, a more complete list of categories to implement could
-be:</p><pre class="programlisting">
-Testing Mode
+be:</p><pre class="programlisting">Testing Mode
   Regression
   Smoke
   Stress
@@ -158,8 +157,8 @@ started</a>
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="usage" leftLabel="Prev" leftTitle="Usage"
-		    rightLink="" rightLabel="" rightTitle=""
-		    homeLink="index" homeLabel="Home" 
-		    upLink="index" upLabel="Up"> 
-		
+			leftLink="usage" leftLabel="Prev" leftTitle="Usage"
+			rightLink="" rightLabel="" rightTitle=""
+			homeLink="index" homeLabel="Home" 
+			upLink="index" upLabel="Up"> 
+		    

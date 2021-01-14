@@ -3,58 +3,7 @@
 <queryset>
    <rdbms><type>postgresql</type><version>7.1</version></rdbms>
 
-<fullquery name="general_comments_get_comments.get_comments">      
-      <querytext>
-      
-             select g.comment_id,
-                    r.title,
-                    r.mime_type,
-                    o.creation_user,
-                    acs_object__name(o.creation_user) as author,
-                    o.creation_date
-                    $content_select
-               from general_comments g,
-                    cr_revisions r,
-                    acs_objects o
-              where g.object_id = :object_id and
-                    r.revision_id = content_item__get_live_revision(g.comment_id) and
-                    o.object_id = g.comment_id
-                    $context_clause
-                    $my_comments_clause
-              order by $orderby
-      </querytext>
-</fullquery>
-
- 
-
- 
-<fullquery name="get_comments.get_comments_deprecated">      
-      <querytext>
-      
-             select g.comment_id,
-                    r.title,
-                    r.content,
-                    r.mime_type,
-                    o.creation_user,
-                    to_char(o.creation_date, 'MM-DD-YYYY') as creation_date,
-                    p.first_names || ' ' || p.last_name as author
-               from general_comments g,
-                    cr_items i,
-                    cr_revisions r,
-                    acs_objects o,
-                    persons p
-              where g.object_id = :object_id and
-                    i.item_id = g.comment_id and
-                    r.revision_id = i.live_revision and
-                    o.object_id = g.comment_id and
-                    p.person_id = o.creation_user
-              order by creation_date
-      </querytext>
-</fullquery>
-
- 
-
-<fullquery name="general_comment_new.insert_comment">      
+<fullquery name="general_comments_new.insert_comment">      
       <querytext>
 	     select acs_message__new (
 		:comment_id,		-- 1  p_message_id
@@ -77,18 +26,7 @@
       </querytext>
 </fullquery>
 
- 
-<fullquery name="general_comment_new.get_revision">      
-      <querytext>
-      
-        select content_item__get_latest_revision(:comment_id) as revision_id
-        
-    
-      </querytext>
-</fullquery>
-
- 
-<fullquery name="general_comment_new.set_content">      
+<fullquery name="general_comments_new.set_content">      
       <querytext>
     
         update cr_revisions

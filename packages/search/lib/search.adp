@@ -4,7 +4,7 @@
     <if @::__csrf_token@ defined><input type="hidden" name="__csrf_token" value="@::__csrf_token;literal@"></if>
     <input type="submit" value="#acs-kernel.common_search#" name="t">
     <br>
-<!--     <a href="@advanced_search_url@">#search.Advanced_Search#</a>  -->
+    <a href="@advanced_search_url@">#search.Advanced_Search#</a>
   </div>
 </form>
 

@@ -5,19 +5,16 @@ OpenACS}</property>
 OpenACS</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="install-php" leftLabel="Prev"
-		    title="
-Appendix B. Install additional supporting
-software"
-		    rightLink="install-pam-radius" rightLabel="Next">
-		<div class="sect1">
+			leftLink="install-php" leftLabel="Prev"
+			title="Appendix B. Install
+additional supporting software"
+			rightLink="install-pam-radius" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="install-squirrelmail" id="install-squirrelmail"></a>Install
-Squirrelmail for use as a webmail system for OpenACS</h2></div></div></div><div class="authorblurb">
-<p>By <a class="ulink" href="mailto:openacs\@sussdorff.de" target="_top">Malte Sussdorff</a>
-</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><p>This section is work in progress. It will detail how you can
+Squirrelmail for use as a webmail system for OpenACS</h2></div></div></div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">By <a class="ulink" href="mailto:openacs\@sussdorff.de" target="_top">Malte
+Sussdorff</a>
+</span></p><span style="color: red">&lt;/authorblurb&gt;</span><p>This section is work in progress. It will detail how you can
 install Squirrelmail as a webmail frontend for OpenACS, thereby
 neglecting the need to have a separate webmail package within
 OpenACS</p><pre class="screen">
@@ -32,9 +29,9 @@ heavily depends on your setup, so no instructions are given
 here.</p>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="install-php" leftLabel="Prev" leftTitle="Install PHP for use in AOLserver"
-		    rightLink="install-pam-radius" rightLabel="Next" rightTitle="Install PAM Radius for use as
+			leftLink="install-php" leftLabel="Prev" leftTitle="Install PHP for use in AOLserver"
+			rightLink="install-pam-radius" rightLabel="Next" rightTitle="Install PAM Radius for use as
 external authentication"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="install-more-software" upLabel="Up"> 
-		
+			homeLink="index" homeLabel="Home" 
+			upLink="install-more-software" upLabel="Up"> 
+		    

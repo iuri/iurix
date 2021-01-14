@@ -1,12 +1,12 @@
 ad_page_contract {
 
-    This page shows all the package instanes mapped to a particular category tree.
+    This page shows all the package instances mapped to a particular category tree.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-usage.tcl,v 1.13.2.2 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -31,8 +31,8 @@ set tree_description $tree(description)
 set page_title [_ categories.Usage_title]
 
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar [_ categories.Usage]
 
 
@@ -46,9 +46,9 @@ foreach instance $instance_list {
     set unmap_url [export_vars -no_empty -base tree-unmap {tree_id object_id ctx_id}]
 
     if {$read_p == "t"} {
-	template::multirow append modules $package $object_id $object_name $package_id $instance_name $read_p $unmap_url
+        template::multirow append modules $package $object_id $object_name $package_id $instance_name $read_p $unmap_url
     } else {
-	incr instances_without_permission
+        incr instances_without_permission
     }
 }
 

@@ -1,5 +1,5 @@
 ad_page_contract {
-  @cvs-id $Id: clear.tcl,v 1.4.2.2 2016/11/04 09:20:41 michaela Exp $
+  @cvs-id $Id: clear.tcl,v 1.6 2018/01/19 21:23:51 gustafn Exp $
 } {
   {package_key ""}
   {category:aa_test_category ""}
@@ -15,6 +15,7 @@ set sql "delete from aa_test_final_results"
 db_dml delete_testcase_tests_sql $sql
 
 ad_returnredirect "index?by_package_key=$package_key&by_category=$category&view_by=$view_by&quiet=$quiet"
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

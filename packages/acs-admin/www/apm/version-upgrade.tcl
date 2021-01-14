@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date Thu Oct 12 17:45:38 2000
-    @cvs-id $Id: version-upgrade.tcl,v 1.2.2.1 2015/09/10 08:21:06 gustafn Exp $
+    @cvs-id $Id: version-upgrade.tcl,v 1.4 2018/07/11 21:57:26 hectorr Exp $
 } {
     version_id:naturalnum,notnull
 }
@@ -17,7 +17,7 @@ set context [list \
 		 [list "version-view?version_id=$version_id" "$pretty_name $version_name"] \
 		 $title]
 
-# Disable all previous versions of this packae.
+# Disable all previous versions of this package.
 apm_version_upgrade $version_id
 
 # Instruct user to run SQL upgrade scripts.

@@ -17,7 +17,7 @@
 <em>&lt; blah blah &gt;</em>
 
 
-The Tcl proc parser relies on three main text markers to divvy the Tcl library file into neat compartments: namespace, procedure and directive.  Each of these divisions has its own text marker(s).  In the end, your Tcl file should look somthing like this:
+The Tcl proc parser relies on three main text markers to divvy the Tcl library file into neat compartments: namespace, procedure and directive.  Each of these divisions has its own text marker(s).  In the end, your Tcl file should look something like this:
 <blockquote>
 <code>
 <kbd>
@@ -42,7 +42,7 @@ The Tcl proc parser relies on three main text markers to divvy the Tcl library f
      # <font color=red>@param</font> <em>&lt;name&gt;</em> <em>&lt;default value&gt;</em> <em>&lt;description&gt;</em>
      # <em>&lt;continued description&gt;</em>
 
-     # <font color=red>@param</font> ... <em>&lt;info for other paramaters&gt;</em>
+     # <font color=red>@param</font> ... <em>&lt;info for other parameters&gt;</em>
 
      # <font color=red>@option</font> <em>&lt;name&gt;</em> <em>&lt;default value&gt;</em> <em>&lt;description&gt;</em>
      # <em>&lt;continued description&gt;</em>
@@ -156,7 +156,7 @@ these comments:
 </blockquote>
 In the above example <code>user_id</code> and <code>object_id</code> would be marked as required,
 <code>alert_admin_email</code> would show no default-value description, and <code>granter_id</code>
-and <code>privilege_id</code> would show the the default info from above.
+and <code>privilege_id</code> would show the default info from above.
 <p>
 On to <strong>@see</strong> directive markers:
 <blockquote>
@@ -169,7 +169,7 @@ be described within their own static html page, and all procedure information is
 <blockquote>
 <pre><code>
 # @see namespace util util.html
-# @see proc template::multirow::create multiow.html#template::multirow::create
+# @see proc template::multirow::create multirow.html#template::multirow::create
 # @see url <em>&lt;a picture of wally my dog&gt;</em> http://my.page.net/dogs/wally.jpg
 # @see proc doc::util::eat_chicken
 </code></pre>

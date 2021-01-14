@@ -1,5 +1,5 @@
 ad_page_contract {
-    @cvs-id $Id: index.tcl,v 1.9.2.3 2016/12/02 16:16:53 michaela Exp $
+    @cvs-id $Id: index.tcl,v 1.16.2.7 2019/09/05 13:58:39 hectorr Exp $
 } {
     {quiet:boolean 0}
     {by_package_key ""}
@@ -23,6 +23,8 @@ ad_page_contract {
 set title "System test cases"
 set return_url [ad_return_url]
 
+template::head::add_css -href /resources/acs-automated-testing/tests.css
+
 if {$by_package_key ne ""} {
     append title " for package $by_package_key"
 }
@@ -32,50 +34,61 @@ if {$by_category ne ""} {
     append title ", all categories"
 }
 
+# Include all enabled packages in the package view list
+foreach enabled_package [apm_enabled_packages] {
+    set packages($enabled_package) [list 0 0 0 0]
+}
+
+# Check for testcases
 foreach testcase [nsv_get aa_test cases] {
-    set testcase_id [lindex $testcase 0]
-    set testcase_desc [lindex $testcase 1]
-    set package_key   [lindex $testcase 3]
-    set categories    [lindex $testcase 4]
-    set results("$testcase_id,$package_key") [list $testcase_desc $package_key $categories]
-    set packages($package_key) [list 0 0 0]
+    lassign $testcase testcase_id testcase_desc . package_key categories
+
+    set results($testcase_id,$package_key) [list $testcase_desc $package_key $categories]
 }
 
 db_foreach acs-automated-testing.results_queryx {
-    select testcase_id, package_key,
-    to_char(timestamp,'YYYY-MM-DD_HH24:MI:SS') as timestamp, passes, fails
-    from aa_test_final_results
+    select
+       fr.testcase_id,
+       fr.package_key,
+       to_char(fr.timestamp,'YYYY-MM-DD_HH24:MI:SS') as timestamp,
+       fr.passes,
+       fr.fails,
+       sum(case when r.result = 'warn' then 1 else 0 end) as warnings
+    from aa_test_final_results fr,
+         aa_test_results r
+     where fr.testcase_id = r.testcase_id
+     group by 1, 2, 3, 4, 5
 } {
-    if {[info exists results("$testcase_id,$package_key")]} {
+    if {[info exists results($testcase_id,$package_key)]} {
         # Append results to individual testcase
-        lappend results("$testcase_id,$package_key") $timestamp $passes $fails
+        lappend results($testcase_id,$package_key) $timestamp $passes $fails $warnings
 
         #
         # If viewing by package, update the by-package results, taking into
         # account whether a specific category has been specified.
         #
         if {$view_by eq "package"} {
-            set package_total [lindex $packages($package_key) 0]
-            set package_pass  [lindex $packages($package_key) 1]
-            set package_fail  [lindex $packages($package_key) 2]
+            lassign $packages($package_key) package_total package_pass package_fail package_warnings
             if {$by_category ne ""} {
                 # Category specific, only add results if this testcase is of the
                 # specified category.
-                set categories  [lindex $results("$testcase_id,$package_key") 2]
-                if {[lsearch $categories $by_category] != -1} {
+                set categories  [lindex $results($testcase_id,$package_key) 2]
+                if {$by_category in $categories} {
                     incr package_total
-                    incr package_pass $passes
-                    incr package_fail $fails
-                    set packages($package_key) [list $package_total \
-                                                    $package_pass $package_fail]
+                    incr package_pass     $passes
+                    incr package_fail     $fails
+                    incr package_warnings $warnings
+                    set packages($package_key) \
+                        [list $package_total $package_pass $package_fail $package_warnings]
                 }
             } else {
                 # No category specified, add results.
                 incr package_total
-                incr package_pass $passes
-                incr package_fail $fails
-                set packages($package_key) [list $package_total \
-                                                $package_pass $package_fail]
+                incr package_pass     $passes
+                incr package_fail     $fails
+                incr package_warnings $warnings
+                set packages($package_key) \
+                    [list $package_total $package_pass $package_fail $package_warnings]
             }
         }
     }
@@ -83,40 +96,46 @@ db_foreach acs-automated-testing.results_queryx {
 
 if {$view_by eq "package"} {
     #
+    # Calculate package proc test coverage
+    #
+    set global_test_coverage            [aa::coverage::proc_coverage]
+    set global_test_coverage_percent    [dict get $global_test_coverage coverage]
+    set global_test_coverage_level      [aa::coverage::proc_coverage_level $global_test_coverage_percent]
+    #
     # Prepare the template data for a view_by "package"
     #
-    template::multirow create packageinfo key total passes fails
+    template::multirow create packageinfo key total passes fails warnings proc_coverage proc_coverage_level
     foreach package_key [lsort [array names packages]] {
-        set total  [lindex $packages($package_key) 0]
-        set passes [lindex $packages($package_key) 1]
-        set fails  [lindex $packages($package_key) 2]
-        template::multirow append packageinfo $package_key $total $passes $fails
+        #ns_log notice "view_by $view_by package_key=$package_key"
+        lassign $packages($package_key) total passes fails warnings
+        set proc_coverage [dict get [aa::coverage::proc_coverage -package_key $package_key] coverage]
+        set proc_coverage_level [aa::coverage::proc_coverage_level $proc_coverage]
+
+        template::multirow append packageinfo $package_key $total $passes $fails $warnings $proc_coverage $proc_coverage_level
     }
 } else {
     #
     # Prepare the template data for a view_by "testcase"
     #
     template::multirow create tests id url description package_key categories \
-        timestamp passes fails marker
+        timestamp passes fails warnings marker
     set old_package_key ""
-    foreach testcase [nsv_get aa_test cases] {
-        set testcase_id        [lindex $testcase 0]
-        set package_key        [lindex $testcase 3]
+    foreach testcase [lsort [nsv_get aa_test cases]] {
+        set testcase_id [lindex $testcase 0]
+        set package_key [lindex $testcase 3]
 
-        set testcase_desc      [lindex $results("$testcase_id,$package_key") 0]
+        lassign $results($testcase_id,$package_key) testcase_desc . categories \
+            testcase_timestamp testcase_passes testcase_fails testcase_warnings
+
         regexp {^(.+?\.)\s} $testcase_desc "" testcase_desc
-        set categories         [lindex $results("$testcase_id,$package_key") 2]
         set categories_str     [join $categories ", "]
-        set testcase_timestamp [lindex $results("$testcase_id,$package_key") 3]
-        set testcase_passes    [lindex $results("$testcase_id,$package_key") 4]
-        set testcase_fails     [lindex $results("$testcase_id,$package_key") 5]
         #
         # Only add the testcase to the template multirow if either
         # - The package key is blank or it matches the specified.
         # - The category is blank or it matches the specified.
         #
-        if {($by_package_key eq "" || ($by_package_key eq $package_key))
-            && ($by_category eq "" || ($by_category in $categories))
+        if {$by_package_key in [list "" $package_key]
+            && $by_category in [list "" $categories]
         } {
             # Swap the highlight flag between packages.
             if {$old_package_key ne $package_key} {
@@ -125,7 +144,9 @@ if {$view_by eq "package"} {
             } else {
                 set marker 0
             }
-            set testcase_url [export_vars -base "testcase" -url {testcase_id package_key view_by {category by_category} quiet return_url}]
+            set testcase_url [export_vars -base "testcase" -url {
+                testcase_id package_key view_by {category by_category} quiet return_url
+            }]
             template::multirow append tests \
                 $testcase_id \
                 $testcase_url \
@@ -133,7 +154,7 @@ if {$view_by eq "package"} {
                 $package_key \
                 $categories_str \
                 $testcase_timestamp \
-                $testcase_passes $testcase_fails \
+                $testcase_passes $testcase_fails $testcase_warnings \
                 $marker
         }
     }
@@ -146,7 +167,7 @@ template::multirow create main_categories name
 template::multirow create exclusion_categories name
 foreach category [nsv_get aa_test categories] {
     # joel@aufrecht.org: putting in special cases for exclusionary categories
-    if { [lsearch [nsv_get aa_test exclusion_categories] $category ] < 0 } {
+    if { $category in [nsv_get aa_test exclusion_categories] } {
         template::multirow append main_categories $category
     } else {
         template::multirow append exclusion_categories $category
@@ -154,7 +175,7 @@ foreach category [nsv_get aa_test categories] {
 }
 
 set record_url [export_vars -base "record-test" -url {return_url package_key}]
-ad_return_template
+set bulk_actions_vars [export_vars -form {{category $by_category} view_by quiet stress security_risk}]
 
 # Local variables:
 #    mode: tcl

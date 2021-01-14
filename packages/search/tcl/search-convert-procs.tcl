@@ -4,7 +4,7 @@ ad_library {
 
     @author Dirk Gomez <openacs@dirkgomez.de>
     @creation-date 2005-06-25
-    @cvs-id $Id: search-convert-procs.tcl,v 1.4.2.4 2017/03/27 10:41:51 gustafn Exp $
+    @cvs-id $Id: search-convert-procs.tcl,v 1.5.2.1 2019/05/24 13:45:42 antoniop Exp $
 }
 
 
@@ -46,7 +46,7 @@ ad_proc -public search::convert::binary_to_text {
             set convert_command {catppt $filename >$tmp_filename}
         }
         application/pdf {
-            set convert_command {pdftotext -q $filename $tmp_filename}
+            set convert_command {pdftotext $filename $tmp_filename}
         }
         application/vnd.oasis.opendocument.text -
         application/vnd.oasis.opendocument.text-template -
@@ -84,16 +84,24 @@ ad_proc -public search::convert::binary_to_text {
         }
     }
 
-    if {[catch {eval exec $convert_command} err]} {
-        catch {file delete -- $tmp_filename}
-        ns_log Error "SEARCH: conversion failed - $convert_command: $err"
-        return
+    ad_try {
+        set convert_command [subst $convert_command]
+        exec -- {*}$convert_command
+    } on error {errorMsg} {
+        if {$mime_type eq "application/pdf" &&
+            [string first $errorMsg "Command Line Error: Incorrect password"] >= 0} {
+            ns_log warning "SEARCH: pdf seems password protected - $convert_command"
+        } else {
+            ns_log error "SEARCH: conversion failed - $convert_command: $errorMsg"
+        }
+    } on ok {d} {
+        set fd [open $tmp_filename "r"]
+        set result [read $fd]
+        close $fd
+    } finally {
+        file delete -- $tmp_filename
     }
 
-    set fd [open $tmp_filename "r"]
-    set result [read $fd]
-    close $fd
-    file delete -- $tmp_filename
     return $result
 }
 

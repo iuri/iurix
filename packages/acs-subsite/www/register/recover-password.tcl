@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Simon Carstensen
     @creation-date 2003-08-29
-    @cvs-id $Id: recover-password.tcl,v 1.13.2.2 2016/05/27 22:26:49 gustafn Exp $
+    @cvs-id $Id: recover-password.tcl,v 1.16.2.2 2019/04/10 21:09:58 gustafn Exp $
 } {
     {authority_id:naturalnum ""}
     {username ""}
@@ -32,17 +32,9 @@ if {[string is false $email_forgotten_password_p]} {
     ad_script_abort
 }
 
-
-# Display form to collect username and authority
-set authority_options [auth::authority::get_authority_options]
-
-if { (![info exists authority_id] || $authority_id eq "") } {
-    set authority_id [lindex $authority_options 0 1]
-}
-
-ad_form -name recover -edit_buttons [list [list [_ acs-kernel.common_continue] ok]] -form { {dummy:text(hidden),optional} }
-    
-
+ad_form -name recover \
+    -edit_buttons [list [list [_ acs-kernel.common_continue] ok]] \
+    -form { {dummy:text(hidden),optional} }
 
 set username_widget text
 if { [parameter::get -parameter UsePasswordWidgetForUsername -package_id [ad_acs_kernel_id]] } {
@@ -51,25 +43,27 @@ if { [parameter::get -parameter UsePasswordWidgetForUsername -package_id [ad_acs
 
 set focus {}
 if { [auth::UseEmailForLoginP] } {
-    ad_form -extend -name recover -form [list [list email:text($username_widget) [list label "Email"]]]
+    ad_form -extend -name recover -form [list [list email:text($username_widget) [list label [_ acs-subsite.Email]]]]
     set user_id_widget_name email
     set focus "email"
 } else {
     if { [llength $authority_options] > 1 } {
         ad_form -extend -name recover -form {
-            {authority_id:integer(select) 
-                {label {[_ acs-kernel.authentication_authority]}} 
-                {options $authority_options}
+            {authority_id:integer(select)
+                {label {[_ acs-kernel.authentication_authority]}}
+                {options [auth::authority::get_authority_options]}
             }
         }
     }
-    
-    ad_form -extend -name recover -form [list [list username:text($username_widget) [list label "Username"]]] -validate {
-        {username
-            { [acs_user::get_by_username -authority_id $authority_id -username $username] ne "" }
-            { Could not find username at authority }
+
+    ad_form -extend -name recover \
+        -form [list [list username:text($username_widget) [list label [_ acs-subsite.Username]]]] \
+        -validate {
+            {username
+                { [acs_user::get_by_username -authority_id $authority_id -username $username] ne "" }
+                { Could not find username at authority }
+            }
         }
-    }
 
     set user_id_widget_name username
     set focus "username"
@@ -84,9 +78,14 @@ set submission_p 0
 
 ad_form -extend -name recover -on_request {}
 
-# We handle form submission here, because otherwise we can't handle both the case where we use the form
-# and the case where we don't in one go
-if { [form is_valid recover] || (![form is_submission recover] && (([info exists username] && $username ne "") || ([info exists email] && $email ne ""))) } {
+#
+# We handle form submission here, because otherwise we can't handle
+# both the case where we use the form and the case where we don't in
+# one go.
+#
+if { [form is_valid recover]
+     || (![form is_submission recover] && ($username ne "" || $email ne ""))
+ } {
     array set recover_info [auth::password::recover_password \
                                 -authority_id $authority_id \
                                 -username $username \

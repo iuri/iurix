@@ -6,14 +6,12 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Authors:      Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: content-update.sql,v 1.9.4.1 2015/08/16 22:47:37 gustafn Exp $
+-- $Id: content-update.sql,v 1.11 2018/11/01 08:43:43 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
 -- http://www.fsf.org/copyleft/gpl.html
 
---set serveroutput on
--- FIXME: drop constraint doesn't work on postgresql
 CREATE OR REPLACE FUNCTION inline_0 () RETURNS integer AS $$
 BEGIN
   -- altering the constraint on cr_type_template_map

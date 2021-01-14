@@ -5,11 +5,11 @@ ad_page_contract {
     to contained objects. 
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: object-map.tcl,v 1.11.2.2 2019/12/20 21:18:10 gustafn Exp $
 } {
     object_id:naturalnum,notnull
     ctx_id:naturalnum,optional
-    {locale ""}
+    {locale:word ""}
 } -properties {
     page_title:onevalue
     context:onevalue
@@ -30,7 +30,7 @@ set context_bar [list $context_bar $page_title]
 template::multirow create mapped_trees tree_name tree_id \
     site_wide_p assign_single_p require_category_p widget view_url unmap_url edit_url
 
-db_foreach get_mapped_trees "" {
+db_foreach get_mapped_trees {} {
     set tree_name [category_tree::get_name $tree_id $locale]
     if {$subtree_category_id ne ""} {
       append tree_name " :: [category::get_name $subtree_category_id $locale]"
@@ -46,7 +46,15 @@ template::multirow sort mapped_trees -dictionary tree_name
 
 template::multirow create unmapped_trees tree_id tree_name site_wide_p view_url map_url subtree_url
 
-db_foreach get_unmapped_trees "" {
+db_foreach get_unmapped_trees {
+    select tree_id, site_wide_p,
+          acs_permission.permission_p(tree_id, :user_id, 'category_tree_read') as has_read_permission
+     from category_trees t
+    where not exists (select 1 from category_tree_map m
+                       where m.object_id = :object_id
+                         and m.tree_id = t.tree_id)
+    order by t.tree_id
+} {
     if { $has_read_permission == "t" || $site_wide_p == "t" } {
 	set tree_name [category_tree::get_name $tree_id $locale]
 
@@ -69,10 +77,10 @@ template::list::create \
 	}
         flags {
 	    display_template {
-		(<if @mapped_trees.site_wide_p@ eq t>#categories.#SiteWide_tree#, </if>
-                 <if @mapped_trees.widget@>@mapped_trees.widget@, </if>
-		 <if @mapped_trees.assign_single_p@ eq t>#categories.single#, </if><else>#categories.multiple#, </else>
-		 <if @mapped_trees.require_category_p@ eq t>#categories.required#) </if><else>#categories.optional#) </else>
+		(<if @mapped_trees.site_wide_p;literal@ true>#categories.#SiteWide_tree#, </if>
+                 <if @mapped_trees.widget@ ne "">@mapped_trees.widget@, </if>
+		 <if @mapped_trees.assign_single_p;literal@ true>#categories.single#, </if><else>#categories.multiple#, </else>
+		 <if @mapped_trees.require_category_p;literal@ true>#categories.required#) </if><else>#categories.optional#) </else>
 	    }
 	}
 	action {
@@ -94,7 +102,7 @@ template::list::create \
 	}
 	site_wide_p {
 	    display_template {
-		<if @unmapped_trees.site_wide_p@ eq t> (#categories.SiteWide_tree#) </if>
+		<if @unmapped_trees.site_wide_p;literal@ true> (#categories.SiteWide_tree#) </if>
 	    }
 	}
 	action {

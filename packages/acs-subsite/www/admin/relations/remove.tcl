@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date 2000-12-16
-    @cvs-id $Id: remove.tcl,v 1.3.2.5 2017/04/21 15:27:49 gustafn Exp $
+    @cvs-id $Id: remove.tcl,v 1.6.2.1 2020/01/02 17:19:41 antoniop Exp $
 } {
     rel_id:naturalnum,notnull
     { return_url:localurl "" }
@@ -16,24 +16,33 @@ ad_page_contract {
     dependents:multirow
 } -validate {
     permission_p -requires {rel_id:notnull} {
-	if { ![relation_permission_p -privilege delete $rel_id] } {
-	    ad_complain "The relation either does not exist or you do not have permission to remove it"
-	}
+        if { ![permission::permission_p -object_id $rel_id -privilege "delete"] } {
+            ad_complain "The relation either does not exist or you do not have permission to remove it"
+        }
     }
     relation_in_scope_p -requires {rel_id:notnull permission_p} {
-	if { ![application_group::contains_relation_p -rel_id $rel_id]} {
-	    ad_complain "The relation either does not exist or does not belong to this subsite."
-	}
+        if { ![application_group::contains_relation_p -rel_id $rel_id]} {
+            ad_complain "The relation either does not exist or does not belong to this subsite."
+        }
     }
 }
 
 set context [list "Remove relation"]
 
-if { ![db_0or1row select_rel_info {} -column_array rel] 
-} {
+if { ![db_0or1row select_rel_info {
+    select (select pretty_name from acs_object_types
+             where object_type = r.rel_type) as rel_type_pretty_name,
+           r.object_id_one,
+           r.object_id_two
+      from acs_rels r
+     where r.rel_id = :rel_id    
+} -column_array rel] } {
     ad_return_error "Error" "Relation $rel_id does not exist"
     ad_script_abort
 }
+
+set rel(object_id_one_name) [acs_object_name $rel(object_id_one)]
+set rel(object_id_two_name) [acs_object_name $rel(object_id_two)]
 
 # Now let's see if removing this relation would violate some
 # constraint.
@@ -41,10 +50,16 @@ if { ![db_0or1row select_rel_info {} -column_array rel]
 if { [relation_segment_has_dependent -rel_id $rel_id] } {
     set return_url "[ad_conn url]?[ad_conn query]"
     # We can't remove this relation - display the violations
-    template::multirow create dependents rel_id rel_type_pretty_name object_id_one_name object_id_two_name export_vars
-
-    db_foreach select_dependents {} {
-	template::multirow append dependents $rel_id $rel_type_pretty_name $object_id_one_name $object_id_two_name [export_vars {rel_id return_url}]
+    db_multirow -extend {export_vars} dependents select_dependents {
+	select r.viol_rel_id as rel_id,
+               (select pretty_name from acs_object_types
+                where object_type = r.viol_rel_type) as rel_type_pretty_name,
+	       acs_object.name(r.viol_object_id_one) as object_id_one_name,
+	       acs_object.name(r.viol_object_id_two) as object_id_two_name
+	  from rc_violations_by_removing_rel r
+	 where r.rel_id = :rel_id
+    } {
+        set export_vars [export_vars {rel_id return_url}]
     }
     ad_return_template remove-dependents-exist
     return
@@ -52,8 +67,6 @@ if { [relation_segment_has_dependent -rel_id $rel_id] } {
 
 
 set export_vars [export_vars -form {rel_id return_url}]
-
-ad_return_template
 
 # Local variables:
 #    mode: tcl

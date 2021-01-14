@@ -22,6 +22,7 @@
   <msg key="Element_is_too_long_Singular">%label% es un caracater muy largo.</msg>
   <msg key="Enhanced_Text">Texto Enriquecido</msg>
   <msg key="Enter_your_search_text">Introduzca el texto a buscar</msg>
+  <msg key="filter_clear">Limpiar</msg>
   <msg key="Fixed_width_Text">Preformateado
 </msg>
   <msg key="Format">Formato
@@ -70,11 +71,15 @@
   <msg key="Invalid_currency">Moneda incorrecta</msg>
   <msg key="Invalid_decimal_number">Número decimal incorrecto</msg>
   <msg key="Invalid_email_format">Formato de correo incorrecto</msg>
+  <msg key="Invalid_enumeration">Enumeración inválida</msg>
+  <msg key="Invalid_enumeration_duplicate_elements">Enumeración inválida. "%value%" no contiene valores únicos.</msg>
   <msg key="Invalid_filename">Nombre de fichero incorrecto</msg>
   <msg key="Invalid_integer">Entero incorrecto</msg>
   <msg key="Invalid_keyword">Palabra clave incorrecta</msg>
   <msg key="Invalid_natural_number">Número natural incorrecto</msg>
+  <msg key="Invalid_number">Número no válido</msg>
   <msg key="Invalid_url">URL incorrecta</msg>
+  <msg key="Invalid_url_element">URL incorrecta: "%value%". Utilice solamente minúsculas, números o guiones. Por ejemplo: "foo-bar".</msg>
   <msg key="Link_Title">Título del enlace</msg>
   <msg key="lt_Checkuncheck_all_rows">Seleccionar/deseleccionar todas las filas</msg>
   <msg key="lt_Checkuncheck_this_row">Seleccionar/deseleccionar esta fila, y elegir una acción a realizar sobre ella</msg>
@@ -83,6 +88,7 @@
   <msg key="lt_No_value_supplied_for_-field_pretty-">Falta especificar el valor de %field_pretty%</msg>
   <msg key="lt_The_-field_pretty-_must_be_non_negative">%field_pretty% debe ser un entero no negativo</msg>
   <msg key="lt_When_specifying_a_non">Al especificar un page_size distinto de 0, debe especificar también el page_query o page_query_name</msg>
+  <msg key="Markdown_Text">Texto en formato Markdown</msg>
   <msg key="Meridian">Meridiano</msg>
   <msg key="Minutes">Minutos</msg>
   <msg key="minutes">minutos</msg>

@@ -15,7 +15,7 @@
 ad_page_contract {
 
     @author Arjun Sanyal (arjun@openforce.net)
-    @cvs-id $Id: redirect.tcl,v 1.3.24.1 2015/09/10 08:30:13 gustafn Exp $
+    @cvs-id $Id: redirect.tcl,v 1.4 2017/08/07 23:48:04 gustafn Exp $
 
 } -query {
     {referer:notnull}

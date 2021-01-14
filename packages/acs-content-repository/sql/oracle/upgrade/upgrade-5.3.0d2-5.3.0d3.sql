@@ -178,9 +178,9 @@ procedure register_relation_type (
   --                          is targeted.
   --    @param relation_tag  A simple token used to identify a set of
   --                          relations.
-  --    @param min_n          The minimun number of relationships of this type
+  --    @param min_n          The minimum number of relationships of this type
   --                          which an item must have to go live.
-  --    @param max_n          The minimun number of relationships of this type
+  --    @param max_n          The minimum number of relationships of this type
   --                          which an item must have to go live.
   --    @see {content_type.unregister_relation_type}
   --*/
@@ -220,10 +220,10 @@ procedure register_child_type (
   --    @param child_type    The type of the child item.
   --    @param relation_tag  A simple token used to identify a set of
   --                          relations.
-  --    @param min_n         The minimun number of parent-child
+  --    @param min_n         The minimum number of parent-child
   --                          relationships of this type
   --                          which an item must have to go live.
-  --    @param max_n         The minimun number of relationships of this type
+  --    @param max_n         The minimum number of relationships of this type
   --                          which an item must have to go live.
   --    @see {content_type.register_relation_type}, {content_type.register_child_type}
   --*/
@@ -435,10 +435,10 @@ begin
   select 
     decode(count(*),0,0,1) into table_exists 
   from 
-    user_tables u, acs_object_types objet
+    user_tables u, acs_object_types object
   where 
-    objet.object_type = drop_type.content_type and
-    u.table_name = upper(objet.table_name);
+    object.object_type = drop_type.content_type and
+    u.table_name = upper(object.table_name);
 
   if table_exists = 1 and drop_table_p = 't' then
     select 

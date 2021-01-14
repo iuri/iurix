@@ -50,7 +50,7 @@
             <form name="\@list_properties.name@_resize" method="GET" action="">
               \@list_properties.page_size_export_chunk;noquote@
 	      <tcl>template::add_event_listener -event change -id "$list_properties(name)_resize-control" -script [subst {
-                  acs_ListBulkActionClick('$list_properties(name)_resize', '$list_properties(url)');
+                  acs_ListBulkActionClick("$list_properties(name)_resize", "$list_properties(url)");
 	      }]</tcl>
               <select id='\@list_properties.name@_resize-control' name="page_size">
                 <multiple name="page_sizes">
@@ -79,7 +79,7 @@
 </if>
 
 
-<if @actions:rowcount@ gt 0>
+<if @actions:rowcount;literal@ gt 0>
 <!-- list-button-bar-top div -->
   <div class="list-button-bar-top">
     <ul class="compact">
@@ -239,7 +239,7 @@
 
 
 <noparse><if \@@list_properties.multirow@:rowcount@ gt 0></noparse>
-  <if @bulk_actions:rowcount@ gt 0>
+  <if @bulk_actions:rowcount;literal@ gt 0>
     <!-- list-button-bar-bottom div -->
     <div class="list-button-bar-bottom">
         <multiple name="bulk_actions">

@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Hiro Iwashima (iwashima@mit.edu)
 
--- $Id: content-image.sql,v 1.18.4.2 2017/02/12 00:15:44 gustafn Exp $
+-- $Id: content-image.sql,v 1.20 2018/02/21 14:11:08 antoniop Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -15,7 +15,7 @@
 create table images (
    image_id       integer
                   constraint images_image_id_fk
-                  references cr_revisions
+                  references cr_revisions on delete cascade
                   constraint images_image_id_pk
                   primary key,
    width          integer,

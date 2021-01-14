@@ -1,10 +1,11 @@
-# $Id: request-info.tcl,v 1.21.2.2 2016/05/22 19:22:11 gustafn Exp $
-# File:        request-info.tcl
-# Author:      Jon Salz <jsalz@mit.edu>
-# Description: Displays information about a page request.
-# Inputs:      request
+# /packages/acs-developer-support/www/request-info.tcl
 
 ad_page_contract {
+    Displays information about a page request.
+
+    @author Jon Salz (jsalz@mit.edu)
+
+    @cvs-id $Id: request-info.tcl,v 1.25 2018/06/29 15:41:51 hectorr Exp $
 } {
     request
     {rp_show_debug_p:boolean 0}
@@ -141,8 +142,8 @@ if { [info exists property(rp)] } {
 		}
 	    }
 	    registered_proc {
-		set proc [lindex $info 2]
-		set args [lindex $info 3]
+        set proc [lindex $info 2]
+        set args [lindex $info 3]
 		append body "Called registered procedure: <b>$proc</b> [ns_quotehtml $args] for ($method $path) - $duration\n"
 		if {$action eq "error"} {
 		    append body "<ul><li>returned error: <pre>[ns_quotehtml $error]</pre></ul>\n"
@@ -225,7 +226,7 @@ if { ![info exists property(db)] } {
 	} else {
 	    set statement_pool ""
 	}
-        
+
 	if { $command eq "gethandle" } {
 	    # Remember which handle was acquired from which pool.
 	    set statement_pool $sql
@@ -239,7 +240,7 @@ if { ![info exists property(db)] } {
 	    } else {
 		set value "$statement_name: "
 	    }
-            
+
             # Remove extra whitespace before query
             set min_whitespace -1
             foreach line [split $sql \n] {
@@ -252,7 +253,7 @@ if { ![info exists property(db)] } {
                     }
                 }
             }
-            
+
             if { $min_whitespace > 0 } {
                 set new_sql {}
                 foreach line [split $sql \n] {
@@ -303,7 +304,7 @@ if { ![info exists property(db)] } {
                 hide_p t
             }
         }
-            
+
 }
 
 # Profiling information
@@ -350,7 +351,7 @@ if { [info exists property(prof)] } {
                 append file_links " x"
                 set size -
             }
-        } else { 
+        } else {
             set size {}
         }
 

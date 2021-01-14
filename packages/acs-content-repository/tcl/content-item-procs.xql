@@ -4,8 +4,7 @@
 <!--  -->
 <!-- @author Dave Bauer (dave@thedesignexperience.org) -->
 <!-- @creation-date 2005-01-09 -->
-<!-- @arch-tag: 47baf88a-8fad-43bc-8b02-059315c80e00 -->
-<!-- @cvs-id $Id: content-item-procs.xql,v 1.4.14.1 2016/01/02 14:31:29 gustafn Exp $ -->
+<!-- @cvs-id $Id: content-item-procs.xql,v 1.6 2018/08/15 17:00:24 gustafn Exp $ -->
 
 <queryset>
   <fullquery name="content::item::get.get_item">

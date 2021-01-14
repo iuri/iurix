@@ -1,5 +1,5 @@
 ad_page_contract {
-    @cvs-id $Id: fibo-start.tcl,v 1.2.28.2 2016/05/14 09:58:04 gustafn Exp $
+    @cvs-id $Id: fibo-start.tcl,v 1.3 2017/08/07 23:48:02 gustafn Exp $
 } -properties {
     m:onevalue
 } -query {

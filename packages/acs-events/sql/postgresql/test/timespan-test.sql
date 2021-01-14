@@ -6,7 +6,7 @@
 -- @author jowell@jsabino.com
 -- @creation-date 2001-06-26
 --
--- $Id: timespan-test.sql,v 1.3.4.1 2017/04/21 15:50:24 gustafn Exp $
+-- $Id: timespan-test.sql,v 1.7 2018/10/20 11:55:29 hectorr Exp $
 
 -- Note: These tests use the semi-ported utPLSQL regression package
 \i utest-create.sql
@@ -27,7 +27,7 @@ BEGIN
 				    'ut_timespans'
 				    );
 
-	-- Store keys that are in the table prior to the regresion test
+	-- Store keys that are in the table prior to the regression test
 	create table ut_interval_ids as select interval_id from time_intervals;
 	create table ut_timespan_ids as select timespan_id from timespans;
 
@@ -174,7 +174,7 @@ BEGIN
 	-- JS: Aha, a demonstration of the effect of transactions to foreign keys
 	-- JS: It seems that while timespan__delete would remove the row from
 	-- JS: time_intervals, the cascade delete removal of the corresponding row
-	-- JS: in timespans is not yet done until the transation is complete.  Thus,
+	-- JS: in timespans is not yet done until the transaction is complete.  Thus,
 	-- JS: deleting the row in the shadow table within this function/transaction 
 	-- JS: will cause the comparison of the timespans table and the shadow table 
 	-- JS: to fail (since delete will immediately remove the row from the shadow 
@@ -221,7 +221,7 @@ BEGIN
 					 join_interval__interval_id,
 					 join_interval__copy_p);
 
-	-- Dont forget to put the newly created timepsan into the shadow table
+	-- Don't forget to put the newly created timepsan into the shadow table
 	insert into ut_timespans (timespan_id,interval_id)
 	values (join_interval__timespan_id,v_interval_id_cp);
 

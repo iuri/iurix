@@ -1,6 +1,6 @@
 ad_page_contract {
     Will redirect you to dev.scriptics.com if documentation can be found
-    @cvs-id $Id: tcl-doc-search.tcl,v 1.8.2.4 2017/02/06 12:44:41 gustafn Exp $
+    @cvs-id $Id: tcl-doc-search.tcl,v 1.9 2017/08/07 23:47:46 gustafn Exp $
 } {
     tcl_proc:token,notnull
 } -properties {

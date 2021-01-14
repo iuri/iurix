@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-05-28
-    @cvs-id $Id: application-add.tcl,v 1.12.2.4 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: application-add.tcl,v 1.14.2.3 2019/05/16 08:15:46 gustafn Exp $
 } {
     node_id:naturalnum,optional
     {return_url:localurl "."}
@@ -20,6 +20,10 @@ if { [ad_form_new_p -key node_id] } {
     set focus application.instance_name
 }
 
+
+set main_subsite_id [site_node::get_node_id -url "/"]
+set main_subsite_p [expr {[info exists node_id] && $node_id == $main_subsite_id}]
+
 set multiple_add_url [export_vars -base multiple-add { return_url }]
 
 ad_form -name application -cancel_url . -form {
@@ -29,7 +33,7 @@ ad_form -name application -cancel_url . -form {
         {label "[_ acs-subsite.Application]"}
         {options $packages}
         {help_text "The type of application you want to add.  If the application is not in the list, you may need to <a href=\"/acs-admin/install/\">install</a> it on the server."}
-        {mode {[ad_decode [ad_form_new_p -key node_id] 1 "" "display"]}}
+        {mode {[expr {[ad_form_new_p -key node_id] ? "" : "display"}]}}
     }
     {instance_name:text,optional
         {label "[_ acs-subsite.Application_name]"}
@@ -39,7 +43,7 @@ ad_form -name application -cancel_url . -form {
     {folder:text,optional
         {label "[_ acs-subsite.URL_folder_name]"}
         {help_text "The partial URL of the new application.  This should be a short string, all lowercase, with hyphens instead of spaces. If blank, the package name is used (e.g. 'forum')."}
-        {html {size 30}}
+        {html "size 30 [expr {$main_subsite_p ? {disabled {}} : {}}]"}
     }
 } -new_request {
     # Sets return_url
@@ -80,17 +84,22 @@ ad_form -name application -cancel_url . -form {
         form set_error application folder "This folder name is already used"
         break
     }
+    
 } -new_data {
-    if { [catch {
+    ad_try {
         site_node::instantiate_and_mount \
             -parent_node_id [ad_conn node_id] \
             -node_name $folder \
             -package_name $instance_name \
             -package_key $package_key
-    } errmsg] } {
-        ns_log Error "Error creating application: $errmsg\n$::errorInfo"
-        ad_return_error "Problem Creating Application" "We had a problem creating the application."
+    } on error {errorMsg} {
+        ad_log warning "Problem creating application: $errorMsg"
+        ad_return_error \
+            "Problem Creating Application" \
+            "We had a problem creating the application."
+        ad_script_abort
     }
+    
 } -edit_data {
     # this is where we would rename ...
     
@@ -99,9 +108,13 @@ ad_form -name application -cancel_url . -form {
 
     db_transaction {
         apm_package_rename -package_id $node(package_id) -instance_name $instance_name
-        
+        # Renaming the main subsite URL would make the system unusable
+        if {$main_subsite_p} {
+            set folder ""
+        }
         site_node::rename -node_id $node_id -name $folder
     }
+
 } -after_submit {
     ad_returnredirect $return_url
     ad_script_abort

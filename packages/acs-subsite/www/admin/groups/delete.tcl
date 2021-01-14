@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Fri Dec  8 14:32:28 2000
-    @cvs-id $Id: delete.tcl,v 1.5.2.2 2015/10/28 09:38:35 gustafn Exp $
+    @cvs-id $Id: delete.tcl,v 1.9 2018/06/20 08:44:15 antoniop Exp $
 
 } {
     group_id:integer,notnull
@@ -17,19 +17,25 @@ ad_page_contract {
     group_id:onevalue
 } -validate {
     groups_exists_p -requires {group_id:notnull} {
-	if { ![group::permission_p -privilege delete $group_id] } {
-	    ad_complain "The group either does not exist or you do not have permission to delete it"
-	}
+        if { ![permission::permission_p -object_id $group_id -privilege "delete"] } {
+            ad_complain "The group either does not exist or you do not have permission to delete it"
+        }
     }
 }
 
 set context [list [list "" "Groups"] [list [export_vars -base one {group_id}] "One Group"] "Nuke group"]
-set group_name [db_string object_name {}]
+set group_name [group::get_element -group_id $group_id -element group_name]
 set export_form_vars [export_vars -form {group_id}]
 
-db_1row select_counts {} -column_array number
-
-ad_return_template
+db_1row select_counts {
+    select (select count(*) from group_element_map where group_id = :group_id) as elements,
+           (select count(*) from rel_segments where group_id = :group_id) as segments,
+           (select count(*)
+              from rel_constraints cons, rel_segments segs
+             where segs.segment_id in (cons.rel_segment,cons.required_rel_segment)
+               and segs.group_id = :group_id) as constraints
+      from dual
+} -column_array number
 
 # Local variables:
 #    mode: tcl

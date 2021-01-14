@@ -1,6 +1,6 @@
 template::filter add content::init
 
-# a patch to the cr for handling the deleting revision's files
+# A patch to the CR for handling the deleting revision's files
 # when the revision has been deleted from the database
 # schedules the sweep
 #
@@ -8,14 +8,14 @@ template::filter add content::init
 # based on original photo-album package code by Tom Baginski
 
 # Daveb: unless someone has a good reason this should go away for OpenACS 5.1
-# we should promote a Tcl api to the cr instead of each package accessing
+# we should promote a Tcl API to the CR instead of each package accessing
 # the pl/sql procs directly. 
 
 ad_schedule_proc -thread t -schedule_proc ns_schedule_daily [list 22 0] cr_delete_scheduled_files
 
 ad_proc -public acs_cr_scheduled_release_exec {} {
 
-    This was handled by oracle, but since other dbs, such as postgresql don't 
+    This was handled by oracle, but since other dbs, such as PostgreSQL don't 
     support job submission, the job scheduling has been moved to aolserver.
     (OpenACS - DanW)
 

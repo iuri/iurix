@@ -7,7 +7,7 @@
 --
 -- @creation-date 2001-06-26
 --
--- $Id: utest-create.sql,v 1.3 2013/03/30 13:00:30 gustafn Exp $
+-- $Id: utest-create.sql,v 1.4 2018/01/31 20:43:24 gustafn Exp $
 
 -- /* 
 -- GNU General Public License for utPLSQL
@@ -209,7 +209,7 @@ CREATE OR REPLACE FUNCTION ut_assert__eq(
    eq__check_this boolean,
    eq__against_this boolean,
    eq__null_ok boolean,  -- default false
-   eq__raise_exc boolean -- defualt false
+   eq__raise_exc boolean -- default false
 
 ) RETURNS integer AS $$
 DECLARE

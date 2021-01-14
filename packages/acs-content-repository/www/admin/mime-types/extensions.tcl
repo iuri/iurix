@@ -2,7 +2,7 @@ ad_page_contract {
    
     @author Emmanuelle Raffenne (eraffenne@gmail.com)
     @creation-date 22-feb-2010
-    @cvs-id $Id: extensions.tcl,v 1.1.6.1 2015/09/10 08:21:19 gustafn Exp $
+    @cvs-id $Id: extensions.tcl,v 1.2 2017/08/07 23:47:47 gustafn Exp $
 
 } {    
     mime_type:notnull

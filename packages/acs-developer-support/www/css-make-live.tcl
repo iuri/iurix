@@ -6,7 +6,7 @@ ad_page_contract {
     
     @author Malte Sussdorff (malte.sussdorff@cognovis.de)
     @creation-date 2007-09-30
-    @cvs-id $Id: css-make-live.tcl,v 1.3.2.2 2017/03/28 06:46:51 gustafn Exp $
+    @cvs-id $Id: css-make-live.tcl,v 1.5 2018/01/05 22:59:57 gustafn Exp $
 } {
     {revision_id:naturalnum,notnull}
     {file_location }
@@ -29,6 +29,7 @@ set source [content::revision::get_cr_file_path -revision_id $revision_id]
 file copy -force -- $source $target
 
 ad_returnredirect $return_url_2
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

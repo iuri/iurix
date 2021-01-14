@@ -6,7 +6,7 @@ ad_library {
     @author Dave Bauer (dave@thedesignexperience.org)
 
     @creation-date Fri Oct 26 11:43:26 2001
-    @cvs-id $Id: rss-utilities-procs.tcl,v 1.5.2.1 2015/09/12 19:00:44 gustafn Exp $
+    @cvs-id $Id: rss-utilities-procs.tcl,v 1.6 2017/08/07 23:48:29 gustafn Exp $
 }
 
 

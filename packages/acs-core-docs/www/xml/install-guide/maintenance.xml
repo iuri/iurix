@@ -377,7 +377,7 @@ set address                127.0.0.1 </programlisting>
     <sect1 id="maintenance-deploy">
   <title>Staged Deployment for Production Networks</title>
     <authorblurb>
-  <para><phrase role="cvstag">($Id: maintenance.xml,v 1.30.6.3 2017/06/17 08:29:28 gustafn Exp $)</phrase></para>      
+  <para><phrase role="cvstag">($Id: maintenance.xml,v 1.35 2018/11/03 19:57:22 gustafn Exp $)</phrase></para>      
 <para>By <ulink url="mailto:joel@aufrecht.org">Joel Aufrecht</ulink></para>
     </authorblurb>
   <para>This section describes two minimal-risk methods for deploying changes on a production network.  The important characteristics of a safe change deployment include:  (THIS SECTION IN DEVELOPMENT)</para>
@@ -404,7 +404,7 @@ set address                127.0.0.1 </programlisting>
       installation, and follow the instructions for committing your
       files to CVS. We&#39;ll assume in this example that you set up the
       production server (service0). To set up the developmental instance,
-      you then follow the intall guide again, this time creating a new
+      you then follow the install guide again, this time creating a new
       user (service0-dev) that you&#39;ll use for the new installation. To get
       the files for service0-dev, you check them out from cvs (check out
       service0). </para>
@@ -578,7 +578,7 @@ chmod 700 /var/lib/aolserver/<replaceable>$OPENACS_SERVICE_NAME</replaceable>/et
         </para>
 
         <para>
-          Mac OS X users: use perl /System/Library/OpenSSL/misc/CA.pl -newcert instead of /usr/share/ssl/CA
+          macOS users: use perl /System/Library/OpenSSL/misc/CA.pl -newcert instead of /usr/share/ssl/CA
         </para>
 
             <screen>[$OPENACS_SERVICE_NAME $OPENACS_SERVICE_NAME]$ <userinput>cd /var/lib/aolserver/$OPENACS_SERVICE_NAME/etc/certs</userinput>
@@ -641,7 +641,7 @@ mkdir www/log
 cp -r /usr/share/analog-5.32/images www/log/</action></screen>
         <para>Edit
 <computeroutput>/var/lib/aolserver/$OPENACS_SERVICE_NAME/etc/analog.cfg</computeroutput> and change the variable in <computeroutput>HOSTNAME "[my
-organisation]"</computeroutput> to reflect your website title.  If you
+organization]"</computeroutput> to reflect your website title.  If you
 don&#39;t want the traffic log to be publicly visible, change
 <computeroutput>OUTFILE /var/lib/aolserver/$OPENACS_SERVICE_NAME/www/log/traffic.html</computeroutput> to use a private
 directory. You&#39;ll also need to edit all instances of service0 to your $OPENACS_SERVICE_NAME.</para>
@@ -829,7 +829,7 @@ openacs.org=&gt;</programlisting>
       url="http://asktom.oracle.com/~tkyte/article1/autotrace.html">http://asktom.oracle.com/~tkyte/article1/autotrace.html</ulink>.
     </para>
     <sect3>
-      <title>Make sure, that the Oracle CBO works with adequate statistics</title>
+      <title>Make sure that the Oracle CBO works with adequate statistics</title>
   
       <para>
     The Oracle Cost Based optimizer is a piece of software that tries to find

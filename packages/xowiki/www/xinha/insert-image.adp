@@ -63,7 +63,7 @@
 	  var f_url = document.getElementById("f_url");
 	  var url = f_url.value;
 	  if (!url) {
-	    alert("You have to enter an URL first");
+	    alert("You have to enter a URL first");
 	    f_url.focus();
 	    return false;
 	  }
@@ -73,7 +73,7 @@
 	
 	function openImageSelector() {
 	
-		// open the image selctor popup
+		// open the image selector popup
 		// make sure it is at least this size
 		var w=640;
 		var h=480;

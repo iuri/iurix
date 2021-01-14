@@ -11,7 +11,7 @@ ad_page_contract {
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: file-add-2.tcl,v 1.8.2.2 2016/05/21 10:15:38 gustafn Exp $
+    @cvs-id $Id: file-add-2.tcl,v 1.10.2.2 2019/07/01 14:47:07 hectorr Exp $
 } {
     attach_id:naturalnum,notnull
     parent_id:naturalnum,notnull
@@ -23,14 +23,14 @@ ad_page_contract {
     allow_file_attachments {
         set allow_files_p [parameter::get -parameter AllowFileAttachmentsP -default {t}]
         if { $allow_files_p != "t" } {
-            ad_complain "[_ general-comments.lt_Attaching_files_to_co]"            
+            ad_complain "[_ general-comments.lt_Attaching_files_to_co]"
         }
     }
     check_file_size {
         set tmp_size [file size ${upload_file.tmpfile}]
         set max_file_size [parameter::get -parameter MaxFileSize -default {0}]
         if { $tmp_size > $max_file_size && $max_file_size > 0 } {
-            ad_complain "[_ general-comments.lt_Your_file_is_too_larg]  [_ general-comments.The_publisher_of] [ad_system_name] [_ general-comments.lt_has_chosen_to_limit_a] [util_commify_number $max_file_size] [_ general-comments.bytes].\n"
+            ad_complain "[_ general-comments.lt_Your_file_is_too_larg]  [_ general-comments.The_publisher_of] [ad_system_name] [_ general-comments.lt_has_chosen_to_limit_a] [lc_content_size_pretty -size $max_file_size].\n"
         }
         if { $tmp_size == 0 } {
             ad_complain "[_ general-comments.lt_Your_file_is_zero-len]\n"
@@ -66,11 +66,10 @@ if { $file_extension eq "jpeg" || $file_extension eq "jpg" } {
     catch { set what_aolserver_told_us [ns_gifsize $tmp_filename] }
 }
 
-# the AOLserver jpegsize command has some bugs where the height comes 
-# through as 1 or 2 
+# the AOLserver jpegsize command has some bugs where the height comes
+# through as 1 or 2
 if { $what_aolserver_told_us ne "" && [lindex $what_aolserver_told_us 0] > 10 && [lindex $what_aolserver_told_us 1] > 10 } {
-    set original_width [lindex $what_aolserver_told_us 0]
-    set original_height [lindex $what_aolserver_told_us 1]
+    lassign $what_aolserver_told_us original_width original_height
 } else {
     set original_width ""
     set original_height ""
@@ -116,12 +115,12 @@ db_transaction {
             end;
         }
     }
-  
+
     db_1row get_revision {
         select content_item.get_latest_revision(:attach_id) as revision_id
         from dual
     }
-    
+
 #    db_dml set_content {
 #    update cr_revisions
 #        set content = empty_blob()

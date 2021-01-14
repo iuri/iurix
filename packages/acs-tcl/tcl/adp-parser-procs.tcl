@@ -25,14 +25,14 @@ ad_library {
 
     @author Jon Salz (jsalz@mit.edu)
     @creation-date 26 June 2000
-    @cvs-id $Id: adp-parser-procs.tcl,v 1.3.2.2 2015/09/10 08:21:55 gustafn Exp $
+    @cvs-id $Id: adp-parser-procs.tcl,v 1.5.2.1 2020/07/13 12:02:33 gustafn Exp $
 
 }
 
 # NSV: doc_adptags($tag) is a list representation of an array containing:
 #
 #   - balanced_p: do we expect a close tag for $tag?
-#   - literal_p: was literal provided to doc_register_adp_tag?
+#   - literal_p: was literal provided to doc_register_adptag?
 #   - handler: the name of the handler proc. See document-procs.tcl for some good
 #       examples.
 
@@ -127,8 +127,8 @@ ad_proc -public doc_adp_execute_file {
 	set tcl_code [doc_adp_compile $adp_code]
     } else {
 	set reparse_p 0
-	set mtime [file mtime $file_name]
-	set size [file size $file_name]
+	set mtime [ad_file mtime $file_name]
+	set size [ad_file size $file_name]
 	
 	# See whether the file has been cached, i.e., the __doc_adp_cache_info,$file_name
 	# proc has been declared. If it has, the proc will return a two-element list

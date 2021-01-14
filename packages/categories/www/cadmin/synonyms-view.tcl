@@ -3,11 +3,11 @@ ad_page_contract {
     Displays list of synonyms of a category.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: synonyms-view.tcl,v 1.8.2.2 2019/12/20 21:18:10 gustafn Exp $
 } {
     category_id:naturalnum,notnull
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     orderby:token,optional
     ctx_id:naturalnum,optional
@@ -25,8 +25,8 @@ set category_name [category::get_name $category_id $locale]
 set page_title "Synonyms for category \"$tree_name :: $category_name\""
 
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar "Synonyms of $category_name"
 
 

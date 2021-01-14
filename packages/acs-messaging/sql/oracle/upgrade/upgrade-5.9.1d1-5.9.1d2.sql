@@ -3,7 +3,7 @@
 --
 -- @author John Prevost <jmp@arsdigita.com>
 -- @creation-date 2000-08-27
--- @cvs-id $Id: upgrade-5.9.1d1-5.9.1d2.sql,v 1.1.2.1 2016/09/20 15:35:55 antoniop Exp $
+-- @cvs-id $Id: upgrade-5.9.1d1-5.9.1d2.sql,v 1.2 2017/08/07 23:47:57 gustafn Exp $
 --
 
 set feedback off

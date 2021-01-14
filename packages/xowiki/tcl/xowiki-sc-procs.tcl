@@ -3,24 +3,25 @@
 
   @creation-date 2006-01-10
   @author Gustaf Neumann
-  @cvs-id $Id: xowiki-sc-procs.tcl,v 1.39.2.3 2017/05/08 17:05:04 gustafn Exp $
+  @cvs-id $Id: xowiki-sc-procs.tcl,v 1.50.2.1 2019/02/27 11:18:04 antoniop Exp $
 }
 
 namespace eval ::xowiki {}
 
-ad_proc -private ::xowiki::datasource { revision_id } {
+ad_proc -private ::xowiki::datasource { -nocleanup:boolean revision_id } {
   @param revision_id
 
   returns a datasource for the search package
 } {
   #ns_log notice "--sc ::xowiki::datasource called with revision_id = $revision_id"
-
   set page [::xowiki::Package instantiate_page_from_id -revision_id $revision_id -user_id 0]
 
   #ns_log notice "--sc ::xowiki::datasource $page [$page set publish_status]"
 
   if {[$page set publish_status] in {production expired}} {
-    # no data source for for pages under construction
+    #
+    # No data source result for pages under construction
+    #
     #ns_log notice "--sc page under construction, no datasource"
     return [list object_id $revision_id title "" \
                 content "" keywords "" \
@@ -39,9 +40,33 @@ ad_proc -private ::xowiki::datasource { revision_id } {
   switch [dict get $d mime] {
     text/html {
       set content [dict get $d html]
-      set text [ad_html_text_convert -from text/html -to text/plain -- [dict get $d html]]
-      #set text [ad_text_to_html [dict get $d html]]; #this could be used for entity encoded html text in rss entries
-      
+      if {![string is space $content]} {
+        try {
+          dom parse -simple -html <html>$content doc
+          $doc documentElement root
+          foreach n [$root selectNodes {//script|//noscript|//style//nav|//button}] {
+            $n delete
+          }
+          set content [$root asHTML]
+        } on error {errorMsg} {
+          ns_log notice "xowiki::datasource: could not parse result of search_render for page $page: $errorMsg"
+        }
+      }
+      #
+      # The function ad_html_text_convert can take forever on largish
+      # files, when e.g. someone loads a huge content into xowiki.
+      # So, when available, and performance is an issue, one could
+      # consider to use "ns_striphtml", but this produces no nice
+      # rendering, so text base syndication will suffer. For now,
+      # "ns_striphtml" is deactivated.
+      #
+      if {0 && [info commands ns_striphtml] ne ""} {
+        set text [ns_striphtml [dict get $d html]]
+      } else {
+        set text [ad_html_text_convert -from text/html -to text/plain -- [dict get $d html]]
+        #set text [ad_text_to_html -- [dict get $d html]]; #this could be used for entity encoded html text in rss entries
+      }
+
       # If the html contains links (which are rendered by ad_html_text as [1], [2], ...)
       # then we have to use CDATA in the description
       #
@@ -73,7 +98,7 @@ ad_proc -private ::xowiki::datasource { revision_id } {
   if {[::xo::db::require exists_table txt]} {
     ::xo::dc dml delete_old_revisions {
       delete from txt where object_id in \
-          (select revision_id from cr_revisions 
+          (select revision_id from cr_revisions
            where item_id = :item_id and revision_id != :revision_id)
     }
   }
@@ -93,14 +118,14 @@ ad_proc -private ::xowiki::datasource { revision_id } {
                                    guid "$item_id" \
                                    pubDate $pubDate] \
                  ]
-  if {[catch {::xo::at_cleanup} errorMsg]} {
+  if {!$nocleanup_p && [catch {::xo::at_cleanup} errorMsg]} {
     ns_log notice "cleanup in ::xowiki::datasource returned $errorMsg"
   }
   return $result
 }
 
 ad_proc -private ::xowiki::url { revision_id} {
-  returns a url for a message to the search package
+  returns a URL for a message to the search package
 } {
   return [::xowiki::Package get_url_from_id -revision_id $revision_id]
 }
@@ -167,7 +192,7 @@ namespace eval ::xowiki::sc {
   }
 }
 
-::xo::library source_dependent 
+::xo::library source_dependent
 
 #
 # Local variables:

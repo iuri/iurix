@@ -11,7 +11,8 @@ Acceptance test</font>
 <font>The first thing we have to test is developer defined group
 types working in conjunction with the user defined ones.</font>
 <p><font>Create the following object type in SQL*Plus.</font></p>
-<pre><font>begin
+<pre><font>
+begin
  acs_object_type.create_type (
    supertype =&gt; 'group',
    object_type =&gt; 'developer_defined_test_type',
@@ -170,8 +171,8 @@ attribute "salary" (type integer)</font></li>
 <ol>
 <li><font>Go back to the admin page (/admin)</font></li><li><font>Click on the Groups -&gt; GuideStar.org. Add ArsDigita as
 a component</font></li><li><font>Remove the composition rel type from this
-group</font></li><li><font>Readd the composition rel type. Make sure arsdigita
-doesn&#39;t show up</font></li><li><font>remove the composition rel type</font></li><li><font>Add a permissible rel type:
+group</font></li><li><font>Re-add the composition rel type. Make sure arsdigita
+doesn&#39;t show up</font></li><li><font>Remove the composition rel type</font></li><li><font>Add a permissible rel type:
 project_lead_relation</font></li><li><font>Click yes to create a rel segment named "GuideStar
 Project Leads"</font></li><li><font>Go back to /admin/groups</font></li><li><font>Click on "relationship to site"</font></li><li><font>Remove yourself from the group.</font></li><li><font>Add yourself again as a member (using the membership
 relation). You will have to select an existing party from the
@@ -217,7 +218,8 @@ role</font></li><li><font>Click on "Employer" then on Employment
 Relation</font></li><li><font>Delete the employment relation type.</font></li><li><font>Delete the employee, employer, and project_leader
 roles</font></li><li><font>Delete any groups you created for the developer defined
 type</font></li><li>
-<font>Drop the developer defined type (in SQL*Plus):</font><pre><font>exec acs_object_type.drop_type('developer_defined_test_type'); 
+<font>Drop the developer defined type (in SQL*Plus):</font><pre><font>
+exec acs_object_type.drop_type('developer_defined_test_type'); 
 drop table developer_defined_test_types;
 drop package developer_defined_test_type;
 </font></pre>
@@ -227,6 +229,6 @@ drop package developer_defined_test_type;
 <address><font><a href="mailto:mbryzek\@arsdigita.com">Michael
 Bryzek</a></font></address>
 <font>
-<br><font size="-1">$&zwnj;Id: group-admin-pages-acceptance-test.html,v
-1.3.24.1 2016/07/18 11:40:32 gustafn Exp $</font>
+<br><font size="-1">$&zwnj;Id: group-admin-pages-acceptance-test.html,v 1.4
+2017/08/07 23:47:59 gustafn Exp $</font>
 </font>

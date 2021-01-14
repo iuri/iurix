@@ -6,7 +6,7 @@
 <h2>Why</h2>
 <p>To facilitate greater code reuse, application integration, and
 package extensibility within the OpenACS.</p>
-<p>To do this acs-service-contract defines an api for the creation
+<p>To do this acs-service-contract defines an API for the creation
 of interfaces and discovery of interface implementations.</p>
 <h2>Background</h2>
 <p>Most component systems are based on the use of interfaces.
@@ -29,7 +29,7 @@ only available through tcl.</p>
 <p>Interface Discovery is available programmatically as well as via
 documentation through ad_proc.</p>
 <p>The Service Contract interface specification was inspired by
-WDSL, the interface specfication for web services.</p>
+WDSL, the interface specification for web services.</p>
 <h2>Hitchiker&#39;s Guide to Service Contract Definitions</h2>
 <ul>
 <li>contract - analogous to interface, contracts serve as logical
@@ -68,26 +68,24 @@ already installed on the system can be bound to it.</p>
 <h3>Creating Message Types</h3>
 <ul><li>(sql):: acs_sc_msg_type__new (name, spec):
 <p>defines a type based on spec. Spec should be a string (possibly
-emtpy) that defines the names and types that compose this type.
+empty) that defines the names and types that compose this type.
 example <code>ObjectDisplay.Name.InputType</code> as name
 <code>object_id:integer</code> as spec.</p>
 </li></ul>
 <h3>Creating Interfaces</h3>
 <ul><li>(sql):
 <pre>
-                 acs_sc_contract__new (contract_name, contract_desc):
-</pre>
+acs_sc_contract__new (contract_name, contract_desc):</pre>
 </li></ul>
 <p>creates a new contract to serve as a logical container for
 operations. contract_desc is a text description of the
 contract.</p>
 <ul><li>(sql):
 <pre>
-                 acs_sc_operation__new (contract_name, operation_name,
+acs_sc_operation__new (contract_name, operation_name,
                                        operation_desc, operation_iscachable_p,
                                        operation_inputtype, operation_outputtype
-                                      ):
-</pre>
+                                      ):</pre>
 </li></ul>
 <p>creates a new operation as part of a contract.</p>
 <h3>Creating Implementations</h3>
@@ -96,13 +94,13 @@ implementations. ?? why operation</li></ul>
 <h3>Discovery</h3>
 <ul><li>(tcl) acs_sc_binding_exists_p (contract, impl): returns boolean
 whether a binding exists between a given contract name and
-implmentation.</li></ul>
+implementation.</li></ul>
 <h3>Dispatching</h3>
 <ul><li>(tcl) acs_sc::invoke (contract, operation, [arguments, impl]):
 calls an operation</li></ul>
 <h2>Examples</h2>
 <p>Included in the service contract package are examples for oracle
-and postgresql of a trivial contract.</p>
+and PostgreSQL of a trivial contract.</p>
 <p>Also the search contract functions as a non-trivial core
 contract used by openacs4.</p>
 <h2>Further Reading</h2>

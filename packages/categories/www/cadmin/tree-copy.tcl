@@ -3,10 +3,10 @@ ad_page_contract {
     Let the user select a category tree which will be copied into the current category tree
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-copy.tcl,v 1.15.2.3 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -25,13 +25,18 @@ set target_tree_id $tree_id
 set page_title [_ categories.Tree_copy_title]
 
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar [_ categories.Tree_copy]
 
 template::multirow create trees tree_id tree_name site_wide_p view_url copy_url
 
-db_foreach trees_select "" {
+db_foreach trees_select {
+    select tree_id as source_tree_id, site_wide_p,
+           acs_permission.permission_p(tree_id, :user_id, 'category_tree_read') as has_read_p
+    from category_trees
+    where tree_id <> :tree_id
+} {
     if {$site_wide_p == "t" || $has_read_p == "t"} {
 	set source_tree_name [category_tree::get_name $source_tree_id $locale]
 
@@ -53,7 +58,7 @@ template::list::create \
 	}
 	site_wide_p {
 	    display_template {
-		<if @trees.site_wide_p@ eq t> (#categories.SiteWide_tree#) </if>
+		<if @trees.site_wide_p;literal@ true> (#categories.SiteWide_tree#) </if>
 	    }
 	}
 	copy {

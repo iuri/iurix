@@ -4,7 +4,7 @@ ad_page_contract {
     @author Lars Pind (lars@pinds.com)
     @author Jeff Davis <davis@xarg.net>
     @creation-date 2003-10-28
-    @cvs-id $Id: set.tcl,v 1.3.2.4 2016/05/20 19:55:32 gustafn Exp $
+    @cvs-id $Id: set.tcl,v 1.6 2018/06/22 10:49:52 gustafn Exp $
 } {
     field 
     enabled_p:boolean
@@ -37,10 +37,12 @@ switch -- $field {
         ds_set_user_switching_enabled $enabled_p
     }
     default { 
-        ns_return 200 text/plain "bad field $field"
+        ad_return_complaint 1 "bad field $field"
+        ad_script_abort
     }
 }
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

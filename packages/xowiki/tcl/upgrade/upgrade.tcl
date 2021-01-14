@@ -3,17 +3,17 @@
 
   @creation-date 2010-06-26
   @author Gustaf Neumann
-  @cvs-id $Id: upgrade.tcl,v 1.11.2.10 2017/07/28 13:37:53 antoniop Exp $
+  @cvs-id $Id: upgrade.tcl,v 1.15.2.12 2020/10/17 16:31:27 gustafn Exp $
 }
 
 namespace eval ::xowiki {
 
   #
   # For the time being, we keep the __upgrade proc a single Tcl
-  # function. We could split it into separate files like the sql
+  # function. We could split it into separate files like the SQL
   # upgrade scripts, but on one hand side, the upgrade snippets are
   # often similar, so it is convenient to reuse the logic from there,
-  # and on the other hand side, this is not performance nor memoriy
+  # and on the other hand side, this is not performance nor memory
   # sensitive, such we have to remove the big cascade below.
   #
   proc __upgrade {from_version_name to_version_name} {
@@ -24,7 +24,7 @@ namespace eval ::xowiki {
       set package_id [::xo::package_id_from_package_key xowiki]
       set folder_id  [::xowiki::Page require_folder \
                           -package_id $package_id \
-                          -content_types ::xowki::Page* \
+                          -content_types ::xowiki::Page* \
                           -name xowiki]
       set r [::CrWikiPage get_instances_from_db -folder_id $folder_id]
       db_transaction {
@@ -50,7 +50,7 @@ namespace eval ::xowiki {
           } else {
             ns_log notice "-- no new class for $oldClass"
           }
-        }       
+        }
       }
     }
 
@@ -135,19 +135,21 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name "0.30"] == -1 &&
         [apm_version_names_compare $to_version_name "0.30"] > -1} {
       ns_log notice "-- upgrading to 0.30"
-      # delete orphan cr revisions, created automatically by content_item
+      #
+      # Delete orphan cr revisions, created automatically by content_item
       # new, when e.g. a title is specified....
+      #
       foreach class {::xowiki::Page ::xowiki::PlainPage ::xowiki::Object
         ::xowiki::PageTemplate ::xowiki::PageInstance} {
         db_dml delete_orphan_revisions "
           delete from cr_revisions where revision_id in (
-                 select r.revision_id from cr_items i,cr_revisions r  
-                 where i.content_type = '$class' and r.item_id = i.item_id 
+                 select r.revision_id from cr_items i,cr_revisions r
+                 where i.content_type = '$class' and r.item_id = i.item_id
                  and not r.revision_id in (select [$class id_column] from [$class table_name]))
         "
         db_dml delete_orphan_items "
-         delete from acs_objects where object_type = '$class' 
-             and not object_id in (select item_id from cr_items where content_type = '$class') 
+         delete from acs_objects where object_type = '$class'
+             and not object_id in (select item_id from cr_items where content_type = '$class')
              and not object_id in (select [$class id_column] from [$class table_name])
          "
       }
@@ -162,10 +164,10 @@ namespace eval ::xowiki {
         set folder_id [db_string get_folder_id "select f.folder_id from cr_items c, cr_folders f \
                 where c.name = 'xowiki: $package_id' and c.item_id = f.folder_id"]
         if {$folder_id ne ""} {
-          db_dml update_package_id {update acs_objects set package_id = :package_id where object_id in 
+          db_dml update_package_id {update acs_objects set package_id = :package_id where object_id in
             (select item_id as object_id from cr_items where parent_id = :folder_id)}
-          db_dml update_package_id {update acs_objects set package_id = :package_id where object_id in 
-            (select r.revision_id as object_id from cr_revisions r, cr_items i where 
+          db_dml update_package_id {update acs_objects set package_id = :package_id where object_id in
+            (select r.revision_id as object_id from cr_revisions r, cr_items i where
              i.item_id = r.item_id and i.parent_id = :folder_id)}
           ::xowiki::Package initialize -package_id $package_id -init_url false
           ::$package_id reindex
@@ -199,7 +201,7 @@ namespace eval ::xowiki {
             -drop_column t
       }
       # drop old non-conformant indices
-      foreach index { xowiki_ref_index 
+      foreach index { xowiki_ref_index
         xowiki_last_visited_index_unique xowiki_last_visited_index
         xowiki_tags_index_tag xowiki_tags_index_user
       } {
@@ -226,8 +228,9 @@ namespace eval ::xowiki {
     object_type = '::xowiki::Form' and supertype = '::xowiki::Page'"]} {
         #
         # We have a version with a type hierarchy not compatible with
-        # the new one.  This comes by updating often from head.  The
+        # the new one.  This comes by updating often from CVS head.  The
         # likelihood to have such as version is rather low.
+        #
         ns_log notice "Deleting incompatible version of ::xowiki::Form"
         ::xo::db::sql::content_type drop_type -content_type ::xowiki::FormInstance \
             -drop_children_p t -drop_table_p t -drop_objects_p t
@@ -257,8 +260,10 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name "0.59"] == -1 &&
         [apm_version_names_compare $to_version_name "0.59"] > -1} {
       ns_log notice "-- upgrading to 0.59"
+      #
       # Remove all old objects of tyoe ::xowiki::FormInstance and the type
       # from the database.
+      #
       if {[catch {
         ::xo::db::sql::content_type drop_type -content_type ::xowiki::FormInstance \
             -drop_children_p t -drop_table_p t -drop_objects_p t
@@ -270,10 +275,13 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name "0.60"] == -1 &&
         [apm_version_names_compare $to_version_name "0.60"] > -1} {
       ns_log notice "-- upgrading to 0.60"
-      # load for all xowiki package instances the weblog-portlet prototype page
+      #
+      # Load for all xowiki package instances the weblog-portlet
+      # prototype page.
+      #
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page weblog-portlet
+        ::$package_id import-prototype-page weblog-portlet
       }
     }
 
@@ -281,23 +289,24 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-
-      # make sure, the page_order is added for the upgrade
+      #
+      # Make sure that the page_order is added for the upgrade.
+      #
       ::xowiki::add_ltree_order_column
 
-      # for all xowiki package instances 
+      # for all xowiki package instances
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
         # rename swf:name and image:name to file:name
         db_dml change_swf \
             "update cr_items set name = 'file' || substr(name,4) \
-    where name like 'swf:%' and parent_id = [$package_id folder_id]"
+    where name like 'swf:%' and parent_id = [::$package_id folder_id]"
         db_dml change_image \
             "update cr_items set name = 'file' || substr(name,6) \
-    where name like 'image:%' and parent_id = [$package_id folder_id]"
+    where name like 'image:%' and parent_id = [::$package_id folder_id]"
         # reload updated prototype pages
-        $package_id import-prototype-page book
-        $package_id import-prototype-page weblog
+        ::$package_id import-prototype-page book
+        ::$package_id import-prototype-page weblog
         # TODO check: jon.griffin
       }
     }
@@ -306,26 +315,35 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-      # for all xowiki package instances 
+      #
+      # For all xowiki package instances...
+      #
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page categories-portlet
+        ::$package_id import-prototype-page categories-portlet
       }
-      # perform the upgrate of 0.62 for the s5 package as well
+      #
+      # ... Perform the upgrade of 0.62 for the s5 package as well.
+      #
       if {[info commands ::s5::Package] ne ""} {
         foreach package_id [::s5::Package instances] {
           ::s5::Package initialize -package_id $package_id -init_url false
-          # rename swf:name and image:name to file:name
+          #
+          # Rename swf:name and image:name to file:name
+          #
           db_dml change_swf \
               "update cr_items set name = 'file' || substr(name,4) \
-    where name like 'swf:%' and parent_id = [$package_id folder_id]"
+    where name like 'swf:%' and parent_id = [::$package_id folder_id]"
           db_dml change_image \
               "update cr_items set name = 'file' || substr(name,6) \
-    where name like 'image:%' and parent_id = [$package_id folder_id]"
+    where name like 'image:%' and parent_id = [::$package_id folder_id]"
         }
       }
       catch {
-        # for new installs, the old column might not exist, therefor the catch
+        #
+        # For new installs, the old column might not exist, therefore,
+        # the catch operation.
+        #
         db_dml drop_old_column \
             "alter table xowiki_page_instance drop column old_page_template cascade"
       }
@@ -336,12 +354,15 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-      # load for all xowiki package instances the weblog-portlet prototype page
+      #
+      # Load for all xowiki package instances the weblog-portlet
+      # prototype page.
+      #
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page announcements
-        $package_id import-prototype-page news
-        $package_id import-prototype-page weblog-portlet
+        ::$package_id import-prototype-page announcements
+        ::$package_id import-prototype-page news
+        ::$package_id import-prototype-page weblog-portlet
       }
     }
 
@@ -349,11 +370,14 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-      # load for all xowiki package instances the weblog-portlet prototype page
+      #
+      # Load for all xowiki package instances the weblog-portlet
+      # prototype page.
+      #
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page news
-        $package_id import-prototype-page weblog-portlet
+        ::$package_id import-prototype-page news
+        ::$package_id import-prototype-page weblog-portlet
       }
       # To iterate over all kind of xowiki packages, we could do
       # foreach package [concat ::xowiki::Package [::xowiki::Package info subclass]] {
@@ -366,10 +390,13 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-      # load for all xowiki package instances the weblog-portlet prototype page
+      #
+      # Load for all xowiki package instances the weblog-portlet
+      # prototype page.
+      #
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page news-item
+        ::$package_id import-prototype-page news-item
       }
       copy_parameter top_portlet top_includelet
     }
@@ -387,8 +414,8 @@ namespace eval ::xowiki {
       ns_log notice "-- upgrading to $v"
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page weblog
-        $package_id import-prototype-page weblog-portlet
+        ::$package_id import-prototype-page weblog
+        ::$package_id import-prototype-page weblog-portlet
       }
     }
 
@@ -400,7 +427,7 @@ namespace eval ::xowiki {
       foreach file {
         tcl/xowiki-portlet-procs.tcl
         www/delete-revision.tcl www/delete.tcl www/edit.tcl www/revisions.tcl
-        www/index.adp www/index.tcl 
+        www/index.adp www/index.tcl
         www/view.adp www/view.tcl
         www/make-live-revision.tcl www/popular_tags.tcl www/save_tags.tcl www/weblog.tcl
         www/portlets/categories-recent.adp
@@ -411,8 +438,8 @@ namespace eval ::xowiki {
         www/portlets/last-visited.tcl
         www/portlets/most-popular.adp
         www/portlets/most-popular.tcl
-        www/portlets/recent.adp 
-        www/portlets/recent.tcl 
+        www/portlets/recent.adp
+        www/portlets/recent.tcl
         www/portlets/rss-button.adp
         www/portlets/rss-button.tcl
         www/portlets/tags.tcl
@@ -420,10 +447,10 @@ namespace eval ::xowiki {
         www/portlets/weblog.tcl
         www/portlets/wiki.adp
         www/portlets/wiki.tcl
-        www/prototypes/announcements.page 
+        www/prototypes/announcements.page
         www/admin/regression_test.tcl
       } {
-        if {[file exists $dir/$file]} {
+        if {[ad_file exists $dir/$file]} {
           ns_log notice "Deleting obsolete file $dir/$file"
           file delete -- $dir/$file
         }
@@ -436,7 +463,7 @@ namespace eval ::xowiki {
       ns_log notice "-- upgrading to $v"
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page ical
+        ::$package_id import-prototype-page ical
       }
     }
 
@@ -446,7 +473,7 @@ namespace eval ::xowiki {
       ns_log notice "-- upgrading to $v"
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page weblog
+        ::$package_id import-prototype-page weblog
       }
       db_dml strip_colons_from_tags \
           "update xowiki_tags set tag = trim(both ',' from tag)  where tag like '%,%'"
@@ -472,16 +499,16 @@ namespace eval ::xowiki {
 
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id
-        set item_id [$package_id lookup -name ::[$package_id folder_id]]
+        set item_id [::$package_id lookup -name ::[::$package_id folder_id]]
         if {$item_id ne 0} {
           ::xowiki::Object get_instance_from_db -item_id $item_id
-          set p [$item_id get_payload widget_specs]
+          set p [::$item_id get_payload widget_specs]
           if {$p ne ""} {
-            ns_log notice "Transferring widget_specs to parameter WidgetSpecs for $package_id [$package_id package_url]"
+            ns_log notice "Transferring widget_specs to parameter WidgetSpecs for $package_id [::$package_id package_url]"
             parameter::set_value -package_id $package_id -parameter WidgetSpecs -value $p
           }
         } else {
-          ns_log notice "no folder object found for $package_id - [$package_id package_url]"
+          ns_log notice "no folder object found for $package_id - [::$package_id package_url]"
         }
       }
     }
@@ -490,12 +517,14 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-
-      # load for all xowiki package instances the weblog-portlet prototype page
+      #
+      # Load for all xowiki package instances the weblog-portlet
+      # prototype page.
+      #
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page weblog-portlet
-        $package_id import-prototype-page news
+        ::$package_id import-prototype-page weblog-portlet
+        ::$package_id import-prototype-page news
       }
     }
 
@@ -505,7 +534,9 @@ namespace eval ::xowiki {
       ns_log notice "-- upgrading to $v"
       foreach package_id [::xowiki::Package instances -closure true] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        # strip language prefix from folder pages
+        #
+        # Strip language prefix from folder pages.
+        #
         set ff [::xowiki::Weblog instantiate_forms -forms en:folder.form -package_id $package_id]
         set e [::xowiki::FormPage get_form_entries -form_fields "" \
                    -base_item_ids $ff -package_id $package_id \
@@ -527,7 +558,7 @@ namespace eval ::xowiki {
       ::xowiki::Package require_site_wide_pages -refetch true
       foreach package_id [::xowiki::Package instances] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
-        $package_id import-prototype-page weblog
+        ::$package_id import-prototype-page weblog
       }
     }
 
@@ -547,8 +578,10 @@ namespace eval ::xowiki {
       db_dml fix_transformed_folders \
           "update acs_objects set object_type = '::xowiki::FormPage' where object_id in (select object_id from acs_objects,cr_revisions cr,cr_items ci where ci.item_id = cr.item_id and revision_id = object_id and object_type = 'content_folder' and content_type = '::xowiki::FormPage')"
 
-      # Reset potentially wrong context-ids 
-      # (the context id of the root folder should be the package id)
+      #
+      # Reset potentially wrong context_ids (the context id of the
+      # root folder should be the package id).
+      #
       foreach p [::xowiki::Package instances -closure true] {
         ::xowiki::Package initialize -package_id $p
         set folder_id [$p folder_id]
@@ -564,7 +597,7 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-      
+
       foreach object_type {PlainPage Page File PodcastItem PageTemplate PageInstance Object Form FormPage} {
         set pretty_name_key "#xowiki.${object_type}_pretty_name#"
         set pretty_plural_key "#xowiki.${object_type}_pretty_plural#"
@@ -580,11 +613,11 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-      
+
       foreach package_id [::xowiki::Package instances -closure true] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
         # reload updated prototype pages
-        $package_id import-prototype-page categories-portlet
+        ::$package_id import-prototype-page categories-portlet
       }
     }
 
@@ -631,9 +664,10 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-
-      # Some old instances have no proper foreign keys with cascading delete.
-      # Simply refresh all of these
+      #
+      # Some old instances have no proper foreign keys with cascading
+      # delete.  Simply refresh all of these.
+      #
       ::xowiki::refresh_id_column_fk_constraints
     }
 
@@ -641,7 +675,7 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-      
+
       foreach package_id [::xowiki::Package instances -closure true] {
         ns_log notice "::xowiki::Package initialize -package_id $package_id -init_url false"
         if {[catch {
@@ -652,9 +686,9 @@ namespace eval ::xowiki {
         }
         ns_log notice "update prototype pages"
         # reload updated prototype pages
-        $package_id import-prototype-page bib
-        $package_id import-prototype-page news
-        $package_id import-prototype-page weblog-portlet
+        ::$package_id import-prototype-page bib
+        ::$package_id import-prototype-page news
+        ::$package_id import-prototype-page weblog-portlet
       }
     }
 
@@ -662,7 +696,7 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-      
+
       foreach package_id [::xowiki::Package instances -closure true] {
         ns_log notice "::xowiki::Package initialize -package_id $package_id -init_url false"
         if {[catch {
@@ -672,10 +706,12 @@ namespace eval ::xowiki {
           continue
         }
         ns_log notice "update prototype page"
-        # reload updated prototype pages. If new "www"-prefix does not work yet,
-        # try old format
+        #
+        # Reload updated prototype pages. If new "www"-prefix does not
+        # work yet, try old format.
+        #
         if {[catch {$package_id www-import-prototype-page sitemapindex.xml}]} {
-          $package_id import-prototype-page sitemapindex.xml
+          ::$package_id import-prototype-page sitemapindex.xml
         }
       }
     }
@@ -684,9 +720,11 @@ namespace eval ::xowiki {
     if {[apm_version_names_compare $from_version_name $v] == -1 &&
         [apm_version_names_compare $to_version_name $v] > -1} {
       ns_log notice "-- upgrading to $v"
-
-      # There are still instances having old constraint names. The updated
-      # version of the refresh-function cares about these relicts.
+      #
+      # There are still instances having old constraint names. The
+      # updated version of the refresh-function cares about these
+      # relicts.
+      #
       ::xowiki::refresh_id_column_fk_constraints
     }
 
@@ -698,14 +736,15 @@ namespace eval ::xowiki {
       foreach package_id [::xowiki::Package instances -closure true] {
         ::xowiki::Package initialize -package_id $package_id -init_url false
         # reload updated prototype pages
-        $package_id www-import-prototype-page categories-portlet        
+        ::$package_id www-import-prototype-page categories-portlet
       }
-
-      # This ON DELETE CASCADE was missed in the old good days and
+      #
+      # This "ON DELETE CASCADE" was missed in the old good days and
       # instances born with xowiki < 0.56 won't have it. Check if we
       # still have the old name and in case recreate anew with proper
       # ON DELETE behavior. We don't do it in every case because could
       # be costly.
+      #
       if {[::xo::dc 0or1row constraint_exists {
         SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
         WHERE CONSTRAINT_NAME ='xowiki_page_instance_npage_template_fkey'
@@ -720,8 +759,104 @@ namespace eval ::xowiki {
 
     }
 
-  }
+    set v 5.10.0d2
+    if {[apm_version_names_compare $from_version_name $v] == -1 &&
+        [apm_version_names_compare $to_version_name $v] > -1} {
+      ns_log notice "-- upgrading to $v"
+
+      foreach package_id [::xowiki::Package instances -closure true] {
+        ns_log notice "::xowiki::Package initialize -package_id $package_id -init_url false"
+        if {[catch {
+          ::xowiki::Package initialize -package_id $package_id -init_url false
+        } errorMsg]} {
+          ns_log notice "Could not initialize package '$package_id': $errorMsg"
+          continue
+        }
+        ns_log notice "update prototype page"
+        #
+        # Reload updated prototype pages. If new "www"-prefix does not work yet,
+        # try old format.
+        #
+        if {[catch {$package_id www-import-prototype-page categories-portlet}]} {
+          ::$package_id import-prototype-page categories-portlet
+        }
+      }
+    }
+
+    set v 5.10.0d29
+    if {[apm_version_names_compare $from_version_name $v] == -1 &&
+        [apm_version_names_compare $to_version_name $v] > -1} {
+      ns_log notice "-- upgrading to $v"
+
+      ns_log notice "dropping view xowiki_form_instance_item_view"
+      ::xo::dc dml drop {
+        drop view if exists xowiki_form_instance_item_view
+      }
+    }
+
+    set v 5.10.0d30
+    if {[apm_version_names_compare $from_version_name $v] == -1 &&
+        [apm_version_names_compare $to_version_name $v] > -1} {
+      ns_log notice "-- upgrading to $v"
+
+      ns_log notice "dropping view xowiki_form_instance_item_view"
+      ::xo::dc dml drop {
+        drop view if exists xowiki_form_instance_item_view
+      }
+    }
+
+    set v 5.10.0d31
+    if {[apm_version_names_compare $from_version_name $v] == -1 &&
+        [apm_version_names_compare $to_version_name $v] > -1} {
+      ns_log notice "-- upgrading to $v"
+
+      ns_log notice "dropping view xowiki_form_instance_item_view"
+      ::xo::dc dml drop {
+        drop view if exists xowiki_form_instance_item_view
+      }
+    }
+
+    set v 5.10.0d32
+    if {[apm_version_names_compare $from_version_name $v] == -1 &&
+        [apm_version_names_compare $to_version_name $v] > -1} {
+      ns_log notice "-- upgrading to $v"
+
+      ns_log notice "dropping view xowiki_form_instance_item_view"
+      ::xo::dc dml drop {
+        drop view if exists xowiki_form_instance_item_view
+      }
+    }
+
+    set v 5.10.0d37
+    if {[apm_version_names_compare $from_version_name $v] == -1 &&
+        [apm_version_names_compare $to_version_name $v] > -1} {
+      ns_log notice "-- upgrading to $v"
+      ::xowiki::Package require_site_wide_pages -refetch true
+    }
+
+    set v 5.10.0d49
+    if {[apm_version_names_compare $from_version_name $v] == -1 &&
+        [apm_version_names_compare $to_version_name $v] > -1} {
+      ns_log notice "-- upgrading to $v"
+      ::xowiki::Package reparent_site_wide_pages
+    }
+
+    set v 5.10.0d65
+    if {[apm_version_names_compare $from_version_name $v] == -1 &&
+        [apm_version_names_compare $to_version_name $v] > -1} {
+      ns_log notice "-- upgrading to $v"
+      foreach p {BootstrapCSS BootstrapJS} {
+        if {[::xo::dc 0or1row p {
+          select parameter_id from apm_parameters
+          where package_key = 'xowiki' and parameter_name = :p
+        }]} {
+          ns_log notice "unregister parameter $p"
+          apm_parameter_unregister -package_key xowiki -parameter $p -parameter_id $parameter_id
+        }
+      }
+    }
     
+  }
 }
 
 #

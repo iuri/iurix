@@ -2,7 +2,7 @@ ad_page_contract {
 
     @author Peter Marklund
     @creation-date 28 January 2003
-    @cvs-id $Id: version-callbacks.tcl,v 1.8.2.2 2016/01/02 21:14:09 gustafn Exp $  
+    @cvs-id $Id: version-callbacks.tcl,v 1.11.2.1 2019/03/13 09:04:09 antoniop Exp $  
 } {
     version_id:naturalnum,notnull    
 }
@@ -50,7 +50,7 @@ template::list::create \
         invoke {
             label "\#acs-admin.Invoke\#"
             display_template {<if @callbacks.type@ in "before-install" "after-install" "before-uninstall" "after-uninstall">\#acs-admin.Invoke\#</if><else><i style="color: gray;">N/A</i></else>}
-            link_url_eval {[ad_decode [lsearch { before-install after-install before-uninstall after-uninstall } $type] -1 {} [export_vars -base "version-callback-invoke" { version_id type }]]}
+            link_url_eval {[expr {$type in { before-install after-install before-uninstall after-uninstall } ? [export_vars -base "version-callback-invoke" { version_id type }] : ""}]}
             link_html { title "\#acs-admin.Invoke_this_callback_proc_now_Be_careful\#" }
             html { align center }
         }

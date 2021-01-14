@@ -3,8 +3,7 @@
 -- 
 -- @author Malte Sussdorff (sussdorff@sussdorff.de)
 -- @creation-date 2005-08-25
--- @arch-tag: e4da8594-c90f-4ca9-b517-d10cc8bddcb9
--- @cvs-id $Id: upgrade-5.2.0d5-5.2.0d6.sql,v 1.2 2006/08/08 21:26:48 donb Exp $
+-- @cvs-id $Id: upgrade-5.2.0d5-5.2.0d6.sql,v 1.3 2018/08/15 16:53:10 gustafn Exp $
 --
 
 create or replace view fs_objects

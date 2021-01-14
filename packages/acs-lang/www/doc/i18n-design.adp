@@ -56,12 +56,12 @@ the user&#39;s native country, region, or culture.
 Java Locale API</a> there is an optional <em>variant</em> which can
 be added to a locale, which we will omit in the Tcl API.</p>
 <p>The <em>language</em> is a valid <strong>ISO Language
-Code</strong>. These codes are the lower-case two-letter codes as
+Code</strong>. These codes are the lowercase two-letter codes as
 defined by ISO-639. You can find a full list of these codes at a
 number of sites, such as:<br><a href="http://www.ics.uci.edu/pub/ietf/http/related/iso639.txt">http://www.ics.uci.edu/pub/ietf/http/related/iso639.txt</a>
 </p>
 <p>The <em>country</em> is a valid <strong>ISO Country
-Code</strong>. These codes are the upper-case two-letter codes as
+Code</strong>. These codes are the uppercase two-letter codes as
 defined by ISO-3166. You can find a full list of these codes at a
 number of sites, such as:<br><a href="http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html">http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html</a>
 </p>
@@ -101,7 +101,7 @@ current session.
 The request processor should use the ad_locale API to figure out
 the preferred locale for a request (perhaps combining user
 preference with subsite defaults in some way). It will make this
-information accesible via the <kbd>ad_conn</kbd>
+information accessible via the <kbd>ad_conn</kbd>
  function:
 <pre><strong>ad_conn locale</strong></pre>
 <h4>Character Sets and Encodings</h4>
@@ -165,7 +165,7 @@ which call <kbd>lang_message_lookup</kbd>, or else use the
 
 Message catalog lookups can be potentially expensive, if many of
 them are done in a page. The templating system can already
-precompile and and cache adp pages. This works fine for a page in a
+precompile and cache adp pages. This works fine for a page in a
 specific language such as <kbd>foo.en.adp</kbd>
 , but we need to
 modify the caching mechanism if we want to use a single template
@@ -270,12 +270,12 @@ author the HTML template files will still find it easier to use
 legacy tools that author in their "native" character
 sets, such as ShiftJIS in Japan, or BIG5 in China.</p>
 <p>So we make the convention that the template file is authored in
-it&#39;s <em>effective locale</em>'s character set. For
-multilingual templates, we will load the template in the site
-default character set as specified by the AOLserver
-<kbd>OutputCharset</kbd> initializatoin parameter. For now, we will
-say that authoring generic multilingual adp files can and should be
-done in ASCII. Eventually we can switch to using UTF8.</p>
+its <em>effective locale</em>'s character set. For multilingual
+templates, we will load the template in the site default character
+set as specified by the AOLserver <kbd>OutputCharset</kbd>
+initializatoin parameter. For now, we will say that authoring
+generic multilingual adp files can and should be done in ASCII.
+Eventually we can switch to using UTF8.</p>
 <p>A character set corresponding to a locale can be found using the
 <kbd>[<strong>ad_locale charset</strong><em>$locale</em>]</kbd>
 command. The templating system should call this right after it
@@ -307,7 +307,7 @@ generally ISO-8859-1 for AOLserver running on Unix systems in
 English.
 <p>This default can be overridden by setting the AOLserver init
 parameter for the MIME type of <kbd>.tcl</kbd> files to include an
-explcit character set. If an explicit MIME type is not found,
+explicit character set. If an explicit MIME type is not found,
 <kbd>ns_encodingfortype</kbd> will default to the AOLserver init
 parameter value <kbd>DefaultCharset</kbd> if it is set.</p>
 <p>Example AOLserver .ini configuration file to set default script
@@ -413,7 +413,7 @@ A message catalog is defined by placing a file in the
 <kbd>catalog</kbd>
  subdirectory of a package. Each file defines a
 set of messages in different locales, and the file is written in a
-character set specified by it&#39;s file suffix:
+character set specified by its file suffix:
 <pre>
 /packages/bboard/catalog/
                          bboard.iso-8859-1
@@ -432,7 +432,7 @@ _mr fr mail_notification "Le notification du email"
 </pre>
 
 In the example above, if the catalog file was loaded from the
-bboard package, all of the keys would be prefixed autmatically with
+bboard package, all of the keys would be prefixed automatically with
 "<code>bboard.</code>
 ".
 <h4>Loading A Message Catalog At Package Init Time</h4>
@@ -445,7 +445,7 @@ The API function
 Is used to load the message catalogs for a package. The catalog
 files are stored in a package subdirectory called
 <kbd>catalog</kbd>
-. Their file names have the form
+. Their filenames have the form
 <kbd>*.<em>encoding</em>.cat</kbd>
 , where <em>encoding</em>
  is the
@@ -485,7 +485,7 @@ previous section, since our system precompiles adp templates, we
 can get a performance improvement if we can cache the message
 lookups at template compile time.
 <p>The &lt;TRN&gt; tag is a call to lang_message_lookup that can be
-used inside of an ADP file. Here is the documention:</p>
+used inside of an ADP file. Here is the documentation:</p>
 <blockquote>Procedure that gets called when the &lt;trn&gt; tag is
 encountered on an ADP page. The purpose of the procedure is to
 register the text string enclosed within a pair of &lt;trn&gt; tags
@@ -504,34 +504,31 @@ English.</li><li>
 translation is made. If omitted, type is user which means that the
 translation is provided in the user&#39;s preferred language.</li><li>
 <code>static</code> specifies that this tag should be
-translated once at templat compile time, rather than dynamically
+translated once at template compile time, rather than dynamically
 every time the page is run. This will be unneccessaru and will be
 deprecated once we have implemented <em>effective locale</em> based
-cacheing for templates.</li>
+caching for templates.</li>
 </ul>
 Example 1: Display the text string <em>Hello</em> on an ADP page
 (i.e. do nothing special):
 <pre>
     &lt;trn&gt;Hello&lt;/trn&gt;
-    
-</pre>
+    </pre>
 Example 2: Assign the key key <em>hello</em> to the text string
 <em>Hello</em> and display the translated string in the user&#39;s
 preferred language:
 <pre>
     &lt;trn key="hello"&gt;Hello&lt;/trn&gt;
-    
-</pre>
+    </pre>
 Example 3: Specify that <em>Bonjour</em> needs to be registered as
 the French translation for the key <em>hello</em> (in addition to
 displaying the translation in the user&#39;s preferred language):
 <pre>
     &lt;trn key="hello" lang="fr"&gt;Bonjour&lt;/trn&gt;
-    
-</pre>
+    </pre>
 Example 4: Register the string and display it in the preferred
 language of the current user. Note that the possible values for the
-<code>type</code> paramater are determined by what has been
+<code>type</code> parameter are determined by what has been
 implemented in the <code>ad_locale</code> procedure. By default,
 only the <code>user</code> type is implemented. An example of a
 type that could be implemented is <code>subsite</code>, for
@@ -539,12 +536,10 @@ displaying strings in the language of the subsite that owns the
 current web page.
 <pre>
     &lt;trn key="hello" type="user"&gt;Hello&lt;/trn&gt;
-    
-</pre><p>Example 5: Translates the string once at template compile time,
+    </pre><p>Example 5: Translates the string once at template compile time,
 using the effective local of the page.</p><pre>
     &lt;trn key="hello" static&gt;Hello&lt;/trn&gt;
-    
-</pre>
+    </pre>
 </blockquote>
 <h3>VII. Data Model Discussion</h3>
 <h4>Internationalizing the Data Models</h4>

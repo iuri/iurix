@@ -608,7 +608,7 @@ Loading package .info files ... this will take a few minutes</programlisting>
 		  You&#39;ll see the final Installer page, &quot;OpenACS
 		  Installation: Complete.&quot; It will tell you that the server is
 		  being restarted; note that unless you already set up a way for
-		  AOLserver to restart itself (ie. <link linkend="install-openacs-keepalive">inittab or daemontools</link>),
+		  AOLserver to restart itself (i.e. <link linkend="install-openacs-keepalive">inittab or daemontools</link>),
 		  you&#39;ll need to manually restart your service.
 		</para>
         <screen>[$OPENACS_SERVICE_NAME $OPENACS_SERVICE_NAME]$ <userinput>/usr/local/aolserver/bin/nsd-postgres -t /var/lib/aolserver/<replaceable>$OPENACS_SERVICE_NAME</replaceable>/config.tcl</userinput></screen>
@@ -735,7 +735,7 @@ ORA_NLS33=$ORACLE_HOME/ocommon/nls/admin/data</screen>
       </listitem>
     </itemizedlist>
 
-  <para><phrase role="cvstag">($Id: openacs.xml,v 1.31.14.4 2017/06/11 08:42:13 gustafn Exp $)</phrase></para>
+  <para><phrase role="cvstag">($Id: openacs.xml,v 1.33 2018/09/30 15:53:28 gustafn Exp $)</phrase></para>
   </sect2>
 
 </sect1>

@@ -53,7 +53,7 @@ proc db_installer_checks { errors error_p } {
     	append my_errors "<P>"
 	append my_errors [ns_fmttime [ns_time] "%Y-%m-%d"] 
 	append my_errors "</B><P><hr>"
-        append my_errors "<li><p><b>Your Oracle driver is correctly installed, however
+        append my_errors "<li><p><b>Your Oracle driver is correctly installed, however,
             Oracle's date format should be set to <i>YYYY-MM-DD</i>.</b></p>\n"
         set my_error_p 1
     }
@@ -141,9 +141,7 @@ ALTER USER $thisuser DEFAULT ROLE ALL;
     }
 
     set dbversion_list [split $dbversion .]
-    set dbversion_major [lindex $dbversion_list 0]
-    set dbversion_minor [lindex $dbversion_list 1]
-    set dbversion_patch [lindex $dbversion_list 2]
+    lassign $dbversion_list dbversion_major dbversion_minor dbversion_patch
     set dbversion_total [expr {($dbversion_major * 1000000) + ($dbversion_minor * 1000) + ($dbversion_patch)}]
 
     # Check for Oracle 8.1.6 and before running on Linux. If so, we've got to tell the user
@@ -196,7 +194,7 @@ ln -s /bin/sh /bin/ksh
 	    </strong></p>"
         } else {
 	    append my_errors "<li><p>You have the Korn shell installed in <code>/usr/bin/ksh</code>, but Oracle's
-	    <code>loadjava</code> program expects in in <code>/bin/ksh</code>.  As root, please create 
+	    <code>loadjava</code> program expects it in <code>/bin/ksh</code>.  As root, please create 
 	    a symbolic link.
 	    <blockquote><pre>
 ln -s /usr/bin/ksh /bin/ksh

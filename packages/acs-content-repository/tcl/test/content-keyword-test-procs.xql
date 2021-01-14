@@ -4,8 +4,7 @@
 <!--  -->
 <!-- @author Dave Bauer (dave@thedesignexperience.org) -->
 <!-- @creation-date 2005-03-20 -->
-<!-- @arch-tag: 6a8b6362-151b-499d-923c-cdb43b9fb4c1 -->
-<!-- @cvs-id $Id: content-keyword-test-procs.xql,v 1.1 2005/03/20 13:41:50 daveb Exp $ -->
+<!-- @cvs-id $Id: content-keyword-test-procs.xql,v 1.2 2018/08/15 17:00:24 gustafn Exp $ -->
 
 <queryset>
   <fullquery name="_acs-content-repository__content_keyword.confirm_delete">

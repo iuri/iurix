@@ -75,17 +75,6 @@
 </fullquery>
 
  
-<fullquery name="package_insert_default_comment.select_comments">      
-      <querytext>
-      
-	    select acs_object.name(:user_id) as author,
-	           sysdate as creation_date
-	      from dual
-	
-      </querytext>
-</fullquery>
-
- 
 <fullquery name="package_object_attribute_list.attributes_select">      
       <querytext>
       
@@ -250,14 +239,6 @@ END ${package_name};
       </querytext>
 </partialquery>
 
- 
-<partialquery name="package_attribute_default.creation_date">      
-      <querytext>sysdate</querytext>
-</partialquery>
-
-<partialquery name="package_attribute_default.last_modified">      
-      <querytext>sysdate</querytext>
-</partialquery>
 
 <fullquery name="package_exec_plsql.exec_func_plsql">
       <querytext>

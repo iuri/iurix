@@ -2,15 +2,14 @@ ad_page_contract {
     Adds a package to the package manager.
     @author Jon Salz (jsalz@arsdigita.com)
     @creation-date 17 April 2000
-    @cvs-id $Id: package-add.tcl,v 1.13.2.5 2016/11/30 11:16:29 antoniop Exp $
+    @cvs-id $Id: package-add.tcl,v 1.16.2.2 2020/07/03 07:43:20 gustafn Exp $
 } {
 }
 
 set user_id [ad_conn user_id]
-
-db_1row apm_get_name { 
-    select first_names || ' ' || last_name user_name, email from cc_users where user_id = :user_id
-}
+set user_info [acs_user::get -user_id $user_id]
+set user_name [dict get $user_info name]
+set email     [dict get $user_info email]
 
 set package_id [db_nextval acs_object_id_seq]
 set version_id [db_nextval acs_object_id_seq]
@@ -24,7 +23,7 @@ set form_name "packageAdd"
 set body [subst {
 <form name='$form_name' action='package-add-2' method='post'>
 [export_vars -form {package_id version_id}] 
-<script type="text/javascript" nonce='$::__csp_nonce'>
+<script type="text/javascript" nonce='[security::csp::nonce]'>
 function updateURLs() {
     // Update the package and version URL, if the package key and/or version name change.
     var form = document.getElementsByName('$form_name')\[0\];
@@ -46,7 +45,7 @@ function checkMailto(element) {
 
 <tr>
   <td></td>
-  <td>Select a package key for your package. This is a unique, short, and lower-case identifier
+  <td>Select a package key for your package. This is a unique, short, and lowercase identifier
 for your package containing only letters, numbers, and hyphens (e.g., <tt>address-book</tt>
 for the address book package or <tt>photo-album</tt> for the Photo Album).
 Files for your package will be placed in a directory with this name.</td>
@@ -256,7 +255,7 @@ this package, please load them manually into your database.
 }]
 
 
-# Add event listener for updating urls and checking mailto urls
+# Add event listener for updating URLs and checking mailto URLs
 
 template::add_event_listener -CSSclass "update-url" -event change -script {updateURLs();}
 template::add_event_listener -CSSclass "check-mailto" -event change -script {checkMailto(this);}

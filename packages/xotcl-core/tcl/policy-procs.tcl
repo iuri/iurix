@@ -1,27 +1,27 @@
-ad_library {
-  XOTcl API for policies 
+xo::library doc {
+  XOTcl API for policies
 
   @author Gustaf Neumann
   @creation-date 2007-03-09
-  @cvs-id $Id: policy-procs.tcl,v 1.23.2.2 2017/06/01 09:42:53 gustafn Exp $
+  @cvs-id $Id: policy-procs.tcl,v 1.29.2.10 2020/11/21 16:43:18 gustafn Exp $
 }
 
 namespace eval ::xo {
-  
+
   Class create Policy
 
   Policy instproc defined_methods {class} {
     set c [self]::$class
-    expr {[my isclass $c] ? [$c array names require_permission] : [list]}
+    expr {[:isclass $c] ? [$c array names require_permission] : {}}
   }
-  
+
   Policy instproc check_privilege {
-    {-login true} 
-    -user_id:required 
-    -package_id 
+    {-login true}
+    -user_id:required
+    -package_id
     privilege object method
   } {
-    #my log "--p [self proc] [self args]"
+    #:log "--p [self proc] [self args]"
     if {$privilege eq "nobody"} {
       return 0
     }
@@ -29,13 +29,13 @@ namespace eval ::xo {
       return 1
     }
 
-    #my log "--login $login user_id=$user_id uid=[::xo::cc user_id] untrusted=[::xo::cc set untrusted_user_id]"
+    #:log "--login $login user_id=$user_id uid=[::xo::cc user_id] untrusted=[::xo::cc set untrusted_user_id]"
     if {$login && $user_id == 0} {
       #
       # The tests below depend on the user_id.
       # The main reason, we call auth:require_login here is to check for exired logins.
       #
-      #my log "--p [self proc] calls require_login"
+      #:log "--p [self proc] calls require_login"
       set user_id [auth::require_login]
     }
 
@@ -59,30 +59,30 @@ namespace eval ::xo {
 
     set allowed -1   ;# undecided
     # try object specific privileges. These have the signature:
-    # 
+    #
     # <class> instproc privilege=<name> {{-login true} user_id package_id method}
     #
     if {[$object info methods privilege=$privilege] ne ""} {
       if {![info exists package_id]} {set package_id [::xo::cc package_id]}
       set allowed [$object privilege=$privilege -login $login $user_id $package_id $method]
     }
-    #my msg "--check_privilege {$privilege $object $method} ==> $allowed"
+    #:msg "--check_privilege {$privilege $object $method} ==> $allowed"
     return $allowed
   }
 
   Policy instproc get_privilege {{-query_context "::xo::cc"} permission object method} {
     # the privilege might by primitive (one word privilege)
     # or it might be complex (attribute + privilege)
-    # or it might be conditional (primitive or complex) in a list of privilges
+    # or it might be conditional (primitive or complex) in a list of privileges
 
     foreach p $permission {
-      #my msg "checking permission '$p'"
+      #:msg "checking permission '$p'"
       set condition [lindex $p 0]
       if {[llength $condition]>1} {
         # we have a condition
         lassign $condition cond value
         if {[$object condition=$cond $query_context $value]} {
-          return [my get_privilege [list [lrange $p 1 end]] $object $method]
+          return [:get_privilege [list [lrange $p 1 end]] $object $method]
         }
       } else {
         # we have no condition
@@ -100,9 +100,9 @@ namespace eval ::xo {
     set permission ""
     set o [self]::[namespace tail $object]
     set key require_permission($method)
-    if {[my isobject $o] && [$o exists $key]} {
+    if {[nsf::is object $o] && [$o exists $key]} {
       set permission [$o set $key]
-    } elseif {[my isobject $o] && [$o exists default_permission]} {
+    } elseif {[nsf::is object $o] && [$o exists default_permission]} {
       set permission [$o set default_permission]
     } elseif {$check_classes} {
       # we have no object specific policy information, check the classes
@@ -110,14 +110,14 @@ namespace eval ::xo {
       set c [$object info class]
       foreach class [concat $c [$c info heritage]] {
         set c [self]::[namespace tail $class]
-        if {![my isclass $c]} continue
-        set permission [my get_permission -check_classes false $class $method]
+        if {![:isclass $c]} continue
+        set permission [:get_permission -check_classes false $class $method]
         if {$permission ne ""} break
       }
     }
     return $permission
   }
-  
+
   Policy ad_instproc check_permissions {-user_id -package_id {-link ""} object method} {
 
     This method checks whether the current user is allowed
@@ -128,30 +128,44 @@ namespace eval ::xo {
 
     @see enforce_permissions
     @return 0 or 1
-    
+
   } {
-    if {![info exists user_id]} {set user_id [::xo::cc user_id]}
-    if {![info exists package_id]} {set package_id [::xo::cc package_id]}
-    #my msg [info exists package_id]=>$package_id-[my exists logical_package_id]
+    if {![info exists user_id]} {
+      set user_id [::xo::cc user_id]
+    }
+    if {![info exists package_id]} {
+      set package_id [::xo::cc package_id]
+    }
+    #:msg [info exists package_id]=>$package_id-[info exists :logical_package_id]
     set ctx "::xo::cc"
     if {$link ne ""} {
-      set query [lindex [split $link ?] 1]
+      #
+      # Extract the query parameter from the link
+      #
+      set questionMarkPos [string first ? $link]
+      if {$questionMarkPos > -1} {
+        set query [string range $link $questionMarkPos+1 end]
+      } else {
+        set query ""
+      }
       set ctx [::xo::Context new -destroy_on_cleanup -actual_query $query]
       $ctx process_query_parameter
     }
-    
-    set allowed 0
-    set permission [my get_permission $object $method]
-    #my log "--permission for o=$object, m=$method => $permission"
 
-    #my log "--     user_id=$user_id uid=[::xo::cc user_id] untrusted=[::xo::cc set untrusted_user_id]"
+    set allowed 0
+    set permission [:get_permission $object $method]
+    #:log "--permission for o=$object, m=$method => $permission"
+
+    #:log "--     user_id=$user_id uid=[::xo::cc user_id] untrusted=[::xo::cc set untrusted_user_id]"
     if {$permission ne ""} {
-      lassign [my get_privilege -query_context $ctx $permission $object $method] kind p
-      #my msg "--privilege = $p kind = $kind"
+      lassign [:get_privilege -query_context $ctx $permission $object $method] kind p
+      #:msg "--privilege = $p kind = $kind"
       switch -- $kind {
-        primitive {set allowed [my check_privilege -login false \
-                                    -package_id $package_id -user_id $user_id \
-                                    $p $object $method]}
+        primitive {
+          set allowed [:check_privilege -login false \
+                           -package_id $package_id -user_id $user_id \
+                           $p $object $method]
+        }
         complex {
           lassign $p attribute privilege
           set id [$object set $attribute]
@@ -159,7 +173,7 @@ namespace eval ::xo {
         }
       }
     }
-    #my log "--p check_permissions {$object $method} : $permission ==> $allowed"
+    #:log "--p check_permissions {$object $method} : $permission ==> $allowed"
     return $allowed
   }
 
@@ -171,18 +185,18 @@ namespace eval ::xo {
 
     @see check_permissions
     @return 0 or 1
-    
+
   } {
     if {![info exists user_id]} {set user_id [::xo::cc user_id]}
     if {![info exists package_id]} {set package_id [::xo::cc package_id]}
 
     set allowed 0
-    set permission [my get_permission $object $method]
+    set permission [:get_permission $object $method]
     if {$permission ne ""} {
-      lassign [my get_privilege $permission $object $method] kind p
+      lassign [:get_privilege $permission $object $method] kind p
       switch -- $kind {
         primitive {
-          set allowed [my check_privilege \
+          set allowed [:check_privilege \
                            -user_id $user_id -package_id $package_id \
                            $p $object $method]
           set privilege $p
@@ -197,27 +211,39 @@ namespace eval ::xo {
       }
     }
 
-    #my log "--p enforce_permissions {$object $method} : $permission ==> $allowed"
+    #:log "--p enforce_permissions {$object $method} : $permission ==> $allowed"
 
     if {!$allowed} {
-      set untrusted_user_id [::xo::cc set untrusted_user_id]
-      if {$permission eq ""} {
-        ns_log notice "enforce_permissions: no permission for $object->$method defined"
-      } elseif {$user_id == 0 && $untrusted_user_id} {
-        ns_log notice "enforce_permissions: force login, user_id=0 and untrusted_id=$untrusted_user_id"
-        auth::require_login
+      #
+      # In case the request does not come from a connected client
+      # (e.g. via some magic way via background processing) then
+      # just abort in the call (raising an exception).
+      #
+      if {[ns_conn isconnected]} {
+        set untrusted_user_id [::xo::cc set untrusted_user_id]
+        if {$permission eq ""} {
+          ns_log notice "enforce_permissions: no permission for $object->$method defined"
+        } elseif {$user_id == 0 && $untrusted_user_id} {
+          ns_log notice "enforce_permissions: force login, user_id=0 and untrusted_id=$untrusted_user_id"
+          auth::require_login
+        } else {
+          ns_log notice "enforce_permissions: $user_id doesn't have $privilege on $object"
+        }
+
+        ad_return_forbidden [_ xotcl-core.permission_denied] \
+            [_ xotcl-core.policy-error-insufficient_permissions]
       } else {
-        ns_log notice "enforce_permissions: $user_id doesn't have $privilege on $object"
+        ns_log warning "enforce_permissions: $user_id has no right to $method on $object in background operation"
       }
-      ad_return_forbidden  "[_ xotcl-core.permission_denied]" [_ xotcl-core.policy-error-insufficient_permissions]
       ad_script_abort
     }
-    
+
     return $allowed
   }
 
 }
 
+::xo::library source_dependent
 #
 # Local variables:
 #    mode: tcl

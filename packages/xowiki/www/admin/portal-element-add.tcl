@@ -3,16 +3,16 @@
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Oct 23, 2005
-  @cvs-id $Id: portal-element-add.tcl,v 1.15.2.2 2016/09/20 11:27:48 gustafn Exp $
+  @cvs-id $Id: portal-element-add.tcl,v 1.17.2.4 2020/10/15 08:50:43 gustafn Exp $
 
   @param object_type show objects of this class and its subclasses
 } -parameter {
   {-portal_id:required}
   {-page_name:required}
-  {-referer .}
+  {-referrer .}
 }
 
-set page [$package_id get_page_from_item_ref $page_name]
+set page [::$package_id get_page_from_item_ref $page_name]
 
 if {$page eq ""} {
   #
@@ -20,7 +20,8 @@ if {$page eq ""} {
   #
   ad_return_error \
       [_ xowiki.portlet_page_does_not_exist_error_short] \
-      [_ xowiki.portlet_page_does_not_exist_error_long $page_name]
+      [_ xowiki.portlet_page_does_not_exist_error_long [list page_name $page_name]]
+  ad_script_abort
 
 } else {
   #
@@ -30,37 +31,38 @@ if {$page eq ""} {
 
   # for the time being, we add the portlet on the first page (page 0)
   set portal_page_id [portal::get_page_id -portal_id $portal_id -sort_key 0]
-  
+
   if {[xo::dc get_value check_unique_name_on_page {
     select 1 from portal_element_map
-    where page_id     = :portal_page_id 
+    where page_id     = :portal_page_id
     and   pretty_name = :page_title
   } 0]} {
     #
     # The name of the portal element is not unique.
     #
     ad_return_error \
-	[_ xowiki.portlet_title_exists_error_short] \
-	[_ xowiki.portlet_title_exists_error_long $page_title]
+        [_ xowiki.portlet_title_exists_error_short] \
+        [_ xowiki.portlet_title_exists_error_long $page_title]
+    ad_script_abort
   } else {
     #
     # everything ok, add the portal element
     #
     db_transaction {
       set element_id [portal::add_element \
-			  -portal_id $portal_id \
-			  -portlet_name [xowiki_portlet name] \
-			  -pretty_name $page_title \
-			  -force_region [parameter::get_from_package_key \
-					     -parameter "xowiki_portal_content_force_region" \
-					     -package_key "xowiki-portlet"]
-		     ]
+                          -portal_id $portal_id \
+                          -portlet_name [xowiki_portlet name] \
+                          -pretty_name $page_title \
+                          -force_region [parameter::get_from_package_key \
+                                             -parameter "xowiki_portal_content_force_region" \
+                                             -package_key "xowiki-portlet"]
+                     ]
       portal::set_element_param $element_id package_id $package_id
       # in case, someone wants language-specific includelets
       #regexp {^..:(.*)$} $page_name _ page_name
       portal::set_element_param $element_id page_name $page_name
     }
-    ad_returnredirect $referer
+    ad_returnredirect $referrer
   }
 }
 ad_script_abort

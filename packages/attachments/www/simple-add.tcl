@@ -4,7 +4,7 @@ ad_page_contract {
     @author Ben Adida (ben@openforce.net)
     @author arjun (arjun@openforce.net)
     @creation-date 01 April 2002
-    @cvs-id $Id: simple-add.tcl,v 1.11.2.2 2016/05/20 20:11:45 gustafn Exp $
+    @cvs-id $Id: simple-add.tcl,v 1.12 2017/08/07 23:48:04 gustafn Exp $
 } {
     folder_id:naturalnum,notnull
     object_id:naturalnum,notnull

@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author Bruno Mattarollo <bruno.mattarollo@ams.greenpeace.org>
     @creation-date 15 march 2002
-    @cvs-id $Id: locale-new.tcl,v 1.7.2.1 2015/09/10 08:21:28 gustafn Exp $
+    @cvs-id $Id: locale-new.tcl,v 1.8 2017/08/07 23:47:57 gustafn Exp $
 }
 
 

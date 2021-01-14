@@ -3,7 +3,7 @@
 -- 
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2009-10-12
--- @cvs-id $Id: upgrade-5.6.0d2-5.6.0d3.sql,v 1.2.8.1 2017/04/21 14:53:07 gustafn Exp $
+-- @cvs-id $Id: upgrade-5.6.0d2-5.6.0d3.sql,v 1.4 2018/04/05 07:04:40 gustafn Exp $
 --
 
 
@@ -148,10 +148,10 @@ begin
   select 
     decode(count(*),0,0,1) into table_exists 
   from 
-    user_tables u, acs_object_types objet
+    user_tables u, acs_object_types object
   where 
-    objet.object_type = drop_type.content_type and
-    u.table_name = upper(objet.table_name);
+    object.object_type = drop_type.content_type and
+    u.table_name = upper(object.table_name);
 
   if table_exists = 1 and drop_table_p = 't' then
     select 

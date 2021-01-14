@@ -35,7 +35,7 @@ ad_library {
 
     @creation-date 2010/04/09
     @author Don Baccus
-    @cvs-id $Id: json-procs.tcl,v 1.6.2.2 2017/04/22 18:11:54 gustafn Exp $
+    @cvs-id $Id: json-procs.tcl,v 1.11.2.1 2020/07/13 12:02:33 gustafn Exp $
 }
 
 namespace eval util {
@@ -396,14 +396,14 @@ ad_proc -private util::json::object2json {objectVal} {
             lappend values "\"$key\":[util::json::gen_inner $val]"
         }
     }
-    return "\{[join $values ,]\}"
+    return "\{[ns_dbquotelist $values]\}"
 }
 
 ad_proc -private util::json::array2json {arrayVal} {
 
     Generate a JSON string for a two-element Tcl JSON array list.
 
-    @param objectVal [list array values]
+    @param arrayVal [list array values]
     @return Valid JSON array string.
 } {
     set values {}
@@ -414,7 +414,7 @@ ad_proc -private util::json::array2json {arrayVal} {
             lappend values [util::json::gen_inner $val]
         }
     }
-    return "\[[join $values ,]\]"
+    return "\[[ns_dbquotelist $values]\]"
 }
 
 ad_proc util::json::gen {value} {
@@ -439,16 +439,16 @@ ad_proc util::json::json_value_to_sql_value {value} {
     @param value A value from a parsed JSON string
     @return Something that works in Real SQL, not to be confused with MySQL. This
             includes not trying to insert '' into columns of type real, when
-            "null" is meant (we mimic Oracle bindvar/PG bindvar emulation sematics).
+            "null" is meant (we mimic Oracle bindvar/PG bindvar emulation semantics).
             The Ilias RTE JavaScript returns '' rather than null for JS null variables.
 
 } {
-    switch $value {
+    switch -- $value {
         false { return 0 }
         true { return 1 }
         null -
         "" { return null }
-        default { return "'[DoubleApos $value]'" }
+        default { return "[::ns_dbquotevalue $value]" }
     }
 }
 

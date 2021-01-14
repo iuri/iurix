@@ -4,7 +4,7 @@ ad_page_contract {
     @param url The url of the package to load.
     @author Bryan Quinn (bquinn@arsdigita.com)
     @creation-date 10 October 2000
-    @cvs-id $Id: package-load-2.tcl,v 1.5.2.5 2017/03/27 11:01:10 gustafn Exp $
+    @cvs-id $Id: package-load-2.tcl,v 1.6 2017/08/07 23:47:45 gustafn Exp $
 
 } {
     {url ""}

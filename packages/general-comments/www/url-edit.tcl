@@ -1,12 +1,10 @@
-# /packages/general-comments/www/url-edit.tcl
-
 ad_page_contract {
-    Edits a url comment
+    Edits a URL comment
 
     @author Phong Nguyen (phong@arsdigita.com)
     @author Pascal Scheffers (pascal@scheffers.net)
     @creation-date 2000-10-12
-    @cvs-id $Id: url-edit.tcl,v 1.5.2.2 2016/05/21 10:15:38 gustafn Exp $
+    @cvs-id $Id: url-edit.tcl,v 1.8 2018/05/01 08:49:35 gustafn Exp $
 } {
     attach_id:naturalnum,notnull
     parent_id:naturalnum,notnull
@@ -31,6 +29,7 @@ if { ![db_0or1row get_comment {
            where extlink_id = :attach_id
 }] } {
     ad_return_complaint 1 "The attach_id does not refer to a valid url attachment."
+    ad_script_abort
 }
 
 set page_title "[_ general-comments.lt_Edit_url_attachment_o] #$parent_id"

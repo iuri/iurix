@@ -8,20 +8,20 @@ ad_library {
     http://www.fsf.org/copyleft/gpl.html
 
     @creation-date 30 September 2000
-    @author Jeff Davis (davis@xarg.net) 
+    @author Jeff Davis (davis@xarg.net)
     @author Ashok Argent-Katwala (akatwala@arsdigita.com)
-    @cvs-id $Id: localization-procs.tcl,v 1.24.2.7 2017/04/22 18:21:46 gustafn Exp $
+    @cvs-id $Id: localization-procs.tcl,v 1.29.2.14 2020/07/21 14:02:09 gustafn Exp $
 }
 
 
-ad_proc -public lc_parse_number { 
-    num 
-    locale 
+ad_proc -public lc_parse_number {
+    num
+    locale
     {integer_only_p 0}
 } {
-    Converts a number to its canonical 
-    representation by stripping everything but the 
-    decimal separator and triming left 0's so it 
+    Converts a number to its canonical
+    representation by stripping everything but the
+    decimal separator and trimming left 0's so it
     won't be octal. It can process the following types of numbers:
     <ul>
     <li>Just digits (allows leading zeros).
@@ -40,7 +40,7 @@ ad_proc -public lc_parse_number {
 
 } {
     if {$num eq ""} {
-	return ""
+        return ""
     }
 
     set dec  [lc_get -locale $locale "decimal_point"]
@@ -56,10 +56,10 @@ ad_proc -public lc_parse_number {
     # results, the safety check is here as well.
     #
     if {[string first $dec $thou] > -1} {
-	error "error in locale $locale: decimal point '$decimal_point' must be different\
-		from thousands separator\
-		(mon_thousands_sep '[lc_get -locale $locale mon_thousands_sep]'\
-		and thousands_sep '[lc_get -locale $locale thousands_sep]')"
+        error "error in locale $locale: decimal point '$decimal_point' must be different\
+                from thousands separator\
+                (mon_thousands_sep '[lc_get -locale $locale mon_thousands_sep]'\
+                and thousands_sep '[lc_get -locale $locale thousands_sep]')"
     }
 
     lang::util::escape_vars_if_not_null {dec thou neg pos}
@@ -70,9 +70,9 @@ ad_proc -public lc_parse_number {
     set pattern "^\\ *($neg|$pos)?\\ *((\[0-9\]+|\[1-9\]\[0-9\]{0,2}($thou\[0-9\]\{3\})+)"
 
     if {$integer_only_p} {
-	append pattern "?)(${dec}0*)?"
+        append pattern "?)(${dec}0*)?"
     } else {
-	append pattern "?($dec\[0-9\]*)?)"
+        append pattern "?($dec\[0-9\]*)?)"
     }
 
     append pattern "\\ *\$"
@@ -80,50 +80,50 @@ ad_proc -public lc_parse_number {
     set is_valid_number  [regexp -- $pattern $num match sign number]
 
     if {!$is_valid_number} {
-	error "Not a number $num"
+        error "Not a number $num"
     } else {
 
-	regsub -all $thou $number "" number
+        regsub -all $thou $number "" number
 
-	if {!$integer_only_p} {
-	    regsub -all $dec $number "." number
-	}
+        if {!$integer_only_p} {
+            regsub -all $dec $number "." number
+        }
 
         set number [util::trim_leading_zeros $number]
-	
+
         # Last pathological case
-	if {"." eq $number } {
-	    set number 0
-	}
+        if {"." eq $number } {
+            set number 0
+        }
 
-	if {[string match "\\\\\\${sign}" $neg]} {
-	    set number -$number
-	}
+        if {[string match "\\\\\\${sign}" $neg]} {
+            set number -$number
+        }
 
-	return $number
+        return $number
     }
 }
 
 
-ad_proc -private lc_sepfmt { 
-    num 
+ad_proc -private lc_sepfmt {
+    num
     {grouping {3}}
-    {sep ,} 
+    {sep ,}
     {num_re {[0-9]}}
-} { 
+} {
     Called by lc_numeric and lc_monetary.
     <p>
-    Takes a grouping specifier and 
-    inserts the given separator into the string. 
-    Given a separator of : 
+    Takes a grouping specifier and
+    inserts the given separator into the string.
+    Given a separator of :
     and a number of 123456789 it returns:
     <pre>
     grouping         Formatted Value
-    {3 -1}               123456:789     
-    {3}                  123:456:789    
-    {3 2 -1}             1234:56:789    
-    {3 2}                12:34:56:789   
-    {-1}                 123456789      
+    {3 -1}               123456:789
+    {3}                  123:456:789
+    {3 2 -1}             1234:56:789
+    {3 2}                12:34:56:789
+    {-1}                 123456789
     </pre>
 
     @param num        Number
@@ -132,52 +132,52 @@ ad_proc -private lc_sepfmt {
     @param num_re     Regular expression for valid numbers
     @return           Number formatted with thousand separator
 } {
-    # with empty separator or grouping string we behave 
+    # with empty separator or grouping string we behave
     # posixly
-    if {$grouping eq "" || $sep eq "" } { 
+    if {$grouping eq "" || $sep eq "" } {
         return $num
     }
-    
+
     # we need to sanitize the subspec
     regsub -all -- "(\[&\\\\\])" $sep "\\\\\\1" sep
 
     set match "^(-?$num_re+)("
     set group [lindex $grouping 0]
-    
-    while { $group > 0} { 
+
+    while { $group > 0} {
         set re "$match[string repeat $num_re $group])"
-        if { ![regsub -- $re $num "\\1$sep\\2" num] } { 
-            break 
-        } 
-        if {[llength $grouping] > 1} { 
+        if { ![regsub -- $re $num "\\1$sep\\2" num] } {
+            break
+        }
+        if {[llength $grouping] > 1} {
             set grouping [lrange $grouping 1 end]
         }
         set group [lindex $grouping 0]
-    } 
-    
-    return $num 
+    }
+
+    return $num
 }
 
 
 ad_proc -public lc_numeric {
-    num 
-    {fmt {}} 
+    num
+    {fmt {}}
     {locale ""}
-} { 
+} {
 
     Given a number and a locale return a formatted version of the number
     for that locale.
 
     @param num      Number in canonical form
-    @param fmt      Format string used by the Tcl format 
+    @param fmt      Format string used by the Tcl format
                     command (should be restricted to the form "%.Nf" if present).
     @param locale   Locale
     @return         Localized form of the number
 
-} { 
-    if {$fmt ne ""} { 
+} {
+    if {$fmt ne ""} {
         set out [format $fmt $num]
-    } else { 
+    } else {
         set out $num
     }
 
@@ -191,18 +191,34 @@ ad_proc -public lc_numeric {
         set sep ,
         set dec .
         set grouping 3
-        
+
     }
-    
+
     regsub {\.} $out $dec out
     return [lc_sepfmt $out $grouping $sep]
 }
 
-ad_proc -public clock_to_ansi {
+ad_proc -deprecated clock_to_ansi {
     seconds
 } {
-    Convert a time in the Tcl internal clock seeconds format to ANSI format, usable by lc_time_fmt.
-    
+    Convert a time in the Tcl internal clock seconds format to ANSI format, usable by lc_time_fmt.
+
+    DEPRECATED: this proc does not comply with naming convention
+    enforced by acs-tcl.naming__proc_naming automated test
+
+    @author Lars Pind (lars@pinds.com)
+    @return ANSI (YYYY-MM-DD HH24:MI:SS) formatted date.
+    @see lc_time_fmt
+    @see lc_clock_to_ansi
+} {
+    return [lc_clock_to_ansi $seconds]
+}
+
+ad_proc -public lc_clock_to_ansi {
+    seconds
+} {
+    Convert a time in the Tcl internal clock seconds format to ANSI format, usable by lc_time_fmt.
+
     @author Lars Pind (lars@pinds.com)
     @return ANSI (YYYY-MM-DD HH24:MI:SS) formatted date.
     @see lc_time_fmt
@@ -231,17 +247,27 @@ ad_proc -public lc_get {
 }
 
 ad_proc -public lc_time_fmt {
-    datetime 
-    fmt 
+    datetime
+    fmt
     {locale ""}
 } {
-    Formats a time for the specified locale.  
+    Formats a time for the specified locale.
 
-    @param datetime        Strictly in the form &quot;YYYY-MM-DD HH24:MI:SS&quot;.
-                           Formulae for calculating day of week from the Calendar FAQ 
-                           (<a href="http://www.tondering.dk/claus/calendar.html">http://www.tondering.dk/claus/calendar.html</a>)
-    @param fmt             An ISO 14652 LC_TIME style formatting string.  The <b>highlighted</b> functions localize automatically based on the user's locale; other strings will use locale-specific text but not necessarily locale-specific formatting.
-    <pre>    
+    @param datetime A time string in one of the following formats as
+                    from clock tcl command specifications: "%Y-%m-%d
+                    %H:%M:%S", "%Y-%m-%d %H:%M" and
+                    "%Y-%m-%d". Database timestamps such as
+                    "2019-12-16 12:50:14.049896+01" are also
+                    tolerated, by normalizing them to "2019-12-16
+                    12:50:14". Note that in this case all information
+                    about timezone and fractions of second will be
+                    discarded.
+    @param fmt An ISO 14652 LC_TIME style formatting string.  The
+               <b>highlighted</b> functions localize automatically
+               based on the user's locale; other strings will use
+               locale-specific text but not necessarily
+               locale-specific formatting.
+    <pre>
       %a           FDCC-set's abbreviated weekday name.
       %A           FDCC-set's full weekday name.
       %b           FDCC-set's abbreviated month name.
@@ -268,7 +294,7 @@ ad_proc -public lc_time_fmt {
       %n           A <newline> character.
       %p           FDCC-set's equivalent of either AM or PM.
       %r           Hours and minutes using 12-hour clock AM/PM
-                   notation, e.g. '06:12 AM'. 
+                   notation, e.g. '06:12 AM'.
       <b>%q           Long date without weekday (OpenACS addition to the standard)</b>
       <b>%Q           Long date with weekday (OpenACS addition to the standard)</b>
       %S           Seconds as a decimal number (00-61).
@@ -289,14 +315,20 @@ ad_proc -public lc_time_fmt {
       %Z           The connection's timezone, e.g. 'America/New_York'.
       %%           A <percent-sign> character.
     </pre>
-    See also <pre>man strftime</pre> on a UNIX shell prompt for more of these abbreviations.
+
     @param locale          Locale identifier must be in the locale database
-    @error                 Fails if given a non-existent locale or a malformed datetime
-                           Doesn't check for impossible dates. Ask it for 29 Feb 1999 and it will tell you it was a Monday
-                           (1st March was a Monday, it wasn't a leap year). Also it only works with the Gregorian calendar -
-                           but that's reasonable, but could be a problem if you are running a seriously historical site 
-                           (or have an 'on this day in history' style page that goes back a good few hundred years).
-    @return                A date formatted for a locale
+    @error Fails if given a non-existent locale or a malformed
+           datetime. Impossible dates will be treated as per clock
+           scan behavior and e.g. 29 Feb 1999 will be translated to
+           1st March, Monday, as it wasn't a leap year. The clock api
+           takes care of the proper handling of Julian/Gregorian
+           dates.
+
+    @see clock
+    @see http://www.tondering.dk/claus/calendar.html
+    @see man strftime on a UNIX shell prompt for more date format abbreviations.
+
+    @return A date formatted for a locale
 } {
     if { $datetime eq "" } {
         return ""
@@ -305,41 +337,52 @@ ad_proc -public lc_time_fmt {
     if { $locale eq "" } {
         set locale [ad_conn locale]
     }
-    
-    # Some initialisation...
-    # Now, expect d_fmt, t_fmt and d_t_fmt to exist of the form in ISO spec
-    # Rip $date into $lc_time_* as numbers, no leading zeroes
-    set matchdate {([0-9]{4})\-0?(1?[0-9])\-0?([1-3]?[0-9])}
-    set matchtime {0?([1-2]?[0-9]):0?([1-5]?[0-9]):0?([1-6]?[0-9])}
-    set matchfull "$matchdate $matchtime"
-    
-    set lc_time_p 1
-    if {![regexp -- $matchfull $datetime match lc_time_year lc_time_month lc_time_days lc_time_hours lc_time_minutes lc_time_seconds]} {
-	if {[regexp -- $matchdate $datetime match lc_time_year lc_time_month lc_time_days]} {
-	    set lc_time_hours 0
-	    set lc_time_minutes 0
-	    set lc_time_seconds 0
-	} else {
-	    error "Invalid date: $datetime"
-	}
+
+    set datetime [string range [string trim $datetime] 0 18]
+    foreach format {
+        "%Y-%m-%d %H:%M:%S"
+        "%Y-%m-%d %H:%M"
+        "%Y-%m-%d"
+    } {
+        set invalid_format_p [catch {
+            set date_clock [clock scan $datetime -format $format]
+        }]
+        if {!$invalid_format_p} {
+            break
+        }
     }
-    set lc_time_year [util::trim_leading_zeros $lc_time_year]
-    
-    set a [expr {(14 - $lc_time_month) / 12}]
-    set y [expr {$lc_time_year - $a}]
-    set m [expr {$lc_time_month + 12*$a - 2}]
-    
-    # day_no becomes 0 for Sunday, through to 6 for Saturday. Perfect for addressing zero-based lists pulled from locale info.
-    set lc_time_day_no [expr {(($lc_time_days + $y + $y/4 - $y/100 + $y/400) + (31 * $m / 12)) % 7}]
-    
-    return [subst [util_memoize [list lc_time_fmt_compile $fmt $locale]]]
+    if {$invalid_format_p} {
+        error "Invalid date: $datetime"
+    }
+
+    set date_tokens [list]
+    foreach token [clock format $date_clock -format "%Y %m %d %H %M %S %w"] {
+        lappend date_tokens [util::trim_leading_zeros $token]
+    }
+
+    lassign $date_tokens \
+        lc_time_year \
+        lc_time_month \
+        lc_time_days \
+        lc_time_hours \
+        lc_time_minutes \
+        lc_time_seconds \
+        lc_time_day_no
+
+    #
+    # Keep the results of lc_time_fmt_compile in the per-thread cache
+    # (namespaced variable)
+    #
+    return [subst [acs::per_thread_cache eval -key acs-lang.lc_time_fmt_compile($fmt,$locale) {
+        lc_time_fmt_compile $fmt $locale
+    }]]
 }
 
 ad_proc -public lc_time_fmt_compile {
-    fmt 
+    fmt
     locale
 } {
-    Compiles ISO 14652 LC_TIME style formatting string to variable substitions and proc calls.
+    Compiles ISO 14652 LC_TIME style formatting string to variable substitutions and proc calls.
 
     @param fmt             An ISO 14652 LC_TIME style formatting string.
     @param locale          Locale identifier must be in the locale database
@@ -347,46 +390,46 @@ ad_proc -public lc_time_fmt_compile {
                            after local variables have been set.
 } {
     set to_process $fmt
-        
+
     set compiled_string ""
     while {[regexp -- {^(.*?)%(.)(.*)$} $to_process match done_portion percent_modifier remaining]} {
-	
-	switch -exact -- $percent_modifier {
-	    x {
-		append compiled_string $done_portion
-		set to_process "[lc_get -locale $locale "d_fmt"]$remaining"
-	    }
-	    X {
-		append compiled_string $done_portion
-		set to_process "[lc_get -locale $locale "t_fmt"]$remaining"
-	    }
-	    c {
-		append compiled_string $done_portion
-		set to_process "[lc_get -locale $locale "d_t_fmt"]$remaining"	
-	    }
-	    q {
-		append compiled_string $done_portion
-		set to_process "[lc_get -locale $locale "dlong_fmt"]$remaining"	
-	    }
-	    Q {
-		append compiled_string $done_portion
-		set to_process "[lc_get -locale $locale "dlongweekday_fmt"]$remaining"	
-	    }
-	    default {
-		append compiled_string "${done_portion}$::lang::util::percent_match($percent_modifier)"
-		set to_process $remaining
-	    }
-	}
+
+        switch -exact -- $percent_modifier {
+            x {
+                append compiled_string $done_portion
+                set to_process "[lc_get -locale $locale d_fmt]$remaining"
+            }
+            X {
+                append compiled_string $done_portion
+                set to_process "[lc_get -locale $locale t_fmt]$remaining"
+            }
+            c {
+                append compiled_string $done_portion
+                set to_process "[lc_get -locale $locale d_t_fmt]$remaining"
+            }
+            q {
+                append compiled_string $done_portion
+                set to_process "[lc_get -locale $locale dlong_fmt]$remaining"
+            }
+            Q {
+                append compiled_string $done_portion
+                set to_process "[lc_get -locale $locale dlongweekday_fmt]$remaining"
+            }
+            default {
+                append compiled_string "${done_portion}$::lang::util::percent_match($percent_modifier)"
+                set to_process $remaining
+            }
+        }
     }
-    
+
     # What is left to_process must be (%.)-less, so it should be included without transformation.
     append compiled_string $to_process
-    
+
     return $compiled_string
 }
 
 ad_proc -public lc_time_utc_to_local {
-    time_value 
+    time_value
     {tz ""}
 } {
     Converts a Universal Time to local time for the specified timezone.
@@ -401,23 +444,22 @@ ad_proc -public lc_time_utc_to_local {
 
     set local_time $time_value
 
-    if {[catch {
-	set local_time [db_exec_plsql utc_to_local {}]
-    } errmsg]
-    } {
-	ns_log Warning "lc_time_utc_to_local: Query exploded on time conversion from UTC, probably just an invalid date, $time_value: $errmsg"
+    ad_try {
+        set local_time [db_exec_plsql utc_to_local {}]
+    } on error {errorMsg} {
+       ad_log Warning "lc_time_utc_to_local: Query exploded on time conversion from UTC, probably just an invalid date, $time_value: $errorMsg"
     }
 
     if {$local_time eq ""} {
-	# If no conversion possible, log it and assume local is as given (i.e. UTC)	    
-	ns_log Notice "lc_time_utc_to_local: Timezone adjustment in ad_localization.tcl found no conversion to UTC for $time_value $tz"	
+        # If no conversion possible, log it and assume local is as given (i.e. UTC)
+        ns_log Notice "lc_time_utc_to_local: Timezone adjustment in ad_localization.tcl found no conversion to UTC for $time_value $tz"
     }
 
     return $local_time
 }
 
 ad_proc -public lc_time_local_to_utc {
-    time_value 
+    time_value
     {tz ""}
 } {
     Converts a local time to a UTC time for the specified timezone.
@@ -431,16 +473,15 @@ ad_proc -public lc_time_local_to_utc {
     }
 
     set utc_time $time_value
-    if {[catch {
-	set utc_time [db_exec_plsql local_to_utc {}]
-    } errmsg]
-    } {
-	ns_log Warning "lc_time_local_to_utc: Query exploded on time conversion to UTC, probably just an invalid date, $time_value: $errmsg"
+    ad_try {
+        set utc_time [db_exec_plsql local_to_utc {}]
+    } on error {errorMsg} {
+        ad_log Warning "lc_time_local_to_utc: Query exploded on time conversion to UTC, probably just an invalid date, $time_value: $errorMsg"
     }
 
     if {$utc_time eq ""} {
-	# If no conversion possible, log it and assume local is as given (i.e. UTC)	    
-	ns_log Notice "lc_time_local_to_utc: Timezone adjustment in ad_localization.tcl found no conversion to local time for $time_value $tz"	
+        # If no conversion possible, log it and assume local is as given (i.e. UTC)
+        ns_log Notice "lc_time_local_to_utc: Timezone adjustment in ad_localization.tcl found no conversion to local time for $time_value $tz"
     }
 
     return $utc_time
@@ -450,7 +491,7 @@ ad_proc -public lc_time_local_to_utc {
 
 
 ad_proc -public lc_time_system_to_conn {
-    time_value 
+    time_value
 } {
     Converts a date from the system (database) to the connection's timezone,
     using the OpenACS timezone setting and user's preference
@@ -458,7 +499,7 @@ ad_proc -public lc_time_system_to_conn {
     @param time_value        Timestamp from the database in the ISO datetime format.
     @return                  Timestamp in conn's local time, also in ISO datetime format.
 } {
-    if { ![ad_conn isconnected] } {
+    if { ![ns_conn isconnected] } {
         return $time_value
     }
 
@@ -473,15 +514,15 @@ ad_proc -public lc_time_system_to_conn {
 }
 
 ad_proc -public lc_time_conn_to_system {
-    time_value 
+    time_value
 } {
-    Converts a date from the connection's timezone to the system (database) timezone, 
+    Converts a date from the connection's timezone to the system (database) timezone,
     using the OpenACS timezone setting and user's preference
 
     @param time_value        Timestamp from conn input in the ISO datetime format.
-    @return                  Timestamp in the database's time zone, also in ISO datetime format.
+    @return                  Timestamp in the database's timezone, also in ISO datetime format.
 } {
-    if { ![ad_conn isconnected] } {
+    if { ![ns_conn isconnected] } {
         return $time_value
     }
 
@@ -506,10 +547,10 @@ ad_proc -public lc_time_tz_convert {
     @param time_value        Timestamp in the 'from' timezone, in the ISO datetime format.
     @return                  Timestamp in the 'to' timezone, also in ISO datetime format.
 } {
-    with_catch errmsg {
+    ad_try {
         set time_value [db_exec_plsql convert {}]
-    } {
-        ns_log Warning "lc_time_tz_convert: Error converting timezone: $errmsg"
+    } on error {errorMsg} {
+        ad_log Warning "lc_time_tz_convert: Error converting timezone: $errorMsg"
     }
     return $time_value
 }
@@ -521,7 +562,7 @@ ad_proc -public lc_time_tz_convert {
 
 
 ad_proc -public lc_list_all_timezones { } {
-    @return list of pairs containing all  timezone names and offsets.
+    @return list of pairs containing all timezone names and offsets.
     Data drawn from acs-reference package timezones table
 } {
     return [db_list_of_lists all_timezones {}]
@@ -533,9 +574,9 @@ ad_proc -private lc_time_drop_meridian { hours } {
     Converts HH24 to HH12.
 } {
     if {$hours > 12} {
-	incr hours -12
+        incr hours -12
     } elseif {$hours == 0} {
-	set hours 12
+        set hours 12
     }
     return $hours
 }
@@ -545,9 +586,9 @@ ad_proc -private lc_wrap_sunday { day_no } {
     to 1(Mon) - 7(Sun)
 } {
     if {$day_no==0} {
-	return 7
+        return 7
     } else {
-	return $day_no
+        return $day_no
     }
 }
 
@@ -555,9 +596,9 @@ ad_proc -private lc_time_name_meridian { locale hours } {
     Returns locale data depending on AM or PM.
 } {
     if {$hours > 11} {
-	return [lc_get -locale $locale "pm_str"]
+        return [lc_get -locale $locale "pm_str"]
     } else {
-	return [lc_get -locale $locale "am_str"]
+        return [lc_get -locale $locale "am_str"]
     }
 }
 
@@ -565,20 +606,108 @@ ad_proc -private lc_leading_space {num} {
     Inserts a leading space for numbers less than 10.
 } {
     if {$num < 10} {
-	return " $num"
+        return " $num"
     } else {
-	return $num
+        return $num
     }
 }
 
 
 ad_proc -private lc_leading_zeros {
-    the_integer 
+    the_integer
     n_desired_digits
 } {
     Adds leading zeros to an integer to give it the desired number of digits
 } {
     return [format "%0${n_desired_digits}d" $the_integer]
+}
+
+
+ad_proc -public lc_content_size_pretty {
+    {-size "0"}
+    {-precision "1"}
+    {-standard "decimal"}
+} {
+
+    Transforms data size, provided in nonnegative bytes, to KB, MB... up to YB.
+
+    @param size       Size in bytes
+    @param precision  Numbers in the fractional part
+    @param standard   Standard to use for binary prefix. Three standards are
+                      supported currently by this proc:
+                        - decimal (default): SI (base-10, 1000 bytes = 1kB)
+                        - binary: IEC           (base-2,  1024 bytes = 1KiB)
+                        - legacy: JEDEC         (base-2,  1024 bytes = 1KB)
+
+    @return Size in given standard units (e.g. '5.2 MB')
+
+    @author Héctor Romojaro <hector.romojaro@gmail.com>
+    @creation-date 2019-06-25
+
+} {
+    #
+    # Localized byte/s
+    #
+    set bytes [lc_get "bytes"]
+    set byte  [lc_get "byte"]
+
+    switch $standard {
+        decimal {
+            #
+            # SI (base-10, 1000 bytes = 1KB)
+            #
+            set div 1000
+            set units [list $bytes kB MB GB TB PB EB ZB YB]
+        }
+        binary {
+            #
+            # IEC (base-2, 1024 bytes = 1KiB)
+            #
+            set div 1024
+            set units [list $bytes KiB MiB GiB TiB PiB EiB ZiB YiB]
+        }
+        legacy {
+            #
+            # JEDEC (base-2, 1024 bytes = 1KB)
+            #
+            set div 1024
+            set units [list $bytes KB MB GB TB PB EB ZB YB]
+        }
+        default {
+            return "Unknown value $standard for -standard option"
+        }
+    }
+    #
+    # For empty size, we assume 0
+    #
+    if {$size eq ""} {
+        set size 0
+    }
+
+    set len [string length $size]
+
+    if {$size < $div} {
+        #
+        # 1 byte or n bytes
+        #
+        if {$size == 1} {
+            set size_pretty [format "%s $byte" $size]
+        } else {
+            set size_pretty [format "%s $bytes" $size]
+        }
+    } else {
+        #
+        # > 1K
+        #
+        set unit [expr {($len - 1) / 3}]
+        set size_pretty [format "%.${precision}f %s" [expr {$size / pow($div,$unit)}] [lindex $units $unit]]
+    }
+    #
+    # Localize dot/comma just before return
+    #
+    set size_pretty "[lc_numeric [lindex $size_pretty 0]] [lindex $size_pretty 1]"
+
+    return $size_pretty
 }
 
 # Local variables:

@@ -1,13 +1,13 @@
 ad_page_contract {
-    Revert the a message to the last overwritten version. 
+    Revert the message to the last overwritten version.
     Mark conflict of an I18N message as resolved, i.e.
     set the conflict_p flag to false.
 
     @author Peter Marklund
 } {
-    package_key
+    package_key:token
     message_key
-    locale
+    locale:word
     {return_url:localurl {[export_vars -base "message-conflicts" { package_key locale }]}}
 }
 
@@ -21,6 +21,7 @@ db_transaction {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

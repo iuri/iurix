@@ -3,11 +3,11 @@
 <property name="doc(title)">Chapter 5. Upgrading</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="how-do-I" leftLabel="Prev"
-		    title="
+			leftLink="how-do-I" leftLabel="Prev"
+			title="
 Part II. Administrator&#39;s Guide"
-		    rightLink="upgrade-overview" rightLabel="Next">
-		<div class="chapter">
+			rightLink="upgrade-overview" rightLabel="Next">
+		    <div class="chapter">
 <div class="titlepage"><div><div><h2 class="title">
 <a name="upgrade" id="upgrade"></a>Chapter 5. Upgrading</h2></div></div></div><div class="toc">
 <p><strong>Table of Contents</strong></p><dl class="toc">
@@ -18,15 +18,13 @@ OpenACS 5.0.0 or greater installation</a></span></dt><dt><span class="sect1"><a 
 files</a></span></dt><dt><span class="sect1"><a href="upgrade-supporting">Upgrading
 Platform components</a></span></dt>
 </dl>
-</div><div class="authorblurb">
-<p>by <a class="ulink" href="mailto:joel\@aufrecht.org" target="_top">Joel Aufrecht</a>
-</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div>
+</div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">by <a class="ulink" href="mailto:joel\@aufrecht.org" target="_top">Joel
+Aufrecht</a>
+</span></p><span style="color: red">&lt;/authorblurb&gt;</span>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="how-do-I" leftLabel="Prev" leftTitle="How Do I?"
-		    rightLink="upgrade-overview" rightLabel="Next" rightTitle="Overview"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="acs-admin" upLabel="Up"> 
-		
+			leftLink="how-do-I" leftLabel="Prev" leftTitle="How Do I?"
+			rightLink="upgrade-overview" rightLabel="Next" rightTitle="Overview"
+			homeLink="index" homeLabel="Home" 
+			upLink="acs-admin" upLabel="Up"> 
+		    

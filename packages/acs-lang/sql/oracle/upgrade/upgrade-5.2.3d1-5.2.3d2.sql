@@ -3,8 +3,7 @@
 -- 
 -- @author Victor Guerra (guerra@galileo.edu)
 -- @creation-date 2006-01-26
--- @arch-tag: dc7aa6da-eb77-48df-9d42-6c3fb2d4ddcb
--- @cvs-id $Id: upgrade-5.2.3d1-5.2.3d2.sql,v 1.2 2006/06/04 00:45:39 donb Exp $
+-- @cvs-id $Id: upgrade-5.2.3d1-5.2.3d2.sql,v 1.3 2018/08/15 16:48:01 gustafn Exp $
 --
 
 --new locales for oacs-5-2

@@ -1,9 +1,9 @@
 ad_page_contract {
     Configuration home page.
-    
+
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date 2003-06-13
-    @cvs-id $Id: configure.tcl,v 1.12.6.3 2015/09/10 10:07:01 gustafn Exp $
+    @cvs-id $Id: configure.tcl,v 1.14.2.2 2020/09/28 21:04:04 gustafn Exp $
 }
 
 set page_title [_ acs-subsite.Subsite_Configuration]
@@ -48,11 +48,10 @@ ad_form -name name -cancel_url [ad_conn url] -mode display -form {
 } -on_submit {
     apm_package_rename -instance_name $instance_name
     subsite::set_theme -theme $theme
-    set group(join_policy) $join_policy
-    set group(description) $description
-    group::update -group_id $group_id -array group
+    group::update -group_id $group_id \
+        [list join_policy $join_policy description $description]
 
-    switch $visibility {
+    switch -- $visibility {
         any {
             permission::set_inherit -object_id [ad_conn package_id]
         }

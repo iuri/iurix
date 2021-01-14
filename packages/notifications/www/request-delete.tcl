@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 2002-05-24
-    @cvs-id $Id: request-delete.tcl,v 1.4.2.2 2016/05/21 10:18:18 gustafn Exp $
+    @cvs-id $Id: request-delete.tcl,v 1.7 2018/08/17 13:02:43 hectorr Exp $
 } {
     request_id:naturalnum,notnull
     return_url:localurl

@@ -4,7 +4,7 @@ ad_library {
 
     @creation-date 15 APR 2005
     @author Enrique Catalan (quio@galileo.edu)
-    @cvs-id $Id: merge-procs.tcl,v 1.3.14.2 2016/01/02 13:50:15 gustafn Exp $
+    @cvs-id $Id: merge-procs.tcl,v 1.4.2.1 2019/09/05 13:35:22 antoniop Exp $
 
 }
 
@@ -18,14 +18,14 @@ ad_proc -public merge::MergeUserInfo {
     them to to_user_id.
 
     @param from_user_id From user ID.
-    @param to_user_id To user ID. 
+    @param to_user_id To user ID.
 } {
     ns_log Notice "Running merge::MergeUserInfo"
     db_transaction {
 	if { ![db_0or1row to_user_portrait {}] &&  [db_0or1row from_user_portrait {}] } {
 	    db_dml upd_portrait {}
-	} 
-	
+	}
+
 	# get the permissions of the from_user_id
 	# and grant them to the to_user_id
 	db_foreach getfromobjs {} {
@@ -34,12 +34,12 @@ ad_proc -public merge::MergeUserInfo {
 	    if { ![db_string touserhas {} ] } {
 		# grant the permissions to to_user_id
 		permission::grant -object_id $from_oid -party_id $to_user_id -privilege $from_priv
-	    } 
+	    }
 	}
-	
+
 	ns_log notice "  Merging acs_objects"
-	
-	db_dml acs_objs_upd {} 	
+
+	db_dml acs_objs_upd {}
     }
     ns_log Notice "Finishing merge::MergeUserInfo"
 }

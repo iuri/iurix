@@ -6,11 +6,11 @@ ad_page_contract {
     @author Bruno Mattarollo <bruno.mattarollo@ams.greenpeace.org>
     @author Christian Hvid
     @creation-date 15 April 2002
-    @cvs-id $Id: localized-message-new.tcl,v 1.12.2.3 2016/05/20 19:55:32 gustafn Exp $
+    @cvs-id $Id: localized-message-new.tcl,v 1.13.2.1 2019/12/20 21:47:58 gustafn Exp $
 
 } {
-    locale
-    package_key
+    locale:word
+    package_key:token
     {message_key ""}
     {return_url:localurl {[export_vars -base message-list { locale package_key }]}}
 }

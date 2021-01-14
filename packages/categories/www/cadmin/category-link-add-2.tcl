@@ -3,12 +3,12 @@ ad_page_contract {
     Let user decide about the target category to add a category link.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: category-link-add-2.tcl,v 1.11.2.3 2019/12/20 21:18:10 gustafn Exp $
 } {
     link_tree_id:naturalnum,notnull
     category_id:naturalnum,notnull
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -29,8 +29,8 @@ set link_tree_name [category_tree::get_name $link_tree_id $locale]
 set page_title "Add link from \"$link_tree_name\" to category \"$tree_name :: $category_name\""
 
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar \
     [list [export_vars -no_empty -base category-links-view {category_id tree_id locale object_id ctx_id}] "Links to $category_name"] \
     [list [export_vars -no_empty -base category-link-add {category_id tree_id locale object_id ctx_id}] "Select link target"] \
@@ -53,7 +53,7 @@ foreach category [category_tree::get_tree -all $link_tree_id $locale] {
     set backward_exists_p [info exists backward_links($link_category_id)]
 
     template::multirow append tree $link_category_name $link_category_id $forward_exists_p $backward_exists_p \
-	[string repeat "&nbsp;" [expr {($level-1)*5]}] \
+	[string repeat "&nbsp;" [expr {($level-1)*5}]] \
 	[export_vars -no_empty -base category-links-view {{category_id $link_category_id} {tree_id $link_tree_id} locale object_id  ctx_id}] \
 	[export_vars -no_empty -base category-link-add-3 {link_category_id category_id tree_id locale object_id ctx_id}] \
 	[export_vars -no_empty -base category-link-add-4 {link_category_id category_id tree_id locale object_id ctx_id}]
@@ -71,8 +71,8 @@ template::list::create \
 	links {
 	    sub_class narrow
 	    display_template {
-		<if @tree.backward_exists_p@ true><img src="/resources/acs-subsite/left.gif" height="16" width="16" alt="backward link" style="border:0"></if>
-		<if @tree.forward_exists_p@ true><img src="/resources/acs-subsite/right.gif" height="16" width="16" alt="forward link" style="border:0"></if>
+		<if @tree.backward_exists_p;literal@ true><img src="/resources/acs-subsite/left.gif" height="16" width="16" alt="backward link" style="border:0"></if>
+		<if @tree.forward_exists_p;literal@ true><img src="/resources/acs-subsite/right.gif" height="16" width="16" alt="forward link" style="border:0"></if>
 	    }
 	    html {align center}
 	}

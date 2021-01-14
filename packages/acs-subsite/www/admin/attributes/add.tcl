@@ -1,12 +1,10 @@
-# /packages/mbryzek-subsite/www/admin/attribute/add.tcl
-
 ad_page_contract {
 
     Form to adds attributes
 
     @author mbryzek@arsdigita.com
     @creation-date Tue Nov  7 12:14:42 2000
-    @cvs-id $Id: add.tcl,v 1.3.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: add.tcl,v 1.4.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     object_type:notnull,trim
@@ -18,9 +16,9 @@ ad_page_contract {
     datatypes:multirow
 } -validate {
     dynamic_type -requires {object_type:notnull} {
-	if { ![package_type_dynamic_p $object_type] } {
-	    ad_complain "The specified object type, $object_type, is not dynamic and therefore cannot be modified."
-	}
+        if { ![package_type_dynamic_p $object_type] } {
+            ad_complain "The specified object type, $object_type, is not dynamic and therefore cannot be modified."
+        }
     }
 }
 
@@ -28,7 +26,7 @@ set context [list "Add attribute"]
 set export_vars [export_vars -form {object_type return_url}]
 
 set object_pretty_name [db_string object_pretty_name {
-    select t.pretty_name 
+    select t.pretty_name
       from acs_object_types t
      where t.object_type = :object_type
 }]
@@ -44,8 +42,8 @@ db_foreach select_datatypes {
      order by lower(d.datatype)
 } {
     if { [attribute::datatype_validator_exists_p $datatype] } {
-	incr ctr
-	template::multirow append datatypes $datatype
+        incr ctr
+        template::multirow append datatypes $datatype
     }
 }
 

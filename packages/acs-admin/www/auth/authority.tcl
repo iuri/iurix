@@ -31,14 +31,14 @@ set form_widgets_full {
     {pretty_name:text
         {html {size 50}}
         {label "\#acs-admin.Name\#"}
-    }        
+    }
 
     {short_name:text,optional
         {html {size 50}}
         {label "\#acs-admin.Short_Name\#"}
-        {mode {[ad_decode $local_authority_p 1 "display" ""]}}
+        {mode {[expr {$local_authority_p ? "display" : ""}]}}
         {help_text "[_ acs-admin.Authority_short_name_help_text]"}
-    }        
+    }
 
     {enabled_p:text(radio)
         {label "\#acs-admin.Enabled\#"}
@@ -46,10 +46,10 @@ set form_widgets_full {
     }
 
     {help_contact_text:richtext,optional
-        {html {cols 60 rows 13}} 
+        {html {cols 60 rows 13}}
         {label "\#acs-admin.Help_contact_text\#"}
         {help_text "[_ acs-admin.Help_contact_help_text]"}
-    }        
+    }
 
     {-section "auth" {legendtext \#acs-admin.Authentication\#}}
 
@@ -69,12 +69,12 @@ set form_widgets_full {
         {html {size 50}}
         {label "\#acs-admin.Recover_password_URL\#"}
         {help_text "[_ acs-admin.Recover_password_URL_help_text]"}
-    }        
+    }
     {change_pwd_url:text,optional
         {html {size 50}}
         {label "\#acs-admin.Change_password_URL\#"}
         {help_text "[_ acs-admin.Change_password_URL_help_text]"}
-    }        
+    }
 
     {-section "accreg" {legendtext \#acs-admin.Account_Registration\#}}
 
@@ -87,7 +87,7 @@ set form_widgets_full {
         {html {size 50}}
         {label "\#acs-admin.Account_registration_URL\#"}
         {help_text "[_ acs-admin.Account_reg_URL_help_text]"}
-    }        
+    }
 
     {-section "ondemsyn" {legendtext \#acs-admin.On-Demand_Sync\#}}
 
@@ -155,7 +155,7 @@ ad_form -name authority \
         set batch_sync_enabled_p f
     } \
     -edit_request {
-            
+
     auth::authority::get -authority_id $authority_id -array element_array
 
     set page_title $element_array(pretty_name)
@@ -167,11 +167,13 @@ ad_form -name authority \
     if { !$local_authority_p } {
         # Set the value of the help_contact_text element - both contents and format attributes
         set help_contact_text [template::util::richtext::create]
-        set help_contact_text [template::util::richtext::set_property contents $help_contact_text $element_array(help_contact_text)]
+        set help_contact_text [template::util::richtext::set_property contents $help_contact_text \
+                                   $element_array(help_contact_text)]
         if { $element_array(help_contact_text_format) eq "" } {
             set element_array(help_contact_text_format) "text/enhanced"
         }
-        set help_contact_text [template::util::richtext::set_property format $help_contact_text  $element_array(help_contact_text_format)]     
+        set help_contact_text_format [template::util::richtext::set_property format $help_contact_text \
+                                          $element_array(help_contact_text_format)]
     }
 
 } -new_data {
@@ -214,6 +216,7 @@ ad_form -name authority \
         -array element_array
 } -after_submit {
     ad_returnredirect [export_vars -base [ad_conn url] { authority_id }]
+    ad_script_abort
 }
 
 # Show recent batch jobs for existing authorities
@@ -229,7 +232,7 @@ list::create \
         }
         end_time_pretty {
             label "\#acs-admin.End_time\#"
-        }            
+        }
         run_time {
             label "\#acs-admin.Run_time\#"
             html { align right }
@@ -257,23 +260,45 @@ list::create \
 
 set display_batch_history_p [expr {$authority_exists_p && $ad_form_mode eq "display"}]
 if { $display_batch_history_p } {
-    
-    db_multirow -extend { 
-        job_url 
+
+    set yes [_ acs-kernel.common_Yes]
+    set no  [_ acs-kernel.common_No]
+
+    db_multirow -extend {
+        job_url
         start_time_pretty
         end_time_pretty
-        interactive_pretty 
-        short_message 
+        interactive_pretty
+        short_message
         actions_per_minute
         run_time
-    } batch_jobs select_batch_jobs {} {
+        run_time_seconds
+    } batch_jobs select_batch_jobs {
+        select job_id,
+               to_char(job_start_time, 'YYYY-MM-DD HH24:MI:SS') as start_time_ansi,
+               to_char(job_end_time, 'YYYY-MM-DD HH24:MI:SS') as end_time_ansi,
+               snapshot_p,
+               (select count(*) from auth_batch_job_entries
+                where job_id = auth_batch_jobs.job_id) as num_actions,
+               (select count(*) from auth_batch_job_entries
+                 where job_id = auth_batch_jobs.job_id
+                   and not success_p) as num_problems,
+               interactive_p,
+               message
+        from   auth_batch_jobs
+        where  authority_id = :authority_id
+                order by start_time_ansi
+    } {
+        set run_time_seconds [expr {[clock scan $end_time_ansi -format "%Y-%m-%d %H:%M:%S"] -
+                                    [clock scan $start_time_ansi -format "%Y-%m-%d %H:%M:%S"]}]
+
         set job_url [export_vars -base batch-job { job_id }]
 
         set start_time_pretty [lc_time_fmt $start_time_ansi "%x %X"]
         set end_time_pretty [lc_time_fmt $end_time_ansi "%x %X"]
 
-        set interactive_pretty [ad_decode $interactive_p "t" "Yes" "No"]
-        set short_message [string_truncate -len 30 -- $message]
+        set interactive_pretty [expr {$interactive_p eq "t" ? $yes : $no}]
+        set short_message [ad_string_truncate -len 30 -- $message]
 
         set actions_per_minute {}
         if { $run_time_seconds > 0 && $num_actions > 0 } {
@@ -281,8 +306,8 @@ if { $display_batch_history_p } {
         }
         set run_time [util::interval_pretty -seconds $run_time_seconds]
     }
-    if { ([info exists get_doc_impl_id] && $get_doc_impl_id ne "")
-         && ([info exists process_doc_impl_id] && $process_doc_impl_id ne "") } {
+    if { [info exists get_doc_impl_id] && $get_doc_impl_id ne ""
+         && [info exists process_doc_impl_id] && $process_doc_impl_id ne "" } {
         set batch_sync_run_url [export_vars -base batch-job-run { authority_id }]
         template::add_confirm_handler \
             -id batch-sync-run \
@@ -318,13 +343,13 @@ if { ($initial_request_p || $submit_p) && !$local_authority_p } {
     foreach element_name [auth::authority::get_sc_impl_columns] {
         # Only offer link if there is an implementation chosen and that implementation has
         # parameters to configure
-        if { ([info exists element_array($element_name)] && $element_array($element_name) ne "") && 
-             [auth::driver::get_parameters -impl_id $element_array($element_name)] ne ""} {
-            
+        if { [info exists element_array($element_name)] && $element_array($element_name) ne ""
+             && [auth::driver::get_parameters -impl_id $element_array($element_name)] ne ""
+         } {
             set configure_url [export_vars -base authority-parameters { authority_id }]
             break
         }
-    }    
+    }
 }
 
 # Local variables:

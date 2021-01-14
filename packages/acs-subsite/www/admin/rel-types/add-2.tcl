@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Nov 12 18:05:09 2000
-    @cvs-id $Id: add-2.tcl,v 1.2.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: add-2.tcl,v 1.4 2018/01/19 14:09:48 gustafn Exp $
 
 } {
     constraint_id:naturalnum,notnull
@@ -23,6 +23,7 @@ db_dml update_rel_type_mapping {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

@@ -35,8 +35,8 @@ which they will see a list of tree nodes.<br>
 The mapped subtree will consist of all subcategories of the
 category the user selected - the category itself will not be
 included. Note that the mapped subtree will not be a new tree.
-Therefore this option should be used only if an admin plans to use
-the subtree 'as is' and has no intention of making changes
+Therefore, this option should be used only if an admin plans to use
+the subtree as-is and has no intention of making changes
 to it.</p>
 <p>An alternative solution is available for admins who want to
 create a tree by copying one of the existing trees and subsequently
@@ -199,8 +199,7 @@ selected categories (if editing an object):</p>
 
 Alternatively, you can include the following in your adp:
 <pre>
-  &lt;include src="/packages/categories/www/include/widget" object_id=\@object_id\@ package_id=\@package_id\@&gt;
-</pre>
+  &lt;include src="/packages/categories/www/include/widget" object_id=\@object_id\@ package_id=\@package_id\@&gt;</pre>
 
 In the processing part of ad_form use:
 <pre>

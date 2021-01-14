@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author philg@mit.edu
     @creation-date Jan 1999
-    @cvs-id $Id: registration-history.tcl,v 1.3.2.2 2016/01/02 13:50:17 gustafn Exp $
+    @cvs-id $Id: registration-history.tcl,v 1.4 2017/08/07 23:47:45 gustafn Exp $
 } -properties {
     context:onevalue
     user_rows:multirow

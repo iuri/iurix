@@ -4,8 +4,7 @@
 <!--  -->
 <!-- @author Dave Bauer (dave@thedesignexperience.org) -->
 <!-- @creation-date 2005-02-09 -->
-<!-- @arch-tag: 8fc5c63c-02e7-4910-a536-8edbaff68ff8 -->
-<!-- @cvs-id $Id: content-revision-procs.xql,v 1.2.14.1 2016/10/27 18:02:00 antoniop Exp $ -->
+<!-- @cvs-id $Id: content-revision-procs.xql,v 1.4.2.1 2020/09/01 17:35:38 antoniop Exp $ -->
 
 <queryset>
 
@@ -15,9 +14,4 @@
     </querytext>
   </fullquery>
 
-  <fullquery name="content::revision::new.mime_type_registered_p">
-    <querytext>
-      select exists(select 1 from cr_mime_types where mime_type = :mime_type)
-    </querytext>
-  </fullquery>
 </queryset>

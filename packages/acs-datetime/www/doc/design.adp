@@ -19,7 +19,7 @@ conversions.</p>
 date/time information as input and return date/time strings to the
 caller. Rather than standardize on a low-level representation of
 time (like seconds since 00:00:00 UTC, January 1 1970) all of these
-procedures accept general date specfications. For example, the
+procedures accept general date specifications. For example, the
 default date for <code>dt_widget_datetime</code> can be specified
 as "2001-01-05", "2000-01-05 09:57 pm",
 "2000-01-05 21:57", etc. Internally these are parsed by
@@ -88,7 +88,7 @@ calendar</li><li>
 <code>dt_widget_centered</code> generates small monthly
 calendars centered in a given month (previous, current, next)</li><li>
 <code>dt_widget_year</code> generates a yearly calendar
-(composed of small montly calendars) given the starting month as a
+(composed of small monthly calendars) given the starting month as a
 date</li><li>
 <code>dt_widget_calendar_year</code> generates a yearly
 calendar based on calendar year (Jan to Dec), given any date within

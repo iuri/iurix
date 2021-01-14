@@ -3,7 +3,7 @@
 --
 -- @author oumi@arsdigita.com
 -- @creation-date 2000-12-02
--- @cvs-id $Id: rel-constraints-test.sql,v 1.2.24.1 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: rel-constraints-test.sql,v 1.3 2017/08/07 23:47:56 gustafn Exp $
 --
 
 set serveroutput on

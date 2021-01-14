@@ -1,7 +1,7 @@
 ad_page_contract {
     Page for users to register themselves on the site.
 
-    @cvs-id $Id: user-new.tcl,v 1.22.12.6 2016/05/28 09:54:42 gustafn Exp $
+    @cvs-id $Id: user-new.tcl,v 1.24 2018/01/05 22:40:56 gustafn Exp $
 } {
     {email ""}
     {return_url:localurl [ad_pvt_home]}
@@ -28,6 +28,7 @@ ad_page_contract {
 set registration_url [parameter::get -parameter RegistrationRedirectUrl]
 if {$registration_url ne ""} {
     ad_returnredirect [export_vars -base "$registration_url" -url {return_url email}]
+    ad_script_abort
 }
 
 set subsite_id [ad_conn subsite_id]

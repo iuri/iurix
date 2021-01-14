@@ -3,9 +3,9 @@
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Nov 16, 2006
-  @cvs-id $Id: set-publish-state.tcl,v 1.12.2.1 2015/09/10 08:10:42 gustafn Exp $
+  @cvs-id $Id: set-publish-state.tcl,v 1.16 2019/01/27 17:07:55 gustafn Exp $
 
-  @param object_type 
+  @param object_type
   @param query
 } -parameter {
   {-state:required}
@@ -14,20 +14,10 @@
 }
 
 set page [::xo::db::CrClass get_instance_from_db -revision_id $revision_id]
-$page set_live_revision \
-    -revision_id $revision_id \
-    -publish_status $state
-
-ns_cache flush xotcl_object_cache ::$revision_id
-
-if {$state ne "production"} {
-  ::xowiki::notification::do_notifications -revision_id $revision_id
-  ::xowiki::datasource $revision_id
-} else {
-  db_dml flush_syndication {delete from syndication where object_id = :revision_id}
-}
+$page update_publish_status $state
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

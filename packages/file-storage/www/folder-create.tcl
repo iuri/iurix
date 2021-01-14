@@ -5,7 +5,7 @@ ad_page_contract {
     @creation-date 7 Nov 2000
     @author Caroline Meeks (caroline@meekshome.com)
     @creation-date 4 Jan 2004
-    @cvs-id $Id: folder-create.tcl,v 1.10.2.5 2017/06/08 16:42:26 antoniop Exp $
+    @cvs-id $Id: folder-create.tcl,v 1.11 2017/08/07 23:48:11 gustafn Exp $
 } {
     parent_id:naturalnum,optional,notnull
     folder_id:naturalnum,optional,notnull

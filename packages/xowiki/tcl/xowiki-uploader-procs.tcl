@@ -4,7 +4,7 @@
 
   @creation-date 2016-03-21
   @author Gustaf Neumann
-  @cvs-id $Id: xowiki-uploader-procs.tcl,v 1.1.2.1 2016/03/23 11:57:25 gustafn Exp $
+  @cvs-id $Id: xowiki-uploader-procs.tcl,v 1.3.2.3 2020/08/26 18:35:00 gustafn Exp $
 }
 
 namespace eval ::xowiki {
@@ -19,14 +19,24 @@ namespace eval ::xowiki {
     :property tmpfile
     :property parent_object
 
-    :public method store_file {} {error "not implemented"}
+    :public method store_file {} {
+      #
+      # Abstract method.
+      #
+
+      error "not implemented"
+    }
   }
-  
+
   nx::Class create ::xowiki::UploadFile -superclass ::xowiki::Upload {
     #
     # Class for storing files as xowiki::File instances.
     #
     :public method store_file {} {
+      #
+      # Store the file provided via instance variables by using the
+      # formfield::file implementation.
+      #
       set f [::xowiki::formfield::file new -name upload -object ${:parent_object}]
       set file_object [$f store_file \
                            -file_name ${:file_name} \
@@ -55,13 +65,13 @@ namespace eval ::xowiki {
         return {status_code 200 message ok}
       }
       #
-      # Mime type is ok, save the file under the file name either as a
+      # Mime type is ok, save the file under the filename either as a
       # new item or as a new revision.
       #
       set package_id [${:parent_object} package_id]
       set parent_id [${:parent_object} item_id]
-      
-      set photo_object [$package_id get_page_from_name -name en:${:file_name} -parent_id $parent_id]
+
+      set photo_object [::$package_id get_page_from_name -name en:${:file_name} -parent_id $parent_id]
       if {$photo_object ne ""} {
         #
         # The photo page instance exists already, create a new revision.
@@ -73,14 +83,14 @@ namespace eval ::xowiki {
         $f content-type ${:content_type}
         $f set tmpfile ${:tmpfile}
         $f convert_to_internal
-        $photo_object save      
+        $photo_object save
       } else {
         #
         # Create a new page instance of photo.form.
         #
         ns_log notice "new Photo ${:file_name}"
-        set photoFormObj [::xowiki::Weblog instantiate_forms \
-                              -parent_id $parent_id -forms en:photo.form -package_id $package_id]
+        set photoFormObj [::$package_id instantiate_forms \
+                              -parent_id $parent_id -forms en:photo.form]
         set photo_object [$photoFormObj create_form_page_instance \
                               -name en:${:file_name} \
                               -nls_language en_US \
@@ -97,7 +107,7 @@ namespace eval ::xowiki {
         $f set tmpfile ${:tmpfile}
         $f convert_to_internal
       }
-      
+
       return {status_code 201 message created}
     }
   }

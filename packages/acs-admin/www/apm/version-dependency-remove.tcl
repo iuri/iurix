@@ -2,16 +2,16 @@ ad_page_contract {
     Adds a dependency to a version of a package. 
     @author Jon Salz (jsalz@arsdigita.com)
     @creation-date 17 April 2000
-    @cvs-id $Id: version-dependency-remove.tcl,v 1.8.2.2 2015/09/18 07:39:04 gustafn Exp $
+    @cvs-id $Id: version-dependency-remove.tcl,v 1.12.2.1 2019/08/14 07:34:34 gustafn Exp $
 } {
     {version_id:naturalnum,notnull}
     {dependency_id:naturalnum,notnull}
     dependency_type:notnull
-    package_key:notnull
+    package_key:token,notnull
 }
 
 db_transaction {
-    switch $dependency_type {
+    switch -- $dependency_type {
 
 	provide - require {
 	    apm_dependency_remove $dependency_id
@@ -23,7 +23,7 @@ db_transaction {
 	}
 
 	default {
-	    ad_return_complaint 1 "Dependency Entry Error: Depenendencies are either interfaces or requirements."
+	    ad_return_complaint 1 "Dependency Entry Error: Dependencies are either interfaces or requirements."
 	}
     }
     apm_package_install_spec $version_id
@@ -33,7 +33,7 @@ db_transaction {
 }
 
 ad_returnredirect [export_vars -base version-dependencies {version_id}]
-
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

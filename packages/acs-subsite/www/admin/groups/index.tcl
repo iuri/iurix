@@ -1,20 +1,18 @@
-# /packages/subsite/www/admin/groups/index.tcl
-
 ad_page_contract {
 
     Shows the user all groups on which s/he has permission
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Dec  7 18:09:49 2000
-    @cvs-id $Id: index.tcl,v 1.4.6.2 2016/06/06 18:28:20 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.6.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     {view_by "group_type"}
 } -validate {
     view_by_valid_p {
-	if { $view_by ni {group_type rel_type}} { 
-	    ad_complain "view_by is invalid."
-	}
+        if { $view_by ni {group_type rel_type}} {
+            ad_complain "view_by is invalid."
+        }
     }
 } -properties {
     context:onevalue
@@ -37,9 +35,7 @@ db_1row subsite_info {
       and ag.package_id = :package_id
 }
 
-set intro_text [lang::util::localize [_ acs-subsite.Currently_the_instance_name_has_the_following_groups]]
-
-ad_return_template
+set intro_text [_ acs-subsite.Currently_the_instance_name_has_the_following_groups]
 
 # Local variables:
 #    mode: tcl

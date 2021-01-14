@@ -5,7 +5,7 @@ ad_page_contract {
     @param watch_file The file to stop watching.
     @author Jon Salz [jsalz@arsdigita.com]
     @creation-date 17 April 2000
-    @cvs-id $Id: file-watch-cancel.tcl,v 1.5.24.3 2016/05/20 19:52:59 gustafn Exp $
+    @cvs-id $Id: file-watch-cancel.tcl,v 1.7 2018/01/19 13:40:40 gustafn Exp $
 } {
     {watch_file ""}
     {return_url:localurl ""}
@@ -13,6 +13,7 @@ ad_page_contract {
 apm_file_watch_cancel $watch_file
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

@@ -40,7 +40,7 @@ ad_page_contract {
   @see template::head::add_link
   @see template::head::add_script
 
-  JavaScript event handlers, such as onload, an be added to the <body> tag by 
+  JavaScript event handlers, such as onload, can be added to the <body> tag by 
   calling template::add_body_handler within your page.
 
   @see template::add_body_handler
@@ -58,14 +58,11 @@ ad_page_contract {
     
   @creation-date 14 Sept 2000
 
-  $Id: blank-master.tcl,v 1.10 2018/11/03 19:47:34 gustafn Exp $
+  $Id: blank-master.tcl,v 1.10.2.4 2020/10/28 15:39:19 hectorr Exp $
 }
 
-set system_name [parameter::get -parameter "SystemName" -package_id [apm_package_id_from_key acs-kernel] -default [ad_system_name]]
-
-set user_id [ad_conn user_id]
 if {![info exists doc(type)]} { 
-    set doc(type) {<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">}
+    set doc(type) {<!DOCTYPE HTML>}
 }
 
 #
@@ -90,7 +87,7 @@ template::add_body_script -type "text/javascript" -src "/resources/acs-subsite/c
 # e.g. the blank master is installed before the subsite definitions
 # for the page_plugin callback.  Templates are required to be very
 # robust.
-if {[info commands ::callback::subsite::page_plugin::*] ne ""} {
+if {[llength [info commands ::callback::subsite::page_plugin::*]]} {
     callback subsite::page_plugin
 }
 
@@ -198,7 +195,7 @@ template::head::add_meta \
     -content "text/html; charset=$doc(charset)" \
     -http_equiv "content-type"
 #
-# The following meta tags are unknown for HTML5, therefore discouraged
+# The following meta tags are unknown for HTML5, therefore, discouraged
 #
 # template::head::add_meta \
 #     -content "text/css" \
@@ -216,7 +213,7 @@ if {[lang::util::translator_mode_p]} {
 
 # Determine if developer support is installed and enabled
 #
-if {[llength [info commands ::ds_show_p]] == 1 && [ds_show_p]} {
+if {[namespace which ::ds_show_p] ne {} && [ds_show_p]} {
     template::head::add_css \
         -href "/resources/acs-developer-support/acs-developer-support.css" \
         -media "all"
@@ -274,7 +271,7 @@ template::head::prepare_multirows
 # blocked out.
 #
 if {[parameter::get -parameter CSPEnabledP -package_id [ad_acs_kernel_id] -default 0]
-    && [info commands ::security::csp::render] ne ""
+    && [namespace which ::security::csp::render] ne ""
 } {
     set csp [::security::csp::render]
     if {$csp ne ""} {

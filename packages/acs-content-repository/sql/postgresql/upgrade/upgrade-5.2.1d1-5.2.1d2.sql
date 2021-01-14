@@ -3,8 +3,7 @@
 -- 
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2005-12-26
--- @arch-tag: c141278e-3359-4f40-8d61-3b8e940c633c
--- @cvs-id $Id: upgrade-5.2.1d1-5.2.1d2.sql,v 1.3 2007/09/25 15:22:34 donb Exp $
+-- @cvs-id $Id: upgrade-5.2.1d1-5.2.1d2.sql,v 1.4 2018/08/15 16:48:01 gustafn Exp $
 --
 
 -- New installs were not setting parent_id to security_context_root (-4)

@@ -1,9 +1,10 @@
-ad_library {
-  XOTcl API for low level db abstraction
+::xo::library doc {
+
+  XOTcl API for low-level db abstraction
 
   @author Gustaf Neumann
   @creation-date 2006-12-28
-  @cvs-id $Id: 05-db-procs.tcl,v 1.103.2.37 2017/04/24 20:18:59 gustafn Exp $
+  @cvs-id $Id: 05-db-procs.tcl,v 1.148.2.29 2021/01/05 09:38:55 gustafn Exp $
 }
 
 namespace eval ::xo::db {
@@ -21,8 +22,8 @@ namespace eval ::xo::db {
   # database connection is configured in an object ::xo::dc (for
   # database context) quite similar to ::xo::cc (the default
   # connection context). In general ::xo::dc can be reconfigured at
-  # runtime, and multiple database context can be established,
-  # although there is no high level support to connect to multiple
+  # run time, and multiple database context can be established,
+  # although there is no high-level support to connect to multiple
   # different OpenACS databases at the same time.
   #
   ##########################################################################
@@ -41,7 +42,7 @@ namespace eval ::xo::db {
   ::xo::db::SQL instproc map_datatype {type} {
     # If a mapping is not found we keep the type unaltered, but this
     # will currently break acs_attributes_datatype_fk when creating
-    # acs_attributes with a unmapped type.
+    # acs_attributes with an unmapped type.
     return [::xo::dc get_value map "
      select database_type from acs_datatypes
       where datatype = :type" $type]
@@ -74,8 +75,8 @@ namespace eval ::xo::db {
     switch -- $type {
       string    { set type text }
       long_text { set type text }
-      date      { set type "timestamp with time zone" }
-      ltree     { set type [expr {[my has_ltree] ? "ltree" : "text" }] }
+      date      { set type "timestamp with timezone" }
+      ltree     { set type [expr {[:has_ltree] ? "ltree" : "text" }] }
       default   { return [next] }
     }
     return $type
@@ -109,16 +110,16 @@ namespace eval ::xo::db {
   }
 
   ::xo::db::postgresql instproc has_ltree {} {
-    ns_cache eval xotcl_object_cache [self]::has_ltree {
-      if {[my get_value check_ltree "select count(*) from pg_proc where proname = 'ltree_in'"] > 0} {
+    ::xo::xotcl_package_cache eval [self]::has_ltree {
+      if {[:get_value check_ltree "select count(*) from pg_proc where proname = 'ltree_in'"] > 0} {
         return 1
       }
       return 0
     }
   }
   ::xo::db::postgresql instproc has_hstore {} {
-    ns_cache eval xotcl_object_cache [self]::has_hstore {
-      if {[my get_value check_ltree "select count(*) from pg_proc where proname = 'hstore_in'"] > 0} {
+    ::xo::xotcl_package_cache eval [self]::has_hstore {
+      if {[:get_value check_ltree "select count(*) from pg_proc where proname = 'hstore_in'"] > 0} {
         return 1
       }
       return 0
@@ -141,7 +142,7 @@ namespace eval ::xo::db {
       #ns_log notice "-- found $sequence"
       set sequenceName $sequence
       set nextval [::xo::dc get_value nextval "select nextval(:sequenceName)"]
-    } elseif { [::xo::dc db_0or1row nextval_sequence {
+    } elseif { [::xo::dc 0or1row nextval_sequence {
       select nextval(:sequence) as nextval
       where (select relkind
              from pg_class
@@ -157,7 +158,7 @@ namespace eval ::xo::db {
       #
       # finally, there might be a view with a nextval
       #
-      ns_log debug "db_nextval: sequence($sequence) is not a real sequence.  perhaps it uses the view hack."
+      ns_log debug "db_nextval: sequence($sequence) is not a real sequence.  Perhaps it uses the view hack."
       set nextval [::xo::dc get_value nextval "select nextval from :sequence"]
     }
     return $nextval
@@ -176,6 +177,35 @@ namespace eval ::xo::db {
     return [string map [list "__" .] $sql]
   }
 
+  ::xo::db::oracle instproc limit_clause {
+    {-sql}
+    {-limit ""}
+    {-offset ""}
+  } {
+    if {$limit ne "" || $offset ne ""} {
+      if {$offset eq ""} {
+        #
+        # Only a limit is given.
+        #
+        set limit_clause "ROWNUM <= $limit"
+      } elseif {$limit eq ""} {
+        #
+        # Only an offset is given.
+        #
+        set limit_clause "ROWNUM >= $offset"
+      } else {
+        #
+        # Both, an offset and limit is given.
+        #
+        set limit_clause "ROWNUM BETWEEN $offset and [expr {$offset+$limit}]"
+      }
+      # for pagination, we will need an "inner" sort, such as
+      # SELECT * FROM (SELECT ...., ROW_NUMBER() OVER (ORDER BY ...) R FROM table) WHERE R BETWEEN 0 and 100
+      set sql "SELECT * FROM ($sql) WHERE $limit_clause"
+    }
+    return $sql
+  }
+
   ::xo::db::oracle instproc map_datatype {type} {
     switch -- $type {
       string    { set type varchar2(1000) }
@@ -187,11 +217,12 @@ namespace eval ::xo::db {
     }
     return $type
   }
+
   ::xo::db::oracle instproc datatype_constraint {type table att} {
     set constraint ""
     switch -- $type {
       boolean {
-        set cname [my mk_sql_constraint_name $table $att _ck]
+        set cname [:mk_sql_constraint_name $table $att _ck]
         set constraint "constraint $cname check ($att in ('t','f'))"}
     }
     return $constraint
@@ -212,23 +243,14 @@ namespace eval ::xo::db {
     set where_clause [expr {$where   ne "" ? "WHERE $where" : ""}]
     set order_clause [expr {$orderby ne "" ? "ORDER BY $orderby" : ""}]
     set group_clause [expr {$groupby ne "" ? "GROUP BY $groupby" : ""}]
-    if {$map_function_names} {set vars [my map_function_name $vars]}
+    if {$map_function_names} {set vars [:map_function_name $vars]}
     set sql "SELECT $vars FROM $from $where_clause $group_clause"
     if {$limit ne "" || $offset ne ""} {
-      if {$offset eq ""} {
-        set limit_clause "ROWNUM <= $limit"
-      } elseif {$limit eq ""} {
-        set limit_clause "ROWNUM >= $offset"
-      } else {
-        set limit_clause "ROWNUM BETWEEN $offset and [expr {$offset+$limit}]"
-      }
-      # for pagination, we will need an "inner" sort, such as
-      # SELECT * FROM (SELECT ...., ROW_NUMBER() OVER (ORDER BY ...) R FROM table) WHERE R BETWEEN 0 and 100
-      set sql "SELECT * FROM ($sql $order_clause) WHERE $limit_clause"
+      set sql [:limit_clause -sql "$sql $order_clause" -limit $limit -offset $offset]
     } else {
       append sql " " $order_clause
     }
-    my log "--returned sql = $sql"
+    :log "--returned sql = $sql"
     return $sql
   }
   ::xo::db::oracle instproc date_trunc {field date} {
@@ -240,8 +262,8 @@ namespace eval ::xo::db {
   }
   ::xo::db::oracle instproc mk_sql_constraint_name {table att suffix} {
     #
-    # Constaint names are limited in oracle to 30 characters;
-    # Postgres has no such limits. Therefore, we use different
+    # Constraint names are limited in oracle to 30 characters;
+    # PostgreSQL has no such limits. Therefore, we use different
     # rules depending on whether we are running under Oracle or not.
     #
     set name ${table}_${att}_$suffix
@@ -264,7 +286,7 @@ namespace eval ::xo::db {
   # issue SQL commands and to perform profiling.
   #
 
-  ::xotcl::Class create ::xo::db::Driver
+  ::xotcl::Class create ::xo::db::Driver -parameter dialect
   ::xo::db::Driver abstract instproc sets           {{-dbn ""} {-bind ""} -prepare qn sql}
   ::xo::db::Driver abstract instproc 0or1row        {{-dbn ""} {-bind ""} -prepare qn sql}
   ::xo::db::Driver abstract instproc 1row           {{-dbn ""} {-bind ""} -prepare qn sql}
@@ -272,7 +294,7 @@ namespace eval ::xo::db {
   ::xo::db::Driver abstract instproc list_of_lists  {{-dbn ""} {-bind ""} -prepare qn sql}
   ::xo::db::Driver abstract instproc list           {{-dbn ""} {-bind ""} -prepare qn sql}
   ::xo::db::Driver abstract instproc dml            {{-dbn ""} {-bind ""} -prepare qn sql}
-  ::xo::db::Driver abstract instproc foreach        {{-dbn ""} {-bind ""} -prepare qn sql script}
+  ::xo::db::Driver abstract instproc foreach        {{-dbn ""} {-bind ""} -prepare qn sql {script}}
   ::xo::db::Driver abstract instproc transaction    {{-dbn ""} script args}
   ::xo::db::Driver abstract instproc ds {onOff}
   ::xo::db::Driver abstract instproc prepare        {-handle {-argtypes ""} sql}
@@ -291,7 +313,7 @@ namespace eval ::xo::db {
     set full_statement_name [db_qd_get_fullname $qn 2]
     set full_query [db_qd_fetch $full_statement_name $dbn]
     set sql [db_fullquery_get_querytext $full_query]
-    my uplevel 2 [list subst $sql]
+    :uplevel 2 [list subst $sql]
   }
 
 
@@ -301,88 +323,90 @@ namespace eval ::xo::db {
   #
   ::xo::db::DBI instproc profile {onOff} {
     if {$onOff} {
-      my mixin ::xo::db::DBI::Profile
+      :mixin ::xo::db::DBI::Profile
     } else {
-      if {[my info mixin] ne ""} {my mixin ""}
+      if {[:info mixin] ne ""} {:mixin ""}
     }
   }
 
   ::xo::db::DBI instproc sets {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
-    return [my uplevel [list dbi_rows -result sets {*}$bindOpt -- $sql]]
+    return [:uplevel [list dbi_rows -result sets {*}$bindOpt -- $sql]]
   }
 
   #
   # foreach based on "dbi_rows + results avlists"
   #
   ::xo::db::DBI instproc foreach {{-dbn ""} {-bind ""} -prepare qn sql body} {
-    #if {$sql eq ""} {set sql [my get_sql $qn]}
+    #if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$sql eq ""} {set qn [uplevel [list [self] qn $qn]]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
-    set avlists [my uplevel [list dbi_rows -result avlists {*}$bindOpt -- $sql]]
+    set avlists [:uplevel [list dbi_rows -result avlists {*}$bindOpt -- $sql]]
     foreach avlist $avlists {
-      foreach {a v} $avlist {my uplevel [list set $a $v]}
-      my uplevel $body
+      foreach {a v} $avlist {:uplevel [list set $a $v]}
+      :uplevel $body
     }
   }
   #
   # foreach based on "dbi_eval"
   #
   #::xo::db::DBI instproc foreach {{-dbn ""} {-bind ""} -prepare qn sql body} {
-  #  if {$sql eq ""} {set sql [my get_sql $qn]}
+  #  if {$sql eq ""} {set sql [:get_sql $qn]}
   #  if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
-  #  my uplevel [list dbi_foreach $sql $body]
+  #  :uplevel [list dbi_foreach $sql $body]
   #}
 
   ::xo::db::DBI instproc 0or1row {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
-    return [my uplevel [list ::dbi_0or1row {*}$bindOpt $sql]]
+    return [:uplevel [list ::dbi_0or1row {*}$bindOpt $sql]]
   }
   ::xo::db::DBI instproc 1row {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
-    return [my uplevel [list ::dbi_1row {*}$bindOpt $sql]]
+    return [:uplevel [list ::dbi_1row {*}$bindOpt $sql]]
   }
   ::xo::db::DBI instproc list_of_lists {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
-    return [my uplevel [list ::dbi_rows -result lists -max 1000000 {*}$bindOpt -- $sql]]
+    return [:uplevel [list ::dbi_rows -result lists -max 1000000 {*}$bindOpt -- $sql]]
   }
   ::xo::db::DBI instproc list {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
-    set flat [my uplevel [list ::dbi_rows -columns __columns {*}$bindOpt -- $sql]]
-    if {[my uplevel {llength $__columns}] > 1} {error "query is returing more than one column"}
+    set flat [:uplevel [list ::dbi_rows -columns __columns {*}$bindOpt -- $sql]]
+    if {[:uplevel {llength $__columns}] > 1} {error "query is returning more than one column"}
     return $flat
   }
   ::xo::db::DBI instproc dml {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
-    return [my uplevel [list ::dbi_dml {*}$bindOpt -- $sql]]
+    return [:uplevel [list ::dbi_dml {*}$bindOpt -- $sql]]
   }
   ::xo::db::DBI instproc transaction {{-dbn ""} script args} {
     if {$args ne ""} {
       lassign $args op on_error_code
       set result ""
-      if {$op ne "on_error"} {error "only 'on_error' as argument after script allowed"}
-      if {[catch {
-        set result [my uplevel [list ::dbi_eval -transaction committed $script]]
-      }]} {
-        my uplevel $on_error_code
+      if {$op ne "on_error"} {
+        error "only 'on_error' as argument after script allowed"
+      }
+      try {
+        set result [:uplevel [list ::dbi_eval -transaction committed $script]]
+      } on error {$errorMsg} {
+        :uplevel $on_error_code
       }
       return $result
     } else {
-      return [my uplevel [list ::dbi_eval -transaction committed $script]]
+      return [:uplevel [list ::dbi_eval -transaction committed $script]]
     }
   }
   ::xo::db::DBI instproc prepare {-handle {-argtypes ""} sql} {
     return $sql
   }
   ::xo::db::DBI instproc get_value {{-dbn ""} -prepare qn sql {default ""}} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
-    set answers [my uplevel [list ::dbi_rows -result sets -max 1 $sql]]
+    if {$sql eq ""} {set sql [:get_sql $qn]}
+    set answers [:uplevel [list ::dbi_rows -result sets -max 1 $sql]]
     if {$answers ne ""} {
       set result [ns_set value $answers 0]
       ns_set free $answers
@@ -399,10 +423,10 @@ namespace eval ::xo::db {
   foreach call {sets 0or1row 1row list_of_lists list dml} {
 
     ::xo::db::DBI::Profile instproc $call {{-dbn ""} qn sql} {
-      if {$sql eq ""} {set sql [my get_sql $qn]}
+      if {$sql eq ""} {set sql [:get_sql $qn]}
       set start_time [expr {[clock clicks -microseconds]/1000.0}]
       set result [next]
-      ds_add db $dbn [my ds_map [self proc]] $qn $sql $start_time [expr {[clock clicks -microseconds]/1000.0}] 0 ""
+      ds_add db $dbn [:ds_map [self proc]] $qn $sql $start_time [expr {[clock clicks -microseconds]/1000.0}] 0 ""
       return $result
     }
   }
@@ -411,14 +435,14 @@ namespace eval ::xo::db {
   # foreach based on "dbi_rows + results avlists"
   #
   ::xo::db::DBI::Profile instproc foreach {{-dbn ""} {-bind ""} -prepare qn sql body} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
     set start_time [expr {[clock clicks -microseconds]/1000.0}]
-    set avlists [my uplevel [list dbi_rows -result avlists {*}$bindOpt -- $sql]]
+    set avlists [:uplevel [list dbi_rows -result avlists {*}$bindOpt -- $sql]]
     ds_add db $dbn "exec foreach" $qn $sql $start_time [expr {[clock clicks -microseconds]/1000.0}] 0 ""
     foreach avlist $avlists {
-      foreach {a v} $avlist {my uplevel [list set $a $v]}
-      my uplevel $body
+      foreach {a v} $avlist {:uplevel [list set $a $v]}
+      :uplevel $body
     }
   }
 
@@ -426,7 +450,7 @@ namespace eval ::xo::db {
   # foreach based on "dbi_foreach"
   #
   #::xo::db::DBI::Profile instproc foreach {{-dbn ""} {-bind ""} -prepare qn sql body} {
-  #  if {$sql eq ""} {set sql [my get_sql $qn]}
+  #  if {$sql eq ""} {set sql [:get_sql $qn]}
   #  if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
   #  set start_time [expr {[clock clicks -microseconds]/1000.0}]
   #  set result [next]
@@ -441,12 +465,12 @@ namespace eval ::xo::db {
 
   # The following should not be necessary, but there seems to be a bad
   # interaction when "ns_cache eval" calls 1row with a mixin, doing a
-  # :uplevel (the mixin should be transparant). Without "ns_cache eval"
+  # :uplevel (the mixin should be transparent). Without "ns_cache eval"
   # things look fine.
   ::xo::db::DBI::Profile instproc 1row {{-dbn ""} {-bind ""} -prepare qn sql} {
     set start_time [expr {[clock clicks -microseconds]/1000.0}]
-    set result [my uplevel [list ::dbi_1row $sql]]
-    ds_add db $dbn [my ds_map [self proc]] $qn $sql $start_time [expr {[clock clicks -microseconds]/1000.0}] 0 ""
+    set result [:uplevel [list ::dbi_1row $sql]]
+    ds_add db $dbn [:ds_map [self proc]] $qn $sql $start_time [expr {[clock clicks -microseconds]/1000.0}] 0 ""
     return $result
   }
 
@@ -460,14 +484,14 @@ namespace eval ::xo::db {
   }
 
   ::xo::db::DB instproc transaction {{-dbn ""} script args} {
-    return [my uplevel [list ::db_transaction -dbn $dbn $script {*}$args]]
+    return [:uplevel [list ::db_transaction -dbn $dbn $script {*}$args]]
   }
   ::xo::db::DB instproc prepare {-handle {-argtypes ""} sql} {
     return $sql
   }
 
   ::xo::db::DB instproc sets {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
     db_with_handle -dbn $dbn db {
       if {[info exists prepare]} {set sql [:prepare -handle $db -argtypes $prepare $sql]}
@@ -481,11 +505,12 @@ namespace eval ::xo::db {
   }
 
   ::xo::db::DB instproc foreach {{-dbn ""} {-bind ""} -prepare qn sql body} {
-    #if {$sql eq ""} {set sql [my get_sql $qn]}
+    #if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
     set qn [uplevel [list [self] qn $qn]]
     #
-    # the prepare in the next line works probably only with inline sql statements
+    # The prepare statement in the next line works probably only with
+    # inline SQL statements.
     #
     #if {[info exists prepare]} {set sql [:prepare -dbn $dbn -argtypes $prepare $sql]}
     #ns_log notice "### [list ::db_foreach -dbn $dbn $qn $sql $body {*}$bindOpt]"
@@ -493,7 +518,7 @@ namespace eval ::xo::db {
   }
 
   ::xo::db::DB instproc exec_0or1row {-prepare {-bind ""} sql} {
-    # Helper, used from several postgres-spefic one-tuple queries
+    # Helper, used from several postgres-specific one-tuple queries
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
     ::db_with_handle h {
       if {[info exists prepare]} {set sql [:prepare -handle $h -argtypes $prepare $sql]}
@@ -510,7 +535,7 @@ namespace eval ::xo::db {
     uplevel [list ::db_1row [uplevel [list [self] qn $qn]] $sql {*}$bindOpt]
   }
   ::xo::db::DB instproc dml {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
     uplevel [list ::db_dml [uplevel [list [self] qn $qn]] $sql {*}$bindOpt]
     return [db_resultrows]
@@ -529,14 +554,14 @@ namespace eval ::xo::db {
   }
 
   proc ::xo::db::pg_0or1row {sql} {
-    ns_log notice "::xo::db::pg_0or1row decprecated"
+    ns_log notice "::xo::db::pg_0or1row deprecated"
     ::db_with_handle h {
       return [uplevel [list ns_pg_bind 0or1row $h {*}$bindOpt $sql]]
     }
   }
 
   #
-  # The default insert-view operation (different in postgres and oracle)
+  # The default insert-view operation (different in PostgreSQL and Oracle)
   #
   ::xo::db::Driver instproc insert-view-operation {} { return dml }
   ::xo::db::DB-postgresql instproc insert-view-operation {} { return 0or1row }
@@ -545,7 +570,7 @@ namespace eval ::xo::db {
   # DB driver functions, optimized for PostgreSQL
   #
   ::xo::db::DB-postgresql instproc 0or1row {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     set prepOpt [expr {[info exists prepare] ? [list -prepare $prepare] : ""}]
     set answers [uplevel [list [self] exec_0or1row {*}$prepOpt -bind $bind $sql]]
     if {$answers ne ""} {
@@ -556,7 +581,7 @@ namespace eval ::xo::db {
     return 0
   }
   ::xo::db::DB-postgresql instproc 1row {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     set prepOpt [expr {[info exists prepare] ? [list -prepare $prepare] : ""}]
     set answers [uplevel [list [self] exec_0or1row {*}$prepOpt -bind $bind $sql]]
     if {$answers ne ""} {
@@ -567,7 +592,7 @@ namespace eval ::xo::db {
     error "query $sql did not return an answer"
   }
   ::xo::db::DB-postgresql instproc get_value {{-dbn ""} {-bind ""} -prepare qn sql {default ""}} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     set prepOpt [expr {[info exists prepare] ? [list -prepare $prepare] : ""}]
     set answers [uplevel [list [self] exec_0or1row {*}$prepOpt -bind $bind $sql]]
     if {$answers ne ""} {
@@ -578,7 +603,7 @@ namespace eval ::xo::db {
     return $default
   }
   ::xo::db::DB-postgresql instproc list_of_lists {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
     db_with_handle db {
       if {[info exists prepare]} {set sql [:prepare -handle $db -argtypes $prepare $sql]}
@@ -594,7 +619,7 @@ namespace eval ::xo::db {
     return $result
   }
   ::xo::db::DB-postgresql instproc list {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
     db_with_handle db {
       if {[info exists prepare]} {set sql [:prepare -handle $db -argtypes $prepare $sql]}
@@ -608,7 +633,7 @@ namespace eval ::xo::db {
     return $result
   }
   ::xo::db::DB-postgresql instproc dml {{-dbn ""} {-bind ""} -prepare qn sql} {
-    if {$sql eq ""} {set sql [my get_sql $qn]}
+    if {$sql eq ""} {set sql [:get_sql $qn]}
     if {$bind ne ""} {set bindOpt [list -bind $bind]} {set bindOpt ""}
     set bind $bindOpt
     db_with_handle -dbn $dbn db {
@@ -621,28 +646,47 @@ namespace eval ::xo::db {
   ::xo::db::DB-postgresql instproc prepare {-handle:required {-argtypes ""} sql} {
     #
     # Define a md5 key for the prepared statement in nsv based on the
-    # sql statement.
+    # SQL statement.
     #
     set key [ns_md5 $sql]
 
-    if {[nsv_exists pepared_statement $key]} {
+    #
+    # Get local variables "prepare", "execute", "prepName", and "sql"
+    # keeping the relevant prepared statement context.
+    #
+    set per_interp_cache ::xo::prepared($key)
+    if {[info exists $per_interp_cache]} {
       #
-      # The perepared statement exists already
+      # The prepared statement exists in the per-interp cache, get the
+      # values from there.
       #
-      lassign [nsv_get pepared_statement $key] prepare execute prepName sql
+      lassign [set $per_interp_cache] prepare execute prepName sql
+
+    } elseif {[nsv_exists prepared_statement $key]} {
+      #
+      # The prepared statement exists already in the nsv-cache.
+      #
+      set nsv_cached_value [nsv_get prepared_statement $key]
+      #
+      # Save the nsv-cached value as well in the per-interpreter cache
+      # and set the output variables.
+      #
+      set $per_interp_cache $nsv_cached_value
+      lassign $nsv_cached_value prepare execute prepName sql
+
     } else {
       #
       # Compute a PREPARE statement and an EXECUTE statement on the
       # fly. Notice, that the incoming SQL statement must not have Tcl
       # vars, but has to use bind vars.
       #
-      set c 0; set l ""; set last 0;
+      set c 0; set l ""; set last 0
       set execArgs {}; set prepArgs {}
-      foreach pair [regexp -all -inline -indices {:[a-zA-Z0_9_]+\M} $sql ] {
+      foreach pair [regexp -all -inline -indices {[^:]:[a-zA-Z0_9_]+\M} $sql ] {
         lassign $pair from to
-        lappend execArgs [string range $sql $from $to]
+        lappend execArgs [string range $sql $from+1 $to]
         lappend prepArgs unknown
-        append l [string range $sql $last $from-1] \$[incr c]
+        append l [string range $sql $last $from] \$[incr c]
         set last [incr to]
       }
       append l [string range $sql $last end]
@@ -651,26 +695,27 @@ namespace eval ::xo::db {
       if {[llength $argtypes] == [llength $prepArgs]} {
         set prepArgs $argtypes
       }
-      set c [nsv_incr pepared_statement count]
+      set c [nsv_incr prepared_statement count]
       set prepName __p$c
       set prepare "PREPARE $prepName ([join $prepArgs ,]) AS $l"
       set execute "EXECUTE $prepName ([join $execArgs ,])"
-      nsv_set pepared_statement $key [list $prepare $execute $prepName $sql]
+      nsv_set prepared_statement $key [list $prepare $execute $prepName $sql]
     }
 
     #
     # Cache the information, whether the prepared statement was
     # defined per pg session. Depending on the version of the driver,
-    # we can obtain a session_id from the the db driver. If we can't,
-    # we fall back to a per request-cache (via toplevel variable).
+    # we can obtain a session_id from the db driver. If we can't,
+    # we fall back to a per request-cache (via top-level variable).
     #
-    catch {set session_id [ns_db session_id $handle]}
-    if {[info exists session_id]} {
+    try {
+      set session_id [ns_db session_id $handle]
+    } on ok {r} {
       #ns_log notice "=== $handle $session_id"
       set varName ::xo::prepared($session_id,$key)
-    } else {
+    } on error {errorMsg} {
       set session_id "-"
-      set varName __prepared($key)    
+      set varName __prepared($key)
     }
 
     if {![info exists $varName]} {
@@ -681,12 +726,12 @@ namespace eval ::xo::db {
       if {[ns_pg_bind 0or1row $handle {
         select 1 from pg_prepared_statements where name = :prepName
       }] eq ""} {
-        ns_log notice "=== do prepare handle $handle $prepare session_id $session_id"
-        ::db_exec dml $handle qn..create_preapared $prepare
+        #ns_log notice "=== do prepare handle $handle $prepare session_id $session_id"
+        ::db_exec dml $handle dbqd..create_preapared $prepare
         set $varName 1
       }
     }
-    #ns_log notice "=== pepare done, handle $handle execute $execute session_id $session_id"
+    #ns_log notice "=== prepare done, handle $handle execute $execute session_id $session_id"
     return $execute
   }
 
@@ -711,12 +756,10 @@ namespace eval ::xo::db {
         set driver DBI
       }
     }
-    ::xo::db::$driver-$sqlDialect create ::xo::dc
+    ::xo::db::$driver-$sqlDialect create ::xo::dc -dialect $sqlDialect
   }
 
   ::xo::db::select_driver
-
-
 
   ##########################################################################
   #
@@ -728,60 +771,61 @@ namespace eval ::xo::db {
   # xotcl-core are not executed (probably a bug). Without the
   # ns_cache, creating objects fails with an error. So, we moved the
   # cache creation here and create caches, when they do not exist
-  # already. This change makes the object-cache-init.tcl
-  # obsolete.
+  # already.
   #
-  # Unfortunately, ns_cache has no command to check, whether
+  # Unfortunately, AOLserver's ns_cache has no command to check, whether
   # a cache exists, so we use the little catch below to check.
   #
-  if {[catch {ns_cache flush xotcl_object_cache NOTHING}]} {
+  try {
+    ns_cache flush xotcl_object_cache NOTHING
+  } on error {errorMsg} {
     ns_log notice "xotcl-core: creating xotcl-object caches"
 
-    if {[info commands ns_cache_create] ne ""} {
-      #
-      # Version for NaviServer, which provides allows to provide
-      # maximum size for a single cache entry.
-      #
-      ns_cache_create \
-          -maxentry 200000 \
-          xotcl_object_cache \
-          [parameter::get_from_package_key \
-               -package_key xotcl-core \
-               -parameter XOTclObjectCacheSize \
-               -default 400000]
-    } else {
-      #
-      # Version for AOLserver
-      #
-      ns_cache create xotcl_object_cache \
-          -size [parameter::get_from_package_key \
-                     -package_key xotcl-core \
-                     -parameter XOTclObjectCacheSize \
-                     -default 400000]
-    }
+    ::acs::PartitionedCache create ::xo::xotcl_object_cache \
+        -maxentry 200000 \
+        -package_key xotcl-core \
+        -parameter XOTclObjectCache \
+        -default_size 400000 \
+        -partitions 2
+    ns_log notice "... created ::xo::xotcl_object_cache"
 
-    ns_cache create xotcl_object_type_cache \
-        -size [parameter::get_from_package_key \
-                   -package_key xotcl-core \
-                   -parameter XOTclObjectTypeCacheSize \
-                   -default 10000]
+    ::acs::KeyPartitionedCache create ::xo::xotcl_object_type_cache \
+        -package_key xotcl-core \
+        -parameter XOTclObjectTypeCache \
+        -default_size 50000 \
+        -partitions 2
+    ns_log notice "... created ::xo::xotcl_object_type_cache"
+
+    ::acs::Cache create ::xo::xotcl_package_cache \
+        -package_key xotcl-core \
+        -parameter XOTclPackageCache \
+        -default_size 10000
+    ns_log notice "... created ::xo::xotcl_package_cache"
   }
 
-
-
+  ##########################################################################
+  #
+  # Deprecated functions, obsoleted by xo::dc
+  #
   ad_proc -deprecated has_ltree {} {
     Check, whether ltree is available (postgres only)
+    @see ::xo::dc has_ltree
   } {
     ::xo::dc has_ltree
   }
 
   ad_proc -deprecated has_hstore {} {
     Check, whether hstore is available (postgres only)
+    @see ::xo::dc has_hstore
   } {
     ::xo::dc has_hstore
   }
 
-  
+  ##########################################################################
+  #
+  # Support for requiring database artifacts
+  #
+  ##########################################################################
   ::xotcl::Object create require
 
   require proc exists_table {name} {
@@ -801,28 +845,43 @@ namespace eval ::xo::db {
       set table_name  [string tolower $table_name]
       set column_name [string tolower $column_name]
     }
-    ::xo::db::sql::util table_column_exists \
-        -t_name $table_name \
-        -c_name $column_name
+    #
+    # The following "try" operation is a transitional code: When
+    # someone upgrades from OpenACS 5.9.1 to OpenACS 5.10, and the
+    # upgrade script of 5.10 were not yet executed, the SQL function
+    # definition is still the one of 5.9.1 have no -p_table and
+    # p_column attributes defined (still the old names). A end user is
+    # lost in this situation. Therefore, we provide as a fallback the
+    # interface to the 5.9.1 parameter names.
+    #
+    try {
+      ::xo::db::sql::util table_column_exists \
+          -p_table $table_name \
+          -p_column $column_name
+    } on error {errorMsg} {
+      ::xo::db::sql::util table_column_exists \
+          -t_name $table_name \
+          -c_name $column_name
+    }
   }
 
   require proc table {name definition {populate ""}} {
-    #my log "==== require table $name exists: [my exists_table $name]\n$definition"
-    if {![my exists_table $name]} {
+    #:log "==== require table $name exists: [:exists_table $name]\n$definition"
+    if {![:exists_table $name]} {
       set lines {}
       foreach col [dict keys $definition] {lappend lines "$col [dict get $definition $col]"}
       set definition [join $lines ",\n"]
-      # my log "--table $name does not exist, creating with definition: $definition"
+      # :log "--table $name does not exist, creating with definition: $definition"
       ::xo::dc dml create-table-$name "create table $name ($definition)"
       if {$populate ne ""} {
         ::xo::dc dml populate-table-$name $populate
       }
     } else {
-      # The table exists already. Check the colums, whether we have to
+      # The table exists already. Check the columns, whether we have to
       # add columns. We do not alter attribute types, and we do not
       # delete columns.
       foreach col [dict keys $definition] {
-        if {![my exists_column $name $col]} {
+        if {![:exists_column $name $col]} {
           ns_log notice "xodb: adding column <alter table $name add column $col [dict get $definition $col]>"
           ::xo::dc dml alter-table-$name \
               "alter table $name add column $col [dict get $definition $col]"
@@ -878,15 +937,18 @@ namespace eval ::xo::db {
   } {
     if {[db_driverkey ""] eq "oracle"} {
       set name [string toupper $name]
-      if {[::xo::dc 0or1row exists "
-         SELECT 1 FROM user_sequences
-          WHERE sequence_name = :name limit 1"]} return
+      # sequences have a unique name, no "exists" necessary
+      if {[::xo::dc 0or1row exists {
+        SELECT 1 FROM user_sequences WHERE sequence_name = :name
+      }]} return
     } else {
-      # postgres could avoid this check and use 'if not exists' from
-      # version 9.5
+      #
+      # PostgreSQL could avoid this check and use 'if not exists' in
+      # versions starting with 9.5.
+      #
       if {[::xo::dc 0or1row exists "
-         SELECT 1 FROM information_schema.sequences 
-          WHERE sequence_schema = 'public' 
+         SELECT 1 FROM information_schema.sequences
+          WHERE sequence_schema = 'public'
             AND sequence_name = :name"]} return
     }
 
@@ -907,13 +969,13 @@ namespace eval ::xo::db {
       lappend clause "NO"
     }
     lappend clause "CYCLE"
-    lappend clause "CACHE $cache"    
+    lappend clause "CACHE $cache"
     ::xo::dc dml create-seq "
        CREATE SEQUENCE $name [join $clause]"
   }
 
   require proc package {package_key} {
-    if {![my exists required_package($package_key)]} {
+    if {![info exists :required_package($package_key)]} {
       foreach path [apm_get_package_files \
                         -package_key $package_key \
                         -file_types tcl_procs] {
@@ -922,7 +984,7 @@ namespace eval ::xo::db {
         # sourcing should no happen)
         uplevel #1 apm_source "[acs_root_dir]/packages/$package_key/$path"
       }
-      my set required_package($package_key) 1
+      set :required_package($package_key) 1
     }
   }
 
@@ -932,9 +994,9 @@ namespace eval ::xo::db {
     -check_function
     sql_file
   } {
-    Load the sql file, if the the kernel is older than the
-    specified version, and the version of the specified package is older,
-    and the check_function does not exist in function_args.
+    Load the SQL file, if the kernel is older than the specified
+    version, and the version of the specified package is older, and
+    the check_function does not exist in function_args.
     <p>
     Sample usage: <tt>
     ::xo::db::require function_args \<br>
@@ -944,7 +1006,7 @@ namespace eval ::xo::db {
     &nbsp;&nbsp;[acs_package_root_dir xotcl-request-broker]/patches/funcs-1.sql</tt>
   } {
     if {[db_driverkey ""] eq "postgresql"} {
-      # only necessary with postgres
+      # only necessary with PostgreSQL
       if {[info exists kernel_older_than]} {
         if {[apm_version_names_compare \
                  $kernel_older_than [ad_acs_version]] < 1} {
@@ -967,23 +1029,23 @@ namespace eval ::xo::db {
       }
       if {[info exists check_function]} {
         set check_function [string toupper $check_function]
-        set function_exists [::xo::dc get_value query_version {
-          select 1 from acs_function_args where function = :check_function
-          limit 1
-        } 0]
+        set function_exists [::xo::dc 0or1row function_exists {        
+          select 1 from dual where exists
+          (SELECT 1 FROM acs_function_args WHERE function = :check_function)
+        }]
         if {$function_exists} {
           # nothing to do
           return
         }
       }
 
-      if {[file readable $sql_file]} {
-        my log "Sourcing '$sql_file'"
+      if {[ad_file readable $sql_file]} {
+        :log "Sourcing '$sql_file'"
         db_source_sql_file $sql_file
         ::xo::db::Class create_all_functions
         return 1
       } else {
-        my log "Could not source '$sql_file'"
+        :log "Could not source '$sql_file'"
       }
     }
     return 0
@@ -1058,10 +1120,10 @@ namespace eval ::xo::db {
 
     @return object_type, typically an XOTcl class
   } {
-    return [ns_cache eval xotcl_object_type_cache $id {
+    xo::xotcl_object_type_cache eval -partition_key $id $id {
       ::xo::dc 1row get_class "select object_type from acs_objects where object_id=:id"
       return $object_type
-    }]
+    }
   }
 
   ::xo::db::Class ad_proc get_instance_from_db {
@@ -1074,13 +1136,13 @@ namespace eval ::xo::db {
 
     @return fully qualified object
   } {
-    set type  [my get_object_type -id $id]
+    set type  [:get_object_type -id $id]
     set class [::xo::db::Class object_type_to_class $type]
-    if {![my isclass $class]} {
+    if {![:isclass $class]} {
       error "no class $class defined"
     }
     set r [$class create ::$id]
-    $r db_1row get_instance [$class fetch_query $id]
+    $r db_1row dbqd..get_instance [$class fetch_query $id]
     $r set object_id $id
     $r destroy_on_cleanup
     $r initialize_loaded_object
@@ -1130,7 +1192,7 @@ namespace eval ::xo::db {
       }
     }
     ::xo::db::sql::acs_object_type drop_type \
-        -object_type $object_type -cascade_p $cascade_p
+        -object_type $object_type -drop_children_p $cascade_p
     return ""
   }
 
@@ -1155,18 +1217,18 @@ namespace eval ::xo::db {
 
     @return class name of the created XOTcl class
   } {
-    # some table_names and id_columns in acs_object_types are unfortunately upper case,
-    # so we have to convert to lower case here....
+    # some table_names and id_columns in acs_object_types are unfortunately uppercase,
+    # so we have to convert to lowercase here....
     ::xo::dc 1row fetch_class {
       select object_type, supertype, pretty_name, lower(id_column) as id_column, lower(table_name) as table_name
       from acs_object_types where object_type = :object_type
     }
-    set classname [my object_type_to_class $object_type]
-    if {![my isclass $classname]} {
+    set classname [:object_type_to_class $object_type]
+    if {![:isclass $classname]} {
       # the XOTcl class does not exist, we create it
-      #my log "--db create class $classname superclass $supertype"
+      #:log "--db create class $classname superclass $supertype"
       ::xo::db::Class create $classname \
-          -superclass [my object_type_to_class $supertype] \
+          -superclass [:object_type_to_class $supertype] \
           -object_type $object_type \
           -supertype $supertype \
           -pretty_name $pretty_name \
@@ -1175,7 +1237,7 @@ namespace eval ::xo::db {
           -sql_package_name [namespace tail $classname] \
           -noinit
     } else {
-      #my log "--db we have a class $classname"
+      #:log "--db we have a class $classname"
     }
     set attributes [::xo::dc list_of_lists get_atts {
       select attribute_name, pretty_name, pretty_plural, datatype,
@@ -1189,7 +1251,7 @@ namespace eval ::xo::db {
           default_value min_n_values max_n_values
 
       # ignore some erroneous definitions in the acs meta model
-      if {[my exists exclude_attribute($table_name,$attribute_name)]} {
+      if {[info exists :exclude_attribute($table_name,$attribute_name)]} {
         continue
       }
 
@@ -1207,7 +1269,9 @@ namespace eval ::xo::db {
       }
       append slots $cmd \n
     }
-    if {[catch {$classname slots $slots} errorMsg]} {
+    ad_try {
+      $classname slots $slots
+    } on error {errorMsg} {
       error "Error during slots: $errorMsg"
     }
 
@@ -1290,7 +1354,7 @@ namespace eval ::xo::db {
     # Note: based on the ordering, char has lower priority over int*
     # which is probably a bug, but is not a problem in OpenACS.
     #
-    # Note, that we can as well get the type in future versions.
+    # Note that we can as well get the type in future versions.
     #
     ::xo::dc foreach get_function_params {
       select proname, pronargs, proargtypes, prosrc
@@ -1331,8 +1395,8 @@ namespace eval ::xo::db {
   }
 
   #
-  # The generation of the code interface code is driver specifc, since
-  # e.q. dbi supports option "-autonull", which simplified the
+  # The generation of the code interface code is driver specific, since
+  # e.g. dbi supports option "-autonull", which simplified the
   # interface code significantly
   #
 
@@ -1341,11 +1405,12 @@ namespace eval ::xo::db {
   #
 
   ::xo::db::DBI instproc generate_psql {package_name object_name} {
-    set function_args [my get_function_args $package_name $object_name]
-    set function_args [my fix_function_args $function_args $package_name $object_name]
-    set sql_info [my sql_arg_info $function_args $package_name $object_name]
+    set function_args [:get_function_args $package_name $object_name]
+    set function_args [:fix_function_args $function_args $package_name $object_name]
+    set sql_info [:sql_arg_info $function_args $package_name $object_name]
     #ns_log notice "-- select ${package_name}__${object_name}($psql_args)"
-    dict set sql_info sql [subst { select ${package_name}__${object_name}([dict get $sql_info psql_args]) }]
+    set sql_suffix [:psql_statement_suffix ${package_name} ${object_name}]
+    dict set sql_info sql [subst { select ${package_name}__${object_name}([dict get $sql_info psql_args]) $sql_suffix}]
     dict set sql_info sql_cmd [subst {dbi_1row -autonull {[dict get $sql_info sql] as result}}]
     dict set sql_info body [subst {
       #function_args: $function_args
@@ -1374,16 +1439,30 @@ namespace eval ::xo::db {
   }
 
   #
-  #  DB and Postgres interface method generation (no autonull):
+  # In some cases, we need locks on SQL select statements, when the
+  # select updates tuples, e.g. via a function. This is required at
+  # least in PostgreSQL.
   #
+  set ::xo::db::sql_suffix(postgresql,content_item,set_live_revision) "FOR NO KEY UPDATE"
+  set ::xo::db::sql_suffix(postgresql,content_item,del) "FOR UPDATE"
+  set ::xo::db::sql_suffix(postgresql,content_item,new) "FOR UPDATE"
 
+  ::xo::db::DB instproc psql_statement_suffix {package_name object_name} {
+    set key ::xo::db::sql_suffix(${:dialect},$package_name,$object_name)
+    return [expr {[info exists $key] ? [set $key] : ""}]
+  }
+
+  #
+  #  DB-postgresql interface method generation (no autonull):
+  #
   ::xo::db::DB-postgresql instproc generate_psql {package_name object_name} {
-    set function_args [my get_function_args $package_name $object_name]
-    set function_args [my fix_function_args $function_args $package_name $object_name]
-    set sql_info [my sql_arg_info $function_args $package_name $object_name]
+    set function_args [:get_function_args $package_name $object_name]
+    set function_args [:fix_function_args $function_args $package_name $object_name]
+    set sql_info [:sql_arg_info $function_args $package_name $object_name]
     #ns_log notice "-- select ${package_name}__${object_name} ($psql_args)"
+    set sql_suffix [:psql_statement_suffix ${package_name} ${object_name}]
     set sql [subst {
-      select ${package_name}__${object_name}([dict get $sql_info psql_args])
+      select ${package_name}__${object_name}([dict get $sql_info psql_args]) $sql_suffix
     }]
     set sql_cmd {ns_set value [ns_pg_bind 0or1row $db $sql] 0}
     dict set sql_info body [subst {
@@ -1449,9 +1528,9 @@ namespace eval ::xo::db {
                     and position = 0)
     }]
 
-    set function_args [my get_function_args $package_name $object_name]
-    set function_args [my fix_function_args $function_args $package_name $object_name]
-    set sql_info [my sql_info $function_args $package_name $object_name]
+    set function_args [:get_function_args $package_name $object_name]
+    set function_args [:fix_function_args $function_args $package_name $object_name]
+    set sql_info [:sql_info $function_args $package_name $object_name]
 
     if {$is_function} {
       set sql [subst {BEGIN :1 := ${package_name}.${object_name}(\$sql_args); END;}]
@@ -1472,7 +1551,7 @@ namespace eval ::xo::db {
       set sql_args \[join \$sql_args ,\]
       set sql "$sql"
       db_with_handle -dbn \$dbn db {
-        #my log "sql=$sql, sql_command=$sql_cmd"
+        #:log "sql=$sql, sql_command=$sql_cmd"
         return \[ $sql_cmd \]
       }
     }]
@@ -1559,22 +1638,23 @@ namespace eval ::xo::db {
 
   ::xo::db::Class instproc dbproc_nonposargs {object_name} {
     #
-    # This method compiles a stored procedure into a xotcl method
+    # This method compiles a stored procedure into an XOTcl method
     # using a classic nonpositional argument style interface.
     #
-    # The current implementation should work on postgres and oracle (not tested)
-    # but will not work, when a single OpenACS instance want to talk to
-    # postgres and oracle simultaneously. Not sure, how important this is...
+    # The current implementation should work on PostgreSQL and Oracle
+    # (not tested) but will not work, when a single OpenACS instance
+    # want to talk to PostgreSQL and Oracle simultaneously. Not sure,
+    # how important this is...
     #
     if {$object_name eq "set"} {
-      my log "We cannot handle object_name = '$object_name' in this version"
+      :log "We cannot handle object_name = '$object_name' in this version"
       return
     }
     #
     # Object names have the form of e.g. ::xo::db::apm_parameter.
     # Therefore, we use the namspace tail as sql_package_name.
     #
-    set package_name  [my sql_package_name [namespace tail [self]]]
+    set package_name  [:sql_package_name [namespace tail [self]]]
     set sql_info      [::xo::dc generate_psql $package_name $object_name]
 
     # puts "sql_command=$sql_command"
@@ -1602,13 +1682,13 @@ namespace eval ::xo::db {
       lappend nonposarg_list $arg
     }
     # When the new method is executed within a contains, -childof is
-    # appended. we have to added it here to avoid complains. xotcl 2.0
+    # appended. We have to added it here to avoid complains. Xotcl 2.0
     # should find better ways to handle contain or the new invocation.
     if {$object_name eq "new"} {lappend nonposarg_list -childof}
-    #my log "-- define $object_name $nonposarg_list"
+    #:log "-- define $object_name $nonposarg_list"
 
     #ns_log notice final=[dict get $sql_info body]
-    my ad_proc $object_name $nonposarg_list {Automatically generated method} [dict get $sql_info body]
+    :ad_proc $object_name $nonposarg_list {Automatically generated method} [dict get $sql_info body]
   }
 
   ::xo::db::Class instproc unknown {m args} {
@@ -1626,12 +1706,12 @@ namespace eval ::xo::db {
       }
 
       set class_name ::xo::db::sql::[string tolower $package_name]
-      if {![my isobject $class_name]} {
+      if {![nsf::is object $class_name]} {
         ::xo::db::Class create $class_name
       } elseif {![$class_name istype ::xo::db::Class]} {
         #
         # The methods of ::xo::db::sql::util like "table_exists" fall
-        # into this category. Make sure, that we do not create new
+        # into this category. Make sure that we do not create new
         # objects via the next command.
         #
         continue
@@ -1641,14 +1721,14 @@ namespace eval ::xo::db {
   }
 
   ::xo::db::Class proc class_to_object_type {name} {
-    if {[my isclass $name]} {
+    if {[:isclass $name]} {
       if {[$name exists object_type]} {
         # The specified class has an object_type defined; return it
         return [$name object_type]
       }
       if {![$name istype ::xo::db::Object]} {
         # The specified class is not subclass of ::xo::db::Object.
-        # return acs_object in your desparation.
+        # return acs_object in your desperation.
         return acs_object
       }
     }
@@ -1675,7 +1755,7 @@ namespace eval ::xo::db {
   }
 
   #
-  # now, create all stored procedures in postgres or Oracle
+  # Now, create all stored procedures in PostgreSQL or Oracle.
   #
   ::xo::db::Class create_all_functions
 
@@ -1684,126 +1764,111 @@ namespace eval ::xo::db {
   # The object require provides an interface to create certain
   # resources in case they are not created already.
   #
+  #
+  # Most of ::xo::db::sql::util is coming from acs-kernel / utilities.create.sql
+  #
+  # But still, we add here more procs
+  if {[::xo::db::sql::util info commands get_default] ne ""} {
+    require proc unique {-table -col} {
+      # Unique could be there by an index too
+      set idxname [::xo::dc mk_sql_constraint_name $table $col un_idx]
+      if {[::xo::db::sql::util index_exists -name $idxname]} return
+      if {![::xo::db::sql::util unique_exists -table $table -column $col]} {
+        ::xo::dc dml alter-table-$table \
+            "alter table $table add unique ($col)"
+      }
+    }
 
-  # Installations with acs-kernel prior to 5.8.1a6 (or later, before running upgrade script)
-  # won't have these procs. We define them here if missing to avoid breaking running instances during transition.
-  if {![::xotcl::Class isobject "::xo::db::sql::util"]} {
-    ::xotcl::Class create ::xo::db::sql::util
-    if {[::xo::db::sql::util info commands table_exists] eq ""} {
-      ::xo::db::sql::util ad_proc table_exists {-name:required} {Transitional method} {
-        set query [expr {[db_driverkey ""] eq "oracle" ?
-                         {select 1 from user_tables  where table_name = :name} :
-                         {select 1 from pg_class where relname = :name and pg_table_is_visible(oid)}}]
-        ::xo::dc 0or1row query $query
+    require proc not_null {-table -col} {
+      if {![::xo::db::sql::util not_null_exists -table $table -column $col]} {
+        ::xo::dc dml alter-table-$table \
+            "alter table $table alter column $col set not null"
       }
     }
-    if {[::xo::db::sql::util info commands view_exists] eq ""} {
-      ::xo::db::sql::util ad_proc view_exists {-name:required} {Transitional method} {
-        set query [expr {[db_driverkey ""] eq "oracle" ?
-                         {select 1 from user_views   where view_name  = :name} :
-                         {select 1 from pg_views     where viewname   = :name}}]
-        ::xo::dc 0or1row query $query
+
+    require proc default {-table -col -value} {
+      set default [::xo::db::sql::util get_default -table $table -column $col]
+      #
+      # Newer versions of PostgreSQL return default values with type
+      # casts (e.g. 'en_US'::character varying). In these cases, we
+      # remove the type cast from the returned default value before
+      # comparison.
+      #
+      # Depending on the generation and real datatype of the DBMS,
+      # certain datatype values are reported differently from the
+      # DBMS. Therefore, we use a type cast to check whether
+      # specified default value (e.g. '1900-01-01') is in fact
+      # equivalent to default stored in db (e.g. '1900-01-01
+      # 00:00:00+01'::timestamp with timezone).
+      #
+      # Booleans can be normalized in advance without involving the
+      # database
+      if {
+          ($default eq "f" && $value eq "false")
+          || ($default eq "t" && $value eq "true")
+        } {
+        set value $default
       }
-    }
-    if {[::xo::db::sql::util info commands index_exists] eq ""} {
-      ::xo::db::sql::util ad_proc index_exists {-name:required} {Transitional method} {
-        set query [expr {[db_driverkey ""] eq "oracle" ?
-                         {select 1 from user_indexes where index_name = :name} :
-                         {select 1 from pg_indexes   where indexname  = :name}}]
-        ::xo::dc 0or1row query $query
-      }
-    }
-    if {[::xo::db::sql::util info commands table_column_exists] eq ""} {
-      ::xo::db::sql::util ad_proc table_column_exists {-t_name:required -c_name:required} {Transitional method} {
-        set query [expr {[db_driverkey ""] eq "oracle" ?
-                         {select 1 from user_tab_columns where table_name = :t_name and column_name = :c_name} :
-                         {select 1 from information_schema.columns where table_name = :t_name and column_name = :c_name}}]
-        ::xo::dc 0or1row query $query
-      }
-    }
-  } else {
-    # If we have the proper utils, require object can be enhanced with
-    # new procs
-    if {[::xo::db::sql::util info commands get_default] ne ""} {
-      require proc unique {-table -col} {
-        # Unique could be there by a index too
-        set idxname [::xo::dc mk_sql_constraint_name $table $col un_idx]
-        if {[::xo::db::sql::util index_exists -name $idxname]} return
-        if {![::xo::db::sql::util unique_exists -table $table -column $col]} {
-          ::xo::dc dml alter-table-$table \
-              "alter table $table add unique ($col)"
+      if {$default ne $value} {
+        if {[regexp {^'(.*)'::(.*)$} $default match default_value default_datatype]} {
+          set clause "$default <> cast(:value as $default_datatype)"
+        } else {
+          set datatype [db_column_type $table $col]
+          set clause "cast(:default as $datatype) <> cast(:value as $datatype)"
         }
-      }
-
-      require proc not_null {-table -col} {
-        if {![::xo::db::sql::util not_null_exists -table $table -column $col]} {
-          ::xo::dc dml alter-table-$table \
-              "alter table $table alter column $col set not null"
-        }
-      }
-
-      require proc default {-table -col -value} {
-        set default [::xo::db::sql::util get_default -table $table -column $col]
-        if {$default ne $value} {
+        # This last coalesce is in case one of the compared values
+        # was null: as we know they were different, this is
+        # certainly a new default
+        if {[::xo::dc get_value check_default "
+                select coalesce($clause, true) from dual"]} {
           ::xo::dc dml alter-table-$table \
               "alter table $table alter column $col set default :value"
         }
       }
+    }
 
-      require proc references {-table -col -ref} {
-        # Check for already existing foreign keys.
-        set ref [string trim $ref]
-        # try to match the full reftable(refcol) syntax...
-        if {![regexp {^(\w*)\s*\(\s*(\w*)\s*\)\s*(.*)$} $ref match reftable refcol rest]} {
-          # if fails only table was given, assume refcol is reftable's
-          # primary key
-          set reftable [lindex $ref 0]
-          set refcol [::xo::db::sql::util get_primary_keys -table $reftable]
-          # only one primary key is supported for the table
-          if {[llength $refcol] != 1} return
-        }
-        if {[::xo::db::sql::util foreign_key_exists \
-                 -table $table -column $col \
-                 -reftable $reftable -refcolumn $refcol]} {
-          ns_log debug "foreign key already exists for table $table column $col to ${reftable}(${refcol})"
-          return
-        }
-        ::xo::dc dml alter-table-$table \
-            "alter table $table add foreign key ($col) references $ref"
+    require proc references {-table -col -ref} {
+      # Check for already existing foreign keys.
+      set ref [string trim $ref]
+      # try to match the full reftable(refcol) syntax...
+      if {![regexp {^(\w*)\s*\(\s*(\w*)\s*\)\s*(.*)$} $ref match reftable refcol rest]} {
+        # if fails only table was given, assume refcol is reftable's
+        # primary key
+        set reftable [lindex $ref 0]
+        set refcol [::xo::db::sql::util get_primary_keys -table $reftable]
+        # only one primary key is supported for the table
+        if {[llength $refcol] != 1} return
       }
-    } else {
-      # some features for this object require kernel to be >=
-      # 5.9.1d20, so some database checking utils are present. Create
-      # only stubs if we have the code but still have to run the
-      # upgrade scripts.
-      require proc unique {-table -col} {}
-      require proc not_null {-table -col} {}
-      require proc default {-table -col -value} {}
-      require proc references {-table -col -ref} {}
+      if {[::xo::db::sql::util foreign_key_exists \
+               -table $table -column $col \
+               -reftable $reftable -refcolumn $refcol]} {
+        ns_log debug "foreign key already exists for table $table column $col to ${reftable}(${refcol})"
+        return
+      }
+      ::xo::dc dml alter-table-$table \
+          "alter table $table add foreign key ($col) references $ref"
     }
   }
-  ###
-
 
   #
   # Methods for instances of the meta class (methods for object_types)
   #
   if {[db_driverkey ""] eq "postgresql"} {
     #
-    # Postgres
+    # PostgreSQL
     #
     ::xo::db::Class instproc object_types_query {
       {-subtypes_first:boolean false}
     } {
-      my instvar object_type_key
+      set object_type_key ${:object_type_key}
       set order_clause [expr {$subtypes_first ? "order by tree_sortkey desc":""}]
       return "select object_type from acs_object_types where
         tree_sortkey between '$object_type_key' and tree_right('$object_type_key')
         $order_clause"
     }
     ::xo::db::Class instproc init_type_hierarchy {} {
-      my instvar object_type
-      my set object_type_key [::xo::dc list get_tree_sortkey {
+      set object_type ${:object_type}
+      set :object_type_key [::xo::dc list get_tree_sortkey {
         select tree_sortkey from acs_object_types
         where object_type = :object_type
       }]
@@ -1815,14 +1880,14 @@ namespace eval ::xo::db {
     ::xo::db::Class instproc object_types_query {
       {-subtypes_first:boolean false}
     } {
-      my instvar object_type
+      set object_type ${:object_type}
       set order_clause [expr {$subtypes_first ? "order by LEVEL desc":""}]
       return "select object_type from acs_object_types
         start with object_type = '$object_type'
         connect by prior object_type = supertype $order_clause"
     }
     ::xo::db::Class instproc init_type_hierarchy {} {
-      my set object_type_key {}
+      set :object_type_key {}
     }
   }
 
@@ -1836,128 +1901,120 @@ namespace eval ::xo::db {
     @return list of object_types
   } {
     return [::xo::dc list get_object_types \
-                [my object_types_query -subtypes_first $subtypes_first]]
+                [:object_types_query -subtypes_first $subtypes_first]]
   }
 
   ::xo::db::Class ad_instproc create_object_type {} {
     Create an acs object_type for the current XOTcl class
   } {
-    my instvar object_type supertype pretty_name pretty_plural \
-        table_name id_column name_method abstract_p
-
-    my check_default_values
-    my check_table_atts
+    :check_default_values
+    :check_table_atts
 
     # The default supertype is acs_object. If the supertype
     # was not changed (still acs_object), we map the superclass
     # to the object_type to obtain the ACS supertype.
-    if {$supertype eq "acs_object"} {
-      set supertype [::xo::db::Class class_to_object_type [my info superclass]]
+    if {${:supertype} eq "acs_object"} {
+      set :supertype [::xo::db::Class class_to_object_type [:info superclass]]
     }
 
     ::xo::db::sql::acs_object_type create_type \
-        -object_type $object_type \
-        -supertype $supertype \
-        -pretty_name $pretty_name \
-        -pretty_plural $pretty_plural \
-        -table_name $table_name \
-        -id_column $id_column \
-        -abstract_p $abstract_p \
-        -name_method $name_method \
-        -package_name [my sql_package_name]
+        -object_type   ${:object_type} \
+        -supertype     ${:supertype} \
+        -pretty_name   ${:pretty_name} \
+        -pretty_plural ${:pretty_plural} \
+        -table_name    ${:table_name} \
+        -id_column     ${:id_column} \
+        -abstract_p    ${:abstract_p} \
+        -name_method   ${:name_method} \
+        -package_name  [:sql_package_name]
   }
 
   ::xo::db::Class ad_instproc drop_object_type {{-cascade true}} {
     Drop an acs object_type; cascde true means that the attributes
-    are droped as well.
+    are dropped as well.
   } {
-    my instvar object_type
     ::xo::db::sql::acs_object_type drop_type \
-        -object_type $object_type \
+        -object_type ${:object_type} \
         -cascade_p [expr {$cascade ? "t" : "f"}]
   }
 
   ::xo::db::Class instproc db_slots {} {
 
-    my instvar id_column db_slot db_constraints
-    array set db_slot [list]
-    array set db_constraints [list]
+    array set :db_slot [list]
+    array set :db_constraints [list]
     #
     # First get all ::xo::db::Attribute slots and check later,
     # if we have to add the id_column automatically.
     #
-    # my log "--setting db_slot all=[my info slots]"
-    foreach att [my info slots] {
-      #my log "--checking $att [$att istype ::xo::db::Attribute] [$att info class]"
+    # :log "--setting db_slot all=[:info slots]"
+    foreach att [:info slots] {
+      #:log "--checking $att [$att istype ::xo::db::Attribute] [$att info class]"
       if {![$att istype ::xo::db::Attribute]} continue
-      set db_slot([$att name]) $att
-      my collect_constraints $att
+      set :db_slot([$att name]) $att
+      :collect_constraints $att
     }
     if {[self] ne "::xo::db::Object"} {
-      if {[my exists id_column] && ![info exists db_slot($id_column)]} {
+      if {[info exists :id_column] && ![info exists :db_slot(${:id_column})]} {
         # create automatically the slot for the id column
-        my slots [subst {
-          ::xo::db::Attribute create $id_column \
+        :slots [subst {
+          ::xo::db::Attribute create ${:id_column} \
               -pretty_name "ID" \
               -datatype integer \
               -create_acs_attribute false
         }]
-        set db_slot($id_column) [self]::slot::$id_column
+        set :db_slot(${:id_column}) [self]::slot::${:id_column}
       }
     }
-    #my log "--setting db_slot of [self] to [array names db_slot]"
+    #:log "--setting db_slot of [self] to [array names _db_slot]"
   }
 
   # read attribute constraints and store them so they can be added
   # after plain table creation
   ::xo::db::Class instproc collect_constraints {att} {
-    my instvar db_constraints table_name
     set attname [$att name]
     # Index is always created after table creation, so it is always ok
     # to collect this...
     if {[$att exists index]} {
-      lappend db_constraints($attname) [list index [$att set index]]
+      lappend :db_constraints($attname) [list index [$att set index]]
     }
     # ...in all other cases, when column doesn not exist will be
     # created properly. No need to collect constraints.
-    if {[::xo::db::require exists_column $table_name $attname]} {
+    if {[::xo::db::require exists_column ${:table_name} $attname]} {
       if {[$att exists unique] && [$att set unique]} {
-        lappend db_constraints($attname) unique
+        lappend :db_constraints($attname) unique
       }
       if {[$att exists not_null] && [$att set not_null]} {
-        lappend db_constraints($attname) not_null
+        lappend :db_constraints($attname) not_null
       }
       if {![string is space [$att set references]]} {
-        lappend db_constraints($attname) [list references [$att set references]]
+        lappend :db_constraints($attname) [list references [$att set references]]
       }
       if {[$att exists default]} {
-        lappend db_constraints($attname) [list default [$att set default]]
+        lappend :db_constraints($attname) [list default [$att set default]]
       }
     }
   }
 
   ::xo::db::Class instproc table_definition {} {
-    my instvar id_column table_name db_slot
     array set column_specs [list]
     #
     # iterate over the slots and collect the column_specs for table generation
     #
-    foreach {slot_name slot} [my array get db_slot] {
+    foreach {slot_name slot} [array get :db_slot] {
       if {![$slot create_table_attribute]} continue
       set column_name [$slot column_name]
       set column_specs($column_name) \
-          [$slot column_spec -id_column [expr {$column_name eq $id_column}]]
+          [$slot column_spec -id_column [expr {$column_name eq ${:id_column}}]]
     }
 
     # Requires collected constraints on object's table.
     ::xo::db::Class instproc require_constraints {} {
-      my instvar db_constraints
-      set table_name [my table_name]
-      foreach col [array names db_constraints] {
-        foreach constr $db_constraints($col) {
+      set table_name [:table_name]
+      foreach col [array names :db_constraints] {
+        foreach constr [set :db_constraints($col)] {
           set type  [lindex $constr 0]
           set value [join [lrange $constr 1 end]]
-          switch $type {
+          switch -- $type {
             "unique" {
               ::xo::db::require unique \
                   -table $table_name -col $col
@@ -1987,10 +2044,10 @@ namespace eval ::xo::db {
     }
 
     if {[array size column_specs] > 0} {
-      if {$table_name eq ""} {error "no table_name specified"}
-      if {$id_column eq ""}  {error "no id_column specified"}
-      if {![info exists column_specs($id_column)]} {
-        error "no ::xo::db::Attribute slot for id_column '$id_column' specified"
+      if {${:table_name} eq ""} {error "no table_name specified"}
+      if {${:id_column} eq ""}  {error "no id_column specified"}
+      if {![info exists column_specs(${:id_column})]} {
+        error "no ::xo::db::Attribute slot for id_column '${:id_column}' specified"
       }
       set table_specs [list]
       foreach {att spec} [array get column_specs] {lappend table_specs $att $spec}
@@ -1998,27 +2055,27 @@ namespace eval ::xo::db {
     } else {
       set table_definition ""
     }
-    # my log table_definition=$table_definition
+    # :log table_definition=$table_definition
     return $table_definition
   }
 
   ::xo::db::Class instproc mk_update_method {} {
     set updates [list]
     set vars [list]
-    foreach {slot_name slot} [my array get db_slot] {
+    foreach {slot_name slot} [array get :db_slot] {
       $slot instvar name column_name
-      if {$column_name ne [my id_column]} {
+      if {$column_name ne [:id_column]} {
         lappend updates "$column_name = :$name"
         lappend vars $name
       }
     }
     if {[llength $updates] == 0} return
-    my instproc update {} [subst {
+    :instproc update {} [subst {
       ::xo::dc transaction {
         next
-        my instvar object_id $vars
-        ::xo::dc dml update_[my table_name] {update [my table_name]
-          set [join $updates ,] where [my id_column] = :object_id
+        :instvar object_id $vars
+        ::xo::dc dml update_[:table_name] {update [:table_name]
+          set [join $updates ,] where [:id_column] = :object_id
         }
       }
     }]
@@ -2027,15 +2084,15 @@ namespace eval ::xo::db {
   ::xo::db::Class instproc mk_insert_method {} {
     # create method 'insert' for the application class
     # The caller (e.g. method new) should care about db_transaction
-    my instproc insert {} {
+    :instproc insert {} {
       set __table_name [[self class] table_name]
       set __id [[self class] id_column]
-      my set $__id [my set object_id]
-      my log "ID insert in $__table_name, id = $__id = [my set $__id]"
+      set :$__id ${:object_id}
+      :log "ID insert in $__table_name, id = $__id = [set :$__id]"
       next
       foreach {__slot_name __slot} [[self class] array get db_slot] {
-        my instvar $__slot_name
-        if {[info exists $__slot_name]} {
+        if {[info exists :$__slot_name]} {
+          set $__slot_name [set :$__slot_name]
           lappend __vars $__slot_name
           lappend __atts [$__slot column_name]
         }
@@ -2049,88 +2106,85 @@ namespace eval ::xo::db {
     Check table_name and id_column and set meaningful
     defaults, if these attributes are not provided.
   } {
-    my check_default_values
+    :check_default_values
     set table_name_error_tail ""
     set id_column_error_tail ""
-    my instvar sql_package_name
 
-    if {![my exists sql_package_name]} {
-      set sql_package_name [self]
-      #my log "-- sql_package_name of [self] is '$sql_package_name'"
+    if {![info exists :sql_package_name]} {
+      set :sql_package_name [self]
+      #:log "-- sql_package_name of [self] is '${:sql_package_name}'"
     }
-    if {[string length $sql_package_name] > 30} {
-      error "SQL package_name '$sql_package_name' can be maximal 30 characters long!\
+    if {[string length ${:sql_package_name}] > 30} {
+      error "SQL package_name '${:sql_package_name}' can be maximal 30 characters long!\
         Please specify a shorter sql_package_name in the class definition."
     }
-    if {$sql_package_name eq ""} {
-      error "Cannot determine SQL package_name. Please specify it explicitely!"
+    if {${:sql_package_name} eq ""} {
+      error "Cannot determine SQL package_name. Please specify it explicitly!"
     }
 
-    if {![my exists table_name]} {
+    if {![info exists :table_name]} {
       set tail [namespace tail [self]]
       regexp {^::([^:]+)::} [self] _ head
-      my table_name [string tolower ${head}_$tail]
-      #my log "-- table_name of [self] is '[my table_name]'"
+      :table_name [string tolower ${head}_$tail]
+      #:log "-- table_name of [self] is '[:table_name]'"
       set table_name_error_tail ", or use different namespaces/class names"
     }
 
-    if {![my exists id_column]} {
-      my set id_column [string tolower [namespace tail [self]]]_id
+    if {![info exists :id_column]} {
+      set :id_column [string tolower [namespace tail [self]]]_id
       set id_column_error_tail ", or use different class names"
-      #my log "-- created id_column '[my id_column]'"
+      #:log "-- created id_column '[:id_column]'"
     }
 
-    if {![regexp {^[[:alpha:]_][[:alnum:]_]*$} [my table_name]]} {
-      error "Table name '[my table_name]' is unsafe in SQL: \
+    if {![regexp {^[[:alpha:]_][[:alnum:]_]*$} [:table_name]]} {
+      error "Table name '[:table_name]' is unsafe in SQL: \
     Please specify a different table_name$table_name_error_tail."
     }
 
-    if {[string length [my table_name]] > 30} {
-      error "SQL table_name '[my table_name]' can be maximal 30 characters long!\
+    if {[string length [:table_name]] > 30} {
+      error "SQL table_name '[:table_name]' can be maximal 30 characters long!\
         Please specify a shorter table_name in the class definition."
     }
 
-    if {![regexp {^[[:alpha:]_][[:alnum:]_]*$} [my id_column]]} {
-      error "Name for id_column '[my id_column]' is unsafe in SQL: \
+    if {![regexp {^[[:alpha:]_][[:alnum:]_]*$} [:id_column]]} {
+      error "Name for id_column '[:id_column]' is unsafe in SQL: \
         Please specify a different id_column$id_column_error_tail"
     }
   }
 
   ::xo::db::Class instproc check_default_values {} {
-    my instvar pretty_name pretty_plural
-    if {![info exists pretty_name]}   {set pretty_name [namespace tail [self]]}
-    if {![info exists pretty_plural]} {set pretty_plural $pretty_name}
+    if {![info exists :pretty_name]}   {set :pretty_name [namespace tail [self]]}
+    if {![info exists :pretty_plural]} {set :pretty_plural ${:pretty_name}}
   }
 
   ::xo::db::Class instproc init {} {
-    if {![::xo::db::Class object_type_exists_in_db -object_type [my object_type]]} {
-      my create_object_type
+    if {![::xo::db::Class object_type_exists_in_db -object_type [:object_type]]} {
+      :create_object_type
     }
-    my init_type_hierarchy
-    my check_table_atts
-    my db_slots
+    :init_type_hierarchy
+    :check_table_atts
+    :db_slots
 
-    if {[my with_table]} {
-      set table_definition [my table_definition]
+    if {[:with_table]} {
+      set table_definition [:table_definition]
       if {$table_definition ne ""} {
-        ::xo::db::require table [my table_name] $table_definition
-        my require_constraints
+        ::xo::db::require table [:table_name] $table_definition
+        :require_constraints
       }
-
-      my mk_update_method
-      my mk_insert_method
+      :mk_update_method
+      :mk_insert_method
     }
     next
   }
 
   ::xo::db::Class instproc get_context {package_id_var user_id_var ip_var} {
-    my upvar \
+    :upvar \
         $package_id_var package_id \
         $user_id_var user_id \
         $ip_var ip
 
     if {![info exists package_id]} {
-      if {[info commands ::xo::cc] ne ""} {
+      if {[nsf::is object ::xo::cc]} {
         set package_id    [::xo::cc package_id]
       } elseif {[ns_conn isconnected]} {
         set package_id    [ad_conn package_id]
@@ -2139,7 +2193,7 @@ namespace eval ::xo::db {
       }
     }
     if {![info exists user_id]} {
-      if {[info commands ::xo::cc] ne ""} {
+      if {[nsf::is object ::xo::cc]} {
         set user_id    [::xo::cc user_id]
       } elseif {[ns_conn isconnected]} {
         set user_id    [ad_conn user_id]
@@ -2149,7 +2203,7 @@ namespace eval ::xo::db {
     }
     if {![info exists ip]} {
       if {[ns_conn isconnected]} {
-        set ip [ns_conn peeraddr]
+        set ip [ad_conn peeraddr]
       } else {
         set ip [ns_info address]
       }
@@ -2160,9 +2214,10 @@ namespace eval ::xo::db {
     -package_id
     -creation_user
     -creation_ip
+    {-context_id ""}
     {object_title ""}
   } {
-    my get_context package_id creation_user creation_ip
+    :get_context package_id creation_user creation_ip
 
     set id [::xo::db::sql::acs_object new \
                 -object_type [::xo::db::Class class_to_object_type [self]] \
@@ -2170,7 +2225,8 @@ namespace eval ::xo::db {
                 -package_id $package_id \
                 -creation_user $creation_user \
                 -creation_ip $creation_ip \
-                -security_inherit_p [my security_inherit_p]]
+                -context_id $context_id \
+                -security_inherit_p [:security_inherit_p]]
     return $id
   }
 
@@ -2181,8 +2237,8 @@ namespace eval ::xo::db {
     #
     $obj set object_id $id
     # construct the same object_title as acs_object.new() does
-    $obj set object_title "[my pretty_name] $id"
-    #$obj set object_type [my object_type]
+    $obj set object_title "[:pretty_name] $id"
+    #$obj set object_type [:object_type]
   }
 
   ::xo::db::Class ad_instproc new_persistent_object {
@@ -2198,19 +2254,21 @@ namespace eval ::xo::db {
 
     @return fully qualified object
   } {
-    my get_context package_id creation_user creation_ip
+    :get_context package_id creation_user creation_ip
     ::xo::dc transaction {
-      set id [my new_acs_object \
+      set id [:new_acs_object \
                   -package_id $package_id \
                   -creation_user $creation_user \
                   -creation_ip $creation_ip \
                   ""]
       #[self class] set during_fetch 1
-      if {[catch {my create ::$id {*}$args} errorMsg]} {
-        ad_log error $errorMsg
+      ad_try {
+        :create ::$id {*}$args
+      } on error {errorMsg} {
+        ad_log error "create fails: $errorMsg"
       }
       #[self class] unset during_fetch
-      my initialize_acs_object ::$id $id
+      :initialize_acs_object ::$id $id
       ::$id insert
     }
     ::$id destroy_on_cleanup
@@ -2230,6 +2288,7 @@ namespace eval ::xo::db {
     {-named_objects:boolean false}
     {-object_named_after ""}
     {-destroy_on_cleanup:boolean true}
+    {-keep_existing_objects:boolean false}
     {-ignore_missing_package_ids:boolean false}
     {-initialize true}
   } {
@@ -2238,31 +2297,32 @@ namespace eval ::xo::db {
     query and create XOTcl objects from the tuples.
 
     @param sql The SQL query to retrieve tuples. Note that if the SQL
-    query only returns a restricted set of attributes, the objects will
-    be only partially instantiated.
+    query only returns a restricted set of attributes, the objects
+    will be only partially instantiated.
 
     @param as_ordered_composite return an ordered composite object
-    preserving the order. If the flag is false, one has to use
-    "info instances" to access the resulted objects.
+    preserving the order. If the flag is false, one has to use "info
+    instances" to access the resulted objects.
 
     @param object_class specifies the XOTcl class, for which instances
     are created.
 
-    @param named_objects If this flag is true, the value of the id_column is used
-    for the name of the created objects (object will be named e.g. ::13738).
-    Otherwise, objects are created with the XOTcl "new" method to avoid object name clashes.
+    @param named_objects If this flag is true, the value of the
+    id_column is used for the name of the created objects (object will
+    be named e.g. ::13738).  Otherwise, objects are created with the
+    XOTcl "new" method to avoid object name clashes.
 
-    @param destroy_on_cleanup If this flag is true, the objects (and ordered composite)
-      will be automatically destroyed on cleaup (typically                                                                                      after the request was processed).
+    @param destroy_on_cleanup If this flag is true, the objects (and
+    ordered composite) will be automatically destroyed on cleaup
+    (typically after the request was processed).
 
-    @param initialize can be used to avoid full initialization, when
-    a large series of of objects is loaded. Per default, these objects
-    are initialized via initialize_loaded_object, when the are
-    of type ::xo::db::Object
-  } {
+    @param initialize can be used to avoid full initialization, when a
+    large series of objects is loaded. Per default, these objects are
+    initialized via initialize_loaded_object, when the are of type
+    ::xo::db::Object } {
 
     if {$object_class eq ""} {set object_class [self]}
-    if {$sql eq ""} {set sql [my instance_select_query]}
+    if {$sql eq ""} {set sql [:instance_select_query]}
     if {$as_ordered_composite} {
       set __result [::xo::OrderedComposite new]
       if {$destroy_on_cleanup} {$__result destroy_on_cleanup}
@@ -2271,7 +2331,7 @@ namespace eval ::xo::db {
     }
     if {$named_objects} {
       if {$object_named_after eq ""} {
-        set object_named_after [my id_column]
+        set object_named_after [:id_column]
       }
     }
 
@@ -2279,12 +2339,15 @@ namespace eval ::xo::db {
     foreach selection $sets {
       if {$named_objects} {
         set object_name ::[ns_set get $selection $object_named_after]
-        if {[info commands $object_name] eq ""} {
-          set o [$object_class create $object_name]
-        } else {
+        if {[nsf::is object $object_name]} {
           set o $object_name
+          set new 0
+        } else {
+          set o [$object_class create $object_name]
+          set new 1
         }
       } else {
+        set new 0
         set o [$object_class new]
       }
       if {$as_ordered_composite} {
@@ -2295,13 +2358,20 @@ namespace eval ::xo::db {
         }
         lappend __result $o
       }
-      #foreach {att val} [ns_set array $selection] {$o set $att $val}
+
+      if {!$new && $keep_existing_objects} {
+        #ns_log notice "+++ instantiate_objects keep existing object $o"
+        continue
+      }
       $o mset [ns_set array $selection]
 
       if {[$o exists object_type]} {
-        # set the object type if it looks like managed from XOTcl
-        if {[string match "::*" [set ot [$o set object_type]] ]} {
-          $o class $ot
+        #
+        # Set the object type if it looks like managed from XOTcl.
+        #
+        set object_type [$o set object_type]
+        if {[string match "::*" $object_type]} {
+          $o class $object_type
         }
       }
       if {$initialize && [$o istype ::xo::db::Object]} {
@@ -2312,11 +2382,13 @@ namespace eval ::xo::db {
             ns_log warning "[namespace tail [$o info class]] $o has no package_id and no object_package_id"
           }
         }
-        if {[catch {$o initialize_loaded_object} errorMsg]} {
+        ad_try {
+          $o initialize_loaded_object
+        } on error {errorMsg} {
           ns_log error "$o initialize_loaded_object => [$o info vars] -> $errorMsg"
         }
       }
-      #my log "--DB more = $continue [$o serialize]"
+      #:log "--DB more = $continue [$o serialize]"
     }
 
     return $__result
@@ -2325,15 +2397,15 @@ namespace eval ::xo::db {
   ::xo::db::Class instproc fetch_query {id} {
     set tables [list]
     set attributes [list]
-    set id_column [my id_column]
-    set join_expressions [list "[my table_name].$id_column = $id"]
-    foreach cl [concat [self] [my info heritage]] {
+    set id_column [:id_column]
+    set join_expressions [list "[:table_name].$id_column = $id"]
+    foreach cl [list [self] {*}[:info heritage]] {
       #if {$cl eq "::xo::db::Object"} break
       if {$cl eq "::xotcl::Object"} break
       set tn [$cl table_name]
       if {$tn  ne ""} {
         lappend tables $tn
-        #my log "--db_slots of $cl = [$cl array get db_slot]"
+        #:log "--db_slots of $cl = [$cl array get db_slot]"
         foreach {slot_name slot} [$cl array get db_slot] {
           # avoid duplicate output names
           set name [$slot name]
@@ -2343,7 +2415,7 @@ namespace eval ::xo::db {
           set names($name) 1
         }
         if {$cl ne [self]} {
-          lappend join_expressions "$tn.[$cl id_column] = [my table_name].$id_column"
+          lappend join_expressions "$tn.[$cl id_column] = [:table_name].$id_column"
         }
       }
     }
@@ -2369,7 +2441,7 @@ namespace eval ::xo::db {
     @return SQL query
   } {
     set tables [list]
-    set id_column [my id_column]
+    set id_column [:id_column]
 
     if {$count} {
       set select_attributes "count(*)"
@@ -2379,7 +2451,7 @@ namespace eval ::xo::db {
 
     set all_attributes [expr {$select_attributes eq ""}]
     set join_expressions [list]
-    foreach cl [concat [self] [my info heritage]] {
+    foreach cl [list [self] {*}[:info heritage]] {
       #if {$cl eq "::xo::db::Object"} break
       if {$cl eq "::xotcl::Object"} break
       set tn [$cl table_name]
@@ -2397,7 +2469,7 @@ namespace eval ::xo::db {
           }
         }
         if {$cl ne [self]} {
-          lappend join_expressions "$tn.[$cl id_column] = [my table_name].$id_column"
+          lappend join_expressions "$tn.[$cl id_column] = [:table_name].$id_column"
         }
       }
     }
@@ -2429,14 +2501,14 @@ namespace eval ::xo::db {
     {-initialize true}
   } {
     Returns a set (ordered composite) of the answer tuples of
-    an 'instance_select_query' with the same attributes. Note, that
+    an 'instance_select_query' with the same attributes. Note that
     the returned objects might by partially instantiated.
 
     @return ordered composite
   } {
-    set s [my instantiate_objects \
+    set s [:instantiate_objects \
                -object_class [self] \
-               -sql [my instance_select_query \
+               -sql [:instance_select_query \
                          -select_attributes $select_attributes \
                          -from_clause $from_clause \
                          -where_clause $where_clause \
@@ -2456,57 +2528,82 @@ namespace eval ::xo::db {
       -pretty_plural "Objects" \
       -table_name "acs_objects" -id_column "object_id"
 
-  ::xo::db::Object instproc insert {} {my log no-insert;}
+  ::xo::db::Object instproc insert {} {:log no-insert;}
 
-  ::xo::db::Object ad_instproc update {-package_id -modifying_user} {
+  ::xo::db::Object ad_instproc update {
+    -package_id -modifying_user -context_id
+  } {
     Update the current object in the database
   } {
-    my instvar object_id
-    if {![info exists package_id] && [my exists package_id]} {
-      set package_id [my package_id]
+    set object_id ${:object_id}
+    if {![info exists package_id] && [info exists :package_id]} {
+      set package_id ${:package_id}
     }
-    [my info class] get_context package_id modifying_user modifying_ip
-    ::xo::dc dml update_object {update acs_objects
-      set modifying_user = :modifying_user, modifying_ip = :modifying_ip
-      where object_id = :object_id}
+    if {![info exists context_id]} {
+      set context_id [expr {[info exists :context_id] ? ${:context_id} : ""}]
+    }
+    [:info class] get_context package_id modifying_user modifying_ip
+    set title ${:object_title}
+    ::xo::dc dml update_object {
+      update acs_objects set
+         title          = :title,
+         modifying_user = :modifying_user,
+         modifying_ip   = :modifying_ip,
+         context_id     = :context_id
+      where object_id = :object_id
+    }
+    # Make sure object memory image reflects db values
+    foreach att {modifying_user modifying_ip context_id} {
+      set :${att} [set $att]
+    }
+    set :last_modified [::xo::dc get_value -prepare integer \
+                            get_last_modified {
+      select last_modified from acs_objects
+      where object_id = :object_id
+    }]
   }
 
   ::xo::db::Object ad_instproc delete {} {
     Delete the object from the database and from memory
   } {
-    ::xo::db::sql::acs_object delete -object_id [my set object_id]
-    my destroy
+    ::xo::db::sql::acs_object delete -object_id ${:object_id}
+    :destroy
   }
 
-  ::xo::db::Object ad_instproc save {-package_id -modifying_user} {
+  ::xo::db::Object ad_instproc save {-package_id -modifying_user -context_id} {
     Save the current object in the database
   } {
-    set cmd [list my update]
+    set cmd [list :update]
     if {[info exists package_id]} {lappend cmd -package_id $package_id}
     if {[info exists modifying_user]} {lappend cmd -modifying_user $modifying_user}
+    if {[info exists context_id]} {lappend cmd -context_id $context_id}
     {*}$cmd
   }
 
   ::xo::db::Object ad_instproc save_new {
-    -package_id -creation_user -creation_ip
+    -package_id -creation_user -creation_ip -context_id
   } {
     Save the XOTcl Object with a fresh acs_object
     in the database.
 
     @return new object id
   } {
-    if {![info exists package_id] && [my exists package_id]} {
-      set package_id [my package_id]
+    if {![info exists package_id] && [info exists :package_id]} {
+      set package_id ${:package_id}
     }
-    [my info class] get_context package_id creation_user creation_ip
+    if {![info exists context_id]} {
+      set context_id [expr {[info exists :context_id] ? ${:context_id} : ""}]
+    }
+    [:info class] get_context package_id creation_user creation_ip
     ::xo::dc transaction {
-      set id [[my info class] new_acs_object \
+      set id [[:info class] new_acs_object \
                   -package_id $package_id \
                   -creation_user $creation_user \
                   -creation_ip $creation_ip \
+                  -context_id $context_id \
                   ""]
-      [my info class] initialize_acs_object [self] $id
-      my insert
+      [:info class] initialize_acs_object [self] $id
+      :insert
     }
     return $id
   }
@@ -2537,65 +2634,64 @@ namespace eval ::xo::db {
       }
 
   ::xo::db::Attribute instproc create_attribute {} {
-    if {![my create_acs_attribute]} return
+    if {![:create_acs_attribute]} return
 
-    my instvar datatype pretty_name min_n_values max_n_values domain column_name
-    set object_type [$domain object_type]
+    set column_name ${:column_name}
+    set object_type [${:domain} object_type]
+    #ns_log notice "::xo::db::Attribute create_attribute $object_type $column_name epoch [ns_ictl epoch] [array get ::db_state_default]"
+
     if {[::xo::dc get_value check_att {select 0 from acs_attributes where
       attribute_name = :column_name and object_type = :object_type} 1]} {
 
       if {![::xo::db::Class object_type_exists_in_db -object_type $object_type]} {
-        $domain create_object_type
+        ${:domain} create_object_type
       }
 
       ::xo::db::sql::acs_attribute create_attribute \
-          -object_type $object_type \
+          -object_type    $object_type \
           -attribute_name $column_name \
-          -datatype $datatype \
-          -pretty_name $pretty_name \
-          -min_n_values $min_n_values \
-          -max_n_values $max_n_values
-      #my save
+          -datatype       ${:datatype} \
+          -pretty_name    ${:pretty_name} \
+          -min_n_values   ${:min_n_values} \
+          -max_n_values   ${:max_n_values}
+      #:save
     }
   }
 
   ::xo::db::Attribute instproc attribute_reference {tn} {
-    my instvar column_name name
-    if {$column_name ne $name} {
-      return "$tn.$column_name AS $name"
+    if {${:column_name} ne ${:name}} {
+      return "$tn.${:column_name} AS ${:name}"
     } else {
-      return "$tn.$name"
+      return "$tn.${:name}"
     }
   }
 
   ::xo::db::Attribute instproc column_spec {{-id_column false}} {
-    my instvar sqltype name references default not_null unique
-    set table_name [[my domain] table_name]
+    set table_name [${:domain} table_name]
     set column_spec ""
-    append column_spec " " [::xo::dc map_datatype $sqltype]
+    append column_spec " " [::xo::dc map_datatype ${:sqltype}]
     #
     # Default
     #
-    if {[info exists default]} {append column_spec " DEFAULT '$default' "}
+    if {[info exists :default]} {
+      append column_spec " DEFAULT '${:default}' "
+    }
     #
     # References
     #
-    if {[info exists references] && $references ne ""} {
-      append column_spec " REFERENCES $references"
+    if {[info exists :references] && ${:references} ne ""} {
+      append column_spec " REFERENCES ${:references}"
     } elseif {$id_column} {
-      set sc [[my domain] info superclass]
+      set sc [${:domain} info superclass]
       if {![$sc istype ::xo::db::Class]} {set sc ::xo::db::Object}
       append column_spec " REFERENCES [$sc table_name]([$sc id_column])\
         ON DELETE CASCADE "
     }
     #
-    # Unique
+    # Unique and Not NULL
     #
-    if {[info exists unique]} {append column_spec " UNIQUE "}
-    #
-    # Not null
-    #
-    if {[info exists not_null]} {append column_spec " NOT NULL "}
+    if {[info exists :unique]}   {append column_spec " UNIQUE "  }
+    if {[info exists :not_null]} {append column_spec " NOT NULL "}
     #
     # Primary key
     #
@@ -2603,17 +2699,16 @@ namespace eval ::xo::db {
       # add automatically a constraint for the id_column
       append column_spec " PRIMARY KEY "
     }
-    append column_spec [::xo::dc datatype_constraint $sqltype $table_name $name]
+    append column_spec [::xo::dc datatype_constraint ${:sqltype} $table_name ${:name}]
     return $column_spec
   }
 
   ::xo::db::Attribute instproc init {} {
     next    ;# do first ordinary slot initialization
-    my instvar datatype name
-    if {![my exists sqltype]} {my set sqltype $datatype}
-    if {![my exists column_name]} {my set column_name $name}
+    if {![info exists :sqltype]}     {set :sqltype     ${:datatype}}
+    if {![info exists :column_name]} {set :column_name ${:name}}
 
-    my create_attribute
+    :create_attribute
   }
 
   ##############
@@ -2622,30 +2717,30 @@ namespace eval ::xo::db {
 
   ::xo::db::CrAttribute instproc create_attribute {} {
     # do nothing, if create_acs_attribute is set to false
-    if {![my create_acs_attribute]} return
+    if {![:create_acs_attribute]} return
 
-    my instvar name column_name datatype pretty_name domain
-    set object_type [$domain object_type]
+    set column_name ${:column_name}
+    set object_type [${:domain} object_type]
 
     if {$object_type eq "content_folder"} {
-      # content_folder does NOT allow to use create_attribute etc.
+      # content_folder does NOT allow one to use create_attribute etc.
       return
     }
 
-    #my log "check attribute $column_name ot=$object_type, domain=$domain"
+    #:log "check attribute $column_name object_type=$object_type, domain=${:domain}"
     if {[::xo::dc get_value check_att {select 0 from acs_attributes where
       attribute_name = :column_name and object_type = :object_type} 1]} {
 
       if {![::xo::db::Class object_type_exists_in_db -object_type $object_type]} {
-        $domain create_object_type
+        ${:domain} create_object_type
       }
 
       ::xo::db::sql::content_type create_attribute \
-          -content_type $object_type \
+          -content_type   $object_type \
           -attribute_name $column_name \
-          -datatype $datatype \
-          -pretty_name $pretty_name \
-          -column_spec [my column_spec]
+          -datatype       ${:datatype} \
+          -pretty_name    ${:pretty_name} \
+          -column_spec    [:column_spec]
     }
   }
 
@@ -2654,7 +2749,43 @@ namespace eval ::xo::db {
   ::xo::db::Object slots {
     ::xo::db::Attribute create object_id    -pretty_name "Object ID" -datatype integer
     #::xo::db::Attribute create object_type  -pretty_name "Object Type"
-    ::xo::db::Attribute create object_title -pretty_name "Object Title" -column_name title
+    ::xo::db::Attribute create object_title \
+        -pretty_name "Object Title" \
+        -column_name title
+    ::xo::db::Attribute create context_id \
+        -pretty_name "Context ID" \
+        -datatype integer \
+        -column_name context_id
+    ::xo::db::Attribute create security_inherit_p \
+        -pretty_name "Security Inherit" \
+        -datatype boolean \
+        -column_name security_inherit_p
+    ::xo::db::Attribute create package_id \
+        -pretty_name "Package ID" \
+        -datatype integer \
+        -column_name package_id
+    ::xo::db::Attribute create creation_user \
+        -pretty_name "Creation User" \
+        -datatype integer \
+        -column_name creation_user
+    ::xo::db::Attribute create creation_date \
+        -pretty_name "Creation Date" \
+        -datatype timestamp \
+        -column_name creation_date
+    ::xo::db::Attribute create creation_ip \
+        -pretty_name "Creation IP Address" \
+        -column_name creation_ip
+    ::xo::db::Attribute create last_modified \
+        -pretty_name "Last Modified On" \
+        -datatype timestamp \
+        -column_name last_modified
+    ::xo::db::Attribute create modifying_user \
+        -pretty_name "Modifying User" \
+        -datatype integer \
+        -column_name modifying_user
+    ::xo::db::Attribute create modifying_ip \
+        -pretty_name "Modifying IP Address" \
+        -column_name modifying_ip
   }
   ::xo::db::Object db_slots
   ##############
@@ -2665,48 +2796,94 @@ namespace eval ::xo::db {
 
   ::xotcl::Class create ::xo::db::temp_table -parameter {name query vars}
   ::xo::db::temp_table instproc init {} {
+    #
     # The cleanup order is - at least under AOLserver 4.01 - hard to get right.
     # When destroy_on_cleanup is executed, there might be already some global
     # data for the database interaction gone.... So, destroy these objects
     # by hand for now.
-    # my destroy_on_cleanup
+    # :destroy_on_cleanup
+    #
+    # The "GLOBAL" keyword on temp tables is deprecated (and currently
+    # ignored) on PostgreSQL. Not sure, what's the state on various
+    # Oracle versions. Therefore, we keep the comment for now.
+    #
 
-    # PRESERVE ROWS means that the data will be available until the end of the SQL session
-    set sql_create "CREATE global temporary table [my name] on commit PRESERVE ROWS as "
+    if {![info exists :name]} {
+      #
+      # If there is no temp table name provided, create a name
+      # avoiding name clashes. We assume, that the set of variables is
+      # unique for such temp tables.
+      #
+      set :name "temp_table_[ns_md5 $vars]"
+    }
+
+    #
+    # PRESERVE ROWS means that the data will be available until the
+    # end of the SQL session..
+    #
+    set sql_create "CREATE temporary table ${:name} on commit PRESERVE ROWS as "
 
     # When the table exists already, simply insert into it ...
-    if {[::xo::db::require exists_table [my name]]} {
-      ::xo::dc dml . "insert into [my name] ([my vars]) ([my query])"
+    if {[::xo::db::require exists_table ${:name}]} {
+      ::xo::dc dml . "insert into ${:name} ([:vars]) (${:query})"
     } else {
       # ... otherwise, create the table with the data in one step
-      ::xo::dc dml get_n_most_recent_contributions $sql_create[my query]
+      ::xo::dc dml get_n_most_recent_contributions $sql_create${:query}
     }
   }
   ::xo::db::temp_table instproc destroy {} {
     # A session spans multiple connections in OpenACS.
     # We want to get rid the data when we are done.
-    ::xo::dc dml truncate_temp_table "truncate table [my name]"
+    ::xo::dc dml truncate_temp_table "truncate table ${:name}"
     next
   }
 
   ##############
-  ad_proc tcl_date {timestamp tz_var} {
-    Convert the time stamp (coming from the database) into a format, which
+  ad_proc tcl_date {timestamp tz_var {secfrac_var ""}} {
+    Convert the timestamp (coming from the database) into a format, which
     can be passed to Tcl's "clock scan".
   } {
     upvar $tz_var tz
+    if {$secfrac_var ne ""} {
+      upvar $secfrac_var secfrac
+    }
     set tz 00
-    # Oracle style format like 2008-08-25 (no TZ)
+    set secfrac 0
+    # Oracle style format like 2008-08-25 (no TZ, no sec frac)
     if {![regexp {^([0-9]+-[0-9]+-[0-9]+)$} $timestamp _ timestamp]} {
-      # PostgreSQL type ANSI format
-      if {![regexp {^([^.]+)[.][0-9]*([+-][0-9]*)$} $timestamp _ timestamp tz]} {
-        regexp {^([^.]+)([+-][0-9]*)$} $timestamp _ timestamp tz
+      # PostgreSQL type ANSI format secfrac and TZ
+      if {![regexp {^([^.]+)[.]([0-9]*)([+-][0-9]*)$} $timestamp _ timestamp secfrac tz]} {
+        # no TZ
+        if {![regexp {^([^.]+)[.]([0-9]+)$} $timestamp _ timestamp secfrac]} {
+          regexp {^([^.]+)([+-][0-9]*)$} $timestamp _ timestamp tz
+        }
       }
     }
     return $timestamp
   }
+
+  ad_proc list_to_values {
+    list
+    {type text}
+  } {
+
+    Convert a Tcl list into a quoted SQL VALUES expression
+
+    Example:
+
+    <pre>% list_to_values {1 2 3 4 5}
+    (VALUES (1), (2), (3), (4), (5))</pre>
+
+  } {
+    set result {}
+    foreach e $list {
+      lappend result "([ns_dbquotevalue $e $type])"
+    }
+    return "(VALUES [join $result ,])"
+  }
 }
 
+::xo::library source_dependent
 
 #
 # Local variables:

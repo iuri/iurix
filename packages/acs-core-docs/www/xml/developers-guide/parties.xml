@@ -212,7 +212,7 @@ C, then A is a member of C.
 </para><para>
 For example, consider the membership relations of Greenpeace, and
 composite relations of a multinational corporation. Greenpeace, an
-organization (ie. group), can have both individuals and organizations
+organization (i.e. group), can have both individuals and organizations
 (other groups) as members. Hence the membership relation between
 groups and <emphasis>parties</emphasis>. However, someone is not
 a member of Greenpeace just because they are a member of a
@@ -500,7 +500,7 @@ Because a membership relation is an ordinary acs object with <ulink url="object-
 membership relation to store extra information as it is to extend the users
 table or the groups table.</para>
 
-<para><phrase role="cvstag">($Id: parties.xml,v 1.9 2006/09/25 20:32:37 byronl Exp $)</phrase></para>
+<para><phrase role="cvstag">($Id: parties.xml,v 1.10 2018/09/30 15:53:28 gustafn Exp $)</phrase></para>
 
 </sect2>
 

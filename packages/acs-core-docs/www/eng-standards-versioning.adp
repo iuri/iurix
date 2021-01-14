@@ -3,17 +3,17 @@
 <property name="doc(title)">Release Version Numbering</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="cvs-guidelines" leftLabel="Prev"
-		    title="
-Chapter 12. Engineering Standards"
-		    rightLink="eng-standards-constraint-naming" rightLabel="Next">
-		<div class="sect1">
+			leftLink="cvs-guidelines" leftLabel="Prev"
+			title="Chapter 12. Engineering
+Standards"
+			rightLink="eng-standards-constraint-naming" rightLabel="Next">
+		    <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="eng-standards-versioning" id="eng-standards-versioning"></a>Release Version Numbering</h2></div></div></div><div class="authorblurb">
-<div class="cvstag">($&zwnj;Id: eng-standards-versioning.xml,v 1.10.14.2
-2016/10/28 20:26:53 gustafn Exp $)</div><p>By Ron Henderson, Revised by Joel Aufrecht</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div><p>OpenACS version numbers help identify at a high-level what is in
+<a name="eng-standards-versioning" id="eng-standards-versioning"></a>Release Version Numbering</h2></div></div></div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red"><span class="cvstag">($&zwnj;Id:
+eng-standards-versioning.xml,v 1.11 2017/08/07 23:47:54 gustafn Exp
+$)</span></span></p><p>By Ron Henderson, Revised by Joel Aufrecht</p>
+&lt;/authorblurb&gt;
+<p>OpenACS version numbers help identify at a high-level what is in
 a particular release and what has changed since the last
 release.</p><p>A "version number" is really just a string of the
 form:</p><div class="blockquote"><blockquote class="blockquote"><p>
@@ -45,8 +45,7 @@ tags.)</p></li>
 </ul></div><p>Milestone markers are numbered: d1, d2, ..., a1, b1, rc1,
 etc.</p>
 </li>
-</ul></div><p>A complete sequence of milestones between two releases:</p><pre class="programlisting">
-5.0.0
+</ul></div><p>A complete sequence of milestones between two releases:</p><pre class="programlisting">5.0.0
 5.0.0rc2
 5.0.0rc1
 5.0.0b4
@@ -55,8 +54,7 @@ etc.</p>
 5.0.0a3
 5.0.0a1
 5.0.0d1
-4.6.3
-</pre><p>Version numbers are also recorded in the CVS repository so that
+4.6.3</pre><p>Version numbers are also recorded in the CVS repository so that
 the code tree can be restored to the exact state it was in for a
 particular release. To translate between a distribution tar file
 (acs-3.2.2.tar.gz) and a CVS tag, just swap '.' for
@@ -112,8 +110,7 @@ to the appropriate value for that release of the package.</p><pre class="program
         &lt;maturity&gt;1&lt;/maturity&gt;
         &lt;callbacks&gt;
             ...
-    
-</pre><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc;">
+    </pre><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc;">
 <li class="listitem"><p>
 <span class="strong"><strong>Level -1:
 Incompatible.</strong></span> This package is not supported for
@@ -146,11 +143,11 @@ description should point to a preferred version.</p></li>
 <a name="naming-upgrade-scripts" id="naming-upgrade-scripts"></a>Naming Database Upgrade Scripts</h3></div></div></div><p>Database upgrade scripts must be named very precisely in order
 for the Package Manager to run the correct script at the correct
 time.</p><div class="orderedlist"><ol class="orderedlist" type="1">
-<li class="listitem"><p>Upgrade scripts should be named <code class="computeroutput">/packages/<span class="replaceable"><span class="replaceable">myfirstpackage</span></span>/sql/<span class="replaceable"><span class="replaceable">postgresql</span></span>/upgrade/upgrade-<span class="replaceable"><span class="replaceable">OLDVERSION</span></span>-<span class="replaceable"><span class="replaceable">NEWVERSION</span></span>.sql</code>
+<li class="listitem"><p>Upgrade scripts should be named <code class="computeroutput">/packages/<em class="replaceable"><code>myfirstpackage</code></em>/sql/<em class="replaceable"><code>postgresql</code></em>/upgrade/upgrade-<em class="replaceable"><code>OLDVERSION</code></em>-<em class="replaceable"><code>NEWVERSION</code></em>.sql</code>
 </p></li><li class="listitem"><p>If the version you are working on is a later version than the
 current released version, OLDVERSION should be the current version.
 The current version is package version in the APM and in
-<code class="computeroutput">/packages/<span class="replaceable"><span class="replaceable">myfirstpackage</span></span>/<span class="replaceable"><span class="replaceable">myfirstpackage</span></span>.info</code>. So if
+<code class="computeroutput">/packages/<em class="replaceable"><code>myfirstpackage</code></em>/<em class="replaceable"><code>myfirstpackage</code></em>.info</code>. So if
 forums is at 2.0.1, OLDVERSION should be 2.0.1d1. Note that this
 means that new version development that includes an upgrade must
 start at d2, not d1.</p></li><li class="listitem"><p>If you are working on a pre-release version of a package, use
@@ -172,8 +169,8 @@ which overlap like that. Instead, use <code class="computeroutput">upgrade-5.1.0
 </div>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="cvs-guidelines" leftLabel="Prev" leftTitle="CVS Guidelines"
-		    rightLink="eng-standards-constraint-naming" rightLabel="Next" rightTitle="Constraint naming standard"
-		    homeLink="index" homeLabel="Home" 
-		    upLink="eng-standards" upLabel="Up"> 
-		
+			leftLink="cvs-guidelines" leftLabel="Prev" leftTitle="CVS Guidelines"
+			rightLink="eng-standards-constraint-naming" rightLabel="Next" rightTitle="Constraint naming standard"
+			homeLink="index" homeLabel="Home" 
+			upLink="eng-standards" upLabel="Up"> 
+		    

@@ -4,7 +4,7 @@
 --
 -- @author W. Scott Meeks
 --
--- $Id: recurrence-create.sql,v 1.4 2013/03/30 13:00:29 gustafn Exp $
+-- $Id: recurrence-create.sql,v 1.5 2018/03/25 20:56:30 hectorr Exp $
 
 -- Sequence for recurrence tables
 create sequence recurrence_sequence start 1;
@@ -87,7 +87,7 @@ create table recurrences (
 create index recurrences_interval_type_idx on recurrences(interval_type);
 
 comment on table recurrences is '
-    Desribes how an event recurs.
+    Describes how an event recurs.
 ';
 
 comment on column recurrences.interval_type is '

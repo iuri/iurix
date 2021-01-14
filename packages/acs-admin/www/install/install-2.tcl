@@ -1,7 +1,7 @@
 ad_page_contract {
     Install packages - dependency check
 } {
-    package_key:multiple
+    package_key:token,multiple
     {repository_url ""}
 }
 
@@ -36,7 +36,7 @@ while 1 {
 			  -package_keys $install_pkgs]
     array set failed $result(failed)
 
-    switch $result(status) {
+    switch -- $result(status) {
 	ok {
 	    set continue_url [export_vars -base "install-3" { repository_url }]
 	    set page_title "Confirm"
@@ -45,7 +45,7 @@ while 1 {
 	    set page_title "Missing Required Packages"
 	}
 	default {
-	    error "Bad status returned from apm_depdendency_check_new: '$result(status)'"
+	    error "Bad status returned from apm_dependency_check_new: '$result(status)'"
 	}
     }
 
@@ -128,12 +128,12 @@ template::list::create \
         }
         comment {
             label "Error Message"
-            hide_p {[ad_decode $problems_p 1 0 1]}
+            hide_p {[expr {!$problems_p}]}
         }
         extra_p {
             label "Added"
-            display_eval {[ad_decode $extra_p 1 "*" ""]}
-            hide_p {[ad_decode $extras_p 1 0 1]}
+            display_eval {[expr {$extra_p ? "*" : ""}]}
+            hide_p {[expr {!$extras_p}]}
             html { align center }
         }
     }

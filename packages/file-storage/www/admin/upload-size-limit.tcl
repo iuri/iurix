@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Tracy Adams (teadams@mit.edu)
     @creation-date  2004-07-07
-    @cvs-id $Id: upload-size-limit.tcl,v 1.7.2.2 2016/05/20 20:37:03 gustafn Exp $
+    @cvs-id $Id: upload-size-limit.tcl,v 1.10 2018/12/06 15:48:10 antoniop Exp $
 
 } {
     {return_url:localurl ""}
@@ -19,7 +19,7 @@ if {$max_size eq ""} {
 set title "#file-storage.Configure_File_Upload_Limit#"
 set context [list $title]
 
-set upload_limit [parameter::get -parameter "MaximumFileSize"]
+set upload_limit [fs::max_upload_size]
 
 ad_form -name upload_limit_size -export folder_id -form {
     {new_size:integer(text) {label "#file-storage.Upload_Limit# $max_size"} {value $upload_limit} {html { maxlength 10}}}
@@ -34,6 +34,7 @@ ad_form -name upload_limit_size -export folder_id -form {
     parameter::set_value  -parameter "MaximumFileSize" -value $new_size
     if {$return_url ne ""} {
 	ad_returnredirect $return_url
+        ad_script_abort
     }
 }
 

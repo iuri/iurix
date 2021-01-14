@@ -12,7 +12,7 @@
 --
 -- @creation-date 2000-05-18
 --
--- @cvs-id $Id: acs-metadata-create.sql,v 1.43.2.2 2017/04/21 15:59:20 gustafn Exp $
+-- @cvs-id $Id: acs-metadata-create.sql,v 1.45 2018/07/04 17:16:23 antoniop Exp $
 
 -- ******************************************************************
 -- * KNOWLEDGE LEVEL
@@ -353,7 +353,7 @@ begin;
  insert into acs_datatypes
   (datatype, max_n_values, database_type, column_size)
  values
-  ('boolean', 1, 'bool', null);
+  ('boolean', 1, 'boolean', null);
 
  insert into acs_datatypes
   (datatype, max_n_values, database_type, column_size)

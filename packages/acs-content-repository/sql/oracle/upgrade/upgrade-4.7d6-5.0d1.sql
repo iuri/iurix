@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: upgrade-4.7d6-5.0d1.sql,v 1.1.24.1 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: upgrade-4.7d6-5.0d1.sql,v 1.5.2.1 2019/08/10 18:09:52 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -165,7 +165,7 @@ show errors
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: upgrade-4.7d6-5.0d1.sql,v 1.1.24.1 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: upgrade-4.7d6-5.0d1.sql,v 1.5.2.1 2019/08/10 18:09:52 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -794,7 +794,7 @@ show errors
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Hiro Iwashima (iwashima@mit.edu)
 
--- $Id: upgrade-4.7d6-5.0d1.sql,v 1.1.24.1 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: upgrade-4.7d6-5.0d1.sql,v 1.5.2.1 2019/08/10 18:09:52 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -1069,7 +1069,7 @@ show errors;
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: upgrade-4.7d6-5.0d1.sql,v 1.1.24.1 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: upgrade-4.7d6-5.0d1.sql,v 1.5.2.1 2019/08/10 18:09:52 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -3066,7 +3066,7 @@ show errors
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: upgrade-4.7d6-5.0d1.sql,v 1.1.24.1 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: upgrade-4.7d6-5.0d1.sql,v 1.5.2.1 2019/08/10 18:09:52 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -3618,7 +3618,7 @@ show errors
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: upgrade-4.7d6-5.0d1.sql,v 1.1.24.1 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: upgrade-4.7d6-5.0d1.sql,v 1.5.2.1 2019/08/10 18:09:52 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -3867,7 +3867,7 @@ show errors
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: upgrade-4.7d6-5.0d1.sql,v 1.1.24.1 2017/04/21 14:53:07 gustafn Exp $
+-- $Id: upgrade-4.7d6-5.0d1.sql,v 1.5.2.1 2019/08/10 18:09:52 gustafn Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -4167,9 +4167,9 @@ procedure register_relation_type (
   --                          is targeted.
   --    @param relation_tag  A simple token used to identify a set of
   --                          relations.
-  --    @param min_n          The minimun number of relationships of this type
+  --    @param min_n          The minimum number of relationships of this type
   --                          which an item must have to go live.
-  --    @param max_n          The minimun number of relationships of this type
+  --    @param max_n          The minimum number of relationships of this type
   --                          which an item must have to go live.
   --    @see {content_type.unregister_relation_type}
   --*/
@@ -4209,10 +4209,10 @@ procedure register_child_type (
   --    @param child_type    The type of the child item.
   --    @param relation_tag  A simple token used to identify a set of
   --                          relations.
-  --    @param min_n         The minimun number of parent-child
+  --    @param min_n         The minimum number of parent-child
   --                          relationships of this type
   --                          which an item must have to go live.
-  --    @param max_n         The minimun number of relationships of this type
+  --    @param max_n         The minimum number of relationships of this type
   --                          which an item must have to go live.
   --    @see {content_type.register_relation_type}, {content_type.register_child_type}
   --*/
@@ -4281,7 +4281,7 @@ as
 --/** 
 --Content items store the overview of the content published on a
 --website. The actual content is stored in content revisions. It is
---implemented this way so that there can be mulitple versions of the
+--implemented this way so that there can be multiple versions of the
 --actual content while the main idea remains constant. For example: If
 --there is a review for the movie "Terminator," there will exist a
 --content item by the name "terminator" with all the right parameters
@@ -4319,7 +4319,7 @@ function new (
   --    @param description   A short description for the item (4000 characters maximum)
   --    @param mime_type     The file type of the item, defaults to 'text/plain'
   --    @param nls_language  The language for the item, used for Intermedia search
-  --    @param text          The text content of the new revision, 4000 charcters maximum.
+  --    @param text          The text content of the new revision, 4000 characters maximum.
   --                         Cannot be specified simultaneously with the <tt>data</tt>
   --                         parameter
   --    @param data          The blob content of the new revision. Cannot be specified 
@@ -4365,7 +4365,7 @@ function new (
 
 
 function is_published (
-  --/** Determins whether an item is published or not.
+  --/** Determines whether an item is published or not.
   --    @author Michael Pih
   --    @param item_id		The item ID
   --    @return 't' if the item is published, 'f' otherwise
@@ -4382,7 +4382,7 @@ function is_publishable (
   --	3) any 'publishing_wf' workflows are finished
   --    @author Michael Pih
   --    @param item_id		The item ID
-  --    @return 't' if the item is publishable in it's present state, 
+  --    @return 't' if the item is publishable in its present state,
   --            Otherwise, returns 'f'
   --*/
   item_id		in cr_items.item_id%TYPE
@@ -5033,7 +5033,7 @@ procedure copy (
   --    @param symlink_id        The id of the symlink to copy
   --    @param target_folder_id  The id of the folder where the symlink is to be copied
   --    @param creation_user	 The id of the creation user
-  --    @param creation_ip	 The IP address of the creation user (defualt null)
+  --    @param creation_ip	 The IP address of the creation user (default null)
   --    @see {content_symlink.new}, {content_item.copy}
   --*/
   symlink_id		in cr_symlinks.symlink_id%TYPE,

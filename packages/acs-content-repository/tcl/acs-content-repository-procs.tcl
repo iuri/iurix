@@ -18,9 +18,9 @@ ad_proc -private cr_delete_scheduled_files {} {
     file isn't being used by another revision prior to deleting it.
     Should be scheduled daily.
 
-    This proc is extremely simple, and does not have any concurrancy
+    This proc is extremely simple, and does not have any concurrency
     checks to make sure another version of the proc is
-    running/deleting a file.  Will add some concurancy checks to a
+    running/deleting a file.  Will add some concurrency checks to a
     future revision.  Right now go with short and sweet, count on
     scheduling to prevent conflicts
 } {
@@ -57,13 +57,13 @@ ad_proc -private cr_delete_scheduled_files {} {
 ad_proc -private cr_scan_mime_types {} {
     # Get the config file ns_set
     set mime_types [ns_configsection "ns/mimetypes"]
-    if {$mime_types ne ""} { 
+    if {$mime_types ne ""} {
         set n_mime_types [ns_set size $mime_types]
 
         for {set i 0} {$i < $n_mime_types} {incr i} {
             set extension [ns_set key $mime_types $i]
             set mime_type [ns_set value $mime_types $i]
-            
+
             # special case
             if {$extension eq "NoExtension" || $extension eq "Default"} {
                 continue
@@ -77,27 +77,27 @@ ad_proc -private cr_scan_mime_types {} {
 }
 
 ##
-## Check for orphans in the content respository directory, and delete
+## Check for orphans in the content repository directory, and delete
 ## such files if required.
 ##
 ## gustaf.neumann@wu-wien.ac.at
 ##
 
 
-ad_proc cr_check_orphaned_files {-delete:boolean {-mtime ""}} { 
+ad_proc cr_check_orphaned_files {-delete:boolean {-mtime ""}} {
 
-    Check for orphaned files in the content respository directory, and
+    Check for orphaned files in the content repository directory, and
     delete such files if required.  Orphaned files might be created,
     when files are added to the content repository, but the transaction
     is being aborted. This function is intended to be used for one-time
-    maintainenace operations. Starting with 5.8.1, OpenACS contains
+    maintenance operations. Starting with 5.8.1, OpenACS contains
     support for handling orphaned files much more efficiently via a
     transaction log that is checked via cr_cleanup_orphaned_files in
     cr_delete_scheduled_files.
 
-    @param -delete delete the orphaned files
-    @param -mtime same semantics as mtime in the file command
-    
+    @param delete delete the orphaned files
+    @param mtime same semantics as mtime in the file command
+
 } {
     set cr_root [nsv_get CR_LOCATIONS CR_FILES]
     set root_length [string length $cr_root]
@@ -109,18 +109,18 @@ ad_proc cr_check_orphaned_files {-delete:boolean {-mtime ""}} {
         set name [string range $f $root_length end]
         if {![regexp {^[0-9/]+$} $name]} continue
 
-        # For every file in the content respository directory, check if this
+        # For every file in the content repository directory, check if this
         # file is still referenced from the content-revisions.
 
         set x [cr_count_file_entries $name]
         if {$x > 0} continue
-        
+
         lappend result $f
         if {$delete_p} {
             file delete -- $f
         }
     }
-    
+
     return $result
 }
 

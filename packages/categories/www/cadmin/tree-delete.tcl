@@ -3,10 +3,10 @@ ad_page_contract {
     This page checks whether the category tree can be deleted and asks for confirmation.
 
     @author Timo Hentschel (timo@timohentschel.de)
-    @cvs-id $Id:
+    @cvs-id $Id: tree-delete.tcl,v 1.14.2.2 2019/12/20 21:18:10 gustafn Exp $
 } {
     tree_id:naturalnum,notnull
-    {locale ""}
+    {locale:word ""}
     object_id:naturalnum,optional
     ctx_id:naturalnum,optional
 } -properties {
@@ -30,8 +30,8 @@ set tree_description $tree(description)
 
 set page_title [_ categories.Delete_category_tree_title]
 set context_bar [category::context_bar $tree_id $locale \
-                     [value_if_exists object_id] \
-                     [value_if_exists ctx_id]]
+                     [expr {[info exists object_id] ? $object_id : ""}] \
+                     [expr {[info exists ctx_id] ? $ctx_id : ""}]]
 lappend context_bar [_ categories.Delete]
 
 set instance_list [category_tree::usage $tree_id]

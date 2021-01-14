@@ -13,7 +13,7 @@
         <revremark>First Draft</revremark>
       </revision>
     </revhistory>
-    <pubdate role="cvstag">($Id: package-documentation.xml,v 1.2.24.2 2017/04/21 15:07:52 gustafn Exp $)</pubdate>
+    <pubdate role="cvstag">($Id: package-documentation.xml,v 1.3 2017/08/07 23:47:54 gustafn Exp $)</pubdate>
     <authorgroup>
       <author>
 	<firstname>Joel</firstname>

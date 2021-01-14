@@ -1,5 +1,5 @@
 ad_page_contract {
-  @cvs-id $Id: contract.tcl,v 1.2.28.1 2015/09/10 08:22:09 gustafn Exp $
+  @cvs-id $Id: contract.tcl,v 1.3 2017/08/07 23:48:02 gustafn Exp $
 } -properties {}
 
 # Local variables:

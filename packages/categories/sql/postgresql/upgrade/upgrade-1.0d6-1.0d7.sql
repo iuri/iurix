@@ -4,7 +4,7 @@
 -- @author Deds Castillo (deds@i-manila.com.ph)
 -- @creation-date 2005-01-13
 -- @arch-tag: a966a122-5391-45e3-8176-dc0956fc9450
--- @cvs-id $Id: upgrade-1.0d6-1.0d7.sql,v 1.3 2013/03/30 22:50:44 gustafn Exp $
+-- @cvs-id $Id: upgrade-1.0d6-1.0d7.sql,v 1.3.6.1 2019/08/09 20:19:04 gustafn Exp $
 --
 
 -----
@@ -135,7 +135,7 @@ execute procedure category_synonym__edit_cat_trans_trg();
 
 -----
 --
--- these function have embedded tabs which make pg or is is the driver(?) barf
+-- these function have embedded tabs which make pg or is the driver(?) barf
 -- fix them to have spaces
 --
 -----

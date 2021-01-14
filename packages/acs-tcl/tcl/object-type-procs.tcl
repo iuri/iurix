@@ -4,7 +4,7 @@ ad_library {
 
     @author Yonatan Feldman (yon@arsdigita.com)
     @creation-date August 13, 2000
-    @cvs-id $Id: object-type-procs.tcl,v 1.11.2.1 2015/09/10 08:21:58 gustafn Exp $
+    @cvs-id $Id: object-type-procs.tcl,v 1.15 2018/06/15 08:39:48 gustafn Exp $
 
 }
 
@@ -12,7 +12,7 @@ namespace eval acs_object_type {}
 
 ad_proc -public acs_object_type_hierarchy {
 
-    -object_type
+    { -object_type "" }
     { -indent_string "&nbsp;" }
     { -indent_width "4" }
     { -join_string "<br>" }
@@ -34,9 +34,9 @@ ad_proc -public acs_object_type_hierarchy {
 
     set result ""
 
-    if { [info exists object_type] && $object_type ne "" } {
+    if { $object_type ne "" } {
         set sql [db_map object_type_not_null]
-	set join_string "&nbsp;&gt;&nbsp;"
+        set join_string "&nbsp;&gt;&nbsp;"
     } else {
         set sql [db_map object_type_is_null]
     }
@@ -44,13 +44,13 @@ ad_proc -public acs_object_type_hierarchy {
     set i 0
     db_foreach object_types "$sql" {
 
-	if { $i > 0 } {
-	    append result $join_string
-	}
-	incr i
-	set href [export_vars -base ./one {object_type}]
-	append result [subst {\n    $indent<a href="[ns_quotehtml $href]">[lang::util::localize $pretty_name]</a>}]
-	append result $additional_html
+        if { $i > 0 } {
+            append result $join_string
+        }
+        incr i
+        set href [export_vars -base ./one {object_type}]
+        append result [subst {\n    $indent<a href="[ns_quotehtml $href]">[lang::util::localize $pretty_name]</a>}]
+        append result $additional_html
     }
 
     return $result
@@ -61,7 +61,7 @@ ad_proc -public acs_object_type::get {
     -object_type:required
     -array:required
 } {
-    Get info about an object type. Returns columns 
+    Get info about an object type. Returns columns
 
     <ul>
       <li>object_type,
@@ -95,22 +95,6 @@ ad_proc -public acs_object_type::get {
     } -column_array row
 }
 
-ad_proc -private acs_object_type::acs_object_instance_of {
-    {-object_id:required}
-    {-type:required}
-} {
-    Returns true if the specified object_id is a subtype of the specified type.
-    This is an inclusive check.
-
-    @author Lee Denison (lee@thaum.net)
-} {
-    acs_object::get -object_id $object_id -array obj
-
-    return [acs_object_type::supertype \
-        -supertype $type \
-        -subtype $obj(object_type)]
-}
-
 ad_proc -private acs_object_type::supertype {
     {-supertype:required}
     {-subtype:required}
@@ -142,14 +126,16 @@ ad_proc -private acs_object_type::supertypes {
     }
 }
 
-ad_proc -private acs_object_type::get_table_name {
+ad_proc acs_object_type::get_table_name {
     -object_type:required
 } {
     Return the table name associated with an object_type.
 
-    Allow caching of the table_name as it is unlikely to change without a restart of the server (\which is mandatory after an upgrade)
+    Allow caching of the table_name as it is unlikely to change without a restart of the server
+    (which is mandatory after an upgrade)
+
 } {
-    return [util_memoize [list acs_object_type::get_table_name_not_cached -object_type $object_ty\pe]]
+    return [util_memoize [list acs_object_type::get_table_name_not_cached -object_type $object_type]]
 }
 
 ad_proc -private acs_object_type::get_table_name_not_cached {
@@ -158,7 +144,10 @@ ad_proc -private acs_object_type::get_table_name_not_cached {
     Return the table name associated with an object_type.
 
 } {
-    return [db_string get_table_name ""]
+    return [db_string get_table_name {
+        select table_name from acs_object_types
+        where object_type = :object_type
+    }]
 }
 
 # Local variables:

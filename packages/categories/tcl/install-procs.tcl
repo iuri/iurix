@@ -5,7 +5,7 @@ ad_library {
 
     @creation-date 2005-02-10
     @author Lee Denison (lee@thaum.net)
-    @cvs-id $Id: install-procs.tcl,v 1.3.6.1 2015/09/10 08:30:19 gustafn Exp $
+    @cvs-id $Id: install-procs.tcl,v 1.4 2017/08/07 23:48:05 gustafn Exp $
 }
 
 namespace eval install {}

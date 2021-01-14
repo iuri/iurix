@@ -2,7 +2,7 @@ ad_page_contract {
     Adds a parameter to a version.
     @author Todd Nightingale [tnight@arsdigita.com]
     @creation-date 17 April 2000
-    @cvs-id $Id: parameter-add.tcl,v 1.10.2.2 2015/09/18 07:39:03 gustafn Exp $
+    @cvs-id $Id: parameter-add.tcl,v 1.12.2.1 2020/09/01 17:21:39 antoniop Exp $
 } {
     version_id:naturalnum,notnull
     {section_name ""}
@@ -15,6 +15,15 @@ db_1row apm_get_name {
     select package_key, pretty_name, version_name
     from apm_package_version_info
     where version_id = :version_id
+}
+
+# This to filter out sections such as "all" and $package_key, which
+# have special meaning and are not supposed to be created.
+if {![db_string get_section {
+    select case when exists (select 1 from apm_parameters
+                             where section_name = :section_name
+                             and package_key = :package_key) then 1 else 0 end from dual}]} {
+    set section_name ""
 }
 
 set title "Add Parameter"

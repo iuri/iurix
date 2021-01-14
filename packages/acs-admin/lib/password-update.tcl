@@ -1,12 +1,21 @@
+ad_include_contract {
+
+    Password update form
+
+} {
+    user_id:naturalnum,notnull
+    {return_url:localurl ""}
+}
+
 # Redirect to HTTPS if so configured
 if { [security::RestrictLoginToSSLP] } {
     security::require_secure_conn
 }
 
-set level [ad_decode [security::RestrictLoginToSSLP] 1 "secure" "ok"]
+set level [expr {[security::RestrictLoginToSSLP] == 1 ? "secure" : "ok"}]
 
 # If the user is changing passwords for another user, they need to be account ok
-set account_status [ad_decode $user_id [ad_conn untrusted_user_id] "closed" "ok"]
+set account_status [expr {$user_id == [ad_conn untrusted_user_id] ? "closed" : "ok"}]
 
 auth::require_login \
     -level $level \
@@ -14,6 +23,7 @@ auth::require_login \
 
 if { ![auth::password::can_change_p -user_id $user_id] } {
     ad_return_error "Not supported" "Changing password is not supported."
+    ad_script_abort
 }
 
 set page_title [_ acs-subsite.Update_Password]
@@ -46,7 +56,7 @@ ad_form -extend -name update -form {
         {html {size 20}}
     }
 } -on_request {
-    
+
 } -validate {
     {password_1
         { [string equal $password_1 $password_2] }
@@ -58,33 +68,33 @@ ad_form -extend -name update -form {
                           -old_password "" \
                           -new_password $password_1]
 
-    switch $result(password_status) {
+    switch -- $result(password_status) {
         ok {
             # Continue
         }
         old_password_bad {
-            if { (![info exists old_password] || $old_password eq "") } {
+            if { ![info exists old_password] || $old_password eq "" } {
                 form set_error update password_old $result(password_message)
             } else {
                 # This hack causes the form to reload as if submitted, but with the old password showing
                 ad_returnredirect [export_vars -base [ad_conn url] -entire_form -exclude { old_password } -override { { password_old $old_password } }]
                 ad_script_abort
             }
-	    ad_return_error $result(password_message) ""
-	    break
+            ad_return_error $result(password_message) ""
+            ad_script_abort
         }
         default {
             form set_error update password_1 $result(password_message)
-	    break
+            break
         }
 
     }
-   
+
     # If the account was closed, it might be open now
     if {[ad_conn account_status] eq "closed"} {
         auth::verify_account_status
     }
-    
+
 } -after_submit {
     if { $return_url eq "" } {
         set return_url [ad_pvt_home]
@@ -99,6 +109,7 @@ ad_form -extend -name update -form {
     # ad_return_template /packages/acs-subsite/www/register/display-message
 
     ad_returnredirect $return_url
+    ad_script_abort
 }
 
 # Local variables:

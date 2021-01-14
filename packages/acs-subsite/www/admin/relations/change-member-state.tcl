@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Wed Dec 13 20:11:27 2000
-    @cvs-id $Id: change-member-state.tcl,v 1.3.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: change-member-state.tcl,v 1.6 2018/06/07 17:46:16 hectorr Exp $
 
 } {
     rel_id:naturalnum,notnull
@@ -14,14 +14,14 @@ ad_page_contract {
     {return_url:localurl ""}
 } -validate {
     permission_p -requires {rel_id:notnull} {
-	if { ![relation_permission_p -privilege admin $rel_id] } {
-	    ad_complain "The relation either does not exist or you do not have permission to administer it"
-	}
+        if { ![permission::permission_p -object_id $rel_id -privilege "admin"] } {
+            ad_complain "The relation either does not exist or you do not have permission to administer it"
+        }
     }
     relation_in_scope_p -requires {rel_id:notnull permission_p} {
-	if { ![application_group::contains_relation_p -rel_id $rel_id]} {
-	    ad_complain "The relation either does not exist or does not belong to this subsite."
-	}
+        if { ![application_group::contains_relation_p -rel_id $rel_id]} {
+            ad_complain "The relation either does not exist or does not belong to this subsite."
+        }
     }
 }
 
@@ -35,7 +35,10 @@ db_dml update_member_state {
 if {$return_url eq ""} {
     set return_url "one?rel_id=$rel_id"
 }
+
 ad_returnredirect $return_url
+ad_script_abort
+
 # Local variables:
 #    mode: tcl
 #    tcl-indent-level: 4

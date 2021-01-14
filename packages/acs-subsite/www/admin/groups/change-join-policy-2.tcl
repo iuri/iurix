@@ -6,21 +6,21 @@ ad_page_contract {
     @author Oumi Mehrotra (oumi@arsdigita.com)
 
     @creation-date 2001-02-23
-    @cvs-id $Id: change-join-policy-2.tcl,v 1.3.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: change-join-policy-2.tcl,v 1.7 2018/06/07 17:30:17 hectorr Exp $
 } {
     group_id:naturalnum,notnull
     join_policy:notnull
     {return_url:localurl ""}
 } -validate {
     groups_exists_p -requires {group_id:notnull} {
-	if { ![group::permission_p -privilege admin $group_id] } {
-	    ad_complain "The group either does not exist or you do not have permission to administer it"
-	}
+        if { ![permission::permission_p -object_id $group_id -privilege "admin"] } {
+            ad_complain "The group either does not exist or you do not have permission to administer it"
+        }
     }
     group_in_scope_p -requires {group_id:notnull} {
-	if { ![application_group::contains_party_p -party_id $group_id]} {
-	    ad_complain "The group either does not exist or does not belong to this subsite."
-	}
+        if { ![application_group::contains_party_p -party_id $group_id]} {
+            ad_complain "The group either does not exist or does not belong to this subsite."
+        }
     }
 }
 
@@ -37,6 +37,8 @@ if {$return_url eq ""} {
 }
 
 ad_returnredirect $return_url
+ad_script_abort
+
 # Local variables:
 #    mode: tcl
 #    tcl-indent-level: 4

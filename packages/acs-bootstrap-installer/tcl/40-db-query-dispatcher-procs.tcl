@@ -16,17 +16,17 @@
 # The following code allows ad_proc to be used
 # here (a local workalike is declared if absent).
 # added 2002-09-11 Jeff Davis (davis@xarg.net)
-if {[info commands ad_library] ne "" } { 
+if {[namespace which ad_library] ne "" } { 
     ad_library {
         Query Dispatching for multi-RDBMS capability
 
         @author Ben Adida (ben@openforce.net)
         @author Bart Teeuwisse (bart.teeuwisse@thecodemill.biz)
-	@cvs-id $Id: 40-db-query-dispatcher-procs.tcl,v 1.43.2.4 2017/04/22 18:26:04 gustafn Exp $
+	@cvs-id $Id: 40-db-query-dispatcher-procs.tcl,v 1.49.2.3 2020/10/28 15:39:19 hectorr Exp $
     } 
 }
 
-if { [info commands ad_proc] ne ""} {
+if { [namespace which ad_proc] ne ""} {
     set remove_ad_proc_p 0
 } else { 
     set remove_ad_proc_p 1
@@ -237,7 +237,7 @@ ad_proc -public db_qd_load_query_file {file_path {errorVarName ""}} {
 }
 
 # small compatibility function to avoid existence checks at runtime
-if {[info commands ::nsf::strip_proc_name] eq ""} {
+if {[namespace which ::nsf::strip_proc_name] eq ""} {
     namespace eval ::nsf {
         proc ::nsf::strip_proc_name {name} {return $name}
     }
@@ -256,7 +256,7 @@ ad_proc -public db_qd_get_fullname {local_name {added_stack_num 1}} {
 
     # Get the proc name being executed.
     # We catch this in case we're being called from the top level
-    # (eg. from bootstrap.tcl), in which case we return what we
+    # (e.g. from bootstrap.tcl), in which case we return what we
     # were given
     if { [catch {string trimleft [info level [expr {-1 - $added_stack_num}]] ::} proc_name] } {
 	return [::nsf::strip_proc_name $local_name]
@@ -272,10 +272,10 @@ ad_proc -public db_qd_get_fullname {local_name {added_stack_num 1}} {
     set list_of_source_procs {ns_sourceproc apm_source template::adp_parse template::frm_page_handler rp_handle_tcl_request}
 
     # We check if we're running the special ns_ proc that tells us
-    # whether this is an URL or a Tcl proc.
+    # whether this is a URL or a Tcl proc.
     if { [lindex $proc_name 0] in $list_of_source_procs } {
 
-	# Means we are running inside an URL
+	# Means we are running inside a URL
 
 	# TEST
 	# for {set i 0} {$i < 6} {incr i} {
@@ -404,7 +404,7 @@ ad_proc -public db_qd_get_fullname {local_name {added_stack_num 1}} {
     # db_qd_log QDDebug "generated fullname of $full_name"
     
     # The following block is apparently just for debugging
-    # aks - making debug output actually useable
+    # aks - making debug output actually usable
     # if {[llength $proc_name] > 1} {
     #     set proc_name_with_parameters "[lindex $proc_name 0] "
     #     set i 1
@@ -530,8 +530,7 @@ ad_proc -private db_qd_internal_load_queries {file_pointer file_tag} {
 	    break
 	}
 
-	set one_query [lindex $result 0]
-	set parsing_state [lindex $result 1]
+    lassign $result one_query parsing_state
 
 	# db_qd_log QDDebug "loaded one query - [db_fullquery_get_name $one_query]"
 
@@ -642,7 +641,7 @@ ad_proc -private db_qd_internal_get_queryname_root {relative_path} {
     # remove the prepended "/packages/" string
     regsub {^\/?packages\/} $relative_path {} relative_path
 
-    # remove the last chunk of the file name, since we're just looking for the root path
+    # remove the last chunk of the filename, since we're just looking for the root path
     # NOTE: THIS MAY NEED BETTER ABSTRACTION, since this assumes a naming scheme
     # of -rdbms.XXX (ben)
     regsub {\.xql} $relative_path {} relative_path

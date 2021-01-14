@@ -1,15 +1,13 @@
 
-<property name="context">{/doc/acs-core-docs {ACS Core Documentation}} {Chapter 6. Production
-Environments}</property>
-<property name="doc(title)">Chapter 6. Production
-Environments</property>
+<property name="context">{/doc/acs-core-docs {ACS Core Documentation}} {Chapter 6. Production Environments}</property>
+<property name="doc(title)">Chapter 6. Production Environments</property>
 <master>
 <include src="/packages/acs-core-docs/lib/navheader"
-		    leftLink="upgrade-supporting" leftLabel="Prev"
-		    title="
+			leftLink="upgrade-supporting" leftLabel="Prev"
+			title="
 Part II. Administrator&#39;s Guide"
-		    rightLink="install-openacs-keepalive" rightLabel="Next">
-		<div class="chapter">
+			rightLink="install-openacs-keepalive" rightLabel="Next">
+		    <div class="chapter">
 <div class="titlepage"><div><div><h2 class="title">
 <a name="maintenance-web" id="maintenance-web"></a>Chapter 6. Production
 Environments</h2></div></div></div><div class="toc">
@@ -25,16 +23,14 @@ Analysis Reports</a></span></dt><dt><span class="sect1"><a href="uptime">Externa
 validation</a></span></dt><dt><span class="sect1"><a href="maint-performance">Diagnosing
 Performance Problems</a></span></dt>
 </dl>
-</div><div class="authorblurb">
-<p>by <a class="ulink" href="mailto:joel\@aufrecht.org" target="_top">Joel Aufrecht</a>
-</p>
-OpenACS docs are written by the named authors, and may be edited by
-OpenACS documentation staff.</div>
+</div><span style="color: red">&lt;authorblurb&gt;</span><p><span style="color: red">by <a class="ulink" href="mailto:joel\@aufrecht.org" target="_top">Joel
+Aufrecht</a>
+</span></p><span style="color: red">&lt;/authorblurb&gt;</span>
 </div>
 <include src="/packages/acs-core-docs/lib/navfooter"
-		    leftLink="upgrade-supporting" leftLabel="Prev" leftTitle="Upgrading Platform components"
-		    rightLink="install-openacs-keepalive" rightLabel="Next" rightTitle="Starting and Stopping an OpenACS
+			leftLink="upgrade-supporting" leftLabel="Prev" leftTitle="Upgrading Platform components"
+			rightLink="install-openacs-keepalive" rightLabel="Next" rightTitle="Starting and Stopping an OpenACS
 instance."
-		    homeLink="index" homeLabel="Home" 
-		    upLink="acs-admin" upLabel="Up"> 
-		
+			homeLink="index" homeLabel="Home" 
+			upLink="acs-admin" upLabel="Up"> 
+		    

@@ -76,7 +76,7 @@ and allows the database server to scan and read it more
 efficiently.</p>
 <h3>VI. Further Reading</h3>
 <p>The <a href="object-model">Object Model</a> provides a
-graphic overview of the the how the content repository is designed.
+graphic overview of how the content repository is designed.
 The model links to pages of the API Guide that describe individual
 objects. The Developer Guide describes how to address common
 development tasks using the content repository.</p>
@@ -84,5 +84,5 @@ development tasks using the content repository.</p>
 <a href="mailto:karlg\@arsdigita.com">karlg\@arsdigita.com</a>
 <br>
 
-Last Modified: $&zwnj;Id: design.html,v 1.1.1.1.30.1 2016/06/22 07:40:41
-gustafn Exp $
+Last Modified: $&zwnj;Id: design.html,v 1.2 2017/08/07 23:47:47 gustafn
+Exp $

@@ -3,8 +3,7 @@
 -- 
 -- @author Dave Bauer (dave@thedesignexperience.org)
 -- @creation-date 2005-02-27
--- @arch-tag: 0c2560da-f1ba-4fd7-b02d-608cd4d35f47
--- @cvs-id $Id: upgrade-5.1.5d3-5.1.5d4.sql,v 1.1 2005/02/27 17:38:49 daveb Exp $
+-- @cvs-id $Id: upgrade-5.1.5d3-5.1.5d4.sql,v 1.2 2018/08/15 16:48:01 gustafn Exp $
 --
 -- fix bug#2298
 create or replace function content_revision__del (integer)

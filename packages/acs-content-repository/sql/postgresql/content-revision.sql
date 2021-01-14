@@ -4,7 +4,7 @@
 -- Copyright (C) 1999-2000 ArsDigita Corporation
 -- Author: Karl Goldstein (karlg@arsdigita.com)
 
--- $Id: content-revision.sql,v 1.48.2.4 2017/02/12 00:15:44 gustafn Exp $
+-- $Id: content-revision.sql,v 1.50 2018/03/23 23:53:01 hectorr Exp $
 
 -- This is free software distributed under the terms of the GNU Public
 -- License.  Full text of the license is available from the GNU Project:
@@ -27,7 +27,7 @@ select define_function_args('content_revision__new','title,description;null,publ
 --
 -- content_revision__new/13
 --
--- We can't use for the last two argments "default null", since
+-- We can't use for the last two arguments "default null", since
 -- otherwise calls with provided package_id but no content_length
 -- would lead to a wrong interpretation of the package_id as
 -- content_length.

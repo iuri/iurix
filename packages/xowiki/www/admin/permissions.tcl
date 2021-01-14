@@ -3,7 +3,7 @@
 
   @author Gustaf Neumann (gustaf.neumann@wu-wien.ac.at)
   @creation-date Aug 16, 2006
-  @cvs-id $Id: permissions.tcl,v 1.7.2.3 2016/11/17 18:23:48 antoniop Exp $
+  @cvs-id $Id: permissions.tcl,v 1.8.2.1 2019/05/08 14:33:40 gustafn Exp $
 
 } -parameter {
   {-item_id:naturalnum,optional}
@@ -15,13 +15,13 @@ if {[info exists item_id]} {
   set object_id  $item_id
   set page_name [$page name]
   set page_title [_ xowiki.permissions_manage_page]
-  set return_url [$package_id query_parameter return_url [$package_id package_url]admin/list]
+  set return_url [::$package_id query_parameter return_url [::$package_id package_url]admin/list]
 } else {
   set object_id  $package_id
   set package_name [apm_instance_name_from_id $package_id]
-  set package_name [$package_id get_parameter PackageTitle $package_name]
+  set package_name [::$package_id get_parameter PackageTitle $package_name]
   set page_title [_ xowiki.permissions_manage_package]
-  set return_url [$package_id query_parameter return_url [$package_id package_url]admin]
+  set return_url [::$package_id query_parameter return_url [::$package_id package_url]admin]
 }
 
 set context [list $page_title]

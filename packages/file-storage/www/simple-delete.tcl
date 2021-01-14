@@ -3,7 +3,7 @@ ad_page_contract {
 
     @author Ben Adida (ben@openforce.net)
     @creation-date 10 Nov 2000
-    @cvs-id $Id: simple-delete.tcl,v 1.9.2.2 2017/04/11 05:20:12 antoniop Exp $
+    @cvs-id $Id: simple-delete.tcl,v 1.11 2018/01/19 14:18:32 gustafn Exp $
 } {
     object_id:naturalnum,notnull
     folder_id:naturalnum,notnull
@@ -26,6 +26,7 @@ db_transaction {
 
 
 ad_returnredirect "./?folder_id=$folder_id"
+ad_script_abort
 
 
 # Local variables:

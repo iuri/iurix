@@ -2,7 +2,7 @@
 --
 -- @author Eric Lorenzo (eric@openforce.net)
 -- @creation-date 2002-10-24
--- @cvs-id $Id: upgrade-4.6b-4.6.1b.sql,v 1.2.24.1 2017/04/21 15:27:49 gustafn Exp $
+-- @cvs-id $Id: upgrade-4.6b-4.6.1b.sql,v 1.3 2017/08/07 23:47:58 gustafn Exp $
 
 
 -- Moving primary key constraint on host_node_map from node_id column

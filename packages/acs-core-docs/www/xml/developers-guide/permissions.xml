@@ -367,7 +367,7 @@ permissions in a hierarchical fashion.
 then used to check permissions in application pages.
 </para>
 
-<para><phrase role="cvstag">($Id: permissions.xml,v 1.17.6.1 2016/06/23 08:32:46 gustafn Exp $)</phrase></para>
+<para><phrase role="cvstag">($Id: permissions.xml,v 1.18 2017/08/07 23:47:54 gustafn Exp $)</phrase></para>
 
 </sect2>
 

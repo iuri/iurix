@@ -1,27 +1,26 @@
-# /packages/mbryzek-subsite/www/admin/attributes/value-delete-2.tcl
-
 ad_page_contract {
 
     Deletes a value
 
     @author mbryzek@arsdigita.com
     @creation-date Sun Dec 10 14:48:44 2000
-    @cvs-id $Id: value-delete-2.tcl,v 1.4.2.3 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: value-delete-2.tcl,v 1.6.2.1 2019/05/16 09:54:29 gustafn Exp $
 
 } {
     attribute_id:naturalnum,notnull
     enum_value:trim,notnull
-    { operation:trim "No, I want to cancel my request" } 
+    { operation:trim "No, I want to cancel my request" }
     { return_url:localurl "[export_vars -base one attribute_id]" }
 }
 
 if {$operation eq "Yes, I really want to delete this attribute value"} {
     db_transaction {
-	attribute::value_delete $attribute_id $enum_value
+        attribute::value_delete $attribute_id $enum_value
     }
 }
 
 ad_returnredirect $return_url
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

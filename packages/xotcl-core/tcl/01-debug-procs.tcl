@@ -1,4 +1,3 @@
-
 if {$::tcl_version < 8.5
     || ([regexp {8[.]5[.]([0-9]+)$} $::tcl_patchLevel _ minor] && $minor < 4)
   } {
@@ -13,7 +12,7 @@ if {[info exists ::xotcl_version] || ([info exists ::xotcl::version] && $::xotcl
 package require xotcl::serializer
 
 #
-# Keep the initcmds of classes for documentaiton purposes.
+# Keep the initcmds of classes for documentation purposes.
 #
 ::nsf::configure keepcmds 1
 
@@ -54,9 +53,10 @@ namespace eval ::xo {
 
 set ::xo::naviserver [expr {[ns_info name] eq "NaviServer"}]
 
-if {[info commands ::nx::Object] ne ""} {
+if {[nsf::is object ::nx::Object]} {
   ns_log notice "Defining minimal XOTcl 1 compatibility"
   ::nsf::method::alias ::xo::Attribute instvar ::nsf::methods::object::instvar
+
   # provide compatibility with nsf 2.0b6, which has "-noinit" removed
   ::nx::ObjectParameterSlot create ::xo::Attribute::slot::noinit \
       -methodname ::nsf::methods::object::noinit -noarg true
@@ -74,10 +74,35 @@ if {[info commands ::nx::Object] ne ""} {
   ::nx::Object method qn {query_name} {
     return "dbqd.[:uplevel [list current class]]-[:uplevel [list current method]].$query_name"
   }
-  # allow the use of naturalnum with ::xowiki::Package initialize
-  ::nx::Slot method type=naturalnum {name value} {
-    if {![string is integer -strict $value] || $value < 0 } {
-      return -code error "Value '$value' of parameter $name is not a natural number."
+  #
+  # Allow the use of types "naturalnum" and "token" e.g. in
+  # ::xowiki::Package initialize.
+  #
+  ::nx::Slot eval {
+    :method type=naturalnum {name value} {
+      if {![string is integer -strict $value] || $value < 0 } {
+        return -code error "Value '$value' of parameter $name is not a natural number."
+      }
+    }
+    :method type=token {name value} {
+      if {![regexp {^[\w.,: -]+$} $value]} {
+        return -code error "Value '$value' of parameter $name is not a valid token."
+      }
+    }
+    :method type=localurl {name value} {
+      if { $value eq "" || [util::external_url_p $value]} {
+        return -code error "Value '$value' of parameter $name is not a valid local url."
+      }
+    }
+    :method type=nohtml {name value} {
+      if {[ad_page_contract_filter_proc_nohtml name value] == 0} {
+        return -code error "Value '$value' of parameter $name contains HTML."
+      }
+    }
+    :method type=html {name value} {
+      if {[ad_page_contract_filter_proc_html name value] == 0} {
+        return -code error "Value '$value' of parameter $name contains unsafe HTML."
+      }
     }
   }
 
@@ -92,6 +117,10 @@ if {[info commands ::nx::Object] ne ""} {
     ::nx::Slot method exists
     ::nx::Slot method set
     ::nx::Slot method type=naturalnum
+    ::nx::Slot method type=token
+    ::nx::Slot method type=localurl
+    ::nx::Slot method type=html
+    ::nx::Slot method type=nohtml
     ::nx::Object nsfproc ::nsf::debug::call
     ::nx::Object nsfproc ::nsf::debug::exit
   }
@@ -131,15 +160,14 @@ if {[info commands ::nx::Object] ne ""} {
 
 namespace eval ::xo {
   ::xo::Attribute instproc init {} {
-    my instvar name pretty_name
     next
     # provide a default pretty name for the attribute based on message keys
-    if {![info exists pretty_name]} {
-      set object_type [my domain]
+    if {![info exists :pretty_name]} {
+      set object_type ${:domain}
       if {[regexp {^::([^:]+)::} $object_type _ head]} {
         set tail [namespace tail $object_type]
-        set pretty_name "#$head.$tail-$name#"
-        #my log "--created pretty_name = $pretty_name"
+        set :pretty_name "#$head.$tail-${:name}#"
+        #:log "--created pretty_name = ${:pretty_name}"
       } else {
         error "Cannot determine automatically message key for pretty name. \
         Use namespaces for classes"
@@ -157,8 +185,8 @@ namespace eval ::xo {
 if {[info exists ::acs::preferdbi]} {
   ::xotcl::Object instforward dbi_1row    -objscope ::dbi_1row
   ::xotcl::Object instforward dbi_0or1row -objscope ::dbi_0or1row
-  ::xotcl::Object instproc    db_1row    {. sql} {my dbi_1row $sql}
-  ::xotcl::Object instproc    db_0or1row {. sql} {my dbi_0or1row $sql}
+  ::xotcl::Object instproc    db_1row    {. sql} {:dbi_1row $sql}
+  ::xotcl::Object instproc    db_0or1row {. sql} {:dbi_0or1row $sql}
   ::Serializer exportMethods {
     ::xotcl::Object instforward dbi_1row
     ::xotcl::Object instforward dbi_0or1row
@@ -204,13 +232,14 @@ if {[::package vcompare [package require xotcl::serializer] 2.0] < -1} {
   ns_set update $form show_methods   [::xo::cc query_parameter "show_methods" 2]
   ns_set update $form show_variables [::xo::cc query_parameter "show_variables" 1]
   rp_internal_redirect /packages/xotcl-core/www/show-object
+  ad_script_abort
 }
 
 namespace eval ::xo {
   proc slotobjects cl {
     set so [list]
     array set names ""
-    foreach c [concat $cl [$cl info heritage]] {
+    foreach c [list $cl {*}[$cl info heritage]] {
       foreach s [$c info slots] {
         set n [namespace tail $s]
         if {![info exists names($n)]} {
@@ -276,10 +305,10 @@ if {[info commands ::xotcl::nonposArgs] ne ""} {
 }
 
 ::xotcl::Object instproc log msg {
-  ns_log notice "$msg, [self] [self callingclass]->[self callingproc] ([my __timediff])"
+  ns_log notice "$msg, [self] [self callingclass]->[self callingproc] ([:__timediff])"
 }
 ::xotcl::Object instproc ds msg {
-  ds_comment "[self]: $msg, ([self callingclass]->[self callingproc] [my __timediff])"
+  ds_comment "[self]: $msg, ([self callingclass]->[self callingproc] [:__timediff])"
 }
 ::xotcl::Object instproc debug msg {
   ns_log debug "[self] [self callingclass]->[self callingproc]: $msg"
@@ -305,31 +334,31 @@ if {[info commands ::xotcl::nonposArgs] ne ""} {
 # }
 
 ::xotcl::Object instproc qn query_name {
-  #set qn "dbqd.[my uplevel [list self class]]-[my uplevel [list self proc]].$query_name"
+  #set qn "dbqd.[:uplevel [list self class]]-[:uplevel [list self proc]].$query_name"
   set l [info level]
   if {$l < 2} {
     set prefix topLevel
   } else {
-    set prefix [my uplevel {info level 0}]
+    set prefix [:uplevel {info level 0}]
   }
   return "dbqd.$prefix.$query_name"
 }
 namespace eval ::xo {
   Class create Timestamp
-  Timestamp instproc init {} {my set time [clock clicks -milliseconds]}
+  Timestamp instproc init {} {set :time [clock clicks -milliseconds]}
   Timestamp instproc diffs {} {
     set now [clock clicks -milliseconds]
-    set ldiff [expr {[my exists ltime] ? [expr {$now-[my set ltime]}] : 0}]
-    my set ltime $now
-    return [list [expr {$now-[my set time]}] $ldiff]
+    set ldiff [expr {[info exists :ltime] ? ($now-${:ltime}): 0}]
+    set :ltime $now
+    return [list [expr {$now-${:time}}] $ldiff]
   }
   Timestamp instproc diff {{-start:switch}} {
-    lindex [my diffs] [expr {$start ? 0 : 1}]
+    lindex [:diffs] [expr {$start ? 0 : 1}]
   }
 
   Timestamp instproc report {{string ""}} {
-    lassign [my diffs] start_diff last_diff
-    my log "--$string (${start_diff}ms, diff ${last_diff}ms)"
+    lassign [:diffs] start_diff last_diff
+    :log "--$string (${start_diff}ms, diff ${last_diff}ms)"
   }
 
   proc show_stack {{m 100}} {
@@ -338,19 +367,21 @@ namespace eval ::xo {
     } else {
       set parse_level ""
     }
-    set msg "### tid=[::thread::id] <$parse_level> connected=[ns_conn isconnected] "
+    set msg "### template::parse_level <$parse_level> connected=[ns_conn isconnected] "
     if {[ns_conn isconnected]} {
       append msg "flags=[ad_conn flags] status=[ad_conn status] req=[ad_conn request]"
     }
-    ::xotcl::Object log $msg
+    ns_log notice $msg
     set max [info level]
     if {$m<$max} {set max $m}
-    ::xotcl::Object  log "### Call Stack (level: command)"
+    ns_log notice "### Call Stack (level: command)"
     for {set i 0} {$i < $max} {incr i} {
-      if {[catch {set s [uplevel $i self]} msg]} {
+      try {
+        set s [uplevel $i self]
+      } on error {errorMsg} {
         set s ""
       }
-      ::xotcl::Object  log "### [format %5d -$i]:\t$s [info level [expr {-$i}]]"
+      ns_log notice "### [format %5d -$i]:   $s [info level [expr {-$i}]]"
     }
   }
 
@@ -368,7 +399,8 @@ namespace eval ::xo {
     } else {
       append _ [db_driverkey {}]\n
     }
-    append _ "Server:    [ns_info patchlevel] ([ns_info name])\n"
+    append _ "Server:    [ns_info patchlevel] ([ns_info name] [ns_info tag])\n"
+    append _ "NSF:       $::nsf::patchLevel\n"
     append _ "Tcl:       $::tcl_patchLevel\n"
     append _ "XOTcl:     $::xotcl::version$::xotcl::patchlevel\n"
     append _ "Tdom:      [package req tdom]\n"
@@ -396,16 +428,14 @@ namespace eval ::xo {
     # Return 2 digit version number (suitable for number compare
     # operations) from PostgreSQL or 0.0 if not available
     #
-    set key ::xo::pg_version
-    if {[info exists $key]} {
-      return [set $key]
-    }
-    set version 0.0
-    if {[db_driverkey {}] eq "postgresql"} {
-      set version_string [db_string dbqd.null.get_version {select version() from dual}]
-      regexp {PostgreSQL ([0-9]+[.][0-9+])} $version_string . version
-    }
-    return [set $key $version]
+    return [acs::per_thread_cache eval -key xotcl-core.pg_version {
+      set version 0.0
+      if {[db_driverkey {}] eq "postgresql"} {
+        set version_string [db_string dbqd.null.get_version {select version() from dual}]
+        regexp {PostgreSQL ([0-9]+[.][0-9+])} $version_string . version
+      }
+      set version
+    }]
   }
 }
 
@@ -422,62 +452,35 @@ namespace eval ::xo {
 
 namespace eval ::xo {
   #
-  # In earlier versions of xotcl-core, we used variable traces
-  # to trigger deletion of objects. This had two kind of problems:
-  #   1) there was no way to control the order of the deletions
-  #   2) the global variables used for managing db handles might
-  #      be deleted already
-  #   3) the traces are executed at a time when the connection
-  #      is already closed
-  # AOLserver 4.5 supports a trace for freeconn. We can register
-  # a callback to be executed before the connection is freed,
-  # therefore, we have still information from ns_conn available.
-  # For AOLserver 4.5 we use oncleanup, which is at least before
-  # the cleanup of variables.
+  # Cleanup functions
   #
-  # In contrary, in 4.0.10, "on cleanup" is called after the global
-  # variables of a connection thread are deleted. Therefore
-  # the triggered calls should not use database handles,
-  # since these are as well managed via global variables,
-  # the will be deleted as well at this time.
+
   #
-  # To come up with an approach working for AOLserver 4.5 and 4.0.10,
-  # we distinguish between a at_cleanup and at_close, so connection
-  # related info can still be obtained.
+  # Register xo::freeconn function only once
   #
-  if {[catch {set registered [ns_ictl gettraces freeconn]}]} {
-    ns_log notice "*** you should really upgrade to AOLserver 4.5 or better NaviServer"
-    # "ns_ictl oncleanup" is called after variables are deleted
-    if {[ns_ictl epoch] == 0} {
-      ns_ictl oncleanup ::xo::at_cleanup
-      ns_ictl oninit [list ns_atclose ::xo::at_close]
-      ns_ictl ondelete ::xo::at_delete
+  if {"::xo::freeconn" ni [ns_ictl gettraces freeconn]} {
+    if {[catch {ns_ictl trace freeconn ::xo::freeconn} errorMsg]} {
+      ns_log Error "ns_ictl trace returned: $errorMsg"
     }
+  }
 
-  } else {
+  #
+  # Register::xo::at_delete function only once
+  #
+  if {"::xo::at_delete" ni [ns_ictl gettraces delete]} {
+    if {[catch {ns_ictl trace delete ::xo::at_delete} errorMsg]} {
+      ns_log Warning "The command 'ns_ictl trace delete' returned: $errorMsg"
+    }
+  }
 
-    # register only once
-    if {"::xo::freeconn" ni $registered} {
-      if {[catch {ns_ictl trace freeconn ::xo::freeconn} errorMsg]} {
-        ns_log Warning "ns_ictl trace returned: $errorMsg"
-      }
-    }
-    if {"::xo::at_delete" ni [ns_ictl gettraces delete]} {
-      if {[catch {ns_ictl trace delete ::xo::at_delete} errorMsg]} {
-        ns_log Warning "rhe command 'ns_ictl trace delete' returned: $errorMsg"
-      }
-    }
-
-    proc ::xo::freeconn {} {
-      catch {::xo::at_close}
-      catch {::xo::at_cleanup}
-    }
+  proc ::xo::freeconn {} {
+    catch {::xo::at_cleanup}
   }
 
   #proc ::xo::at_create {} {
   #  ns_log notice "--at_create *********"
   #  foreach i [::xo::InstanceManager array names blueprint] {
-  #    if {![::xotcl::Object isobject $i]} {
+  #    if {![nsf::is object $i]} {
   #      ::xo::InstanceManager unset blueprint($i)
   #      ns_log notice "--at_create no such object: $i"
   #    }
@@ -485,21 +488,57 @@ namespace eval ::xo {
   #}
 
   ::xotcl::Object instproc destroy_on_cleanup {} {
-    #my log "--cleanup adding ::xo::cleanup([self]) [list [self] destroy]"
+    #:log "--cleanup adding ::xo::cleanup([self]) [list [self] destroy]"
     set ::xo::cleanup([self]) [list [self] destroy]
   }
 
-  proc at_close {args} {
+  #
+  # Activate/deactivate the following line to track (unexpected)
+  # memory size changes in the system log.
+  #
+  set ::xo::rss 0 ;# set it to one to activate it
+
+  #
+  # Experimental low-level cleanup handlers, which are similar to
+  # ::xo::cleanup, but which survive per-request cleanup and which
+  # have to be manually deregistered.
+  #
+  proc add_cleanup {key cmd} {
+    set ::xo::cleanup_always($key) $cmd
+  }
+  proc remove_cleanup {key} {
+    unset ::xo::cleanup_always($key)
   }
 
+  #
+  # Per-request cleanup handler.
+  #
   proc at_cleanup {args} {
     ::xo::dc profile off
     ::xo::broadcast receive
+
+    if {$::xo::rss} {
+      #
+      # The following code works just for Linux, since it depends on
+      # the /proc filesystem and the order of values in the resulting
+      # line.
+      #
+      if {[file readable /proc/[pid]/statm]} {
+        set F [open /proc/[pid]/statm]; set c [read $F]; close $F
+        lassign $c size rss shared
+        set size [format %.2f [expr {$rss * 4.096 / 1048576}]]
+        if {$::xo::rss != $size} {
+          ns_log notice "=== RSS size change to: $size GB"
+          set ::xo::rss $size
+        }
+      }
+    }
+
     #ns_log notice "*** start of cleanup <$args> ([array get ::xo::cleanup])"
     set at_end ""
-    foreach {name cmd} [array get ::xo::cleanup] {
+    foreach {name cmd} [list {*}[array get ::xo::cleanup] {*}[array get ::xo::cleanup_always]] {
       #::trace remove variable ::xotcl_cleanup($name) unset ::xo::cleanup
-      if {![::xotcl::Object isobject $name]} {
+      if {![nsf::is object $name]} {
         #ns_log notice "--D $name already destroyed, nothing to do"
         continue
       }
@@ -508,12 +547,14 @@ namespace eval ::xo {
         continue
       }
       #ns_log notice "*** cleanup $cmd"
-      if {[catch {eval $cmd} errorMsg]} {
+      try {
+        {*}$cmd
+      } on error {errorMsg} {
         set obj [lindex $cmd 0]
         ns_log error "Error during ::xo::cleanup: $errorMsg $::errorInfo"
-        catch {
+        try {
           ns_log notice "... analyze: cmd = $cmd"
-          ns_log notice "... analyze: $obj is_object? [::xotcl::Object isobject $obj]"
+          ns_log notice "... analyze: $obj is_object? [nsf::is object $obj]"
           ns_log notice "... analyze: class [$obj info class]"
           ns_log notice "... analyze: precedence [$obj info precedence]"
           ns_log notice "... analyze: methods [lsort [$obj info methods]]"
@@ -521,7 +562,7 @@ namespace eval ::xo {
           # In case, we want to destroy some objects, and the
           # destructor fails, make sure to destroy them even
           # then. Half-deleted zombies can produce harm. We reclass
-          # the object to the base classe and try again.
+          # the object to the base class and try again.
           #
           if {[lindex $cmd 1] eq "destroy"} {
             ns_log error "... forcing object destroy without application level destuctors"
@@ -535,8 +576,10 @@ namespace eval ::xo {
       }
     }
     #ns_log notice "*** at_end $at_end"
-    if {[catch {eval $at_end} errorMsg]} {
-      ns_log notice "Error during ::xo::cleanup: $errorMsg $::errorInfo"
+    try {
+      {*}$at_end
+    } on error {errorMsg} {
+      ns_log Error "Error during ::xo::cleanup: $errorMsg $::errorInfo"
     }
     array unset ::xo::cleanup
     #ns_log notice "*** end of cleanup"
@@ -545,14 +588,14 @@ namespace eval ::xo {
   proc ::xo::at_delete args {
     #
     # Delete all object and classes at a time, where the thread is
-    # fully functioning. During interp exit, the commands would be
-    # deleted anyhow, but there exists a potential memory leak, when
-    # e.g. a destroy method (or an exit handler) writes to ns_log.
-    # ns_log requires the thread name, but it is cleared already
-    # earlier (after the interp deletion trace). AOLserver recreated
-    # the name and the an entry in the thread list, but this elements
-    # will not be freed. If we destroy the objects here, the mentioned
-    # problem will not occur.
+    # still fully functioning. During interp exit, the commands would
+    # be deleted anyhow, but there exists a potential memory leak,
+    # when e.g. a destroy method (or an exit handler) writes to
+    # ns_log.  ns_log requires the thread name, but it is cleared
+    # already earlier (after the interp deletion trace). AOLserver
+    # recreated the name and the an entry in the thread list, but this
+    # elements will not be freed. If we destroy the objects here, the
+    # mentioned problem will not occur.
     #
     ns_log notice "ON DELETE $args"
     ::xo::broadcast clear
@@ -577,12 +620,12 @@ namespace eval ::xo {
       set objs [::xotcl::Object allinstances]
       ns_log notice "no finalize available, deleting [llength $objs] objects"
       foreach o $objs {
-        if {![::xotcl::Object isobject $o]} continue
+        if {![nsf::is object $o]} continue
         if {[$o istype ::xotcl::Class]} continue
         catch {$o destroy} errorMsg
       }
       foreach o [::xotcl::Class allinstances] {
-        if {![::xotcl::Object isobject $o]} continue
+        if {![nsf::is object $o]} continue
         if {$o eq "::xotcl::Object" || $o eq "::xotcl::Class"} continue
         catch {$o destroy} errorMsg
       }
@@ -595,7 +638,7 @@ namespace eval ::xo {
     set xobjs   [llength [::xotcl::Object info instances -closure]]
     set nobjs   [llength [::nx::Object info instances  -closure]]
     set tmpObjs [llength [info commands ::nsf::__#*]]
-    set tdoms   [llength [concat [info commands domNode0*] [info commands domDoc0x*]]]
+    set tdoms   [llength [list {*}[info commands domNode0*] {*}[info commands domDoc0x*]]]
     set nssets  [llength [ns_set list]]
     ns_log notice "xo::stats $msg: current objects xotcl $xobjs nx $nobjs tmp $tmpObjs tDOM $tdoms ns_set $nssets"
   }
@@ -605,14 +648,14 @@ namespace eval ::xo {
   # created/recreated, it does not perform a cleanup of its
   # contents. This means that preexisting procs, objects classes,
   # variables etc. will survive a recreation. As a consequence,
-  # ::xo::Modules can easily span multiple files an they can be used
+  # ::xo::Modules can easily span multiple files and they can be used
   # like a namespace. However, the modules have the advantage that it
   # is possible to define procs, instprocs with non-positional
   # arguments directly in it. It is as well possible to use mixins
   # etc.
   #
   Class create Module
-  Module instproc init    args {my requireNamespace}
+  Module instproc init    args {:requireNamespace}
   Module instproc cleanup args {ns_log notice "create/recreate [self] without cleanup"}
 }
 
@@ -662,24 +705,46 @@ namespace eval ::xo {
   ::xotcl::Object create ::xo::system_stats
 
   if {$::tcl_platform(os) eq "Linux"} {
+
     ::xo::system_stats proc thread_info {pid tid} {
+      set s ""
       set fn /proc/$pid/task/$tid/stat
-      if {[file readable $fn]} {
-        set f [open $fn]; set s [read $f]; close $f
+      if {[ad_file readable $fn]} {
+        try {
+          set f [open $fn]
+          set s [read $f]
+        } on error err {
+          set errorMsg "IO error $err reading file $fn"
+          if {[info exists f]} { append errorMsg " (fh $f)" }
+          ns_log error $errorMsg
+        } finally {
+          close $f
+        }
       } elseif {[file readable /proc/$pid/task/$pid/stat]} {
-        set f [open /proc/$pid/task/$pid/stat]; set s [read $f]; close $f
-      } else {
-        return ""
+        set fn /proc/$pid/task/$pid/stat
+        try {
+          set f [open $fn]
+          set s [read $f]
+        } on error err {
+          set errorMsg "IO error $err reading file $fn"
+          if {[info exists f]} { append errorMsg " (fh $f)" }
+          ns_log error $errorMsg
+        } finally {
+          close $f
+        }
       }
-      lassign $s tid comm state ppid pgrp session tty_nr tpgid flags minflt \
-          cminflt majflt cmajflt utime stime cutime cstime priority nice \
-          numthreads itrealval starttime vsize rss rsslim startcode endcode \
-          startstack kstkesp kstkeip signal blocked sigignore sigcatch wchan \
-          nswap cnswap ext_signal processor ...
-      # utime and stimes are jiffies. Since Linux has HZ 100, we can
-      # multiply the jiffies by 10 to obtain ms
-      return [list utime [expr {$utime*10}] stime [expr {$stime*10}]]
+      if {$s ne ""} {
+        lassign $s tid comm state ppid pgrp session tty_nr tpgid flags minflt \
+            cminflt majflt cmajflt utime stime cutime cstime priority nice \
+            numthreads itrealval starttime vsize rss rsslim startcode endcode \
+            startstack kstkesp kstkeip signal blocked sigignore sigcatch wchan \
+            nswap cnswap ext_signal processor ...
+        # utime and stimes are jiffies. Since Linux has HZ 100, we can
+        # multiply the jiffies by 10 to obtain ms
+        return [list utime [expr {$utime*10}] stime [expr {$stime*10}]]
+      }
     }
+
   } else {
     ::xo::system_stats proc thread_info {pid tid} {
       return ""
@@ -687,6 +752,9 @@ namespace eval ::xo {
   }
 
   ::xo::system_stats proc gettid {} {
+    #
+    # Get name and tid of the current thread
+    #
     set hex [ns_thread id]
     foreach t [ns_info threads] {
       if {[lindex $t 2] eq $hex} {
@@ -705,20 +773,24 @@ namespace eval ::xo {
       "-driver:*" { set group drivers }
       "-asynclogwriter*" { set group logwriter }
       "-writer*"  { set group writers }
+      "-spooler*" { set group spoolers }
+      "-socks-"   { set group socks }
+      "-nsproxy*" { set group nsproxy }
+      "-ns_job_*" { set group ns_job }
       default     { set group others  }
     }
     return $group
   }
 
   ::xo::system_stats proc recordtimes {} {
-    set threadInfo [my gettid]
+    set threadInfo [:gettid]
     if {$threadInfo ne ""} {
-      array set i $threadInfo
-      array set i [my thread_info [pid] $i(tid)]
-      if {[info exists i(stime)]} {
-        set group [my thread_classify $i(name)]
-        nsv_incr [self] $group,stime $i(stime)
-        nsv_incr [self] $group,utime $i(utime)
+      set i [:thread_info [pid] [dict get $threadInfo tid]]
+      lappend i {*}$threadInfo
+      if {[dict exists $i stime]} {
+        set group [:thread_classify [dict get $i name]]
+        nsv_incr [self] $group,stime [dict get $i stime]
+        nsv_incr [self] $group,utime [dict get $i utime]
       }
     }
   }
@@ -732,25 +804,24 @@ namespace eval ::xo {
   ::xo::system_stats proc aggcpuinfo {utime stime ttime} {
     upvar $utime utimes $stime stimes $ttime ttimes
     set pid [pid]
-    array set varnames {utime utimes stime stimes}
+    set varnames {utime utimes stime stimes}
     foreach index [nsv_array names [self]] {
       lassign [split $index ,] group kind
-      my aggregate $group $varnames($kind) [nsv_get [self] $index]
+      :aggregate $group [dict get $varnames $kind] [nsv_get [self] $index]
     }
     set threadInfo [ns_info threads]
     if {[file readable /proc/$pid/statm] && [llength [lindex $threadInfo 0]] > 7} {
       foreach t $threadInfo {
-        array unset s
-        array set s [my thread_info $pid [lindex $t 7]]
-        if {[info exists s(stime)]} {
-          set group [my thread_classify [lindex $t 0]]
-          my aggregate $group $varnames(utime) $s(utime)
-          my aggregate $group $varnames(stime) $s(stime)
+        set s [:thread_info $pid [lindex $t 7]]
+        if {[dict exists $s stime]} {
+          set group [:thread_classify [lindex $t 0]]
+          :aggregate $group [dict get $varnames utime] [dict get $s utime]
+          :aggregate $group [dict get $varnames stime] [dict get $s stime]
         }
       }
     }
     foreach group [array names utimes] {
-      my aggregate $group ttimes [expr {$utimes($group) + $stimes($group)}]
+      :aggregate $group ttimes [expr {$utimes($group) + $stimes($group)}]
     }
   }
 }
@@ -765,17 +836,33 @@ namespace eval ::xo {
   # after a request was processed (defined in this file).
   #
   ::xotcl::Object create ::xo::broadcast
-  ::xo::broadcast proc send {cmd} {
+
+  ::xo::broadcast proc send {-thread_pattern cmd} {
+
+    set tids {}
     foreach thread_info [ns_info threads] {
-      switch -glob -- [lindex $thread_info 0] {
+      set tn [lindex $thread_info 0]
+      set tid [lindex $thread_info 2]
+      dict set tids $tid 1
+      if { [info exists thread_name] && ![string match $thread_pattern $tn] } {
+        continue
+      }
+      switch -glob -- $tn {
         -conn:* -
         -sched:* {
-          set tid [lindex $thread_info 2]
           nsv_lappend broadcast $tid $cmd
         }
       }
     }
+
+    foreach tid [nsv_array names broadcast] {
+      if {![dict exists $tids $tid]} {
+        nsv_unset broadcast $tid
+        ns_log notice "xo::broadcast cleanup of TID $tid (thread does not exist anymore)"
+      }
+    }
   }
+
   ::xo::broadcast proc blueprint {cmd} {
     foreach t [::xotcl::THREAD info instances] {
       $t do eval $cmd
@@ -790,17 +877,19 @@ namespace eval ::xo {
     if {[nsv_exists broadcast $tid]} {
       foreach cmd [nsv_get broadcast $tid] {
         ns_log notice "broadcast received {$cmd}"
-        if {[catch $cmd errorMsg]} {
+        try {
+          eval $cmd
+        } on error {errorMsg} {
           ns_log notice "broadcast receive error: $errorMsg for cmd $cmd"
         }
       }
-      my clear
+      :clear
     }
   }
 }
 
 proc ::xo::getObjectProperty {o what args} {
-  switch $what {
+  switch -- $what {
     "mixin" {
       return [$o ::nsf::methods::object::info::mixins]
     }
@@ -880,7 +969,7 @@ proc ::xo::getObjectProperty {o what args} {
       return [nsf::is object $o]
     }
     "isbaseclass" {
-      if {[info commands $o] eq ""} {return 0}
+      if {![nsf::is class $o]} {return 0}
       if {[catch {set p [$o info precedence]}]} {return 0}
       return [expr {[lindex $p end] eq $o}]
     }
@@ -985,8 +1074,8 @@ proc ::xo::getObjectProperty {o what args} {
   set config [lrange $arg 1 end]
 
   # search for slot
-  foreach c [my info heritage] {
-    if {[info commands ${c}::slot::$name] ne ""} {
+  foreach c [:info heritage] {
+    if {[nsf::is object ${c}::slot::$name]} {
       set slot ${c}::slot::$name
       break
     }
@@ -997,8 +1086,25 @@ proc ::xo::getObjectProperty {o what args} {
   set newSlot [self]::slot::$name
 
   $slot copy $newSlot
-  $newSlot configure -domain [self] -manager $newSlot -create_acs_attribute false -create_table_attribute false {*}$config
-  my set db_slot($name) $newSlot
+  $newSlot configure \
+      -domain [self] \
+      -manager $newSlot \
+      -create_acs_attribute false \
+      -create_table_attribute false \
+      {*}$config
+  #
+  # Changing the domain is necessary for "update_attribute_from_slot"
+  # for the extended slots like "title", "description" etc. But then
+  # the accessor methods (for "title", "description") have to be
+  # installed manually for the classes, on which the extension
+  # happens.
+  #
+  ::nsf::method::setter [$newSlot domain] $name
+  ns_log notice "=== change domain of $name from [$newSlot domain] to [$slot domain]"
+  $newSlot domain [$slot domain]
+
+  #
+  set :db_slot($name) $newSlot
 }
 
 

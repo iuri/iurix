@@ -4,7 +4,7 @@ ad_page_contract {
     @author Ben Adida (ben@openforce.net)    
     @author arjun (arjun@openforce.net)
     @creation-date 01 April 2002
-    @cvs-id $Id: simple-add.tcl,v 1.15.2.1 2015/09/12 11:06:20 gustafn Exp $
+    @cvs-id $Id: simple-add.tcl,v 1.17.2.1 2019/04/17 19:16:00 gustafn Exp $
 } {
     folder_id:naturalnum,notnull
     {type "fs_url"}
@@ -64,7 +64,13 @@ set submit_label [_ file-storage.Create]
 ad_form -extend -form {
     {url:text(text) {label \#file-storage.URL\#} {value "http://"}}
     {description:text(textarea),optional {html {rows 5 cols 50}} {label \#file-storage.Description\#}}
+} -validate {
+    {url
+        {[string match "data:*" [string trim $url]] == 0}
+        "\$url\" must not start with 'data:'"
+    }
 }
+
 
 set package_id [ad_conn package_id]
 set user_id [ad_conn user_id]
@@ -102,7 +108,7 @@ ad_form -extend -form {
 } -after_submit {
 
     ad_returnredirect "?folder_id=$folder_id"
-
+    ad_script_abort
 }
 
 # Local variables:

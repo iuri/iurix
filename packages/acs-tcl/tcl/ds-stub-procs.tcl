@@ -9,19 +9,21 @@ ad_library {
 
     @author Jeff Davis <davis@xarg.net>
     @creation-date 2005-03-02
-    @cvs-id $Id: ds-stub-procs.tcl,v 1.4.2.1 2015/09/10 08:21:56 gustafn Exp $
+    @cvs-id $Id: ds-stub-procs.tcl,v 1.6.2.1 2020/10/28 15:39:19 hectorr Exp $
 }
 
-if {[info commands ds_add] eq ""} {
+if {[namespace which ds_add] eq ""} {
     proc ds_add {args} {}
 }
-if {[info commands ds_collect_db_call] eq ""} {
+if {[namespace which ds_collect_db_call] eq ""} {
     proc ds_collect_db_call {args} {}
 }
-if {[info commands ds_collect_connection_info] eq ""} {
+if {[namespace which ds_collect_connection_info] eq ""} {
     proc ds_collect_connection_info {} {}
 }
-
+if {[namespace which ds_init] eq ""} {
+    proc ds_init {} {}
+}
 # Local variables:
 #    mode: tcl
 #    tcl-indent-level: 4

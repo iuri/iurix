@@ -432,7 +432,7 @@ We also saw how to use the templating system&#39;s forms API in a simple
 way, to create forms based pages with minimal duplication of code.
 </para>
 
-<para><phrase role="cvstag">($Id: subsites.xml,v 1.9.2.1 2016/06/23 08:32:46 gustafn Exp $)</phrase></para>
+<para><phrase role="cvstag">($Id: subsites.xml,v 1.10 2017/08/07 23:47:54 gustafn Exp $)</phrase></para>
 
 </sect2>
 

@@ -4,7 +4,7 @@ ad_page_contract {
 
     @author philg@mit.edu
     @creation-date September 26, 1999
-    @cvs-id $Id: index.tcl,v 1.12.2.6 2016/05/20 20:02:44 gustafn Exp $
+    @cvs-id $Id: index.tcl,v 1.15 2018/05/28 17:45:26 antoniop Exp $
 } {
     {return_url:localurl "" }
     {user_id:naturalnum ""}
@@ -48,32 +48,22 @@ if { $current_user_id == $user_id } {
 set portrait_image_url [export_vars -base ${subsite_url}shared/portrait-bits.tcl {user_id}]
 set export_edit_vars   [export_vars {user_id return_url}]
 
-if {![db_0or1row user_info {
-    select first_names, last_name 
-    from persons 
-    where person_id = :user_id
-}]} {
+if {![person::person_p -party_id $user_id]} {
     set return_code "no_user"
     set context [list "Account Unavailable"]
     ad_return_template
     return
 }
 
+set person [person::get -person_id $user_id]
+set first_names [dict get $person first_names]
+set last_name   [dict get $person last_name]
 
-if {![db_0or1row get_item_id {
-    select live_revision as revision_id, item_id
-    from acs_rels a, cr_items c
-    where a.object_id_two = c.item_id
-    and a.object_id_one = :user_id
-    and a.rel_type = 'user_portrait_rel'
-    and live_revision is not null
-    order by revision_id desc
-    limit 1
-}] || $revision_id eq ""} {
-    # The user doesn't have a portrait yet
-    set portrait_p 0
-} else {
-    set portrait_p 1
+set item_id [acs_user::get_portrait_id \
+                 -user_id $user_id]
+set portrait_p [expr {$item_id != 0}]
+if {$portrait_p} {
+    set revision_id [content::item::get_live_revision -item_id $item_id]
 }
     
 if { $admin_p } {

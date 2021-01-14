@@ -101,7 +101,7 @@
       <listitem><para>
         <emphasis role="strong">Implementation phase</emphasis> is about performing the
         work according to the plan, where decisions on how to handle
-        unforseen circumstances are guided by the strategy and
+        unforeseen circumstances are guided by the strategy and
         requirements.
       </para></listitem>
       <listitem><para>
@@ -210,7 +210,7 @@
         expertise, complexity or specificity.
       </para></listitem>
       <listitem><para>
-        Consistency in link descriptions -When link urls refer to
+        Consistency in link descriptions -When link URLs refer to
         whole documents, make the link (anchor wrapped title) that
         points to a document with the same title and/or heading of
         the document.
@@ -476,7 +476,7 @@
       <listitem><para>
         Create a list of administrative tools that are useful to
         administrating OpenACS, including developer support,
-        schema-browser and api browser. Link to AOLserver&#39;s config
+        schema-browser and API browser. Link to AOLserver&#39;s config
         file documentation.
       </para></listitem>
       <listitem><para>

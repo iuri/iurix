@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author Jeff Davis davis@xarg.net
     @creation-date 2003-12-29
-    @cvs-id $Id: o.vuh,v 1.7.2.1 2016/06/09 09:13:25 gustafn Exp $
+    @cvs-id $Id: o.vuh,v 1.9 2018/04/11 21:35:07 hectorr Exp $
 } {}
 
 if {![regexp {^/([0-9]+)(-(.+))?$} [ad_conn path_info] match object_id dummy anchor]} {
@@ -73,8 +73,8 @@ if {$page_url ne ""} {
     ad_returnredirect $page_url$anchor
 } else {
     ad_return_warning "Invalid object ID" [subst {
-        <p>The object ID $object_id is a $object_type but getting 
-        it's real url failed.</p>
+        <p>The object ID $object_id is a $object_type but getting
+        its real url failed.</p>
         <p>We are sorry for this inconvenience.</p>
     }]
 }

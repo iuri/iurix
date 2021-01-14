@@ -1,16 +1,25 @@
-set title "Richtext CKEditor Sitewide Admin"
-set context [list  $title]
-set version $::richtext::ckeditor4::version
+ad_page_contract {
+    @author Gustaf Neumann
 
-#
-# Get version info about CKEditor. If not locally installed, offer a
-# link for download.
-#
-set version_info [::richtext::ckeditor4::version_info]
-if {[dict exists $version_info resources]} {
-    set resources [dict get $version_info resources]
+    @creation-date Aug 6, 2018
+} {
+    {ck_package:token ""}
 }
-set cdn [dict get $version_info cdn]
 
-set path $::acs::rootdir/packages/richtext-ckeditor4/www
-set writable [file writable $path]
+set version $::richtext::ckeditor4::version
+set default_ck_package $::richtext::ckeditor4::ck_package
+if {$ck_package eq ""} {
+    set ck_package $::richtext::ckeditor4::ck_package
+}
+set resource_info [::richtext::ckeditor4::resource_info -ck_package $ck_package]
+set download_url download?ck_package=$ck_package
+
+set title "[dict get $resource_info resourceName] - Sitewide Admin"
+set context [list $title]
+
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

@@ -1,7 +1,7 @@
 ad_page_contract {
     Adding a user by an administrator
 
-    @cvs-id $Id: user-add.tcl,v 1.6.12.1 2015/09/10 08:21:10 gustafn Exp $
+    @cvs-id $Id: user-add.tcl,v 1.7 2017/08/07 23:47:45 gustafn Exp $
 } -query {
     {referer "/acs-admin/users"}
 } -properties {

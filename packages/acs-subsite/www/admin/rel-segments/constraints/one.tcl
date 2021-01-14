@@ -6,7 +6,7 @@ ad_page_contract {
 
     @author mbryzek@arsdigita.com
     @creation-date Thu Dec 14 18:06:02 2000
-    @cvs-id $Id: one.tcl,v 1.4.2.2 2015/10/28 09:38:36 gustafn Exp $
+    @cvs-id $Id: one.tcl,v 1.6 2018/01/21 00:35:29 gustafn Exp $
 
 } {
     constraint_id:naturalnum,notnull
@@ -40,8 +40,10 @@ set package_id [ad_conn package_id]
 #  rel_segment
 
 if { ![db_0or1row select_constraint_properties {} -column_array props] } {
-    ad_return_error "Error" "Constraint #$constraint_id could not be found or is out of the scope of this subsite."
-    return
+    ad_return_error \
+        "Error" \
+        "Constraint #$constraint_id could not be found or is out of the scope of this subsite."
+    ad_script_abort
 }
 
 set segment_id $props(segment_id)

@@ -3,7 +3,7 @@ ad_page_contract {
     
     @author Lars Pind (lars@collaboraid.biz)
     @creation-date October 24, 2002
-    @cvs-id $Id: translator-mode-toggle.tcl,v 1.2.12.3 2016/05/20 19:55:32 gustafn Exp $
+    @cvs-id $Id: translator-mode-toggle.tcl,v 1.4 2018/01/19 21:23:51 gustafn Exp $
 } {
     {return_url:localurl "."}
 }
@@ -11,7 +11,7 @@ ad_page_contract {
 lang::util::translator_mode_set [expr {![lang::util::translator_mode_p]}] 
 
 ad_returnredirect $return_url
-
+ad_script_abort
 
 # Local variables:
 #    mode: tcl

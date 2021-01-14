@@ -5,7 +5,7 @@ ad_page_contract {
 
     @author rhs@mit.edu
     @creation-date 2000-12-04
-    @cvs-id $Id: new.tcl,v 1.5.6.3 2016/01/02 12:42:04 gustafn Exp $
+    @cvs-id $Id: new.tcl,v 1.7.2.1 2019/03/13 11:22:05 antoniop Exp $
 } {
     { object_type:trim "" }
     { pretty_name:trim "" }
@@ -64,8 +64,8 @@ if { [template::form is_valid group_type] } {
         incr exception_count
         append exception_text \
             "<li>The specified object type, $object_type, already exists. " \
-            [ad_decode $safe_object_type $object_type "" \
-                 "Note that we converted the object type to \"$safe_object_type\" to ensure that the name would be safe for the database."] \
+            [expr {$safe_object_type eq $object_type ? "" :
+                   "Note that we converted the object type to \"$safe_object_type\" to ensure that the name would be safe for the database."}] \
             "Please back up and choose another.</li>"
     } else {
         # let's make sure the names are unique
@@ -91,7 +91,7 @@ if { [template::form is_valid group_type] } {
         group_type::new -group_type $object_type -supertype $supertype $pretty_name $pretty_plural
     }
     ad_returnredirect ""
-    return 
+    ad_script_abort
 }
 
 ad_return_template

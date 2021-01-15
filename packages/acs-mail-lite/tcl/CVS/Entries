@@ -1,0 +1,16 @@
+/acs-mail-lite-callback-procs.tcl/1.30.2.1/Fri Jul  3 07:53:44 2020//Toacs-5-10
+/acs-mail-lite-callback-procs.xql/1.4/Fri Dec 22 07:57:43 2006//Toacs-5-10
+/acs-mail-lite-init.tcl/1.18/Thu Jun 21 14:29:38 2018//Toacs-5-10
+/acs-mail-lite-procs-oracle.xql/1.18/Wed Jun 13 14:55:27 2018//Toacs-5-10
+/acs-mail-lite-procs-postgresql.xql/1.17/Wed Jun 13 14:55:27 2018//Toacs-5-10
+/acs-mail-lite-procs.tcl/1.108.2.14/Tue Dec 15 11:08:34 2020//Toacs-5-10
+/acs-mail-lite-procs.xql/1.19.2.1/Tue Sep  1 14:26:27 2020//Toacs-5-10
+/apm-callback-procs.tcl/1.2/Mon Aug  7 23:47:57 2017//Toacs-5-10
+/email-inbound-procs.tcl/1.15.2.9/Tue Sep  1 14:28:40 2020//Toacs-5-10
+/email-inbound-procs.xql/1.1/Thu Jun 21 15:45:53 2018//Toacs-5-10
+/imap-inbound-procs.tcl/1.8.2.3/Tue Sep  1 14:29:57 2020//Toacs-5-10
+/legacy-inbound-procs.tcl/1.2.2.4/Fri Jul  3 07:53:44 2020//Toacs-5-10
+/legacy-inbound-procs.xql/1.1/Thu Jun 21 15:21:23 2018//Toacs-5-10
+/maildir-inbound-procs.tcl/1.8.2.1/Sat Nov 16 16:54:06 2019//Toacs-5-10
+/utils-procs.tcl/1.9/Wed Aug 15 16:24:28 2018//Toacs-5-10
+D

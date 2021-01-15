@@ -1,0 +1,54 @@
+# -*- Tcl -*- /packages/qt-rest/www/users/index.vuh
+# @author Iuri de Araujo, iuri@iurix.com
+#
+# serves users objects
+#
+# expecting a user_id as path_info
+
+ns_log Notice "PATH INFO [ad_conn path_info]"
+
+regexp {^([0-9]+)} [ad_conn path_info] match user_id
+if {![info exists user_id] || ![string is integer -strict $user_id]} {
+    ad_page_contract_handle_datasource_error "user_id is not valid"
+    ad_script_abort
+}
+
+#if {[parameter::get -parameter CheckPermissionOnImageServeP] == "t"} {
+#    permission::require_permission -object_id $image_id -privilege "read"
+#}
+
+if {[catch {acs_user::get -user_id $user_id -array user} errMsg]} {
+    if {$::errorCode eq "NOT_FOUND"} {
+        ns_returnnotfound
+        ad_script_abort
+    }
+    error $errMsg $::errorInfo $::errorCode
+} 
+
+
+append result "\{
+    \"id\": $user(user_id),
+    \"age\":54,
+    \"gender\": \"M\",
+    \"date\": \"2021-01-04\",
+    \"time\": \"18:03:24\",
+    \"phone\": \"+ 57 320 927 8742\",
+    \"email\": \"$user(email)\",
+    \"first_names\": \"$user(first_names)\",
+    \"last_name\": \"$user(last_name)\"
+\}"
+
+
+
+ns_respond -status 200 -type "application/json" -string $result
+ad_script_abort
+
+#rp_internal_redirect "/packages/$package_key/$path_tail"
+
+
+#
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:

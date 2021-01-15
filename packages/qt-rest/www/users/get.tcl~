@@ -1,0 +1,76 @@
+# /packages/qt-rest/www/users/get-users.tcl
+ad_page_contract {
+    API REST method to return cr_items qt_face
+} {
+    {date_from:optional}
+    {date_to:optional}
+    {offset:integer 0}
+    {limit:integer 10}
+    {type ""}
+}
+ns_log Notice "Running TCL script get-person-graphics.tcl"
+
+# Validate and Authenticate JWT
+qt::rest::jwt::validation_p
+
+
+
+set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
+set content_type qt_face
+set where_clauses ""
+
+if {[info exists date_from]} {
+    if {![catch {set t [clock scan $date_from]} errmsg]} {
+	append where_clauses " AND o.creation_date::date >= :date_from::date"
+    } else {
+	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	ad_script_abort    
+    }
+}
+
+
+if {[info exists date_to]} {
+    if {![catch {set t [clock scan $date_to]} errmsg]} {
+	append where_clauses " AND o.creation_date::date <= :date_to::date "
+    } else {
+	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
+	ad_script_abort    
+    }
+}
+
+
+append result "\["
+
+
+append result "\{
+    id:1,
+    age:54,
+    sex:M,
+    date:2020-08-04,
+    time: 18:03:24,
+    phone: + 57 320 927 8742,
+    email:Juan.sanchez.t@gmail.com,
+    firstsurname:Sanchez,
+    lastsurname:Torres,
+    firstname:juan,
+    secondname: Carillo
+\},\{
+    id:1,
+    age:54,
+    sex:M,
+    date:2020-08-04,
+    time: 18:03:24,
+    phone: + 57 320 927 8742,
+    email:Juan.sanchez.t@gmail.com,
+    firstsurname:Sanchez,
+    lastsurname:Torres,
+    firstname:juan,
+    secondname: Carillo
+\}"
+
+
+
+
+append result "\]"
+ns_respond -status 200 -type "application/json" -string $result
+ad_script_abort

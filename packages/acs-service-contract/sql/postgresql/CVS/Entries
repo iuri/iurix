@@ -1,0 +1,15 @@
+/acs-sc-msg-types-create.sql/1.9/Sat Mar 30 17:40:53 2013//
+/acs-sc-msg-types-drop.sql/1.2/Wed Sep 26 21:01:35 2001//
+/acs-sc-object-types-create.sql/1.2/Sat Oct  6 16:30:30 2001//
+/acs-sc-object-types-drop.sql/1.1/Sat Sep  1 20:22:57 2001//
+/acs-sc-packages-create.sql/1.18/Mon Aug  7 23:47:57 2017//
+/acs-sc-packages-drop.sql/1.2/Sat May 17 09:56:31 2003//
+/acs-sc-tables-create.sql/1.6/Mon Sep 25 21:09:43 2006//
+/acs-sc-tables-drop.sql/1.2/Sat Oct  6 16:30:30 2001//
+/acs-sc-views-create.sql/1.4/Wed Sep 17 09:53:22 2003//
+/acs-sc-views-drop.sql/1.2/Sat Oct  6 16:30:30 2001//
+/acs-service-contract-create.sql/1.1/Sat Sep  1 20:22:57 2001//
+/acs-service-contract-drop.sql/1.1/Sat Sep  1 20:22:57 2001//
+/sc-sample-create.sql/1.1/Sat Sep  1 20:22:57 2001//
+/sc-sample-drop.sql/1.1/Sat Sep  1 20:22:57 2001//
+D

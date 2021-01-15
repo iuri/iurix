@@ -151,6 +151,19 @@ if { [template::form is_valid add_group] } {
             }]
     }
 
+    ## Added custom chunk to integrate with Luna
+    ## Iuri de Araujo (iuri@iurix.com)
+    # Create Group List at Luna
+    set req_headers [ns_set create]
+    ns_set put $req_headers "X-Auth-Token" "9fb6e731-b342-4952-b0c1-aa1d0b52757b"
+    set url "http://luna.qonteo.com:5000/4/storage/lists"
+    set body "\{\"list_data\": \"${group.group_name}\", \"type\": \"persons\"\}"
+    util::http::post \
+        -headers $req_headers \
+        -url $url \
+        -timeout 60 \
+        -body $body
+
     # Add the original return_url as the last one in the list
     lappend return_url_list $return_url
 

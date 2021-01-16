@@ -1,4 +1,4 @@
-_page_contract {
+ad_page_contract {
     Uploading user portraits
 
     @cvs-id $Id: upload.tcl,v 1.22.2.3 2019/07/01 14:47:06 hectorr Exp $
@@ -125,75 +125,6 @@ ad_form -extend -name "portrait_upload" -validate {
 
     }
 
-
-
-
-
-    # Integration with Luna Faces Luna
-    # Creates person id
-    set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
-    set req_headers [ns_set create]
-    ns_set put $req_headers "X-Auth-Token" "$token"
-
-
-    #   set url "http://luna.qonteo.com:5000/4/storage/lists"
-    set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
-
-    set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
-
-    set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
-
-    set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
-
-
-    # Add person
-    set url "${proto}://${domain}:${port}${path}persons"
-    ns_log Notice "URL $url"
-    set res [util::http::post \
-                 -headers $req_headers \
-                 -url $url \
-                 -timeout 60 \
-                 -body ""]
-
-    ns_log Notice "RES $res"
-    package req json
-    set person_id [lindex [json::json2dict [dict get $res page]] 1]
-    
-    ns_log Notice "DATA $person_id"
-
-
-
-
-
-
-
-
-    # Add Descriptor (portrait)
-    ns_set put $req_headers "Content-Type" "image/jpeg"
-    ns_log Notice "HEADERS $req_headers"
-    ns_log Notice "TOKEN $token"
-    set url "${proto}://${domain}:${port}${path}descriptors"
-    ns_log Notice "URL $url"
-    
-
-    set fp [open [ns_queryget upload_file.tmpfile] "rb"]
-    ns_log Notice "FILE  [ns_queryget upload_file.tmpfile] "
-    # ns_log Notice "[open [ns_queryget upload_file.tmpfile] rb]"
-    #    ns_log Notice "[read $fp]"
-    
-
-    set res [util::http::post \
-                 -headers $req_headers \
-                 -url $url \
-                 -timeout 60 \
-                 -body "file=[read $fp]"]
-
-    ns_log Notice "RES $res"
-#    package req json
-#    set person_id [lindex [json::json2dict [dict get $res page]] 1]
-
-    
-    
 } -after_submit {
 
     ad_returnredirect $return_url

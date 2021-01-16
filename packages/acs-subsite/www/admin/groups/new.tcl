@@ -154,9 +154,21 @@ if { [template::form is_valid add_group] } {
     ## Added custom chunk to integrate with Luna
     ## Iuri de Araujo (iuri@iurix.com)
     # Create Group List at Luna
+    set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
     set req_headers [ns_set create]
-    ns_set put $req_headers "X-Auth-Token" "9fb6e731-b342-4952-b0c1-aa1d0b52757b"
-    set url "http://luna.qonteo.com:5000/4/storage/lists"
+    ns_set put $req_headers "X-Auth-Token" "$token"
+
+
+    #   set url "http://luna.qonteo.com:5000/4/storage/lists"
+    set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
+
+    set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
+    set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
+    
+    set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
+
+    set url "${proto}://${domain}:${port}${path}lists"
+
     set body "\{\"list_data\": \"${group.group_name}\", \"type\": \"persons\"\}"
     util::http::post \
         -headers $req_headers \

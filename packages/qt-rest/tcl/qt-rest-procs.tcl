@@ -1,4 +1,4 @@
-# /packages/ix-restapi/tcl/ix-rest-procs.tcl
+# /packages/qt-rest/tcl/qt-rest-procs.tcl
 #
 # Copyright (C) 2020 IURIX
 #

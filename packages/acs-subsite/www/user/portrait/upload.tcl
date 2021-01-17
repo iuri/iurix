@@ -1,4 +1,4 @@
-_page_contract {
+ad_page_contract {
     Uploading user portraits
 
     @cvs-id $Id: upload.tcl,v 1.22.2.3 2019/07/01 14:47:06 hectorr Exp $
@@ -90,11 +90,12 @@ if { $portrait_p } {
     }
 }
 
+
 set mime_types [parameter::get -parameter AcceptablePortraitMIMETypes -default ""]
 set max_bytes [parameter::get -parameter MaxPortraitBytes -default ""]
 
 ad_form -extend -name "portrait_upload" -validate {
-
+    
     # check to see if this is one of the favored MIME types,
     # e.g., image/gif or image/jpeg
 
@@ -115,84 +116,23 @@ ad_form -extend -name "portrait_upload" -validate {
 
 } -on_submit {
 
-    db_transaction {
 
+    set person_id [qt::lunaapi::person::new]
+
+
+    set descriptor_id [qt::lunaapi::descriptor::new -file [ns_queryget upload_file.tmpfile]]
+
+    qt::lunaapi::descriptor::attach_to_person -person_id $person_id -descriptor_id $descriptor_id 
+    
+    db_transaction {
+        
         acs_user::create_portrait \
             -user_id $user_id \
             -description $portrait_comment \
             -filename $upload_file \
             -file [ns_queryget upload_file.tmpfile]
-
+        
     }
-
-
-
-
-
-    # Integration with Luna Faces Luna
-    # Creates person id
-    set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
-    set req_headers [ns_set create]
-    ns_set put $req_headers "X-Auth-Token" "$token"
-
-
-    #   set url "http://luna.qonteo.com:5000/4/storage/lists"
-    set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
-
-    set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
-
-    set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
-
-    set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
-
-
-    # Add person
-    set url "${proto}://${domain}:${port}${path}persons"
-    ns_log Notice "URL $url"
-    set res [util::http::post \
-                 -headers $req_headers \
-                 -url $url \
-                 -timeout 60 \
-                 -body ""]
-
-    ns_log Notice "RES $res"
-    package req json
-    set person_id [lindex [json::json2dict [dict get $res page]] 1]
-    
-    ns_log Notice "DATA $person_id"
-
-
-
-
-
-
-
-
-    # Add Descriptor (portrait)
-    ns_set put $req_headers "Content-Type" "image/jpeg"
-    ns_log Notice "HEADERS $req_headers"
-    ns_log Notice "TOKEN $token"
-    set url "${proto}://${domain}:${port}${path}descriptors"
-    ns_log Notice "URL $url"
-    
-
-    set fp [open [ns_queryget upload_file.tmpfile] "rb"]
-    ns_log Notice "FILE  [ns_queryget upload_file.tmpfile] "
-    # ns_log Notice "[open [ns_queryget upload_file.tmpfile] rb]"
-    #    ns_log Notice "[read $fp]"
-    
-
-    set res [util::http::post \
-                 -headers $req_headers \
-                 -url $url \
-                 -timeout 60 \
-                 -body "file=[read $fp]"]
-
-    ns_log Notice "RES $res"
-#    package req json
-#    set person_id [lindex [json::json2dict [dict get $res page]] 1]
-
-    
     
 } -after_submit {
 

@@ -20,7 +20,9 @@ namespace eval qt::lunaapi::person {}
 namespace eval qt::lunaapi::group {}
 
 
-ad_proc -public qt::lunaapi::person::new  {} {
+ad_proc -public qt::lunaapi::person::new  {
+    {-user_id}
+} {
     Creates a person_id at Luna SFW 
 } {
     ns_log Notice "Running ad_proc qt::lunapai::person::new"
@@ -42,12 +44,18 @@ ad_proc -public qt::lunaapi::person::new  {} {
     set url "${proto}://${domain}:${port}${path}persons"
     ns_log Notice "URL $url"
 
+    acs_user::get -user_id $user_id -array user
+    set person_name $user(name)
+    
+		     
+    set body "\{\"user_data\": \"${person_name}\"\}"
+
     
     set res [util::http::post \
                  -headers $req_headers \
                  -url $url \
                  -timeout 60 \
-                 -body ""]
+                 -body $body]
     
     ns_log Notice "RES $res"
     package req json
@@ -215,17 +223,17 @@ ad_proc -public qt::lunaapi::group::add_person  {
     set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
 
     # Retrieves person_id
-    set image_id acs_user::get_portrait_id -user_id $party_id
+    set image_id [acs_user::get_portrait_id -user_id $user_id]
     content::item::get -item_id $image_id -array_name item
     set person_id [lindex $item(description) 1]
 
     
     # Retrieves list_id
-    
-    
-    
+    group::get -group_id $group_id -array group
+     
+    ns_log Notice "[parray group]"
     # Add person
-    set url "${proto}://${domain}:${port}${path}persons/${person_id}/linked_list?list_id=${list_id}&do=attach"
+    set url "${proto}://${domain}:${port}${path}persons/${person_id}/linked_lists?list_id=$group(group_name)&do=attach"
     ns_log Notice "URL $url"
     
     

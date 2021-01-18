@@ -122,7 +122,7 @@ ad_form -extend -name "portrait_upload" -validate {
     ## @creation-date 2021-01-17
     # Create Group List at Luna
     ## BEGIN
-    set person_id [qt::lunaapi::person::new]
+    set person_id [qt::lunaapi::person::new -user_id $user_id]
     set descriptor_id [qt::lunaapi::descriptor::new -file [ns_queryget upload_file.tmpfile]]
     qt::lunaapi::descriptor::attach_to_person -person_id $person_id -descriptor_id $descriptor_id 
     ## END

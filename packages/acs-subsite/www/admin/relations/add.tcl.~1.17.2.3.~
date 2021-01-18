@@ -135,15 +135,6 @@ if { [template::form is_valid add_relation] } {
         ad_complain $errorMsg
     }
 
-    ## Added custom chunk to integrate with Luna
-    ## @author Iuri de Araujo (iuri@iurix.com)
-    ## @creation-date 2021-01-17
-    # Attach a person to a List at Luna
-    qt::lunaapi::group::add_person -user_id $party_id -group_id $group_id
-
-
-
-    
     if { $return_url eq "" } {
         set return_url [export_vars -base one rel_id]
     }

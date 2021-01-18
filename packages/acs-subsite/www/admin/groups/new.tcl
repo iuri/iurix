@@ -123,11 +123,21 @@ if { [template::form is_request add_group] } {
 
 if { [template::form is_valid add_group] } {
     db_transaction {
+
+        ## Added custom chunk to integrate with Luna
+        ## @author Iuri de Araujo (iuri@iurix.com)
+        ## @creation-date 2021-01-17
+        # Create Group List at Luna
+        set list_id [qt::lunaapi::group::new -group_name ${group.group_name}]
+        
+        
+        
         set group_id [group::new \
                           -form_id add_group \
                           -variable_prefix group \
                           -group_id $group_id \
                           -context_id [ad_conn package_id] \
+                          -group_name $list_id \
                           -pretty_name ${group.group_name} \
                           $group_type]
         relation_add -member_state $member_state $add_with_rel_type $add_to_group_id $group_id
@@ -150,31 +160,6 @@ if { [template::form is_valid add_group] } {
                 {allow_out_of_scope_p t}
             }]
     }
-
-    ## Added custom chunk to integrate with Luna
-    ## Iuri de Araujo (iuri@iurix.com)
-    # Create Group List at Luna
-    set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
-    set req_headers [ns_set create]
-    ns_set put $req_headers "X-Auth-Token" "$token"
-
-
-    #   set url "http://luna.qonteo.com:5000/4/storage/lists"
-    set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
-
-    set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
-    set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
-    
-    set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
-
-    set url "${proto}://${domain}:${port}${path}lists"
-
-    set body "\{\"list_data\": \"${group.group_name}\", \"type\": \"persons\"\}"
-    util::http::post \
-        -headers $req_headers \
-        -url $url \
-        -timeout 60 \
-        -body $body
 
     # Add the original return_url as the last one in the list
     lappend return_url_list $return_url

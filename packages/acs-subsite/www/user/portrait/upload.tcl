@@ -117,18 +117,21 @@ ad_form -extend -name "portrait_upload" -validate {
 } -on_submit {
 
 
+    ## Added custom chunk to integrate with Luna
+    ## @author Iuri de Araujo (iuri@iurix.com)
+    ## @creation-date 2021-01-17
+    # Create Group List at Luna
+    ## BEGIN
     set person_id [qt::lunaapi::person::new]
-
-
     set descriptor_id [qt::lunaapi::descriptor::new -file [ns_queryget upload_file.tmpfile]]
-
     qt::lunaapi::descriptor::attach_to_person -person_id $person_id -descriptor_id $descriptor_id 
+    ## END
     
     db_transaction {
         
         acs_user::create_portrait \
             -user_id $user_id \
-            -description $portrait_comment \
+            -description "person_id\n$person_id\ndescriptor_id\n$descriptor_id\n$portrait_comment" \
             -filename $upload_file \
             -file [ns_queryget upload_file.tmpfile]
         

@@ -17,6 +17,7 @@ ad_library {
 namespace eval qt::lunaapi {}
 namespace eval qt::lunaapi::descriptor {}
 namespace eval qt::lunaapi::person {}
+namespace eval qt::lunaapi::group {}
 
 
 ad_proc -public qt::lunaapi::person::new  {} {
@@ -137,6 +138,94 @@ ad_proc -public qt::lunaapi::descriptor::attach_to_person  {
     
     # Add person
     set url "${proto}://${domain}:${port}${path}persons/${person_id}/linked_descriptors?descriptor_id=${descriptor_id}&do=attach"
+    ns_log Notice "URL $url"
+    
+    
+    set res [ns_http run -method PATCH -headers $req_headers $url]   
+    ns_log Notice "RES $res"
+    
+}
+
+
+
+
+##
+# Group ad_procs API
+##
+ad_proc -public qt::lunaapi::group::new {
+    {-group_name ""}
+} {
+    It creates a list at Luna SFW, returns list_id
+} {
+
+    set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
+    set req_headers [ns_set create]
+    ns_set put $req_headers "X-Auth-Token" "$token"
+    
+    
+    #   set url "http://luna.qonteo.com:5000/4/storage/lists"
+    set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
+
+    set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
+    set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
+    
+    set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
+
+    set url "${proto}://${domain}:${port}${path}lists"
+
+    set body "\{\"list_data\": \"${group_name}\", \"type\": \"persons\"\}"
+    set res [util::http::post \
+		 -headers $req_headers \
+		 -url $url \
+		 -timeout 60 \
+		 -body $body]
+
+    
+    package req json
+    set group_id [lindex [json::json2dict [dict get $res page]] 1]
+    
+    ns_log Notice "DATA $group_id"
+
+    return $group_id
+	     
+
+}
+
+
+ad_proc -public qt::lunaapi::group::add_person  {
+    {-user_id}
+    {-group_id}
+} {
+    Attaches a person to a list/group at Luna SFW
+
+    curl -k -v -X PATCH -H "X-Auth-Token: 41fb3071-4947-48a-bf2a-e59e3062c2ff" "http://ip:5000/4/storage/persons/e5630cda-84c3-4bfe-9871-e2a5078c94fc/linked_lists?list_id=770bf902-fe2a-4c39-a292-93e9d2b1dd18&do=attach"
+} {
+    ns_log Notice "Running ad_proc qt::lunapai::group::add_person"
+    
+    
+    # Integration with Luna Faces
+    set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
+    set req_headers [ns_set create]
+    ns_set put $req_headers "X-Auth-Token" "$token"
+    
+    #   set url "http://luna.qonteo.com:5000/4/storage/lists"
+    set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
+    set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
+    set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
+    set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
+
+    # Retrieves person_id
+    set image_id acs_user::get_portrait_id -user_id $party_id
+    content::item::get -item_id $image_id -array_name item
+    set person_id [lindex $item(description) 1]
+
+    
+    # Retrieves list_id
+    
+    
+    
+    # Add person
+    set url "${proto}://${domain}:${port}${path}persons/${person_id}/linked_list?list_id=${list_id}&do=attach"
     ns_log Notice "URL $url"
     
     

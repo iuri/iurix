@@ -22,7 +22,7 @@
         <li> <a href="groups-display?group_type=@group_type_enc@">#acs-subsite.View_all_groups_of_this_type#</a> </li>
       </if>
       <else>
-        <li> <a href="../groups/one?group_id=@groups.group_id;literal@"><if @groups.title@ ne "">@groups.title@ </if>@groups.group_name@</a> </li>
+        <li> <a href="../groups/one?group_id=@groups.group_id;literal@">@groups.group_name@</a> </li>
       </else>
   </multiple>
   </ul>

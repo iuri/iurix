@@ -1,6 +1,0 @@
-ad_page_contract {
-    API REST method to return organizations
-}
-
-ns_log Notice "Running TCL script organization/get"
-

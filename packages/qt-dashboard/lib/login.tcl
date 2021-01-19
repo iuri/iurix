@@ -76,8 +76,7 @@ set subsite_url [subsite::get_element -element url]
 set system_name [ad_system_name]
 
 if { $return_url eq "" } {
-    #set return_url [ad_pvt_home]
-    set return_url "https://dashboard.qonteo.com/primax"
+    set return_url [ad_pvt_home]
 }
 
 set authority_options [auth::authority::get_authority_options]
@@ -229,7 +228,7 @@ ad_form -extend -name login -form {
                              -password $password \
                              -host_node_id $host_node_id \
                              -persistent=[expr {$allow_persistent_login_p && [template::util::is_true $persistent_p]}]]
-    
+
     # Handle authentication problems
     switch $auth_info(auth_status) {
         ok {
@@ -313,7 +312,7 @@ ad_form -extend -name login -form {
 } -after_submit {
 
     # We're logged in
-
+    
     # Handle account_message
     if { [info exists auth_info(account_message)] && $auth_info(account_message) ne "" } {
         ad_returnredirect [export_vars -base "[subsite::get_element -element url]register/account-message" {

@@ -209,38 +209,41 @@ ad_proc -public qt::lunaapi::group::add_person  {
     curl -k -v -X PATCH -H "X-Auth-Token: 41fb3071-4947-48a-bf2a-e59e3062c2ff" "http://ip:5000/4/storage/persons/e5630cda-84c3-4bfe-9871-e2a5078c94fc/linked_lists?list_id=770bf902-fe2a-4c39-a292-93e9d2b1dd18&do=attach"
 } {
     ns_log Notice "Running ad_proc qt::lunapai::group::add_person"
-    
-    
-    # Integration with Luna Faces
-    set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
-    set req_headers [ns_set create]
-    ns_set put $req_headers "X-Auth-Token" "$token"
-    
-    #   set url "http://luna.qonteo.com:5000/4/storage/lists"
-    set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
-    set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
-    set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
-    set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
 
     # Retrieves person_id
-    set image_id [acs_user::get_portrait_id -user_id $user_id]
-    content::item::get -item_id $image_id -array_name item
-    set person_id [lindex $item(description) 1]
-
+    set portrait_id [acs_user::get_portrait_id -user_id $user_id]
     
-    # Retrieves list_id
-    group::get -group_id $group_id -array group
-     
-    ns_log Notice "[parray group]"
-    # Add person
-    set url "${proto}://${domain}:${port}${path}persons/${person_id}/linked_lists?list_id=$group(group_name)&do=attach"
-    ns_log Notice "URL $url"
+    ns_log Notice "PORTRAIT ID $portrait_id"
     
+    if {$portrait_id ne 0} {
+	# Integration with Luna Faces
+	set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
+	set req_headers [ns_set create]
+	ns_set put $req_headers "X-Auth-Token" "$token"
+	
+	#   set url "http://luna.qonteo.com:5000/4/storage/lists"
+	set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
+	set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
+	set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
+	set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
+	
+	content::item::get -item_id $image_id -array_name item
+	set person_id [lindex $item(description) 1]
+	
+	
+	# Retrieves list_id
+	group::get -group_id $group_id -array group
+	
+	ns_log Notice "[parray group]"
+	# Add person
+	set url "${proto}://${domain}:${port}${path}persons/${person_id}/linked_lists?list_id=$group(group_name)&do=attach"
+	ns_log Notice "URL $url"
+	
+	
+	set res [ns_http run -method PATCH -headers $req_headers $url]   
+	ns_log Notice "RES $res"
+	
+    }
     
-    set res [ns_http run -method PATCH -headers $req_headers $url]   
-    ns_log Notice "RES $res"
     
 }
-
-
-

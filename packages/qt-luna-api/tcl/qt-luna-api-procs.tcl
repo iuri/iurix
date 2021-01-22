@@ -227,7 +227,7 @@ ad_proc -public qt::lunaapi::group::add_person  {
 	set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
 	set path [parameter::get_global_value -package_key qt-luna-api -parameter StorageResourcePath -default ""]
 	
-	content::item::get -item_id $image_id -array_name item
+	content::item::get -item_id $portrait_id -array_name item
 	set person_id [lindex $item(description) 1]
 	
 	

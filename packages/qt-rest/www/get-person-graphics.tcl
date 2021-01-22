@@ -235,7 +235,7 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
     set max 0
     append result "\"heatmap\":\["
     # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-    db_foreach select_week_grouped_hourly {
+    db_foreach select_week_grouped_hourly "
 	select date_trunc('hour', o.creation_date) AS hour,
 	COUNT(1) AS total,
 	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
@@ -243,8 +243,9 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
 	FROM qt_face_tx f, acs_objects o
 	WHERE f.item_id = o.object_id
 	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
+	$where_clauses 
 	GROUP BY 1 ORDER BY hour ASC    
-    } {	
+    " {	
 	set hour [clock scan [lindex [split $hour "+"] 0]]
 	set h [clock format $hour -format %H]
 	set d [clock format $hour -format "%d/%m"]

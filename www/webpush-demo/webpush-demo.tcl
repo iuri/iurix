@@ -14,6 +14,8 @@ set pushstatus ""
 set script [ns_url2file [ns_conn url]]
 set scriptDir [file dirname $script]
 
+ns_log Notice "SUBS $subscription"
+
 if {$subscription ne ""} {
     #
     # Subscription will be in JSON
@@ -45,6 +47,7 @@ if {$subscription ne ""} {
     # send push notification
     #
     try {
+        ns_log Notice "MESSAGE $text"
         webpush::send \
             -subscription $subscription \
             -data $text \

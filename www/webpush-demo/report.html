@@ -280,7 +280,24 @@ pre {color: #e83e8c;}
       ?-salt /salt/? </pre>
 <p>As input you need the encrypted data, the private key matching the public key that was used for encryption, i.e. the private key matching the public key in “p256dh” and the auth as well as the salt used for encryption. Currently supported GCM modes are “aesgcm” and “aes128gcm”.</p>
 
-    <h2>Conclusion</h2>
+
+
+<h2>Storing your Subscription in the database</h2>
+
+<p>Your database should look like if you are using a document db:</p>
+<p><pre>
+userId: {type:String, required: true},
+endpoint: { type: String, unique: true},
+keys: {
+p256dh: {type: String},
+auth: {type: String}
+},
+userAgent: {type: String}, // optional, just an additional tracking field
+deviceId: {type: String} // just additional tracking fields
+</pre></p>
+
+
+<h2>Conclusion</h2>
 <p>Hopefully we could shed some light on how the Web Push protocol as well as payload encryption works. Of course, one could simply use on of the available libraries and be done with it, however, it is often good to understand what is actually happening in order to evaluate all risks of a new technology appropriately. </p>
 
 <h2>References</h2>
@@ -293,6 +310,7 @@ pre {color: #e83e8c;}
   <li>RFC 8292: <a href="https://tools.ietf.org/html/rfc8292">Voluntary Application Server Identification (VAPID) for Web Push</a>
   <li>Mozilla: <a href=https://developer.mozilla.org/en-US/docs/Web/API/Push_API>Push API</a>
   <li>Mozilla: <a href=https://developer.mozilla.org/de/docs/Web/API/Service_Worker_API>Service Worker API</a>
+  <li>StackOverflow: <a href="https://stackoverflow.com/questions/42505120/web-push-api-storing-subscriptions-in-backend">Storing your Subscription in the database</a>
 </ul>
   </div>
   </body>

@@ -51,13 +51,8 @@ ad_proc -public qt::dashboard::person::export_heatmap_csv {
     set elements {
 	textinfo {label "TOTAL SEMANA ACUMULADO PERSONAS POR HORA DEL DIA"}
 	hour {label "HORA"}
-    }
-     
-    
-    
-    
-
-    
+    } 
+       
 #    qt::list::write_csv -name persons
     return
 

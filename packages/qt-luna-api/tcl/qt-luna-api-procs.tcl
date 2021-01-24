@@ -19,6 +19,81 @@ namespace eval qt::lunaapi::descriptor {}
 namespace eval qt::lunaapi::person {}
 namespace eval qt::lunaapi::group {}
 
+ad_proc -public qt::lunaapi::matching::descriptor {
+    {-json}
+} {
+    It matches face's descriptor with person within a list
+    @returns user_id
+} {
+
+
+    set token [parameter::get_global_value -package_key qt-luna-api -parameter AccessToken -default ""]  
+    set req_headers [ns_set create]
+    ns_set put $req_headers "X-Auth-Token" "$token"
+    ns_set put $req_headers "Content-Type" "application/json"
+    
+    #   set url "http://luna.qonteo.com:5000/4/storage/lists"
+    set proto [parameter::get_global_value -package_key qt-luna-api -parameter ProtoURL -default "http"]
+    set domain [parameter::get_global_value -package_key qt-luna-api -parameter DomainURL -default ""]
+    set port [parameter::get_global_value -package_key qt-luna-api -parameter PortURL -default ""]
+    
+    set list_id "36349d2c-36ba-484f-a282-62b0334881ac"
+
+    ns_log Notice "JSON $json"
+    
+    set timestamp [lindex $json 3]    
+    ns_log Notice "TIMESTAMP $timestamp"
+    set creation_date [db_string convert_timestamp {
+	SELECT TIMESTAMP WITH TIME ZONE 'epoch' + :timestamp * INTERVAL '1 second' - INTERVAL '5 hours';
+    }]
+
+    ns_log Notice "CREATION DATE $creation_date"
+
+
+    set descriptor_id [lindex [lindex [lindex [lindex $json 1] 1] 0] 3]
+        
+    set url "${proto}://${domain}:${port}/4/matching/identify?descriptor_id=$descriptor_id&list_id=$list_id"
+
+    set res [ns_http run -method POST -headers $req_headers -body "" $url]
+    ns_log Notice "RES2 $res"
+
+    set data [dict get $res body]
+    # ns_log Notice "DATA $data"
+
+    package req json
+    set l [json::json2dict $data]
+    #ns_log Notice "LUIS $l"
+    
+    foreach elem [lindex $l 1] {
+#	ns_log Notice "ELEM $elem"
+	
+#	ns_log Notice "SIMILARITY [lindex $elem 3]"
+	if {[lindex $l 3] > 0.10} {
+#	    ns_log Notice "MATCHED DESCRIPTOR $descriptor_id | PERSOn $id" 
+
+	    
+#	    % de similitud (con 2 decimales)
+
+#	    La siguiente persona:
+#	    1. Nombres
+#	    2. Apellidos
+#	    3. Tótem
+#	    4. Fecha
+	    #	    5. Hora
+
+
+#	    qt::lunaapi::matching::new \
+#		-descriptor_id $descriptor_id \
+#		-person_id $person_id \
+#		-creation_date $creation_date \
+#		-station $station
+	      
+	} 		
+    }
+
+}
+
+
 
 ad_proc -public qt::lunaapi::person::new  {
     {-user_id}

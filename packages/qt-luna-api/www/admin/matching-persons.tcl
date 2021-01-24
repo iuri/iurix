@@ -29,6 +29,7 @@ db_foreach select_faces {
     LIMIT 100
 } {
 
+    
     ns_log Notice "DESCRIPTION $description"
 
     #faces {{attributes {age 49.9930801392 eyeglasses 0 gender 1 emotions {estimations {anger 0.0000010351 disgust 0.0000071471 fear 1.264e-7 happiness 0.9954314232 neutral 0.0045503597 sadness 0.0000081951 surprise 0.0000018175} predominant_emotion happiness}} id d0f1864e-0e8c-44d1-940a-90d28d3ffed0 score 0.5314277411}} timestamp 1611083014.5894287 authorization {token_id b935a0e0-44ad-4b4d-ad9d-f66b3653cf34 token_data CCPN002}

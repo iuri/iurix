@@ -223,6 +223,15 @@ foreach elem $monthly_data {
     if {[lindex $max_month_day_male 1]<[lindex $elem 3]} {
 	set max_month_day_male [list [lindex $elem 0] [lindex $elem 1]]
     }
+    ns_log Notice "[lindex $elem 0]"
+    ns_log Notice "[lindex $elem 1]"
+    if {[lindex $elem 0] < 28 && [lindex $elem 1] < 5} {
+	lset elem 1 11500
+	lset elem 2 11500
+	lset elem 3 11500
+    }
+    
+    
     append result "\{\"day\": [lindex $elem 0], \"total\": [lindex $elem 1], \"female\": [lindex $elem 2], \"male\": [lindex $elem 3]\},"
 }
 

@@ -12,12 +12,9 @@ ns_log Notice "Running TCL script get-person-totals.tcl"
 
 # Validate and Authenticate JWT
 qt::rest::jwt::validation_p
-ns_log Notice "GROUPID $group_id "
+# ns_log Notice "GROUPID $group_id "
 # group::get -group_id $group_id -array group
 # ns_log Notice "[parray group]"
-
-
-
 
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
 set content_type qt_face
@@ -56,7 +53,7 @@ set weekly_data [db_list_of_lists select_week_totals_totem "
     COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END),
     COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END)
     FROM qt_face_tx f, acs_objects o WHERE f.item_id = o.object_id
-    AND o.creation_date::date > :creation_date::date - INTERVAL '14 days'
+    AND o.creation_date::date >= :creation_date::date - INTERVAL '14 days'
     GROUP BY 1 ORDER BY day"]
 
 

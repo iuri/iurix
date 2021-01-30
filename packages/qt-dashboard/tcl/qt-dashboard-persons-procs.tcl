@@ -289,9 +289,7 @@ ad_proc -public qt::dashboard::person::import {
 	    set creation_date [lindex [split $creation_date  "."] 0] 	    
 	    # set creation_date [clock format $arr(timestamp)]
 	    set package_id [apm_package_id_from_key qt-dashboard]
-	    set content_type qt_face
-	    set storage_type "text"
-	    set parent_id $package_id	    	    
+	    set parent_id $package_id
 	    set attributes [lindex $arr(result) 1]
 #	    ns_log Notice "ATTRIBS $attributes"
 	    
@@ -304,7 +302,7 @@ ad_proc -public qt::dashboard::person::import {
 		db_transaction {
 		    set item_id [content::item::new \
 				     -item_id $item_id \
-				     -parent_id $parent_id \
+				     -parent_id $package_id \
 				     -creation_user $creation_user \
 				     -creation_ip $creation_ip \
 				     -creation_date $creation_date \
@@ -312,8 +310,8 @@ ad_proc -public qt::dashboard::person::import {
 				     -name $name \
 				     -title $name \
 				     -description $description \
-				     -storage_type "$storage_type" \
-				     -content_type $content_type \
+				     -storage_type text \
+				     -content_type qt_face \
 				     -mime_type "text/plain"
 				]
 		}	    	    

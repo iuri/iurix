@@ -1,5 +1,26 @@
 package require json
 
+
+
+ns_log Notice "Running TCL script WEBPUSH-DEMO.tcl"
+
+
+set header [ns_conn header]
+ns_log Notice "HEADER \n $header"
+set h [ns_set size $header]
+ns_log Notice "HEADERS $h"
+set req [ns_set array $header]
+ns_log Notice "$req"
+
+set content [ns_getcontent -as_file false]
+ns_log Notice "CONTENT $content"
+
+
+
+
+
+
+
 set subscription [ns_queryget subscr]
 set text [ns_queryget text]
 set pushstatus ""

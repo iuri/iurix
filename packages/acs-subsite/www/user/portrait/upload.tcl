@@ -124,7 +124,7 @@ ad_form -extend -name "portrait_upload" -validate {
     ## BEGIN
     set person_id [qt::lunaapi::person::new -user_id $user_id]
     set descriptor_id [qt::lunaapi::descriptor::new -file [ns_queryget upload_file.tmpfile]]
-    qt::lunaapi::descriptor::attach_to_person -person_id $person_id -descriptor_id $descriptor_id 
+    qt::lunaapi::descriptor::attach_to_person -user_id $user_id -person_id $person_id -descriptor_id $descriptor_id 
     ## END
     
     db_transaction {

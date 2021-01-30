@@ -22,6 +22,7 @@
         <parameters>
             <parameter scope="global" datatype="string"  min_n_values="1"  max_n_values="1"  name="AccessToken"  default="9fb6e731-b342-4952-b0c1-aa1d0b52757b" description="Token to access Luna API resources"/>
             <parameter scope="global" datatype="string"  min_n_values="1"  max_n_values="1"  name="DomainURL"  default="luna.qonteo.com" description="Domain name to access Luna API"/>
+            <parameter scope="global" datatype="number"  min_n_values="1"  max_n_values="1"  name="MatchingSimilarityPercentage"  default="90" description="It defines the accuracy of face recognition, matching with user&#39;s portrait, to add matching results in the database  "/>
             <parameter scope="global" datatype="number"  min_n_values="1"  max_n_values="1"  name="PortURL"  default="5000" description="Server port number to access Luna API service"/>
             <parameter scope="global" datatype="string"  min_n_values="1"  max_n_values="1"  name="ProtoURL"  default="http" description="Protocol used to connect to Luna API http/https"/>
             <parameter scope="global" datatype="string"  min_n_values="1"  max_n_values="1"  name="StorageResourcePath"  default="/4/storage/" description="PAth to retrieve/send from/to Luna API resources"/>

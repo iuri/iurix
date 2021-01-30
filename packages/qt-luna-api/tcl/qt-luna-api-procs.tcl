@@ -42,15 +42,15 @@ ad_proc -public qt::lunaapi::matching::descriptor {
     ns_log Notice "JSON $json"
     
     set timestamp [lindex $json 3]    
-    ns_log Notice "TIMESTAMP $timestamp"
     set creation_date [db_string convert_timestamp {
 	SELECT TIMESTAMP WITH TIME ZONE 'epoch' + :timestamp * INTERVAL '1 second' - INTERVAL '5 hours';
     }]
 
-    ns_log Notice "CREATION DATE $creation_date"
-
-
-    set descriptor_id [lindex [lindex [lindex [lindex $json 1] 1] 0] 3]
+    set location [lindex [lindex $json 9] 3]
+    #ns_log Notice "LOCATION $location"
+    set descriptor_id [lindex [lindex [lindex $json 1] 0] 3] 
+    #set descriptor_id [lindex [lindex [lindex [lindex $json 1] 1] 0] 3]
+    ns_log Notice "DESC $descriptor_id "
         
     set url "${proto}://${domain}:${port}/4/matching/identify?descriptor_id=$descriptor_id&list_id=$list_id"
 
@@ -65,33 +65,147 @@ ad_proc -public qt::lunaapi::matching::descriptor {
     #ns_log Notice "LUIS $l"
     
     foreach elem [lindex $l 1] {
-#	ns_log Notice "ELEM $elem"
+	ns_log Notice "ELEM $elem"
+	set description  "$elem location $location"
+	# ns_log Notice "DESC $description"
 	
-#	ns_log Notice "SIMILARITY [lindex $elem 3]"
-	if {[lindex $l 3] > 0.10} {
-#	    ns_log Notice "MATCHED DESCRIPTOR $descriptor_id | PERSOn $id" 
+	# ns_log Notice "SIMILARITY [lindex $elem 3]"
+	# ns_log Notice "CREATION DATE $creation_date"
+#	ns_log Notice "SIM PARAM [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90]"
+#	ns_log Notice "*** [lindex $elem 1] > [expr [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90] / 100.00000000]"
+	if {[expr [lindex $elem 1] >= [expr [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90] / 100.0000000000]]} {
 
+	    set person_id [lindex $elem 3]
+	    db_0or1row select_user_id {
+		SELECT user_id FROM user_ext_info WHERE luna_person_id = :person_id
+	    } 
 	    
-#	    % de similitud (con 2 decimales)
+	    ns_log Notice "MATCHED DESCRIPTOR $descriptor_id | PERSOn $user_id" 
+	    
+	    set item_id [db_nextval "acs_object_id_seq"]
+	    set creation_ip "192.199.241.130"
+	    set package_id [apm_package_id_from_key qt-luna-api]
+	    set similarity [lindex $elem 1]
+	    set title [lindex $elem 7]
 
-#	    La siguiente persona:
-#	    1. Nombres
-#	    2. Apellidos
-#	    3. Tótem
-#	    4. Fecha
-	    #	    5. Hora
+	    db_transaction {
+		set item_id [content::item::new \
+				 -item_id $item_id \
+				 -parent_id $user_id \
+				 -creation_user $user_id \
+				 -creation_ip $creation_ip \
+				 -creation_date $creation_date \
+				 -package_id $package_id \
+				 -name "${item_id}-${person_id}-${descriptor_id}" \
+				 -title "$title $similarity"  \
+				 -description $description \
+				 -storage_type text \
+				 -content_type qt_matching \
+				 -mime_type "text/plain"
+			    ]
+	    }	    	    
 
-
-#	    qt::lunaapi::matching::new \
-#		-descriptor_id $descriptor_id \
-#		-person_id $person_id \
-#		-creation_date $creation_date \
-#		-station $station
-	      
+	    qt::do_notifications \
+		-item_id $item_id \
+		-package_id $package_id \
+		-action "new_item" \
+		-name "${person_id}-${descriptor_id}" \
+		-title "$title $similarity" \
+		-description $description
 	} 		
     }
+}
+
+
+
+
+
+ad_proc -public qt::do_notifications {
+    {-item_id:required}
+    {-name:required}
+    {-title ""}
+    {-description ""}
+    {-package_id ""}
+    {-action:required}
+} {
+    Send notifications for Luna API integration &  operations.
+
+    Note that not all possible operations are implemented, e.g. move, copy etc. See documentation.
+
+    @param action The kind of operation. One of: new_matching/new_item
+    Others  such as new_version, new_url, delete_file, delete_url delete_folder must be implemented
+    
+} {
+    ns_log Notice "Running ad_proc qt::do_notification"
+    
+    switch $action {
+        "new_item" {
+            set action_type "[_ qt-luna-api.New_Matching_Added]"
+        }
+        "new_url" {
+            set action_type "[_ file-storage.New_URL_Uploaded]"
+        }
+        "new_version" {
+            set action_type "[_ file-storage.lt_New_version_of_file_u]"
+        }
+        "delete_file" {
+            set action_type "[_ file-storage.File_deleted]"
+        }
+        "delete_url" {
+            set action_type "[_ file-storage.URL_deleted]"
+        }
+        "delete_folder" {
+            set action_type "[_ file-storage.Folder_deleted]"
+        }
+        default {
+            error "Unknown file-storage notification action: $action"
+        }
+    }
+
+    set new_content ""
+    set creation_user [acs_object::get_element \
+                           -object_id $item_id \
+                           -element creation_user]
+    set owner [person::name -person_id $creation_user]
+
+
+    # Set email message body - "text only" for now
+    set text_version ""
+    append text_version "[_ qt-luna-api.lt_Notification_for_Face_Matching]\n"
+
+    if {[info exists description]} {
+	# append text_version "[_ file-storage.lt_Version_Notes_descrip]\n"
+	 append text_version "$title\n$description"
+    }
+
+    set html_version [ad_html_text_convert -from text/plain -to text/html -- $text_version]
+    append html_version "<br><br>"
+    # Do the notification for the file-storage
+
+    notification::new \
+        -type_id [notification::type::get_type_id \
+                      -short_name qt_face_matching_notif] \
+        -object_id $item_id \
+        -notif_subject "[_ qt_luna-api-.lt_Face_Matching_Notif]" \
+        -notif_text $text_version \
+        -notif_html $html_version
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -199,6 +313,7 @@ ad_proc -public qt::lunaapi::descriptor::new  {
 
 
 ad_proc -public qt::lunaapi::descriptor::attach_to_person  {
+    {-user_id}
     {-person_id}
     {-descriptor_id}
 } {
@@ -226,7 +341,24 @@ ad_proc -public qt::lunaapi::descriptor::attach_to_person  {
     
     set res [ns_http run -method PATCH -headers $req_headers $url]   
     ns_log Notice "RES $res"
+
     
+    
+    db_transaction {
+	set userinfo_id [db_nextval "user_info_id_seq"]
+	db_exec_plsql insert_userinfo {
+	    
+	    SELECT userinfo__new(:userinfo_id,
+				 :person_id,
+				 :descriptor_id,
+				 null,
+				 null,
+				 :user_id);
+	}
+    }
+    
+    
+    return 
 }
 
 

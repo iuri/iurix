@@ -27,7 +27,8 @@ set where_clauses ""
 
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
-	append where_clauses " AND o.creation_date::date >= :date_from::date"
+	append where_clauses " AND t.creation_date::date >= :date_from::date"
+	append where_clauses2 " AND o.creation_date::date >= :date_from::date"
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -37,7 +38,8 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
-	append where_clauses " AND o.creation_date::date <= :date_to::date "
+	append where_clauses " AND t.creation_date::date <= :date_to::date "
+	append where_clauses2 " AND o.creation_date::date <= :date_to::date "
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -49,14 +51,17 @@ if {[info exists date_to]} {
 ns_log Notice "TOTEM $totem   ***"
 switch $totem {
    "1"  {
-	append where_clauses " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}'"
+	append where_clauses " AND t.hostname = 'CCPN001'"
+	append where_clauses2 " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}'"
     }
     "2" {
-	append where_clauses " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}'"
+	append where_clauses " AND t.hostname = 'CCPN002'"
+    	append where_clauses2 " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}'"
     }
     default {
 	if {$group_id eq 12169276} {
-	    append where_clauses " AND (SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' OR SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}')"
+	    append where_clauses " AND (t.hostname = 'CCPN002' OR t.hostname = 'CCPN001')"
+	    append where_clauses2 " AND (SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' OR SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}')"
 	}
     }
 }
@@ -65,14 +70,14 @@ switch $totem {
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 append result "\{\"hours\":\["
 set hourly_data [db_list_of_lists select_grouped_per_hour "
-    SELECT EXTRACT('hour' FROM o.creation_date) AS hour,
-    COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
-    FROM qt_face_tx f, acs_objects o
-    WHERE f.item_id = o.object_id
+    SELECT EXTRACT('hour' FROM t.creation_date) AS hour,
+    SUM(t.total1) AS total,
+    SUM(t.total2) AS female,
+    SUM(t.total3) AS male
+    FROM qt_totals t
+    WHERE 1 = 1 
     $where_clauses
-    GROUP BY 1
+    GROUP BY hour
     ORDER BY hour ASC    
 "]
 
@@ -108,14 +113,15 @@ append result "\],"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
-    SELECT EXTRACT('dow' FROM o.creation_date) AS dow,
-    COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
-    FROM qt_face_tx f, acs_objects o
-    WHERE f.item_id = o.object_id
+    SELECT EXTRACT('dow' FROM t.creation_date) AS dow,
+    SUM(t.total1) AS total,
+    SUM(t.total2) AS female,
+    SUM(t.total3) AS male
+    FROM qt_totals t
+    WHERE 1 = 1 
     $where_clauses
-    GROUP BY 1 ORDER BY dow;
+    GROUP BY dow
+    ORDER BY dow;
 "]
 
 
@@ -182,15 +188,15 @@ ns_log Notice "$where_clauses"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set monthly_data [db_list_of_lists select_month_per_day "
-    SELECT EXTRACT('day' FROM o.creation_date) AS day,
-    COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
-    FROM qt_face_tx f, acs_objects o
-    WHERE f.item_id = o.object_id
-    AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
+    SELECT EXTRACT('day' FROM t.creation_date) AS day,
+    SUM(t.total1) AS total,
+    SUM(t.total2) AS female,
+    SUM(t.total3) AS male
+    FROM qt_totals t
+    WHERE date_trunc('month', t.creation_date::date) = date_trunc('month', :creation_date::date)
     $where_clauses
-    GROUP BY 1 ORDER BY day;
+    GROUP BY day
+    ORDER BY day;
 "]
 
 for {set i 1} {$i<32} {incr i} {    
@@ -223,15 +229,7 @@ foreach elem $monthly_data {
     if {[lindex $max_month_day_male 1]<[lindex $elem 3]} {
 	set max_month_day_male [list [lindex $elem 0] [lindex $elem 1]]
     }
-    ns_log Notice "[lindex $elem 0]"
-    ns_log Notice "[lindex $elem 1]"
-    if {[lindex $elem 0] < 28 && [lindex $elem 1] < 5} {
-	lset elem 1 11500
-	lset elem 2 11500
-	lset elem 3 11500
-    }
-    
-    
+        
     append result "\{\"day\": [lindex $elem 0], \"total\": [lindex $elem 1], \"female\": [lindex $elem 2], \"male\": [lindex $elem 3]\},"
 }
 
@@ -245,15 +243,15 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
     append result "\"heatmap\":\["
     # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
     db_foreach select_week_grouped_hourly "
-	select date_trunc('hour', o.creation_date) AS hour,
-	COUNT(1) AS total,
-	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
-	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
-	FROM qt_face_tx f, acs_objects o
-	WHERE f.item_id = o.object_id
-	AND o.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
+	select date_trunc('hour', t.creation_date) AS hour,
+        SUM(t.total1) AS total,
+        SUM(t.total2) AS female,
+        SUM(t.total3) AS male
+	FROM qt_totals t
+	WHERE t.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
 	$where_clauses 
-	GROUP BY 1 ORDER BY hour ASC    
+        GROUP BY hour
+	ORDER BY hour ASC    
     " {	
 	set hour [clock scan [lindex [split $hour "+"] 0]]
 	set h [clock format $hour -format %H]
@@ -288,7 +286,7 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS total_male
 	FROM qt_face_tx f, acs_objects o
 	WHERE f.item_id = o.object_id
-        $where_clauses
+        $where_clauses2
 	GROUP BY range;
 	
     "]
@@ -364,14 +362,14 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 # Instant data: hour, today, yesterday, day, week and month total
 
 set instant_data [db_list_of_lists select_instant_data {
-    SELECT date_trunc('hour', o.creation_date) AS hour,
-    COUNT(1) AS total,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS female,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS male
-    FROM qt_face_tx f, acs_objects o
-    WHERE f.item_id = o.object_id
-    AND date_trunc('month', o.creation_date::date) = date_trunc('month', :creation_date::date)
-    GROUP BY 1 ORDER BY hour;
+    SELECT date_trunc('hour', t.creation_date) AS hour,
+    SUM(t.total1) AS total,
+    SUM(t.total2) AS female,
+    SUM(t.total3) AS male
+    FROM qt_totals t
+    WHERE date_trunc('month', t.creation_date::date) = date_trunc('month', :creation_date::date)
+    GROUP BY hour
+    ORDER BY hour;
 }]
 
 

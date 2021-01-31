@@ -20,11 +20,9 @@ set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour')
 set content_type qt_face
 set where_clauses ""
 
-ns_log Notice "CREATIONDATE $creation_date"
-
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
-	append where_clauses " AND o.creation_date::date >= :date_from::date"
+	append where_clauses " AND t.creation_date::date >= :date_from::date"
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -34,7 +32,7 @@ if {[info exists date_from]} {
 
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
-	append where_clauses " AND o.creation_date::date <= :date_to::date "
+	append where_clauses " AND t.creation_date::date <= :date_to::date "
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -47,16 +45,16 @@ if {[info exists date_to]} {
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set weekly_data [db_list_of_lists select_week_totals_totem "
-    SELECT date_trunc('day', o.creation_date) AS day,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN 1 END),
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN 1 END),
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END),
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END),
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END),
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END)
-    FROM qt_face_tx f, acs_objects o WHERE f.item_id = o.object_id
-    AND o.creation_date::date >= :creation_date::date - INTERVAL '14 days'
-    GROUP BY 1 ORDER BY day"]
+    SELECT date_trunc('day', t.creation_date) AS day,
+    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total1 END),
+    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total1 END),
+    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total2 END),
+    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total2 END),
+    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total3 END),
+    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total3 END)
+    FROM qt_totals t
+    WHERE t.creation_date::date >= :creation_date::date - INTERVAL '14 days'
+    GROUP BY day ORDER BY day"]
 
 
 # weekly_data Format
@@ -76,7 +74,12 @@ set i 0
 set previous_week_totals [list 0 0 0]
 set week_totals [list 0 0 0]
 foreach elem $weekly_data {
-    #    ns_log Notice "ELEM $elem"
+    for {set j 1} {$j<7} {incr j} {
+	if {[llength [lindex $elem $j]] eq 0} {
+	    lset elem $j 0
+	}
+    }
+        ns_log Notice "ELEM $elem"
     if {$i < 8} {
         set previous_week_totals [list \
 				      [expr [lindex $previous_week_totals 0] + [lindex $elem 1]] \
@@ -164,16 +167,17 @@ if {[expr [lindex $week_totals 0] + [lindex $week_totals 1]] ne 0 && [expr [lind
 
 # Total
 db_0or1row select_totems_totals "
-    SELECT
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN 1 END) AS total_totem1,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN 1 END) AS total_totem2,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END) AS total_female1,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END) AS total_female2,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}' THEN f.item_id END) AS total_male1,
-    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' THEN f.item_id END) AS total_male2
-    FROM qt_face_tx f
+    SELECT 
+    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total1 END) AS total_totem1,
+    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total1 END) AS total_totem2,
+    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total2 END) AS total_female1,
+    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total2 END) AS total_female2,
+    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total3 END) AS total_male1,
+    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total3 END) AS total_male2
+    FROM qt_totals t
     WHERE 1 = 1
-    $where_clauses"
+    $where_clauses
+"
 
 
 append result "\{

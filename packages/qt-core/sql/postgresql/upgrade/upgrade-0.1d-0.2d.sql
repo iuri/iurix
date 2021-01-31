@@ -1,32 +1,8 @@
----------
--- qt_totals
----------
-create table qt_totals (
-    qt_total_id			integer
-    				constraint qt_total_id_pk primary key,
-    creation_date		timestamp,
-    total1			numeric,
-    total2			numeric,
-    total3			numeric,
-    percentage			numeric,
-    hostname			varchar,
-    content_type		varchar(1000)
-    				CONSTRAINT qt_totals_content_type_fk
-				REFERENCES acs_object_types(object_type) ON DELETE CASCADE
-);
+DROP FUNCTION qt_totals__new (timestamp, numeric, numeric, numeric, numeric, varchar, varchar);
 
-
--- create sequence t_qt_total_id_seq;
--- create view qt_total_id_seq as
--- select nextval('t_qt_total_id_seq') as nextval;
-
-CREATE SEQUENCE qt_totals_total_id_seq cache 1000;
-
-
-SELECT define_function_args('qt_totals__new', 'total_id integer, creation_date timestamp, total1 numeric, total2 numeric, total3 numeric, percentage numeric, hostname varchar, content_type varchar');
+SELECT define_function_args('qt_totals__new', 'creation_date timestamp, total1 numeric, total2 numeric, total3 numeric, percentage numeric, hostname varchar, content_type varchar');
 
 CREATE OR REPLACE FUNCTION qt_totals__new (
-       p_total_id 	   integer,
        p_creation_date	   timestamp, 
        p_total1		   numeric, 
        p_total2		   numeric, 
@@ -62,6 +38,10 @@ CREATE OR REPLACE FUNCTION qt_totals__new (
 
 
 
+
+
+
+DROP FUNCTION qt_totals__edit (integer, numeric, numeric, numeric, numeric);
 
 SELECT define_function_args('qt_totals__edit', 'total_id integer, total1 numeric, total2 numeric, total3 numeric, percentage numeric');
 

@@ -8,8 +8,9 @@ ad_library {
 }
 
 
-# ad_schedule_proc -thread t 18 qt::dashboard::vehicle::import
+#ad_schedule_proc -thread t 18 qt::dashboard::vehicle::import
 
+ad_schedule_proc -thread t 60 qt::dashboard::person::update_totals
 
 # Local variables:
 #    mode: tcl

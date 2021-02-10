@@ -25,7 +25,7 @@ ad_proc -public qt::dashboard::person::update_totals {} {
      
     set creation_date [db_string select_now { SELECT date_trunc('hour', now()::timestamp - INTERVAL '5 hour') FROM dual}]
     # set creation_date "2021-01-15 00:00:00"
-    ns_log Notice "CREATION DATE $creation_date"
+#    ns_log Notice "CREATION DATE $creation_date"
     
     set hostnames [list CCPN001 CCPN002]
     foreach hostname $hostnames {

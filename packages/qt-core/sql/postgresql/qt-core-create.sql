@@ -1,19 +1,38 @@
 ---------
 -- qt_totals
 ---------
-create table qt_totals (
-    qt_total_id			integer
-    				constraint qt_total_id_pk primary key,
+create table qt_face_totals (
+    total_id			integer
+    				constraint qt_ft_total_id_pk primary key,
     creation_date		timestamp,
-    total1			numeric,
-    total2			numeric,
-    total3			numeric,
+    total			numeric,
+    total_female		numeric,
+    total_male			numeric,
     percentage			numeric,
     hostname			varchar,
     content_type		varchar(1000)
-    				CONSTRAINT qt_totals_content_type_fk
+    				CONSTRAINT qt_ft_content_type_fk
 				REFERENCES acs_object_types(object_type) ON DELETE CASCADE
 );
+
+
+
+create table qt_face_range_totals (
+    range_id			integer
+    				constraint qt_frt_range_id_pk primary key,
+    range			varchar(100),
+    creation_date		timestamp,
+    total			numeric,
+    total_male			numeric,
+    total_female		numeric,
+    percentage			numeric,
+    hostname			varchar,
+    content_type		varchar(1000)
+    				CONSTRAINT qt_frt_content_type_fk
+				REFERENCES acs_object_types(object_type) ON DELETE CASCADE
+);
+
+
 
 
 -- create sequence t_qt_total_id_seq;

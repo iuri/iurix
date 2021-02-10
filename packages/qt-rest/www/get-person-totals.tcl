@@ -71,15 +71,15 @@ set yesterday_totals [lindex $weekly_data end-1]
 
 
 set i 0
-set previous_week_totals [list 0 0 0]
-set week_totals [list 0 0 0]
+set previous_week_totals [list 0 0 0 0 0 0]
+set week_totals [list 0 0 0 0 0 0]
 foreach elem $weekly_data {
     for {set j 1} {$j<7} {incr j} {
 	if {[llength [lindex $elem $j]] eq 0} {
 	    lset elem $j 0
 	}
     }
-        ns_log Notice "ELEM $elem"
+    ns_log Notice "ELEM $elem"
     if {$i < 8} {
         set previous_week_totals [list \
 				      [expr [lindex $previous_week_totals 0] + [lindex $elem 1]] \

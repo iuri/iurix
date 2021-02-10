@@ -14,7 +14,6 @@ ns_log Notice "Running TCL script get-person-graphics.tcl"
 # Validate and Authenticate JWT
 qt::rest::jwt::validation_p
 ns_log Notice "GROUPID $group_id "
-#ns_log Notice "DATE FROM $date_from  | DATE TO $date_to"
 # group::get -group_id $group_id -array group
 # ns_log Notice "[parray group]"
 
@@ -23,7 +22,9 @@ ns_log Notice "GROUPID $group_id "
 
 set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour') FROM dual}]
 set content_type qt_face
+set month_clauses ""
 set where_clauses ""
+set where_clauses2 ""
 
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
@@ -47,6 +48,12 @@ if {[info exists date_to]} {
 }
 
 
+
+if {$where_clauses eq ""} {
+    set month_clauses "AND date_trunc('month', t.creation_date::date) = date_trunc('month', :creation_date::date)"
+}
+
+#ns_log Notice "DATE FROM $date_from  | DATE TO $date_to"
 
 ns_log Notice "TOTEM $totem   ***"
 switch $totem {
@@ -184,7 +191,7 @@ append result "\],"
 
 
 ns_log Notice "$where_clauses"
-
+ns_log Notice "CREATIONDATE $creation_date"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set monthly_data [db_list_of_lists select_month_per_day "
@@ -193,7 +200,8 @@ set monthly_data [db_list_of_lists select_month_per_day "
     SUM(t.total2) AS female,
     SUM(t.total3) AS male
     FROM qt_totals t
-    WHERE date_trunc('month', t.creation_date::date) = date_trunc('month', :creation_date::date)
+    WHERE 1 = 1
+    $month_clauses
     $where_clauses
     GROUP BY day
     ORDER BY day;

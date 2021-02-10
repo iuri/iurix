@@ -1,0 +1,5 @@
+ad_page_contract {}
+
+set url https://apollo-psq.bluefoxengage.com/third_party_fetch_api/v100/get_location_historical_occupancy_counts
+
+set accestoken ACCESS-A57FBE37-9193-4801-B7A7-515173721A7C

@@ -12,7 +12,7 @@ ad_page_contract {
 ns_log Notice "Running TCL script get-person-graphics.tcl"
 
 # Validate and Authenticate JWT
-qt::rest::jwt::validation_p
+#qt::rest::jwt::validation_p
 ns_log Notice "GROUPID $group_id "
 # group::get -group_id $group_id -array group
 # ns_log Notice "[parray group]"

@@ -24,12 +24,10 @@ set creation_date [db_string select_now { SELECT date(now() - INTERVAL '5 hour')
 set content_type qt_face
 set month_clauses ""
 set where_clauses ""
-set where_clauses2 ""
 
 if {[info exists date_from]} {
     if {![catch {set t [clock scan $date_from]} errmsg]} {
 	append where_clauses " AND t.creation_date::date >= :date_from::date"
-	append where_clauses2 " AND o.creation_date::date >= :date_from::date"
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -40,7 +38,6 @@ if {[info exists date_from]} {
 if {[info exists date_to]} {
     if {![catch {set t [clock scan $date_to]} errmsg]} {
 	append where_clauses " AND t.creation_date::date <= :date_to::date "
-	append where_clauses2 " AND o.creation_date::date <= :date_to::date "
     } else {
 	ns_respond -status 422 -type "text/plain" -string "Unprocessable Entity! $errmsg"
 	ad_script_abort    
@@ -59,16 +56,13 @@ ns_log Notice "TOTEM $totem   ***"
 switch $totem {
    "1"  {
 	append where_clauses " AND t.hostname = 'CCPN001'"
-	append where_clauses2 " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}'"
     }
     "2" {
 	append where_clauses " AND t.hostname = 'CCPN002'"
-    	append where_clauses2 " AND SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}'"
     }
     default {
 	if {$group_id eq 12169276} {
 	    append where_clauses " AND (t.hostname = 'CCPN002' OR t.hostname = 'CCPN001')"
-	    append where_clauses2 " AND (SPLIT_PART(f.description, ' ', 37) = 'CCPN002\}' OR SPLIT_PART(f.description, ' ', 37) = 'CCPN001\}')"
 	}
     }
 }
@@ -289,11 +283,12 @@ if {[info exists age_range_p] && $age_range_p eq true} {
     set l_age_ranges [db_list_of_lists select_ranges "
 	SELECT
 	range,
-	SUM(total),
-	SUM(total_female),
-	SUM(total_male)
-	FROM qt_face_range_totals
-	$where_clauses2
+	SUM(t.total),
+	SUM(t.total_female),
+	SUM(t.total_male)
+	FROM qt_face_range_totals t
+        WHERE 1 = 1 
+	$where_clauses
 	GROUP BY range
 	ORDER BY range::numeric
     "]

@@ -78,10 +78,10 @@ switch $totem {
 append result "\{\"hours\":\["
 set hourly_data [db_list_of_lists select_grouped_per_hour "
     SELECT EXTRACT('hour' FROM t.creation_date) AS hour,
-    SUM(t.total1) AS total,
-    SUM(t.total2) AS female,
-    SUM(t.total3) AS male
-    FROM qt_totals t
+    COALESCE(SUM(t.total),0) AS total,
+    COALESCE(SUM(t.total_female),0) AS female,
+    COALESCE(SUM(t.total_male),0) AS male
+    FROM qt_face_totals t
     WHERE 1 = 1 
     $where_clauses
     GROUP BY hour
@@ -121,10 +121,10 @@ append result "\],"
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set weekly_data [db_list_of_lists select_vehicles_grouped_hourly "
     SELECT EXTRACT('dow' FROM t.creation_date) AS dow,
-    SUM(t.total1) AS total,
-    SUM(t.total2) AS female,
-    SUM(t.total3) AS male
-    FROM qt_totals t
+    COALESCE(SUM(t.total),0) AS total,
+    COALESCE(SUM(t.total_female),0) AS female,
+    COALESCE(SUM(t.total_male),0) AS male
+    FROM qt_face_totals t
     WHERE 1 = 1 
     $where_clauses
     GROUP BY dow
@@ -196,10 +196,10 @@ ns_log Notice "CREATIONDATE $creation_date"
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set monthly_data [db_list_of_lists select_month_per_day "
     SELECT EXTRACT('day' FROM t.creation_date) AS day,
-    SUM(t.total1) AS total,
-    SUM(t.total2) AS female,
-    SUM(t.total3) AS male
-    FROM qt_totals t
+    COALESCE(SUM(t.total),0) AS total,
+    COALESCE(SUM(t.total_female),0) AS female,
+    COALESCE(SUM(t.total_male),0) AS male
+    FROM qt_face_totals t
     WHERE 1 = 1
     $month_clauses
     $where_clauses
@@ -252,10 +252,10 @@ if {[info exists heatmap_p] && $heatmap_p eq true} {
     # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
     db_foreach select_week_grouped_hourly "
 	select date_trunc('hour', t.creation_date) AS hour,
-        SUM(t.total1) AS total,
-        SUM(t.total2) AS female,
-        SUM(t.total3) AS male
-	FROM qt_totals t
+        COALESCE(SUM(t.total),0) AS total,
+        COALESCE(SUM(t.total_female),0) AS female,
+        COALESCE(SUM(t.total_male),0) AS male
+	FROM qt_face_totals t
 	WHERE t.creation_date BETWEEN :creation_date::date - INTERVAL '6 day' AND :creation_date::date + INTERVAL '1 day'
 	$where_clauses 
         GROUP BY hour
@@ -288,15 +288,14 @@ if {[info exists age_range_p] && $age_range_p eq true} {
     append result "\"ageRanges\":\["
     set l_age_ranges [db_list_of_lists select_ranges "
 	SELECT
-	CASE WHEN SPLIT_PART(f.description, ' ', 4) <> 'undefined' THEN ROUND(SPLIT_PART(f.description, ' ', 4)::numeric) END AS range,
-	COUNT(1) AS total,
-	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS total_female,
-	COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '1' THEN f.item_id END) AS total_male
-	FROM qt_face_tx f, acs_objects o
-	WHERE f.item_id = o.object_id
-        $where_clauses2
-	GROUP BY range;
-	
+	range,
+	SUM(total),
+	SUM(total_female),
+	SUM(total_male)
+	FROM qt_face_range_totals
+	$where_clauses2
+	GROUP BY range
+	ORDER BY range::numeric
     "]
    
     if {[llength $l_age_ranges] > 0} {
@@ -371,16 +370,16 @@ if {[info exists age_range_p] && $age_range_p eq true} {
 
 set instant_data [db_list_of_lists select_instant_data {
     SELECT date_trunc('hour', t.creation_date) AS hour,
-    SUM(t.total1) AS total,
-    SUM(t.total2) AS female,
-    SUM(t.total3) AS male
-    FROM qt_totals t
+    COALESCE(SUM(t.total),0) AS total,
+    COALESCE(SUM(t.total_female),0) AS female,
+    COALESCE(SUM(t.total_male),0) AS male
+    FROM qt_face_totals t
     WHERE date_trunc('month', t.creation_date::date) = date_trunc('month', :creation_date::date)
     GROUP BY hour
     ORDER BY hour;
 }]
 
-
+ns_log Notice "INSTANT DATA $instant_data"
 set today_total 0
 set today_female 0
 set today_male 0

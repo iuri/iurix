@@ -46,13 +46,13 @@ if {[info exists date_to]} {
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set weekly_data [db_list_of_lists select_week_totals_totem "
     SELECT date_trunc('day', t.creation_date) AS day,
-    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total1 END),
-    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total1 END),
-    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total2 END),
-    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total2 END),
-    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total3 END),
-    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total3 END)
-    FROM qt_totals t
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total END),0),
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total END),0),
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total_female END),0),
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total_female END),0),
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total_male END),0),
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total_male END),0)
+    FROM qt_face_totals t
     WHERE t.creation_date::date >= :creation_date::date - INTERVAL '14 days'
     GROUP BY day ORDER BY day"]
 
@@ -64,21 +64,20 @@ ns_log Notice "Weekly data $weekly_data"
 
 
 # list date total1 total2 female1 female2 male1 male2
-set today_totals [lindex $weekly_data end]
-
+set today_totals [list 0 0 0 0 0 0 0]
+if {[llength [lindex $weekly_data end]] > 0} {
+    set today_totals [lindex $weekly_data end]
+}
 # list date total1 total2 female1 female2 male1 male2
-set yesterday_totals [lindex $weekly_data end-1]
-
+set yesterday_totals [list 0 0 0 0 0 0 0] 
+if {[llength [lindex $weekly_data end-1]] > 0} {
+    set yesterday_totals [lindex $weekly_data end-1]
+}
 
 set i 0
 set previous_week_totals [list 0 0 0 0 0 0]
 set week_totals [list 0 0 0 0 0 0]
 foreach elem $weekly_data {
-    for {set j 1} {$j<7} {incr j} {
-	if {[llength [lindex $elem $j]] eq 0} {
-	    lset elem $j 0
-	}
-    }
     ns_log Notice "ELEM $elem"
     if {$i < 8} {
         set previous_week_totals [list \
@@ -168,13 +167,13 @@ if {[expr [lindex $week_totals 0] + [lindex $week_totals 1]] ne 0 && [expr [lind
 # Total
 db_0or1row select_totems_totals "
     SELECT 
-    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total1 END) AS total_totem1,
-    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total1 END) AS total_totem2,
-    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total2 END) AS total_female1,
-    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total2 END) AS total_female2,
-    SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total3 END) AS total_male1,
-    SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total3 END) AS total_male2
-    FROM qt_totals t
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total END),0) AS total_totem1,
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total END),0) AS total_totem2,
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total_female END),0) AS total_female1,
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total_female END),0) AS total_female2,
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN001' THEN t.total_male END),0) AS total_male1,
+    COALESCE(SUM(CASE WHEN t.hostname = 'CCPN002' THEN t.total_male END),0) AS total_male2
+    FROM qt_face_totals t
     WHERE 1 = 1
     $where_clauses
 "

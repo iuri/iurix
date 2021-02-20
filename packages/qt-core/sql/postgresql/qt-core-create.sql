@@ -207,7 +207,7 @@ CREATE OR REPLACE FUNCTION qt_face_range_totals__edit (
   DECLARE
   BEGIN
 	UPDATE qt_face_range_totals SET
-	       range_ = p_range,
+	       range = p_range,
 	       total = p_total,
 	       total_female = p_total_female,
 	       total_male = p_total_male,

@@ -69,6 +69,7 @@ switch $totem {
 
 
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
+ns_log Notice "$where_clauses ***"
 append result "\{\"hours\":\["
 set hourly_data [db_list_of_lists select_grouped_per_hour "
     SELECT EXTRACT('hour' FROM t.creation_date) AS hour,

@@ -20,7 +20,9 @@
         <callbacks>
         </callbacks>
         <parameters>
-        <!-- No version parameters -->
+            <parameter scope="global" datatype="string"  min_n_values="1"  max_n_values="1"  name="AccountSID"  default="ACe13c431fe7a0339882f57e87c4b4db37" description="Twilio&#39;s account SID"/>
+            <parameter scope="global" datatype="string"  min_n_values="1"  max_n_values="1"  name="AuthToken"  default="7863396e735d48a4a4d4379d06ad1af6" description="Twilio&#39;s access authorization token"/>
+            <parameter scope="global" datatype="string"  min_n_values="1"  max_n_values="1"  name="WhatsAppDefaultNumber"  default="whatsapp:+14155238886" description="WhatsApp default number"/>
         </parameters>
 
     </version>

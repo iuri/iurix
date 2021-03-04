@@ -96,7 +96,7 @@ ad_proc -public qt::dashboard::person::update_range_totals {} {
 		}		
 	    } else {
 		ns_log Notice "ADDING NEW TOTAL "
-		#		ns_log Notice "$hour $total $female $male $hostname"
+		#		ns_log Notice "$hour $total $total_female $total_male $hostname"
 		
 		db_transaction {
 		    db_exec_plsql insert_totals {
@@ -152,7 +152,7 @@ ad_proc -public qt::dashboard::person::update_count_totals {} {
 	    # set hostname "CCPN001"
 	    # set hostname "CCPN002"
 	    
-	    ns_log Notice "$total | $female | $male | $hostname | [db_string select_hour { SELECT DATE_TRUNC('hour', :hour::timestamp) FROM dual} ]"
+	    ns_log Notice "$total | $total_female | $total_male | $hostname | [db_string select_hour { SELECT DATE_TRUNC('hour', :hour::timestamp) FROM dual} ]"
 	    
 	    db_0or1row exists_total_p {
 		SELECT total_id AS total_id, total, total_female, total_male, creation_date AS old_date, hostname AS old_host
@@ -184,7 +184,7 @@ ad_proc -public qt::dashboard::person::update_count_totals {} {
 		
 	    } else {
 		ns_log Notice "ADDING NEW TOTAL "
-#		ns_log Notice "$hour $total $female $male $hostname"
+#		ns_log Notice "$hour $total $total_female $total_male $hostname"
 		
 		db_transaction {
 		    db_exec_plsql insert_totals {

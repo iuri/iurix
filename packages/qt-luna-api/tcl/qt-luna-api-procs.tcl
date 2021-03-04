@@ -47,9 +47,10 @@ ad_proc -public qt::lunaapi::matching::descriptor {
     }]
 
     set location [lindex [lindex $json 9] 3]
-    #ns_log Notice "LOCATION $location"
-    set descriptor_id [lindex [lindex [lindex $json 1] 0] 3] 
+    ns_log Notice "LOCATION $location"
+   # set descriptor_id [lindex [lindex [lindex $json 1] 0] 3] 
     #set descriptor_id [lindex [lindex [lindex [lindex $json 1] 1] 0] 3]
+    set descriptor_id [lindex [lindex $json 9] 1]
     ns_log Notice "DESC $descriptor_id "
         
     set url "${proto}://${domain}:${port}/4/matching/identify?descriptor_id=$descriptor_id&list_id=$list_id"
@@ -57,65 +58,67 @@ ad_proc -public qt::lunaapi::matching::descriptor {
     set res [ns_http run -method POST -headers $req_headers -body "" $url]
     ns_log Notice "RES2 $res"
 
-    set data [dict get $res body]
-    # ns_log Notice "DATA $data"
-
-    package req json
-    set l [json::json2dict $data]
-    #ns_log Notice "LUIS $l"
-    
-    foreach elem [lindex $l 1] {
-	ns_log Notice "ELEM $elem"
-	set description  "$elem location $location"
-	# ns_log Notice "DESC $description"
+    if {[lindex $res 1] eq 200} {
 	
-	# ns_log Notice "SIMILARITY [lindex $elem 3]"
-	# ns_log Notice "CREATION DATE $creation_date"
-#	ns_log Notice "SIM PARAM [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90]"
-#	ns_log Notice "*** [lindex $elem 1] > [expr [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90] / 100.00000000]"
-	if {[expr [lindex $elem 1] >= [expr [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90] / 100.0000000000]]} {
-
-	    set person_id [lindex $elem 3]
-	    db_0or1row select_user_id {
-		SELECT user_id FROM user_ext_info WHERE luna_person_id = :person_id
-	    } 
+	set data [dict get $res body]
+	# ns_log Notice "DATA $data"
+	
+	package req json
+	set l [json::json2dict $data]
+	#ns_log Notice "LUIS $l"
+    
+	foreach elem [lindex $l 1] {
+	    ns_log Notice "ELEM $elem"
+	    set description  "$elem location $location"
+	    # ns_log Notice "DESC $description"
 	    
-	    ns_log Notice "MATCHED DESCRIPTOR $descriptor_id | PERSOn $user_id" 
-	    
-	    set item_id [db_nextval "acs_object_id_seq"]
-	    set creation_ip "192.199.241.130"
-	    set package_id [apm_package_id_from_key qt-luna-api]
-	    set similarity [lindex $elem 1]
-	    set title [lindex $elem 7]
-
-	    db_transaction {
-		set item_id [content::item::new \
-				 -item_id $item_id \
-				 -parent_id $user_id \
-				 -creation_user $user_id \
-				 -creation_ip $creation_ip \
-				 -creation_date $creation_date \
-				 -package_id $package_id \
-				 -name "${item_id}-${person_id}-${descriptor_id}" \
-				 -title "$title $similarity"  \
-				 -description $description \
-				 -storage_type text \
-				 -content_type qt_matching \
-				 -mime_type "text/plain"
-			    ]
-	    }	    	    
-
-	    qt::do_notifications \
-		-item_id $item_id \
-		-package_id $package_id \
-		-action "new_item" \
-		-name "${person_id}-${descriptor_id}" \
-		-title "$title $similarity" \
-		-description $description
-	} 		
+	    ns_log Notice "SIMILARITY [lindex $elem 3]"
+	    ns_log Notice "CREATION DATE $creation_date"
+	    ns_log Notice "SIM PARAM [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90]"
+	    ns_log Notice "*** [lindex $elem 1] > [expr [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90] / 100.00000000]"
+	    if {[expr [lindex $elem 1] >= [expr [parameter::get_global_value -package_key qt-luna-api -parameter MatchingSimilarityPercentage -default 90] / 100.0000000000]]} {
+		
+		set person_id [lindex $elem 3]
+		db_0or1row select_user_id {
+		    SELECT user_id FROM user_ext_info WHERE luna_person_id = :person_id
+		} 
+		
+		ns_log Notice "MATCHED DESCRIPTOR $descriptor_id | PERSOn $user_id" 
+		
+		set item_id [db_nextval "acs_object_id_seq"]
+		set creation_ip "192.199.241.130"
+		set package_id [apm_package_id_from_key qt-luna-api]
+		set similarity [lindex $elem 1]
+		set title [lindex $elem 7]
+		
+		db_transaction {
+		    set item_id [content::item::new \
+				     -item_id $item_id \
+				     -parent_id $user_id \
+				     -creation_user $user_id \
+				     -creation_ip $creation_ip \
+				     -creation_date $creation_date \
+				     -package_id $package_id \
+				     -name "${item_id}-${person_id}-${descriptor_id}" \
+				     -title "$title $similarity"  \
+				     -description $description \
+				     -storage_type text \
+				     -content_type qt_matching \
+				     -mime_type "text/plain"
+				]
+		}	    	    
+		
+		qt::do_notifications \
+		    -item_id $item_id \
+		    -package_id $package_id \
+		    -action "new_item" \
+		    -name "${person_id}-${descriptor_id}" \
+		    -title "$title $similarity" \
+		    -description $description
+	    } 		
+	}
     }
 }
-
 
 
 

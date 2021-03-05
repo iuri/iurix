@@ -21,7 +21,8 @@ ad_proc -public qt::dashboard::person::update_totals {} {
 
     Updates qt_face_range_totals and qt_face_totals tables from qt_faces
 } {
-
+    ns_log Notice "Running TCL  ad_proc scheduled dashboard::person::update_totals.tcl"
+     
     qt::dashboard::person::update_count_totals
     qt::dashboard::person::update_range_totals
 }
@@ -31,11 +32,11 @@ ad_proc -public qt::dashboard::person::update_totals {} {
 ad_proc -public qt::dashboard::person::update_range_totals {} {
     Updates qt_face_range_totals table from qt_faces
 } {
-    ns_log Notice "Running TCL script ad_proc schedule dashboard::person::update_range_totals.tcl"
+ #   ns_log Notice "Running TCL script ad_proc schedule dashboard::person::update_range_totals.tcl"
      
     set creation_date [db_string select_now { SELECT date_trunc('hour', now()::timestamp - INTERVAL '5 hour') FROM dual}]
     #    set creation_date "2018-01-15 00:00:00"
-    ns_log Notice "CREATION DATE $creation_date"
+#    ns_log Notice "CREATION DATE $creation_date"
     
     set hostnames [list PMXCO001 CCPN001 CCPN002]
     foreach hostname $hostnames {
@@ -65,12 +66,13 @@ ad_proc -public qt::dashboard::person::update_range_totals {} {
 	    # set hostname "CCPN001"
 	    # set hostname "CCPN002"
 	    
-	    ns_log Notice "$hour | $range | $total | $total_female | $total_male | $hostname "
+	 #   ns_log Notice "$hour | $range | $total | $total_female | $total_male | $hostname "
 	    
 	    db_0or1row exists_total_p {
-		SELECT range_id, total AS old_total,
-		total_female,
-		total_male,
+		SELECT range_id,
+		total AS old_total,
+		total_female AS old_total_female,
+		total_male AS old_total_male,
 		creation_date AS old_date,
 		hostname AS old_host
 		FROM qt_face_range_totals
@@ -81,7 +83,7 @@ ad_proc -public qt::dashboard::person::update_range_totals {} {
 	    
 	    if {[info exists range_id]} {
 		if {$old_total ne $total} {
-		    ns_log Notice "UPDATE TOTALS $range_id | $range | $total | $total_female | $total_male | $old_date | $old_host"
+	#	    ns_log Notice "UPDATE TOTALS $range_id | $range | $total | $total_female | $total_male | $old_date | $old_host"
 		    db_transaction {
 			db_exec_plsql update_totals {
 			    SELECT qt_face_range_totals__edit(
@@ -95,7 +97,7 @@ ad_proc -public qt::dashboard::person::update_range_totals {} {
 		    }
 		}		
 	    } else {
-		ns_log Notice "ADDING NEW TOTAL "
+	#	ns_log Notice "ADDING NEW TOTAL "
 		#		ns_log Notice "$hour $total $total_female $total_male $hostname"
 		
 		db_transaction {
@@ -124,7 +126,7 @@ ad_proc -public qt::dashboard::person::update_range_totals {} {
 ad_proc -public qt::dashboard::person::update_count_totals {} {
     Updates qt_face_totals tables from qt_faces
 } {
-    ns_log Notice "Running TCL script ad_proc schedule dashboard::person::update_count_totals.tcl"
+#    ns_log Notice "Running TCL script ad_proc schedule dashboard::person::update_count_totals.tcl"
      
     set creation_date [db_string select_now { SELECT date_trunc('hour', now()::timestamp - INTERVAL '5 hour') FROM dual}]
     # set creation_date "2021-01-15 00:00:00"
@@ -134,7 +136,7 @@ ad_proc -public qt::dashboard::person::update_count_totals {} {
     foreach hostname $hostnames {
 	#ns_log Notice "Hostname $hostname"
 	
-	db_foreach select_grouped_per_hour "
+	db_foreach select_totals_grouped_per_hour "
 	    SELECT DATE_TRUNC('hour', o.creation_date::timestamp) AS hour,
 	    COUNT(1) AS total,
 	    COUNT(CASE WHEN SPLIT_PART(f.description, ' ', 8) = '0' THEN f.item_id END) AS total_female,
@@ -152,18 +154,21 @@ ad_proc -public qt::dashboard::person::update_count_totals {} {
 	    # set hostname "CCPN001"
 	    # set hostname "CCPN002"
 	    
-	    ns_log Notice "$total | $total_female | $total_male | $hostname | [db_string select_hour { SELECT DATE_TRUNC('hour', :hour::timestamp) FROM dual} ]"
+#	    ns_log Notice "$total | $total_female | $total_male | $hostname | [db_string select_hour { SELECT DATE_TRUNC('hour', :hour::timestamp) FROM dual} ]"
 	    
 	    db_0or1row exists_total_p {
-		SELECT total_id AS total_id, total, total_female, total_male, creation_date AS old_date, hostname AS old_host
-		FROM qt_totals
+		SELECT total_id,
+		total AS old_total,
+		total_female AS old_total_female,
+		total_male AS old_total_male, creation_date AS old_date, hostname AS old_host
+		FROM qt_face_totals
 		WHERE hostname = :hostname
 		AND creation_date = DATE_TRUNC('hour', :hour::timestamp) 
 	    }
 	    
 	    if {[info exists total_id]} {
-		if {$total1 ne $total} {
-		    ns_log Notice "UPDATE TOTALS $total_id | $total1 | $total2 | $total3 | $old_date | $old_host"
+		if {$total ne $old_total} {
+		    ns_log Notice "UPDATE TOTALS $total_id | $total | $total_female | $total_male | $old_date | $old_host"
 		    db_transaction {
 			db_exec_plsql update_totals {
 			    SELECT qt_face_totals__edit(
@@ -176,14 +181,14 @@ ad_proc -public qt::dashboard::person::update_count_totals {} {
 		    }
 		}
 		unset total_id
-		unset total1
-		unset total2
-		unset total3
+		unset old_total
+		unset old_total_female
+		unset old_total_male
 		unset old_date
 		unset old_host
 		
 	    } else {
-		ns_log Notice "ADDING NEW TOTAL "
+#		ns_log Notice "ADDING NEW TOTAL "
 #		ns_log Notice "$hour $total $total_female $total_male $hostname"
 		
 		db_transaction {

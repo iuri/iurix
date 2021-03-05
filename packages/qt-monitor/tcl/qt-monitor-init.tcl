@@ -10,7 +10,7 @@ ad_library {
 
 #ad_schedule_proc -thread t 18 qt::dashboard::vehicle::import
 
-ad_schedule_proc -thread t 10 qt::monitor::resource::check_availability
+ad_schedule_proc -thread t 3600 qt::monitor::resource::check_availability
 
 # Local variables:
 #    mode: tcl

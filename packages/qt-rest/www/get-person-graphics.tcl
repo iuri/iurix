@@ -13,7 +13,7 @@ ns_log Notice "Running TCL script get-person-graphics.tcl"
 
 # Validate and Authenticate JWT
 #qt::rest::jwt::validation_p
-ns_log Notice "GROUPID $group_id "
+#ns_log Notice "GROUPID $group_id "
 # group::get -group_id $group_id -array group
 # ns_log Notice "[parray group]"
 
@@ -51,8 +51,7 @@ if {$where_clauses eq ""} {
 }
 
 #ns_log Notice "DATE FROM $date_from  | DATE TO $date_to"
-
-ns_log Notice "TOTEM $totem   ***"
+#ns_log Notice "TOTEM $totem   ***"
 switch $totem {
    "1"  {
 	append where_clauses " AND t.hostname = 'CCPN001'"
@@ -69,7 +68,7 @@ switch $totem {
 
 
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
-ns_log Notice "$where_clauses ***"
+#ns_log Notice "$where_clauses ***"
 append result "\{\"hours\":\["
 set hourly_data [db_list_of_lists select_grouped_per_hour "
     SELECT EXTRACT('hour' FROM t.creation_date) AS hour,
@@ -185,8 +184,8 @@ append result "\],"
 
 
 
-ns_log Notice "$where_clauses"
-ns_log Notice "CREATIONDATE $creation_date"
+# ns_log Notice "$where_clauses"
+# ns_log Notice "CREATIONDATE $creation_date"
 # Retrieves vehicles grouped by hour
 # Reference: https://popsql.com/learn-sql/postgresql/how-to-group-by-time-in-postgresql
 set monthly_data [db_list_of_lists select_month_per_day "
@@ -375,7 +374,6 @@ set instant_data [db_list_of_lists select_instant_data {
     ORDER BY hour;
 }]
 
-ns_log Notice "INSTANT DATA $instant_data"
 set today_total 0
 set today_female 0
 set today_male 0
@@ -437,7 +435,6 @@ while {$i>-1} {
     }
     set i [expr $i - 1]    
 }
-
 set last_week_total 0
 set last_week_female 0
 set last_week_male 0

@@ -110,7 +110,7 @@ CREATE OR REPLACE FUNCTION qt_face_totals__edit (
        p_total_id 	   integer,
        p_total		   numeric, 
        p_total_female	   numeric, 
-       p_total_total	   numeric,
+       p_total_male	   numeric,
        p_percentage	   numeric
 ) RETURNS integer AS $$
   DECLARE

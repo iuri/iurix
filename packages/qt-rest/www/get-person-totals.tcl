@@ -59,8 +59,7 @@ set weekly_data [db_list_of_lists select_week_totals_totem "
 
 # weekly_data Format
 # list date total1 total2 female1 female2 male1 male2
-
-ns_log Notice "Weekly data $weekly_data"
+# ns_log Notice "Weekly data $weekly_data"
 
 
 # list date total1 total2 female1 female2 male1 male2
@@ -78,8 +77,9 @@ set i 0
 set previous_week_totals [list 0 0 0 0 0 0]
 set week_totals [list 0 0 0 0 0 0]
 foreach elem $weekly_data {
-    ns_log Notice "ELEM $elem"
-    if {$i < 8} {
+    ns_log Notice "ELEM $elem *******  $i"
+    if {$i < 8 && [llength $weekly_data] > 7} {
+	ns_log Notice "**** [lindex $week_totals 0]  [lindex $elem 1]"
         set previous_week_totals [list \
 				      [expr [lindex $previous_week_totals 0] + [lindex $elem 1]] \
 				      [expr [lindex $previous_week_totals 1] + [lindex $elem 2]] \
@@ -88,6 +88,7 @@ foreach elem $weekly_data {
 				      [expr [lindex $previous_week_totals 4] + [lindex $elem 5]] \
 				      [expr [lindex $previous_week_totals 5] + [lindex $elem 6]] ]
     } else {
+	ns_log Notice "**** [lindex $week_totals 0]  [lindex $elem 1]"
 	set week_totals [list \
 			     [expr [lindex $week_totals 0] + [lindex $elem 1]] \
 			     [expr [lindex $week_totals 1] + [lindex $elem 2]] \
@@ -98,6 +99,7 @@ foreach elem $weekly_data {
     }
     incr i
 }
+ns_log Notice "WEEK TOTALS $week_totals "
 
 
 # Percentage & maths

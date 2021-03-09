@@ -7,7 +7,7 @@
 
 ad_library {
     REST Webservice API
-    Utility functions - Library to support IURIX WS API
+    Utility functions - Library to support Luna's API
 
     @author Iuri de Araujo [iuri@iurix.com]
     @creation-date Sat May 23 17:16:42 2020 

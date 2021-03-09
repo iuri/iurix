@@ -625,7 +625,7 @@ ad_proc util::http::post {
         }
         # ...replace it with our own...
         set boundary [ns_sha1 [list [clock clicks -milliseconds] [clock seconds]]]
-        set req_content_type "multipart/form-data; charset=utf-8; boundary=$boundary"
+        set req_content_type "multipart/form-data; boundary=$boundary"
         ns_set put $headers "Content-type" $req_content_type
         # ...and get the proper encoding for the content.
         set enc [util::http::get_channel_settings $req_content_type]
@@ -786,7 +786,7 @@ ad_proc util::http::post {
     lassign $app payload payload_file payload_file_fd
 
     if {$payload_file_fd ne ""} {close $payload_file_fd}
-    
+
     return [util::http::request \
                 -method          POST \
                 -body            $payload \

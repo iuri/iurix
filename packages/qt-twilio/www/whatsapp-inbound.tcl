@@ -30,9 +30,6 @@ ad_page_contract {
     {From ""}
     {ApiVersion ""}
 }
-ns_headers 200 "multipart/form-data; charset=utf-8"
-
-
 
 set package_id [apm_package_id_from_key qt-twilio]
 

@@ -7,7 +7,7 @@ ad_library {
     
 }
 
-ad_schedule_proc -thread t 18000 qt::monitor::resource::check_availability
+ad_schedule_proc -thread t 600 qt::monitor::resource::check_availability
 
 # Local variables:
 #    mode: tcl

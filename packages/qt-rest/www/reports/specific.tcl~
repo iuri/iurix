@@ -1,0 +1,60 @@
+# /packages/qt-rest/www/reports/specific.tcl
+ad_page_contract {
+    API REST method to return cr_items qt_face
+} {
+    {report_type ""}
+    {resource ""}
+    {contact_type ""}
+    {gender ""}
+    {age_from ""}
+    {age_to ""}
+    {time_from ""}
+    {time_to ""}
+}
+ns_log Notice "Running TCL script reports/specific.tcl"
+
+# Validate and Authenticate JWT
+qt::rest::jwt::validation_p
+
+
+set hours "\{\"hours\": \["
+for {set i 0} {$i<24} {incr i} {
+    append hours " 
+	      \{
+		  \"time\": \"${i}:00h\",
+		  \"hour\": \"${i}h\",
+		  \"total\": 161,
+		  \"female\": 19,
+		  \"male\": 142
+	      \},"
+}
+
+set hours [string trimright $hours ","]
+append hours "\],"
+
+
+
+
+
+
+
+set max "\"max_hour\": \{
+	\"hour\": \"18h\",
+	\"total\": 35497
+    \},
+    \"max_week_day\": \{
+	\"day\": \"SAB\",
+	\"total\": 43419
+    \},
+    \"max_month_day\": \{
+	\"day\": \"5\",
+	\"total\": 11531
+    \}
+\}"
+
+
+set result "${hours} ${max}"
+
+
+ns_respond -status 200 -type "application/json" -string $result
+ad_script_abort

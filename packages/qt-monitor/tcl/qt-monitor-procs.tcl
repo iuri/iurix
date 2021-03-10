@@ -28,7 +28,7 @@ ad_proc -public qt::monitor::resource::check_availability {} {
     } {
 	
 	if { [catch {
-	    acs_mail_lite::send -send_immediately -to_addr $to_addr -from_addr postmaster@qonteo.com -reply_to postmaster@qonteo.com -subject "Notification Alert! $resource has been offline since $last_modified!" -body "Notification Alert! $resource has been offline since $last_modified!" -mime_type "text/html" } errmsg] } {
+	    acs_mail_lite::send -send_immediately -to_addr $to_addr -from_addr info@qonteo.com -subject "Notification Alert! $resource has been offline since $last_modified!" -body "Notification Alert! $resource has been offline since $last_modified!" -mime_type "text/html" } errmsg] } {
 	    ns_log Notice "ERROR SENDING EMAIL $errmsg"
 	    set result "\{\"result\": false\}" 
 	}
